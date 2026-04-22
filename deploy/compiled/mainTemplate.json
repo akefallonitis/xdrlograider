@@ -1,0 +1,297 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "Compiled from deploy/main.bicep — regenerate via CI release.yml"
+    }
+  },
+  "parameters": {
+    "projectPrefix": {
+      "type": "string",
+      "defaultValue": "xdrlr",
+      "minLength": 3,
+      "maxLength": 12,
+      "metadata": { "description": "Project prefix. 3-12 alphanumeric." }
+    },
+    "env": {
+      "type": "string",
+      "defaultValue": "prod",
+      "allowedValues": [ "dev", "staging", "prod" ],
+      "metadata": { "description": "Environment tag." }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": { "description": "Azure region." }
+    },
+    "serviceAccountUpn": {
+      "type": "string",
+      "metadata": { "description": "UPN of the service account the connector authenticates as." }
+    },
+    "authMethod": {
+      "type": "string",
+      "defaultValue": "credentials_totp",
+      "allowedValues": [ "passkey", "credentials_totp" ],
+      "metadata": { "description": "Auth method." }
+    },
+    "existingWorkspaceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "Existing Log Analytics workspace resource ID. Blank = create new." }
+    },
+    "functionPlanSku": {
+      "type": "string",
+      "defaultValue": "Y1",
+      "allowedValues": [ "Y1", "EP1", "EP2" ],
+      "metadata": { "description": "Function App plan SKU." }
+    },
+    "functionAppZipVersion": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": { "description": "Release tag for the Function App ZIP." }
+    },
+    "githubRepo": {
+      "type": "string",
+      "defaultValue": "akefallonitis/xdrlograider",
+      "metadata": { "description": "GitHub owner/repo for WEBSITE_RUN_FROM_PACKAGE." }
+    }
+  },
+  "variables": {
+    "uniq": "[uniqueString(resourceGroup().id, parameters('projectPrefix'), parameters('env'))]",
+    "suffix": "[substring(variables('uniq'), 0, 6)]",
+    "prefix": "[concat(parameters('projectPrefix'), '-', parameters('env'))]",
+    "funcName": "[concat(variables('prefix'), '-fn-', variables('suffix'))]",
+    "planName": "[concat(variables('prefix'), '-plan')]",
+    "kvName": "[concat(variables('prefix'), '-kv-', variables('suffix'))]",
+    "stName": "[toLower(replace(concat(parameters('projectPrefix'), parameters('env'), 'st', variables('suffix')), '-', ''))]",
+    "laName": "[concat(variables('prefix'), '-la')]",
+    "dceName": "[concat(variables('prefix'), '-dce')]",
+    "dcrName": "[concat(variables('prefix'), '-dcr')]",
+    "aiName": "[concat(variables('prefix'), '-ai')]",
+    "packageUrl": "[if(equals(parameters('functionAppZipVersion'), 'latest'), concat('https://github.com/', parameters('githubRepo'), '/releases/latest/download/function-app.zip'), concat('https://github.com/', parameters('githubRepo'), '/releases/download/v', parameters('functionAppZipVersion'), '/function-app.zip'))]",
+    "workspaceId": "[if(empty(parameters('existingWorkspaceId')), resourceId('Microsoft.OperationalInsights/workspaces', variables('laName')), parameters('existingWorkspaceId'))]",
+    "createWorkspace": "[empty(parameters('existingWorkspaceId'))]",
+    "kvSecretsUserRoleId": "4633458b-17de-408a-b874-0445c86b69e6",
+    "storageTableContributorRoleId": "0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3",
+    "monitoringMetricsPublisherRoleId": "3913510d-42f4-4e42-8a64-420c390055eb"
+  },
+  "resources": [
+    {
+      "condition": "[variables('createWorkspace')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('laName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": { "name": "PerGB2018" },
+        "retentionInDays": 90,
+        "features": { "enableLogAccessUsingOnlyResourcePermissions": true },
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('stName')]",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": { "name": "Standard_LRS" },
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": false,
+        "allowSharedKeyAccess": true,
+        "networkAcls": { "defaultAction": "Allow" }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices",
+      "apiVersion": "2023-05-01",
+      "name": "[concat(variables('stName'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('stName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+      "apiVersion": "2023-05-01",
+      "name": "[concat(variables('stName'), '/default/connectorCheckpoints')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2023-07-01",
+      "name": "[variables('kvName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "tenantId": "[subscription().tenantId]",
+        "sku": { "family": "A", "name": "standard" },
+        "enableRbacAuthorization": true,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 7,
+        "enablePurgeProtection": true,
+        "publicNetworkAccess": "Enabled",
+        "networkAcls": { "bypass": "AzureServices", "defaultAction": "Allow" }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('aiName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[variables('workspaceId')]",
+        "IngestionMode": "LogAnalytics"
+      },
+      "dependsOn": [
+        "[if(variables('createWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', variables('laName')), 'dummy')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionEndpoints",
+      "apiVersion": "2023-03-11",
+      "name": "[variables('dceName')]",
+      "location": "[parameters('location')]",
+      "kind": "Linux",
+      "properties": {
+        "networkAcls": { "publicNetworkAccess": "Enabled" }
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2023-12-01",
+      "name": "[variables('planName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('functionPlanSku')]",
+        "tier": "[if(equals(parameters('functionPlanSku'), 'Y1'), 'Dynamic', 'ElasticPremium')]"
+      },
+      "kind": "[if(equals(parameters('functionPlanSku'), 'Y1'), 'functionapp', 'elastic')]",
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-12-01",
+      "name": "[variables('funcName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp,linux",
+      "identity": { "type": "SystemAssigned" },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+        "httpsOnly": true,
+        "siteConfig": {
+          "linuxFxVersion": "POWERSHELL|7.4",
+          "powerShellVersion": "7.4",
+          "use32BitWorkerProcess": false,
+          "ftpsState": "Disabled",
+          "minTlsVersion": "1.2",
+          "appSettings": [
+            { "name": "FUNCTIONS_EXTENSION_VERSION",   "value": "~4" },
+            { "name": "FUNCTIONS_WORKER_RUNTIME",      "value": "powershell" },
+            { "name": "FUNCTIONS_WORKER_RUNTIME_VERSION", "value": "7.4" },
+            { "name": "AzureWebJobsStorage",           "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2023-05-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]" },
+            { "name": "APPLICATIONINSIGHTS_CONNECTION_STRING", "value": "[reference(resourceId('Microsoft.Insights/components', variables('aiName')), '2020-02-02').ConnectionString]" },
+            { "name": "WEBSITE_RUN_FROM_PACKAGE",      "value": "[variables('packageUrl')]" },
+            { "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING", "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2023-05-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]" },
+            { "name": "WEBSITE_CONTENTSHARE",          "value": "[toLower(variables('funcName'))]" },
+            { "name": "AUTH_METHOD",                   "value": "[parameters('authMethod')]" },
+            { "name": "SERVICE_ACCOUNT_UPN",           "value": "[parameters('serviceAccountUpn')]" },
+            { "name": "KEY_VAULT_URI",                 "value": "[reference(resourceId('Microsoft.KeyVault/vaults', variables('kvName')), '2023-07-01').vaultUri]" },
+            { "name": "AUTH_SECRET_NAME",              "value": "mde-portal-auth" },
+            { "name": "STORAGE_ACCOUNT_NAME",          "value": "[variables('stName')]" },
+            { "name": "CHECKPOINT_TABLE_NAME",         "value": "connectorCheckpoints" }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('stName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('aiName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', variables('kvName')), variables('funcName'), variables('kvSecretsUserRoleId'))]",
+      "scope": "[concat('Microsoft.KeyVault/vaults/', variables('kvName'))]",
+      "properties": {
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('funcName')), '2023-12-01', 'Full').identity.principalId]",
+        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('kvSecretsUserRoleId'))]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('funcName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), variables('funcName'), variables('storageTableContributorRoleId'))]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts/', variables('stName'))]",
+      "properties": {
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('funcName')), '2023-12-01', 'Full').identity.principalId]",
+        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('storageTableContributorRoleId'))]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('funcName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('stName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "deploySentinelContent",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'sentinelContent.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "workspaceName": {
+            "value": "[if(variables('createWorkspace'), variables('laName'), last(split(parameters('existingWorkspaceId'), '/')))]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[if(variables('createWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', variables('laName')), 'dummy')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "functionAppName": {
+      "type": "string",
+      "value": "[variables('funcName')]"
+    },
+    "keyVaultName": {
+      "type": "string",
+      "value": "[variables('kvName')]"
+    },
+    "dceEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[variables('stName')]"
+    },
+    "postDeployCommand": {
+      "type": "string",
+      "value": "[concat('git clone https://github.com/akefallonitis/xdrlograider && cd xdrlograider && ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName ', variables('kvName'))]"
+    }
+  }
+}

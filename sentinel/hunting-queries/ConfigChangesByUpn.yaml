@@ -1,0 +1,14 @@
+id: 8c69e1f2-3b5a-4c7e-d0f2-6a5b8e3c1d10
+name: MDE config changes by UPN
+description: |
+  Join drift events with AuditLogs to surface who changed what Defender config.
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  union (MDE_Drift_P0Compliance(7d, 1h)), (MDE_Drift_P1Pipeline(7d, 30m)), (MDE_Drift_P2Governance(7d, 1d)) | join kind=leftouter (AuditLogs | where Category in ("PolicyManagement", "DefenderXdrSettings") | where TimeGenerated > ago(7d) | project ChangedBy = tostring(InitiatedBy.user.userPrincipalName), AuditTime = TimeGenerated, AuditTarget = tostring(TargetResources[0].displayName)) on $left.EntityId == $right.AuditTarget | summarize Count = count() by ChangedBy, StreamName | order by Count desc

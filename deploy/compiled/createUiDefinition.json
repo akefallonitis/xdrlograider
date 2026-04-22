@@ -1,0 +1,185 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "config": {
+      "isWizard": false,
+      "basics": {
+        "description": "**XdrLogRaider** — Microsoft Sentinel Solution ingesting Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance) via PowerShell Azure Function App. 55 streams across 8 tiers. After this deploy, run the setup helper from the repo to upload auth secrets to Key Vault.",
+        "subscription": {
+          "constraints": {
+            "validations": [
+              {
+                "permission": "Microsoft.Resources/deployments/write",
+                "message": "You must have contributor access to deploy."
+              }
+            ]
+          }
+        },
+        "resourceGroup": {
+          "allowExisting": true
+        },
+        "location": {
+          "label": "Region",
+          "toolTip": "Region for all created resources"
+        }
+      }
+    },
+    "basics": [
+      {
+        "name": "projectPrefix",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Project prefix",
+        "toolTip": "3-12 alphanumeric characters. Used as a prefix for all created resource names.",
+        "defaultValue": "xdrlr",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z0-9]{3,12}$",
+          "validationMessage": "Must be 3-12 lowercase alphanumeric characters"
+        }
+      },
+      {
+        "name": "env",
+        "type": "Microsoft.Common.DropDown",
+        "label": "Environment",
+        "toolTip": "Environment tag used in resource names and tags.",
+        "defaultValue": "prod",
+        "constraints": {
+          "required": true,
+          "allowedValues": [
+            { "label": "Production", "value": "prod" },
+            { "label": "Staging", "value": "staging" },
+            { "label": "Development", "value": "dev" }
+          ]
+        }
+      },
+      {
+        "name": "infoServiceAccount",
+        "type": "Microsoft.Common.InfoBox",
+        "visible": true,
+        "options": {
+          "icon": "Info",
+          "text": "Before deploying, create a dedicated read-only Entra service account (Security Reader + MDE analyst read roles) in your tenant. You'll upload this account's credentials to Key Vault AFTER deployment. Never use a privileged or human account."
+        }
+      }
+    ],
+    "steps": [
+      {
+        "name": "authSettings",
+        "label": "Authentication",
+        "subLabel": {
+          "preValidation": "Configure how the connector authenticates to security.microsoft.com",
+          "postValidation": "OK"
+        },
+        "bladeTitle": "Authentication settings",
+        "elements": [
+          {
+            "name": "serviceAccountUpn",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Service account UPN",
+            "toolTip": "The UPN of the dedicated service account the connector authenticates as. e.g. svc-xdrlr@contoso.onmicrosoft.com",
+            "defaultValue": "",
+            "constraints": {
+              "required": true,
+              "regex": "^[^@]+@[^@]+\\.[^@]+$",
+              "validationMessage": "Enter a valid UPN (user@domain.tld)"
+            }
+          },
+          {
+            "name": "authMethod",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Auth method",
+            "toolTip": "How the connector authenticates. Both unattended, auto-refreshing. Passkey is stronger against modern CA.",
+            "defaultValue": "Credentials + TOTP",
+            "constraints": {
+              "required": true,
+              "allowedValues": [
+                { "label": "Credentials + TOTP", "value": "credentials_totp" },
+                { "label": "Software Passkey", "value": "passkey" }
+              ]
+            }
+          },
+          {
+            "name": "infoPostDeploy",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Info",
+              "text": "After deployment, secrets are NOT yet in Key Vault. Run `./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName <name>` from the cloned repo to upload them. The deployment output contains the exact command."
+            }
+          }
+        ]
+      },
+      {
+        "name": "workspaceSettings",
+        "label": "Workspace",
+        "subLabel": {
+          "preValidation": "Log Analytics workspace for ingestion",
+          "postValidation": "OK"
+        },
+        "bladeTitle": "Log Analytics workspace",
+        "elements": [
+          {
+            "name": "existingWorkspaceId",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Existing workspace resource ID (optional)",
+            "toolTip": "Full resource ID of an existing Log Analytics workspace. Leave blank to create a new one. Sentinel-enabled workspaces recommended.",
+            "defaultValue": "",
+            "constraints": {
+              "required": false,
+              "regex": "^$|^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.OperationalInsights/workspaces/[^/]+$",
+              "validationMessage": "Must be a valid workspace resource ID or blank"
+            }
+          }
+        ]
+      },
+      {
+        "name": "advanced",
+        "label": "Advanced",
+        "subLabel": {
+          "preValidation": "Optional overrides",
+          "postValidation": "OK"
+        },
+        "bladeTitle": "Advanced settings",
+        "elements": [
+          {
+            "name": "functionPlanSku",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Function App plan",
+            "toolTip": "Y1 (Consumption) is recommended — fits within Azure Functions free tier for typical workloads.",
+            "defaultValue": "Consumption (Y1)",
+            "constraints": {
+              "required": true,
+              "allowedValues": [
+                { "label": "Consumption (Y1)", "value": "Y1" },
+                { "label": "Premium EP1", "value": "EP1" },
+                { "label": "Premium EP2", "value": "EP2" }
+              ]
+            }
+          },
+          {
+            "name": "functionAppZipVersion",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Function App version",
+            "toolTip": "Version tag to deploy. 'latest' pulls the newest GitHub release; or specify vX.Y.Z to pin.",
+            "defaultValue": "latest",
+            "constraints": {
+              "required": true
+            }
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "projectPrefix": "[basics('projectPrefix')]",
+      "env": "[basics('env')]",
+      "location": "[location()]",
+      "serviceAccountUpn": "[steps('authSettings').serviceAccountUpn]",
+      "authMethod": "[steps('authSettings').authMethod]",
+      "existingWorkspaceId": "[steps('workspaceSettings').existingWorkspaceId]",
+      "functionPlanSku": "[steps('advanced').functionPlanSku]",
+      "functionAppZipVersion": "[steps('advanced').functionAppZipVersion]"
+    }
+  }
+}

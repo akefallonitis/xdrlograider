@@ -1,0 +1,24 @@
+id: b5f6d8e9-0a23-4b4d-c7e9-3f2a5d0b8c03
+name: MDE new data export destination
+description: |
+  A new streaming/export destination was added to Defender data export settings. Potential data-exfiltration channel.
+severity: Medium
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+queryFrequency: 15m
+queryPeriod: 2h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Exfiltration
+relevantTechniques:
+  - T1537
+query: |
+  MDE_Drift_P1Pipeline(1h, 10m) | where StreamName == "MDE_DataExportSettings_CL" | where ChangeType == "Added"
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: SingleAlert
+suppressionEnabled: false
+suppressionDuration: PT5H

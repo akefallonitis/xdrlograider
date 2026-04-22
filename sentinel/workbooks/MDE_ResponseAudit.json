@@ -1,0 +1,73 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDE_ResponseAudit",
+  "items": [
+    {
+      "name": "header",
+      "content": {
+        "json": "# MDE Response Audit\n\nAction Center history with approvers, comments, and time-to-action metrics."
+      },
+      "type": 1
+    },
+    {
+      "name": "parameters",
+      "content": {
+        "parameters": [
+          {
+            "value": {
+              "durationMs": 86400000
+            },
+            "id": "tr",
+            "name": "TimeRange",
+            "version": "KqlParameterItem/1.0",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          }
+        ],
+        "queryType": 0,
+        "style": "pills",
+        "version": "KqlParameterItem/1.0"
+      },
+      "type": 9
+    },
+    {
+      "name": "panel-1",
+      "content": {
+        "queryType": 0,
+        "title": "Primary view",
+        "size": 0,
+        "query": "MDE_ActionCenter_CL | where TimeGenerated > ago(30d) | extend ActionType = tostring(parse_json(RawJson).actionType), Status = tostring(parse_json(RawJson).status), Approver = tostring(parse_json(RawJson).approverUpn) | summarize Count = count() by ActionType, Status | render barchart",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    },
+    {
+      "name": "panel-2",
+      "content": {
+        "queryType": 0,
+        "title": "Drift / trend",
+        "size": 0,
+        "query": "MDE_ActionCenter_CL | where TimeGenerated > ago(7d) | extend ActionType = tostring(parse_json(RawJson).actionType), Status = tostring(parse_json(RawJson).status), Created = todatetime(parse_json(RawJson).creationDateTimeUtc), Completed = todatetime(parse_json(RawJson).completionDateTimeUtc) | extend TimeToAction = datetime_diff(\"minute\", Completed, Created) | project TimeGenerated, EntityId, ActionType, Status, TimeToAction",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    }
+  ],
+  "version": "Notebook/1.0"
+}

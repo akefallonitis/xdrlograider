@@ -1,0 +1,14 @@
+id: 0e8bf3c4-5d7c-4e9a-f2b4-8c7d0a5e3f12
+name: MDE silent bypass indicators
+description: |
+  Composite signal combining suppression additions + ASR downgrades + PUA off in same day.
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  let drift = MDE_Drift_P0Compliance(7d, 1h); let suppressions = drift | where StreamName == "MDE_SuppressionRules_CL" and ChangeType == "Added"; let asrDowngrades = drift | where StreamName == "MDE_AsrRulesConfig_CL" and FieldName == "mode" and OldValue == "Block"; let puaOff = drift | where StreamName == "MDE_PUAConfig_CL" and FieldName == "enabled" and NewValue == "false"; union suppressions, asrDowngrades, puaOff | summarize Events = count() by bin(TimeGenerated, 1d) | where Events >= 2

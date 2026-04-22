@@ -1,0 +1,14 @@
+id: 4c2f37a8-9b10-4c3e-d6f8-2a1b4e9c7d16
+name: MDE RBAC escalation events
+description: |
+  Role assignments to accounts that previously had none.
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - PrivilegeEscalation
+relevantTechniques:
+  - T1078
+query: |
+  MDE_Drift_P2Governance(30d, 1d) | where StreamName == "MDE_UnifiedRbacRoles_CL" and ChangeType == "Added" | join kind=inner (MDE_UnifiedRbacRoles_CL | summarize arg_max(TimeGenerated, *) by EntityId) on EntityId

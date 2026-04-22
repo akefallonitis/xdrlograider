@@ -1,0 +1,48 @@
+// SYNOPSIS:
+//   Drift detection for P1Pipeline streams.
+//
+// PARAMETERS:
+//   lookback - How far back to consider "previous". Default 24h.
+//   window   - How recent is "current". Default 30m.
+//
+// INVOCATION:
+//   MDE_Drift_P1Pipeline(24h, 30m)
+
+let lookback = 24h;
+let window = 30m;
+let sources = union withsource=_Table
+    MDE_DataExportSettings_CL,
+    MDE_StreamingApiConfig_CL,
+    MDE_IntuneConnection_CL,
+    MDE_PurviewSharing_CL,
+    MDE_ConnectedApps_CL,
+    MDE_TenantContext_CL,
+    MDE_TenantWorkloadStatus_CL
+    | where TimeGenerated > ago(lookback);
+let current = sources
+    | where TimeGenerated > ago(window)
+    | summarize arg_max(TimeGenerated, *) by _Table, EntityId;
+let previous = sources
+    | where TimeGenerated between (ago(lookback) .. ago(window))
+    | summarize arg_max(TimeGenerated, *) by _Table, EntityId;
+current
+| join kind=leftouter previous on _Table, EntityId
+| where hash(tostring(RawJson)) != hash(tostring(RawJson1)) or isnull(RawJson1)
+| extend CurrentFields  = bag_keys(parse_json(RawJson))
+| extend PreviousFields = iff(isnull(RawJson1), dynamic([]), bag_keys(parse_json(RawJson1)))
+| mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (
+    extend
+        NewValue = tostring(parse_json(RawJson)[tostring(field)]),
+        OldValue = tostring(iff(isnull(RawJson1), '', parse_json(RawJson1)[tostring(field)]))
+    | where NewValue != OldValue
+  )
+| project
+    TimeGenerated,
+    StreamName       = _Table,
+    EntityId,
+    FieldName        = tostring(field),
+    OldValue,
+    NewValue,
+    SnapshotCurrent  = TimeGenerated,
+    SnapshotPrevious = TimeGenerated1,
+    ChangeType       = iff(isnull(RawJson1), "Added", iff(isnull(parse_json(RawJson)[tostring(field)]), "Removed", "Modified"))

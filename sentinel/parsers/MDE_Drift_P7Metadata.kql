@@ -1,0 +1,45 @@
+// SYNOPSIS:
+//   Drift detection for P7Metadata streams.
+//
+// PARAMETERS:
+//   lookback - How far back to consider "previous". Default 30d.
+//   window   - How recent is "current". Default 1d.
+//
+// INVOCATION:
+//   MDE_Drift_P7Metadata(30d, 1d)
+
+let lookback = 30d;
+let window = 1d;
+let sources = union withsource=_Table
+    MDE_LicenseReport_CL,
+    MDE_UserPreferences_CL,
+    MDE_MtoTenants_CL,
+    MDE_CloudAppsConfig_CL
+    | where TimeGenerated > ago(lookback);
+let current = sources
+    | where TimeGenerated > ago(window)
+    | summarize arg_max(TimeGenerated, *) by _Table, EntityId;
+let previous = sources
+    | where TimeGenerated between (ago(lookback) .. ago(window))
+    | summarize arg_max(TimeGenerated, *) by _Table, EntityId;
+current
+| join kind=leftouter previous on _Table, EntityId
+| where hash(tostring(RawJson)) != hash(tostring(RawJson1)) or isnull(RawJson1)
+| extend CurrentFields  = bag_keys(parse_json(RawJson))
+| extend PreviousFields = iff(isnull(RawJson1), dynamic([]), bag_keys(parse_json(RawJson1)))
+| mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (
+    extend
+        NewValue = tostring(parse_json(RawJson)[tostring(field)]),
+        OldValue = tostring(iff(isnull(RawJson1), '', parse_json(RawJson1)[tostring(field)]))
+    | where NewValue != OldValue
+  )
+| project
+    TimeGenerated,
+    StreamName       = _Table,
+    EntityId,
+    FieldName        = tostring(field),
+    OldValue,
+    NewValue,
+    SnapshotCurrent  = TimeGenerated,
+    SnapshotPrevious = TimeGenerated1,
+    ChangeType       = iff(isnull(RawJson1), "Added", iff(isnull(parse_json(RawJson)[tostring(field)]), "Removed", "Modified"))

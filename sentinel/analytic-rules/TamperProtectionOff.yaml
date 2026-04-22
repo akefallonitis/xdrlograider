@@ -1,0 +1,24 @@
+id: d7b8f0a1-2c45-4d6f-e9a1-5b4c7f2d0e05
+name: MDE Tamper Protection disabled
+description: |
+  Defender Tamper Protection was disabled. This allows malicious tools to modify Defender settings directly.
+severity: High
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+queryFrequency: 15m
+queryPeriod: 2h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562.001
+query: |
+  MDE_Drift_P0Compliance(2h, 15m) | where StreamName == "MDE_AdvancedFeatures_CL" | where EntityId has "Tamper" | where FieldName == "Enabled" and NewValue == "false"
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: SingleAlert
+suppressionEnabled: false
+suppressionDuration: PT5H

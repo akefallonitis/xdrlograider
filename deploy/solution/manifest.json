@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json.schemastore.org/sentinel-solution-manifest.json",
+  "Name": "XdrLogRaider",
+  "Author": "Alex Kefallonitis",
+  "Logo": "<img src=\"https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/deploy/solution/Images/Logo.svg\" width=\"75px\" height=\"75px\">",
+  "Description": "**XdrLogRaider** is a Microsoft Sentinel Solution that ingests **Defender XDR portal-only telemetry** — tenant security configuration, compliance posture, drift events, XSPM exposure, RBAC governance, and identity coverage — that is **not exposed by public Graph Security, Defender XDR, or MDE public APIs**.\n\nThe solution deploys a PowerShell Azure Function App that authenticates as a dedicated service account (via Credentials+TOTP or Software Passkey) and polls 55 portal endpoints across 8 compliance tiers, ingesting results into custom `MDE_*_CL` tables in your Log Analytics workspace. Drift detection is computed in pure KQL via 6 category-scoped parsers, feeding 6 workbooks and 15 analytic rules.",
+  "WorkbookBladeDescription": "Workbooks for security configuration compliance, drift tracking, RBAC governance, exposure mapping, identity posture, and response audit.",
+  "AnalyticalRuleBladeDescription": "15 scheduled analytic rules detecting configuration drift and high-risk changes — ASR rule downgrades, Live Response policy relaxation, new data-export destinations, RBAC role assignments to unusual accounts, XSPM attack-path creation, and more.",
+  "HuntingQueryBladeDescription": "10 ad-hoc hunting queries for analyst-driven drift exploration and historical configuration investigation.",
+  "DataConnectorsBladeDescription": "One data connector — XdrLogRaider — that authenticates to the Defender XDR portal using cookie-based auth (sccauth + XSRF rotation) and publishes 55 streams to custom Log Analytics tables.",
+  "WorkbookDescription": [
+    "MDE Compliance Dashboard",
+    "MDE Drift Report",
+    "MDE Governance Scorecard",
+    "MDE Exposure Map",
+    "MDE Identity Posture",
+    "MDE Response Audit"
+  ],
+  "Workbooks": [
+    "Workbooks/MDEComplianceDashboard.json",
+    "Workbooks/MDEDriftReport.json",
+    "Workbooks/MDEGovernanceScorecard.json",
+    "Workbooks/MDEExposureMap.json",
+    "Workbooks/MDEIdentityPosture.json",
+    "Workbooks/MDEResponseAudit.json"
+  ],
+  "AnalyticalRules": [
+    "Analytic Rules/AsrRuleDowngrade.yaml",
+    "Analytic Rules/LrUnsignedScriptsOn.yaml",
+    "Analytic Rules/DataExportNewDestination.yaml",
+    "Analytic Rules/PuaDisabled.yaml",
+    "Analytic Rules/TamperProtectionOff.yaml",
+    "Analytic Rules/TenantAllowListNewEntry.yaml",
+    "Analytic Rules/SuppressionRuleBroadened.yaml",
+    "Analytic Rules/RbacRoleToUnusualAccount.yaml",
+    "Analytic Rules/XspmNewAttackPath.yaml",
+    "Analytic Rules/XspmPathToCriticalAsset.yaml",
+    "Analytic Rules/MdiDcSensorDown.yaml",
+    "Analytic Rules/AlertTuningBroadened.yaml",
+    "Analytic Rules/StreamingApiNewTarget.yaml",
+    "Analytic Rules/ConnectedAppNewRegistration.yaml",
+    "Analytic Rules/PortalConfigAfterHours.yaml"
+  ],
+  "HuntingQueries": [
+    "Hunting Queries/ConfigChangesByUpn.yaml",
+    "Hunting Queries/AfterHoursDrift.yaml",
+    "Hunting Queries/SilentBypassIndicators.yaml",
+    "Hunting Queries/AsrRuleStateTransitions.yaml",
+    "Hunting Queries/LrSessionsWithoutJustification.yaml",
+    "Hunting Queries/ExclusionAdditionsPastQuarter.yaml",
+    "Hunting Queries/RbacEscalationEvents.yaml",
+    "Hunting Queries/XspmChokepointDeltas.yaml",
+    "Hunting Queries/MdiServiceAccountDrift.yaml",
+    "Hunting Queries/CustomDetectionContentAudit.yaml"
+  ],
+  "Parsers": [
+    "Parsers/MDE_Drift_P0Compliance.yaml",
+    "Parsers/MDE_Drift_P1Pipeline.yaml",
+    "Parsers/MDE_Drift_P2Governance.yaml",
+    "Parsers/MDE_Drift_P3Exposure.yaml",
+    "Parsers/MDE_Drift_P5Identity.yaml",
+    "Parsers/MDE_Drift_P7Metadata.yaml"
+  ],
+  "DataConnectors": [
+    "Data Connectors/XdrLogRaider_DataConnector.json"
+  ],
+  "Metadata": "SolutionMetadata.json",
+  "BasePath": ".",
+  "Version": "1.0.0",
+  "TemplateSpec": true,
+  "Is1PConnector": false,
+  "StaticDataConnectorIds": [
+    "XdrLogRaiderInternal"
+  ]
+}

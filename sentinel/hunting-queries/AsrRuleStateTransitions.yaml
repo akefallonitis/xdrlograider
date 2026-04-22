@@ -1,0 +1,14 @@
+id: 1f9c04d5-6e8d-4f0b-a3c5-9d8e1b6f4a13
+name: MDE ASR rule state transitions (30d)
+description: |
+  Every ASR rule mode transition over the last 30 days.
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562.001
+query: |
+  MDE_Drift_P0Compliance(30d, 1h) | where StreamName == "MDE_AsrRulesConfig_CL" and FieldName == "mode" | project TimeGenerated, RuleId = EntityId, From = OldValue, To = NewValue | order by TimeGenerated desc

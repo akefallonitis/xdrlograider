@@ -1,0 +1,16 @@
+Name: MDE Exposure Map
+Author: Alex Kefallonitis
+Description: |
+  XSPM attack paths, chokepoints, and exposure score trends from Microsoft Security Exposure Management.
+Id: c771eee6-0b4f-4c15-9d9f-f4ed88858fe7
+Logo: '<img src="https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/deploy/solution/Images/Logo.svg" width="75px" height="75px">'
+Data:
+  - DataConnector: XdrLogRaiderInternal
+    DataTypes:
+      - MDE_Heartbeat_CL
+      - MDE_AuthTestResult_CL
+WorkbookKey: MDE_ExposureMap
+SourceCenter: sentinel
+FileName: MDE_ExposureMap.json
+Version: '1.0.0'
+PreviewImages: []

@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pester
+        shell: pwsh
+        run: Install-Module -Name Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Install Bicep
+        shell: pwsh
+        run: az bicep install
+
+      - name: Gate — lint + unit + validate must pass
+        shell: pwsh
+        run: |
+          # Lint (src + tools + tests) with project-level settings
+          $lint = Invoke-ScriptAnalyzer -Path ./src, ./tools, ./tests -Recurse `
+              -Settings ./.config/PSScriptAnalyzerSettings.psd1
+          if ($lint | Where-Object Severity -eq 'Error') {
+              $lint | Where-Object Severity -eq 'Error' | Format-Table -AutoSize
+              throw "PSScriptAnalyzer errors — release aborted"
+          }
+
+          # Unit
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = './tests/unit'
+          $cfg.Run.Exit = $true
+          $cfg.Run.Throw = $true
+          Invoke-Pester -Configuration $cfg
+
+          # Static validation (kql + arm)
+          $cfg.Run.Path = @('./tests/kql', './tests/arm')
+          Invoke-Pester -Configuration $cfg
+
+      - name: Compile Bicep → ARM (mainTemplate.json)
+        shell: pwsh
+        run: |
+          if (Test-Path ./deploy/main.bicep) {
+              az bicep build --file ./deploy/main.bicep --outfile ./deploy/compiled/mainTemplate.json
+              Write-Host "✓ Compiled main.bicep → mainTemplate.json" -ForegroundColor Green
+          } else {
+              Write-Host "ℹ No main.bicep — using committed compiled/mainTemplate.json" -ForegroundColor Yellow
+          }
+
+      - name: Build Sentinel content ARM (sentinelContent.json)
+        shell: pwsh
+        run: |
+          pwsh -File ./tools/Build-SentinelContent.ps1
+          if (-not (Test-Path ./deploy/compiled/sentinelContent.json)) {
+              throw "Build-SentinelContent.ps1 did not produce sentinelContent.json"
+          }
+          Write-Host "✓ Sentinel content built" -ForegroundColor Green
+
+      - name: Build Sentinel Solution package
+        shell: pwsh
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          # Strip leading 'v' from tag (v1.0.0 → 1.0.0)
+          $version = $env:VERSION -replace '^v', ''
+          pwsh -File ./tools/Build-SentinelSolution.ps1 -Version $version
+          $zipPath = "./deploy/solution-staging/XdrLogRaider/Package/$version.zip"
+          if (-not (Test-Path $zipPath)) {
+              throw "Build-SentinelSolution.ps1 did not produce $zipPath"
+          }
+          Write-Host "✓ Solution package built: $zipPath" -ForegroundColor Green
+
+      - name: Build Function App ZIP
+        shell: pwsh
+        run: |
+          Push-Location ./src
+          Compress-Archive -Path * -DestinationPath ../function-app.zip -Force
+          Pop-Location
+          $size = (Get-Item ./function-app.zip).Length
+          Write-Host "✓ function-app.zip: $([int]($size / 1024)) KB" -ForegroundColor Green
+
+      - name: Stage solution zip for release attachment
+        shell: pwsh
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          $version = $env:VERSION -replace '^v', ''
+          Copy-Item "./deploy/solution-staging/XdrLogRaider/Package/$version.zip" `
+              "./xdrlograider-solution-$version.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            function-app.zip
+            deploy/compiled/mainTemplate.json
+            deploy/compiled/sentinelContent.json
+            deploy/compiled/createUiDefinition.json
+            xdrlograider-solution-*.zip
+          body: |
+            ## XdrLogRaider ${{ github.ref_name }}
+
+            See [CHANGELOG.md](./CHANGELOG.md) for details.
+
+            ### Assets
+            - `function-app.zip` — Function App code (PowerShell 7.4)
+            - `mainTemplate.json` — ARM template for one-click deploy
+            - `sentinelContent.json` — Nested ARM deployment for parsers, workbooks, analytic rules, hunting queries
+            - `createUiDefinition.json` — Azure Portal wizard UI
+            - `xdrlograider-solution-*.zip` — Sentinel Solution package (Content Hub-ready)
+
+            ### Deploy to Azure
+
+            [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fgithub.com%2F${{ github.repository }}%2Freleases%2Fdownload%2F${{ github.ref_name }}%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fgithub.com%2F${{ github.repository }}%2Freleases%2Fdownload%2F${{ github.ref_name }}%2FcreateUiDefinition.json)
+
+            See README for post-deploy helper instructions.
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

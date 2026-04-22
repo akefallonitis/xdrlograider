@@ -1,0 +1,73 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDE_GovernanceScorecard",
+  "items": [
+    {
+      "name": "header",
+      "content": {
+        "json": "# MDE Governance Scorecard\n\nRBAC, asset classification, and approval governance posture."
+      },
+      "type": 1
+    },
+    {
+      "name": "parameters",
+      "content": {
+        "parameters": [
+          {
+            "value": {
+              "durationMs": 86400000
+            },
+            "id": "tr",
+            "name": "TimeRange",
+            "version": "KqlParameterItem/1.0",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          }
+        ],
+        "queryType": 0,
+        "style": "pills",
+        "version": "KqlParameterItem/1.0"
+      },
+      "type": 9
+    },
+    {
+      "name": "panel-1",
+      "content": {
+        "queryType": 0,
+        "title": "Primary view",
+        "size": 0,
+        "query": "MDE_RbacDeviceGroups_CL | summarize arg_max(TimeGenerated, *) by EntityId | project EntityId, RawJson, TimeGenerated",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    },
+    {
+      "name": "panel-2",
+      "content": {
+        "queryType": 0,
+        "title": "Drift / trend",
+        "size": 0,
+        "query": "MDE_Drift_P2Governance(7d, 1d) | summarize Changes = count() by StreamName | render piechart",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    }
+  ],
+  "version": "Notebook/1.0"
+}

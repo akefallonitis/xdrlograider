@@ -1,0 +1,14 @@
+id: 3b1e26f7-8a0f-4b2d-c5e7-1f0a3d8b6c15
+name: MDE exclusion additions (past quarter)
+description: |
+  File/path/process exclusions added in the last 90 days. Attackers abuse exclusions for persistence.
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562.001
+query: |
+  MDE_AntivirusPolicy_CL | where TimeGenerated > ago(90d) | extend Exclusions = tostring(parse_json(RawJson).exclusions) | summarize arg_max(TimeGenerated, *) by EntityId, Exclusions | order by TimeGenerated desc

@@ -1,0 +1,14 @@
+{
+  "description": "ASR rule downgrade scenario — Block → Audit for rule 75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84 (Block Office apps from creating child processes)",
+  "before": [
+    { "TimeGenerated": "2026-04-21T10:00:00Z", "SourceStream": "MDE_AsrRulesConfig_CL", "EntityId": "75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84", "RawJson": "{\"id\":\"75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84\",\"name\":\"Block Office apps from creating child processes\",\"mode\":\"Block\",\"exclusions\":[]}" },
+    { "TimeGenerated": "2026-04-21T10:00:00Z", "SourceStream": "MDE_AsrRulesConfig_CL", "EntityId": "3b576869-a4ec-4529-8536-b80a7769e899", "RawJson": "{\"id\":\"3b576869-a4ec-4529-8536-b80a7769e899\",\"name\":\"Block Office apps from creating executable content\",\"mode\":\"Block\",\"exclusions\":[]}" }
+  ],
+  "after": [
+    { "TimeGenerated": "2026-04-22T10:00:00Z", "SourceStream": "MDE_AsrRulesConfig_CL", "EntityId": "75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84", "RawJson": "{\"id\":\"75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84\",\"name\":\"Block Office apps from creating child processes\",\"mode\":\"Audit\",\"exclusions\":[]}" },
+    { "TimeGenerated": "2026-04-22T10:00:00Z", "SourceStream": "MDE_AsrRulesConfig_CL", "EntityId": "3b576869-a4ec-4529-8536-b80a7769e899", "RawJson": "{\"id\":\"3b576869-a4ec-4529-8536-b80a7769e899\",\"name\":\"Block Office apps from creating executable content\",\"mode\":\"Block\",\"exclusions\":[]}" }
+  ],
+  "expectedDrift": [
+    { "StreamName": "MDE_AsrRulesConfig_CL", "EntityId": "75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84", "FieldName": "mode", "OldValue": "Block", "NewValue": "Audit", "ChangeType": "Modified" }
+  ]
+}

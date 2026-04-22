@@ -1,0 +1,72 @@
+name: Integration (gated)
+
+# Manual only, never on forks. Uses federated identity credential (OIDC),
+# no stored secrets. Requires repository variables AZURE_TENANT_ID,
+# AZURE_SUBSCRIPTION_ID, AZURE_CLIENT_ID (federated identity credential SP).
+
+on:
+  workflow_dispatch:
+    inputs:
+      category:
+        description: 'Test category'
+        type: choice
+        options:
+          - integration
+          - e2e
+        default: integration
+
+permissions:
+  contents: read
+  id-token: write  # For Azure login via OIDC
+
+jobs:
+  integration:
+    name: Integration / E2E
+    runs-on: ubuntu-latest
+    if: github.event.repository.fork == false
+    environment: integration
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (federated identity credential)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Pester
+        shell: pwsh
+        run: Install-Module -Name Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Install Az modules
+        shell: pwsh
+        run: |
+          Install-Module -Name Az.Accounts -Force -Scope CurrentUser -SkipPublisherCheck
+          Install-Module -Name Az.KeyVault -Force -Scope CurrentUser -SkipPublisherCheck
+          Install-Module -Name Az.Resources -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Run ${{ inputs.category }} tests
+        shell: pwsh
+        env:
+          XDRLR_ONLINE: 'true'
+          XDRLR_TEST_KV: ${{ vars.XDRLR_TEST_KV }}
+          XDRLR_TEST_WORKSPACE_ID: ${{ vars.XDRLR_TEST_WORKSPACE_ID }}
+          XDRLR_TEST_RG: ${{ vars.XDRLR_TEST_RG }}
+        run: |
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = "./tests/${{ inputs.category }}"
+          $cfg.Run.Exit = $true
+          $cfg.Run.Throw = $true
+          $cfg.Output.Verbosity = 'Detailed'
+          $cfg.TestResult.Enabled = $true
+          $cfg.TestResult.OutputFormat = 'JUnitXml'
+          $cfg.TestResult.OutputPath = "./tests/results/${{ inputs.category }}.xml"
+          Invoke-Pester -Configuration $cfg
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ inputs.category }}-results
+          path: ./tests/results/

@@ -1,0 +1,21 @@
+# Code owners for XdrLogRaider
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner — all files unless overridden below
+*                                       @akefallonitis
+
+# Auth module — security-critical, require maintainer review
+/src/Modules/Xdr.Portal.Auth/          @akefallonitis
+/tools/Initialize-XdrLogRaiderAuth.ps1 @akefallonitis
+
+# Infrastructure — ARM/Bicep templates
+/deploy/                                @akefallonitis
+
+# Sentinel content — workbooks, analytic rules, hunting queries
+/sentinel/                              @akefallonitis
+
+# CI workflows
+/.github/workflows/                     @akefallonitis
+
+# Docs — broader review accepted
+/docs/                                  @akefallonitis

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDE_DriftReport",
+  "items": [
+    {
+      "name": "header",
+      "content": {
+        "json": "# MDE Drift Report\n\nAll configuration drift across P0/P1/P2/P5/P7 categories, unioned and enriched with AuditLogs attribution."
+      },
+      "type": 1
+    },
+    {
+      "name": "parameters",
+      "content": {
+        "parameters": [
+          {
+            "value": {
+              "durationMs": 86400000
+            },
+            "id": "tr",
+            "name": "TimeRange",
+            "version": "KqlParameterItem/1.0",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          }
+        ],
+        "queryType": 0,
+        "style": "pills",
+        "version": "KqlParameterItem/1.0"
+      },
+      "type": 9
+    },
+    {
+      "name": "panel-1",
+      "content": {
+        "queryType": 0,
+        "title": "Primary view",
+        "size": 0,
+        "query": "union (MDE_Drift_P0Compliance(7d, 1h) | extend Category = \"P0 Config\"), (MDE_Drift_P1Pipeline(7d, 30m) | extend Category = \"P1 Pipeline\"), (MDE_Drift_P2Governance(7d, 1d) | extend Category = \"P2 Governance\"), (MDE_Drift_P5Identity(7d, 1d) | extend Category = \"P5 Identity\"), (MDE_Drift_P7Metadata(30d, 1d) | extend Category = \"P7 Metadata\") | summarize Changes = count() by Category, bin(TimeGenerated, 1h) | render timechart",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    },
+    {
+      "name": "panel-2",
+      "content": {
+        "queryType": 0,
+        "title": "Drift / trend",
+        "size": 0,
+        "query": "union (MDE_Drift_P0Compliance(7d, 1h)), (MDE_Drift_P1Pipeline(7d, 30m)), (MDE_Drift_P2Governance(7d, 1d)), (MDE_Drift_P5Identity(7d, 1d)), (MDE_Drift_P7Metadata(30d, 1d)) | order by TimeGenerated desc | take 100",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    }
+  ],
+  "version": "Notebook/1.0"
+}

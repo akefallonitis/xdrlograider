@@ -1,0 +1,123 @@
+function Invoke-MDEPortalRequest {
+    <#
+    .SYNOPSIS
+        Authenticated wrapper around Invoke-WebRequest for Defender XDR portal API calls.
+
+    .DESCRIPTION
+        Takes a session from Connect-MDEPortal and automatically adds the X-XSRF-TOKEN
+        header with the current (just-rotated) value. Handles 401 transparently by
+        forcing a re-auth and retrying once.
+
+    .PARAMETER Session
+        Object returned by Connect-MDEPortal (pscustomobject with .Session, .Upn, etc.)
+
+    .PARAMETER Path
+        Portal API path (e.g., '/api/settings/GetAdvancedFeaturesSetting').
+
+    .PARAMETER Method
+        HTTP method. Default: GET.
+
+    .PARAMETER Body
+        Request body (string or hashtable).
+
+    .PARAMETER ContentType
+        Defaults to 'application/json' for POST/PUT, omitted for GET.
+
+    .PARAMETER TimeoutSec
+        Per-request timeout. Default 60s.
+
+    .OUTPUTS
+        [pscustomobject] parsed JSON response body.
+
+    .EXAMPLE
+        $session = Connect-MDEPortal -Method CredentialsTotp -Credential $creds
+        Invoke-MDEPortalRequest -Session $session -Path '/api/settings/GetAdvancedFeaturesSetting'
+    #>
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param(
+        [Parameter(Mandatory)] [pscustomobject] $Session,
+        [Parameter(Mandatory)] [string] $Path,
+        [string] $Method = 'GET',
+        $Body = $null,
+        [string] $ContentType,
+        [int] $TimeoutSec = 60
+    )
+
+    $portalHost = $Session.PortalHost
+    $uri = "https://$portalHost/apiproxy" + $Path
+
+    $invoke = {
+        param($retry)
+        $xsrf = Update-XsrfToken -Session $Session.Session -PortalHost $portalHost
+        $headers = @{
+            'X-XSRF-TOKEN'     = $xsrf
+            'Accept'           = 'application/json'
+            'X-Requested-With' = 'XMLHttpRequest'
+        }
+
+        $params = @{
+            Uri             = $uri
+            WebSession      = $Session.Session
+            Method          = $Method
+            Headers         = $headers
+            UseBasicParsing = $true
+            TimeoutSec      = $TimeoutSec
+            ErrorAction     = 'Stop'
+        }
+        if ($Body) {
+            $ct = if ($ContentType) { $ContentType } else { 'application/json' }
+            $params.ContentType = $ct
+            $params.Body = if ($Body -is [hashtable] -or $Body -is [pscustomobject]) {
+                $Body | ConvertTo-Json -Depth 10 -Compress
+            } else {
+                $Body
+            }
+        }
+
+        Invoke-WebRequest @params
+    }
+
+    try {
+        $resp = & $invoke $false
+    } catch [System.Net.WebException], [Microsoft.PowerShell.Commands.HttpResponseException] {
+        $status = $_.Exception.Response.StatusCode
+        if ($status -eq 401 -or $status -eq 'Unauthorized') {
+            Write-Verbose "Invoke-MDEPortalRequest: 401 — attempting auto-refresh + retry"
+
+            # Look up the cached credential and force a fresh auth chain
+            $cacheKey = "$($Session.Upn)::$portalHost"
+            if ($script:SessionCache.ContainsKey($cacheKey)) {
+                $cached = $script:SessionCache[$cacheKey]
+                if ($cached._Method -and $cached._Credential) {
+                    $fresh = Connect-MDEPortal -Method $cached._Method -Credential $cached._Credential -PortalHost $portalHost -Force
+                    # Replace the caller's session in-place
+                    $Session.Session     = $fresh.Session
+                    $Session.AcquiredUtc = $fresh.AcquiredUtc
+                    # Retry once with the fresh session
+                    try {
+                        $resp = & $invoke $true
+                    } catch {
+                        throw "Retry after auto-refresh also failed: $($_.Exception.Message). Check that credentials are still valid."
+                    }
+                } else {
+                    throw "Session 401 and no cached credentials for auto-refresh (session may be from Connect-MDEPortalWithCookies). Re-run Initialize-XdrLogRaiderAuth.ps1 to refresh cookies."
+                }
+            } else {
+                throw "Session 401 but no cached session for Upn=$($Session.Upn). Call Connect-MDEPortal before retrying."
+            }
+        } else {
+            throw
+        }
+    }
+
+    if ($resp.Content) {
+        try {
+            return $resp.Content | ConvertFrom-Json -Depth 20
+        } catch {
+            # Non-JSON response — return raw
+            return $resp.Content
+        }
+    }
+    return $null
+}
