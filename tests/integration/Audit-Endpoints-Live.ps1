@@ -53,10 +53,17 @@ $i = 0
 foreach ($entry in $entries) {
     $i++
     # Entries are hashtables.
-    $stream = $entry.Stream
-    $path   = $entry.Path
-    $tier   = $entry.Tier
-    $filter = $entry.Filter
+    $stream   = $entry.Stream
+    $path     = $entry.Path
+    $tier     = $entry.Tier
+    $filter   = $entry.Filter
+    # Honor manifest Method / Body so POST-only endpoints get a fair probe.
+    $method   = if ($entry.ContainsKey('Method') -and $entry.Method) { $entry.Method } else { 'GET' }
+    $body     = if ($entry.ContainsKey('Body')   -and $entry.Body)   { $entry.Body }   else { $null }
+    $deferred = [bool]($entry.ContainsKey('Deferred') -and $entry.Deferred)
+    # Skip paths with unresolved {placeholder} — the audit tool has no source for
+    # PathParams (e.g. {TenantId}), so just mark them 'skip-pathparam' and move on.
+    $hasPlaceholder = $path -match '\{[^}]+\}'
 
     # Probe with a 1-hour back FromUtc so we exercise filter handling on filterable paths.
     $fromUtc = [datetime]::UtcNow.AddHours(-1)
@@ -69,8 +76,13 @@ foreach ($entry in $entries) {
 
     $status = 'unknown'; $payloadShape = ''; $durationMs = 0
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    if ($hasPlaceholder) {
+        $sw.Stop()
+        $status = 'SKIP'
+        $payloadShape = 'path has {placeholder} — audit has no PathParams source'
+    } else {
     try {
-        $resp = Invoke-MDEPortalRequest -Session $session -Path $probePath -Method GET -ErrorAction Stop
+        $resp = Invoke-MDEPortalRequest -Session $session -Path $probePath -Method $method -Body $body -ErrorAction Stop
         $sw.Stop()
         $status = '200'
         if ($null -eq $resp) {
@@ -92,20 +104,24 @@ foreach ($entry in $entries) {
         }
         $payloadShape = ($_.Exception.Message -split "`n" | Select-Object -First 1).Substring(0, [math]::Min(80, ($_.Exception.Message -split "`n")[0].Length))
     }
+    }
     $durationMs = [int]$sw.ElapsedMilliseconds
 
     $results += [pscustomobject]@{
         Stream      = $stream
         Tier        = $tier
         Path        = $path
+        Method      = $method
         Filter      = $filter
+        Deferred    = $deferred
         Status      = $status
         PayloadShape = $payloadShape
         DurationMs  = $durationMs
     }
 
-    $colour = switch ($status) { '200' { 'Green' } '404' { 'Yellow' } default { 'Red' } }
-    Write-Host ("  [{0,3}/{1}] {2,-8} {3,-40} {4,-4} {5,6}ms  {6}" -f $i, $manifest.Count, $tier, $stream, $status, $durationMs, $payloadShape) -ForegroundColor $colour
+    $colour = switch ($status) { '200' { 'Green' } '404' { 'Yellow' } 'SKIP' { 'DarkGray' } default { 'Red' } }
+    $flag = if ($deferred) { ' [deferred]' } else { '' }
+    Write-Host ("  [{0,3}/{1}] {2,-8} {3,-40} {4,-4} {5,6}ms  {6}{7}" -f $i, $manifest.Count, $tier, $stream, $status, $durationMs, $payloadShape, $flag) -ForegroundColor $colour
 
     # Be gentle on the portal — don't hammer.
     Start-Sleep -Milliseconds 200
@@ -140,16 +156,19 @@ $($summary -join "`n")
 
 ## All probes
 
-| Stream | Tier | Path | Filter | Status | Shape | ms |
-|---|---|---|---|---|---|---|
+| Stream | Tier | Method | Path | Filter | Deferred | Status | Shape | ms |
+|---|---|---|---|---|---|---|---|---|
 $($results | ForEach-Object {
-    "| $($_.Stream) | $($_.Tier) | `$($_.Path)` | $($_.Filter) | **$($_.Status)** | $($_.PayloadShape) | $($_.DurationMs) |"
+    "| $($_.Stream) | $($_.Tier) | $($_.Method) | `$($_.Path)` | $($_.Filter) | $($_.Deferred) | **$($_.Status)** | $($_.PayloadShape) | $($_.DurationMs) |"
 } | Out-String)
 "@
 $md | Out-File $mdPath
 Write-Host "MD : $mdPath"
 
-$ok    = ($results | Where-Object Status -eq '200').Count
-$notOk = $results.Count - $ok
+$ok        = ($results | Where-Object Status -eq '200').Count
+$deferredN = ($results | Where-Object { $_.Deferred }).Count
+$active    = $results.Count - $deferredN
+$notOk     = $results.Count - $ok
 Write-Host ""
-Write-Host "VERDICT: $ok/$($results.Count) endpoints returned 200; $notOk need review." -ForegroundColor $(if ($notOk -eq 0) { 'Green' } else { 'Yellow' })
+Write-Host "VERDICT: $ok/$($results.Count) endpoints returned 200 (including deferred)." -ForegroundColor $(if ($notOk -eq 0) { 'Green' } else { 'Yellow' })
+Write-Host "         $ok/$active green among non-deferred ($deferredN deferred)." -ForegroundColor $(if ($notOk -eq 0) { 'Green' } else { 'Yellow' })

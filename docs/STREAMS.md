@@ -99,3 +99,46 @@ All 52 portal-only streams ingested by XdrLogRaider, grouped by cadence tier.
 ## Adding a new stream
 
 See [CONTRIBUTING.md#adding-a-new-telemetry-stream](../CONTRIBUTING.md#adding-a-new-telemetry-stream).
+
+## Live-verified status (2026-04-23 audit)
+
+Paths shown above are illustrative (circa 2024 research). The **canonical paths** live in `src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1`, refreshed on 2026-04-23 against the live portal via `tests/integration/Audit-Endpoints-Live.ps1`, cross-referenced with:
+- [nodoc](https://nodoc.nathanmcnulty.com) — 576 operations (source: `github.com/nathanmcnulty/nodoc` OpenAPI spec)
+- [XDRInternals](https://github.com/MSCloudInternals/XDRInternals) — 150 paths from cmdlet sources
+
+### Production poll set: 26/52 streams return live data
+
+All 52 streams remain declared (DCR + custom tables provisioned). 26 are actively polled today; **26 are marked `Deferred = $true`** in the manifest with a one-line reason, skipped by the tier poller by default:
+
+```powershell
+Import-Module ./src/Modules/XdrLogRaider.Client/XdrLogRaider.Client.psd1 -Force
+(Get-MDEEndpointManifest).Values | Where-Object Deferred | Select-Object Stream, DeferReason
+```
+
+**Why deferred, not deleted**: DCR + custom table stay provisioned, so flipping a deferred stream back on is a one-line manifest edit — no table/schema redeploy needed.
+
+### Deferred breakdown
+
+| Category | Count | Reason |
+|---|---|---|
+| AV / EDR config (ASR, AVPolicy, AntiRansomware, CFA, NetworkProtection) | 5 | Portal paths moved; not in 2026-04 catalogue |
+| XSPM POST (AttackPaths, ChokePoints, TopTargets) | 3 | Needs specific body payload (500 with empty `{}`) |
+| Permission-locked (TenantAllowBlock, CustomCollection, CloudAppsConfig) | 3 | Service account needs elevated Defender/MCAS role |
+| Path drift (PUAConfig, PurviewSharing, IntuneConnection, AuthenticatedTelemetry, etc.) | 15 | nodoc path returns 404 live — needs browser HAR capture to find current |
+
+To re-enable one: see `docs/POSTDEPLOY-PLAYBOOK.md` → "Ongoing: iterate on the 27 deferred streams".
+
+## Time-filter (delta polling) support
+
+Six streams declare `Filter = 'fromDate'` — tier poller passes last-successful-poll timestamp as query-string for incremental fetches:
+
+| Stream | Cadence | Filter param |
+|---|---|---|
+| MDE_ActionCenter_CL | 10 min | fromDate |
+| MDE_ThreatAnalytics_CL | 10 min | fromDate |
+| MDE_SuppressionRules_CL | hourly | fromDate |
+| MDE_CustomDetections_CL | hourly | fromDate |
+| MDE_XspmInitiatives_CL | hourly | fromDate |
+| MDE_ExposureSnapshots_CL | hourly | fromDate |
+
+All other streams do a full snapshot each poll — payloads are small (portal configuration objects).

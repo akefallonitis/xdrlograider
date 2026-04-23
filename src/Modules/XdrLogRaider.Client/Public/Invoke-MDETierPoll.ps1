@@ -35,10 +35,17 @@ function Invoke-MDETierPoll {
         Hashtable/pscustomobject with the connector's runtime config. Required keys:
           DceEndpoint, DcrImmutableId, StorageAccountName, CheckpointTable.
 
+    .PARAMETER IncludeDeferred
+        By default streams with `Deferred = $true` in the manifest are skipped
+        (their DCR/custom-table is kept so the stream can be re-enabled without
+        a redeploy). Pass -IncludeDeferred to force every stream in the tier,
+        including deferred ones — useful for the live audit tool.
+
     .OUTPUTS
         [pscustomobject] with fields:
           StreamsAttempted  [int]
           StreamsSucceeded  [int]
+          StreamsSkipped    [int]   (count of deferred-and-not-included)
           RowsIngested      [int]
           Errors            [hashtable]  (stream-name → error message)
 
@@ -57,7 +64,8 @@ function Invoke-MDETierPoll {
         [Parameter(Mandatory)]
         [ValidateSet('P0', 'P1', 'P2', 'P3', 'P5', 'P6', 'P7')]
         [string] $Tier,
-        [Parameter(Mandatory)] $Config
+        [Parameter(Mandatory)] $Config,
+        [switch] $IncludeDeferred
     )
 
     $manifest = Get-MDEEndpointManifest
@@ -72,6 +80,7 @@ function Invoke-MDETierPoll {
         return [pscustomobject]@{
             StreamsAttempted = 0
             StreamsSucceeded = 0
+            StreamsSkipped   = 0
             RowsIngested     = 0
             Errors           = @{}
         }
@@ -79,11 +88,23 @@ function Invoke-MDETierPoll {
 
     $streamsAttempted = 0
     $streamsSucceeded = 0
+    $streamsSkipped   = 0
     $totalRows = 0
     $errors = @{}
 
     foreach ($entry in $tierStreams) {
         $stream = $entry.Stream
+
+        # Skip deferred streams unless caller explicitly opts in. We still keep
+        # the DCR/custom-table provisioned so the stream can be flipped back on
+        # with a single manifest edit once the upstream path is understood.
+        if ((-not $IncludeDeferred.IsPresent) -and $entry.ContainsKey('Deferred') -and $entry.Deferred) {
+            $streamsSkipped++
+            $reason = if ($entry.ContainsKey('DeferReason') -and $entry.DeferReason) { $entry.DeferReason } else { 'no reason recorded' }
+            Write-Verbose "Invoke-MDETierPoll Tier='$Tier' Stream='$stream' skipped (Deferred=true): $reason"
+            continue
+        }
+
         $streamsAttempted++
         try {
             $invokeArgs = @{ Session = $Session; Stream = $stream }
@@ -127,6 +148,7 @@ function Invoke-MDETierPoll {
     return [pscustomobject]@{
         StreamsAttempted = $streamsAttempted
         StreamsSucceeded = $streamsSucceeded
+        StreamsSkipped   = $streamsSkipped
         RowsIngested     = $totalRows
         Errors           = $errors
     }

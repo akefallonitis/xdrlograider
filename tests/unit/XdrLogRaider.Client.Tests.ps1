@@ -98,8 +98,12 @@ Describe 'Endpoint manifest contract' {
         $_.Filter | Should -Be 'fromDate'
     }
 
-    It 'no manifest entry has path placeholders ({...}) — all paths are fully resolved' -ForEach $script:ManifestEntries {
-        $_.Path | Should -Not -Match '\{[A-Za-z]+\}'
+    It 'manifest entry has path placeholders only when PathParams is declared' -ForEach $script:ManifestEntries {
+        $hasPlaceholders = $_.Path -match '\{[A-Za-z]+\}'
+        if ($hasPlaceholders) {
+            $_.ContainsKey('PathParams') | Should -BeTrue -Because "$($_.Stream) path has {placeholders} — must declare PathParams"
+            $_.PathParams | Should -Not -BeNullOrEmpty
+        }
     }
 
     It 'returns the same cached object on repeated calls' {
@@ -199,17 +203,39 @@ Describe 'Invoke-MDETierPoll' {
         }
     }
 
-    It 'iterates every snapshot endpoint in the tier' {
+    It 'iterates every snapshot endpoint in the tier (with -IncludeDeferred)' {
         InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
             param($Sess, $Cfg)
             Mock Invoke-MDEEndpoint { ,@([pscustomobject]@{ id = 'x' }) }
             Mock Send-ToLogAnalytics { @{ RowsSent = 1 } }
             Mock Set-CheckpointTimestamp { }
             Mock Get-CheckpointTimestamp { $null }
-            $result = Invoke-MDETierPoll -Session $Sess -Tier 'P0' -Config $Cfg
+            # -IncludeDeferred forces every P0 stream (19) regardless of Deferred flag.
+            $result = Invoke-MDETierPoll -Session $Sess -Tier 'P0' -Config $Cfg -IncludeDeferred
             $result.StreamsAttempted | Should -Be 19
             $result.StreamsSucceeded | Should -Be 19
             $result.RowsIngested     | Should -Be 19
+            $result.StreamsSkipped   | Should -Be 0
+        }
+    }
+
+    It 'skips Deferred streams by default and counts them in StreamsSkipped' {
+        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+            param($Sess, $Cfg)
+            Mock Invoke-MDEEndpoint { ,@([pscustomobject]@{ id = 'x' }) }
+            Mock Send-ToLogAnalytics { @{ RowsSent = 1 } }
+            Mock Set-CheckpointTimestamp { }
+            Mock Get-CheckpointTimestamp { $null }
+            # Without -IncludeDeferred: deferred P0 entries are skipped.
+            $result   = Invoke-MDETierPoll -Session $Sess -Tier 'P0' -Config $Cfg
+            $manifest = Get-MDEEndpointManifest
+            $p0       = @($manifest.Values | Where-Object { $_.Tier -eq 'P0' })
+            $deferred = @($p0 | Where-Object { $_.ContainsKey('Deferred') -and $_.Deferred })
+            $active   = $p0.Count - $deferred.Count
+
+            $result.StreamsAttempted | Should -Be $active
+            $result.StreamsSucceeded | Should -Be $active
+            $result.StreamsSkipped   | Should -Be $deferred.Count
         }
     }
 
