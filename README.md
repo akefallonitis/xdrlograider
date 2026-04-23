@@ -2,7 +2,7 @@
 
 **A Microsoft Sentinel Solution that ingests Defender XDR portal-only telemetry — configuration, compliance, drift, exposure, governance — that is not exposed by public Graph Security, Defender XDR, or MDE public APIs.**
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fmain%2Fdeploy%2Fcompiled%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fmain%2Fdeploy%2Fcompiled%2FcreateUiDefinition.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fgithub.com%2Fakefallonitis%2Fxdrlograider%2Freleases%2Fdownload%2Fv1.0.2%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fgithub.com%2Fakefallonitis%2Fxdrlograider%2Freleases%2Fdownload%2Fv1.0.2%2FcreateUiDefinition.json)
 [![CI](https://github.com/akefallonitis/xdrlograider/actions/workflows/ci.yml/badge.svg)](https://github.com/akefallonitis/xdrlograider/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
