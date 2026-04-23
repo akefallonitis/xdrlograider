@@ -6,8 +6,14 @@ function Test-MDEPortalAuth {
     .DESCRIPTION
         Used by the Function App's validate-auth-selftest timer and by operator
         diagnostics. Returns a structured object covering each stage of the auth
-        chain (login → ESTSAUTH → sccauth+XSRF → sample API call) with timing and
-        success/failure per stage.
+        chain (ESTSAUTH+sccauth via Get-EstsCookie, then a benign portal API probe)
+        with timing and success/failure per stage.
+
+        As of v1.0 the auth flow is a single hop: Get-EstsCookie returns a session
+        that already carries sccauth + XSRF for the target portal, so there is no
+        separate `sccauth-exchange` stage. Probe call uses TenantContext which is
+        the most stable portal endpoint (unauthenticated 401 if creds bad,
+        200 + AuthInfo if good).
 
     .PARAMETER Method
         'CredentialsTotp' or 'Passkey'.
@@ -42,40 +48,44 @@ function Test-MDEPortalAuth {
         Stage         = 'start'
         StageTimings  = [ordered]@{}
         FailureReason = $null
-        SccauthAcquiredUtc = $null
-        SampleCallHttpCode = $null
+        SccauthAcquiredUtc  = $null
+        TenantId            = $null
+        SampleCallHttpCode  = $null
         SampleCallLatencyMs = $null
     }
 
     $stageStopwatch = [System.Diagnostics.Stopwatch]::new()
 
     try {
-        # --- Stage 1: ESTSAUTHPERSISTENT ---
+        # --- Stage 1: authenticate (Get-EstsCookie returns session with sccauth+XSRF) ---
         $result.Stage = 'ests-cookie'
         $stageStopwatch.Restart()
-        $session = Get-EstsCookie -Method $Method -Credential $Credential -PortalHost $PortalHost
-        $result.StageTimings.estsMs = [int]$stageStopwatch.ElapsedMilliseconds
+        $auth = Get-EstsCookie -Method $Method -Credential $Credential -PortalHost $PortalHost
+        $result.StageTimings.estsMs      = [int]$stageStopwatch.ElapsedMilliseconds
+        $result.SccauthAcquiredUtc       = $auth.AcquiredUtc
+        $result.TenantId                 = $auth.TenantId
 
-        # --- Stage 2: sccauth + XSRF ---
-        $result.Stage = 'sccauth-exchange'
-        $stageStopwatch.Restart()
-        $exchange = Exchange-SccauthCookie -Session $session -PortalHost $PortalHost
-        $result.StageTimings.sccauthMs = [int]$stageStopwatch.ElapsedMilliseconds
-        $result.SccauthAcquiredUtc = $exchange.AcquiredUtc
-
-        # --- Stage 3: sample API call (benign, low-rate-limit impact) ---
+        # --- Stage 2: benign portal probe (TenantContext — proven-working endpoint) ---
         $result.Stage = 'sample-call'
         $stageStopwatch.Restart()
         $connected = [pscustomobject]@{
-            Session     = $exchange.Session
+            Session     = $auth.Session
             Upn         = $Credential.upn
             PortalHost  = $PortalHost
-            AcquiredUtc = $exchange.AcquiredUtc
+            AcquiredUtc = $auth.AcquiredUtc
+            TenantId    = $auth.TenantId
         }
         try {
-            $sample = Invoke-MDEPortalRequest -Session $connected -Path '/api/settings/GetAdvancedFeaturesSetting' -Method GET -TimeoutSec 30
+            $sample = Invoke-MDEPortalRequest `
+                -Session $connected `
+                -Path '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true' `
+                -Method GET `
+                -TimeoutSec 30
             $result.SampleCallHttpCode  = 200
             $result.SampleCallLatencyMs = [int]$stageStopwatch.ElapsedMilliseconds
+            if (-not $sample -or -not $sample.AuthInfo) {
+                throw "Probe returned 200 but body lacks AuthInfo — response shape unexpected"
+            }
         } catch [Microsoft.PowerShell.Commands.HttpResponseException] {
             $result.SampleCallHttpCode  = [int]$_.Exception.Response.StatusCode
             $result.SampleCallLatencyMs = [int]$stageStopwatch.ElapsedMilliseconds

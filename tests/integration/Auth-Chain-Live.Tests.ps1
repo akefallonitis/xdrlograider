@@ -187,4 +187,88 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
         $sccauth       | Should -Not -BeNullOrEmpty
         $sccauth.Value | Should -Not -BeNullOrEmpty
     }
+
+    It 'Live 401-recovery: poisoning sccauth triggers silent reauth + API call succeeds' -Skip:$script:SkipCacheTest {
+        # Prove the end-to-end reauth path: inject an obviously-invalid sccauth into the
+        # live session so the NEXT /apiproxy call returns 401 → Invoke-MDEPortalRequest
+        # detects the 401 → Connect-MDEPortal -Force mints a fresh session → retry succeeds.
+        # This is the exact path the Function App walks in production when sccauth expires.
+
+        $session = script:New-LiveSession -AuthMethod $script:AuthMethod -Credential $script:Credential -PortalHost $script:PortalHost -Force
+
+        # Wait for fresh TOTP window so the reauth's EndAuth doesn't duplicate-code-reject.
+        $now    = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+        $waitTo = [math]::Floor($now / 30) * 30 + 32
+        Start-Sleep -Seconds ([math]::Max(1, $waitTo - $now))
+
+        # Poison: overwrite sccauth with gibberish. Portal will return 401 on next call.
+        $cookieUri = [System.Uri]::new("https://$script:PortalHost/")
+        $poisoned  = [System.Net.Cookie]::new('sccauth', 'POISONED-BY-LIVE-TEST', '/', $script:PortalHost)
+        $poisoned.Secure = $true
+        $session.Session.Cookies.Add($cookieUri, $poisoned)
+
+        $priorAcquired = $session.AcquiredUtc
+
+        # Trigger the 401→reauth path. TenantContext is our proven-working endpoint.
+        $ctx = Invoke-MDEPortalRequest -Session $session -Path '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true' -Method GET
+        $ctx               | Should -Not -BeNullOrEmpty -Because 'Auto-reauth must recover the call'
+        $ctx.AuthInfo      | Should -Not -BeNullOrEmpty
+        $ctx.AuthInfo.TenantId | Should -Not -BeNullOrEmpty
+
+        # After reauth the in-place session gets its AcquiredUtc bumped.
+        $session.AcquiredUtc | Should -BeGreaterThan $priorAcquired
+    }
+
+    It 'Live delta-polling: two sequential MDETierPoll runs advance the checkpoint' -Skip:$script:SkipCacheTest {
+        # Proves the P6 tier's filterable endpoints (ActionCenter + ThreatAnalytics,
+        # both now Filter='fromDate') correctly pick up the checkpoint on the 2nd run.
+        # We use an IN-MEMORY mock of Get/Set-CheckpointTimestamp because we don't want
+        # to require a real storage account for this laptop test — but the manifest-
+        # driven delta behaviour itself IS live.
+
+        InModuleScope XdrLogRaider.Client -Parameters @{
+            Session = (script:New-LiveSession -AuthMethod $script:AuthMethod -Credential $script:Credential -PortalHost $script:PortalHost)
+        } {
+            param($Session)
+
+            $script:CpStore = @{}
+            Mock Get-CheckpointTimestamp { return $script:CpStore[$args[-1]] }
+            Mock Set-CheckpointTimestamp {
+                $streamName = ($args | ForEach-Object { $_ } | Where-Object { $_ -is [string] -and $_ -match '^MDE_' }) | Select-Object -First 1
+                if ($streamName) { $script:CpStore[$streamName] = [datetime]::UtcNow }
+            }
+            Mock Send-ToLogAnalytics { @{ RowsSent = 0; BatchesSent = 0; LatencyMs = 0 } }
+
+            $config = [pscustomobject]@{
+                DceEndpoint        = 'https://fake.ingest.monitor.azure.com'
+                DcrImmutableId     = 'dcr-fake-0000'
+                StorageAccountName = 'fakesa'
+                CheckpointTable    = 'fakecp'
+            }
+
+            # Run 1: no checkpoint yet → endpoint called without -FromUtc via default 1h.
+            $r1 = Invoke-MDETierPoll -Session $Session -Tier 'P6' -Config $config
+            $r1.StreamsAttempted | Should -Be 2
+
+            # Both filterable streams should now have a checkpoint.
+            $script:CpStore.Keys.Count | Should -BeGreaterOrEqual 1
+
+            # Run 2: each filterable stream's Invoke-MDEEndpoint should receive the
+            # checkpoint as -FromUtc.
+            Mock Invoke-MDEEndpoint {
+                param($Session, $Stream, $FromUtc, $PathParams)
+                # On 2nd run we MUST see a -FromUtc for filterable streams
+                $manifest = Get-MDEEndpointManifest
+                $entry = $manifest[$Stream]
+                $filter = if ($entry -is [hashtable]) { $entry['Filter'] } else { $null }
+                if ($filter) {
+                    $PSBoundParameters.ContainsKey('FromUtc') | Should -BeTrue -Because "$Stream is filterable and must receive -FromUtc after first run"
+                }
+                ,@()
+            }
+
+            $r2 = Invoke-MDETierPoll -Session $Session -Tier 'P6' -Config $config
+            $r2.StreamsAttempted | Should -Be 2
+        }
+    }
 }

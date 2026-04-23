@@ -89,8 +89,19 @@ function Invoke-MDEPortalRequest {
         $resp = & $invoke $false
     } catch [System.Net.WebException], [Microsoft.PowerShell.Commands.HttpResponseException] {
         $status = $_.Exception.Response.StatusCode
-        if ($status -eq 401 -or $status -eq 'Unauthorized') {
-            Write-Verbose "Invoke-MDEPortalRequest: 401 — attempting auto-refresh + retry"
+        $statusInt = try { [int]$status } catch { 0 }
+        # Portal emits three "session is no good" signals that we must all treat
+        # as "reauth needed":
+        #   401 Unauthorized    - classic Entra rejection
+        #   440 Session timeout - Microsoft-specific "your sccauth expired" status
+        #   403 Forbidden       - SOMETIMES used by portal when sccauth is valid
+        #                         but rotated out of the ring (rare); reauth fixes
+        $needsReauth = ($statusInt -in @(401, 403, 440)) -or
+                       ($status -in @('Unauthorized', 'Forbidden')) -or
+                       ($_.Exception.Message -match 'Session timeout|sccauth expired')
+
+        if ($needsReauth) {
+            Write-Verbose "Invoke-MDEPortalRequest: HTTP $statusInt — attempting auto-refresh + retry"
 
             # Look up the cached credential and force a fresh auth chain
             $cacheKey = "$($Session.Upn)::$portalHost"

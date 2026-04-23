@@ -153,9 +153,22 @@ $cfg.TestResult.OutputPath = Join-Path $resultsDir "$Category.xml"
 # Coverage for unit/offline categories
 if ($Category -in @('unit', 'all-offline')) {
     $cfg.CodeCoverage.Enabled = $true
-    $cfg.CodeCoverage.Path = @('./src/Modules/**/*.ps1', './src/functions/**/*.ps1', './tools/*.ps1')
-    $cfg.CodeCoverage.OutputPath = Join-Path $resultsDir "coverage-$Category.xml"
-    $cfg.CodeCoverage.OutputFormat = 'JaCoCo'
+    # Coverage.Path must be actual absolute/relative FILE paths (resolved globs).
+    # Pester 5's CoveragePath glob resolution is fragile across OSes — resolve
+    # the globs ourselves so the reporter sees real files and emits non-zero
+    # coverage. Empty list disables coverage silently.
+    $covFiles = @(
+        (Get-ChildItem "$repoRoot/src/Modules" -Recurse -Filter *.ps1 -File -ErrorAction SilentlyContinue).FullName
+        (Get-ChildItem "$repoRoot/src/functions" -Recurse -Filter *.ps1 -File -ErrorAction SilentlyContinue).FullName
+        (Get-ChildItem "$repoRoot/tools" -Filter *.ps1 -File -ErrorAction SilentlyContinue).FullName
+    ) | Where-Object { $_ }
+    if ($covFiles) {
+        $cfg.CodeCoverage.Path = $covFiles
+        $cfg.CodeCoverage.OutputPath = Join-Path $resultsDir "coverage-$Category.xml"
+        $cfg.CodeCoverage.OutputFormat = 'JaCoCo'
+    } else {
+        $cfg.CodeCoverage.Enabled = $false
+    }
 }
 
 # --- Banner -------------------------------------------------------------------
