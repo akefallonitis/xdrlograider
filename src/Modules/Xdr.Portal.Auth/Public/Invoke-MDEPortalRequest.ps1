@@ -90,14 +90,15 @@ function Invoke-MDEPortalRequest {
     } catch [System.Net.WebException], [Microsoft.PowerShell.Commands.HttpResponseException] {
         $status = $_.Exception.Response.StatusCode
         $statusInt = try { [int]$status } catch { 0 }
-        # Portal emits three "session is no good" signals that we must all treat
-        # as "reauth needed":
+        # Portal emits TWO "session is no good" signals that we must treat as
+        # "reauth needed":
         #   401 Unauthorized    - classic Entra rejection
         #   440 Session timeout - Microsoft-specific "your sccauth expired" status
-        #   403 Forbidden       - SOMETIMES used by portal when sccauth is valid
-        #                         but rotated out of the ring (rare); reauth fixes
-        $needsReauth = ($statusInt -in @(401, 403, 440)) -or
-                       ($status -in @('Unauthorized', 'Forbidden')) -or
+        # 403 Forbidden is NOT a reauth signal — it means "authenticated but
+        # not permitted" (e.g. service account missing Defender role). Surface
+        # 403 to caller unchanged so they can fix permissions, not spin on retry.
+        $needsReauth = ($statusInt -in @(401, 440)) -or
+                       ($status -eq 'Unauthorized') -or
                        ($_.Exception.Message -match 'Session timeout|sccauth expired')
 
         if ($needsReauth) {

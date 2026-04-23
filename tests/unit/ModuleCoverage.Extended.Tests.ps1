@@ -63,26 +63,22 @@ Describe 'Update-XsrfToken (Xdr.Portal.Auth)' {
 Describe 'Get-XdrAuthSelfTestFlag — all return paths' {
 
     BeforeAll {
-        # Stub the Az cmdlets the function calls. Module-scope stubs so Mock can
-        # intercept them. Without these, Mock finds no command to intercept
-        # (the Az modules aren't imported in the offline suite).
+        # Inject stubs INSIDE the module scope so when XdrLogRaider.Ingest's
+        # Get-XdrAuthSelfTestFlag calls New-AzStorageContext / Get-AzStorageTable
+        # / Get-AzTableRow, PowerShell resolves to our stubs (not the real Az
+        # cmdlets) — which on Linux CI have strict Context parameter validators
+        # that would bypass Pester's Mock intercept.
         InModuleScope XdrLogRaider.Ingest {
-            if (-not (Get-Command New-AzStorageContext -ErrorAction SilentlyContinue)) {
-                function global:New-AzStorageContext { param($StorageAccountName, [switch]$UseConnectedAccount, $ErrorAction) }
+            if (-not (Get-Command New-AzStorageContext -ErrorAction SilentlyContinue -CommandType Function)) {
+                function script:New-AzStorageContext { param($StorageAccountName, [switch]$UseConnectedAccount, $ErrorAction) @{} }
             }
-            if (-not (Get-Command Get-AzStorageTable -ErrorAction SilentlyContinue)) {
-                function global:Get-AzStorageTable { param($Name, $Context, $ErrorAction) }
+            if (-not (Get-Command Get-AzStorageTable -ErrorAction SilentlyContinue -CommandType Function)) {
+                function script:Get-AzStorageTable { param($Name, $Context, $ErrorAction) @{ CloudTable = @{} } }
             }
-            if (-not (Get-Command Get-AzTableRow -ErrorAction SilentlyContinue)) {
-                function global:Get-AzTableRow { param($Table, $PartitionKey, $RowKey, $ErrorAction) }
+            if (-not (Get-Command Get-AzTableRow -ErrorAction SilentlyContinue -CommandType Function)) {
+                function script:Get-AzTableRow { param($Table, $PartitionKey, $RowKey, $ErrorAction) $null }
             }
         }
-    }
-
-    AfterAll {
-        Remove-Item function:global:New-AzStorageContext -ErrorAction SilentlyContinue
-        Remove-Item function:global:Get-AzStorageTable -ErrorAction SilentlyContinue
-        Remove-Item function:global:Get-AzTableRow -ErrorAction SilentlyContinue
     }
 
     It 'returns false when storage context creation throws' {
