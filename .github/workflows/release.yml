@@ -31,8 +31,10 @@ jobs:
         shell: pwsh
         run: |
           # Lint (src + tools + tests) with project-level settings
-          $lint = Invoke-ScriptAnalyzer -Path ./src, ./tools, ./tests -Recurse `
-              -Settings ./.config/PSScriptAnalyzerSettings.psd1
+          # Explicit array + quoted strings avoids CI parser folding
+          # `-Path ./src, ./tools` into a string assignment.
+          $lintPaths = @('./src', './tools', './tests')
+          $lint = Invoke-ScriptAnalyzer -Path $lintPaths -Recurse -Settings './.config/PSScriptAnalyzerSettings.psd1'
           if ($lint | Where-Object Severity -eq 'Error') {
               $lint | Where-Object Severity -eq 'Error' | Format-Table -AutoSize
               throw "PSScriptAnalyzer errors — release aborted"
