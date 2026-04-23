@@ -4,7 +4,8 @@ Welcome to XdrLogRaider docs. Each page targets a specific audience.
 
 ## For anyone deploying
 
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** — Step-by-step install, with screenshots
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** — Step-by-step install with the 8-step flow
+- **[PERMISSIONS.md](PERMISSIONS.md)** — Consolidated permissions reference (setup + runtime + cross-RG scenarios)
 - **[GETTING-AUTH-MATERIAL.md](GETTING-AUTH-MATERIAL.md)** — How to obtain a TOTP Base32 secret / passkey / cookies for the service account (read this BEFORE running `Initialize-XdrLogRaiderAuth.ps1`)
 - **[AUTH.md](AUTH.md)** — Auth methods, Conditional Access compatibility, rotation
 - **[BRING-YOUR-OWN-PASSKEY.md](BRING-YOUR-OWN-PASSKEY.md)** — How to generate a passkey JSON

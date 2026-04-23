@@ -55,7 +55,25 @@ Describe 'mainTemplate.json — schema + structure' {
         $script:MainTemplate.parameters.serviceAccountUpn | Should -Not -BeNullOrEmpty
     }
 
-    It 'creates core resource types' {
+    It 'existingWorkspaceId is REQUIRED (no default value)' {
+        $p = $script:MainTemplate.parameters.existingWorkspaceId
+        $p | Should -Not -BeNullOrEmpty
+        $p.PSObject.Properties['defaultValue'] | Should -BeNullOrEmpty
+        $p.minLength | Should -Be 1
+    }
+
+    It 'workspaceLocation is REQUIRED' {
+        $p = $script:MainTemplate.parameters.workspaceLocation
+        $p | Should -Not -BeNullOrEmpty
+        $p.minLength | Should -Be 1
+    }
+
+    It 'has NO workspace-creation resource (workspace must pre-exist)' {
+        $types = $script:MainTemplate.resources | ForEach-Object { $_.type }
+        $types | Should -Not -Contain 'Microsoft.OperationalInsights/workspaces'
+    }
+
+    It 'creates core connector resource types' {
         $types = $script:MainTemplate.resources | ForEach-Object { $_.type } | Sort-Object -Unique
         $types | Should -Contain 'Microsoft.Storage/storageAccounts'
         $types | Should -Contain 'Microsoft.KeyVault/vaults'
@@ -63,6 +81,9 @@ Describe 'mainTemplate.json — schema + structure' {
         $types | Should -Contain 'Microsoft.Web/serverfarms'
         $types | Should -Contain 'Microsoft.Insights/components'
         $types | Should -Contain 'Microsoft.Insights/dataCollectionEndpoints'
+        $types | Should -Contain 'Microsoft.Insights/dataCollectionRules'
+        $types | Should -Contain 'Microsoft.Authorization/roleAssignments'
+        $types | Should -Contain 'Microsoft.Resources/deployments'
     }
 
     It 'Function App has SystemAssigned managed identity' {
@@ -70,9 +91,45 @@ Describe 'mainTemplate.json — schema + structure' {
         $funcApp.identity.type | Should -Be 'SystemAssigned'
     }
 
-    It 'outputs keyVaultName and dceEndpoint' {
-        $script:MainTemplate.outputs.keyVaultName  | Should -Not -BeNullOrEmpty
-        $script:MainTemplate.outputs.dceEndpoint   | Should -Not -BeNullOrEmpty
+    It 'creates exactly 3 role assignments for the MI (KV Secrets User, Storage Table Contributor, Monitoring Metrics Publisher)' {
+        $roleAssignments = @($script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Authorization/roleAssignments' })
+        $roleAssignments.Count | Should -Be 3
+    }
+
+    It 'has a nested deployment for cross-RG custom tables (54)' {
+        $nestedDeployments = @($script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' })
+        $nestedDeployments.Count | Should -BeGreaterOrEqual 2  # customTables + sentinelContent
+        $customTablesDeploy = $nestedDeployments | Where-Object { $_.name -match 'customTables' }
+        $customTablesDeploy | Should -Not -BeNullOrEmpty
+        $customTablesDeploy.subscriptionId | Should -Not -BeNullOrEmpty  # cross-subscription capable
+        $customTablesDeploy.resourceGroup  | Should -Not -BeNullOrEmpty  # cross-RG
+    }
+
+    It 'has a nested deployment for cross-RG Sentinel content' {
+        $sentinelDeploy = $script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'sentinelContent' }
+        $sentinelDeploy | Should -Not -BeNullOrEmpty
+        $sentinelDeploy.properties.templateLink.uri | Should -Match 'sentinelContent\.json'
+    }
+
+    It 'DCE + DCR use workspaceLocation (not connectorLocation)' {
+        $dce = $script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionEndpoints' } | Select-Object -First 1
+        $dcr = $script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules'    } | Select-Object -First 1
+        $dce.location | Should -Be "[parameters('workspaceLocation')]"
+        $dcr.location | Should -Be "[parameters('workspaceLocation')]"
+    }
+
+    It 'DCE does NOT have a `kind` property (the AMA-era label)' {
+        $dce = $script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionEndpoints' } | Select-Object -First 1
+        $dce.PSObject.Properties['kind'] | Should -BeNullOrEmpty
+    }
+
+    It 'outputs keyVaultName, dceEndpoint, dcrImmutableId, workspace context' {
+        $script:MainTemplate.outputs.keyVaultName      | Should -Not -BeNullOrEmpty
+        $script:MainTemplate.outputs.dceEndpoint       | Should -Not -BeNullOrEmpty
+        $script:MainTemplate.outputs.dcrImmutableId    | Should -Not -BeNullOrEmpty
+        $script:MainTemplate.outputs.workspaceId       | Should -Not -BeNullOrEmpty
+        $script:MainTemplate.outputs.workspaceRg       | Should -Not -BeNullOrEmpty
+        $script:MainTemplate.outputs.workspaceLocation | Should -Not -BeNullOrEmpty
         $script:MainTemplate.outputs.postDeployCommand | Should -Not -BeNullOrEmpty
     }
 }
@@ -101,9 +158,18 @@ Describe 'createUiDefinition.json — schema + structure' {
 
     It 'outputs match mainTemplate parameters' {
         $outputs = $script:UiDef.parameters.outputs.PSObject.Properties.Name
-        foreach ($requiredOutput in 'projectPrefix', 'serviceAccountUpn', 'authMethod') {
+        foreach ($requiredOutput in 'projectPrefix', 'serviceAccountUpn', 'authMethod', 'existingWorkspaceId', 'workspaceLocation') {
             $outputs | Should -Contain $requiredOutput
         }
+    }
+
+    It 'has workspaceSettings step requiring existingWorkspaceId + workspaceLocation' {
+        $wsStep = $script:UiDef.parameters.steps | Where-Object name -eq 'workspaceSettings'
+        $wsStep | Should -Not -BeNullOrEmpty
+        $wsIdElement  = $wsStep.elements | Where-Object name -eq 'existingWorkspaceId'
+        $wsLocElement = $wsStep.elements | Where-Object name -eq 'workspaceLocation'
+        $wsIdElement.constraints.required  | Should -BeTrue
+        $wsLocElement.constraints.required | Should -BeTrue
     }
 }
 
@@ -112,10 +178,24 @@ Describe 'Bicep source — files present' {
         (Get-Content $script:BicepMainPath -Raw).Length | Should -BeGreaterThan 500
     }
 
-    It 'has modular submodules' {
+    It 'has modular submodules (no log-analytics.bicep — workspace is external)' {
         $modulesDir = Join-Path $script:DeployDir 'modules'
         $modules = Get-ChildItem -Path $modulesDir -Filter '*.bicep'
-        $modules.Count | Should -BeGreaterOrEqual 6  # log-analytics, storage, key-vault, app-insights, function-app, dce-dcr, custom-tables, role-assignments, data-connector
+        $modules.Count | Should -BeGreaterOrEqual 6  # storage, key-vault, app-insights, function-app, dce-dcr, custom-tables, role-assignments, data-connector
+        $moduleNames = $modules | ForEach-Object { $_.BaseName }
+        $moduleNames | Should -Not -Contain 'log-analytics'  # deleted in v1.0
+    }
+
+    It 'main.bicep requires existingWorkspaceId + workspaceLocation (no defaults)' {
+        $bicep = Get-Content $script:BicepMainPath -Raw
+        $bicep | Should -Match "param existingWorkspaceId string\b"
+        $bicep | Should -Match "param workspaceLocation string\b"
+        $bicep | Should -Match "@minLength\(1\)"   # Both required params carry minLength(1)
+    }
+
+    It 'main.bicep uses cross-RG scope for custom-tables module' {
+        $bicep = Get-Content $script:BicepMainPath -Raw
+        $bicep | Should -Match "scope:\s*resourceGroup\(workspaceSubscriptionId,\s*workspaceResourceGroup\)"
     }
 }
 

@@ -11,10 +11,13 @@ param location string
 param workspaceResourceId string
 
 // --- Data Collection Endpoint ---
+// Note: `kind` property omitted intentionally. It's an AMA-era label used to pair
+// VM-based Azure Monitor Agent configs; our connector sends via the HTTPS Logs
+// Ingestion API, which accepts regardless of `kind`. Omitting keeps the resource
+// generic for both Linux- and Windows-hosted senders.
 resource dce 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' = {
   name: dceName
   location: location
-  kind: 'Linux'
   properties: {
     networkAcls: {
       publicNetworkAccess: 'Enabled'

@@ -47,13 +47,35 @@ MDE_Heartbeat_CL
 
 ## Incident response
 
-### Auth chain broken (MDE_AuthTestResult_CL shows Success=false)
+### Auth self-test failure (MDE_AuthTestResult_CL.Success=false)
 
-1. Identify failure stage: `ests-cookie` = sign-in issue; `sccauth-exchange` = portal access issue; `sample-call` = permissions/403
-2. Check Entra sign-in logs for the service account — is there a CA block?
-3. Reset service account password if expired; re-run helper
-4. If passkey: verify credential is still registered in Entra security info
-5. If persistent, check [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+**Symptom**: most recent row of `MDE_AuthTestResult_CL` shows `Success=false`. All tier pollers refuse to run (they gate on the flag) so nothing ingests until this resolves.
+
+```kql
+MDE_AuthTestResult_CL
+| order by TimeGenerated desc
+| take 1
+| project TimeGenerated, Success, Stage, FailureReason, SampleCallHttpCode
+```
+
+**Diagnose by `Stage`**:
+
+| Stage | Most likely cause | First action |
+|---|---|---|
+| `credentials` | KV read failed | Check FA's MI has `Key Vault Secrets User`; verify secrets exist (`mde-portal-upn`, `mde-portal-password`, `mde-portal-totp` OR `mde-portal-passkey`) |
+| `ests-cookie` | Entra sign-in blocked | Check Entra sign-in logs for the service account — look for Conditional Access deny, password expired, or MFA enrolment lapse |
+| `sccauth-exchange` | Portal rejected ESTS cookie | Service account lacks portal access — verify Defender RBAC role (`Defender XDR Analyst` or equivalent read role) |
+| `sample-call` | HTTP 401/403 on sample endpoint | Service account roles missing — verify both `Security Reader` (Entra) + Defender RBAC are assigned |
+| `complete` with `Success=false` | Sample call returned non-200 | Check `SampleCallHttpCode` — 429 = throttled (wait); 5xx = Microsoft transient; 403 = permissions |
+
+**Resolution paths**:
+1. **Password expired**: reset in Entra → re-run `Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName <name>`
+2. **TOTP seed rotated**: re-enrol at `mysignins.microsoft.com` → re-run helper
+3. **Passkey revoked**: re-register → re-run helper
+4. **CA policy blocks the SP**: add the service account to the CA exclusion list OR register a named location exception
+5. **Never resolves**: follow [TROUBLESHOOTING.md](TROUBLESHOOTING.md) + file a `bug_report` issue
+
+Until fixed, **no data flows** — the auth-selftest gate is intentional (see `docs/ARCHITECTURE.md`), preventing 401 storms on misconfigured auth.
 
 ### Specific stream endpoint broken (Microsoft hardened it)
 

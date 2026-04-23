@@ -10,22 +10,30 @@
 |---|---|
 | Platform | Azure Functions (PowerShell 7.4), Log Analytics, Sentinel |
 | Auth | Two unattended auto-refreshing methods: Credentials+TOTP, Software Passkey |
-| Scope | Defender XDR portal (`security.microsoft.com`) — 52 streams across 7 compliance tiers |
-| Deployment | One-click **Deploy to Azure** (button above) + one `./tools/Initialize-XdrLogRaiderAuth.ps1` run post-deploy |
-| Content | 6 workbooks · 15 analytic rules · 10 hunting queries · 6 KQL drift parsers (all auto-deployed via nested ARM) |
+| Scope | Defender XDR portal (`security.microsoft.com`) — 52 telemetry streams across 7 compliance tiers |
+| Prerequisite | **Existing Sentinel-enabled Log Analytics workspace** (any RG / subscription in the same tenant). This template does NOT create a workspace. |
+| Deployment | One-click **Deploy to Azure** (button above) + one `./tools/Initialize-XdrLogRaiderAuth.ps1` run post-deploy. Cross-RG / cross-region workspace supported. |
+| Content | 6 workbooks · 15 analytic rules · 10 hunting queries · 6 KQL drift parsers + 54 custom LA tables (52 telemetry + Heartbeat + AuthTestResult) — all auto-deployed via nested ARM |
 | License | MIT |
 
 XdrLogRaider ingests the tenant-configuration surface that Microsoft's first-party APIs don't expose: ASR rule state drift, exclusion list changes, data export destination adds, Live Response policy relaxations, XSPM attack paths, MDI sensor coverage, Action Center approval history, and 48 more streams. Drift is computed in pure KQL at query time — 6 category-scoped parsers feed 6 workbooks and analytic rules.
 
 ## Quick start
 
+### 0. Prerequisites (one-time)
+
+- **Existing Sentinel-enabled Log Analytics workspace**. Copy its full resource ID + region (Portal → workspace → Overview → JSON view).
+- **Dedicated read-only Entra service account** (`svc-xdrlr@...`) with `Security Reader` + `Defender XDR Analyst` roles.
+- **TOTP Base32 secret** (or **software passkey JSON**) for that account — see [docs/GETTING-AUTH-MATERIAL.md](docs/GETTING-AUTH-MATERIAL.md).
+- **Contributor** on the target RG + **Log Analytics Contributor** on the workspace RG. Full breakdown in [docs/PERMISSIONS.md](docs/PERMISSIONS.md).
+
 ### 1. Click **Deploy to Azure** (badge above)
 
-The button resolves to an Azure Portal wizard that:
-- Prompts for region, project prefix, service account UPN, auth method, Log Analytics workspace
-- Provisions Function App + Key Vault + Storage + DCE + DCR + App Insights
-- Deploys the Sentinel content pack (6 parsers · 6 workbooks · 15 analytic rules · 10 hunting queries) via a nested ARM deployment — **no manual Sentinel-content install needed**
-- Outputs `KeyVaultName` and `DceEndpoint` for the helper script
+The button opens an Azure Portal wizard that:
+- Asks for the workspace resource ID + workspace region (required), service account UPN, auth method, project prefix
+- Provisions Function App + Plan + Key Vault + Storage + DCE + DCR + App Insights in your target RG
+- Adds 54 custom tables + a Sentinel Data Connector UI card + 6 parsers / 6 workbooks / 15 analytic rules / 10 hunting queries to your existing workspace (via cross-RG nested deployments — no manual Sentinel-content install)
+- Outputs `keyVaultName`, `dceEndpoint`, `dcrImmutableId`, and the exact `postDeployCommand` for step 2
 
 > **Private repository note:** the Deploy button uses `raw.githubusercontent.com` URLs and requires the repo to be public for Azure Portal to fetch the templates. For private-repo deployment: use Azure Portal → **Deploy a custom template** → **Load template from file** with the JSONs in `deploy/compiled/` (or from the GitHub Release assets).
 
@@ -54,7 +62,9 @@ Production polling timers activate automatically once the self-test passes. With
 
 - [Architecture](docs/ARCHITECTURE.md) — components, data flow, trust boundaries
 - [Deployment](docs/DEPLOYMENT.md) — step-by-step walkthrough
+- **[Permissions](docs/PERMISSIONS.md)** — consolidated setup + runtime + cross-RG reference
 - [Auth](docs/AUTH.md) — both methods explained, CA compatibility, rotation
+- [Getting Auth Material](docs/GETTING-AUTH-MATERIAL.md) — how to obtain TOTP / passkey / cookies
 - [Bring Your Own Passkey](docs/BRING-YOUR-OWN-PASSKEY.md) — generating a software passkey JSON
 - [Streams](docs/STREAMS.md) — full catalogue of 52 telemetry streams
 - [Workbooks](docs/WORKBOOKS.md) — what each dashboard shows

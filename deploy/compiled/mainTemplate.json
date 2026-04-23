@@ -3,8 +3,9 @@
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
-      "name": "Compiled from deploy/main.bicep — regenerate via CI release.yml"
-    }
+      "name": "Hand-authored ARM template matching deploy/main.bicep. Regenerate via `az bicep build` and diff before committing."
+    },
+    "comments": "XdrLogRaider v1.0 — connector-only deployment. Requires an existing Sentinel-enabled Log Analytics workspace (any RG, any subscription in the same tenant). Adds 54 custom tables + a Data Connector UI card to that workspace via cross-RG nested deployments."
   },
   "parameters": {
     "projectPrefix": {
@@ -12,7 +13,7 @@
       "defaultValue": "xdrlr",
       "minLength": 3,
       "maxLength": 12,
-      "metadata": { "description": "Project prefix. 3-12 alphanumeric." }
+      "metadata": { "description": "Project prefix. 3-12 lowercase alphanumeric." }
     },
     "env": {
       "type": "string",
@@ -20,41 +21,46 @@
       "allowedValues": [ "dev", "staging", "prod" ],
       "metadata": { "description": "Environment tag." }
     },
-    "location": {
+    "connectorLocation": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
-      "metadata": { "description": "Azure region." }
+      "metadata": { "description": "Region for connector resources (FA, KV, Storage, App Insights). Can differ from workspace region." }
+    },
+    "existingWorkspaceId": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": { "description": "REQUIRED: full ARM resource ID of the existing Sentinel-enabled Log Analytics workspace. Can be in any RG or subscription in the same tenant." }
+    },
+    "workspaceLocation": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": { "description": "REQUIRED: region where the existing workspace lives. DCE + DCR MUST be in this region (Azure Monitor regional constraint)." }
     },
     "serviceAccountUpn": {
       "type": "string",
-      "metadata": { "description": "UPN of the service account the connector authenticates as." }
+      "metadata": { "description": "UPN of the dedicated read-only Entra service account." }
     },
     "authMethod": {
       "type": "string",
       "defaultValue": "credentials_totp",
-      "allowedValues": [ "passkey", "credentials_totp" ],
-      "metadata": { "description": "Auth method." }
-    },
-    "existingWorkspaceId": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": { "description": "Existing Log Analytics workspace resource ID. Blank = create new." }
+      "allowedValues": [ "credentials_totp", "passkey" ],
+      "metadata": { "description": "Authentication method for the Defender XDR portal." }
     },
     "functionPlanSku": {
       "type": "string",
       "defaultValue": "Y1",
       "allowedValues": [ "Y1", "EP1", "EP2" ],
-      "metadata": { "description": "Function App plan SKU." }
+      "metadata": { "description": "Function App plan SKU. Y1 = Consumption." }
     },
     "functionAppZipVersion": {
       "type": "string",
       "defaultValue": "latest",
-      "metadata": { "description": "Release tag for the Function App ZIP." }
+      "metadata": { "description": "'latest' or 'X.Y.Z' — resolves to a GitHub Release artefact." }
     },
     "githubRepo": {
       "type": "string",
       "defaultValue": "akefallonitis/xdrlograider",
-      "metadata": { "description": "GitHub owner/repo for WEBSITE_RUN_FROM_PACKAGE." }
+      "metadata": { "description": "GitHub owner/repo hosting the Function App ZIP release." }
     }
   },
   "variables": {
@@ -65,37 +71,29 @@
     "planName": "[concat(variables('prefix'), '-plan')]",
     "kvName": "[concat(variables('prefix'), '-kv-', variables('suffix'))]",
     "stName": "[toLower(replace(concat(parameters('projectPrefix'), parameters('env'), 'st', variables('suffix')), '-', ''))]",
-    "laName": "[concat(variables('prefix'), '-la')]",
     "dceName": "[concat(variables('prefix'), '-dce')]",
     "dcrName": "[concat(variables('prefix'), '-dcr')]",
     "aiName": "[concat(variables('prefix'), '-ai')]",
     "packageUrl": "[if(equals(parameters('functionAppZipVersion'), 'latest'), concat('https://github.com/', parameters('githubRepo'), '/releases/latest/download/function-app.zip'), concat('https://github.com/', parameters('githubRepo'), '/releases/download/v', parameters('functionAppZipVersion'), '/function-app.zip'))]",
-    "workspaceId": "[if(empty(parameters('existingWorkspaceId')), resourceId('Microsoft.OperationalInsights/workspaces', variables('laName')), parameters('existingWorkspaceId'))]",
-    "createWorkspace": "[empty(parameters('existingWorkspaceId'))]",
+    "workspaceSubscriptionId": "[split(parameters('existingWorkspaceId'), '/')[2]]",
+    "workspaceResourceGroup": "[split(parameters('existingWorkspaceId'), '/')[4]]",
+    "workspaceName": "[last(split(parameters('existingWorkspaceId'), '/'))]",
     "kvSecretsUserRoleId": "4633458b-17de-408a-b874-0445c86b69e6",
     "storageTableContributorRoleId": "0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3",
-    "monitoringMetricsPublisherRoleId": "3913510d-42f4-4e42-8a64-420c390055eb"
+    "monitoringMetricsPublisherRoleId": "3913510d-42f4-4e42-8a64-420c390055eb",
+    "commonTag": {
+      "workload": "XdrLogRaider",
+      "environment": "[parameters('env')]",
+      "managedBy": "ARM"
+    }
   },
   "resources": [
-    {
-      "condition": "[variables('createWorkspace')]",
-      "type": "Microsoft.OperationalInsights/workspaces",
-      "apiVersion": "2023-09-01",
-      "name": "[variables('laName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "sku": { "name": "PerGB2018" },
-        "retentionInDays": 90,
-        "features": { "enableLogAccessUsingOnlyResourcePermissions": true },
-        "publicNetworkAccessForIngestion": "Enabled",
-        "publicNetworkAccessForQuery": "Enabled"
-      }
-    },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2023-05-01",
       "name": "[variables('stName')]",
-      "location": "[parameters('location')]",
+      "location": "[parameters('connectorLocation')]",
+      "tags": "[variables('commonTag')]",
       "kind": "StorageV2",
       "sku": { "name": "Standard_LRS" },
       "properties": {
@@ -103,7 +101,7 @@
         "minimumTlsVersion": "TLS1_2",
         "allowBlobPublicAccess": false,
         "allowSharedKeyAccess": true,
-        "networkAcls": { "defaultAction": "Allow" }
+        "networkAcls": { "defaultAction": "Allow", "bypass": "AzureServices" }
       }
     },
     {
@@ -126,7 +124,8 @@
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2023-07-01",
       "name": "[variables('kvName')]",
-      "location": "[parameters('location')]",
+      "location": "[parameters('connectorLocation')]",
+      "tags": "[variables('commonTag')]",
       "properties": {
         "tenantId": "[subscription().tenantId]",
         "sku": { "family": "A", "name": "standard" },
@@ -142,46 +141,177 @@
       "type": "Microsoft.Insights/components",
       "apiVersion": "2020-02-02",
       "name": "[variables('aiName')]",
-      "location": "[parameters('location')]",
+      "location": "[parameters('connectorLocation')]",
+      "tags": "[variables('commonTag')]",
       "kind": "web",
       "properties": {
         "Application_Type": "web",
-        "WorkspaceResourceId": "[variables('workspaceId')]",
+        "WorkspaceResourceId": "[parameters('existingWorkspaceId')]",
         "IngestionMode": "LogAnalytics"
-      },
-      "dependsOn": [
-        "[if(variables('createWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', variables('laName')), 'dummy')]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Insights/dataCollectionEndpoints",
       "apiVersion": "2023-03-11",
       "name": "[variables('dceName')]",
-      "location": "[parameters('location')]",
-      "kind": "Linux",
+      "location": "[parameters('workspaceLocation')]",
+      "tags": "[variables('commonTag')]",
       "properties": {
         "networkAcls": { "publicNetworkAccess": "Enabled" }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2023-03-11",
+      "name": "[variables('dcrName')]",
+      "location": "[parameters('workspaceLocation')]",
+      "tags": "[variables('commonTag')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+      ],
+      "properties": {
+        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "streamDeclarations": {
+          "Custom-MDE_AdvancedFeatures_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_PreviewFeatures_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_AuthenticatedTelemetry_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_PUAConfig_CL":              { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_AsrRulesConfig_CL":         { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_AntivirusPolicy_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_AntiRansomwareConfig_CL":   { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_ControlledFolderAccess_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_NetworkProtectionConfig_CL":{ "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_DeviceControlPolicy_CL":    { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_WebContentFiltering_CL":    { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_SmartScreenConfig_CL":      { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_TenantAllowBlock_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_CustomCollection_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_LiveResponseConfig_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_AlertServiceConfig_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_AlertTuning_CL":            { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_SuppressionRules_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_CustomDetections_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_DataExportSettings_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_StreamingApiConfig_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_IntuneConnection_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_PurviewSharing_CL":         { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_ConnectedApps_CL":          { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_TenantContext_CL":          { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_TenantWorkloadStatus_CL":   { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_RbacDeviceGroups_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_UnifiedRbacRoles_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_DeviceCriticality_CL":      { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_CriticalAssets_CL":         { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_AssetRules_CL":             { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_SAClassification_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_ApprovalAssignments_CL":    { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_XspmAttackPaths_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_XspmChokePoints_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_XspmTopTargets_CL":         { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_XspmInitiatives_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_ExposureSnapshots_CL":      { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_SecureScoreBreakdown_CL":   { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_SecurityBaselines_CL":      { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_ExposureRecommendations_CL":{ "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_IdentityServiceAccounts_CL":{ "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_IdentityOnboarding_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_DCCoverage_CL":             { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_IdentityAlertThresholds_CL":{ "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_RemediationAccounts_CL":    { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_ActionCenter_CL":           { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_ThreatAnalytics_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_LicenseReport_CL":          { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_UserPreferences_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_MtoTenants_CL":             { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_CloudAppsConfig_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_Heartbeat_CL":              { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_AuthTestResult_CL":         { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "name": "la-destination",
+              "workspaceResourceId": "[parameters('existingWorkspaceId')]"
+            }
+          ]
+        },
+        "dataFlows": [
+          { "streams": [ "Custom-MDE_AdvancedFeatures_CL" ],       "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_AdvancedFeatures_CL" },
+          { "streams": [ "Custom-MDE_PreviewFeatures_CL" ],        "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_PreviewFeatures_CL" },
+          { "streams": [ "Custom-MDE_AuthenticatedTelemetry_CL" ], "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_AuthenticatedTelemetry_CL" },
+          { "streams": [ "Custom-MDE_PUAConfig_CL" ],              "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_PUAConfig_CL" },
+          { "streams": [ "Custom-MDE_AsrRulesConfig_CL" ],         "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_AsrRulesConfig_CL" },
+          { "streams": [ "Custom-MDE_AntivirusPolicy_CL" ],        "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_AntivirusPolicy_CL" },
+          { "streams": [ "Custom-MDE_AntiRansomwareConfig_CL" ],   "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_AntiRansomwareConfig_CL" },
+          { "streams": [ "Custom-MDE_ControlledFolderAccess_CL" ], "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_ControlledFolderAccess_CL" },
+          { "streams": [ "Custom-MDE_NetworkProtectionConfig_CL" ],"destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_NetworkProtectionConfig_CL" },
+          { "streams": [ "Custom-MDE_DeviceControlPolicy_CL" ],    "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_DeviceControlPolicy_CL" },
+          { "streams": [ "Custom-MDE_WebContentFiltering_CL" ],    "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_WebContentFiltering_CL" },
+          { "streams": [ "Custom-MDE_SmartScreenConfig_CL" ],      "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_SmartScreenConfig_CL" },
+          { "streams": [ "Custom-MDE_TenantAllowBlock_CL" ],       "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_TenantAllowBlock_CL" },
+          { "streams": [ "Custom-MDE_CustomCollection_CL" ],       "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_CustomCollection_CL" },
+          { "streams": [ "Custom-MDE_LiveResponseConfig_CL" ],     "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_LiveResponseConfig_CL" },
+          { "streams": [ "Custom-MDE_AlertServiceConfig_CL" ],     "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_AlertServiceConfig_CL" },
+          { "streams": [ "Custom-MDE_AlertTuning_CL" ],            "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_AlertTuning_CL" },
+          { "streams": [ "Custom-MDE_SuppressionRules_CL" ],       "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_SuppressionRules_CL" },
+          { "streams": [ "Custom-MDE_CustomDetections_CL" ],       "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_CustomDetections_CL" },
+          { "streams": [ "Custom-MDE_DataExportSettings_CL" ],     "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_DataExportSettings_CL" },
+          { "streams": [ "Custom-MDE_StreamingApiConfig_CL" ],     "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_StreamingApiConfig_CL" },
+          { "streams": [ "Custom-MDE_IntuneConnection_CL" ],       "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_IntuneConnection_CL" },
+          { "streams": [ "Custom-MDE_PurviewSharing_CL" ],         "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_PurviewSharing_CL" },
+          { "streams": [ "Custom-MDE_ConnectedApps_CL" ],          "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_ConnectedApps_CL" },
+          { "streams": [ "Custom-MDE_TenantContext_CL" ],          "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_TenantContext_CL" },
+          { "streams": [ "Custom-MDE_TenantWorkloadStatus_CL" ],   "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_TenantWorkloadStatus_CL" },
+          { "streams": [ "Custom-MDE_RbacDeviceGroups_CL" ],       "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_RbacDeviceGroups_CL" },
+          { "streams": [ "Custom-MDE_UnifiedRbacRoles_CL" ],       "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_UnifiedRbacRoles_CL" },
+          { "streams": [ "Custom-MDE_DeviceCriticality_CL" ],      "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_DeviceCriticality_CL" },
+          { "streams": [ "Custom-MDE_CriticalAssets_CL" ],         "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_CriticalAssets_CL" },
+          { "streams": [ "Custom-MDE_AssetRules_CL" ],             "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_AssetRules_CL" },
+          { "streams": [ "Custom-MDE_SAClassification_CL" ],       "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_SAClassification_CL" },
+          { "streams": [ "Custom-MDE_ApprovalAssignments_CL" ],    "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_ApprovalAssignments_CL" },
+          { "streams": [ "Custom-MDE_XspmAttackPaths_CL" ],        "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_XspmAttackPaths_CL" },
+          { "streams": [ "Custom-MDE_XspmChokePoints_CL" ],        "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_XspmChokePoints_CL" },
+          { "streams": [ "Custom-MDE_XspmTopTargets_CL" ],         "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_XspmTopTargets_CL" },
+          { "streams": [ "Custom-MDE_XspmInitiatives_CL" ],        "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_XspmInitiatives_CL" },
+          { "streams": [ "Custom-MDE_ExposureSnapshots_CL" ],      "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_ExposureSnapshots_CL" },
+          { "streams": [ "Custom-MDE_SecureScoreBreakdown_CL" ],   "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_SecureScoreBreakdown_CL" },
+          { "streams": [ "Custom-MDE_SecurityBaselines_CL" ],      "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_SecurityBaselines_CL" },
+          { "streams": [ "Custom-MDE_ExposureRecommendations_CL" ],"destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_ExposureRecommendations_CL" },
+          { "streams": [ "Custom-MDE_IdentityServiceAccounts_CL" ],"destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_IdentityServiceAccounts_CL" },
+          { "streams": [ "Custom-MDE_IdentityOnboarding_CL" ],     "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_IdentityOnboarding_CL" },
+          { "streams": [ "Custom-MDE_DCCoverage_CL" ],             "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_DCCoverage_CL" },
+          { "streams": [ "Custom-MDE_IdentityAlertThresholds_CL" ],"destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_IdentityAlertThresholds_CL" },
+          { "streams": [ "Custom-MDE_RemediationAccounts_CL" ],    "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_RemediationAccounts_CL" },
+          { "streams": [ "Custom-MDE_ActionCenter_CL" ],           "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_ActionCenter_CL" },
+          { "streams": [ "Custom-MDE_ThreatAnalytics_CL" ],        "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_ThreatAnalytics_CL" },
+          { "streams": [ "Custom-MDE_LicenseReport_CL" ],          "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_LicenseReport_CL" },
+          { "streams": [ "Custom-MDE_UserPreferences_CL" ],        "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_UserPreferences_CL" },
+          { "streams": [ "Custom-MDE_MtoTenants_CL" ],             "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_MtoTenants_CL" },
+          { "streams": [ "Custom-MDE_CloudAppsConfig_CL" ],        "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_CloudAppsConfig_CL" },
+          { "streams": [ "Custom-MDE_Heartbeat_CL" ],              "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_Heartbeat_CL" },
+          { "streams": [ "Custom-MDE_AuthTestResult_CL" ],         "destinations": [ "la-destination" ], "transformKql": "source | extend TimeGenerated = todatetime(TimeGenerated)", "outputStream": "Custom-MDE_AuthTestResult_CL" }
+        ]
       }
     },
     {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2023-12-01",
       "name": "[variables('planName')]",
-      "location": "[parameters('location')]",
+      "location": "[parameters('connectorLocation')]",
+      "tags": "[variables('commonTag')]",
       "sku": {
         "name": "[parameters('functionPlanSku')]",
         "tier": "[if(equals(parameters('functionPlanSku'), 'Y1'), 'Dynamic', 'ElasticPremium')]"
       },
       "kind": "[if(equals(parameters('functionPlanSku'), 'Y1'), 'functionapp', 'elastic')]",
-      "properties": {
-        "reserved": true
-      }
+      "properties": { "reserved": true }
     },
     {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2023-12-01",
       "name": "[variables('funcName')]",
-      "location": "[parameters('location')]",
+      "location": "[parameters('connectorLocation')]",
+      "tags": "[variables('commonTag')]",
       "kind": "functionapp,linux",
       "identity": { "type": "SystemAssigned" },
       "properties": {
@@ -194,20 +324,22 @@
           "ftpsState": "Disabled",
           "minTlsVersion": "1.2",
           "appSettings": [
-            { "name": "FUNCTIONS_EXTENSION_VERSION",   "value": "~4" },
-            { "name": "FUNCTIONS_WORKER_RUNTIME",      "value": "powershell" },
-            { "name": "FUNCTIONS_WORKER_RUNTIME_VERSION", "value": "7.4" },
-            { "name": "AzureWebJobsStorage",           "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2023-05-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]" },
-            { "name": "APPLICATIONINSIGHTS_CONNECTION_STRING", "value": "[reference(resourceId('Microsoft.Insights/components', variables('aiName')), '2020-02-02').ConnectionString]" },
-            { "name": "WEBSITE_RUN_FROM_PACKAGE",      "value": "[variables('packageUrl')]" },
-            { "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING", "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2023-05-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]" },
-            { "name": "WEBSITE_CONTENTSHARE",          "value": "[toLower(variables('funcName'))]" },
-            { "name": "AUTH_METHOD",                   "value": "[parameters('authMethod')]" },
-            { "name": "SERVICE_ACCOUNT_UPN",           "value": "[parameters('serviceAccountUpn')]" },
-            { "name": "KEY_VAULT_URI",                 "value": "[reference(resourceId('Microsoft.KeyVault/vaults', variables('kvName')), '2023-07-01').vaultUri]" },
-            { "name": "AUTH_SECRET_NAME",              "value": "mde-portal-auth" },
-            { "name": "STORAGE_ACCOUNT_NAME",          "value": "[variables('stName')]" },
-            { "name": "CHECKPOINT_TABLE_NAME",         "value": "connectorCheckpoints" }
+            { "name": "FUNCTIONS_EXTENSION_VERSION",            "value": "~4" },
+            { "name": "FUNCTIONS_WORKER_RUNTIME",               "value": "powershell" },
+            { "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",       "value": "7.4" },
+            { "name": "AzureWebJobsStorage",                    "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2023-05-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]" },
+            { "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",  "value": "[reference(resourceId('Microsoft.Insights/components', variables('aiName')), '2020-02-02').ConnectionString]" },
+            { "name": "WEBSITE_RUN_FROM_PACKAGE",               "value": "[variables('packageUrl')]" },
+            { "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING","value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2023-05-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]" },
+            { "name": "WEBSITE_CONTENTSHARE",                   "value": "[toLower(variables('funcName'))]" },
+            { "name": "AUTH_METHOD",                            "value": "[parameters('authMethod')]" },
+            { "name": "SERVICE_ACCOUNT_UPN",                    "value": "[parameters('serviceAccountUpn')]" },
+            { "name": "KEY_VAULT_URI",                          "value": "[reference(resourceId('Microsoft.KeyVault/vaults', variables('kvName')), '2023-07-01').vaultUri]" },
+            { "name": "AUTH_SECRET_NAME",                       "value": "mde-portal-auth" },
+            { "name": "DCE_ENDPOINT",                           "value": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]" },
+            { "name": "DCR_IMMUTABLE_ID",                       "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName')), '2023-03-11').immutableId]" },
+            { "name": "STORAGE_ACCOUNT_NAME",                   "value": "[variables('stName')]" },
+            { "name": "CHECKPOINT_TABLE_NAME",                  "value": "connectorCheckpoints" }
           ]
         }
       },
@@ -215,7 +347,9 @@
         "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('stName'))]",
         "[resourceId('Microsoft.Insights/components', variables('aiName'))]",
-        "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName'))]"
       ]
     },
     {
@@ -249,49 +383,121 @@
       ]
     },
     {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName')), variables('funcName'), variables('monitoringMetricsPublisherRoleId'))]",
+      "scope": "[concat('Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
+      "properties": {
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('funcName')), '2023-12-01', 'Full').identity.principalId]",
+        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('monitoringMetricsPublisherRoleId'))]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('funcName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName'))]"
+      ]
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "deploySentinelContent",
+      "name": "[concat('customTables-', variables('suffix'))]",
+      "subscriptionId": "[variables('workspaceSubscriptionId')]",
+      "resourceGroup": "[variables('workspaceResourceGroup')]",
       "properties": {
         "mode": "Incremental",
+        "expressionEvaluationOptions": { "scope": "inner" },
+        "parameters": {
+          "workspaceName": { "value": "[variables('workspaceName')]" },
+          "retentionInDays": { "value": 90 }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "workspaceName":    { "type": "string" },
+            "retentionInDays":  { "type": "int", "defaultValue": 90 }
+          },
+          "variables": {
+            "commonSchema": [
+              { "name": "TimeGenerated", "type": "datetime" },
+              { "name": "SourceStream",  "type": "string"   },
+              { "name": "EntityId",      "type": "string"   },
+              { "name": "RawJson",       "type": "dynamic"  }
+            ],
+            "tableNames": [
+              "MDE_AdvancedFeatures_CL","MDE_PreviewFeatures_CL","MDE_AuthenticatedTelemetry_CL",
+              "MDE_PUAConfig_CL","MDE_AsrRulesConfig_CL","MDE_AntivirusPolicy_CL",
+              "MDE_AntiRansomwareConfig_CL","MDE_ControlledFolderAccess_CL","MDE_NetworkProtectionConfig_CL",
+              "MDE_DeviceControlPolicy_CL","MDE_WebContentFiltering_CL","MDE_SmartScreenConfig_CL",
+              "MDE_TenantAllowBlock_CL","MDE_CustomCollection_CL","MDE_LiveResponseConfig_CL",
+              "MDE_AlertServiceConfig_CL","MDE_AlertTuning_CL","MDE_SuppressionRules_CL",
+              "MDE_CustomDetections_CL","MDE_DataExportSettings_CL","MDE_StreamingApiConfig_CL",
+              "MDE_IntuneConnection_CL","MDE_PurviewSharing_CL","MDE_ConnectedApps_CL",
+              "MDE_TenantContext_CL","MDE_TenantWorkloadStatus_CL","MDE_RbacDeviceGroups_CL",
+              "MDE_UnifiedRbacRoles_CL","MDE_DeviceCriticality_CL","MDE_CriticalAssets_CL",
+              "MDE_AssetRules_CL","MDE_SAClassification_CL","MDE_ApprovalAssignments_CL",
+              "MDE_XspmAttackPaths_CL","MDE_XspmChokePoints_CL","MDE_XspmTopTargets_CL",
+              "MDE_XspmInitiatives_CL","MDE_ExposureSnapshots_CL","MDE_SecureScoreBreakdown_CL",
+              "MDE_SecurityBaselines_CL","MDE_ExposureRecommendations_CL","MDE_IdentityServiceAccounts_CL",
+              "MDE_IdentityOnboarding_CL","MDE_DCCoverage_CL","MDE_IdentityAlertThresholds_CL",
+              "MDE_RemediationAccounts_CL","MDE_ActionCenter_CL","MDE_ThreatAnalytics_CL",
+              "MDE_LicenseReport_CL","MDE_UserPreferences_CL","MDE_MtoTenants_CL",
+              "MDE_CloudAppsConfig_CL","MDE_Heartbeat_CL","MDE_AuthTestResult_CL"
+            ]
+          },
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/', variables('tableNames')[copyIndex()])]",
+              "copy": {
+                "name": "customTableLoop",
+                "count": "[length(variables('tableNames'))]"
+              },
+              "properties": {
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "[variables('tableNames')[copyIndex()]]",
+                  "columns": "[variables('commonSchema')]"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[concat('sentinelContent-', variables('suffix'))]",
+      "subscriptionId": "[variables('workspaceSubscriptionId')]",
+      "resourceGroup": "[variables('workspaceResourceGroup')]",
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": { "scope": "inner" },
+        "parameters": {
+          "workspaceName": { "value": "[variables('workspaceName')]" }
+        },
         "templateLink": {
           "uri": "[uri(deployment().properties.templateLink.uri, 'sentinelContent.json')]",
           "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "workspaceName": {
-            "value": "[if(variables('createWorkspace'), variables('laName'), last(split(parameters('existingWorkspaceId'), '/')))]"
-          },
-          "location": {
-            "value": "[parameters('location')]"
-          }
         }
       },
       "dependsOn": [
-        "[if(variables('createWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', variables('laName')), 'dummy')]"
+        "[resourceId('Microsoft.Resources/deployments', concat('customTables-', variables('suffix')))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName'))]"
       ]
     }
   ],
   "outputs": {
-    "functionAppName": {
-      "type": "string",
-      "value": "[variables('funcName')]"
-    },
-    "keyVaultName": {
-      "type": "string",
-      "value": "[variables('kvName')]"
-    },
-    "dceEndpoint": {
-      "type": "string",
-      "value": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]"
-    },
-    "storageAccountName": {
-      "type": "string",
-      "value": "[variables('stName')]"
-    },
-    "postDeployCommand": {
-      "type": "string",
-      "value": "[concat('git clone https://github.com/akefallonitis/xdrlograider && cd xdrlograider && ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName ', variables('kvName'))]"
-    }
+    "functionAppName":    { "type": "string", "value": "[variables('funcName')]" },
+    "keyVaultName":       { "type": "string", "value": "[variables('kvName')]" },
+    "storageAccountName": { "type": "string", "value": "[variables('stName')]" },
+    "dceEndpoint":        { "type": "string", "value": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]" },
+    "dcrImmutableId":     { "type": "string", "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName')), '2023-03-11').immutableId]" },
+    "workspaceId":        { "type": "string", "value": "[parameters('existingWorkspaceId')]" },
+    "workspaceRg":        { "type": "string", "value": "[variables('workspaceResourceGroup')]" },
+    "workspaceLocation":  { "type": "string", "value": "[parameters('workspaceLocation')]" },
+    "postDeployCommand":  { "type": "string", "value": "[concat('git clone https://github.com/', parameters('githubRepo'), ' && cd xdrlograider && ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName ', variables('kvName'))]" }
   }
 }

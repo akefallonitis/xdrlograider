@@ -14,14 +14,14 @@ XdrLogRaider is a three-layer Sentinel Solution:
 ┌────────────────────────────────────────────────────────────────────────┐
 │ ADMIN WORKSTATION (one-off)                                            │
 │                                                                        │
-│  git clone → ./tools/Initialize-XdrLogRaiderAuth.ps1              │
-│      ├─ Validates passkey JSON or creds+TOTP inputs                   │
-│      └─ Uploads secrets to Key Vault                                  │
+│  git clone → ./tools/Initialize-XdrLogRaiderAuth.ps1                   │
+│      ├─ Validates passkey JSON or creds+TOTP inputs                    │
+│      └─ Uploads secrets to Key Vault                                   │
 └────────────────────────────────────────────────────────────────────────┘
                                    │
                                    ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│ AZURE — resource group                                                 │
+│ AZURE — CONNECTOR RG (target of Deploy-to-Azure)                       │
 │                                                                        │
 │  ┌────────────────────────────────────────────────────────────┐       │
 │  │ Function App (PowerShell 7.4 + System-Assigned MI)         │       │
@@ -63,27 +63,34 @@ XdrLogRaider is a three-layer Sentinel Solution:
 │  └──────────────────┘  └──────────────────┘  └─────────────────────┘ │
 │                                                                        │
 │  ┌────────────────────────────────────────────────────────────┐       │
-│  │ DCE + DCR                                                  │       │
-│  │   52 streams → Log Analytics custom tables                 │       │
-│  └────────────────────────────────────────────────────────────┘       │
-│                                                                        │
-│  ┌────────────────────────────────────────────────────────────┐       │
-│  │ Log Analytics workspace                                    │       │
-│  │   MDE_*_CL (52 tables)                                     │       │
-│  │   MDE_Heartbeat_CL                                         │       │
-│  │   MDE_AuthTestResult_CL                                    │       │
+│  │ DCE + DCR  (location = WORKSPACE region)                   │       │
+│  │   54 streams declared → routed to LA custom tables         │       │
+│  │   (52 telemetry + MDE_Heartbeat + MDE_AuthTestResult)      │       │
 │  └────────────────────────────────────────────────────────────┘       │
 └────────────────────────────────────────────────────────────────────────┘
                                    │
+                                   │ cross-RG nested deployments (2)
+                                   │   tables-<uniq>           (54 LA tables)
+                                   │   sentinelContent-<uniq>  (parsers + workbooks + rules)
                                    ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│ SENTINEL (same workspace, same ARM deployment)                         │
+│ AZURE — SENTINEL WORKSPACE RG (pre-existing, any RG / any subscription)│
 │                                                                        │
-│   6 Parsers (savedSearches / KQL functions)                           │
-│   6 Workbooks                                                          │
-│   15 Analytic rules (scheduled)                                        │
-│   10 Hunting queries                                                   │
-│   1 Data Connector UI card                                             │
+│  ┌────────────────────────────────────────────────────────────┐       │
+│  │ Existing Log Analytics workspace (Sentinel-enabled)        │       │
+│  │                                                            │       │
+│  │   54 custom tables written by cross-RG nested deployment:  │       │
+│  │     MDE_*_CL  (52 telemetry tables)                        │       │
+│  │     MDE_Heartbeat_CL                                       │       │
+│  │     MDE_AuthTestResult_CL                                  │       │
+│  │                                                            │       │
+│  │   Sentinel content written by cross-RG nested deployment:  │       │
+│  │     6 Parsers (savedSearches / KQL functions)              │       │
+│  │     6 Workbooks                                            │       │
+│  │     15 Analytic rules (scheduled, ship disabled)           │       │
+│  │     10 Hunting queries                                     │       │
+│  │     1 Data Connector UI card (XdrLogRaider)                │       │
+│  └────────────────────────────────────────────────────────────┘       │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
