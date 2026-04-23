@@ -3,9 +3,9 @@
 # Cross-layer drift guard. Every MDE data stream MUST be declared in three places
 # that must agree:
 #
-#   1. src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1  (52 entries)
-#   2. DCR streamDeclarations                                   (52 data + 2 system = 54)
-#   3. Custom-tables list in the workspace deployment           (52 data + 2 system = 54)
+#   1. src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1  (47 entries, v1.0.2)
+#   2. DCR streamDeclarations                                   (47 data + 2 system = 49)
+#   3. Custom-tables list in the workspace deployment           (47 data + 2 system = 49)
 #
 # Preferred source of declarations 2 and 3 is the compiled ARM
 # (deploy/compiled/mainTemplate.json) — it's what actually gets deployed. Bicep
@@ -56,6 +56,11 @@ BeforeAll {
         # Custom tables live inside a nested deployment. Walk the resources tree.
         # StrictMode-safe: use PSObject.Properties.Name checks throughout because
         # some nested deployments use `templateLink` (no inline template at all).
+        # Three patterns supported:
+        #   (a) nested-template variable `tableNames` holding an array of names (copy-loop)
+        #   (b) nested-template resource with literal name "ws/MDE_Xyz_CL"
+        #   (c) nested-template resource with ARM expression name like
+        #       "[concat(parameters('workspaceName'), '/MDE_Xyz_CL')]" — extract via regex
         $nestedDeployments = $arm.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' }
         foreach ($nd in $nestedDeployments) {
             if (-not ($nd.PSObject.Properties.Name -contains 'properties')) { continue }
@@ -71,10 +76,25 @@ BeforeAll {
                     if ($r.PSObject.Properties.Name -contains 'type' -and
                         $r.type -eq 'Microsoft.OperationalInsights/workspaces/tables' -and
                         $r.PSObject.Properties.Name -contains 'name') {
-                        # name is typically "workspacename/tableName" — extract the last segment
+                        # Case (b): plain "workspace/TableName"
                         $tblName = ($r.name -split '/')[-1]
                         if ($tblName -match '^MDE_\w+_CL$') {
                             $script:CustomTables += $tblName
+                            continue
+                        }
+                        # Case (c): ARM expression — extract "/MDE_Xyz_CL" substring
+                        if ($r.name -match "'/(MDE_\w+_CL)'") {
+                            $script:CustomTables += $matches[1]
+                            continue
+                        }
+                        # Case (c-alt): look inside properties.schema.name (literal)
+                        if ($r.PSObject.Properties.Name -contains 'properties' -and
+                            $r.properties.PSObject.Properties.Name -contains 'schema' -and
+                            $r.properties.schema.PSObject.Properties.Name -contains 'name') {
+                            $schemaName = $r.properties.schema.name
+                            if ($schemaName -is [string] -and $schemaName -match '^MDE_\w+_CL$') {
+                                $script:CustomTables += $schemaName
+                            }
                         }
                     }
                 }
@@ -120,16 +140,16 @@ BeforeAll {
 
 Describe 'Manifest / DCR / custom-tables consistency' {
 
-    It 'manifest contains exactly 52 streams' {
-        $script:ManifestStreams.Count | Should -Be 52
+    It 'manifest contains exactly 47 streams (v1.0.2 — 5 removed NO_PUBLIC_API)' {
+        $script:ManifestStreams.Count | Should -Be 47
     }
 
-    It 'DCR declares exactly 54 streams (52 data + 2 system)' {
-        $script:DcrStreams.Count | Should -Be 54
+    It 'DCR declares exactly 49 streams (47 data + 2 system)' {
+        $script:DcrStreams.Count | Should -Be 49
     }
 
-    It 'custom-tables declares exactly 54 tables (52 data + 2 system)' {
-        $script:CustomTables.Count | Should -Be 54
+    It 'custom-tables declares exactly 49 tables (47 data + 2 system)' {
+        $script:CustomTables.Count | Should -Be 49
     }
 
     It 'DCR contains both system streams (Heartbeat + AuthTestResult)' {

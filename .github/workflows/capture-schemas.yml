@@ -1,0 +1,106 @@
+name: Capture Live Endpoint Schemas
+
+# Manual-dispatch only. Regenerates tests/fixtures/live-responses/*.json by
+# hitting the live Defender XDR portal with auth material from repository
+# secrets. Useful when:
+#   - tenant adds/removes features and endpoint responses change shape
+#   - a new stream is promoted from deferred -> active
+#   - operators want to verify schemas offline pre-deployment
+#
+# Does NOT run on push/PR. Opt-in gate via XDRLR_CAPTURE=true ensures accidents
+# (misconfigured branch, wrong secret) don't auto-capture against production.
+
+on:
+  workflow_dispatch:
+    inputs:
+      stream_filter:
+        description: 'Wildcard for which streams to capture (default: *)'
+        required: false
+        default: '*'
+      include_deferred:
+        description: 'Attempt deferred streams too (expected 4xx/5xx)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    if: env.XDRLR_CAPTURE == 'true'
+    env:
+      XDRLR_CAPTURE: ${{ secrets.XDRLR_CAPTURE }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write .env.local from secrets
+        shell: pwsh
+        run: |
+          $envFile = "tests/.env.local"
+          @"
+          XDRLR_TEST_UPN=$env:CAPTURE_UPN
+          XDRLR_TEST_AUTH_METHOD=$env:CAPTURE_AUTH_METHOD
+          XDRLR_TEST_PASSWORD=$env:CAPTURE_PASSWORD
+          XDRLR_TEST_TOTP_SECRET=$env:CAPTURE_TOTP_SECRET
+          XDRLR_TEST_SCCAUTH=$env:CAPTURE_SCCAUTH
+          XDRLR_TEST_XSRF_TOKEN=$env:CAPTURE_XSRF_TOKEN
+          "@ | Out-File -FilePath $envFile -Encoding utf8
+        env:
+          CAPTURE_UPN:          ${{ secrets.CAPTURE_UPN }}
+          CAPTURE_AUTH_METHOD:  ${{ secrets.CAPTURE_AUTH_METHOD }}
+          CAPTURE_PASSWORD:     ${{ secrets.CAPTURE_PASSWORD }}
+          CAPTURE_TOTP_SECRET:  ${{ secrets.CAPTURE_TOTP_SECRET }}
+          CAPTURE_SCCAUTH:      ${{ secrets.CAPTURE_SCCAUTH }}
+          CAPTURE_XSRF_TOKEN:   ${{ secrets.CAPTURE_XSRF_TOKEN }}
+
+      - name: Run capture
+        shell: pwsh
+        run: |
+          $includeDef = '${{ inputs.include_deferred }}' -eq 'true'
+          $args = @(
+              '-NoProfile', '-File', './tools/Capture-EndpointSchemas.ps1',
+              '-StreamFilter', '${{ inputs.stream_filter }}'
+          )
+          if ($includeDef) { $args += '-IncludeDeferred' }
+          & pwsh @args
+          if ($LASTEXITCODE -ne 0) { throw "Capture failed (exit $LASTEXITCODE)" }
+
+      - name: Verify no PII leaks
+        shell: pwsh
+        run: |
+          $leaks = Get-ChildItem tests/fixtures/live-responses/*.json -File | ForEach-Object {
+              $c = Get-Content $_.FullName -Raw
+              if ($c -match '\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b') {
+                  $m = $Matches[0]
+                  if ($m -ne '00000000-0000-0000-0000-000000000000') {
+                      [pscustomobject]@{ File = $_.Name; Leak = $m }
+                  }
+              }
+          }
+          if ($leaks) {
+              $leaks | Format-Table -AutoSize
+              throw "PII leak detected — aborting (fixtures would be committed publicly)"
+          }
+          Write-Host "PII audit clean."
+
+      - name: Commit + PR
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "capture-schemas-$(Get-Date -Format yyyyMMdd-HHmmss)"
+          git add tests/fixtures/live-responses
+          if (git diff --cached --quiet) {
+              Write-Host "No changes to commit."
+              exit 0
+          }
+          git commit -m "chore(fixtures): refresh live schema fixtures`n`nRegenerated via capture-schemas workflow."
+          git push --set-upstream origin HEAD
+          gh pr create --title "Refresh live schema fixtures" --body "Automated capture. Review for PII before merge." --base main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

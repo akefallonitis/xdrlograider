@@ -6,7 +6,7 @@ Quick reference. The full walkthrough lives in [`docs/TESTING.md`](../docs/TESTI
 
 |                 | **Offline (local / CI)** | **Online (live, laptop-only)** |
 |---              |---                        |---                              |
-| **Pre-deploy**  | `all-offline` — 307 tests | `local-online` — real portal sign-in from laptop |
+| **Pre-deploy**  | `all-offline` — 1075 tests (v1.0.2) | `local-online` — real portal sign-in from laptop |
 | **Post-deploy** | —                         | `e2e` — KQL verification of a deployed workspace |
 
 **No CI Azure credentials.** All online tests run from your laptop against your own test tenant.
@@ -38,10 +38,35 @@ Install-Module -Name Az.Resources         -Force -Scope CurrentUser
 pwsh ./tests/Run-Tests.ps1 -Category all-offline
 ```
 
-Expect `307 passed, 0 failed, ~20s`. What runs:
-- `tests/unit/*` — module surface + dispatcher + tier-poller + auth chain + ingest
-- `tests/kql/Parsers.Tests.ps1` + `Parsers.Fixture.Tests.ps1` — parser structure + fixture drift scenarios
-- `tests/arm/MainTemplate.Tests.ps1` — mainTemplate + createUiDefinition assertions
+Expect `1075 passed, 0 failed, 17 skipped, ~60s`. What runs (v1.0.2):
+
+**tests/unit/**
+- `XdrLogRaider.Client.Tests.ps1` — module exports + manifest contract (47 streams, 25 active)
+- `XdrLogRaider.Ingest.Tests.ps1` — Send-ToLogAnalytics, retry, batching
+- `Xdr.Portal.Auth.*.Tests.ps1` — full Entra auth chain (CredentialsTotp + Passkey + DirectCookies)
+- `Ingest.Extended.Tests.ps1` + `ModuleCoverage.Extended.Tests.ps1` — edge cases
+- `Checkpoint.RoundTrip.Tests.ps1` — Storage Table checkpoint shape
+- `Initialize-XdrLogRaiderAuth.Tests.ps1` — helper script
+- `Manifest.DcrConsistency.Tests.ps1` — **cross-layer drift guard** (manifest ↔ DCR ↔ custom-tables)
+- `Profile.EnvVars.Tests.ps1` — profile.ps1 envvar validation
+- **`FA.ParsingPipeline.Tests.ps1`** (v1.0.2) — 177 assertions: Expand-MDEResponse + ConvertTo-MDEIngestRow against the 25 live fixtures
+- **`DCR.SchemaConsistency.Tests.ps1`** (v1.0.2) — 53 assertions: ingest-row columns match DCR streamDeclaration columns exactly (no silent drops, no NULL-forever)
+- `TimerFunctions.Shape.Tests.ps1` — AST verification of all 7 timer-function bodies (canonical shape + try/catch + Write-Heartbeat calls)
+- **`TimerFunctions.Execution.Tests.ps1`** (v1.0.2) — AST verification of fatal-error catch-block semantics (`fatalError` note, correct `-Tier`, nested try, `throw`)
+- `ApiErrorHandling.Tests.ps1` — HTTP 401/403/500/503/429 retry paths
+
+**tests/kql/**
+- `Parsers.Tests.ps1` + `Parsers.Fixture.Tests.ps1` — parser structure + 9-column drift schema + tier coverage + 5 REMOVED streams not referenced
+- **`AnalyticRules.Tests.ps1`** (v1.0.2) — 70 assertions: every rule's query verifies manifest streams, parser calls, no REMOVED-stream refs, balanced parens
+- **`HuntingQueries.Tests.ps1`** (v1.0.2) — same invariants for 9 hunting queries
+- **`Workbooks.Tests.ps1`** (v1.0.2) — walks workbook JSON tree, verifies every `items[].content.query` string
+
+**tests/arm/**
+- `MainTemplate.Tests.ps1` — mainTemplate.json schema + DCR stream count + deployment topology
+
+**Fixtures**
+- `tests/fixtures/live-responses/<Stream>-raw.json` + `-ingest.json` — captured from live portal via `tools/Capture-EndpointSchemas.ps1` (2026-04-23). 25 pairs covering all ACTIVE streams. Redacted of GUIDs, UPNs, IPs, bearer tokens, and tenant name.
+- `tests/fixtures/sample-snapshots/` — hand-crafted drift scenarios for parser-scenario tests.
 
 ## Pre-deploy: online credential check
 

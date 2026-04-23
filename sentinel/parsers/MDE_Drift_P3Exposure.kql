@@ -32,22 +32,31 @@ let previousSet = sources
     | where TimeGenerated between (ago(lookback) .. ago(window))
     | summarize arg_max(TimeGenerated, *) by _Table, EntityId
     | project _Table, EntityId, PreviousRawJson = RawJson, PreviousTime = TimeGenerated;
+// v1.0.2: added SnapshotCurrent + SnapshotPrevious columns to the output so the
+// 9-column drift schema is consistent across all 6 tier parsers. Downstream
+// analytic rules + workbooks can now filter on "seen in snapshot X but not Y"
+// regardless of tier.
 let added = currentSet
     | join kind=leftanti previousSet on _Table, EntityId
-    | extend ChangeType = "Added", OldValue = "", NewValue = tostring(CurrentRawJson), SnapshotTime = CurrentTime;
+    | extend ChangeType = "Added", OldValue = "", NewValue = tostring(CurrentRawJson),
+             CurrentSnapshot = CurrentTime, PreviousSnapshot = datetime(null);
 let removed = previousSet
     | join kind=leftanti currentSet on _Table, EntityId
-    | extend ChangeType = "Removed", OldValue = tostring(PreviousRawJson), NewValue = "", SnapshotTime = PreviousTime;
+    | extend ChangeType = "Removed", OldValue = tostring(PreviousRawJson), NewValue = "",
+             CurrentSnapshot = datetime(null), PreviousSnapshot = PreviousTime;
 let modified = currentSet
     | join kind=inner previousSet on _Table, EntityId
     | where hash(tostring(CurrentRawJson)) != hash(tostring(PreviousRawJson))
-    | extend ChangeType = "Modified", OldValue = tostring(PreviousRawJson), NewValue = tostring(CurrentRawJson), SnapshotTime = CurrentTime;
+    | extend ChangeType = "Modified", OldValue = tostring(PreviousRawJson), NewValue = tostring(CurrentRawJson),
+             CurrentSnapshot = CurrentTime, PreviousSnapshot = PreviousTime;
 union added, removed, modified
 | project
-    TimeGenerated = SnapshotTime,
-    StreamName    = _Table,
+    TimeGenerated    = coalesce(CurrentSnapshot, PreviousSnapshot),
+    StreamName       = _Table,
     EntityId,
-    FieldName     = "",
+    FieldName        = "",
     OldValue,
     NewValue,
+    SnapshotCurrent  = CurrentSnapshot,
+    SnapshotPrevious = PreviousSnapshot,
     ChangeType

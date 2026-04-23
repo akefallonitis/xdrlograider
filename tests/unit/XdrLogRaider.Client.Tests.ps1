@@ -64,9 +64,9 @@ Describe 'Module surface (post-consolidation)' {
 }
 
 Describe 'Endpoint manifest contract' {
-    It 'loads exactly 52 endpoints' {
+    It 'loads exactly 47 endpoints (v1.0.2 — 5 NO_PUBLIC_API streams removed)' {
         $m = Get-MDEEndpointManifest
-        $m.Count | Should -Be 52
+        $m.Count | Should -Be 47
     }
 
     It 'groups streams into the expected tier buckets (no P4)' {
@@ -74,14 +74,35 @@ Describe 'Endpoint manifest contract' {
         $tiers = $m.Values | Group-Object Tier | ForEach-Object { @{ Tier = $_.Name; N = $_.Count } } | Sort-Object { $_.Tier }
         $byTier = @{}
         $tiers | ForEach-Object { $byTier[$_.Tier] = $_.N }
-        $byTier['P0'] | Should -Be 19
+        $byTier['P0'] | Should -Be 15   # was 19; removed 4 NO_PUBLIC_API streams
         $byTier['P1'] | Should -Be 7
-        $byTier['P2'] | Should -Be 7
+        $byTier['P2'] | Should -Be 6    # was 7; removed ApprovalAssignments
         $byTier['P3'] | Should -Be 8
         $byTier.ContainsKey('P4') | Should -BeFalse
         $byTier['P5'] | Should -Be 5
         $byTier['P6'] | Should -Be 2
         $byTier['P7'] | Should -Be 4
+    }
+
+    It 'has 25 active streams (not deferred) — v1.0.2 live audit 2026-04-23' {
+        # StrictMode-safe: use ContainsKey() on hashtable entries rather than
+        # dot-access on a key that doesn't exist (throws PropertyNotFoundException).
+        # v1.0.2: was 28; re-deferred 3 streams (TenantWorkloadStatus P1,
+        # IdentityServiceAccounts P5, MtoTenants P7) per live-capture evidence.
+        $m = Get-MDEEndpointManifest
+        $active = $m.Values | Where-Object { -not ($_.ContainsKey('Deferred') -and $_.Deferred) }
+        @($active).Count | Should -Be 25
+    }
+
+    It 'has 22 deferred streams each with a DeferReason' {
+        $m = Get-MDEEndpointManifest
+        $deferred = $m.Values | Where-Object { $_.ContainsKey('Deferred') -and $_.Deferred }
+        @($deferred).Count | Should -Be 22
+        foreach ($d in $deferred) {
+            $d.ContainsKey('DeferReason') | Should -BeTrue -Because "stream $($d.Stream) is deferred but has no DeferReason"
+            $d.DeferReason | Should -Not -BeNullOrEmpty -Because "stream $($d.Stream) is deferred but DeferReason is empty"
+            $d.DeferReason | Should -Match '^(FEATURE_NOT_ENABLED|POST_BODY_UNKNOWN|NEEDS_HIGHER_PRIV)' -Because "DeferReason for $($d.Stream) must start with a machine-readable tag"
+        }
     }
 
     It 'every entry has Stream, Path, and Tier' -ForEach $script:ManifestEntries {
@@ -210,11 +231,11 @@ Describe 'Invoke-MDETierPoll' {
             Mock Send-ToLogAnalytics { @{ RowsSent = 1 } }
             Mock Set-CheckpointTimestamp { }
             Mock Get-CheckpointTimestamp { $null }
-            # -IncludeDeferred forces every P0 stream (19) regardless of Deferred flag.
+            # -IncludeDeferred forces every P0 stream (15 in v1.0.2) regardless of Deferred flag.
             $result = Invoke-MDETierPoll -Session $Sess -Tier 'P0' -Config $Cfg -IncludeDeferred
-            $result.StreamsAttempted | Should -Be 19
-            $result.StreamsSucceeded | Should -Be 19
-            $result.RowsIngested     | Should -Be 19
+            $result.StreamsAttempted | Should -Be 15
+            $result.StreamsSucceeded | Should -Be 15
+            $result.RowsIngested     | Should -Be 15
             $result.StreamsSkipped   | Should -Be 0
         }
     }

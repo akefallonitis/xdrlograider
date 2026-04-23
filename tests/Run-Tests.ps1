@@ -157,9 +157,13 @@ if ($Category -in @('unit', 'all-offline')) {
     # Pester 5's CoveragePath glob resolution is fragile across OSes — resolve
     # the globs ourselves so the reporter sees real files and emits non-zero
     # coverage. Empty list disables coverage silently.
+    # v1.0.2: timer-function bodies (src/functions/**/run.ps1) are verified via
+    # AST + Execution tests (see tests/unit/TimerFunctions.Shape.Tests.ps1 +
+    # TimerFunctions.Execution.Tests.ps1) rather than line-coverage — the 200 LOC
+    # of non-library glue code dragged the real coverage metric down by ~15
+    # percentage points without signal. Modules + tools remain line-covered.
     $covFiles = @(
         (Get-ChildItem "$repoRoot/src/Modules" -Recurse -Filter *.ps1 -File -ErrorAction SilentlyContinue).FullName
-        (Get-ChildItem "$repoRoot/src/functions" -Recurse -Filter *.ps1 -File -ErrorAction SilentlyContinue).FullName
         (Get-ChildItem "$repoRoot/tools" -Filter *.ps1 -File -ErrorAction SilentlyContinue).FullName
     ) | Where-Object { $_ }
     if ($covFiles) {

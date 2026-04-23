@@ -25,18 +25,16 @@ resource dce 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' = {
   }
 }
 
-// --- Stream declarations for every MDE_*_CL table plus heartbeat + authtest ---
-var streamNames = [
-  // P0 Compliance (19)
+// --- Stream declarations — v1.0.2: 47 data streams + 2 operational = 49 total ---
+// Removed in v1.0.2 (NO_PUBLIC_API): AsrRulesConfig, AntiRansomwareConfig,
+// ControlledFolderAccess, NetworkProtectionConfig, ApprovalAssignments.
+var dataStreamNames = [
+  // P0 Compliance (15)
   'MDE_AdvancedFeatures_CL'
   'MDE_PreviewFeatures_CL'
   'MDE_AuthenticatedTelemetry_CL'
   'MDE_PUAConfig_CL'
-  'MDE_AsrRulesConfig_CL'
   'MDE_AntivirusPolicy_CL'
-  'MDE_AntiRansomwareConfig_CL'
-  'MDE_ControlledFolderAccess_CL'
-  'MDE_NetworkProtectionConfig_CL'
   'MDE_DeviceControlPolicy_CL'
   'MDE_WebContentFiltering_CL'
   'MDE_SmartScreenConfig_CL'
@@ -55,14 +53,13 @@ var streamNames = [
   'MDE_ConnectedApps_CL'
   'MDE_TenantContext_CL'
   'MDE_TenantWorkloadStatus_CL'
-  // P2 Governance (7)
+  // P2 Governance (6)
   'MDE_RbacDeviceGroups_CL'
   'MDE_UnifiedRbacRoles_CL'
   'MDE_DeviceCriticality_CL'
   'MDE_CriticalAssets_CL'
   'MDE_AssetRules_CL'
   'MDE_SAClassification_CL'
-  'MDE_ApprovalAssignments_CL'
   // P3 Exposure (8)
   'MDE_XspmAttackPaths_CL'
   'MDE_XspmChokePoints_CL'
@@ -86,21 +83,60 @@ var streamNames = [
   'MDE_UserPreferences_CL'
   'MDE_MtoTenants_CL'
   'MDE_CloudAppsConfig_CL'
-  // Operational
-  'MDE_Heartbeat_CL'
-  'MDE_AuthTestResult_CL'
 ]
 
-var streamDeclarations = toObject(streamNames, s => 'Custom-${s}', s => {
+// Baseline 4-column schema for all data streams (flattening handled in FA).
+var dataStreamDecls = toObject(dataStreamNames, s => 'Custom-${s}', s => {
   columns: [
     { name: 'TimeGenerated', type: 'datetime' }
-    { name: 'SourceStream', type: 'string' }
-    { name: 'EntityId', type: 'string' }
-    { name: 'RawJson', type: 'dynamic' }
+    { name: 'SourceStream',  type: 'string' }
+    { name: 'EntityId',      type: 'string' }
+    { name: 'RawJson',       type: 'dynamic' }
   ]
 })
 
-var dataFlows = [for s in streamNames: {
+// Heartbeat stream — extended schema matching Write-Heartbeat emission.
+var heartbeatDecl = {
+  'Custom-MDE_Heartbeat_CL': {
+    columns: [
+      { name: 'TimeGenerated',    type: 'datetime' }
+      { name: 'FunctionName',     type: 'string' }
+      { name: 'Tier',             type: 'string' }
+      { name: 'StreamsAttempted', type: 'int' }
+      { name: 'StreamsSucceeded', type: 'int' }
+      { name: 'RowsIngested',     type: 'int' }
+      { name: 'LatencyMs',        type: 'int' }
+      { name: 'HostName',         type: 'string' }
+      { name: 'Notes',            type: 'dynamic' }
+    ]
+  }
+}
+
+// AuthTestResult stream — extended schema matching Write-AuthTestResult emission.
+var authTestResultDecl = {
+  'Custom-MDE_AuthTestResult_CL': {
+    columns: [
+      { name: 'TimeGenerated',       type: 'datetime' }
+      { name: 'Method',              type: 'string' }
+      { name: 'PortalHost',          type: 'string' }
+      { name: 'Upn',                 type: 'string' }
+      { name: 'Success',             type: 'boolean' }
+      { name: 'Stage',               type: 'string' }
+      { name: 'FailureReason',       type: 'string' }
+      { name: 'EstsMs',              type: 'int' }
+      { name: 'SccauthMs',           type: 'int' }
+      { name: 'SampleCallHttpCode',  type: 'int' }
+      { name: 'SampleCallLatencyMs', type: 'int' }
+      { name: 'SccauthAcquiredUtc',  type: 'string' }
+    ]
+  }
+}
+
+var streamDeclarations = union(dataStreamDecls, heartbeatDecl, authTestResultDecl)
+
+var allStreamNames = concat(dataStreamNames, [ 'MDE_Heartbeat_CL', 'MDE_AuthTestResult_CL' ])
+
+var dataFlows = [for s in allStreamNames: {
   streams: [ 'Custom-${s}' ]
   destinations: [ 'la-destination' ]
   transformKql: 'source | extend TimeGenerated = todatetime(TimeGenerated)'

@@ -2,6 +2,8 @@ id: 1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09
 name: MDE XSPM new attack path discovered
 description: |
   A new attack path was identified in Defender Exposure Management XSPM — a route from an entry point to a critical asset.
+  NOTE: In v1.0.2 MDE_XspmAttackPaths_CL is deferred (POST_BODY_UNKNOWN).
+  Rule stays dormant until operator un-defers the stream.
 severity: Medium
 requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal

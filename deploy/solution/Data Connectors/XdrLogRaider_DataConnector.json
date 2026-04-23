@@ -17,8 +17,8 @@
       "query": "MDE_AuthTestResult_CL | order by TimeGenerated desc | take 10"
     },
     {
-      "description": "ASR rules currently not in Block mode",
-      "query": "MDE_AsrRulesConfig_CL | summarize arg_max(TimeGenerated, *) by EntityId | where tostring(parse_json(RawJson).mode) != \"Block\""
+      "description": "Suppression rules modified in the last 24h",
+      "query": "MDE_SuppressionRules_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, RawJson"
     }
   ],
   "dataTypes": [

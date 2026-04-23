@@ -18,7 +18,7 @@ resource dataConnectorDefinition 'Microsoft.OperationalInsights/workspaces/provi
       id: 'XdrLogRaiderInternal'
       title: 'XdrLogRaider — Defender XDR Internal Telemetry'
       publisher: 'Community'
-      descriptionMarkdown: 'Ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance) that is not exposed by public Graph Security / Defender XDR / MDE public APIs.\\n\\n- 52 streams across 7 compliance tiers\\n- Drift detection via pure KQL in 6 category parsers\\n- 6 workbooks, 15 analytic rules, 10 hunting queries\\n\\nSee [repo README](https://github.com/akefallonitis/xdrlograider) for setup + runbook.'
+      descriptionMarkdown: 'Ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance) that is not exposed by public Graph Security / Defender XDR / MDE public APIs.\\n\\n- 47 streams across 7 compliance tiers (28 actively polled; 19 deferred per-tenant-feature)\\n- Drift detection via pure KQL in 6 category parsers\\n- 6 workbooks, 14 analytic rules, 9 hunting queries\\n\\nSee [repo README](https://github.com/akefallonitis/xdrlograider) for setup + runbook.'
       graphQueriesTableName: 'MDE_Heartbeat_CL'
       graphQueries: [
         {
@@ -33,8 +33,8 @@ resource dataConnectorDefinition 'Microsoft.OperationalInsights/workspaces/provi
           query: 'MDE_AuthTestResult_CL | order by TimeGenerated desc | take 10'
         }
         {
-          description: 'ASR rules currently not in Block mode'
-          query: 'MDE_AsrRulesConfig_CL | summarize arg_max(TimeGenerated, *) by EntityId | where parse_json(RawJson).mode != "Block"'
+          description: 'Suppression rules modified in the last 24h'
+          query: 'MDE_SuppressionRules_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, RawJson'
         }
       ]
       dataTypes: [

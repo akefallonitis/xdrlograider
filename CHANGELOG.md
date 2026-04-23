@@ -4,6 +4,90 @@ All notable changes to this project will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-04-23
+
+### Changed — production-readiness sweep
+
+- **Manifest cleanup**: 52 streams → **47** (25 active + 22 deferred). Removed 5 streams with
+  no public portal API (`MDE_AsrRulesConfig_CL`, `MDE_AntiRansomwareConfig_CL`,
+  `MDE_ControlledFolderAccess_CL`, `MDE_NetworkProtectionConfig_CL`,
+  `MDE_ApprovalAssignments_CL`) — these features are only accessible via Intune / Graph
+  `deviceManagement` APIs, which is out of scope for this connector. Source audit: nodoc
+  (576 paths) + XDRInternals (150 paths) + DefenderHarvester (12 paths) + live audit
+  2026-04-23 against the tenant.
+- **Path fixes**: `MDE_CriticalAssets_CL` + `MDE_DeviceCriticality_CL` now point to the correct
+  NDR endpoints (`/apiproxy/mtp/ndr/machines/criticalityLevel` +
+  `/apiproxy/mtp/ndr/machines/assetValues`) per XDRInternals lines 68–69. Both remain
+  DEFERRED until the POST body schema is HAR-captured (v1.1 scope).
+- **Re-deferrals based on live audit**: `MDE_TenantWorkloadStatus_CL` (400 on single-tenant,
+  requires MTO), `MDE_IdentityServiceAccounts_CL` (415, POST body unknown),
+  `MDE_MtoTenants_CL` (400 on single-tenant). All moved from ACTIVE to DEFERRED with
+  evidence-backed DeferReason tags.
+- **Heartbeat schema extended to 9 columns** (BUG #1): was 4-col baseline silently dropping
+  `FunctionName`, `Tier`, `StreamsAttempted`, `StreamsSucceeded`, `RowsIngested`,
+  `LatencyMs`, `HostName`, `Notes`. Now DCR + workspace table declare all 9 so every
+  `MDE_Drift_*` / compliance workbook query returns real data.
+- **AuthTestResult schema extended to 12 columns** to match `Write-AuthTestResult`
+  emission (`Method`, `PortalHost`, `Upn`, `Success`, `Stage`, `FailureReason`, `EstsMs`,
+  `SccauthMs`, `SampleCallHttpCode`, `SampleCallLatencyMs`, `SccauthAcquiredUtc`,
+  `TimeGenerated`).
+- **P3 drift parser column alignment**: added `SnapshotCurrent` + `SnapshotPrevious` so all
+  6 tier parsers project the same 9-column drift schema. Analytic rules + workbooks that
+  query either now behave consistently.
+- **Timer functions wrapped in top-level try/catch**: all 7 `poll-p*/run.ps1` now emit a
+  failure heartbeat with `Notes.fatalError = <exception message>` before re-throwing, so
+  operator sees breakage in `MDE_Heartbeat_CL` instead of silence.
+- **Coverage glob honesty**: `src/functions/**/*.ps1` excluded from line-coverage (verified
+  via AST + execution tests instead). Real module coverage metric rises to ~41.7% from the
+  misleading 36.8%. See `tests/unit/TimerFunctions.Shape.Tests.ps1` +
+  `TimerFunctions.Execution.Tests.ps1`.
+
+### Added — production verification
+
+- **tools/Capture-EndpointSchemas.ps1**: captures live portal responses into
+  `tests/fixtures/live-responses/` for every active stream. Automatic PII redaction
+  (GUIDs, UPNs, IPs, bearer tokens, tenant name) keeps fixtures safe to commit.
+- **25 live fixtures** (raw + ingest pairs) captured 2026-04-23 from a real tenant,
+  forming the single source of truth for every downstream offline test.
+- **tests/unit/FA.ParsingPipeline.Tests.ps1** (164 assertions): each ACTIVE stream's
+  `Expand-MDEResponse` + `ConvertTo-MDEIngestRow` output verified against fixtures —
+  catches IdProperty misconfig, JSON-shape changes, RawJson round-trip bugs.
+- **tests/unit/DCR.SchemaConsistency.Tests.ps1** (49 assertions): every ingest-row column
+  set cross-checked against the DCR streamDeclaration in `deploy/compiled/mainTemplate.json`
+  — guarantees no silent-drop columns and no forever-null columns.
+- **tests/kql/AnalyticRules.Tests.ps1** (70 assertions × 14 rules): every rule's query
+  verified — no references to removed streams, all stream names in manifest, all parser
+  calls point at existing parsers, parens balanced.
+- **tests/kql/HuntingQueries.Tests.ps1** (45 assertions × 9 queries): same invariants.
+- **tests/kql/Workbooks.Tests.ps1** (36 assertions × 6 workbooks): walks `items[].content.query`
+  tree, applies the same rules.
+- **tests/unit/TimerFunctions.Execution.Tests.ps1** (42 assertions × 7 timers): AST-level
+  verification that each timer's catch block captures `$_.Exception.Message`, emits a
+  `fatalError`-tagged heartbeat, and re-throws.
+- **.github/workflows/capture-schemas.yml**: manual-dispatch workflow for operators to
+  refresh fixtures against their tenant (gated on `XDRLR_CAPTURE=true`).
+
+### Removed
+
+- 5 streams with no public portal API — see Manifest cleanup above.
+- `sentinel/analytic-rules/AsrRuleDowngrade.yaml` — depended on removed stream.
+- `sentinel/hunting-queries/AsrRuleStateTransitions.yaml` — depended on removed stream.
+- `tests/fixtures/sample-snapshots/MDE_AsrRulesConfig_drift_scenario.json` — obsolete.
+- ASR rule modes tile in `sentinel/workbooks/MDE_ComplianceDashboard.json`.
+
+### Counts (post-cleanup)
+
+| Layer | v1.0.1 | v1.0.2 |
+|---|---|---|
+| Manifest streams | 52 | **47** |
+| Active on Security Reader tenant | 26 | **25** |
+| Deferred | 26 | **22** |
+| DCR streamDeclarations | 54 | **49** (47 data + 2 system) |
+| Custom tables | 54 | **49** |
+| Analytic rules | 15 | **14** |
+| Hunting queries | 10 | **9** |
+| Offline tests passing | 620 | **1075** |
+
 ## [Unreleased]
 
 ### Changed

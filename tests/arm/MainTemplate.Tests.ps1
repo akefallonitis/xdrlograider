@@ -200,18 +200,27 @@ Describe 'Bicep source — files present' {
 }
 
 Describe 'DCR streams — completeness' {
-    It 'DCR includes 52 MDE_*_CL stream declarations + 2 operational tables' {
-        # 52 = 19 P0 + 7 P1 + 7 P2 + 8 P3 + 5 P5 + 2 P6 + 4 P7
+    It 'DCR includes 47 MDE_*_CL data stream declarations + 2 operational tables (v1.0.2)' {
+        # v1.0.2: 47 = 15 P0 + 7 P1 + 6 P2 + 8 P3 + 5 P5 + 2 P6 + 4 P7
+        # Removed from v1.0.1 (5 streams, NO_PUBLIC_API): MDE_AsrRulesConfig_CL,
+        # MDE_AntiRansomwareConfig_CL, MDE_ControlledFolderAccess_CL,
+        # MDE_NetworkProtectionConfig_CL, MDE_ApprovalAssignments_CL.
         # (P4 DeviceTimeline + AirDecisions + InvestigationPackage dropped from v1.0 scope.)
         $dceDcrBicep = Get-Content (Join-Path $script:DeployDir 'modules' 'dce-dcr.bicep') -Raw
         $streams = [regex]::Matches($dceDcrBicep, "'(MDE_\w+_CL)'") | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
-        $streams.Count | Should -BeGreaterOrEqual 54  # 52 endpoint streams + Heartbeat + AuthTestResult
+        $streams.Count | Should -BeGreaterOrEqual 49  # 47 data streams + Heartbeat + AuthTestResult
     }
 
-    It 'DCR has NO dropped streams (MDE_AirDecisions, MDE_InvestigationPackage, MDE_DeviceTimeline)' {
+    It 'DCR has NO dropped streams (AirDecisions, InvestigationPackage, DeviceTimeline, v1.0.2 removals)' {
         $dceDcrBicep = Get-Content (Join-Path $script:DeployDir 'modules' 'dce-dcr.bicep') -Raw
         $dceDcrBicep | Should -Not -Match 'MDE_AirDecisions'
         $dceDcrBicep | Should -Not -Match 'MDE_InvestigationPackage'
         $dceDcrBicep | Should -Not -Match 'MDE_DeviceTimeline'
+        # v1.0.2 NO_PUBLIC_API removals
+        $dceDcrBicep | Should -Not -Match 'MDE_AsrRulesConfig_CL'
+        $dceDcrBicep | Should -Not -Match 'MDE_AntiRansomwareConfig_CL'
+        $dceDcrBicep | Should -Not -Match 'MDE_ControlledFolderAccess_CL'
+        $dceDcrBicep | Should -Not -Match 'MDE_NetworkProtectionConfig_CL'
+        $dceDcrBicep | Should -Not -Match 'MDE_ApprovalAssignments_CL'
     }
 }

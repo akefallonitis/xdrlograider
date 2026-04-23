@@ -158,12 +158,54 @@ Describe 'Timer function shape: <Folder>' -ForEach $TimerCases {
         $values | Should -Contain $Tier
     }
 
-    It 'calls Write-Heartbeat on BOTH the gated and main paths (at least 2 calls)' {
+    It 'calls Write-Heartbeat on gated, main, AND fatal-catch paths (3 calls, v1.0.2)' {
         $calls = @($script:Parsed.Commands | Where-Object {
             $_.CommandElements[0] -is [System.Management.Automation.Language.StringConstantExpressionAst] -and
             $_.CommandElements[0].Value -ieq 'Write-Heartbeat'
         })
-        $calls.Count | Should -BeGreaterOrEqual 2
+        $calls.Count | Should -BeGreaterOrEqual 3 -Because 'v1.0.2 requires failure-heartbeat emission in the top-level catch block'
+    }
+
+    It 'has a top-level TryStatementAst (v1.0.2 fatal-error handling)' {
+        $tryStatements = $script:Parsed.Ast.FindAll({
+            param($n) $n -is [System.Management.Automation.Language.TryStatementAst]
+        }, $true)
+        $tryStatements | Should -Not -BeNullOrEmpty -Because 'poll-p* timers must wrap main body in try/catch to surface fatal errors as heartbeat rows'
+    }
+
+    It 'catch block emits a fatal-error heartbeat (contains fatalError token)' {
+        $tryStatements = $script:Parsed.Ast.FindAll({
+            param($n) $n -is [System.Management.Automation.Language.TryStatementAst]
+        }, $true)
+        $tryStatements | Should -Not -BeNullOrEmpty
+        $hasFatalError = $false
+        foreach ($try in $tryStatements) {
+            foreach ($catch in $try.CatchClauses) {
+                if ($catch.Body.Extent.Text -match 'fatalError') {
+                    $hasFatalError = $true; break
+                }
+            }
+            if ($hasFatalError) { break }
+        }
+        $hasFatalError | Should -BeTrue -Because "catch block must emit Notes with a 'fatalError' field so operators see the failure in MDE_Heartbeat_CL"
+    }
+
+    It 'catch block re-throws (so Application Insights logs the fatal)' {
+        $tryStatements = $script:Parsed.Ast.FindAll({
+            param($n) $n -is [System.Management.Automation.Language.TryStatementAst]
+        }, $true)
+        $rethrows = $false
+        foreach ($try in $tryStatements) {
+            foreach ($catch in $try.CatchClauses) {
+                # ThrowStatementAst — bare `throw` at the bottom of the catch.
+                $throws = $catch.Body.FindAll({
+                    param($n) $n -is [System.Management.Automation.Language.ThrowStatementAst]
+                }, $true)
+                if ($throws.Count -gt 0) { $rethrows = $true; break }
+            }
+            if ($rethrows) { break }
+        }
+        $rethrows | Should -BeTrue -Because 'catch must `throw` after emitting failure heartbeat so the Functions runtime marks the invocation failed'
     }
 
     It 'does not reference any removed / legacy Lara* function' {

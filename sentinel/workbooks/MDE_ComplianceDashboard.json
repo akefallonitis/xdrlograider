@@ -61,18 +61,6 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_AsrRulesConfig_CL\n| summarize arg_max(TimeGenerated, *) by EntityId\n| extend Mode = tostring(parse_json(RawJson).mode)\n| project EntityId, Mode, TimeGenerated\n| extend Status = case(Mode == 'Block', '\u2705 Block', Mode == 'Audit', '\u26a0\ufe0f Audit', '\u274c Off')\n| order by EntityId asc",
-        "size": 0,
-        "title": "ASR rule modes (current)",
-        "queryType": 0,
-        "visualization": "table"
-      },
-      "name": "asr-table"
-    },
-    {
-      "type": 3,
-      "content": {
-        "version": "KqlItem/1.0",
         "query": "MDE_LiveResponseConfig_CL\n| summarize arg_max(TimeGenerated, *) by EntityId\n| extend AllowUnsignedScripts = tostring(parse_json(RawJson).allowUnsignedScripts)\n| project EntityId, AllowUnsignedScripts, TimeGenerated",
         "size": 0,
         "title": "Live Response config",

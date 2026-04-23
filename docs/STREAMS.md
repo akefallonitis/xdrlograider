@@ -1,144 +1,178 @@
-# Streams catalogue
+# Streams catalogue (v1.0.2)
 
-All 52 portal-only streams ingested by XdrLogRaider, grouped by cadence tier.
+**47 portal-only streams** ingested by XdrLogRaider, grouped by cadence tier.
+Of those, **25 are actively polled** on a Security Reader + Defender XDR Analyst
+service account, and **22 are deferred** (endpoint returns 4xx/5xx until a
+tenant-side feature is enabled, a POST body is HAR-captured, or the service
+account is elevated). Each deferred entry carries a machine-readable
+`DeferReason` tag in [`src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1`].
 
-## P0 — Security configuration (hourly, 19 streams)
+**Source of truth**: the manifest PSD1. Paths below are taken directly from it
+and reflect the live-verified 2026-04-23 audit. DeferReason prefixes:
 
-| Table | Endpoint | Description |
+| Tag | Meaning |
+|---|---|
+| `FEATURE_NOT_ENABLED` | Path is correct per nodoc / XDRInternals / DefenderHarvester research; 4xx/5xx live because the tenant hasn't provisioned the feature. Auto-activates once the feature is turned on. |
+| `POST_BODY_UNKNOWN` | Path + method (POST) correct; body filter schema not documented anywhere public. Needs operator HAR capture from browser session (v1.1 scope). |
+| `NEEDS_HIGHER_PRIV` | Endpoint requires Defender XDR Operator or MCAS Administrator role — Security Reader insufficient. |
+
+## P0 — Security configuration (hourly, 15 streams)
+
+**Active (10)**
+
+| Table | Path | Notes |
 |---|---|---|
-| `MDE_AdvancedFeatures_CL` | `/api/settings/GetAdvancedFeaturesSetting` | Tenant advanced-feature flags matrix |
-| `MDE_PreviewFeatures_CL` | `/api/settings/previewFeatures` | Opt-in preview feature state |
-| `MDE_AuthenticatedTelemetry_CL` | `/api/settings/authenticatedTelemetry` | Signed-telemetry enforcement state |
-| `MDE_PUAConfig_CL` | `/api/settings/puaProtection` | PUA protection tenant policy |
-| `MDE_AsrRulesConfig_CL` | `/api/endpoints/asr/rules` | Per-rule ASR mode (Block/Audit/Off) |
-| `MDE_AntivirusPolicy_CL` | `/api/settings/antivirus/policy` | AV scan schedule + exclusions |
-| `MDE_AntiRansomwareConfig_CL` | `/api/settings/antiRansomware` | Anti-ransomware posture |
-| `MDE_ControlledFolderAccess_CL` | `/api/settings/controlledFolderAccess` | CFA protected folders + allowed apps |
-| `MDE_NetworkProtectionConfig_CL` | `/api/settings/networkProtection` | NP mode + per-category exceptions |
-| `MDE_DeviceControlPolicy_CL` | `/api/settings/deviceControl/policy` | Device-control rules (USB etc.) |
-| `MDE_WebContentFiltering_CL` | `/api/settings/webContentFiltering/policies` | Web filtering rules |
-| `MDE_SmartScreenConfig_CL` | `/api/settings/smartScreen` | SmartScreen tenant mode |
-| `MDE_TenantAllowBlock_CL` | `/api/allowBlockList/entries` | URL/IP/hash/sender allow+block |
-| `MDE_CustomCollection_CL` | `/api/settings/customCollectionRules` | Portal custom collection rules |
-| `MDE_LiveResponseConfig_CL` | `/api/settings/liveResponse` | LR policy (unsigned scripts, timeouts) |
-| `MDE_AlertServiceConfig_CL` | `/api/ine/alertsapiservice/workloads/disabled` | Alert service infrastructure |
-| `MDE_AlertTuning_CL` | `/api/alertTuningRules` | Alert tuning rules |
-| `MDE_SuppressionRules_CL` | `/api/ine/suppressionrulesservice/suppressionRules` | Suppression rule bodies |
-| `MDE_CustomDetections_CL` | `/api/ine/huntingservice/rules` | Custom detection KQL + schedule |
+| `MDE_AdvancedFeatures_CL` | `/apiproxy/mtp/settings/GetAdvancedFeaturesSetting` | Tenant advanced-feature flags (PUA, TamperProtection, etc.) |
+| `MDE_PreviewFeatures_CL` | `/apiproxy/mtp/settings/GetPreviewExperienceSetting` | Preview experience opt-in state |
+| `MDE_AlertServiceConfig_CL` | `/apiproxy/mtp/alertsApiService/workloads/disabled` | Alert workloads currently disabled |
+| `MDE_AlertTuning_CL` | `/apiproxy/mtp/alertsEmailNotifications/email_notifications` | Email-notification rules |
+| `MDE_SuppressionRules_CL` | `/apiproxy/mtp/suppressionRulesService/suppressionRules` | Active alert-suppression rules (filter=fromDate) |
+| `MDE_CustomDetections_CL` | `/apiproxy/mtp/huntingService/rules/unified` | Custom detection KQL + schedule (filter=fromDate) |
+| `MDE_DeviceControlPolicy_CL` | `/apiproxy/mtp/siamApi/Onboarding` | MDE onboarding + device-control policy state |
+| `MDE_WebContentFiltering_CL` | `/apiproxy/mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories` | Web-filtering active categories |
+| `MDE_SmartScreenConfig_CL` | `/apiproxy/mtp/webThreatProtection/webThreats/reports/webThreatSummary` | SmartScreen detection summary |
+| `MDE_LiveResponseConfig_CL` | `/apiproxy/mtp/liveResponseApi/get_properties` | Live Response policy (unsigned scripts, etc.) |
 
-## P1 — Integration + pipeline state (every 30 min, 7 streams)
+**Deferred (5)**
 
-| Table | Endpoint |
+| Table | Path | DeferReason |
+|---|---|---|
+| `MDE_AuthenticatedTelemetry_CL` | `/apiproxy/mtp/deviceManagement/configuration/AuthenticatedTelemetry` | `FEATURE_NOT_ENABLED` — tenant hasn't provisioned authenticated telemetry |
+| `MDE_PUAConfig_CL` | `/apiproxy/mtp/deviceManagement/configuration/PotentiallyUnwantedApplications` | `FEATURE_NOT_ENABLED` — tenant PUA protection not configured |
+| `MDE_AntivirusPolicy_CL` | `/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters` | `POST_BODY_UNKNOWN` — HAR needed from MEM security policies page |
+| `MDE_TenantAllowBlock_CL` | `/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues` | `POST_BODY_UNKNOWN` — HAR needed from Indicators page |
+| `MDE_CustomCollection_CL` | `/apiproxy/mtp/mdeCustomCollection/model` | `NEEDS_HIGHER_PRIV` — 403 as Security Reader, requires Defender XDR Operator |
+
+## P1 — Integration + pipeline state (30-min, 7 streams)
+
+**Active (3)**
+
+| Table | Path |
 |---|---|
-| `MDE_DataExportSettings_CL` | `/api/dataexportsettings` |
-| `MDE_StreamingApiConfig_CL` | `/api/settings/streamingApi` |
-| `MDE_IntuneConnection_CL` | `/api/settings/integrations/intune` |
-| `MDE_PurviewSharing_CL` | `/api/settings/integrations/purview` |
-| `MDE_ConnectedApps_CL` | `/api/cloud/portal/apps/all` |
-| `MDE_TenantContext_CL` | `/api/tenant/context` |
-| `MDE_TenantWorkloadStatus_CL` | `/api/tenant/workloadStatus` |
+| `MDE_DataExportSettings_CL` | `/apiproxy/mtp/wdatpApi/dataexportsettings` |
+| `MDE_ConnectedApps_CL` | `/apiproxy/mtp/responseApiPortal/apps/all` |
+| `MDE_TenantContext_CL` | `/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true` |
 
-## P2 — Governance + RBAC (daily, 7 streams)
+**Deferred (4)**
 
-| Table | Endpoint |
+| Table | DeferReason |
 |---|---|
-| `MDE_RbacDeviceGroups_CL` | `/rbac/machine_groups` |
-| `MDE_UnifiedRbacRoles_CL` | `/api/rbac/unified/roles` |
-| `MDE_DeviceCriticality_CL` | `/api/assetManagement/devices/criticality` |
-| `MDE_CriticalAssets_CL` | `/api/criticalAssets/classifications` |
-| `MDE_AssetRules_CL` | `/api/assetManagement/rules` |
-| `MDE_SAClassification_CL` | `/api/identities/serviceAccountClassifications` |
-| `MDE_ApprovalAssignments_CL` | `/api/autoir/approvers` |
+| `MDE_TenantWorkloadStatus_CL` | `FEATURE_NOT_ENABLED` — MTO (Multi-Tenant Organization) not configured; live 400 on single-tenant |
+| `MDE_StreamingApiConfig_CL` | `FEATURE_NOT_ENABLED` — streaming API not configured (no Event Hub/Storage destination) |
+| `MDE_IntuneConnection_CL` | `FEATURE_NOT_ENABLED` — MDE-Intune connection not set up |
+| `MDE_PurviewSharing_CL` | `FEATURE_NOT_ENABLED` — Purview integration not configured |
+
+## P2 — Governance + RBAC (daily, 6 streams)
+
+**Active (4)**
+
+| Table | Path |
+|---|---|
+| `MDE_RbacDeviceGroups_CL` | `/apiproxy/mtp/rbacManagementApi/rbac/machine_groups` |
+| `MDE_UnifiedRbacRoles_CL` | `/apiproxy/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions` |
+| `MDE_AssetRules_CL` | `/apiproxy/mtp/xspmatlas/assetrules` |
+| `MDE_SAClassification_CL` | `/apiproxy/radius/api/radius/serviceaccounts/classificationrule/getall` |
+
+**Deferred (2)** — v1.0.2 fixed paths to NDR endpoints per XDRInternals lines 68-69, body schema pending
+
+| Table | Path | DeferReason |
+|---|---|---|
+| `MDE_DeviceCriticality_CL` | `/apiproxy/mtp/ndr/machines/assetValues` (POST) | `POST_BODY_UNKNOWN` |
+| `MDE_CriticalAssets_CL` | `/apiproxy/mtp/ndr/machines/criticalityLevel` (POST) | `POST_BODY_UNKNOWN` |
 
 ## P3 — Exposure / XSPM (hourly, 8 streams)
 
-| Table | Endpoint |
+**Active (4)**
+
+| Table | Path |
 |---|---|
-| `MDE_XspmAttackPaths_CL` | `/api/xspm/attackPaths` |
-| `MDE_XspmChokePoints_CL` | `/api/xspm/chokePoints` |
-| `MDE_XspmTopTargets_CL` | `/api/xspm/topTargets` |
-| `MDE_XspmInitiatives_CL` | `/api/xspm/initiatives` |
-| `MDE_ExposureSnapshots_CL` | `/api/xspm/exposureSnapshots` |
-| `MDE_SecureScoreBreakdown_CL` | `/api/secureScore/breakdown` |
-| `MDE_SecurityBaselines_CL` | `/api/settings/securityBaselines` |
-| `MDE_ExposureRecommendations_CL` | `/api/exposure/recommendations` |
+| `MDE_XspmInitiatives_CL` | `/apiproxy/mtp/posture/oversight/initiatives` (filter=fromDate) |
+| `MDE_ExposureSnapshots_CL` | `/apiproxy/mtp/posture/oversight/updates` (filter=fromDate) |
+| `MDE_SecureScoreBreakdown_CL` | `/apiproxy/mtp/secureScore/security/secureScoresV2` |
+| `MDE_ExposureRecommendations_CL` | `/apiproxy/mtp/posture/oversight/recommendations` |
+
+**Deferred (4)**
+
+| Table | DeferReason |
+|---|---|
+| `MDE_XspmAttackPaths_CL` | `POST_BODY_UNKNOWN` — XSPM attack-paths POST, filter body needs HAR |
+| `MDE_XspmChokePoints_CL` | `POST_BODY_UNKNOWN` |
+| `MDE_XspmTopTargets_CL` | `POST_BODY_UNKNOWN` |
+| `MDE_SecurityBaselines_CL` | `FEATURE_NOT_ENABLED` — TVM baselines require Defender Vulnerability Management add-on |
 
 ## P5 — Identity / MDI (daily, 5 streams)
 
-| Table | Endpoint |
+**Active (1)**
+
+| Table | Path |
 |---|---|
-| `MDE_IdentityServiceAccounts_CL` | `/api/identities/serviceAccounts` |
-| `MDE_IdentityOnboarding_CL` | `/api/identities/onboardingStatus` |
-| `MDE_DCCoverage_CL` | `/api/identities/domainControllerCoverage` |
-| `MDE_IdentityAlertThresholds_CL` | `/api/identities/alertThresholds` |
-| `MDE_RemediationAccounts_CL` | `/api/identities/remediationActionAccounts` |
+| `MDE_IdentityOnboarding_CL` | `/apiproxy/mtp/siamApi/domaincontrollers/list` |
 
-## P6 — Audit + threat intel (every 10 min, 2 streams)
+**Deferred (4)**
 
-| Table | Endpoint |
+| Table | DeferReason |
 |---|---|
-| `MDE_ActionCenter_CL` | `/api/autoir/actioncenterui/history-actions` |
-| `MDE_ThreatAnalytics_CL` | `/api/threatAnalytics/outbreaks` |
+| `MDE_IdentityServiceAccounts_CL` | `POST_BODY_UNKNOWN` — 415 live, POST body + Content-Type needed |
+| `MDE_DCCoverage_CL` | `FEATURE_NOT_ENABLED` — MDI sensor deployment required |
+| `MDE_IdentityAlertThresholds_CL` | `FEATURE_NOT_ENABLED` — MDI deployment required |
+| `MDE_RemediationAccounts_CL` | `FEATURE_NOT_ENABLED` — MDI deployment required |
 
-## P7 — Tenant metadata + licensing (daily, 4 streams)
+## P6 — Audit / AIR (10-min, 2 streams, all ACTIVE)
 
-| Table | Endpoint |
+| Table | Path |
 |---|---|
-| `MDE_LicenseReport_CL` | `/api/licensing/report` |
-| `MDE_UserPreferences_CL` | `/api/userPreferences` |
-| `MDE_MtoTenants_CL` | `/api/mto/tenants` |
-| `MDE_CloudAppsConfig_CL` | `/api/cloudApps/generalSettings` |
+| `MDE_ActionCenter_CL` | `/apiproxy/mtp/actionCenter/actioncenterui/history-actions` (filter=fromDate) |
+| `MDE_ThreatAnalytics_CL` | `/apiproxy/mtp/threatAnalytics/outbreaks` (filter=fromDate) |
 
-## Operational tables
+## P7 — Metadata (daily, 4 streams)
 
-| Table | Description |
+**Active (1)**
+
+| Table | Path |
 |---|---|
-| `MDE_Heartbeat_CL` | Per-timer-function invocation heartbeat (streams attempted, succeeded, rows ingested, latency) |
-| `MDE_AuthTestResult_CL` | `validate-auth-selftest` timer results (per-stage timing, success/failure, failure reason) |
+| `MDE_UserPreferences_CL` | `/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference` |
 
-## Adding a new stream
+**Deferred (3)**
 
-See [CONTRIBUTING.md#adding-a-new-telemetry-stream](../CONTRIBUTING.md#adding-a-new-telemetry-stream).
+| Table | DeferReason |
+|---|---|
+| `MDE_MtoTenants_CL` | `FEATURE_NOT_ENABLED` — MTO tenant picker not applicable to single-tenant |
+| `MDE_LicenseReport_CL` | `FEATURE_NOT_ENABLED` — Defender for Business / EDR for Business SKU |
+| `MDE_CloudAppsConfig_CL` | `NEEDS_HIGHER_PRIV` — MCAS licence + MCAS Administrator role |
 
-## Live-verified status (2026-04-23 audit)
+## Operational streams (system)
 
-Paths shown above are illustrative (circa 2024 research). The **canonical paths** live in `src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1`, refreshed on 2026-04-23 against the live portal via `tests/integration/Audit-Endpoints-Live.ps1`, cross-referenced with:
-- [nodoc](https://nodoc.nathanmcnulty.com) — 576 operations (source: `github.com/nathanmcnulty/nodoc` OpenAPI spec)
-- [XDRInternals](https://github.com/MSCloudInternals/XDRInternals) — 150 paths from cmdlet sources
+Two non-telemetry streams the Function App emits itself:
 
-### Production poll set: 26/52 streams return live data
+| Table | Emitted by | Cadence | Schema |
+|---|---|---|---|
+| `MDE_Heartbeat_CL` | every timer function | each invocation | 9 cols: TimeGenerated, FunctionName, Tier, StreamsAttempted, StreamsSucceeded, RowsIngested, LatencyMs, HostName, Notes |
+| `MDE_AuthTestResult_CL` | `validate-auth-selftest` | every 10 min then 1 h | 12 cols: TimeGenerated, Method, PortalHost, Upn, Success, Stage, FailureReason, EstsMs, SccauthMs, SampleCallHttpCode, SampleCallLatencyMs, SccauthAcquiredUtc |
 
-All 52 streams remain declared (DCR + custom tables provisioned). 26 are actively polled today; **26 are marked `Deferred = $true`** in the manifest with a one-line reason, skipped by the tier poller by default:
+## Removed in v1.0.2 (5 streams)
 
-```powershell
-Import-Module ./src/Modules/XdrLogRaider.Client/XdrLogRaider.Client.psd1 -Force
-(Get-MDEEndpointManifest).Values | Where-Object Deferred | Select-Object Stream, DeferReason
-```
+These appeared in v1.0.1 but had no public portal API per any research source
+(nodoc, XDRInternals, DefenderHarvester); the corresponding features (ASR rules,
+Anti-Ransomware, CFA, NetworkProtection, Approval Assignments) are only
+accessible via Intune / Graph `deviceManagement` APIs — out of scope for this
+connector. They were removed at the manifest, DCR, custom-tables, parser, and
+analytic-rule layers:
 
-**Why deferred, not deleted**: DCR + custom table stay provisioned, so flipping a deferred stream back on is a one-line manifest edit — no table/schema redeploy needed.
+- `MDE_AsrRulesConfig_CL`
+- `MDE_AntiRansomwareConfig_CL`
+- `MDE_ControlledFolderAccess_CL`
+- `MDE_NetworkProtectionConfig_CL`
+- `MDE_ApprovalAssignments_CL`
 
-### Deferred breakdown
+## Live fixture coverage
 
-| Category | Count | Reason |
-|---|---|---|
-| AV / EDR config (ASR, AVPolicy, AntiRansomware, CFA, NetworkProtection) | 5 | Portal paths moved; not in 2026-04 catalogue |
-| XSPM POST (AttackPaths, ChokePoints, TopTargets) | 3 | Needs specific body payload (500 with empty `{}`) |
-| Permission-locked (TenantAllowBlock, CustomCollection, CloudAppsConfig) | 3 | Service account needs elevated Defender/MCAS role |
-| Path drift (PUAConfig, PurviewSharing, IntuneConnection, AuthenticatedTelemetry, etc.) | 15 | nodoc path returns 404 live — needs browser HAR capture to find current |
+Every ACTIVE stream has a `<Stream>-raw.json` + `<Stream>-ingest.json` fixture
+under `tests/fixtures/live-responses/` captured via
+`tools/Capture-EndpointSchemas.ps1`. These fixtures drive the offline tests in
+`tests/unit/FA.ParsingPipeline.Tests.ps1`, `DCR.SchemaConsistency.Tests.ps1`,
+and the `tests/kql/*` content-verification suite.
 
-To re-enable one: see `docs/POSTDEPLOY-PLAYBOOK.md` → "Ongoing: iterate on the 27 deferred streams".
+## References
 
-## Time-filter (delta polling) support
-
-Six streams declare `Filter = 'fromDate'` — tier poller passes last-successful-poll timestamp as query-string for incremental fetches:
-
-| Stream | Cadence | Filter param |
-|---|---|---|
-| MDE_ActionCenter_CL | 10 min | fromDate |
-| MDE_ThreatAnalytics_CL | 10 min | fromDate |
-| MDE_SuppressionRules_CL | hourly | fromDate |
-| MDE_CustomDetections_CL | hourly | fromDate |
-| MDE_XspmInitiatives_CL | hourly | fromDate |
-| MDE_ExposureSnapshots_CL | hourly | fromDate |
-
-All other streams do a full snapshot each poll — payloads are small (portal configuration objects).
+See [REFERENCES.md](REFERENCES.md) for nodoc / XDRInternals / DefenderHarvester
+line-number citations and the full 2026-04-23 live-audit result set.
