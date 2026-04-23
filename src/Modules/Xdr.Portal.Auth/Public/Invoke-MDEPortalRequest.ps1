@@ -45,7 +45,14 @@ function Invoke-MDEPortalRequest {
     )
 
     $portalHost = $Session.PortalHost
-    $uri = "https://$portalHost/apiproxy" + $Path
+
+    # Path is used as-is. Caller is responsible for the right prefix — some APIs
+    # live under /api/..., some under /apiproxy/mtp/..., some under /apiproxy/ngp/...
+    # Our endpoints manifest knows the correct base for each stream; do NOT force
+    # /apiproxy here or you'll rewrite /api/settings/... into /apiproxy/api/...
+    # which the portal responds to with HTTP 500.
+    if ($Path -notmatch '^/') { $Path = "/$Path" }
+    $uri = "https://$portalHost$Path"
 
     $invoke = {
         param($retry)

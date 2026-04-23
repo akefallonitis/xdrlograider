@@ -30,5 +30,7 @@ function Update-XsrfToken {
     if (-not $xsrf) {
         throw "XSRF-TOKEN missing from session for $PortalHost. Session may be expired."
     }
-    return $xsrf.Value
+    # The cookie stores the token URL-encoded; the X-XSRF-TOKEN header must carry
+    # the DECODED value, otherwise the portal's CSRF middleware returns HTTP 500.
+    return [System.Net.WebUtility]::UrlDecode($xsrf.Value)
 }

@@ -4,14 +4,21 @@ function Connect-MDEPortal {
         Authenticates to the Microsoft Defender XDR portal and returns a reusable session.
 
     .DESCRIPTION
-        Runs the full auth chain: login.microsoftonline.com → ESTSAUTHPERSISTENT →
-        security.microsoft.com → sccauth + XSRF. Caches the resulting session in a
-        module-scope dictionary keyed by UPN so subsequent calls within the same
-        PowerShell process skip re-authentication.
+        Runs the full non-browser auth chain:
+          1. Get-EstsCookie  -> login.microsoftonline.com (credentials+TOTP or passkey)
+                                returns the ESTSAUTHPERSISTENT cookie VALUE.
+          2. Exchange-SccauthCookie -> fresh session, inject ESTS cookie, walk
+                                security.microsoft.com authorization-code form,
+                                end with sccauth + XSRF-TOKEN.
 
-        The cache entry is considered fresh for 50 minutes (sccauth lifetime ~1h with
-        a 10-minute safety margin). After that the session is evicted and a fresh chain
-        runs on the next call.
+        The returned session is cached in a module-scope dictionary keyed by
+        "<upn>::<host>" for 50 minutes (sccauth lifetime ~1h with 10-min safety
+        margin). Subsequent calls hit the cache; -Force bypasses it.
+
+        The original credential hashtable is retained in-memory on the cache entry
+        under `_Credential` + `_Method` so that Invoke-MDEPortalRequest can silently
+        re-auth on HTTP 401 without another human in the loop. It is never persisted,
+        never logged, and cleared with the process.
 
     .PARAMETER Method
         'CredentialsTotp' or 'Passkey'. Drives which fields are required on -Credential.
@@ -24,14 +31,19 @@ function Connect-MDEPortal {
     .PARAMETER PortalHost
         Target portal hostname. Default: security.microsoft.com.
 
+    .PARAMETER TenantId
+        Optional. Improves first-hop latency by short-circuiting Entra's
+        home-realm-discovery redirect. Auto-resolved otherwise.
+
     .PARAMETER Force
         Bypass the cache and run a fresh auth chain.
 
     .OUTPUTS
         [pscustomobject] @{
-            Session   = [WebRequestSession]
-            Upn       = [string]
-            PortalHost = [string]
+            Session     = [WebRequestSession] (sccauth + XSRF-TOKEN)
+            Upn         = [string]
+            PortalHost  = [string]
+            TenantId    = [string]
             AcquiredUtc = [datetime]
         }
 
@@ -61,6 +73,8 @@ function Connect-MDEPortal {
 
         [string] $PortalHost = 'security.microsoft.com',
 
+        [string] $TenantId,
+
         [switch] $Force
     )
 
@@ -69,7 +83,7 @@ function Connect-MDEPortal {
 
     $cacheKey = "$upn::$PortalHost"
 
-    # --- Cache check (skip if -Force). Pro-actively refresh at 50 min age. ---
+    # --- Cache check (skip if -Force). Evict at 50 min age. ---
     if (-not $Force.IsPresent -and $script:SessionCache.ContainsKey($cacheKey)) {
         $entry = $script:SessionCache[$cacheKey]
         $age = [datetime]::UtcNow - $entry.AcquiredUtc
@@ -81,17 +95,18 @@ function Connect-MDEPortal {
         $script:SessionCache.Remove($cacheKey)
     }
 
-    # --- Run the auth chain ---
+    # --- Run the auth chain (single hop — Defender portal client_id mints
+    # a portal-scoped ESTS cookie so sccauth drops directly, no second exchange). ---
     Write-Verbose "Connect-MDEPortal: authenticating $upn via $Method to $PortalHost"
-    $session = Get-EstsCookie -Method $Method -Credential $Credential -PortalHost $PortalHost
-    $exchange = Exchange-SccauthCookie -Session $session -PortalHost $PortalHost
+    $auth = Get-EstsCookie -Method $Method -Credential $Credential -PortalHost $PortalHost -TenantId $TenantId
 
     # --- Cache (including credential ref for auto re-auth on 401) ---
     $entry = [ordered]@{
-        Session     = $exchange.Session
+        Session     = $auth.Session
         Upn         = $upn
         PortalHost  = $PortalHost
-        AcquiredUtc = $exchange.AcquiredUtc
+        TenantId    = $auth.TenantId
+        AcquiredUtc = $auth.AcquiredUtc
         # Credential stored in memory to support auto-refresh on 401.
         # Never persisted, never logged, cleared on process exit.
         _Method     = $Method

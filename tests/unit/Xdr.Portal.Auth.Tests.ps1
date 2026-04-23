@@ -291,18 +291,21 @@ Describe 'Test-MDEPortalAuth — offline mock' {
         }
     }
 
-    It 'records sccauth-exchange stage failure' {
+    It 'records missing-sccauth stage failure when Get-EstsCookie returns a session without sccauth' {
+        # After the v1.0 auth-chain rewrite, the portal-client-id single-hop flow
+        # returns sccauth directly from Get-EstsCookie. Failure to land sccauth now
+        # manifests as Get-EstsCookie throwing "Auth flow completed but sccauth not
+        # issued" — Test-MDEPortalAuth should categorise this into the ests-cookie
+        # stage (since that's the function that failed), not a separate exchange stage.
         InModuleScope Xdr.Portal.Auth {
-            $mockSession = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
-            Mock Get-EstsCookie { return $mockSession }
-            Mock Exchange-SccauthCookie { throw "sccauth injected failure" }
+            Mock Get-EstsCookie { throw "Auth flow completed but sccauth not issued. Portal cookies: OpenIdConnect.nonce..." }
 
             $result = Test-MDEPortalAuth -Method CredentialsTotp -Credential @{
                 upn = 'x@y.com'; password = 'p'; totpBase32 = 'JBSWY3DPEHPK3PXP'
             }
             $result.Success | Should -BeFalse
-            $result.Stage   | Should -Be 'sccauth-exchange'
-            $result.FailureReason | Should -Match 'sccauth injected failure'
+            $result.Stage   | Should -Be 'ests-cookie'
+            $result.FailureReason | Should -Match 'sccauth not issued'
         }
     }
 }
