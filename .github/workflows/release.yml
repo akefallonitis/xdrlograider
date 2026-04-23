@@ -31,8 +31,6 @@ jobs:
         shell: pwsh
         run: |
           # Lint (src + tools + tests) with project-level settings
-          # Explicit array + quoted strings avoids CI parser folding
-          # `-Path ./src, ./tools` into a string assignment.
           $lintPaths = @('./src', './tools', './tests')
           $lint = Invoke-ScriptAnalyzer -Path $lintPaths -Recurse -Settings './.config/PSScriptAnalyzerSettings.psd1'
           if ($lint | Where-Object Severity -eq 'Error') {
@@ -40,20 +38,11 @@ jobs:
               throw "PSScriptAnalyzer errors — release aborted"
           }
 
-          # Unit
-          $unitCfg = New-PesterConfiguration
-          $unitCfg.Run.Path = @('./tests/unit')
-          $unitCfg.Run.Exit = $true
-          $unitCfg.Run.Throw = $true
-          Invoke-Pester -Configuration $unitCfg
-
-          # Static validation (kql + arm) — FRESH config to avoid
-          # Pester 5.x strict-type re-assignment error on Run.Path
-          $validateCfg = New-PesterConfiguration
-          $validateCfg.Run.Path = @('./tests/kql', './tests/arm')
-          $validateCfg.Run.Exit = $true
-          $validateCfg.Run.Throw = $true
-          Invoke-Pester -Configuration $validateCfg
+          # Use the proven Run-Tests.ps1 driver (identical to CI + local) instead
+          # of inline Pester config which has Run.Path string/array ambiguity on
+          # the Ubuntu runner's Pester 5.x.
+          pwsh -NoProfile -File ./tests/Run-Tests.ps1 -Category all-offline
+          if ($LASTEXITCODE -ne 0) { throw "Offline gate failed (exit $LASTEXITCODE)" }
 
       - name: Compile Bicep → ARM (syntax check only, scratch path)
         shell: pwsh
