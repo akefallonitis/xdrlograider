@@ -30,17 +30,19 @@ jobs:
       - name: Gate — lint + unit + validate must pass
         shell: pwsh
         run: |
-          # Lint (src + tools + tests) with project-level settings
-          $lintPaths = @('./src', './tools', './tests')
-          $lint = Invoke-ScriptAnalyzer -Path $lintPaths -Recurse -Settings './.config/PSScriptAnalyzerSettings.psd1'
-          if ($lint | Where-Object Severity -eq 'Error') {
-              $lint | Where-Object Severity -eq 'Error' | Format-Table -AutoSize
+          # Lint each tree individually — older PSScriptAnalyzer versions on
+          # the Ubuntu runner reject -Path with a string array. Loop + accumulate.
+          $allFindings = @()
+          foreach ($p in @('./src', './tools', './tests')) {
+              $allFindings += Invoke-ScriptAnalyzer -Path $p -Recurse -Settings './.config/PSScriptAnalyzerSettings.psd1'
+          }
+          $errs = $allFindings | Where-Object Severity -eq 'Error'
+          if ($errs) {
+              $errs | Format-Table -AutoSize
               throw "PSScriptAnalyzer errors — release aborted"
           }
 
-          # Use the proven Run-Tests.ps1 driver (identical to CI + local) instead
-          # of inline Pester config which has Run.Path string/array ambiguity on
-          # the Ubuntu runner's Pester 5.x.
+          # Use the proven Run-Tests.ps1 driver (identical to CI + local).
           pwsh -NoProfile -File ./tests/Run-Tests.ps1 -Category all-offline
           if ($LASTEXITCODE -ne 0) { throw "Offline gate failed (exit $LASTEXITCODE)" }
 
