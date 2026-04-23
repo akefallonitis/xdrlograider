@@ -111,7 +111,7 @@ $solutionInput = [ordered]@{
     Name        = $solutionName
     Author      = 'Alex Kefallonitis'
     Logo        = '<img src="Images/Logo.svg" width="75px" height="75px">'
-    Description = 'XdrLogRaider ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance) that is NOT exposed by public Graph Security / Defender XDR / MDE public APIs. 55 streams across 8 compliance tiers; drift detection via pure KQL; 6 workbooks, 15 analytic rules, 10 hunting queries.'
+    Description = 'XdrLogRaider ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance) that is NOT exposed by public Graph Security / Defender XDR / MDE public APIs. 52 streams across 7 compliance tiers; drift detection via pure KQL; 6 workbooks, 15 analytic rules, 10 hunting queries.'
     Workbooks   = @(Get-ChildItem -Path (Join-Path $stagingDir 'Workbooks') -Filter *.json | ForEach-Object { "Workbooks/$($_.Name)" })
     AnalyticalRules = @(Get-ChildItem -Path (Join-Path $stagingDir 'Analytic Rules') -Filter *.yaml | ForEach-Object { "Analytic Rules/$($_.Name)" })
     HuntingQueries  = @(Get-ChildItem -Path (Join-Path $stagingDir 'Hunting Queries') -Filter *.yaml | ForEach-Object { "Hunting Queries/$($_.Name)" })

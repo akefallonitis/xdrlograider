@@ -10,7 +10,7 @@
 |---|---|
 | Platform | Azure Functions (PowerShell 7.4), Log Analytics, Sentinel |
 | Auth | Two unattended auto-refreshing methods: Credentials+TOTP, Software Passkey |
-| Scope | Defender XDR portal (`security.microsoft.com`) — 55 streams across 8 compliance tiers |
+| Scope | Defender XDR portal (`security.microsoft.com`) — 52 streams across 7 compliance tiers |
 | Deployment | One-click **Deploy to Azure** (button above) + one `./tools/Initialize-XdrLogRaiderAuth.ps1` run post-deploy |
 | Content | 6 workbooks · 15 analytic rules · 10 hunting queries · 6 KQL drift parsers (all auto-deployed via nested ARM) |
 | License | MIT |
@@ -56,7 +56,7 @@ Production polling timers activate automatically once the self-test passes. With
 - [Deployment](docs/DEPLOYMENT.md) — step-by-step walkthrough
 - [Auth](docs/AUTH.md) — both methods explained, CA compatibility, rotation
 - [Bring Your Own Passkey](docs/BRING-YOUR-OWN-PASSKEY.md) — generating a software passkey JSON
-- [Streams](docs/STREAMS.md) — full catalogue of 55 telemetry streams
+- [Streams](docs/STREAMS.md) — full catalogue of 52 telemetry streams
 - [Workbooks](docs/WORKBOOKS.md) — what each dashboard shows
 - [Drift](docs/DRIFT.md) — pure-KQL drift model explained
 - [Runbook](docs/RUNBOOK.md) — daily ops, incidents, rotation

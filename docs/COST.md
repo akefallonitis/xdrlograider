@@ -26,11 +26,10 @@ Estimated monthly Azure costs for a typical XdrLogRaider deployment.
 | poll-p1-pipeline-30m | 7 | 30 min | 48 | ~5 MB |
 | poll-p2-governance-1d | 7 | 1d | 1 | ~5 MB (once per day) |
 | poll-p3-exposure-1h | 8 | 1h | 24 | ~30 MB |
-| poll-p4-timeline-ondemand | 3 | per incident | varies | varies |
 | poll-p5-identity-1d | 5 | 1d | 1 | ~3 MB |
 | poll-p6-audit-10m | 2 | 10 min | 144 | ~10 MB |
 | poll-p7-metadata-1d | 4 | 1d | 1 | ~2 MB |
-| **Total** | 55 | | ~600 | ~75 MB/day = ~2.25 GB/month |
+| **Total** | 52 | | ~600 | ~75 MB/day = ~2.25 GB/month |
 
 ## Cost levers (default-on in v1.0)
 

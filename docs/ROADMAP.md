@@ -1,7 +1,7 @@
 # Roadmap
 
 ## v1.0 (current)
-- 55 portal-only streams across 8 compliance tiers
+- 52 portal-only streams across 7 compliance tiers
 - Two unattended auth methods (Credentials+TOTP, Passkey)
 - 6 KQL drift parsers
 - 6 workbooks

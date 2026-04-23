@@ -30,7 +30,7 @@ pwsh ./tests/Run-Tests.ps1 -Category unit
 
 All tests in `./tests/unit/` run with fully mocked HTTP. Should complete in <1 minute. Covers:
 - `Xdr.Portal.Auth` — TOTP generation, passkey signing, module surface, parameter validation
-- `XdrLogRaider.Client` — 55 endpoint wrappers (each with positive + error paths)
+- `XdrLogRaider.Client` — 52 manifest-driven endpoints (each with positive + error paths)
 - `XdrLogRaider.Ingest` — DCE batch writer, checkpoint logic, heartbeat
 - `Initialize-XdrLogRaiderAuth.ps1` — KV interaction mocked, input paths
 

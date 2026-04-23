@@ -28,7 +28,7 @@
             Tags         = @('Defender', 'MDE', 'XDR', 'Portal', 'Endpoints')
             LicenseUri   = 'https://github.com/akefallonitis/xdrlograider/blob/main/LICENSE'
             ProjectUri   = 'https://github.com/akefallonitis/xdrlograider'
-            ReleaseNotes = 'Initial release. All 55 endpoint wrappers. Part of XdrLogRaider v1.0.0.'
+            ReleaseNotes = 'Initial release. All 52 manifest-driven endpoints. Part of XdrLogRaider v1.0.0.'
         }
     }
 }
