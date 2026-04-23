@@ -134,11 +134,36 @@ jobs:
 
       - name: Generate SBOM (SPDX)
         uses: anchore/sbom-action@v0
+        continue-on-error: true  # SBOM upload is nice-to-have; do not block release
         with:
           path: .
           format: spdx-json
           artifact-name: xdrlograider-sbom.spdx.json
           output-file: ./xdrlograider-sbom.spdx.json
+          upload-artifact: false       # disable implicit artifact upload (needs extra perms)
+          upload-release-assets: false  # we attach it ourselves via softprops below
+
+      - name: Guarantee SBOM file exists (fallback stub)
+        shell: pwsh
+        if: always()
+        run: |
+          # If the SBOM action was skipped/failed, emit a minimal SPDX stub so the
+          # release asset manifest stays stable (operators can still verify the zip).
+          if (-not (Test-Path ./xdrlograider-sbom.spdx.json)) {
+              $stub = @{
+                  spdxVersion  = 'SPDX-2.3'
+                  dataLicense  = 'CC0-1.0'
+                  SPDXID       = 'SPDXRef-DOCUMENT'
+                  name         = 'xdrlograider-sbom (stub)'
+                  documentNamespace = "https://github.com/akefallonitis/xdrlograider/sbom/$(New-Guid)"
+                  creationInfo = @{ created = (Get-Date).ToString('o'); creators = @('Tool: manual-stub') }
+                  note         = 'SBOM generation was skipped or failed; release still valid. See workflow logs.'
+              } | ConvertTo-Json -Depth 5
+              Set-Content -Path ./xdrlograider-sbom.spdx.json -Value $stub
+              Write-Host "Emitted SBOM stub (sbom-action failed)" -ForegroundColor Yellow
+          } else {
+              Write-Host "SBOM file present: $((Get-Item ./xdrlograider-sbom.spdx.json).Length) bytes" -ForegroundColor Green
+          }
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
