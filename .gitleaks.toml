@@ -1,0 +1,23 @@
+# Custom gitleaks config for XdrLogRaider.
+#
+# Extends the default config and adds an allowlist for captured portal-response
+# fixtures under tests/fixtures/live-responses/. Those files contain legitimate
+# Microsoft Secure Score + XSPM recommendation identifiers that gitleaks' default
+# "linkedin-client-id" / "generic-api-key" regexes match by coincidence.
+#
+# Every fixture is PII-scrubbed by tools/Capture-EndpointSchemas.ps1 (GUIDs
+# replaced with zeros, UPNs replaced with user@example.com, IPs replaced with
+# 0.0.0.0, tenant-domain tokens replaced with example-tenant) so no real secret
+# can enter these paths.
+
+[extend]
+# Extend default rules; don't replace.
+useDefault = true
+
+[allowlist]
+description = "Allowlist for portal-response test fixtures (PII-scrubbed)"
+# Paths — regex patterns of file paths to skip secret scanning on.
+paths = [
+    '''tests/fixtures/live-responses/.*\.json$''',
+    '''tests/fixtures/sample-snapshots/.*\.json$''',
+]
