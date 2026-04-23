@@ -1,15 +1,24 @@
 <#
 .SYNOPSIS
-    Entry point for XdrLogRaider test suites.
+    Entry point for XdrLogRaider test suites. See docs/TESTING.md for the full walkthrough.
 
 .DESCRIPTION
-    Runs Pester tests across four categories:
-      - unit         Fully mocked, fast (<1 min), offline
-      - validate     KQL + workbook/rule JSON + ARM-TTK (<30s)
-      - integration  Live portal calls (gated by XDRLR_ONLINE env)
-      - e2e          Full deploy+ingest+workbook validation on a test tenant
-      - all-offline  Runs unit + validate (CI-default)
-      - all-online   Runs integration + e2e (manual only)
+    Pester categories mapped to the four-quadrant testing model (pre-deploy × post-deploy × local × online):
+
+      OFFLINE (zero external deps — CI-friendly)
+        unit          Fully mocked unit tests for all 3 modules (~250)
+        validate      KQL parser + ARM template schema tests (~55)
+        all-offline   unit + validate (what CI runs; default path)
+
+      ONLINE — PRE-DEPLOY (verify your service-account credentials against the live portal)
+        local-online  Auth chain live against security.microsoft.com
+                      Requires tests/.env.local with the service account's creds.
+                      No Azure infra touched. No CI integration — laptop only.
+
+      ONLINE — POST-DEPLOY (verify a deployed instance is working)
+        e2e           KQL-based verification of a deployed workspace.
+                      Requires Connect-AzAccount + XDRLR_ONLINE=true
+                             + XDRLR_TEST_RG + XDRLR_TEST_WORKSPACE set.
 
 .PARAMETER Category
     Which test set to run. Defaults to 'unit'.
@@ -21,16 +30,31 @@
     Verbose Pester output. Default is Normal.
 
 .EXAMPLE
-    ./tests/Run-Tests.ps1 -Category unit
+    # Default offline run (no external deps)
+    ./tests/Run-Tests.ps1 -Category all-offline
 
 .EXAMPLE
+    # Pre-deploy online — confirm credentials work
+    #   1. cp tests/.env.local.example tests/.env.local
+    #   2. fill in XDRLR_TEST_UPN + password + TOTP seed
+    ./tests/Run-Tests.ps1 -Category local-online
+
+.EXAMPLE
+    # Post-deploy online — confirm deployed instance ingested rows
+    Connect-AzAccount
     $env:XDRLR_ONLINE = 'true'
-    ./tests/Run-Tests.ps1 -Category integration
+    $env:XDRLR_TEST_RG = 'xdrlr-prod-rg'
+    $env:XDRLR_TEST_WORKSPACE = 'sentinel-prod-ws'
+    ./tests/Run-Tests.ps1 -Category e2e
 #>
 
 [CmdletBinding()]
 param(
-    [ValidateSet('unit', 'validate', 'integration', 'e2e', 'local-online', 'all-offline', 'all-online')]
+    # Categories:
+    #   unit / validate / all-offline  — CI-friendly, no external deps
+    #   local-online                   — pre-deploy: real portal sign-in from laptop
+    #   e2e                            — post-deploy: KQL verification of deployed workspace
+    [ValidateSet('unit', 'validate', 'e2e', 'local-online', 'all-offline')]
     [string] $Category = 'unit',
 
     [switch] $FailFast,
@@ -58,22 +82,20 @@ Set-Location $repoRoot
 $paths = switch ($Category) {
     'unit'         { @('./tests/unit') }
     'validate'     { @('./tests/kql', './tests/arm') }
-    'integration'  { @('./tests/integration') }
     'e2e'          { @('./tests/e2e') }
     'local-online' { @('./tests/integration/Auth-Chain-Live.Tests.ps1') }
     'all-offline'  { @('./tests/unit', './tests/kql', './tests/arm') }
-    'all-online'   { @('./tests/integration', './tests/e2e') }
 }
 
 # --- Online gating ------------------------------------------------------------
 
-if ($Category -in @('integration', 'e2e', 'all-online')) {
+if ($Category -eq 'e2e') {
     if ($env:XDRLR_ONLINE -ne 'true') {
-        Write-Warning "Online tests gated by XDRLR_ONLINE=true. Skipping."
+        Write-Warning "e2e tests gated by XDRLR_ONLINE=true. Skipping."
         exit 0
     }
-    if (-not $env:XDRLR_TEST_KV) {
-        throw "XDRLR_TEST_KV env var required for online tests"
+    if (-not $env:XDRLR_TEST_RG -or -not $env:XDRLR_TEST_WORKSPACE) {
+        throw "e2e tests require XDRLR_TEST_RG + XDRLR_TEST_WORKSPACE env vars. See docs/TESTING.md."
     }
 }
 

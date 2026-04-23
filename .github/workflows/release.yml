@@ -49,14 +49,18 @@ jobs:
           $cfg.Run.Path = @('./tests/kql', './tests/arm')
           Invoke-Pester -Configuration $cfg
 
-      - name: Compile Bicep → ARM (mainTemplate.json)
+      - name: Compile Bicep → ARM (syntax check only, scratch path)
         shell: pwsh
         run: |
+          # Compile to scratch path — we ship the hand-authored ARM in
+          # deploy/compiled/mainTemplate.json, NOT a Bicep-generated variant
+          # (Bicep emits nested-modules ARM that breaks our committed Pester tests).
           if (Test-Path ./deploy/main.bicep) {
-              az bicep build --file ./deploy/main.bicep --outfile ./deploy/compiled/mainTemplate.json
-              Write-Host "✓ Compiled main.bicep → mainTemplate.json" -ForegroundColor Green
+              $scratch = Join-Path $env:RUNNER_TEMP 'mainTemplate.from-bicep.json'
+              az bicep build --file ./deploy/main.bicep --outfile $scratch
+              Write-Host "OK: Bicep syntax check passed — committed mainTemplate.json is the release artefact" -ForegroundColor Green
           } else {
-              Write-Host "ℹ No main.bicep — using committed compiled/mainTemplate.json" -ForegroundColor Yellow
+              Write-Host "WARN: No deploy/main.bicep" -ForegroundColor Yellow
           }
 
       - name: Build Sentinel content ARM (sentinelContent.json)
@@ -100,6 +104,14 @@ jobs:
           Copy-Item "./deploy/solution-staging/XdrLogRaider/Package/$version.zip" `
               "./xdrlograider-solution-$version.zip"
 
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          artifact-name: xdrlograider-sbom.spdx.json
+          output-file: ./xdrlograider-sbom.spdx.json
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -109,6 +121,7 @@ jobs:
             deploy/compiled/sentinelContent.json
             deploy/compiled/createUiDefinition.json
             xdrlograider-solution-*.zip
+            xdrlograider-sbom.spdx.json
           body: |
             ## XdrLogRaider ${{ github.ref_name }}
 
@@ -120,6 +133,7 @@ jobs:
             - `sentinelContent.json` — Nested ARM deployment for parsers, workbooks, analytic rules, hunting queries
             - `createUiDefinition.json` — Azure Portal wizard UI
             - `xdrlograider-solution-*.zip` — Sentinel Solution package (Content Hub-ready)
+            - `xdrlograider-sbom.spdx.json` — SPDX SBOM (supply-chain transparency)
 
             ### Deploy to Azure
 

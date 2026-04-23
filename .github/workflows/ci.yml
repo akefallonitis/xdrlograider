@@ -9,8 +9,24 @@ on:
 
 permissions:
   contents: read
+  security-events: write  # gitleaks needs this to file findings into Security tab
 
 jobs:
+  secret-scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # gitleaks scans full history
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITLEAKS_LICENSE not required for public repos
+          GITLEAKS_ENABLE_COMMENTS: "true"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+
   lint:
     name: PSScriptAnalyzer
     runs-on: ubuntu-latest
@@ -173,15 +189,19 @@ jobs:
   summary:
     name: CI summary
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests, static-validate]
+    needs: [secret-scan, lint, unit-tests, static-validate]
     if: always()
     steps:
       - name: Summary
         run: |
           echo "### CI Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- Lint: ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Unit tests (ubuntu-latest): ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Static validation: ${{ needs.static-validate.result }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ needs.lint.result }}" != "success" ] || [ "${{ needs.unit-tests.result }}" != "success" ] || [ "${{ needs.static-validate.result }}" != "success" ]; then
+          echo "- Secret scan:      ${{ needs.secret-scan.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint:             ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit tests:       ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Static validate:  ${{ needs.static-validate.result }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.secret-scan.result }}" != "success" ] \
+             || [ "${{ needs.lint.result }}" != "success" ] \
+             || [ "${{ needs.unit-tests.result }}" != "success" ] \
+             || [ "${{ needs.static-validate.result }}" != "success" ]; then
             exit 1
           fi

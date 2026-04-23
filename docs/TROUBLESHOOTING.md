@@ -5,8 +5,24 @@ Symptom → cause → fix for common issues.
 ## Deployment issues
 
 ### "Deploy to Azure" button goes to a blank page
-**Cause**: the linked `mainTemplate.json` URL returned 404 or is not publicly accessible.
-**Fix**: verify `deploy/compiled/mainTemplate.json` exists on the `main` branch or the pinned tag. Regenerate via the release workflow.
+**Cause**: the linked `mainTemplate.json` URL returned 404 or the repo is private.
+**Fix**: verify `deploy/compiled/mainTemplate.json` exists on the `main` branch or the pinned tag. If the repo is still private, make it public or use Azure Portal → "Deploy a custom template" → upload the file directly.
+
+### ARM deployment fails with `ResourceNotFound` on the workspace
+**Cause**: `existingWorkspaceId` points at a workspace that doesn't exist or is in another tenant.
+**Fix**: verify the resource ID (Portal → workspace → Overview → JSON view → `id`). Cross-RG and cross-subscription within the same tenant are supported; cross-tenant is not.
+
+### ARM deployment fails with `AuthorizationFailed` on `Microsoft.Authorization/roleAssignments/write`
+**Cause**: your tenant restricts role-assignment writes to Owners / User Access Administrators.
+**Fix**: request **Owner** on the target RG OR `Contributor` + `User Access Administrator`. See [PERMISSIONS.md](PERMISSIONS.md).
+
+### ARM deployment fails with `AuthorizationFailed` on `Microsoft.OperationalInsights/workspaces/tables/write`
+**Cause**: you don't have write access to the workspace's RG (you're Owner on the connector RG but not on the workspace RG).
+**Fix**: request `Log Analytics Contributor` on the workspace RG. See [PERMISSIONS.md](PERMISSIONS.md) Scenario B/C.
+
+### ARM deployment fails at DCR step with "region mismatch"
+**Cause**: the `workspaceLocation` wizard field doesn't match the actual workspace region.
+**Fix**: check the workspace's region in Portal → Overview → Location. Redeploy with the correct value in the wizard dropdown.
 
 ### ARM deployment fails at Key Vault step
 **Cause**: soft-deleted Key Vault with the same name exists in the subscription.
@@ -16,7 +32,13 @@ Symptom → cause → fix for common issues.
 **Cause**: module dependencies installing from `requirements.psd1` on cold start.
 **Fix**: wait ~10 minutes. Check Function App → Monitor → Invocations. If still stuck, restart the Function App.
 
+### Function App fails at cold start with "profile.ps1 FATAL — missing required environment variable(s)"
+**Cause**: one or more of the 8 app settings the FA needs (`KEY_VAULT_URI`, `DCE_ENDPOINT`, etc.) has been deleted or mutated manually.
+**Fix**: redeploy the ARM template (it re-sets all 8 app settings). If you just want to patch, go to Portal → Function App → Configuration → Application settings and re-add the missing key. The error message names the exact variable. See [RUNBOOK.md § Auth self-test failure](RUNBOOK.md#auth-self-test-failure) for related diagnosis.
+
 ## Auth chain issues
+
+See also: [RUNBOOK.md § Auth self-test failure](RUNBOOK.md#auth-self-test-failure) for the full per-stage diagnostic table.
 
 ### MDE_AuthTestResult_CL shows Stage=ests-cookie, Success=false
 **Cause**: login.microsoftonline.com failed.

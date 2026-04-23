@@ -29,6 +29,7 @@ Welcome to XdrLogRaider docs. Each page targets a specific audience.
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Component overview, diagrams, data flow
 - **[CONTRIBUTING.md](../CONTRIBUTING.md)** — Dev setup, coding standards, PR flow
+- **[TESTING.md](TESTING.md)** — The four-quadrant test model (offline / local-online / e2e) + how to run each
 - **[RELEASE-PROCESS.md](RELEASE-PROCESS.md)** — How releases are cut
 - **[SENTINEL-SOLUTION-SUBMISSION.md](SENTINEL-SOLUTION-SUBMISSION.md)** — How to submit this connector to the Azure-Sentinel/Solutions/ Content Hub
 - **[REFERENCES.md](REFERENCES.md)** — Every source cited, with context

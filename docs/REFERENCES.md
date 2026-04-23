@@ -54,10 +54,7 @@ DCE ingestion URL format and auth. Our DCE is deployed via Bicep; the Function A
 Cold-start optimization, `profile.ps1` usage, module-preload pattern, managed dependencies. We follow the per-function isolation guidance: one timer function per logical unit for observability, shared in-memory state via `$global:` variables populated in `profile.ps1`.
 
 ### [Workload Identity Federation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation)
-How our CI integration tests authenticate to the test tenant without stored secrets. GitHub Actions presents its OIDC token, Entra exchanges it for an access token for the dedicated service principal.
-
-### [Entra Conditional Access for workload identities](https://learn.microsoft.com/en-us/entra/identity/conditional-access/workload-identity)
-Confirms service principals (our integration-test SP) are not subject to user-scoped CA by default. Required Workload Identities Premium SKU for custom policies if needed.
+Pattern for CI-to-Azure authentication without stored secrets. **XdrLogRaider v1.0 does NOT use this** — CI runs only offline tests, and online tests run from your laptop with your own `Connect-AzAccount` session (no SP). Reference retained for anyone who forks and wires up their own online CI pipeline.
 
 ### [Azure-Sentinel repo / Solutions directory](https://github.com/Azure/Azure-Sentinel/tree/master/Solutions)
 Reference for community-submitted solution layout. Our `deploy/solution/` folder mirrors this structure for future Content Hub submission (see `docs/SENTINEL-SOLUTION-SUBMISSION.md`).
