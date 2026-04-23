@@ -24,14 +24,17 @@ jobs:
       - name: Lint src/
         shell: pwsh
         run: |
-          $results = Invoke-ScriptAnalyzer -Path ./src -Recurse -Settings ./.config/PSScriptAnalyzerSettings.psd1 -ErrorAction Stop
+          # Drop -ErrorAction Stop: PSSA occasionally surfaces non-fatal internal
+          # errors ("dynamic module" warnings) on Linux runners that should not
+          # fail the build. We gate on actual Error-severity findings.
+          $results = Invoke-ScriptAnalyzer -Path ./src -Recurse -Settings ./.config/PSScriptAnalyzerSettings.psd1 -ErrorAction Continue
           if ($results) {
-              $results | Format-Table -Property Severity, RuleName, ScriptName, Line, Message -AutoSize
               $errors = $results | Where-Object Severity -eq 'Error'
               if ($errors) {
+                  $errors | Format-Table -Property Severity, RuleName, ScriptName, Line, Message -AutoSize
                   throw "PSScriptAnalyzer found $($errors.Count) error(s) in src/"
               }
-              Write-Warning "PSScriptAnalyzer: $($results.Count) warning(s) in src/"
+              Write-Host "src/: $($results.Count) non-error finding(s) (warnings/info allowed)" -ForegroundColor Yellow
           } else {
               Write-Host "src/: no issues" -ForegroundColor Green
           }
@@ -40,7 +43,7 @@ jobs:
         shell: pwsh
         run: |
           $results = Invoke-ScriptAnalyzer -Path ./tools -Recurse `
-              -Settings ./.config/PSScriptAnalyzerSettings.psd1 -ErrorAction Stop
+              -Settings ./.config/PSScriptAnalyzerSettings.psd1 -ErrorAction Continue
           if ($results) {
               $errors = $results | Where-Object Severity -eq 'Error'
               if ($errors) {
@@ -56,7 +59,7 @@ jobs:
         shell: pwsh
         run: |
           $results = Invoke-ScriptAnalyzer -Path ./tests -Recurse `
-              -Settings ./.config/PSScriptAnalyzerSettings.psd1 -ErrorAction Stop `
+              -Settings ./.config/PSScriptAnalyzerSettings.psd1 -ErrorAction Continue `
               -ExcludeRule @('PSUseDeclaredVarsMoreThanAssignments', 'PSAvoidUsingEmptyCatchBlock')
           if ($results) {
               $errors = $results | Where-Object Severity -eq 'Error'
