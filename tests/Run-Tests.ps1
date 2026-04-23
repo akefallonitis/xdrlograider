@@ -54,7 +54,7 @@ param(
     #   unit / validate / all-offline  — CI-friendly, no external deps
     #   local-online                   — pre-deploy: real portal sign-in from laptop
     #   e2e                            — post-deploy: KQL verification of deployed workspace
-    [ValidateSet('unit', 'validate', 'e2e', 'local-online', 'all-offline')]
+    [ValidateSet('unit', 'validate', 'e2e', 'local-online', 'predeploy', 'all-offline')]
     [string] $Category = 'unit',
 
     [switch] $FailFast,
@@ -84,6 +84,7 @@ $paths = switch ($Category) {
     'validate'     { @('./tests/kql', './tests/arm') }
     'e2e'          { @('./tests/e2e') }
     'local-online' { @('./tests/integration/Auth-Chain-Live.Tests.ps1') }
+    'predeploy'    { @('./tests/integration/Auth-Chain-Live.Tests.ps1', './tests/integration/Predeploy-Validation.Tests.ps1') }
     'all-offline'  { @('./tests/unit', './tests/kql', './tests/arm') }
 }
 
@@ -101,7 +102,7 @@ if ($Category -eq 'e2e') {
 
 # Local-online tests use real tenant credentials loaded from env vars or .env file.
 # No Key Vault required — user provides TOTP/passkey directly.
-if ($Category -eq 'local-online') {
+if ($Category -in @('local-online', 'predeploy')) {
     $envFile = Join-Path $repoRoot 'tests' '.env.local'
     if (Test-Path $envFile) {
         Write-Host "Loading local env from tests/.env.local" -ForegroundColor Yellow

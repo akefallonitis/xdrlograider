@@ -104,6 +104,11 @@ function Invoke-MDEEndpoint {
     }
 
     # --- Expand + normalise ---
+    # StrictMode-safe: skip expansion if the portal returned no body (common for
+    # POST-only endpoints that responded with 500 + empty payload).
+    if ($null -eq $r.Data) {
+        return ,@()
+    }
     $expandArgs = @{ Response = $r.Data }
     if ($entry.ContainsKey('IdProperty') -and $entry.IdProperty) {
         $expandArgs['IdProperty'] = [string[]]$entry.IdProperty
@@ -117,13 +122,17 @@ function Invoke-MDEEndpoint {
     # Force array semantics so .Count is always defined even when the response is empty.
     $rows = @(
         foreach ($pair in (Expand-MDEResponse @expandArgs)) {
+            # Expand-MDEResponse may emit pairs with $null Entity for edge-case
+            # responses (primitives, empty scalars). Synthesise an empty object so
+            # ConvertTo-MDEIngestRow's mandatory -Raw is always bindable.
+            $entity = if ($null -ne $pair.Entity) { $pair.Entity } else { [pscustomobject]@{} }
             $entityId = if ($PathParams.Count -gt 0) {
                 # Prefix with path-param values to keep IDs unique across devices/investigations
                 (($PathParams.Values | ForEach-Object { [string]$_ }) + $pair.Id) -join '-'
             } else {
                 $pair.Id
             }
-            ConvertTo-MDEIngestRow -Stream $Stream -EntityId $entityId -Raw $pair.Entity -Extras $extras
+            ConvertTo-MDEIngestRow -Stream $Stream -EntityId $entityId -Raw $entity -Extras $extras
         }
     )
     Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' -> $($rows.Count) rows"

@@ -87,7 +87,7 @@
         @{ Stream = 'MDE_XspmChokePoints_CL';           Path = '/apiproxy/mtp/xspm/chokepoints';      Method = 'POST';                             Tier = 'P3' }
         @{ Stream = 'MDE_XspmTopTargets_CL';            Path = '/apiproxy/mtp/xspm/toptargets';       Method = 'POST';                             Tier = 'P3' }
         @{ Stream = 'MDE_XspmInitiatives_CL';           Path = '/apiproxy/mtp/posture/oversight/initiatives';                                      Tier = 'P3'; Filter = 'fromDate' }
-        @{ Stream = 'MDE_ExposureSnapshots_CL';         Path = '/apiproxy/mtp/posture/oversight/updates';                                          Tier = 'P3' }
+        @{ Stream = 'MDE_ExposureSnapshots_CL';         Path = '/apiproxy/mtp/posture/oversight/updates';                                          Tier = 'P3'; Filter = 'fromDate' }
         @{ Stream = 'MDE_SecureScoreBreakdown_CL';      Path = '/apiproxy/mtp/secureScore/security/secureScoresV2';                                Tier = 'P3' }
         @{ Stream = 'MDE_SecurityBaselines_CL';         Path = '/apiproxy/mtp/tvm/analytics/baseline/profiles';                                    Tier = 'P3' }
         @{ Stream = 'MDE_ExposureRecommendations_CL';   Path = '/apiproxy/mtp/posture/oversight/recommendations';                                  Tier = 'P3' }
@@ -101,7 +101,7 @@
 
         # ---- P6 Audit/AIR (2 streams, 10-min) --------------------------------------
         @{ Stream = 'MDE_ActionCenter_CL';              Path = '/apiproxy/mtp/actionCenter/actioncenterui/history-actions'; Filter = 'fromDate';   Tier = 'P6' }
-        @{ Stream = 'MDE_ThreatAnalytics_CL';           Path = '/apiproxy/mtp/threatAnalytics/outbreaks';                                          Tier = 'P6' }
+        @{ Stream = 'MDE_ThreatAnalytics_CL';           Path = '/apiproxy/mtp/threatAnalytics/outbreaks';                                          Tier = 'P6'; Filter = 'fromDate' }
 
         # ---- P7 Metadata (4 streams, daily) ----------------------------------------
         @{ Stream = 'MDE_LicenseReport_CL';             Path = '/apiproxy/mtp/deviceManagement/deviceLicenseReport';                               Tier = 'P7' }

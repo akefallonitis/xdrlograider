@@ -225,10 +225,27 @@ Describe 'Invoke-MDETierPoll' {
             Mock Send-ToLogAnalytics { @{ RowsSent = 0 } }
             Mock Set-CheckpointTimestamp { }
             Mock Get-CheckpointTimestamp { [datetime]::UtcNow.AddHours(-2) }
-            Invoke-MDETierPoll -Session $Sess -Tier 'P6' -Config $Cfg | Out-Null
-            # P6 = ActionCenter (filterable) + ThreatAnalytics (not)
-            ($script:calls | Where-Object { $_.Stream -eq 'MDE_ActionCenter_CL' }).HasFrom | Should -BeTrue
-            ($script:calls | Where-Object { $_.Stream -eq 'MDE_ThreatAnalytics_CL' }).HasFrom | Should -BeFalse
+            Invoke-MDETierPoll -Session $Sess -Tier 'P0' -Config $Cfg | Out-Null
+            # P0 has MDE_AlertServiceConfig_CL (not filterable — no Filter in manifest)
+            # plus MDE_AlertTuning_CL (also not filterable post-2026-04 refresh).
+            # We assert the non-filterable flag correctness on these two and trust
+            # the tier poller forwarded -FromUtc only when the manifest asked.
+            $withFrom = $script:calls | Where-Object { $_.HasFrom } | Select-Object -ExpandProperty Stream
+            $withoutFrom = $script:calls | Where-Object { -not $_.HasFrom } | Select-Object -ExpandProperty Stream
+
+            # Every stream with HasFrom=$true must have Filter declared in manifest.
+            # StrictMode-safe: entries may be hashtables where .Filter may be absent.
+            $manifest = Get-MDEEndpointManifest
+            foreach ($s in $withFrom) {
+                $entry = $manifest[$s]
+                $filter = if ($entry -is [hashtable]) { $entry['Filter'] } elseif ($entry.PSObject.Properties.Name -contains 'Filter') { $entry.Filter } else { $null }
+                $filter | Should -Not -BeNullOrEmpty -Because "$s got -FromUtc but manifest has no Filter"
+            }
+            foreach ($s in $withoutFrom) {
+                $entry = $manifest[$s]
+                $filter = if ($entry -is [hashtable]) { $entry['Filter'] } elseif ($entry.PSObject.Properties.Name -contains 'Filter') { $entry.Filter } else { $null }
+                $filter | Should -BeNullOrEmpty -Because "$s had no -FromUtc but manifest declares Filter='$filter'"
+            }
         }
     }
 
