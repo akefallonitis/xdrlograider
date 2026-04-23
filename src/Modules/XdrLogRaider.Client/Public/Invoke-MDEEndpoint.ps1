@@ -89,8 +89,15 @@ function Invoke-MDEEndpoint {
         $path = "${path}${sep}$($entry.Filter)=$fromEncoded"
     }
 
+    # --- Method + optional request body (manifest may specify Method='POST' for
+    # endpoints like XSPM attack paths that are POST-only) ---
+    $httpMethod = if ($entry.ContainsKey('Method') -and $entry.Method) { $entry.Method } else { 'GET' }
+    $postBody   = if ($httpMethod -eq 'POST') {
+        if ($entry.ContainsKey('Body') -and $entry.Body) { $entry.Body } else { @{} }
+    } else { $null }
+
     # --- Call ---
-    $r = Invoke-MDEPortalEndpoint -Session $Session -Path $path -Method GET
+    $r = Invoke-MDEPortalEndpoint -Session $Session -Path $path -Method $httpMethod -Body $postBody
     if (-not $r.Success) {
         Write-Warning "Invoke-MDEEndpoint Stream='$Stream' failed: $($r.Error)"
         return ,@()
