@@ -86,11 +86,42 @@ jobs:
       - name: Build Function App ZIP
         shell: pwsh
         run: |
+          # Ubuntu pwsh does NOT glob-expand `-Path *` inside Compress-Archive;
+          # it treats the literal star as a filename and silently produces a
+          # 9-byte (empty header) zip. Resolve the file list ourselves.
+          $srcItems = Get-ChildItem -Path ./src -Exclude 'local.settings.json' |
+              Select-Object -ExpandProperty FullName
+          if (-not $srcItems) { throw "No files found under ./src — aborting zip build" }
+
+          # Compress-Archive preserves the paths RELATIVE to $PWD. To get the
+          # intended structure (files/folders at the ROOT of the zip, not
+          # nested under src/), invoke from inside ./src.
           Push-Location ./src
-          Compress-Archive -Path * -DestinationPath ../function-app.zip -Force
+          $relItems = Get-ChildItem -Exclude 'local.settings.json' |
+              Select-Object -ExpandProperty Name
+          Compress-Archive -Path $relItems -DestinationPath ../function-app.zip -Force
           Pop-Location
+
           $size = (Get-Item ./function-app.zip).Length
-          Write-Host "✓ function-app.zip: $([int]($size / 1024)) KB" -ForegroundColor Green
+          if ($size -lt 10000) {
+              throw "function-app.zip is only $size bytes — Compress-Archive didn't pick up src contents. Aborting."
+          }
+          Write-Host "function-app.zip: $([int]($size / 1024)) KB" -ForegroundColor Green
+
+          # Sanity-check the zip contains profile.ps1 + host.json + Modules/
+          $entries = [IO.Compression.ZipFile]::OpenRead((Resolve-Path ./function-app.zip).Path).Entries.FullName
+          foreach ($required in 'profile.ps1', 'host.json', 'requirements.psd1') {
+              if ($entries -notcontains $required) {
+                  throw "function-app.zip is missing required file: $required"
+              }
+          }
+          if (-not ($entries | Where-Object { $_ -like 'Modules/*' })) {
+              throw "function-app.zip is missing the Modules/ directory"
+          }
+          if (-not ($entries | Where-Object { $_ -like 'functions/*' })) {
+              throw "function-app.zip is missing the functions/ directory"
+          }
+          Write-Host "function-app.zip structure verified: $($entries.Count) entries" -ForegroundColor Green
 
       - name: Stage solution zip for release attachment
         shell: pwsh
