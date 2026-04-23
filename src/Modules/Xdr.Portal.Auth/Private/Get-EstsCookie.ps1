@@ -87,7 +87,21 @@ function Get-EstsCookie {
     if (-not $config) {
         throw "Could not parse Entra `$Config blob from authorize response. Login flow has changed or tenant requires a different entry point."
     }
-    Write-Verbose "Entra config loaded: canary=$($config.canary.Substring(0, [math]::Min(10, $config.canary.Length)))... sFT present=$([bool]$config.sFT)"
+
+    # StrictMode-safe field checks (ConvertFrom-Json returns PSCustomObject; missing
+    # properties throw under strict mode).
+    $configFields = @($config.PSObject.Properties.Name)
+    $hasField = { param($name) $configFields -contains $name }
+
+    $fieldsRequired = @('sFT', 'sCtx', 'canary', 'urlGetCredentialType', 'urlPost', 'apiCanary')
+    $missing = $fieldsRequired | Where-Object { -not (& $hasField $_) }
+    if ($missing) {
+        $present = ($configFields | Sort-Object) -join ', '
+        throw "Entra `$Config blob is missing required fields: $($missing -join ', '). Fields present: $present. This usually means (a) Microsoft has changed the Entra login page structure, (b) the tenant requires a different entry point (e.g. /common vs /organizations), or (c) the authorize response was a redirect to a CA-challenged page. Re-run with -Verbose for more detail; file a bug_report issue with the raw response."
+    }
+
+    $canarySnip = if ($config.canary) { $config.canary.Substring(0, [math]::Min(10, $config.canary.Length)) } else { '<empty>' }
+    Write-Verbose "Entra `$Config loaded: canary=${canarySnip}... sFT len=$($config.sFT.Length) fields=$($configFields.Count)"
 
     # --- Step 2: POST GetCredentialType to resolve MFA requirements / FIDO2 challenge ---
 
