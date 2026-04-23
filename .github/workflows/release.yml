@@ -39,15 +39,19 @@ jobs:
           }
 
           # Unit
-          $cfg = New-PesterConfiguration
-          $cfg.Run.Path = './tests/unit'
-          $cfg.Run.Exit = $true
-          $cfg.Run.Throw = $true
-          Invoke-Pester -Configuration $cfg
+          $unitCfg = New-PesterConfiguration
+          $unitCfg.Run.Path = @('./tests/unit')
+          $unitCfg.Run.Exit = $true
+          $unitCfg.Run.Throw = $true
+          Invoke-Pester -Configuration $unitCfg
 
-          # Static validation (kql + arm)
-          $cfg.Run.Path = @('./tests/kql', './tests/arm')
-          Invoke-Pester -Configuration $cfg
+          # Static validation (kql + arm) — FRESH config to avoid
+          # Pester 5.x strict-type re-assignment error on Run.Path
+          $validateCfg = New-PesterConfiguration
+          $validateCfg.Run.Path = @('./tests/kql', './tests/arm')
+          $validateCfg.Run.Exit = $true
+          $validateCfg.Run.Throw = $true
+          Invoke-Pester -Configuration $validateCfg
 
       - name: Compile Bicep → ARM (syntax check only, scratch path)
         shell: pwsh
