@@ -1,0 +1,62 @@
+// SYNOPSIS:
+//   Drift detection for P3 Exposure/XSPM streams — set-diff flavor.
+//
+//   Unlike P0/P1/P2/P5/P7 which do field-level diff, XSPM streams are graph-structured
+//   (attack paths, chokepoints, entry points). Drift here means "which entities were
+//   added/removed between snapshots", not "which fields changed within an entity".
+//
+// PARAMETERS:
+//   lookback - default 7d
+//   window   - default 1h
+//
+// INVOCATION:
+//   MDE_Drift_P3Exposure(7d, 1h) | where ChangeType == "Added"
+
+let lookback = 7d;
+let window = 1h;
+let sources = union withsource=_Table
+    MDE_XspmAttackPaths_CL,
+    MDE_XspmChokePoints_CL,
+    MDE_XspmTopTargets_CL,
+    MDE_XspmInitiatives_CL,
+    MDE_ExposureSnapshots_CL,
+    MDE_SecureScoreBreakdown_CL,
+    MDE_SecurityBaselines_CL,
+    MDE_ExposureRecommendations_CL
+    | where TimeGenerated > ago(lookback);
+let currentSet = sources
+    | where TimeGenerated > ago(window)
+    | summarize arg_max(TimeGenerated, *) by _Table, EntityId
+    | project _Table, EntityId, CurrentRawJson = RawJson, CurrentTime = TimeGenerated;
+let previousSet = sources
+    | where TimeGenerated between (ago(lookback) .. ago(window))
+    | summarize arg_max(TimeGenerated, *) by _Table, EntityId
+    | project _Table, EntityId, PreviousRawJson = RawJson, PreviousTime = TimeGenerated;
+// v1.0.2: added SnapshotCurrent + SnapshotPrevious columns to the output so the
+// 9-column drift schema is consistent across all 6 tier parsers. Downstream
+// analytic rules + workbooks can now filter on "seen in snapshot X but not Y"
+// regardless of tier.
+let added = currentSet
+    | join kind=leftanti previousSet on _Table, EntityId
+    | extend ChangeType = "Added", OldValue = "", NewValue = tostring(CurrentRawJson),
+             CurrentSnapshot = CurrentTime, PreviousSnapshot = datetime(null);
+let removed = previousSet
+    | join kind=leftanti currentSet on _Table, EntityId
+    | extend ChangeType = "Removed", OldValue = tostring(PreviousRawJson), NewValue = "",
+             CurrentSnapshot = datetime(null), PreviousSnapshot = PreviousTime;
+let modified = currentSet
+    | join kind=inner previousSet on _Table, EntityId
+    | where hash(tostring(CurrentRawJson)) != hash(tostring(PreviousRawJson))
+    | extend ChangeType = "Modified", OldValue = tostring(PreviousRawJson), NewValue = tostring(CurrentRawJson),
+             CurrentSnapshot = CurrentTime, PreviousSnapshot = PreviousTime;
+union added, removed, modified
+| project
+    TimeGenerated    = coalesce(CurrentSnapshot, PreviousSnapshot),
+    StreamName       = _Table,
+    EntityId,
+    FieldName        = "",
+    OldValue,
+    NewValue,
+    SnapshotCurrent  = CurrentSnapshot,
+    SnapshotPrevious = PreviousSnapshot,
+    ChangeType

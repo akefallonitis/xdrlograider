@@ -1,0 +1,328 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "config": {
+      "isWizard": false,
+      "basics": {
+        "description": "**XdrLogRaider v0.1.0-beta** — Microsoft Sentinel connector ingesting Defender XDR portal-only telemetry (config / compliance / drift / exposure / governance) via a PowerShell Azure Function App. **45 streams** across 7 compliance tiers.\n\n**Prerequisite**: you must already have a Sentinel-enabled Log Analytics workspace. This deployment creates the connector resources (Function App + KV + Storage + DCE + DCR + App Insights) in your chosen RG, and adds **47 custom tables** (45 data + Heartbeat + AuthTestResult) + a Data Connector UI card to your existing workspace (cross-RG supported).\n\n**After deploy**: run `./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName <from-output>` from the cloned repo to upload service-account auth secrets to Key Vault.",
+        "subscription": {},
+        "resourceGroup": {
+          "allowExisting": true,
+          "constraints": {
+            "validations": [
+              {
+                "permission": "Microsoft.Resources/deployments/write",
+                "message": "You need Contributor or Owner on the target resource group to deploy. Pick a different RG or create a new one."
+              }
+            ]
+          }
+        },
+        "location": {
+          "label": "Connector region",
+          "toolTip": "Region for connector resources (Function App, KV, Storage, App Insights). Can differ from the workspace region."
+        }
+      }
+    },
+    "basics": [
+      {
+        "name": "projectPrefix",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Project prefix",
+        "toolTip": "3-12 lowercase alphanumeric. Used as the prefix for all created resource names.",
+        "defaultValue": "xdrlr",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z0-9]{3,12}$",
+          "validationMessage": "3-12 lowercase alphanumeric characters"
+        }
+      },
+      {
+        "name": "env",
+        "type": "Microsoft.Common.DropDown",
+        "label": "Environment",
+        "toolTip": "Environment tag used in resource names.",
+        "defaultValue": "prod",
+        "constraints": {
+          "required": true,
+          "allowedValues": [
+            { "label": "Production", "value": "prod" },
+            { "label": "Staging",    "value": "staging" },
+            { "label": "Development", "value": "dev" }
+          ]
+        }
+      },
+      {
+        "name": "infoServiceAccount",
+        "type": "Microsoft.Common.InfoBox",
+        "visible": true,
+        "options": {
+          "icon": "Info",
+          "text": "Before deploying, create a dedicated read-only Entra service account with `Security Reader` + `Defender XDR Analyst` roles. You will paste its UPN below and upload its credentials to Key Vault AFTER deploy. Never use a privileged or human account."
+        }
+      }
+    ],
+    "steps": [
+      {
+        "name": "workspaceSettings",
+        "label": "Sentinel workspace",
+        "subLabel": {
+          "preValidation": "Point the connector at your existing Sentinel workspace",
+          "postValidation": "OK"
+        },
+        "bladeTitle": "Target Sentinel / Log Analytics workspace",
+        "elements": [
+          {
+            "name": "infoWorkspacePrereq",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Info",
+              "text": "Required role on the workspace: 'Log Analytics Contributor' (or generic Contributor / Owner). 'Microsoft Sentinel Contributor' alone is NOT sufficient — does not grant workspaces/tables/write."
+            }
+          },
+          {
+            "name": "existingWorkspace",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Sentinel workspace",
+            "toolTip": "Pick your existing Sentinel-enabled Log Analytics workspace from the dropdown. Includes workspaces across ALL subscriptions in this tenant that you have access to. The workspace's region is auto-populated below; DCE and DCR must be created in the same region (Azure Monitor constraint).",
+            "resourceType": "Microsoft.OperationalInsights/workspaces",
+            "options": {
+              "filter": {
+                "subscription": "all",
+                "location": "all"
+              }
+            }
+          },
+          {
+            "name": "workspaceInfo",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[not(empty(steps('workspaceSettings').existingWorkspace.id))]",
+            "options": {
+              "icon": "Info",
+              "text": "[concat('Selected: ', steps('workspaceSettings').existingWorkspace.name, ' (region: ', steps('workspaceSettings').existingWorkspace.location, ') — DCE + DCR will be created in this region.')]"
+            }
+          },
+          {
+            "name": "workspaceLocationOverride",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Workspace region (override)",
+            "toolTip": "Auto-detected from the selected workspace above. Override only if the auto-detection is wrong (rare — e.g. region rename).",
+            "defaultValue": "",
+            "visible": "[not(empty(steps('workspaceSettings').existingWorkspace.id))]",
+            "constraints": {
+              "required": false,
+              "allowedValues": [
+                { "label": "Auto-detect from workspace (recommended)", "value": "" },
+                { "label": "East US",            "value": "eastus" },
+                { "label": "East US 2",          "value": "eastus2" },
+                { "label": "West US",            "value": "westus" },
+                { "label": "West US 2",          "value": "westus2" },
+                { "label": "West US 3",          "value": "westus3" },
+                { "label": "Central US",         "value": "centralus" },
+                { "label": "North Central US",   "value": "northcentralus" },
+                { "label": "South Central US",   "value": "southcentralus" },
+                { "label": "Canada Central",     "value": "canadacentral" },
+                { "label": "North Europe",       "value": "northeurope" },
+                { "label": "West Europe",        "value": "westeurope" },
+                { "label": "UK South",           "value": "uksouth" },
+                { "label": "UK West",            "value": "ukwest" },
+                { "label": "France Central",     "value": "francecentral" },
+                { "label": "Germany West Central","value": "germanywestcentral" },
+                { "label": "Switzerland North",  "value": "switzerlandnorth" },
+                { "label": "Sweden Central",     "value": "swedencentral" },
+                { "label": "Norway East",        "value": "norwayeast" },
+                { "label": "Australia East",     "value": "australiaeast" },
+                { "label": "Australia Southeast","value": "australiasoutheast" },
+                { "label": "Southeast Asia",     "value": "southeastasia" },
+                { "label": "East Asia",          "value": "eastasia" },
+                { "label": "Japan East",         "value": "japaneast" },
+                { "label": "Japan West",         "value": "japanwest" },
+                { "label": "Korea Central",      "value": "koreacentral" },
+                { "label": "India Central",      "value": "centralindia" },
+                { "label": "UAE North",          "value": "uaenorth" },
+                { "label": "South Africa North", "value": "southafricanorth" },
+                { "label": "Brazil South",       "value": "brazilsouth" }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "authSettings",
+        "label": "Authentication",
+        "subLabel": {
+          "preValidation": "How the connector signs into security.microsoft.com",
+          "postValidation": "OK"
+        },
+        "bladeTitle": "Portal authentication",
+        "elements": [
+          {
+            "name": "serviceAccountUpn",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Service account UPN",
+            "toolTip": "UPN of the dedicated read-only Entra service account. e.g. svc-xdrlr@contoso.onmicrosoft.com",
+            "defaultValue": "",
+            "constraints": {
+              "required": true,
+              "regex": "^[^@]+@[^@]+\\.[^@]+$",
+              "validationMessage": "Valid UPN (user@domain.tld)"
+            }
+          },
+          {
+            "name": "authMethod",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Auth method",
+            "toolTip": "Both methods are unattended and auto-refreshing. Passkey is stronger against modern Conditional Access policies.",
+            "defaultValue": "Credentials + TOTP",
+            "constraints": {
+              "required": true,
+              "allowedValues": [
+                { "label": "Credentials + TOTP", "value": "credentials_totp" },
+                { "label": "Software Passkey",   "value": "passkey" }
+              ]
+            }
+          },
+          {
+            "name": "uploadSecretsNow",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Upload auth secrets",
+            "toolTip": "If 'Upload via wizard', enter the secrets below — ARM writes them straight to Key Vault during deploy. If 'Upload via post-deploy script', leave the fields empty and run ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName <name> after deploy completes.",
+            "defaultValue": "Upload via wizard",
+            "constraints": {
+              "required": true,
+              "allowedValues": [
+                { "label": "Upload via wizard",            "value": "wizard" },
+                { "label": "Upload via post-deploy script", "value": "script" }
+              ]
+            }
+          },
+          {
+            "name": "servicePassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": { "password": "Service account password", "confirmPassword": "Confirm password" },
+            "toolTip": "Service account password. Stored as Key Vault secret 'mde-portal-password'. Only used if Auth method = Credentials + TOTP and Upload = wizard.",
+            "visible": "[and(equals(steps('authSettings').authMethod, 'credentials_totp'), equals(steps('authSettings').uploadSecretsNow, 'wizard'))]",
+            "options": { "hideConfirmation": false },
+            "constraints": { "required": true, "regex": ".+", "validationMessage": "Password is required when uploading via wizard" }
+          },
+          {
+            "name": "totpSeed",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": { "password": "TOTP Base32 secret", "confirmPassword": "Confirm TOTP secret" },
+            "toolTip": "Base32-encoded TOTP seed (the string behind the QR code when MFA is enrolled). 16+ chars, A-Z and 2-7 only. Stored as Key Vault secret 'mde-portal-totp'. Leave the field blank IF the service account is exempt from MFA.",
+            "visible": "[and(equals(steps('authSettings').authMethod, 'credentials_totp'), equals(steps('authSettings').uploadSecretsNow, 'wizard'))]",
+            "options": { "hideConfirmation": true },
+            "constraints": { "required": false, "regex": "^([A-Za-z2-7=\\s]{16,})?$", "validationMessage": "Base32 only (A-Z, 2-7), 16+ chars or empty" }
+          },
+          {
+            "name": "passkeyJson",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Passkey JSON",
+            "toolTip": "Full passkey JSON containing upn, credentialId, privateKeyPem (one-line ECDSA P-256 PEM, escaped). Stored as Key Vault secret 'mde-portal-passkey'.",
+            "multiLine": true,
+            "visible": "[and(equals(steps('authSettings').authMethod, 'passkey'), equals(steps('authSettings').uploadSecretsNow, 'wizard'))]",
+            "constraints": { "required": true, "regex": "^\\s*\\{[\\s\\S]+\\}\\s*$", "validationMessage": "Must be a JSON object containing upn, credentialId, privateKeyPem" }
+          },
+          {
+            "name": "infoPostDeploy",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('authSettings').uploadSecretsNow, 'script')]",
+            "options": {
+              "icon": "Info",
+              "text": "Run ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName <from-output> after the deploy completes. The deployment Output contains the exact command. Self-test fires within ~5 min; check MDE_AuthTestResult_CL."
+            }
+          },
+          {
+            "name": "infoUploadNow",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('authSettings').uploadSecretsNow, 'wizard')]",
+            "options": {
+              "icon": "Info",
+              "text": "Secrets are written to Key Vault as part of the ARM deploy (Microsoft.KeyVault/vaults/secrets resources). They never appear in deployment history (SecureString). Self-test fires within ~5 min; check MDE_AuthTestResult_CL."
+            }
+          }
+        ]
+      },
+      {
+        "name": "advanced",
+        "label": "Advanced",
+        "subLabel": {
+          "preValidation": "Optional overrides",
+          "postValidation": "OK"
+        },
+        "bladeTitle": "Advanced settings",
+        "elements": [
+          {
+            "name": "functionPlanSku",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Function App plan",
+            "toolTip": "Consumption (Y1) is recommended — fits within Azure Functions free tier for typical workload.",
+            "defaultValue": "Consumption (Y1)",
+            "constraints": {
+              "required": true,
+              "allowedValues": [
+                { "label": "Consumption (Y1)", "value": "Y1" },
+                { "label": "Premium EP1",      "value": "EP1" },
+                { "label": "Premium EP2",      "value": "EP2" }
+              ]
+            }
+          },
+          {
+            "name": "functionAppZipVersion",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Function App version",
+            "toolTip": "'latest' pulls the newest GitHub Release; or pin a specific version like 1.0.0.",
+            "defaultValue": "latest",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "githubRepo",
+            "type": "Microsoft.Common.TextBox",
+            "label": "GitHub repo (owner/name)",
+            "toolTip": "Only override if you forked. Used to build the Function App code ZIP URL.",
+            "defaultValue": "akefallonitis/xdrlograider",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$",
+              "validationMessage": "Format: <owner>/<repo>"
+            }
+          },
+          {
+            "name": "deploySentinelContent",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Deploy Sentinel content (parsers, hunting queries, analytic rules, workbooks)",
+            "toolTip": "If 'Yes', the workspace receives the parsers + 14 disabled analytic rules + 9 hunting queries + 6 workbooks. If 'No', only the connector resources + 47 custom tables + Data Connector card are deployed (useful for re-deploys or limited workspace permissions).",
+            "defaultValue": "Yes",
+            "constraints": {
+              "required": true,
+              "allowedValues": [
+                { "label": "Yes", "value": true },
+                { "label": "No",  "value": false }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "projectPrefix":         "[basics('projectPrefix')]",
+      "env":                   "[basics('env')]",
+      "connectorLocation":     "[location()]",
+      "existingWorkspaceId":   "[steps('workspaceSettings').existingWorkspace.id]",
+      "workspaceLocation":     "[if(empty(steps('workspaceSettings').workspaceLocationOverride), steps('workspaceSettings').existingWorkspace.location, steps('workspaceSettings').workspaceLocationOverride)]",
+      "serviceAccountUpn":     "[steps('authSettings').serviceAccountUpn]",
+      "authMethod":            "[steps('authSettings').authMethod]",
+      "servicePassword":       "[if(and(equals(steps('authSettings').authMethod, 'credentials_totp'), equals(steps('authSettings').uploadSecretsNow, 'wizard')), steps('authSettings').servicePassword, '')]",
+      "totpSeed":              "[if(and(equals(steps('authSettings').authMethod, 'credentials_totp'), equals(steps('authSettings').uploadSecretsNow, 'wizard')), steps('authSettings').totpSeed, '')]",
+      "passkeyJson":           "[if(and(equals(steps('authSettings').authMethod, 'passkey'), equals(steps('authSettings').uploadSecretsNow, 'wizard')), steps('authSettings').passkeyJson, '')]",
+      "functionPlanSku":       "[steps('advanced').functionPlanSku]",
+      "functionAppZipVersion": "[steps('advanced').functionAppZipVersion]",
+      "githubRepo":            "[steps('advanced').githubRepo]",
+      "deploySentinelContent": "[steps('advanced').deploySentinelContent]"
+    }
+  }
+}

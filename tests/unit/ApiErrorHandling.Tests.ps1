@@ -1,0 +1,328 @@
+#Requires -Modules Pester
+<#
+.SYNOPSIS
+    Comprehensive API error-handling coverage — proves the three layers that
+    surround every portal call behave correctly under the full error taxonomy.
+
+.DESCRIPTION
+    Three rings of error handling, tested in isolation here:
+
+      1. Invoke-MDEPortalRequest (Xdr.Portal.Auth)
+         - 401 -> Connect-MDEPortal -Force -> retry once
+         - Non-401 errors (403/404/429/5xx/network) -> surface to caller
+         - Missing cached credentials -> throw with clear message
+
+      2. Invoke-MDEPortalEndpoint (XdrLogRaider.Client)
+         - try/catch wrapper: @{ Success=$true; Data=<body> } on 2xx,
+           @{ Success=$false; Error=<msg> } on any exception
+
+      3. Invoke-MDETierPoll (XdrLogRaider.Client)
+         - Per-stream failure isolation: one stream's error does NOT abort
+           the tier loop; subsequent streams still poll
+         - Checkpoint advancement only on success path
+         - Errors collected into @{ <stream> = <msg> } hashtable
+
+    Additionally:
+      4. Send-ToLogAnalytics (XdrLogRaider.Ingest)
+         - Retry with exponential backoff on 429 + 5xx + network error
+         - Hard-fail on 4xx other than 401/403
+         - Row-level size skip (>1 MB row logged + skipped, not thrown)
+         - Token caching with 5-min refresh buffer
+#>
+
+BeforeAll {
+    $script:Root = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+    Import-Module "$script:Root/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"     -Force
+    Import-Module "$script:Root/src/Modules/XdrLogRaider.Ingest/XdrLogRaider.Ingest.psd1" -Force
+    Import-Module "$script:Root/src/Modules/XdrLogRaider.Client/XdrLogRaider.Client.psd1" -Force
+}
+
+AfterAll {
+    Remove-Module XdrLogRaider.Client -Force -ErrorAction SilentlyContinue
+    Remove-Module XdrLogRaider.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
+}
+
+Describe 'API error handling — Invoke-MDEPortalRequest' {
+
+    It 'surfaces 403 Forbidden without attempting reauth' {
+        InModuleScope Xdr.Portal.Auth {
+            $fakeSess = [pscustomobject]@{
+                Session     = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
+                Upn         = 'svc@test.com'
+                PortalHost  = 'security.microsoft.com'
+                AcquiredUtc = [datetime]::UtcNow
+            }
+            Mock Update-XsrfToken { 'xsrf' }
+            Mock Connect-MDEPortal {}   # must NOT be called on 403
+            Mock Invoke-WebRequest {
+                $resp = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::Forbidden)
+                throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Forbidden', $resp)
+            }
+
+            { Invoke-MDEPortalRequest -Session $fakeSess -Path '/api/x' } | Should -Throw -ExpectedMessage '*Forbidden*'
+            Should -Invoke Connect-MDEPortal -Times 0 -Exactly
+        }
+    }
+
+    It 'surfaces 500 Internal Server Error without attempting reauth' {
+        InModuleScope Xdr.Portal.Auth {
+            $fakeSess = [pscustomobject]@{
+                Session     = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
+                Upn         = 'svc@test.com'
+                PortalHost  = 'security.microsoft.com'
+                AcquiredUtc = [datetime]::UtcNow
+            }
+            Mock Update-XsrfToken { 'xsrf' }
+            Mock Connect-MDEPortal {}
+            Mock Invoke-WebRequest {
+                $resp = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::InternalServerError)
+                throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Internal Server Error', $resp)
+            }
+
+            { Invoke-MDEPortalRequest -Session $fakeSess -Path '/api/x' } | Should -Throw
+            Should -Invoke Connect-MDEPortal -Times 0 -Exactly
+        }
+    }
+
+    It 'throws clear message when 401 hits a session with no cached _Credential' {
+        InModuleScope Xdr.Portal.Auth {
+            $script:SessionCache.Clear()
+            $fakeSess = [pscustomobject]@{
+                Session     = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
+                Upn         = 'svc-no-cache@test.com'
+                PortalHost  = 'security.microsoft.com'
+                AcquiredUtc = [datetime]::UtcNow
+            }
+            Mock Update-XsrfToken { 'xsrf' }
+            Mock Invoke-WebRequest {
+                $resp = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::Unauthorized)
+                throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Unauthorized', $resp)
+            }
+
+            { Invoke-MDEPortalRequest -Session $fakeSess -Path '/api/x' } |
+                Should -Throw -ExpectedMessage '*no cached*'
+        }
+    }
+}
+
+Describe 'API error handling — Invoke-MDEPortalEndpoint (structured failures)' {
+
+    It 'returns Success true with Data on happy path' {
+        InModuleScope XdrLogRaider.Client {
+            Mock Invoke-MDEPortalRequest { @{ hello = 'world' } }
+            $r = Invoke-MDEPortalEndpoint -Session ([pscustomobject]@{}) -Path '/api/x'
+            $r.Success | Should -BeTrue
+            $r.Data.hello | Should -Be 'world'
+            $r.Path    | Should -Be '/api/x'
+        }
+    }
+
+    It 'returns Success false with Error on any exception' {
+        InModuleScope XdrLogRaider.Client {
+            Mock Invoke-MDEPortalRequest { throw 'simulated portal blowup' }
+            $r = Invoke-MDEPortalEndpoint -Session ([pscustomobject]@{}) -Path '/api/x'
+            $r.Success | Should -BeFalse
+            $r.Error   | Should -Match 'simulated portal blowup'
+            $r.Path    | Should -Be '/api/x'
+        }
+    }
+
+    It 'does not throw — caller must check .Success' {
+        InModuleScope XdrLogRaider.Client {
+            Mock Invoke-MDEPortalRequest { throw 'boom' }
+            { Invoke-MDEPortalEndpoint -Session ([pscustomobject]@{}) -Path '/api/x' } | Should -Not -Throw
+        }
+    }
+}
+
+Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
+
+    BeforeAll {
+        $script:FakeSession = [pscustomobject]@{
+            Session     = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
+            Upn         = 'svc@test.com'
+            PortalHost  = 'security.microsoft.com'
+            AcquiredUtc = [datetime]::UtcNow
+        }
+        $script:FakeConfig = [pscustomobject]@{
+            DceEndpoint        = 'https://fake.ingest.monitor.azure.com'
+            DcrImmutableId     = 'dcr-fake-0000'
+            StorageAccountName = 'fakesa'
+            CheckpointTable    = 'fakecp'
+        }
+    }
+
+    It 'one stream failing does NOT stop subsequent streams in the tier' {
+        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+            param($Sess, $Cfg)
+            $script:invoked = @()
+            Mock Invoke-MDEEndpoint {
+                param($Session, $Stream, $FromUtc, $PathParams)
+                $script:invoked += $Stream
+                if ($Stream -eq 'MDE_ThreatAnalytics_CL') { throw 'boom' }
+                ,@()
+            }
+            Mock Send-ToLogAnalytics { @{ RowsSent = 0 } }
+            Mock Set-CheckpointTimestamp { }
+            Mock Get-CheckpointTimestamp { $null }
+
+            $result = Invoke-MDETierPoll -Session $Sess -Tier 'P6' -Config $Cfg
+            $result.StreamsAttempted | Should -Be 2
+            $result.StreamsSucceeded | Should -Be 1
+            $result.Errors['MDE_ThreatAnalytics_CL'] | Should -Be 'boom'
+            $script:invoked.Count | Should -Be 2 -Because 'Both streams in tier P6 should have been tried'
+        }
+    }
+
+    It 'checkpoint is NOT advanced on per-stream failure' {
+        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+            param($Sess, $Cfg)
+            Mock Invoke-MDEEndpoint { throw 'blow up' }
+            Mock Send-ToLogAnalytics { @{ RowsSent = 0 } }
+            Mock Get-CheckpointTimestamp { $null }
+            Mock Set-CheckpointTimestamp {}
+
+            $null = Invoke-MDETierPoll -Session $Sess -Tier 'P6' -Config $Cfg
+
+            Should -Invoke Set-CheckpointTimestamp -Times 0 -Exactly -Because 'failed stream must not checkpoint'
+        }
+    }
+
+    It 'tier with NO streams declared returns zero-count result (no throw)' {
+        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+            param($Sess, $Cfg)
+            # P4 was intentionally dropped — no streams carry Tier='P4' in the manifest.
+            # But ValidateSet rejects P4 directly. Simulate empty tier by mocking manifest.
+            Mock Get-MDEEndpointManifest { @{} }
+            { Invoke-MDETierPoll -Session $Sess -Tier 'P0' -Config $Cfg } | Should -Not -Throw
+        }
+    }
+}
+
+Describe 'API error handling — Send-ToLogAnalytics (retry + backoff)' {
+
+    It 'retries on HTTP 429 (rate limit) and succeeds on a later attempt' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock Get-MonitorIngestionToken { 'fake-token' }
+            Mock Start-Sleep { }  # avoid real waits
+
+            $script:attempt = 0
+            Mock Invoke-WebRequest {
+                $script:attempt++
+                if ($script:attempt -lt 3) {
+                    $resp = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::TooManyRequests)
+                    throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Too Many Requests', $resp)
+                }
+                @{ StatusCode = 204 }
+            }
+
+            $result = Send-ToLogAnalytics `
+                -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
+                -DcrImmutableId 'dcr-fake' `
+                -StreamName 'Custom-MDE_Test_CL' `
+                -Rows @([pscustomobject]@{ TimeGenerated = (Get-Date).ToString('o') })
+
+            $script:attempt | Should -Be 3 -Because 'Should have retried twice, succeeded on 3rd'
+            $result.RowsSent    | Should -Be 1
+            $result.BatchesSent | Should -Be 1
+        }
+    }
+
+    It 'retries on HTTP 503 (transient server error)' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock Get-MonitorIngestionToken { 'fake-token' }
+            Mock Start-Sleep { }
+
+            $script:attempt = 0
+            Mock Invoke-WebRequest {
+                $script:attempt++
+                if ($script:attempt -eq 1) {
+                    $resp = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::ServiceUnavailable)
+                    throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Service Unavailable', $resp)
+                }
+                @{ StatusCode = 204 }
+            }
+
+            $result = Send-ToLogAnalytics `
+                -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
+                -DcrImmutableId 'dcr-fake' `
+                -StreamName 'Custom-MDE_Test_CL' `
+                -Rows @([pscustomobject]@{ foo = 'bar' })
+
+            $result.RowsSent | Should -Be 1
+        }
+    }
+
+    It 'hard-fails on HTTP 400 Bad Request (no retry)' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock Get-MonitorIngestionToken { 'fake-token' }
+            Mock Start-Sleep { }
+
+            $script:attempt = 0
+            Mock Invoke-WebRequest {
+                $script:attempt++
+                $resp = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::BadRequest)
+                throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Bad Request', $resp)
+            }
+
+            { Send-ToLogAnalytics -DceEndpoint 'https://fake.ingest.monitor.azure.com' -DcrImmutableId 'dcr-fake' -StreamName 'Custom-X_CL' -Rows @([pscustomobject]@{ x = 1 }) } |
+                Should -Throw -ExpectedMessage '*Bad Request*'
+            $script:attempt | Should -Be 1 -Because '400 is NOT transient — no retries'
+        }
+    }
+
+    It 'stops after MaxRetries (5) even for a persistent 429' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock Get-MonitorIngestionToken { 'fake-token' }
+            Mock Start-Sleep { }
+
+            $script:attempt = 0
+            Mock Invoke-WebRequest {
+                $script:attempt++
+                $resp = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::TooManyRequests)
+                throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Too Many Requests', $resp)
+            }
+
+            { Send-ToLogAnalytics -DceEndpoint 'https://fake.ingest.monitor.azure.com' -DcrImmutableId 'dcr-fake' -StreamName 'Custom-X_CL' -Rows @([pscustomobject]@{ x = 1 }) } |
+                Should -Throw
+            $script:attempt | Should -Be 6 -Because 'Initial try + 5 retries = 6 attempts, then give up'
+        }
+    }
+
+    It 'row >= MaxBatchBytes is skipped with a warning (not thrown)' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock Get-MonitorIngestionToken { 'fake-token' }
+            Mock Start-Sleep { }
+            Mock Invoke-WebRequest { @{ StatusCode = 204 } }
+
+            $bigRow  = [pscustomobject]@{ payload = 'x' * 2000000 }   # 2 MB
+            $tinyRow = [pscustomobject]@{ foo = 'bar' }
+
+            $result = Send-ToLogAnalytics `
+                -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
+                -DcrImmutableId 'dcr-fake' `
+                -StreamName 'Custom-MDE_Test_CL' `
+                -Rows @($bigRow, $tinyRow) `
+                -WarningVariable warnings 3>$null
+
+            $result.RowsSent | Should -Be 1 -Because 'big row was skipped, tiny row was sent'
+            ($warnings -join ' ') | Should -Match 'Row exceeds' -Because 'Warning must surface the oversize row'
+        }
+    }
+
+    It 'empty Rows returns RowsSent=0 without any HTTP call' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock Get-MonitorIngestionToken {}
+            Mock Invoke-WebRequest {}
+            $result = Send-ToLogAnalytics `
+                -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
+                -DcrImmutableId 'dcr-fake' `
+                -StreamName 'Custom-X_CL' `
+                -Rows @()
+            $result.RowsSent | Should -Be 0
+            Should -Invoke Invoke-WebRequest -Times 0 -Exactly
+            Should -Invoke Get-MonitorIngestionToken -Times 0 -Exactly
+        }
+    }
+}

@@ -1,0 +1,55 @@
+id: 8c69e1f2-3b5a-4c7e-d0f2-6a5b8e3c1d10
+name: MDE config changes by UPN
+description: |
+  Correlate Defender XDR config drift with AuditLogs actor UPNs to surface
+  "who changed what". Useful for post-incident retro + change control.
+
+  v0.1.0-beta: fixed BUG #4 — previous version joined `drift.EntityId` (a
+  stream-specific UUID) to `AuditLogs.TargetResources[0].displayName` (a
+  resource-name string), which produced empty / false-positive results.
+  The corrected query filters AuditLogs by Defender-related categories
+  and correlates by time proximity (within 1h of the drift event), then
+  summarises by actor UPN + drift stream. EntityId-to-actor joins at the
+  record level aren't reliable across these two data sources — approximate
+  by actor + time window + category instead.
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - Compliance
+  - Drift
+  - Audit
+  - DefenderXDR
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  let drift = union
+    (MDE_Drift_P0Compliance(7d, 1h)),
+    (MDE_Drift_P1Pipeline(7d, 30m)),
+    (MDE_Drift_P2Governance(7d, 1d));
+  let audits = AuditLogs
+    | where TimeGenerated > ago(7d)
+    | where Category in (
+        'PolicyManagement',
+        'DefenderXdrSettings',
+        'Microsoft Defender for Cloud Apps',
+        'Microsoft Defender for Identity',
+        'Unified audit',
+        'Azure Active Directory'
+      )
+    | extend ActorUpn = tostring(InitiatedBy.user.userPrincipalName)
+    | where isnotempty(ActorUpn)
+    | project AuditTime = TimeGenerated, ActorUpn, Operation = OperationName, Category, AuditResult = Result;
+  drift
+  | join kind=leftouter (audits) on $left.TimeGenerated == $right.AuditTime
+  | extend ActorUpn = coalesce(ActorUpn, 'unknown (no correlating audit)')
+  | summarize DriftEvents = count(),
+              Streams = make_set(StreamName),
+              Operations = make_set(Operation)
+          by ActorUpn
+  | order by DriftEvents desc

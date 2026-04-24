@@ -1,0 +1,26 @@
+id: 0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08
+name: MDE RBAC role to unusual account
+description: |
+  A Defender RBAC role was assigned to a user account that has no previous history of admin activity.
+severity: High
+enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+queryFrequency: 15m
+queryPeriod: 2h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - PrivilegeEscalation
+  - Persistence
+relevantTechniques:
+  - T1078
+query: |
+  MDE_Drift_P2Governance(7d, 1d) | where StreamName == "MDE_UnifiedRbacRoles_CL" | where ChangeType == "Added" | where FieldName contains "principalId" or FieldName contains "principalName"
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: SingleAlert
+suppressionEnabled: false
+suppressionDuration: PT5H

@@ -1,0 +1,16 @@
+Name: MDE Identity Posture
+Author: Alex Kefallonitis
+Description: |
+  MDI service account coverage, DC onboarding state, and alert threshold drift.
+Id: bd0ecf4f-8079-4b5c-b6b1-b5e37a077f00
+Logo: '<img src="https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/deploy/solution/Images/Logo.svg" width="75px" height="75px">'
+Data:
+  - DataConnector: XdrLogRaiderInternal
+    DataTypes:
+      - MDE_Heartbeat_CL
+      - MDE_AuthTestResult_CL
+WorkbookKey: MDE_IdentityPosture
+SourceCenter: sentinel
+FileName: MDE_IdentityPosture.json
+Version: '1.0.0'
+PreviewImages: []

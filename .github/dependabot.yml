@@ -1,0 +1,27 @@
+version: 2
+# Dependabot configuration — auto-update GitHub Actions + reference indirect dependencies.
+# Groups all Actions updates into one weekly PR to avoid churn.
+
+updates:
+  # GitHub Actions used by workflows
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: UTC
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: "ci"
+      include: scope
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  # Terraform / other IaC left as a stub — project is Bicep/ARM, no Terraform.
+  # Add here if we ever introduce Python / Node / Go tooling.

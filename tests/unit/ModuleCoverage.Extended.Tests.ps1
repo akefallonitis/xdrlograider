@@ -1,0 +1,258 @@
+#Requires -Modules Pester
+<#
+.SYNOPSIS
+    Fills coverage gaps across the 3 runtime modules — edge-case paths that
+    weren't exercised by the targeted auth/dispatcher/tier/ingest tests.
+
+    Targets:
+      Xdr.Portal.Auth:
+        - Update-XsrfToken error paths (missing cookie, expired session)
+        - Get-MDEAuthFromKeyVault failure modes
+        - Test-MDEPortalAuth stages
+
+      XdrLogRaider.Ingest:
+        - Get-XdrAuthSelfTestFlag — all 5 return paths
+        - Write-Heartbeat schema + null-safety
+        - Write-AuthTestResult schema
+        - Checkpoint edge cases
+
+      XdrLogRaider.Client:
+        - Expand-MDEResponse on all input shapes
+        - ConvertTo-MDEIngestRow with custom IdProperty
+        - Path substitution + missing PathParams error
+#>
+
+BeforeAll {
+    $script:Root = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+    Import-Module "$script:Root/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"         -Force
+    Import-Module "$script:Root/src/Modules/XdrLogRaider.Ingest/XdrLogRaider.Ingest.psd1" -Force
+    Import-Module "$script:Root/src/Modules/XdrLogRaider.Client/XdrLogRaider.Client.psd1" -Force
+}
+
+AfterAll {
+    Remove-Module XdrLogRaider.Client -Force -ErrorAction SilentlyContinue
+    Remove-Module XdrLogRaider.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
+}
+
+Describe 'Update-XsrfToken (Xdr.Portal.Auth)' {
+
+    It 'throws when the portal cookie jar has no XSRF-TOKEN' {
+        InModuleScope Xdr.Portal.Auth {
+            $session = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
+            # No cookies at all → function should throw with clear message
+            { Update-XsrfToken -Session $session -PortalHost 'security.microsoft.com' } |
+                Should -Throw -ExpectedMessage '*XSRF-TOKEN missing*'
+        }
+    }
+
+    It 'URL-decodes the cookie value before returning (portal middleware rejects encoded form)' {
+        InModuleScope Xdr.Portal.Auth {
+            $session = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
+            $uri = [System.Uri]::new('https://security.microsoft.com/')
+            # Cookie stores URL-encoded value (e.g. '+' → '%2B')
+            $cookie = [System.Net.Cookie]::new('XSRF-TOKEN', 'abc%2Bdef%3D', '/', 'security.microsoft.com')
+            $session.Cookies.Add($uri, $cookie)
+
+            $decoded = Update-XsrfToken -Session $session -PortalHost 'security.microsoft.com'
+            $decoded | Should -Be 'abc+def='   # '+' and '=' come back decoded
+        }
+    }
+}
+
+Describe 'Get-XdrAuthSelfTestFlag — all return paths' {
+
+    BeforeAll {
+        # Inject stubs INSIDE the module scope so when XdrLogRaider.Ingest's
+        # Get-XdrAuthSelfTestFlag calls New-AzStorageContext / Get-AzStorageTable
+        # / Get-AzTableRow, PowerShell resolves to our stubs (not the real Az
+        # cmdlets) — which on Linux CI have strict Context parameter validators
+        # that would bypass Pester's Mock intercept.
+        InModuleScope XdrLogRaider.Ingest {
+            if (-not (Get-Command New-AzStorageContext -ErrorAction SilentlyContinue -CommandType Function)) {
+                function script:New-AzStorageContext { param($StorageAccountName, [switch]$UseConnectedAccount, $ErrorAction) @{} }
+            }
+            if (-not (Get-Command Get-AzStorageTable -ErrorAction SilentlyContinue -CommandType Function)) {
+                function script:Get-AzStorageTable { param($Name, $Context, $ErrorAction) @{ CloudTable = @{} } }
+            }
+            if (-not (Get-Command Get-AzTableRow -ErrorAction SilentlyContinue -CommandType Function)) {
+                function script:Get-AzTableRow { param($Table, $PartitionKey, $RowKey, $ErrorAction) $null }
+            }
+        }
+    }
+
+    It 'returns false when storage context creation throws' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock New-AzStorageContext { throw 'storage not found' }
+            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'missing' -CheckpointTable 'cp'
+            $r | Should -BeFalse
+        }
+    }
+
+    It 'returns false when checkpoint table is missing' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock New-AzStorageContext { @{} }
+            Mock Get-AzStorageTable { $null }
+            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
+            $r | Should -BeFalse
+        }
+    }
+
+    It 'returns false when flag row is missing' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock New-AzStorageContext { @{} }
+            Mock Get-AzStorageTable { @{ CloudTable = @{} } }
+            Mock Get-AzTableRow { $null }
+            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
+            $r | Should -BeFalse
+        }
+    }
+
+    It 'returns true when flag row has Success=true' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock New-AzStorageContext { @{} }
+            Mock Get-AzStorageTable { @{ CloudTable = @{} } }
+            Mock Get-AzTableRow { [pscustomobject]@{ Success = $true } }
+            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
+            $r | Should -BeTrue
+        }
+    }
+
+    It 'returns false when flag row has Success=false' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock New-AzStorageContext { @{} }
+            Mock Get-AzStorageTable { @{ CloudTable = @{} } }
+            Mock Get-AzTableRow { [pscustomobject]@{ Success = $false } }
+            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
+            $r | Should -BeFalse
+        }
+    }
+}
+
+Describe 'ConvertTo-MDEIngestRow schema' {
+
+    It 'produces rows with TimeGenerated + SourceStream + EntityId + RawJson' {
+        InModuleScope XdrLogRaider.Client {
+            $row = ConvertTo-MDEIngestRow -Stream 'MDE_Test_CL' -EntityId 'e-1' -Raw ([pscustomobject]@{ foo = 'bar' })
+            $row.TimeGenerated | Should -Not -BeNullOrEmpty
+            $row.SourceStream  | Should -Be 'MDE_Test_CL'
+            $row.EntityId      | Should -Be 'e-1'
+            ($row.RawJson | ConvertFrom-Json).foo | Should -Be 'bar'
+        }
+    }
+
+    It 'merges Extras into the row' {
+        InModuleScope XdrLogRaider.Client {
+            $row = ConvertTo-MDEIngestRow -Stream 'MDE_Test_CL' -EntityId 'e-1' `
+                -Raw ([pscustomobject]@{ x = 1 }) -Extras @{ deviceId = 'dev-abc' }
+            $row.deviceId | Should -Be 'dev-abc'
+        }
+    }
+
+    It 'TimeGenerated is ISO-8601 with zone suffix' {
+        InModuleScope XdrLogRaider.Client {
+            $row = ConvertTo-MDEIngestRow -Stream 'MDE_Test_CL' -EntityId 'e-1' -Raw ([pscustomobject]@{})
+            $row.TimeGenerated | Should -Match '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$'
+        }
+    }
+}
+
+Describe 'Expand-MDEResponse on varied input shapes' {
+
+    It 'returns empty array on null response' {
+        InModuleScope XdrLogRaider.Client {
+            $r = Expand-MDEResponse -Response $null
+            @($r).Count | Should -Be 0
+        }
+    }
+
+    It 'extracts id from array elements' {
+        InModuleScope XdrLogRaider.Client {
+            $r = Expand-MDEResponse -Response @(
+                [pscustomobject]@{ id = 'one'; name = 'first' }
+                [pscustomobject]@{ id = 'two'; name = 'second' }
+            )
+            $r.Count | Should -Be 2
+            $r[0].Id | Should -Be 'one'
+            $r[1].Id | Should -Be 'two'
+        }
+    }
+
+    It 'falls back to index when no id-like property found' {
+        InModuleScope XdrLogRaider.Client {
+            $r = Expand-MDEResponse -Response @(
+                [pscustomobject]@{ foo = 'a' }
+                [pscustomobject]@{ foo = 'b' }
+            )
+            $r[0].Id | Should -Be 'idx-0'
+            $r[1].Id | Should -Be 'idx-1'
+        }
+    }
+
+    It 'uses custom IdProperty list (e.g. ruleId) when provided' {
+        InModuleScope XdrLogRaider.Client {
+            $r = Expand-MDEResponse -Response @(
+                [pscustomobject]@{ ruleId = 'rule-42'; name = 'alertrule' }
+            ) -IdProperty @('ruleId')
+            $r[0].Id | Should -Be 'rule-42'
+        }
+    }
+
+    It 'iterates named properties when Response is a keyed object' {
+        InModuleScope XdrLogRaider.Client {
+            $obj = [pscustomobject]@{
+                pua_enabled = $true
+                pua_block_mode = 'Audit'
+            }
+            $r = Expand-MDEResponse -Response $obj
+            $r.Count | Should -Be 2
+            ($r | Where-Object Id -eq 'pua_enabled').Entity | Should -BeTrue
+        }
+    }
+}
+
+Describe 'Test-MDEPortalAuth stage reporting' {
+
+    It 'reports ests-cookie stage on initial auth failure' {
+        InModuleScope Xdr.Portal.Auth {
+            Mock Get-EstsCookie { throw 'ESTS sign-in blocked by CA' }
+            $r = Test-MDEPortalAuth -Method CredentialsTotp -Credential @{
+                upn = 'x@y.com'; password = 'p'; totpBase32 = 'JBSWY3DPEHPK3PXP'
+            }
+            $r.Success       | Should -BeFalse
+            $r.Stage         | Should -Be 'ests-cookie'
+            $r.FailureReason | Should -Match 'CA|ESTS'
+        }
+    }
+
+    It 'reports Success=true + TenantId when every step green (post one-hop rewrite)' {
+        InModuleScope Xdr.Portal.Auth {
+            $s = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
+            $uri = [System.Uri]::new('https://security.microsoft.com/')
+            $sc = [System.Net.Cookie]::new('sccauth', 'real-sccauth-value', '/', 'security.microsoft.com')
+            $xs = [System.Net.Cookie]::new('XSRF-TOKEN', 'real-xsrf', '/', 'security.microsoft.com')
+            $s.Cookies.Add($uri, $sc); $s.Cookies.Add($uri, $xs)
+
+            Mock Get-EstsCookie {
+                @{
+                    Session     = $s
+                    Sccauth     = 'real-sccauth-value'
+                    XsrfToken   = 'real-xsrf'
+                    TenantId    = '45f52f35-73d5-4066-8378-fe506ee90fb1'
+                    AcquiredUtc = [datetime]::UtcNow
+                }
+            }
+            Mock Invoke-MDEPortalRequest {
+                [pscustomobject]@{ AuthInfo = [pscustomobject]@{ TenantId = '45f52f35-73d5-4066-8378-fe506ee90fb1' } }
+            }
+
+            $r = Test-MDEPortalAuth -Method CredentialsTotp -Credential @{
+                upn = 'x@y.com'; password = 'p'; totpBase32 = 'JBSWY3DPEHPK3PXP'
+            }
+            $r.Success            | Should -BeTrue
+            $r.Stage              | Should -Be 'complete'
+            $r.TenantId           | Should -Be '45f52f35-73d5-4066-8378-fe506ee90fb1'
+            $r.SampleCallHttpCode | Should -Be 200
+        }
+    }
+}

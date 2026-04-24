@@ -1,0 +1,25 @@
+id: 6a47c9d0-1f3e-4a5c-b8d0-4e3f6c1a9b0e
+name: MDE connected app new registration
+description: |
+  A new third-party app was connected to Defender with API access.
+severity: Low
+enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+queryFrequency: 15m
+queryPeriod: 2h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+relevantTechniques:
+  - T1098
+query: |
+  MDE_Drift_P1Pipeline(1h, 10m) | where StreamName == "MDE_ConnectedApps_CL" | where ChangeType == "Added"
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: SingleAlert
+suppressionEnabled: false
+suppressionDuration: PT5H

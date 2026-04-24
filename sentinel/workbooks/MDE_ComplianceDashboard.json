@@ -1,0 +1,88 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# MDE Compliance Dashboard\n\nCurrent state of Defender XDR tenant security configuration, with recent drift highlighted.\n\n**Data source**: 19 `MDE_*_CL` P0 streams polled hourly by the XdrLogRaider Function App."
+      },
+      "name": "header"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "timerange-param",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "value": { "durationMs": 86400000 },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 3600000 },
+                { "durationMs": 86400000 },
+                { "durationMs": 604800000 },
+                { "durationMs": 2592000000 }
+              ]
+            }
+          }
+        ],
+        "style": "pills",
+        "queryType": 0
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MDE_Heartbeat_CL\n| where TimeGenerated > ago(1h)\n| where Tier == 'P0'\n| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by FunctionName\n| extend Status = iff(LastSeen > ago(30m), '\u2705 Healthy', '\u274c Stale')",
+        "size": 0,
+        "title": "Connector health (last hour)",
+        "queryType": 0,
+        "visualization": "table"
+      },
+      "name": "health-panel"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MDE_Drift_P0Compliance(24h, 1h)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1h)\n| render timechart",
+        "size": 0,
+        "title": "P0 drift events (last 24h)",
+        "queryType": 0
+      },
+      "name": "drift-timechart"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MDE_LiveResponseConfig_CL\n| summarize arg_max(TimeGenerated, *) by EntityId\n| extend AllowUnsignedScripts = tostring(parse_json(RawJson).allowUnsignedScripts)\n| project EntityId, AllowUnsignedScripts, TimeGenerated",
+        "size": 0,
+        "title": "Live Response config",
+        "queryType": 0,
+        "visualization": "table"
+      },
+      "name": "lr-table"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MDE_Drift_P0Compliance(24h, 1h)\n| join kind=leftouter (AuditLogs | where TimeGenerated > ago(24h) | project TargetResource = tostring(TargetResources[0].displayName), InitiatedByUpn = tostring(InitiatedBy.user.userPrincipalName)) on $left.EntityId == $right.TargetResource\n| project TimeGenerated, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType, InitiatedByUpn\n| order by TimeGenerated desc",
+        "size": 0,
+        "title": "Recent changes with attribution",
+        "queryType": 0,
+        "visualization": "table"
+      },
+      "name": "recent-changes-table"
+    }
+  ],
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDEComplianceDashboard",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

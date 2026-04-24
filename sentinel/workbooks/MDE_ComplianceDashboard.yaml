@@ -1,0 +1,16 @@
+Name: MDE Compliance Dashboard
+Author: Alex Kefallonitis
+Description: |
+  Current state of Defender XDR tenant security configuration with recent drift highlighted. Shows connector health, P0 drift events, ASR rule modes, Live Response config, and recent changes with audit-log attribution.
+Id: 9cd55414-1eea-4689-8fa6-e07c537931cd
+Logo: '<img src="https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/deploy/solution/Images/Logo.svg" width="75px" height="75px">'
+Data:
+  - DataConnector: XdrLogRaiderInternal
+    DataTypes:
+      - MDE_Heartbeat_CL
+      - MDE_AuthTestResult_CL
+WorkbookKey: MDE_ComplianceDashboard
+SourceCenter: sentinel
+FileName: MDE_ComplianceDashboard.json
+Version: '1.0.0'
+PreviewImages: []

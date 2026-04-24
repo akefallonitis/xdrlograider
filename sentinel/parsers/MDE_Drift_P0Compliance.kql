@@ -1,0 +1,66 @@
+// SYNOPSIS:
+//   Computes drift across P0 tenant-configuration streams.
+//
+//   One row per (StreamName, EntityId, FieldName) that changed between the
+//   previous and current observation windows. Used by workbooks and analytic
+//   rules to surface configuration changes.
+//
+// PARAMETERS:
+//   lookback - ISO 8601 duration, default 24h. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 1h.  How recent counts as "current".
+//
+// INVOCATION:
+//   MDE_Drift_P0Compliance(24h, 1h) | where StreamName == "MDE_AdvancedFeatures_CL"
+//
+// NOTES:
+//   - Returns an empty result if no drift.
+//   - Uses `hash(RawJson)` for fast inequality check, then expands field-level
+//     deltas only when hashes differ.
+//   - Removed-stream history lives in docs/STREAMS-REMOVED.md + CHANGELOG.md.
+
+let lookback = 24h;
+let window = 1h;
+let sources = union withsource=_Table
+    MDE_AdvancedFeatures_CL,
+    MDE_PUAConfig_CL,
+    MDE_AntivirusPolicy_CL,
+    MDE_DeviceControlPolicy_CL,
+    MDE_WebContentFiltering_CL,
+    MDE_SmartScreenConfig_CL,
+    MDE_TenantAllowBlock_CL,
+    MDE_CustomCollection_CL,
+    MDE_LiveResponseConfig_CL,
+    MDE_AlertServiceConfig_CL,
+    MDE_AlertTuning_CL,
+    MDE_SuppressionRules_CL,
+    MDE_CustomDetections_CL,
+    MDE_AuthenticatedTelemetry_CL,
+    MDE_PreviewFeatures_CL
+    | where TimeGenerated > ago(lookback);
+let current = sources
+    | where TimeGenerated > ago(window)
+    | summarize arg_max(TimeGenerated, *) by _Table, EntityId;
+let previous = sources
+    | where TimeGenerated between (ago(lookback) .. ago(window))
+    | summarize arg_max(TimeGenerated, *) by _Table, EntityId;
+current
+| join kind=leftouter previous on _Table, EntityId
+| where hash(tostring(RawJson)) != hash(tostring(RawJson1)) or isnull(RawJson1)
+| extend CurrentFields  = bag_keys(parse_json(RawJson))
+| extend PreviousFields = iff(isnull(RawJson1), dynamic([]), bag_keys(parse_json(RawJson1)))
+| mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (
+    extend
+        NewValue = tostring(parse_json(RawJson)[tostring(field)]),
+        OldValue = tostring(iff(isnull(RawJson1), '', parse_json(RawJson1)[tostring(field)]))
+    | where NewValue != OldValue
+  )
+| project
+    TimeGenerated,
+    StreamName       = _Table,
+    EntityId,
+    FieldName        = tostring(field),
+    OldValue,
+    NewValue,
+    SnapshotCurrent  = TimeGenerated,
+    SnapshotPrevious = TimeGenerated1,
+    ChangeType       = iff(isnull(RawJson1), "Added", iff(isnull(parse_json(RawJson)[tostring(field)]), "Removed", "Modified"))

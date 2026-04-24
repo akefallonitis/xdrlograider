@@ -1,0 +1,20 @@
+id: 9d7af2b3-4c6b-4d8f-e1a3-7b6c9f4d2e11
+name: MDE after-hours drift events
+description: |
+  Configuration changes made outside 0900-1700 tenant-local time.
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - Compliance
+  - Drift
+  - DefenderXDR
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  union (MDE_Drift_P0Compliance(7d, 1h)), (MDE_Drift_P1Pipeline(7d, 30m)) | extend HourOfDay = datetime_part("Hour", TimeGenerated), DayOfWeek = dayofweek(TimeGenerated) | where HourOfDay < 9 or HourOfDay >= 17 or DayOfWeek == 0d or DayOfWeek == 6d

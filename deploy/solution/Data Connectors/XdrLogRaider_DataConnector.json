@@ -1,0 +1,134 @@
+{
+  "id": "XdrLogRaiderInternal",
+  "title": "XdrLogRaider — Defender XDR Internal Telemetry",
+  "publisher": "Community",
+  "descriptionMarkdown": "Ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance) that is not exposed by public Graph Security / Defender XDR / MDE public APIs.\n\n- **45 data streams** across 7 compliance tiers (P0 Compliance, P1 Pipeline, P2 Governance, P3 Exposure, P5 Identity, P6 Audit/AIR, P7 Metadata) + 2 operational streams (Heartbeat, AuthTestResult) = **47 custom tables**\n- Drift detection via pure KQL in 6 tier parsers (Design A — RawJson blob + query-time hash)\n- 6 workbooks, 14 analytic rules (ship disabled), 9 hunting queries\n- 3 auth methods: Credentials+TOTP and Software Passkey for unattended production; DirectCookies for laptop-level pre-deploy testing only\n\nSee [repo README](https://github.com/akefallonitis/xdrlograider) for setup, deployment, permissions, and operator runbook.",
+  "graphQueriesTableName": "MDE_Heartbeat_CL",
+  "graphQueries": [
+    {
+      "metricName": "Heartbeat (last 24h)",
+      "legend": "XdrLogRaider heartbeats",
+      "baseQuery": "MDE_Heartbeat_CL | where TimeGenerated > ago(24h) | summarize count() by bin(TimeGenerated, 1h)"
+    }
+  ],
+  "sampleQueries": [
+    {
+      "description": "Recent auth self-test results",
+      "query": "MDE_AuthTestResult_CL | order by TimeGenerated desc | take 10"
+    },
+    {
+      "description": "Heartbeat by tier, last 24h (including Rate429Count + GzipBytes from Notes)",
+      "query": "MDE_Heartbeat_CL | where TimeGenerated > ago(24h) | extend n = parse_json(Notes) | project TimeGenerated, Tier, FunctionName, StreamsSucceeded, StreamsAttempted, RowsIngested, LatencyMs, Rate429Count = toint(n.rate429Count), GzipBytes = tolong(n.gzipBytes)"
+    },
+    {
+      "description": "Suppression rules modified in the last 24h",
+      "query": "MDE_SuppressionRules_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, RawJson"
+    }
+  ],
+  "dataTypes": [
+    { "name": "MDE_Heartbeat_CL",                "lastDataReceivedQuery": "MDE_Heartbeat_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_AuthTestResult_CL",           "lastDataReceivedQuery": "MDE_AuthTestResult_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_AdvancedFeatures_CL",         "lastDataReceivedQuery": "MDE_AdvancedFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_PreviewFeatures_CL",          "lastDataReceivedQuery": "MDE_PreviewFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_AlertServiceConfig_CL",       "lastDataReceivedQuery": "MDE_AlertServiceConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_AlertTuning_CL",              "lastDataReceivedQuery": "MDE_AlertTuning_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_SuppressionRules_CL",         "lastDataReceivedQuery": "MDE_SuppressionRules_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_CustomDetections_CL",         "lastDataReceivedQuery": "MDE_CustomDetections_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_DeviceControlPolicy_CL",      "lastDataReceivedQuery": "MDE_DeviceControlPolicy_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_WebContentFiltering_CL",      "lastDataReceivedQuery": "MDE_WebContentFiltering_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_SmartScreenConfig_CL",        "lastDataReceivedQuery": "MDE_SmartScreenConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_LiveResponseConfig_CL",       "lastDataReceivedQuery": "MDE_LiveResponseConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_AuthenticatedTelemetry_CL",   "lastDataReceivedQuery": "MDE_AuthenticatedTelemetry_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_PUAConfig_CL",                "lastDataReceivedQuery": "MDE_PUAConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_AntivirusPolicy_CL",          "lastDataReceivedQuery": "MDE_AntivirusPolicy_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_TenantAllowBlock_CL",         "lastDataReceivedQuery": "MDE_TenantAllowBlock_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_CustomCollection_CL",         "lastDataReceivedQuery": "MDE_CustomCollection_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_DataExportSettings_CL",       "lastDataReceivedQuery": "MDE_DataExportSettings_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_ConnectedApps_CL",            "lastDataReceivedQuery": "MDE_ConnectedApps_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_TenantContext_CL",            "lastDataReceivedQuery": "MDE_TenantContext_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_TenantWorkloadStatus_CL",     "lastDataReceivedQuery": "MDE_TenantWorkloadStatus_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_StreamingApiConfig_CL",       "lastDataReceivedQuery": "MDE_StreamingApiConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_IntuneConnection_CL",         "lastDataReceivedQuery": "MDE_IntuneConnection_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_PurviewSharing_CL",           "lastDataReceivedQuery": "MDE_PurviewSharing_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_RbacDeviceGroups_CL",         "lastDataReceivedQuery": "MDE_RbacDeviceGroups_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_UnifiedRbacRoles_CL",         "lastDataReceivedQuery": "MDE_UnifiedRbacRoles_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_AssetRules_CL",               "lastDataReceivedQuery": "MDE_AssetRules_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_SAClassification_CL",         "lastDataReceivedQuery": "MDE_SAClassification_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_XspmInitiatives_CL",          "lastDataReceivedQuery": "MDE_XspmInitiatives_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_ExposureSnapshots_CL",        "lastDataReceivedQuery": "MDE_ExposureSnapshots_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_SecureScoreBreakdown_CL",     "lastDataReceivedQuery": "MDE_SecureScoreBreakdown_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_ExposureRecommendations_CL",  "lastDataReceivedQuery": "MDE_ExposureRecommendations_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_XspmAttackPaths_CL",          "lastDataReceivedQuery": "MDE_XspmAttackPaths_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_XspmChokePoints_CL",          "lastDataReceivedQuery": "MDE_XspmChokePoints_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_XspmTopTargets_CL",           "lastDataReceivedQuery": "MDE_XspmTopTargets_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_SecurityBaselines_CL",        "lastDataReceivedQuery": "MDE_SecurityBaselines_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_IdentityOnboarding_CL",       "lastDataReceivedQuery": "MDE_IdentityOnboarding_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_IdentityServiceAccounts_CL",  "lastDataReceivedQuery": "MDE_IdentityServiceAccounts_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_DCCoverage_CL",               "lastDataReceivedQuery": "MDE_DCCoverage_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_IdentityAlertThresholds_CL",  "lastDataReceivedQuery": "MDE_IdentityAlertThresholds_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_RemediationAccounts_CL",      "lastDataReceivedQuery": "MDE_RemediationAccounts_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_ActionCenter_CL",             "lastDataReceivedQuery": "MDE_ActionCenter_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_ThreatAnalytics_CL",          "lastDataReceivedQuery": "MDE_ThreatAnalytics_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_UserPreferences_CL",          "lastDataReceivedQuery": "MDE_UserPreferences_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_MtoTenants_CL",               "lastDataReceivedQuery": "MDE_MtoTenants_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_LicenseReport_CL",            "lastDataReceivedQuery": "MDE_LicenseReport_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_CloudAppsConfig_CL",          "lastDataReceivedQuery": "MDE_CloudAppsConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
+  ],
+  "connectivityCriteria": [
+    {
+      "type": "IsConnectedQuery",
+      "value": [ "MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | count | where Count > 0" ]
+    }
+  ],
+  "availability": {
+    "status": 1,
+    "isPreview": true
+  },
+  "permissions": {
+    "resourceProvider": [
+      {
+        "provider": "Microsoft.OperationalInsights/workspaces",
+        "permissionsDisplayText": "read and write permissions on the workspace",
+        "providerDisplayName": "Workspace",
+        "scope": "Workspace",
+        "requiredPermissions": { "read": true, "write": true, "delete": true }
+      }
+    ],
+    "customs": [
+      {
+        "name": "Service account",
+        "description": "Dedicated read-only Entra service account with Security Reader + Defender XDR Analyst roles. Production auth: Credentials+TOTP or Software Passkey (both auto-refresh via Key Vault). DirectCookies is testing-only — not supported for unattended Function App deployment."
+      }
+    ]
+  },
+  "instructionSteps": [
+    {
+      "title": "Deploy the Function App",
+      "description": "Deploy the ARM template via the [Deploy to Azure](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fmain%2Fdeploy%2Fcompiled%2FmainTemplate.json) button. Fill the wizard and wait ~10 minutes."
+    },
+    {
+      "title": "Upload auth secrets to Key Vault",
+      "description": "After deployment, run the initialization script from your local machine:",
+      "instructions": [
+        {
+          "type": "CopyableLabel",
+          "parameters": {
+            "label": "git clone https://github.com/akefallonitis/xdrlograider && cd xdrlograider && ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName <from-deployment-output>"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Wait for self-test",
+      "description": "Within 5 minutes the Function App validates auth and writes a row to MDE_AuthTestResult_CL:",
+      "instructions": [
+        {
+          "type": "CopyableLabel",
+          "parameters": {
+            "label": "MDE_AuthTestResult_CL | order by TimeGenerated desc | take 1 | project TimeGenerated, Success, Stage, FailureReason"
+          }
+        }
+      ]
+    }
+  ]
+}
