@@ -50,6 +50,10 @@ function Invoke-MDEPortalEndpoint {
     .DESCRIPTION
         Returns @{ Success=$true; Data=<response> } on success or @{ Success=$false; Error=$msg } on failure.
         Timer functions use this to track per-stream success without stopping the whole batch.
+
+        Supports optional `-AdditionalHeaders` hashtable for endpoints requiring
+        extra HTTP headers (e.g. XSPM requires `x-tid` + `x-ms-scenario-name`).
+        Manifest-driven callers route their entry's `Headers` field here.
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -58,11 +62,13 @@ function Invoke-MDEPortalEndpoint {
         [Parameter(Mandatory)] [string] $Path,
         [string] $Method = 'GET',
         $Body = $null,
-        [int] $TimeoutSec = 60
+        [int] $TimeoutSec = 60,
+        [hashtable] $AdditionalHeaders = @{}
     )
 
     try {
-        $data = Invoke-MDEPortalRequest -Session $Session -Path $Path -Method $Method -Body $Body -TimeoutSec $TimeoutSec
+        $data = Invoke-MDEPortalRequest -Session $Session -Path $Path -Method $Method `
+            -Body $Body -TimeoutSec $TimeoutSec -AdditionalHeaders $AdditionalHeaders
         return @{ Success = $true; Data = $data; Path = $Path }
     } catch {
         return @{ Success = $false; Error = $_.Exception.Message; Path = $Path }
@@ -75,9 +81,11 @@ function Expand-MDEResponse {
         Flattens a portal response into an enumerable of entity objects with extracted IDs.
 
     .DESCRIPTION
-        Handles the two common shapes:
+        Handles the three common shapes:
           - array of objects (each with an 'id' or 'name' field)
           - object with named properties (each property becomes an entity)
+          - wrapper object with a single array property (e.g. {ServiceAccounts:[...]}),
+            unwrapped via the -UnwrapProperty parameter before array handling
 
         Returns an array of @{ Id = '...'; Entity = <obj> } pairs.
 
@@ -86,15 +94,34 @@ function Expand-MDEResponse {
 
     .PARAMETER IdProperty
         Name of the field to use as entity ID. Default 'id', falls back to 'name' then 'Id' then 'Name'.
+
+    .PARAMETER UnwrapProperty
+        Optional. When supplied and the response is a wrapper object with that
+        property (e.g. `{"ServiceAccounts": [...]}` with UnwrapProperty='ServiceAccounts'),
+        the inner value replaces `$Response` before normal array/object handling.
+        Without this, wrapper objects would otherwise flatten to one pair per
+        top-level property, which is semantically wrong for paged bulk endpoints.
     #>
     [CmdletBinding()]
     [OutputType([hashtable[]])]
     param(
         $Response,
-        [string[]] $IdProperty = @('id', 'name', 'Id', 'Name', 'ruleId', 'policyId')
+        [string[]] $IdProperty = @('id', 'name', 'Id', 'Name', 'ruleId', 'policyId'),
+        [string] $UnwrapProperty
     )
 
     if ($null -eq $Response) { return @() }
+
+    # Unwrap wrapper objects like {ServiceAccounts:[...]} or {value:[...]} BEFORE
+    # the generic array/object branches so paged bulk endpoints don't get flattened
+    # as "one entity per top-level key". Caller specifies the wrapper property name
+    # via the manifest entry's `UnwrapProperty` field.
+    if ($UnwrapProperty -and ($Response -is [pscustomobject] -or $Response -is [hashtable])) {
+        if ($Response.PSObject.Properties[$UnwrapProperty]) {
+            $Response = $Response.$UnwrapProperty
+            if ($null -eq $Response) { return @() }
+        }
+    }
 
     $pairs = @()
 

@@ -2,7 +2,7 @@
 
 Full walk-through from nothing to a working XdrLogRaider deployment.
 
-> **Scope** of this template: it deploys the **connector** (Function App + KV + Storage + DCE + DCR + App Insights + Sentinel content) and adds **54 custom tables + a Data Connector UI card** to your **existing** Sentinel workspace via cross-RG nested deployments. It does **NOT** create or modify your workspace itself.
+> **Scope** of this template: it deploys the **connector** (Function App + KV + Storage + DCE + DCR + App Insights + Sentinel content) and adds **47 custom tables + a Data Connector UI card** to your **existing** Sentinel workspace via cross-RG nested deployments. It does **NOT** create or modify your workspace itself.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ Full walk-through from nothing to a working XdrLogRaider deployment.
 | What you need | Where | Why |
 |---|---|---|
 | **Contributor** (or Owner) on the target RG | Azure subscription | Deploys connector resources (FA/KV/Storage/DCE/DCR/AI) + role assignments |
-| **Log Analytics Contributor** (or Contributor) on the workspace RG | Workspace subscription | Creates the 54 custom tables + Data Connector UI card as workspace sub-resources (cross-RG supported) |
+| **Log Analytics Contributor** (or Contributor) on the workspace RG | Workspace subscription | Creates the 47 custom tables + Data Connector UI card as workspace sub-resources (cross-RG supported) |
 | **User Administrator** | Entra ID | Creates the read-only service account |
 | **Privileged Role Administrator** | Entra ID | Grants `Security Reader` + `Defender XDR Analyst` to the service account |
 | **Key Vault Secrets Officer** (inherited from Contributor/Owner) | The deployed KV | Upload auth secrets via `Initialize-XdrLogRaiderAuth.ps1` |
@@ -51,11 +51,11 @@ The deploy creates resources in **two distinct scopes**:
                            │ cross-RG nested deployments (2)
                            ▼
 ┌── Workspace RG (where your existing Sentinel workspace lives)─┐
-│     - 54 custom tables in the workspace (52 telemetry +       │
+│     - 47 custom tables in the workspace (45 telemetry +       │
 │       MDE_Heartbeat_CL + MDE_AuthTestResult_CL)               │
 │     - Sentinel Data Connector UI card                         │
-│     - 6 KQL parsers + 6 workbooks + 15 analytic rules +       │
-│       10 hunting queries (via sentinelContent.json)           │
+│     - 6 KQL parsers + 6 workbooks + 14 analytic rules +       │
+│       9 hunting queries (via sentinelContent.json)           │
 └───────────────────────────────────────────────────────────────┘
 ```
 

@@ -2,9 +2,8 @@ id: 0e8bf3c4-5d7c-4e9a-f2b4-8c7d0a5e3f12
 name: MDE silent bypass indicators
 description: |
   Composite signal combining suppression-rule additions + PUA protection disables
-  in the same day. v1.0.2: dropped ASR downgrades (MDE_AsrRulesConfig_CL removed
-  — no public API for ASR config via portal). Original scope also included
-  "ASR mode downgrade" dimension; re-add once Intune/Graph coverage is scoped.
+  in the same day. Both are legitimate admin actions on their own; together they
+  suggest an attacker quieting alerts before running unwanted code.
 requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal
     dataTypes:

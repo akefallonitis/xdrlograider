@@ -36,16 +36,16 @@ function Invoke-MDETierPoll {
           DceEndpoint, DcrImmutableId, StorageAccountName, CheckpointTable.
 
     .PARAMETER IncludeDeferred
-        By default streams with `Deferred = $true` in the manifest are skipped
-        (their DCR/custom-table is kept so the stream can be re-enabled without
-        a redeploy). Pass -IncludeDeferred to force every stream in the tier,
-        including deferred ones — useful for the live audit tool.
+        DEPRECATED — v0.1.0-beta.1 removed the `Deferred` flag in favour of
+        `Availability` (live|tenant-gated|role-gated). Every entry is attempted
+        by default; tenant-gated/role-gated streams 4xx gracefully and produce
+        zero rows without failure. The switch is retained for back-compat.
 
     .OUTPUTS
         [pscustomobject] with fields:
           StreamsAttempted  [int]
           StreamsSucceeded  [int]
-          StreamsSkipped    [int]   (count of deferred-and-not-included)
+          StreamsSkipped    [int]   (always 0 post v0.1.0-beta.1; retained for compat)
           RowsIngested      [int]
           Errors            [hashtable]  (stream-name → error message)
 
@@ -95,13 +95,15 @@ function Invoke-MDETierPoll {
     foreach ($entry in $tierStreams) {
         $stream = $entry.Stream
 
-        # Skip deferred streams unless caller explicitly opts in. We still keep
-        # the DCR/custom-table provisioned so the stream can be flipped back on
-        # with a single manifest edit once the upstream path is understood.
+        # v0.1.0-beta.1: `Deferred` flag is deprecated. Every entry in the manifest
+        # has a documented wire contract and is attempted every poll cycle.
+        # tenant-gated / role-gated streams 4xx gracefully — caught by the try
+        # below, producing zero rows without failing the tier. Back-compat: if an
+        # older manifest still carries Deferred=$true and the caller passes
+        # -IncludeDeferred:$false, we honour that too.
         if ((-not $IncludeDeferred.IsPresent) -and $entry.ContainsKey('Deferred') -and $entry.Deferred) {
             $streamsSkipped++
-            $reason = if ($entry.ContainsKey('DeferReason') -and $entry.DeferReason) { $entry.DeferReason } else { 'no reason recorded' }
-            Write-Verbose "Invoke-MDETierPoll Tier='$Tier' Stream='$stream' skipped (Deferred=true): $reason"
+            Write-Verbose "Invoke-MDETierPoll Tier='$Tier' Stream='$stream' skipped (legacy Deferred=true)"
             continue
         }
 

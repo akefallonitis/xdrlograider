@@ -26,12 +26,25 @@ function Invoke-MDEPortalRequest {
     .PARAMETER TimeoutSec
         Per-request timeout. Default 60s.
 
+    .PARAMETER AdditionalHeaders
+        Optional extra HTTP headers. Merged AFTER the hardcoded defaults
+        (X-XSRF-TOKEN, Accept, X-Requested-With) so caller-supplied values
+        OVERRIDE the defaults. Used by XSPM endpoints that require
+        `x-tid` (tenant GUID) + `x-ms-scenario-name` (portal telemetry tag).
+
     .OUTPUTS
         [pscustomobject] parsed JSON response body.
 
     .EXAMPLE
         $session = Connect-MDEPortal -Method CredentialsTotp -Credential $creds
         Invoke-MDEPortalRequest -Session $session -Path '/api/settings/GetAdvancedFeaturesSetting'
+
+    .EXAMPLE
+        # XSPM call with required scenario-name + tenant-id headers
+        Invoke-MDEPortalRequest -Session $session `
+            -Path '/apiproxy/mtp/xspmatlas/attacksurface/query' -Method POST `
+            -Body @{query='AttackPathsV2'; options=@{top=100;skip=0}; apiVersion='v2'} `
+            -AdditionalHeaders @{'x-tid'=$session.TenantId; 'x-ms-scenario-name'='AttackPathOverview_get_has_attack_paths'}
     #>
     [CmdletBinding()]
     [OutputType([pscustomobject])]
@@ -41,7 +54,8 @@ function Invoke-MDEPortalRequest {
         [string] $Method = 'GET',
         $Body = $null,
         [string] $ContentType,
-        [int] $TimeoutSec = 60
+        [int] $TimeoutSec = 60,
+        [hashtable] $AdditionalHeaders = @{}
     )
 
     $portalHost = $Session.PortalHost
@@ -61,6 +75,14 @@ function Invoke-MDEPortalRequest {
             'X-XSRF-TOKEN'     = $xsrf
             'Accept'           = 'application/json'
             'X-Requested-With' = 'XMLHttpRequest'
+        }
+
+        # Merge caller-supplied headers after defaults so caller values override
+        # (enables e.g. XSPM's x-tid + x-ms-scenario-name without losing XSRF).
+        if ($AdditionalHeaders -and $AdditionalHeaders.Count -gt 0) {
+            foreach ($k in $AdditionalHeaders.Keys) {
+                $headers[$k] = $AdditionalHeaders[$k]
+            }
         }
 
         $params = @{

@@ -8,14 +8,12 @@
 // INVOCATION:
 //   MDE_Drift_P2Governance(7d, 1d)
 
-// v1.0.2: removed MDE_ApprovalAssignments_CL (NO_PUBLIC_API). Now 6 P2 streams.
+// Removed-stream history lives in docs/STREAMS-REMOVED.md + CHANGELOG.md.
 let lookback = 7d;
 let window = 1d;
 let sources = union withsource=_Table
     MDE_RbacDeviceGroups_CL,
     MDE_UnifiedRbacRoles_CL,
-    MDE_DeviceCriticality_CL,
-    MDE_CriticalAssets_CL,
     MDE_AssetRules_CL,
     MDE_SAClassification_CL
     | where TimeGenerated > ago(lookback);

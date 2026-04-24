@@ -1,13 +1,14 @@
 {
-  "Stream": "MDE_ExposureSnapshots_CL",
+  "Stream": "MDE_XspmAttackPaths_CL",
   "Tier": "P3",
+  "Availability": "tenant-gated",
   "Deferred": false,
-  "Method": "GET",
-  "Path": "/apiproxy/mtp/posture/oversight/updates",
-  "Status": "200",
-  "RawPath": "tests\\fixtures\\live-responses\\MDE_ExposureSnapshots_CL-raw.json",
-  "IngestPath": "tests\\fixtures\\live-responses\\MDE_ExposureSnapshots_CL-ingest.json",
-  "RawSizeBytes": 43,
-  "IngestRowCount": 2,
-  "Notes": ""
+  "Method": "POST",
+  "Path": "/apiproxy/mtp/xspmatlas/attacksurface/query",
+  "Status": "400",
+  "RawPath": "tests\\fixtures\\live-responses\\MDE_XspmAttackPaths_CL-raw.json",
+  "IngestPath": "",
+  "RawSizeBytes": 0,
+  "IngestRowCount": 0,
+  "Notes": "400 — expected (tenant-gated); marker fixture written"
 }

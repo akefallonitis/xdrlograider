@@ -200,19 +200,22 @@ Describe 'Bicep source — files present' {
 }
 
 Describe 'DCR streams — completeness' {
-    It 'DCR includes 47 MDE_*_CL data stream declarations + 2 operational tables (v1.0.2)' {
-        # v1.0.2: 47 = 15 P0 + 7 P1 + 6 P2 + 8 P3 + 5 P5 + 2 P6 + 4 P7
-        # Removed from v1.0.1 (5 streams, NO_PUBLIC_API): MDE_AsrRulesConfig_CL,
-        # MDE_AntiRansomwareConfig_CL, MDE_ControlledFolderAccess_CL,
-        # MDE_NetworkProtectionConfig_CL, MDE_ApprovalAssignments_CL.
-        # (P4 DeviceTimeline + AirDecisions + InvestigationPackage dropped from v1.0 scope.)
+    It 'DCR includes 45 MDE_*_CL data stream declarations + 2 operational tables (v0.1.0-beta.1)' {
+        # v0.1.0-beta.1: 45 = 15 P0 + 7 P1 + 4 P2 + 8 P3 + 5 P5 + 2 P6 + 4 P7
+        # v0.1.0-beta.1 removals (2 WRITE endpoints per XDRInternals):
+        #   MDE_CriticalAssets_CL, MDE_DeviceCriticality_CL.
+        # Earlier v1.0.2 removals (NO_PUBLIC_API):
+        #   MDE_AsrRulesConfig_CL, MDE_AntiRansomwareConfig_CL,
+        #   MDE_ControlledFolderAccess_CL, MDE_NetworkProtectionConfig_CL,
+        #   MDE_ApprovalAssignments_CL.
         $dceDcrBicep = Get-Content (Join-Path $script:DeployDir 'modules' 'dce-dcr.bicep') -Raw
         $streams = [regex]::Matches($dceDcrBicep, "'(MDE_\w+_CL)'") | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
-        $streams.Count | Should -BeGreaterOrEqual 49  # 47 data streams + Heartbeat + AuthTestResult
+        $streams.Count | Should -BeGreaterOrEqual 47  # 45 data streams + Heartbeat + AuthTestResult
     }
 
-    It 'DCR has NO dropped streams (AirDecisions, InvestigationPackage, DeviceTimeline, v1.0.2 removals)' {
+    It 'DCR has NO dropped streams (v1.0.0 P4 + v1.0.2 + v0.1.0-beta.1 removals)' {
         $dceDcrBicep = Get-Content (Join-Path $script:DeployDir 'modules' 'dce-dcr.bicep') -Raw
+        # v1.0.0 early drops
         $dceDcrBicep | Should -Not -Match 'MDE_AirDecisions'
         $dceDcrBicep | Should -Not -Match 'MDE_InvestigationPackage'
         $dceDcrBicep | Should -Not -Match 'MDE_DeviceTimeline'
@@ -222,5 +225,8 @@ Describe 'DCR streams — completeness' {
         $dceDcrBicep | Should -Not -Match 'MDE_ControlledFolderAccess_CL'
         $dceDcrBicep | Should -Not -Match 'MDE_NetworkProtectionConfig_CL'
         $dceDcrBicep | Should -Not -Match 'MDE_ApprovalAssignments_CL'
+        # v0.1.0-beta.1 write-endpoint removals
+        $dceDcrBicep | Should -Not -Match 'MDE_CriticalAssets_CL'
+        $dceDcrBicep | Should -Not -Match 'MDE_DeviceCriticality_CL'
     }
 }

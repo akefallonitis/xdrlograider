@@ -27,14 +27,14 @@ Consolidated reference for every permission XdrLogRaider needs — at setup time
 | Role | Scope | Reason |
 |---|---|---|
 | **Owner** | Connector RG | All Azure resource creation + role assignments (survives Azure Policy restrictions on `Microsoft.Authorization/roleAssignments/write`) |
-| **Owner** *(or Log Analytics Contributor + Microsoft Sentinel Contributor)* | Workspace RG | Write 54 custom tables, savedSearches (parsers + hunting queries), workbooks, and analytic rules via cross-RG nested deployments |
+| **Owner** *(or Log Analytics Contributor + Microsoft Sentinel Contributor)* | Workspace RG | Write 47 custom tables, savedSearches (parsers + hunting queries), workbooks, and analytic rules via cross-RG nested deployments |
 
 **Fine-grained alternative** (if you can't get Owner):
 | Role | Scope | Covers |
 |---|---|---|
 | **Contributor** | Connector RG | Create FA/Plan/KV/Storage/DCE/DCR/AI |
 | **User Access Administrator** | Connector RG | Role assignments for the FA's Managed Identity (3× on KV/Storage/DCR) |
-| **Log Analytics Contributor** | Workspace RG | Write 54 custom tables + savedSearches |
+| **Log Analytics Contributor** | Workspace RG | Write 47 custom tables + savedSearches |
 | **Microsoft Sentinel Contributor** | Workspace | Write analytic rules, hunting queries, workbooks, data-connector UI card |
 | **Key Vault Secrets Officer** | Deployed KV | Upload auth secrets — inherited if you're Contributor/Owner on the RG |
 

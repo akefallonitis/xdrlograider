@@ -28,8 +28,10 @@ BeforeDiscovery {
     $manifest     = Import-PowerShellDataFile -Path $manifestPath
 
     # StrictMode-safe enumeration: ContainsKey() before dot-access.
+    # v0.1.0-beta.1: 'live' availability = streams returning 200 on test tenant.
+    # tenant-gated/role-gated entries have correct wire contract but no fixture.
     $script:ActiveStreams = $manifest.Endpoints |
-        Where-Object { -not ($_.ContainsKey('Deferred') -and $_.Deferred) } |
+        Where-Object { $_.ContainsKey('Availability') -and $_.Availability -eq 'live' } |
         ForEach-Object { @{ Stream = $_.Stream; Tier = $_.Tier } }
 }
 
@@ -86,8 +88,8 @@ Describe 'DCR stream declarations — invariants' {
         $extras.Count | Should -Be 0 -Because "DCR AuthTestResult schema has extra columns: $($extras -join ', ')"
     }
 
-    It 'DCR declares exactly 49 streams (47 data + 2 system)' {
-        $script:DcrStreamDecls.Count | Should -Be 49
+    It 'DCR declares exactly 47 streams (45 data + 2 system)' {
+        $script:DcrStreamDecls.Count | Should -Be 47
     }
 }
 

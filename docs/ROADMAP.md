@@ -5,8 +5,8 @@
 - Two unattended auth methods (Credentials+TOTP, Passkey)
 - 6 KQL drift parsers
 - 6 workbooks
-- 15 analytic rules
-- 10 hunting queries
+- 14 analytic rules
+- 9 hunting queries
 - Full docs + CI (unit + validate + integration + e2e)
 
 ## v1.1 (planned)

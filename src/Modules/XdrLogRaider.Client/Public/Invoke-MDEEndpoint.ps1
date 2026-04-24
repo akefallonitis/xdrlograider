@@ -96,8 +96,21 @@ function Invoke-MDEEndpoint {
         if ($entry.ContainsKey('Body') -and $entry.Body) { $entry.Body } else { @{} }
     } else { $null }
 
+    # --- Optional custom headers (e.g. XSPM requires x-tid + x-ms-scenario-name) ---
+    # Supports template token {TenantId} → resolved from session's TenantId.
+    $extraHeaders = @{}
+    if ($entry.ContainsKey('Headers') -and $entry.Headers) {
+        foreach ($key in $entry.Headers.Keys) {
+            $val = $entry.Headers[$key]
+            if ($val -is [string] -and $val -match '^\{TenantId\}$') {
+                $val = [string]$Session.TenantId
+            }
+            $extraHeaders[$key] = $val
+        }
+    }
+
     # --- Call ---
-    $r = Invoke-MDEPortalEndpoint -Session $Session -Path $path -Method $httpMethod -Body $postBody
+    $r = Invoke-MDEPortalEndpoint -Session $Session -Path $path -Method $httpMethod -Body $postBody -AdditionalHeaders $extraHeaders
     if (-not $r.Success) {
         Write-Warning "Invoke-MDEEndpoint Stream='$Stream' failed: $($r.Error)"
         return ,@()
@@ -112,6 +125,10 @@ function Invoke-MDEEndpoint {
     $expandArgs = @{ Response = $r.Data }
     if ($entry.ContainsKey('IdProperty') -and $entry.IdProperty) {
         $expandArgs['IdProperty'] = [string[]]$entry.IdProperty
+    }
+    # UnwrapProperty for responses wrapped in an object (e.g. {ServiceAccounts:[...]}).
+    if ($entry.ContainsKey('UnwrapProperty') -and $entry.UnwrapProperty) {
+        $expandArgs['UnwrapProperty'] = [string]$entry.UnwrapProperty
     }
 
     # Per-call Extras: carry any PathParams so ingested rows are self-describing

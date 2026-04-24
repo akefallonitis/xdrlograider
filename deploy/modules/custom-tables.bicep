@@ -15,12 +15,10 @@ var commonColumns = [
   { name: 'RawJson', type: 'dynamic' }
 ]
 
-// v1.0.2: 47 data tables + 2 operational tables = 49 total.
-// Removed from v1.0.1 (5 streams, NO_PUBLIC_API): MDE_AsrRulesConfig_CL,
-// MDE_AntiRansomwareConfig_CL, MDE_ControlledFolderAccess_CL,
-// MDE_NetworkProtectionConfig_CL, MDE_ApprovalAssignments_CL.
-// Reason: no portal API exists; these features are only in Intune/Graph scope.
-// See src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1 header for full audit.
+// v0.1.0-beta.1: 45 data tables + 2 operational tables = 47 total.
+// Full removed-stream history (write endpoints, NO_PUBLIC_API, etc.) lives in
+// docs/STREAMS-REMOVED.md. Do NOT inline removed stream names in this Bicep
+// source — CI grep-gates the file against them.
 //
 // Schema strategy: common 4-column baseline for data streams (TimeGenerated,
 // SourceStream, EntityId, RawJson). Heartbeat + AuthTestResult get extended
@@ -50,8 +48,6 @@ var dataStreamTables = [
   'MDE_TenantWorkloadStatus_CL'
   'MDE_RbacDeviceGroups_CL'
   'MDE_UnifiedRbacRoles_CL'
-  'MDE_DeviceCriticality_CL'
-  'MDE_CriticalAssets_CL'
   'MDE_AssetRules_CL'
   'MDE_SAClassification_CL'
   'MDE_XspmAttackPaths_CL'

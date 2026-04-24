@@ -4,6 +4,79 @@ All notable changes to this project will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+> **Versioning note.** v1.0.0-v1.0.2 were aspirational "production" labels that
+> predated end-to-end live verification. `v0.1.0-beta.1` is the first release
+> that has been audited against the operator-click → first-row-in-LA pipeline
+> with every endpoint documented, every auth method proven, every Sentinel
+> content query cross-checked against live fixtures. The v1.0.x tags remain
+> as historical iterations but are superseded. Promotion path:
+> v0.1.0-beta.1 → v0.1.0 GA (after 30-day tenant soak) → v1.0.0 production
+> (after ≥2 external operators complete soak). See docs/ROADMAP.md.
+
+## [0.1.0-beta.1] - 2026-04-23
+
+### Architectural cleanup
+
+- **Availability tag replaces Deferred flag.** Manifest entries no longer carry `Deferred=$true` / `DeferReason`. Every entry now has one of three `Availability` values: `live` (28 — returns 200 on a Security Reader tenant today), `tenant-gated` (15 — 4xx because feature not provisioned; activates automatically), `role-gated` (2 — 403 because service account lacks higher role). Per-tenant zero-row outcomes are tenant-state, not connector bugs.
+- **Manifest extended with `Headers` + `UnwrapProperty` fields.** `Headers` supports custom HTTP headers with template-token `{TenantId}` resolved at dispatch time (required by XSPM endpoints for `x-tid` + `x-ms-scenario-name`). `UnwrapProperty` tells `Expand-MDEResponse` to unwrap wrapper objects like `{ServiceAccounts:[...]}` before flattening.
+- **Drift stays on the KQL side** (user-confirmed design). RawJson remains `dynamic`; DCR is thin passthrough; drift is computed via `hash(RawJson)` at query time in `MDE_Drift_P*.kql` parsers. Schema is schema-agnostic — re-parseable as response shapes evolve.
+- **Deploy-flow audit** (`docs/DEPLOY-FLOW-AUDIT.md`) verifies 10 hops from operator-click → first row in LA: ARM dependencies, SAMI role scopes, envvar ↔ appSettings mapping, KV secret-name 1:1 consistency, cross-RG nested deployment params, Sentinel Solution zip structure, `host.json` production tuning, `requirements.psd1` version pinning.
+
+### Manifest changes (v1.0.2 → v0.1.0-beta.1)
+
+**Removed 2 write endpoints** (documented in `docs/STREAMS-REMOVED.md`):
+- `MDE_CriticalAssets_CL` — XDRInternals `Set-XdrEndpointDeviceCriticalityLevel.ps1:67-70` confirms this is a POST write endpoint.
+- `MDE_DeviceCriticality_CL` — XDRInternals `Set-XdrEndpointDeviceAssetValue.ps1:53-56` confirms POST write endpoint.
+
+Shipping these as "reads with empty body" corrupts tenant data on a tenant where an admin has previously set criticality labels.
+
+**Activated 4 via XDRInternals-documented bodies**:
+- `MDE_IdentityServiceAccounts_CL` — body `@{PageSize=100;Skip=0;Filters=@{};IncludeAccountActivity=$true}`, UnwrapProperty=`ServiceAccounts` (was `Deferred` with 415 on empty body).
+- `MDE_XspmChokePoints_CL` — path corrected to `/apiproxy/mtp/xspmatlas/attacksurface/query`, inline KQL body from `Get-XdrXspmChokePoint.ps1:95`, Headers `x-tid={TenantId}; x-ms-scenario-name=ChokePoints_get_choke_point_types_filter`.
+- `MDE_XspmTopTargets_CL` — same path, inline KQL from `Get-XdrXspmTopTarget.ps1:62`.
+- `MDE_IdentityOnboarding_CL` — UnwrapProperty=`DomainControllers` added (was returning 200-null because wrapper object wasn't unwrapped).
+
+**Method-corrected 2** (per nodoc, switched POST→GET):
+- `MDE_AntivirusPolicy_CL` — now GET, not POST with empty body.
+- `MDE_TenantAllowBlock_CL` — same.
+
+**1 entry kept tenant-gated pending body discovery**:
+- `MDE_XspmAttackPaths_CL` — same path + headers as ChokePoints/TopTargets, but the documented query-string identifier `AttackPathsV2` returned 400 live. Likely needs inline KQL body; deferred to a future release.
+
+### Additions
+
+- `tools/Capture-EndpointSchemas.ps1` now supports the full manifest (no `-IncludeDeferred` flag needed) and writes **marker fixtures** for tenant-gated / role-gated streams — one-line JSON documenting the expected 4xx so downstream tests detect "expected to skip" rather than fail on missing files.
+- `Invoke-MDEPortalRequest` gains `-AdditionalHeaders` optional param (required for XSPM).
+- `Expand-MDEResponse` gains `-UnwrapProperty` optional param.
+- `Invoke-MDEEndpoint` reads `Headers` + `UnwrapProperty` from manifest entries; resolves `{TenantId}` template token from session.
+- New `docs/DEPLOY-FLOW-AUDIT.md` (10-hop deploy-flow trace + fixes).
+- New `docs/STREAMS-REMOVED.md` (7 removed streams with evidence for each).
+
+### Fixes
+
+- `tests/integration/Audit-Endpoints-Live.ps1:161` — `$_` scoping bug rendered every row's `Path` as hashtable string. Rewrote row composition to use a named iterator + `[char]96` backtick literals.
+- `tests/integration/Predeploy-Validation.Tests.ps1` — hardcoded `52 / 19 / 54` literals replaced with dynamic `(Get-MDEEndpointManifest).Count` reads.
+- `deploy/compiled/sentinelContent.json` — removed lingering `MDE_AsrRulesConfig_CL` reference in hunting-query description. Rebuilt via `Build-SentinelContent.ps1`.
+- `Invoke-MDETierPoll` — `Deferred` flag deprecated but retained for back-compat with older manifests.
+
+### Test matrix
+
+- Offline suite: **1097 pass / 0 fail / 17 skip** (skips = streams with no data on this tenant — e.g. empty responses from `{}` endpoints).
+- 45 fixtures present: 28 real captures + 17 markers. Zero PII leaks.
+- Three auth methods (CredentialsTotp, Passkey, DirectCookies) — CredentialsTotp live-verified via the capture run; Passkey + DirectCookies require operator execution with their respective `.env.local` entries.
+
+### Counts (v1.0.2 → v0.1.0-beta.1)
+
+| Layer | v1.0.2 | v0.1.0-beta.1 |
+|---|---|---|
+| Manifest streams | 47 | **45** |
+| `Deferred` flag | 22 entries | **0 entries** (replaced by Availability) |
+| `live` (200 on test tenant) | 25 | **28** |
+| Tenant/role-gated | 22 | **17** |
+| DCR streamDeclarations | 49 | **47** |
+| Custom tables | 49 | **47** |
+| Offline tests passing | 1075 | **1097** |
+
 ## [1.0.2] - 2026-04-23
 
 ### Changed — production-readiness sweep

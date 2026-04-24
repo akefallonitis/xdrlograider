@@ -64,13 +64,13 @@ XdrLogRaider is a three-layer Sentinel Solution:
 │                                                                        │
 │  ┌────────────────────────────────────────────────────────────┐       │
 │  │ DCE + DCR  (location = WORKSPACE region)                   │       │
-│  │   54 streams declared → routed to LA custom tables         │       │
-│  │   (52 telemetry + MDE_Heartbeat + MDE_AuthTestResult)      │       │
+│  │   47 streams declared → routed to LA custom tables         │       │
+│  │   (45 telemetry + MDE_Heartbeat + MDE_AuthTestResult)      │       │
 │  └────────────────────────────────────────────────────────────┘       │
 └────────────────────────────────────────────────────────────────────────┘
                                    │
                                    │ cross-RG nested deployments (2)
-                                   │   tables-<uniq>           (54 LA tables)
+                                   │   tables-<uniq>           (47 LA tables)
                                    │   sentinelContent-<uniq>  (parsers + workbooks + rules)
                                    ▼
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -79,8 +79,8 @@ XdrLogRaider is a three-layer Sentinel Solution:
 │  ┌────────────────────────────────────────────────────────────┐       │
 │  │ Existing Log Analytics workspace (Sentinel-enabled)        │       │
 │  │                                                            │       │
-│  │   54 custom tables written by cross-RG nested deployment:  │       │
-│  │     MDE_*_CL  (52 telemetry tables)                        │       │
+│  │   47 custom tables written by cross-RG nested deployment:  │       │
+│  │     MDE_*_CL  (45 telemetry tables)                        │       │
 │  │     MDE_Heartbeat_CL                                       │       │
 │  │     MDE_AuthTestResult_CL                                  │       │
 │  │                                                            │       │

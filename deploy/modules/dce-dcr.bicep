@@ -25,9 +25,10 @@ resource dce 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' = {
   }
 }
 
-// --- Stream declarations — v1.0.2: 47 data streams + 2 operational = 49 total ---
-// Removed in v1.0.2 (NO_PUBLIC_API): AsrRulesConfig, AntiRansomwareConfig,
-// ControlledFolderAccess, NetworkProtectionConfig, ApprovalAssignments.
+// --- Stream declarations — v0.1.0-beta.1: 45 data streams + 2 operational = 47 total ---
+// Full removed-stream history (write endpoints, NO_PUBLIC_API, etc.) lives in
+// docs/STREAMS-REMOVED.md. Do NOT inline removed stream names in this Bicep
+// source — CI grep-gates the file against them.
 var dataStreamNames = [
   // P0 Compliance (15)
   'MDE_AdvancedFeatures_CL'
@@ -53,11 +54,9 @@ var dataStreamNames = [
   'MDE_ConnectedApps_CL'
   'MDE_TenantContext_CL'
   'MDE_TenantWorkloadStatus_CL'
-  // P2 Governance (6)
+  // P2 Governance (4) — see docs/STREAMS-REMOVED.md for removed write-endpoint history
   'MDE_RbacDeviceGroups_CL'
   'MDE_UnifiedRbacRoles_CL'
-  'MDE_DeviceCriticality_CL'
-  'MDE_CriticalAssets_CL'
   'MDE_AssetRules_CL'
   'MDE_SAClassification_CL'
   // P3 Exposure (8)

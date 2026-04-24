@@ -141,6 +141,16 @@ Write-Host "CSV: $csvPath"
 $summary = $results | Group-Object Status | Sort-Object Count -Descending | ForEach-Object {
     "| $($_.Name) | $($_.Count) |"
 }
+
+# Build the probe-table rows row-by-row so we don't fight PowerShell's
+# `$(...)` subexpression escaping inside here-strings. The backticks that
+# wrap {Path} in the markdown come from [char]96 literals — cleaner than
+# trying to escape them in interpolated strings.
+$bt = [char]96
+$rowLines = foreach ($row in $results) {
+    "| $($row.Stream) | $($row.Tier) | $($row.Method) | $bt$($row.Path)$bt | $($row.Filter) | $($row.Deferred) | **$($row.Status)** | $($row.PayloadShape) | $($row.DurationMs) |"
+}
+
 $md = @"
 # Endpoint Audit Report — $timestamp
 
@@ -158,9 +168,7 @@ $($summary -join "`n")
 
 | Stream | Tier | Method | Path | Filter | Deferred | Status | Shape | ms |
 |---|---|---|---|---|---|---|---|---|
-$($results | ForEach-Object {
-    "| $($_.Stream) | $($_.Tier) | $($_.Method) | `$($_.Path)` | $($_.Filter) | $($_.Deferred) | **$($_.Status)** | $($_.PayloadShape) | $($_.DurationMs) |"
-} | Out-String)
+$($rowLines -join "`n")
 "@
 $md | Out-File $mdPath
 Write-Host "MD : $mdPath"

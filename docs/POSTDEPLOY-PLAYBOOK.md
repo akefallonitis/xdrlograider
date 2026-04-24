@@ -109,7 +109,7 @@ pwsh ./tests/Run-Tests.ps1 -Category e2e
 - `parser functions / hunting queries / workbook` all deployed ✓
 
 **If per-tier test shows fewer populated streams than expected**:
-- **Expected baseline**: 25 of 52 streams populate immediately (validated by pre-deploy audit). 10 streams are marked `Deferred=true` in the manifest because their paths/body schemas are still under research — they will NOT emit rows until the manifest is updated in a follow-up commit.
+- **Expected baseline**: 25 of 45 streams populate immediately (validated by pre-deploy audit). 10 streams are marked `Deferred=true` in the manifest because their paths/body schemas are still under research — they will NOT emit rows until the manifest is updated in a follow-up commit.
 - **To see which are deferred**: `pwsh -c "(Get-MDEEndpointManifest).Values | Where { `$_.Deferred } | Select Stream, DeferReason"`
 - **To poll them anyway for research**: `Invoke-MDETierPoll -IncludeDeferred` (not used by timer functions).
 

@@ -6,7 +6,7 @@ Quick reference. The full walkthrough lives in [`docs/TESTING.md`](../docs/TESTI
 
 |                 | **Offline (local / CI)** | **Online (live, laptop-only)** |
 |---              |---                        |---                              |
-| **Pre-deploy**  | `all-offline` — 1075 tests (v1.0.2) | `local-online` — real portal sign-in from laptop |
+| **Pre-deploy**  | `all-offline` — 1097 tests (v0.1.0-beta.1) | `local-online` — real portal sign-in from laptop |
 | **Post-deploy** | —                         | `e2e` — KQL verification of a deployed workspace |
 
 **No CI Azure credentials.** All online tests run from your laptop against your own test tenant.
@@ -38,10 +38,10 @@ Install-Module -Name Az.Resources         -Force -Scope CurrentUser
 pwsh ./tests/Run-Tests.ps1 -Category all-offline
 ```
 
-Expect `1075 passed, 0 failed, 17 skipped, ~60s`. What runs (v1.0.2):
+Expect `1097 passed, 0 failed, 17 skipped, ~60s`. What runs (v0.1.0-beta.1):
 
 **tests/unit/**
-- `XdrLogRaider.Client.Tests.ps1` — module exports + manifest contract (47 streams, 25 active)
+- `XdrLogRaider.Client.Tests.ps1` — module exports + manifest contract (45 streams, 28 live + 15 tenant-gated + 2 role-gated)
 - `XdrLogRaider.Ingest.Tests.ps1` — Send-ToLogAnalytics, retry, batching
 - `Xdr.Portal.Auth.*.Tests.ps1` — full Entra auth chain (CredentialsTotp + Passkey + DirectCookies)
 - `Ingest.Extended.Tests.ps1` + `ModuleCoverage.Extended.Tests.ps1` — edge cases

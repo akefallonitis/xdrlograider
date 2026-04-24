@@ -193,6 +193,18 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
     $body     = if ($entry.ContainsKey('Body')   -and $entry.Body)   { $entry.Body }   else { $null }
     $deferred = [bool]($entry.ContainsKey('Deferred') -and $entry.Deferred)
     $hasPlaceholder = $path -match '\{[^}]+\}'
+    $availability = if ($entry.ContainsKey('Availability') -and $entry.Availability) { $entry.Availability } else { 'live' }
+    # v0.1.0-beta.1: resolve Headers with {TenantId} template token.
+    $headers = @{}
+    if ($entry.ContainsKey('Headers') -and $entry.Headers) {
+        foreach ($k in $entry.Headers.Keys) {
+            $val = $entry.Headers[$k]
+            if ($val -is [string] -and $val -match '^\{TenantId\}$') {
+                $val = [string]$session.TenantId
+            }
+            $headers[$k] = $val
+        }
+    }
 
     if ($stream -notlike $StreamFilter) {
         continue
@@ -201,7 +213,8 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
     $row = [pscustomobject]@{
         Stream         = $stream
         Tier           = $tier
-        Deferred       = $deferred
+        Availability   = $availability
+        Deferred       = $deferred    # legacy field for back-compat
         Method         = $method
         Path           = $path
         Status         = '-'
@@ -212,9 +225,11 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
         Notes          = ''
     }
 
+    # Legacy Deferred back-compat (v0.1.0-beta.1 manifests have no Deferred
+    # entries, but older manifests might still).
     if ($deferred -and -not $IncludeDeferred) {
         $row.Status = 'SKIP-deferred'
-        $row.Notes  = 'deferred (use -IncludeDeferred to attempt)'
+        $row.Notes  = 'legacy Deferred flag (use -IncludeDeferred to attempt)'
         $summary += $row
         Write-Host ("  [{0,2}/{1}] {2,-4} {3,-38} {4}" -f $i, $entries.Count, $tier, $stream, 'SKIP-deferred') -ForegroundColor DarkGray
         continue
@@ -229,12 +244,34 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
 
     # -------- Fetch live --------
     try {
-        $resp = Invoke-MDEPortalRequest -Session $session -Path $path -Method $method -Body $body -ErrorAction Stop
+        $resp = Invoke-MDEPortalRequest -Session $session -Path $path -Method $method -Body $body -AdditionalHeaders $headers -ErrorAction Stop
         $row.Status = '200'
     } catch {
         $code = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 'ERR' }
         $row.Status = [string]$code
         $row.Notes  = ($_.Exception.Message -split "`n" | Select-Object -First 1)
+
+        # v0.1.0-beta.1: for tenant-gated / role-gated streams, write a marker
+        # fixture so downstream tests can detect "expected to 4xx — skip" rather
+        # than fail with missing-file errors. 4xx is the EXPECTED outcome for
+        # these until the tenant provisions the feature / the account role elevates.
+        if ($availability -in @('tenant-gated', 'role-gated')) {
+            $markerPath = Join-Path $OutDir ("{0}-raw.json" -f $stream)
+            $marker = @{
+                _availability = $availability
+                _reason       = "$code — expected for $availability stream on a tenant without the feature / without the role"
+                _capturedUtc  = [datetime]::UtcNow.ToString('o')
+            } | ConvertTo-Json -Compress
+            $marker | Out-File -FilePath $markerPath -Encoding utf8 -NoNewline
+            $row.RawPath = [IO.Path]::GetRelativePath($repoRoot, $markerPath)
+            $row.Notes   = "$code — expected ($availability); marker fixture written"
+            $summary += $row
+            $colour = 'DarkCyan'
+            Write-Host ("  [{0,2}/{1}] {2,-4} {3,-38} {4}  ({5})" -f $i, $entries.Count, $tier, $stream, $row.Status, $availability) -ForegroundColor $colour
+            Start-Sleep -Milliseconds 200
+            continue
+        }
+
         $summary += $row
         Write-Host ("  [{0,2}/{1}] {2,-4} {3,-38} {4}  {5}" -f $i, $entries.Count, $tier, $stream, $row.Status, $row.Notes) -ForegroundColor Yellow
         Start-Sleep -Milliseconds 200

@@ -3,9 +3,9 @@
 # Cross-layer drift guard. Every MDE data stream MUST be declared in three places
 # that must agree:
 #
-#   1. src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1  (47 entries, v1.0.2)
-#   2. DCR streamDeclarations                                   (47 data + 2 system = 49)
-#   3. Custom-tables list in the workspace deployment           (47 data + 2 system = 49)
+#   1. src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1  (45 entries, v0.1.0-beta.1)
+#   2. DCR streamDeclarations                                   (45 data + 2 system = 47)
+#   3. Custom-tables list in the workspace deployment           (45 data + 2 system = 47)
 #
 # Preferred source of declarations 2 and 3 is the compiled ARM
 # (deploy/compiled/mainTemplate.json) — it's what actually gets deployed. Bicep
@@ -140,16 +140,16 @@ BeforeAll {
 
 Describe 'Manifest / DCR / custom-tables consistency' {
 
-    It 'manifest contains exactly 47 streams (v1.0.2 — 5 removed NO_PUBLIC_API)' {
-        $script:ManifestStreams.Count | Should -Be 47
+    It 'manifest contains exactly 45 streams (v0.1.0-beta.1 — 2 write endpoints removed vs v1.0.2)' {
+        $script:ManifestStreams.Count | Should -Be 45
     }
 
-    It 'DCR declares exactly 49 streams (47 data + 2 system)' {
-        $script:DcrStreams.Count | Should -Be 49
+    It 'DCR declares exactly 47 streams (45 data + 2 system)' {
+        $script:DcrStreams.Count | Should -Be 47
     }
 
-    It 'custom-tables declares exactly 49 tables (47 data + 2 system)' {
-        $script:CustomTables.Count | Should -Be 49
+    It 'custom-tables declares exactly 47 tables (45 data + 2 system)' {
+        $script:CustomTables.Count | Should -Be 47
     }
 
     It 'DCR contains both system streams (Heartbeat + AuthTestResult)' {

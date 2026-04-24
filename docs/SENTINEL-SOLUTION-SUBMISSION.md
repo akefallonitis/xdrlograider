@@ -14,7 +14,7 @@ This document describes how to submit XdrLogRaider as an official Microsoft Sent
 - [ ] ≥3 months of operational data showing reliable ingestion
 - [ ] No unresolved `portal-endpoint-broken` issues open
 - [ ] All 6 workbooks field-tested by real SOC analysts
-- [ ] All 15 analytic rules have been tuned against false positives in a production environment
+- [ ] All 14 analytic rules have been tuned against false positives in a production environment
 - [ ] Security review completed (internal or contracted)
 - [ ] Unit test coverage meets targets (see `CONTRIBUTING.md`)
 

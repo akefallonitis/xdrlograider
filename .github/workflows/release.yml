@@ -46,6 +46,38 @@ jobs:
           pwsh -NoProfile -File ./tests/Run-Tests.ps1 -Category all-offline
           if ($LASTEXITCODE -ne 0) { throw "Offline gate failed (exit $LASTEXITCODE)" }
 
+      - name: Release-gate — no removed-stream references leak into artefacts
+        shell: pwsh
+        run: |
+          # v0.1.0-beta.1 introduces a grep-gate: any mention of removed stream
+          # names in deploy/compiled/* or sentinel/* fails the release. History
+          # is documented in docs/STREAMS-REMOVED.md + CHANGELOG.md.
+          $removedStreams = @(
+              'MDE_AsrRulesConfig_CL',         # v1.0.2 NO_PUBLIC_API
+              'MDE_AntiRansomwareConfig_CL',   # v1.0.2 NO_PUBLIC_API
+              'MDE_ControlledFolderAccess_CL', # v1.0.2 NO_PUBLIC_API
+              'MDE_NetworkProtectionConfig_CL',# v1.0.2 NO_PUBLIC_API
+              'MDE_ApprovalAssignments_CL',    # v1.0.2 NO_PUBLIC_API
+              'MDE_CriticalAssets_CL',         # v0.1.0-beta.1 WRITE endpoint
+              'MDE_DeviceCriticality_CL'       # v0.1.0-beta.1 WRITE endpoint
+          )
+          $grepPaths = @('./deploy/compiled', './sentinel')
+          $leaks = @()
+          foreach ($p in $grepPaths) {
+              foreach ($removed in $removedStreams) {
+                  $found = Select-String -Path "$p/**/*" -Pattern $removed -SimpleMatch -ErrorAction SilentlyContinue
+                  foreach ($f in $found) {
+                      $leaks += "$($f.Path):$($f.LineNumber) → $removed"
+                  }
+              }
+          }
+          if ($leaks.Count -gt 0) {
+              Write-Host "Removed-stream references leaked into release artefacts:" -ForegroundColor Red
+              $leaks | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+              throw "Release aborted — grep-gate failed. Add removed-stream history to docs/STREAMS-REMOVED.md only."
+          }
+          Write-Host "✓ Release-gate grep clean — 0 removed-stream refs in deploy/compiled + sentinel" -ForegroundColor Green
+
       - name: Compile Bicep → ARM (syntax check only, scratch path)
         shell: pwsh
         run: |

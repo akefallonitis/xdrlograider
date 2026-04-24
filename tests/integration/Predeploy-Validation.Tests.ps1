@@ -13,9 +13,10 @@
          sccauth + XSRF + TenantId returned.
       2. REAUTH: forcing cache eviction re-authenticates silently.
       3. PORTAL API: a known-working endpoint (TenantContext) returns 200.
-      4. MANIFEST COVERAGE: audit all 52 stream paths against live portal;
+      4. MANIFEST COVERAGE: audit every stream path against live portal;
          assert >= threshold (default 20 green — adjustable via
-         XDRLR_MIN_GREEN_STREAMS env var).
+         XDRLR_MIN_GREEN_STREAMS env var). Count is read dynamically from
+         the manifest; no hardcoded stream-count literals.
       5. CHECKPOINT STATE: Azure Table Storage write+read round-trips for a
          test stream (when XDRLR_TEST_STORAGE_ACCOUNT is set).
       6. DCE REACHABILITY: if XDRLR_TEST_DCE_ENDPOINT is set, a single
@@ -104,9 +105,10 @@ Describe 'Pre-deploy: Auth chain' -Tag 'predeploy', 'live' {
 
 Describe 'Pre-deploy: Portal API coverage' -Tag 'predeploy', 'live' {
 
-    It "At least $script:MinGreenStreams of the 52 manifest streams return usable data" -Skip:(-not $script:RunLive) {
+    It "At least $script:MinGreenStreams manifest streams return usable data" -Skip:(-not $script:RunLive) {
         $session = Connect-MDEPortal -Method $script:AuthMethod -Credential $script:Credential -PortalHost $script:PortalHost
         $entries = @((Get-MDEEndpointManifest).Values)
+        Write-Host "  Manifest declares $($entries.Count) streams; threshold: $script:MinGreenStreams green."
 
         $greenCount = 0
         $brokenStreams = @()

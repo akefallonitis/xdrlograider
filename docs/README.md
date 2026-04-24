@@ -14,7 +14,7 @@ Welcome to XdrLogRaider docs. Each page targets a specific audience.
 
 ## For SOC / detection engineering
 
-- **[STREAMS.md](STREAMS.md)** — Catalogue of all 52 telemetry streams
+- **[STREAMS.md](STREAMS.md)** — Catalogue of all 45 telemetry streams
 - **[WORKBOOKS.md](WORKBOOKS.md)** — What each workbook shows
 - **[DRIFT.md](DRIFT.md)** — KQL drift model, parsers, tuning
 - **[ANALYTIC-RULES.md](ANALYTIC-RULES.md)** — Each rule: purpose, query, tuning
