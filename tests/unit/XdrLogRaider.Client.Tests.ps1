@@ -44,7 +44,11 @@ AfterAll {
 }
 
 Describe 'Module surface (post-consolidation)' {
-    It 'exports exactly the 6 public functions: dispatcher, tier-poller, manifest, + 3 helpers' {
+    It 'exports exactly the 7 public functions: dispatcher + tier-poller + tier-with-heartbeat + manifest + 3 helpers' {
+        # Iter 13.1: added Invoke-TierPollWithHeartbeat to Export-ModuleMember
+        # in psm1 to match the FunctionsToExport list in psd1. Was missing →
+        # poll-* functions threw "The term 'Invoke-TierPollWithHeartbeat' is
+        # not recognized" in production.
         $exported = (Get-Module XdrLogRaider.Client).ExportedFunctions.Keys | Sort-Object
         $expected = @(
             'ConvertTo-MDEIngestRow',
@@ -52,7 +56,8 @@ Describe 'Module surface (post-consolidation)' {
             'Get-MDEEndpointManifest',
             'Invoke-MDEEndpoint',
             'Invoke-MDEPortalEndpoint',
-            'Invoke-MDETierPoll'
+            'Invoke-MDETierPoll',
+            'Invoke-TierPollWithHeartbeat'
         )
         [array]$exported | Should -Be $expected
     }

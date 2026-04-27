@@ -13,7 +13,7 @@ $fnName = 'validate-auth-selftest'
 
 $config = $global:XdrLogRaiderConfig
 if (-not $config) {
-    Write-Warning "$fnName: global config not initialized"
+    Write-Warning "${fnName}:global config not initialized"
     return
 }
 
@@ -25,7 +25,7 @@ try {
         $table = New-AzStorageTable -Name $config.CheckpointTable -Context $context
     }
 } catch {
-    Write-Error "$fnName: failed to initialize Storage Table: $_"
+    Write-Error "${fnName}:failed to initialize Storage Table: $_"
     return
 }
 
@@ -42,7 +42,7 @@ try {
         -Credential $credential `
         -PortalHost 'security.microsoft.com'
 
-    Write-Information "$fnName: auth chain result — success=$($result.Success) stage=$($result.Stage)"
+    Write-Information "${fnName}:auth chain result — success=$($result.Success) stage=$($result.Stage)"
 } catch {
     # Build a synthetic failure result if the chain blew up before Test-MDEPortalAuth
     $result = [pscustomobject]@{
@@ -68,7 +68,7 @@ try {
         -DcrImmutableId $config.DcrImmutableId `
         -TestResult $result | Out-Null
 } catch {
-    Write-Warning "$fnName: failed to write MDE_AuthTestResult_CL: $_"
+    Write-Warning "${fnName}:failed to write MDE_AuthTestResult_CL: $_"
 }
 
 # --- Write the gating flag to Storage so poll timers know ---
@@ -87,7 +87,7 @@ try {
         -Property $entity `
         -UpdateExisting | Out-Null
 } catch {
-    Write-Warning "$fnName: failed to persist gating flag: $_"
+    Write-Warning "${fnName}:failed to persist gating flag: $_"
 }
 
 # --- Heartbeat ---

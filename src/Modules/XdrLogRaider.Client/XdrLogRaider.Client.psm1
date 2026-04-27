@@ -40,6 +40,7 @@ $null = Get-MDEEndpointManifest
 Export-ModuleMember -Function @(
     'Invoke-MDEEndpoint',
     'Invoke-MDETierPoll',
+    'Invoke-TierPollWithHeartbeat',
     'Get-MDEEndpointManifest',
     'Invoke-MDEPortalEndpoint',
     'ConvertTo-MDEIngestRow',
