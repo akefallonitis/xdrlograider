@@ -28,6 +28,32 @@ function Write-AuthTestResult {
         [Parameter(Mandatory)] [pscustomobject] $TestResult
     )
 
+    # Iter 13.2 fix: under Set-StrictMode -Version Latest, accessing a hash
+    # key that doesn't exist throws PropertyNotFoundException. StageTimings
+    # may be empty (validate-auth-selftest preflight failure) or missing
+    # estsMs/sccauthMs entries (Test-MDEPortalAuth path-of-failure variations).
+    # Use a defensive Contains() check that works for both [hashtable] and
+    # [System.Collections.Specialized.OrderedDictionary].
+    $stageTimings = $TestResult.StageTimings
+    $estsMs = 0
+    $sccauthMs = 0
+    if ($null -ne $stageTimings) {
+        # IDictionary covers both [hashtable] and [ordered]hashtable
+        if ($stageTimings -is [System.Collections.IDictionary]) {
+            if ($stageTimings.Contains('estsMs') -and $null -ne $stageTimings['estsMs']) {
+                $estsMs = $stageTimings['estsMs']
+            }
+            if ($stageTimings.Contains('sccauthMs') -and $null -ne $stageTimings['sccauthMs']) {
+                $sccauthMs = $stageTimings['sccauthMs']
+            }
+        }
+    }
+    # SccauthAcquiredUtc may be missing on some failure paths. Defensive null-check.
+    $sccauthAcquiredUtc = $null
+    if ($TestResult.PSObject.Properties['SccauthAcquiredUtc'] -and $null -ne $TestResult.SccauthAcquiredUtc) {
+        $sccauthAcquiredUtc = $TestResult.SccauthAcquiredUtc.ToString('o')
+    }
+
     $row = [ordered]@{
         TimeGenerated       = [datetime]::UtcNow.ToString('o')
         Method              = $TestResult.Method
@@ -36,11 +62,11 @@ function Write-AuthTestResult {
         Success             = $TestResult.Success
         Stage               = $TestResult.Stage
         FailureReason       = $TestResult.FailureReason
-        EstsMs              = if ($TestResult.StageTimings.estsMs) { $TestResult.StageTimings.estsMs } else { 0 }
-        SccauthMs           = if ($TestResult.StageTimings.sccauthMs) { $TestResult.StageTimings.sccauthMs } else { 0 }
+        EstsMs              = $estsMs
+        SccauthMs           = $sccauthMs
         SampleCallHttpCode  = $TestResult.SampleCallHttpCode
         SampleCallLatencyMs = $TestResult.SampleCallLatencyMs
-        SccauthAcquiredUtc  = if ($TestResult.SccauthAcquiredUtc) { $TestResult.SccauthAcquiredUtc.ToString('o') } else { $null }
+        SccauthAcquiredUtc  = $sccauthAcquiredUtc
     }
 
     Send-ToLogAnalytics `

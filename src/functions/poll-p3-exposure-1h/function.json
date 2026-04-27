@@ -1,5 +1,5 @@
 {
-  "description": "Hourly poll at :25 (Tier P3 — Exposure / 7 streams). Pulls XSPM (Exposure Management) telemetry: initiatives, exposure snapshots, secure score breakdown, recommendations, attack paths, choke points, top targets, security baselines. Writes to MDE_XspmInitiatives_CL, MDE_ExposureSnapshots_CL, MDE_SecureScoreBreakdown_CL, MDE_ExposureRecommendations_CL, MDE_XspmAttackPaths_CL, MDE_XspmChokePoints_CL, MDE_XspmTopTargets_CL, MDE_SecurityBaselines_CL. Tier P3 = exposure posture.",
+  "description": "Hourly poll at :25 (Tier P3 - Exposure / 8 streams). Pulls XSPM (Exposure Management) telemetry: MDE_XspmInitiatives_CL, MDE_ExposureSnapshots_CL, MDE_SecureScoreBreakdown_CL, MDE_ExposureRecommendations_CL, MDE_XspmAttackPaths_CL, MDE_XspmChokePoints_CL, MDE_XspmTopTargets_CL, MDE_SecurityBaselines_CL. Tier P3 = exposure posture.",
   "bindings": [
     {
       "schedule": "0 25 * * * *",

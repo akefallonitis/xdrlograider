@@ -103,7 +103,16 @@ function Invoke-MDEPortalRequest {
             $cacheKey = "$($Session.Upn)::$portalHost"
             if ($script:SessionCache -and $script:SessionCache.ContainsKey($cacheKey)) {
                 $cached = $script:SessionCache[$cacheKey]
-                if ($cached._Method -and $cached._Credential) {
+                # Iter 13.2 fix: strict-mode-safe key existence check.
+                # DirectCookies path doesn't set _Method/_Credential — accessing
+                # those keys directly throws PropertyNotFoundException.
+                $hasReauthInfo = $false
+                if ($cached -is [System.Collections.IDictionary]) {
+                    $hasReauthInfo = $cached.Contains('_Method') -and $cached.Contains('_Credential') -and $cached['_Method'] -and $cached['_Credential']
+                } elseif ($cached.PSObject.Properties['_Method'] -and $cached.PSObject.Properties['_Credential']) {
+                    $hasReauthInfo = $null -ne $cached._Method -and $null -ne $cached._Credential
+                }
+                if ($hasReauthInfo) {
                     try {
                         $fresh = Connect-MDEPortal -Method $cached._Method -Credential $cached._Credential -PortalHost $portalHost -Force
                         $Session.Session     = $fresh.Session
@@ -219,7 +228,16 @@ function Invoke-MDEPortalRequest {
                 $cacheKey = "$($Session.Upn)::$portalHost"
                 if ($script:SessionCache.ContainsKey($cacheKey)) {
                     $cached = $script:SessionCache[$cacheKey]
-                    if ($cached._Method -and $cached._Credential) {
+                    # Iter 13.2 fix: strict-mode-safe key existence check.
+                # DirectCookies path doesn't set _Method/_Credential — accessing
+                # those keys directly throws PropertyNotFoundException.
+                $hasReauthInfo = $false
+                if ($cached -is [System.Collections.IDictionary]) {
+                    $hasReauthInfo = $cached.Contains('_Method') -and $cached.Contains('_Credential') -and $cached['_Method'] -and $cached['_Credential']
+                } elseif ($cached.PSObject.Properties['_Method'] -and $cached.PSObject.Properties['_Credential']) {
+                    $hasReauthInfo = $null -ne $cached._Method -and $null -ne $cached._Credential
+                }
+                if ($hasReauthInfo) {
                         $fresh = Connect-MDEPortal -Method $cached._Method -Credential $cached._Credential -PortalHost $portalHost -Force
                         # Replace the caller's session in-place
                         $Session.Session     = $fresh.Session

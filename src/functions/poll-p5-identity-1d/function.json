@@ -1,5 +1,5 @@
 {
-  "description": "Daily poll at 03:00 UTC (Tier P5 — Identity / 6 streams). Pulls Microsoft Defender for Identity (MDI) configuration: identity onboarding state, service accounts, DC coverage, alert thresholds, remediation accounts. Writes to MDE_IdentityOnboarding_CL, MDE_IdentityServiceAccounts_CL, MDE_DCCoverage_CL, MDE_IdentityAlertThresholds_CL, MDE_RemediationAccounts_CL, MDE_AssetRules_CL. Tier P5 = identity protection (slow-changing). Activates only when tenant has MDI provisioned.",
+  "description": "Daily poll at 03:00 UTC (Tier P5 - Identity / 5 streams). Pulls Microsoft Defender for Identity (MDI) configuration: MDE_IdentityOnboarding_CL, MDE_IdentityServiceAccounts_CL, MDE_DCCoverage_CL, MDE_IdentityAlertThresholds_CL, MDE_RemediationAccounts_CL. Tier P5 = identity protection (slow-changing). Activates only when tenant has MDI provisioned.",
   "bindings": [
     {
       "schedule": "0 0 3 * * *",

@@ -219,14 +219,23 @@ jobs:
               Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           }
 
+          # CRITICAL: pin EXACT versions, not MinimumVersion. Az.Storage 8+
+          # removed Get-AzStorageTable / New-AzStorageTable / Add-AzTableRow /
+          # Get-AzTableRow — those moved to the separate community module
+          # `AzTable` (or to the modern Az.Data.Tables). Pinning to 7.5.0
+          # keeps the table cmdlets bundled with Az.Storage. ALSO bundling
+          # AzTable as a belt-and-suspenders fallback for legacy code paths.
+          # MinimumVersion = floating dependency hell where each release
+          # silently picks a different snapshot — breaks reproducibility.
           $azModules = @(
-              @{ Name = 'Az.Accounts'; MinVersion = '5.0.0' }
-              @{ Name = 'Az.KeyVault'; MinVersion = '6.0.0' }
-              @{ Name = 'Az.Storage';  MinVersion = '7.0.0' }
+              @{ Name = 'Az.Accounts'; RequiredVersion = '5.3.4' }
+              @{ Name = 'Az.KeyVault'; RequiredVersion = '6.4.3' }
+              @{ Name = 'Az.Storage';  RequiredVersion = '7.5.0' }
+              @{ Name = 'AzTable';     RequiredVersion = '2.1.0' }
           )
           foreach ($m in $azModules) {
-              Save-Module -Name $m.Name -MinimumVersion $m.MinVersion -Path $modulesDir -Repository PSGallery -Force
-              Write-Host "  ✓ $($m.Name) saved (>= $($m.MinVersion))" -ForegroundColor Green
+              Save-Module -Name $m.Name -RequiredVersion $m.RequiredVersion -Path $modulesDir -Repository PSGallery -Force
+              Write-Host "  ✓ $($m.Name) saved (= $($m.RequiredVersion))" -ForegroundColor Green
           }
 
           # === PRUNE: remove docs/help/samples from Az modules (size optimization) ===
@@ -310,13 +319,26 @@ jobs:
           if ($entries | Where-Object { $_ -like 'local.settings.json*' }) {
               throw "function-app.zip contains a local.settings.json* file (dev artefact must not ship)"
           }
-          # 6. Az.* modules bundled (Legion fix invariant) — at least one .psd1 manifest each
-          foreach ($azMod in 'Az.Accounts', 'Az.KeyVault', 'Az.Storage') {
+          # 6. Az.* + AzTable modules bundled (Legion fix invariant) — at least one .psd1 manifest each
+          foreach ($azMod in 'Az.Accounts', 'Az.KeyVault', 'Az.Storage', 'AzTable') {
               $manifest = $entries | Where-Object { $_ -match "^Modules/$azMod/[\d\.]+/$azMod\.psd1$" } | Select-Object -First 1
               if (-not $manifest) {
                   throw "function-app.zip is missing bundled $azMod (Modules/$azMod/<version>/$azMod.psd1). Save-Module failed or pruning was too aggressive."
               }
               Write-Host "  ✓ Bundled module: $manifest" -ForegroundColor Green
+          }
+          # 6b. AzTable cmdlets must resolve from the staged Modules dir.
+          # We can't import in this CI step (PSModulePath not extended), but
+          # we can verify the .psd1 declares the expected functions.
+          $azTableManifest = Get-ChildItem -Path $stage/Modules/AzTable -Recurse -Filter 'AzTable.psd1' | Select-Object -First 1
+          if ($azTableManifest) {
+              $azTableData = Import-PowerShellDataFile $azTableManifest.FullName
+              $expectedTableFns = @('Get-AzTableRow', 'Add-AzTableRow', 'Update-AzTableRow', 'Remove-AzTableRow')
+              $missingTableFns = @($expectedTableFns | Where-Object { $_ -notin @($azTableData.FunctionsToExport) })
+              if ($missingTableFns.Count -gt 0) {
+                  throw "AzTable manifest is missing expected cmdlets: $($missingTableFns -join ', '). Bundled version may be wrong."
+              }
+              Write-Host "  ✓ AzTable manifest declares Get/Add/Update/Remove-AzTableRow" -ForegroundColor Green
           }
           # 7. requirements.psd1 must NOT have module references (Legion fix invariant)
           $reqContent = Get-Content "$env:GITHUB_WORKSPACE/src/requirements.psd1" -Raw

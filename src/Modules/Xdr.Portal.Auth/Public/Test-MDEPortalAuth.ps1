@@ -83,13 +83,28 @@ function Test-MDEPortalAuth {
                 -TimeoutSec 30
             $result.SampleCallHttpCode  = 200
             $result.SampleCallLatencyMs = [int]$stageStopwatch.ElapsedMilliseconds
-            if (-not $sample -or -not $sample.AuthInfo) {
+            # Iter 13.2 fix: strict mode evaluates LHS to bool BEFORE short-circuit;
+            # plain `$sample.AuthInfo` access throws PropertyNotFoundException
+            # if AuthInfo property is absent. Defensive PSObject.Properties check.
+            $hasAuthInfo = ($null -ne $sample) -and
+                           ($sample.PSObject.Properties['AuthInfo']) -and
+                           ($null -ne $sample.AuthInfo)
+            if (-not $hasAuthInfo) {
                 throw "Probe returned 200 but body lacks AuthInfo — response shape unexpected"
             }
         } catch [Microsoft.PowerShell.Commands.HttpResponseException] {
-            $result.SampleCallHttpCode  = [int]$_.Exception.Response.StatusCode
+            # Iter 13.2 fix: $_.Exception.Response may be $null on some HTTP
+            # error paths (DNS failure, TLS handshake fail, etc.). Strict-mode
+            # access throws on null. Wrap defensively.
+            $statusCode = 0
+            try {
+                if ($null -ne $_.Exception.Response) {
+                    $statusCode = [int]$_.Exception.Response.StatusCode
+                }
+            } catch {}
+            $result.SampleCallHttpCode  = $statusCode
             $result.SampleCallLatencyMs = [int]$stageStopwatch.ElapsedMilliseconds
-            throw "Sample call failed: HTTP $($result.SampleCallHttpCode) — $($_.Exception.Message)"
+            throw "Sample call failed: HTTP $statusCode — $($_.Exception.Message)"
         }
 
         $result.Success = $true

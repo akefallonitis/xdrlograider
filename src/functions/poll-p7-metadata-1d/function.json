@@ -1,5 +1,5 @@
 {
-  "description": "Daily poll at 04:00 UTC (Tier P7 — Metadata / 6 streams). Pulls tenant ground-truth metadata: tenant context, workload status (per-product enablement), license report, MTO (Multi-Tenant Org) tenants, cloud apps config (Defender for Cloud Apps), user preferences. Writes to MDE_TenantContext_CL, MDE_TenantWorkloadStatus_CL, MDE_LicenseReport_CL, MDE_MtoTenants_CL, MDE_CloudAppsConfig_CL, MDE_UserPreferences_CL, MDE_ConnectedApps_CL. Tier P7 = metadata baseline (slow-changing reference data).",
+  "description": "Daily poll at 04:00 UTC (Tier P7 - Metadata / 4 streams). Pulls tenant ground-truth metadata: MDE_UserPreferences_CL, MDE_MtoTenants_CL, MDE_LicenseReport_CL, MDE_CloudAppsConfig_CL. Tier P7 = metadata baseline (slow-changing reference data).",
   "bindings": [
     {
       "schedule": "0 0 4 * * *",
