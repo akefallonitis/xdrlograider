@@ -6,7 +6,7 @@ Quick reference. The full walkthrough lives in [`docs/TESTING.md`](../docs/TESTI
 
 |                 | **Offline (local / CI)** | **Online (live, laptop-only)** |
 |---              |---                        |---                              |
-| **Pre-deploy**  | `all-offline` — 1089 tests (v0.1.0-beta) | `local-online` — real portal sign-in from laptop |
+| **Pre-deploy**  | `all-offline` — 1184 tests (v0.1.0-beta iter 12) | `local-online` — real portal sign-in from laptop |
 | **Post-deploy** | —                         | `e2e` — KQL verification of a deployed workspace |
 
 **No CI Azure credentials.** All online tests run from your laptop against your own test tenant.

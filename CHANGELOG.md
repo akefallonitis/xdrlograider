@@ -17,6 +17,96 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Deploy blockers fixed (post-tag patches, same v0.1.0-beta tag)
 
+#### Iteration 13 — Function App actually executes user code (Linux Consumption Legion managed-dependencies fix)
+
+Iter 12 successfully shipped 3 deploy-blocker fixes (zip flatten, URL pin, GenericUI/2021-03-01-preview canonical pair). Connector card surfaced in Sentinel UI, all 14 ARM resources deployed, 47/47 custom tables created, 3/3 SAMI roles granted. But during the 14-phase post-deploy verification, **6 of 14 phases failed** — all tracing to ONE root cause + 2 verification-script bugs + 1 connector-card cosmetic gap.
+
+**Critical fix (data-flow blocker)**:
+
+- **Linux Consumption "Legion" runtime does NOT support Managed Dependencies.** App Insights captured 215 exceptions/h all with the same message: `"Failed to install function app dependencies. Error: 'Managed Dependencies is not supported in Linux Consumption on Legion. Please remove all module references from requirements.psd1 and include the function app dependencies with the function app content.'"` Every function load (heartbeat-5m, all 7 poll-* timers, validate-auth-selftest) fails at `ProcessFunctionLoadRequest` BEFORE user code runs. Confirmed via [Microsoft GitHub Issue #944](https://github.com/Azure/azure-functions-powershell-worker/issues/944) + [official guidance at https://aka.ms/functions-powershell-include-modules](https://aka.ms/functions-powershell-include-modules).
+
+  **Cascading symptoms (all downstream of the same bug)**:
+  - Heartbeat sporadic (3 of 24 5-min bins, should be 24/24)
+  - MDE_AuthTestResult_CL has 0 rows (auth chain never runs)
+  - 1 of 47 tables has rows (only Heartbeat partial; 46 empty)
+  - Connector status "Disconnected" in Sentinel UI despite some heartbeats
+  - 215 exceptions/h in App Insights
+
+  **Fix** (3 files):
+  - `src/requirements.psd1` — emptied (was: Az.Accounts 3.* / Az.KeyVault 6.* / Az.Storage 7.*)
+  - `src/host.json` — `managedDependency.Enabled = true → false` (also bumped App Insights `maxTelemetryItemsPerSecond: 5 → 20` for better incident-response visibility)
+  - `.github/workflows/release.yml` — added `Save-Module Az.Accounts/Az.KeyVault/Az.Storage` (MinimumVersion 5.0.0/6.0.0/7.0.0) into staged `Modules/` directory before zipping; added module-pruning step (saves ~30% size by removing docs/help/samples); added 10-100 MB zip size budget gate (catches Save-Module silent failure + unintended bloat); added bundled-modules assertion in post-build verification + requirements.psd1 module-free invariant gate.
+
+  **Resulting zip**: 67 KB → 18 MB (compressed; raw Modules/ ~54 MB after pruning). Cold-start adds ~10s but cron tiers tolerate it. Same approach is required by Flex Consumption (Microsoft's strategic Y1 replacement, retiring Linux Consumption Sept 30 2028) — bundled-modules work carries forward to v0.2.0 unchanged.
+
+**High-priority fixes**:
+
+- **Connector card embedded `dataTypes` was 3 of 47.** Iter 11 shipped only Heartbeat + AuthTestResult + AdvancedFeatures in `mainTemplate.json` connectorUiConfig.dataTypes (the standalone `XdrLogRaider_DataConnector.json` already had all 47). Synced the 47-table list across mainTemplate + bicep. New validator gate: `dataConnector.dataTypes.Count == 47`.
+
+- **`connectivityCriterias` query strengthened** to modern `summarize ... | project IsConnected = ...` pattern (per Trend Micro Vision One + AbnormalSecurity reference). Previous `| count | where Count > 0` form caused "Disconnected" status in Sentinel UI even when rows present. New validator gate locks the modern pattern.
+
+- **`Post-DeploymentVerification.ps1` had 3 bugs that hid the real verification results**:
+  - **P3 ARM token bug**: `Get-AzAccessToken` without `-ResourceUrl` returns Microsoft Graph token; Sentinel REST API rejects with 401. Plus Az.Accounts 5.x breaking change: `.Token` is now SecureString (caller passing it as a Bearer header value silently produces malformed auth header). Fix: new `Get-ArmPlainToken` helper handles both `-ResourceUrl 'https://management.azure.com/'` + SecureString-to-plain-text conversion via `[System.Net.NetworkCredential]::new('', $secure).Password`.
+  - **P3.5 KV management-plane API eventual-consistency**: management-plane secret-list API may not show newly-uploaded secrets for several minutes. Fix: switched to data-plane `Get-AzKeyVaultSecret` (real-time) with management-plane fallback if RBAC denies. Also fixed strict-mode null-guard regression on `.Count` access.
+  - **`ExpectedSolutionId` parameter default**: was `'xdrlograider'` (legacy unqualified) but iter 12 changed solutionId to `'community.xdrlograider'` (qualified per Microsoft `<publisher>.<solution-key>` convention). Updated default.
+
+  After all 3 verification fixes: P3 + P3.5 + P12 all GREEN; P4/P5/P8/P9 still RED but those are downstream of the Legion bug — they auto-resolve once iter-13 deploys.
+
+**Documentation + operator clarity**:
+
+- All 9 `function.json` files now have a `description` field — Azure Portal "Function details" pane displays operator-friendly explanation of what each function does + cron cadence + tier purpose. Names stay terse (`poll-p0-compliance-1h`) to avoid checkpoint-table orphan + App Insights dashboard breakage; descriptions provide the context.
+
+- `docs/TROUBLESHOOTING.md` — new entry "FA fails every invocation with 'Failed to install function app dependencies (Managed Dependencies / Legion)'" with cascade explanation + redeploy fix.
+
+- `docs/PERMISSIONS.md` — new section "Audit / SRE service principal" documenting the 4 RBAC roles needed for full 14-phase Post-Deploy verification (Contributor on connector RG + Log Analytics Contributor + Microsoft Sentinel Reader + Key Vault Secrets User on workspace/KV) + one-shot `az role assignment create` snippet.
+
+**New regression gates** (lock the iter-13 invariants):
+
+- `tests/unit/FunctionAppZip.BundledModules.Tests.ps1` — NEW (13 Pester tests): requirements.psd1 module-free, host.json managedDependency=false, release.yml Save-Module Az.Accounts/Az.KeyVault/Az.Storage present, zip size budget gate present, bundled-modules assertion present, requirements.psd1 invariant gate present, prune-step present.
+- `tools/Validate-ArmJson.ps1` — 4 new gates: requirements.psd1 module-free, host.json managedDependency=false, dataConnector.dataTypes.Count==47, connectivityCriterias query uses modern pattern.
+
+Test count: 1184 + 13 (new bundled-modules) = 1197 tests. Validator: PASS with 4 new gates. PSScriptAnalyzer: 0 errors.
+
+**Sentinel Content Hub UI fix (DEPRECATED tag + empty info panel)**:
+
+After iter-12 deploy, operator screenshot showed two "XdrLogRaider" entries in Content Hub — both marked **DEPRECATED** with "Solutions marked as deprecated are no longer supported by their respective providers" banner; the right info panel was empty.
+
+**Root cause investigation** (verified against [Microsoft's official ARM schema](https://learn.microsoft.com/en-us/azure/templates/microsoft.securityinsights/2023-04-01-preview/contentpackages) and [Sentinel Solution lifecycle docs](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solution-deprecation)):
+
+1. **Two entries** = `contentPackages` resources live in the WORKSPACE RG, not the connector RG. Deleting the connector RG between iter-11 and iter-12 left the iter-11 Solution (`contentId='xdrlograider'`) in place; iter-12 added a SECOND Solution (`contentId='community.xdrlograider'` qualified). Sentinel's Content Hub auto-flags duplicate-displayName solutions as DEPRECATED to nudge cleanup.
+2. **Empty info panel** = canonical schema requires plain `description` field; we only set `descriptionHtml` which the UI's detail panel doesn't read.
+3. **Missing canonical fields**: `categories.verticals`, `isPreview`/`isNew` flags, `threatAnalysisTactics`/`threatAnalysisTechniques` arrays.
+
+**Fix** (mainTemplate.json + bicep + Validate-ArmJson):
+- Added plain `description` field (alongside existing `descriptionHtml` for backward compat)
+- Added `categories.verticals: []` (empty array, but field present per canonical schema)
+- Added `isPreview: 'true'` + `isNew: 'true'` (string flags per Microsoft schema)
+- Added `threatAnalysisTactics` + `threatAnalysisTechniques` arrays (declares MITRE coverage at the Solution level)
+- Bumped `lastPublishDate: 2026-04-26 → 2026-04-27`
+- New Validate-ArmJson gate: `description` must be plain-text populated; `categories.verticals` must exist; `isPreview` should be set.
+
+**Cleanup procedure documented** in `docs/TROUBLESHOOTING.md` — operator runs a REST DELETE loop against the workspace's `contentPackages` to remove stale entries before redeploying. Without this, the DEPRECATED-tagged duplicates will persist forever (deleting the connector RG doesn't remove workspace-side Solution resources).
+
+**Permanent prevention** (lock-in for future version bumps):
+- `contentId='community.xdrlograider'` is now STABLE — won't change between v0.1.0-beta → v0.1.0 GA → v1.0.0
+- iter-13 forward, all version bumps use the same `contentId`; only `version` field updates → no duplicate-displayName regression
+
+**Production-readiness verdict after iter 13 lands + redeploy**: 14/14 phases GREEN expected. No DEPRECATED tag. Info panel populated.
+
+#### Iteration 12 — Function App boots + connector card surfaces (3 deploy-blockers fixed)
+
+The first deployment landed every ARM resource cleanly but the Function App entered "Runtime: Error" state with 0 functions loaded, MDE_Heartbeat_CL stayed empty, and the connector card never surfaced in Sentinel → Data Connectors. Three confirmed root causes — all evidence-cited via live HTTP probe / zip extraction / Microsoft Learn cross-reference — fixed in iter 12.
+
+- **Bug A — `function-app.zip` had a `functions/` wrapper directory.** Azure Functions PowerShell runtime walks the zip ROOT for subdirectories containing `function.json`. Previous `release.yml` build used `Push-Location ./src; Compress-Archive (Get-ChildItem)` which preserved the `src/functions/` parent → runtime found 0 function dirs at root → "Runtime: Error". Fixed by rewriting the build step to stage to a temp dir with the canonical flat layout (`heartbeat-5m/`, `poll-p0-compliance-1h/`, ...) at root, plus `Modules/` + `host.json` + `profile.ps1` + `requirements.psd1`. Validation gates now ASSERT NO `functions/` wrapper + all 9 expected timer dirs at root + no `local.settings.json*` stowaways. New offline Pester gate `tests/unit/FunctionAppZip.Structure.Tests.ps1` (13 tests) catches this in PR before tag/push.
+- **Bug B — `functionAppZipVersion` default `'latest'` returns 404 for pre-release tags.** GitHub `/releases/latest/download/...` resolves only to non-pre-release tags by design. Live HTTP probe confirmed: `/releases/latest/download/function-app.zip` → 404; `/v0.1.0-beta/download/function-app.zip` → 200. The wizard default silently caused FA to download nothing. Fixed default in `mainTemplate.json` + `createUiDefinition.json` + `main.bicep` to explicit `0.1.0-beta`. New validator gate bans `'latest'` defaults across all three files.
+- **Bug C — Connector card stayed hidden in Sentinel → Data Connectors blade (kind=StaticUI → GenericUI).** Iter 5 shipped `kind: StaticUI` + `apiVersion: 2023-04-01-preview`. StaticUI is documented for first-party Microsoft solutions (Defender XDR, MDE, Office 365); Sentinel's UI blade indexer treats StaticUI from non-Microsoft publishers differently after direct ARM deploy, leaving the card hidden. Trend Micro Vision One reference (community FA-based connector, last published 2024-07-16, still active in Azure-Sentinel master 2026-04-26) uses `kind: GenericUI` + `apiVersion: 2021-03-01-preview` — which Lookout (committed 2026-04-24) and Qualys VM (committed 2026-04-23) ALSO use. Migrated dataConnector to GenericUI + 2021-03-01-preview pair. Updated DataConnector metadata.parentId to use `extensionResourceId(workspace, 'Microsoft.SecurityInsights/dataConnectors', id)` form per Trend Micro reference (the hierarchical resourceId() form produces a different canonical ID string the indexer doesn't always chain back).
+- **Microsoft deprecation audit (2026-04-26).** Verified: NO deprecation notice for `Microsoft.OperationalInsights/workspaces/providers/dataConnectors @ 2021-03-01-preview` for kind=GenericUI. The March 2026 retirement scoped explicitly to Source Control APIs only. HTTP Data Collector API retiring Sept 14 2026 — not affected (we use Logs Ingestion API). Codeless Connector Framework (CCF) is Microsoft's recommended path for new connectors but doesn't fit our custom-auth FA-based architecture; deferred to v0.2.0+ as future-compat.
+- **Phase P3.5 added to `Post-DeploymentVerification.ps1`** — Key Vault structure validation (RBAC mode + expected secret names + SAMI Secrets User role). Total phases: 14 (was 13).
+- **3 new validator gates** in `tools/Validate-ArmJson.ps1`: (a) latest-default ban for functionAppZipVersion across mainTemplate + createUiDefinition + bicep; (b) dataConnector canonical-shape lock (type + kind=GenericUI + apiVersion=2021-03-01-preview); (c) DataConnector metadata.parentId must use extensionResourceId() form.
+- **3 new Pester gates** added to `tests/arm/MainTemplate.Tests.ps1` (functionAppZipVersion default not 'latest', dataConnector apiVersion 2021-03-01-preview, parentId extensionResourceId form) + 1 to `tests/arm/SentinelContent.Schema.Tests.ps1` (every metadata.parentId resolves to a content resource of the matching kind).
+
+Test count: 1184 / 0 fail / 75 skip (was 1167; +17 new).
+
 #### Iteration 6 — `extensionResourceId` → `resourceId` for hierarchical Solution refs
 
 - **`InvalidTemplate` at template validation**: `Solution-xdrlograider` metadata's `parentId` used `extensionResourceId(workspaceScope, 'Microsoft.OperationalInsights/workspaces/providers/contentPackages', 2-names)` — Bicep's `.id` accessor on a hierarchical `workspaces/providers/<resource>` type emits `extensionResourceId` with the workspace passed as the *scope* (1st arg). ARM rejects: `the type 'Microsoft.OperationalInsights/workspaces/providers/contentPackages' requires '3' resource name argument(s)`. Same wrong shape was emitted for the `dataConnectors` metadata `parentId` and 3 `dependsOn` references. Replaced **all 5 occurrences** in `deploy/compiled/mainTemplate.json` with the canonical `resourceId('Microsoft.OperationalInsights/workspaces/providers/<resource>', workspaceName, 'Microsoft.SecurityInsights', <name>)` form.

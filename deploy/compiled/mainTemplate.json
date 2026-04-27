@@ -5,7 +5,7 @@
     "_generator": {
       "name": "Hand-authored ARM template matching deploy/main.bicep. Regenerate via `az bicep build` and diff before committing."
     },
-    "comments": "XdrLogRaider v0.1.0-beta — connector + Sentinel Solution. Requires an existing Sentinel-enabled Log Analytics workspace (any RG, any subscription in the same tenant). Adds 47 custom tables (45 data + Heartbeat + AuthTestResult) + a Sentinel Solution package (XdrLogRaider) + a StaticUI Data Connector card visible in Sentinel → Data Connectors blade, all via cross-RG nested deployments."
+    "comments": "XdrLogRaider v0.1.0-beta — connector + Sentinel Solution. Requires an existing Sentinel-enabled Log Analytics workspace (any RG, any subscription in the same tenant). Adds 47 custom tables (45 data + Heartbeat + AuthTestResult) + a Sentinel Solution package (XdrLogRaider) + a GenericUI Data Connector card visible in Sentinel → Data Connectors blade, all via cross-RG nested deployments."
   },
   "parameters": {
     "projectPrefix": {
@@ -54,8 +54,8 @@
     },
     "functionAppZipVersion": {
       "type": "string",
-      "defaultValue": "latest",
-      "metadata": { "description": "'latest' or 'X.Y.Z' — resolves to a GitHub Release artefact." }
+      "defaultValue": "0.1.0-beta",
+      "metadata": { "description": "Pinned release tag, e.g. '0.1.0-beta'. URL becomes releases/download/v<value>/function-app.zip. DO NOT use 'latest' for pre-release tags — GitHub's /releases/latest endpoint excludes pre-releases and returns 302→nothing, leaving the Function App with no code." }
     },
     "githubRepo": {
       "type": "string",
@@ -608,6 +608,7 @@
                 "contentSchemaVersion": "3.0.0",
                 "displayName":          "[variables('solutionName')]",
                 "publisherDisplayName": "[variables('solutionPublisher')]",
+                "description":          "Microsoft Sentinel custom connector ingesting Defender XDR portal-only telemetry — 45 streams across 7 tiers (configuration, compliance, drift, exposure, governance, identity/MDI, audit, metadata). Includes 47 custom tables, 6 KQL parsers, 14 analytic rules (ship disabled per best practice), 9 hunting queries, 6 workbooks. PowerShell 7.4 Function App authenticates to security.microsoft.com via Credentials+TOTP or Software Passkey. Source: https://github.com/akefallonitis/xdrlograider",
                 "descriptionHtml":      "<p>Microsoft Sentinel custom connector ingesting Defender XDR portal-only telemetry — 45 streams across 7 tiers (configuration, compliance, drift, exposure, governance, identity/MDI, audit, metadata).</p><p>Includes 47 custom tables, 6 KQL parsers, 14 analytic rules (ship disabled per best practice), 9 hunting queries, 6 workbooks. PowerShell 7.4 Function App authenticates to <code>security.microsoft.com</code> via Credentials+TOTP or Software Passkey.</p><p>Source: <a href=\"https://github.com/akefallonitis/xdrlograider\">github.com/akefallonitis/xdrlograider</a></p>",
                 "contentKind":          "Solution",
                 "contentProductId":     "[concat(variables('solutionId'), '-sl-', parameters('solutionVersion'))]",
@@ -620,17 +621,21 @@
                 "support":              "[variables('solutionSupport')]",
                 "dependencies":         { "criteria": [] },
                 "firstPublishDate":     "2026-04-25",
-                "lastPublishDate":      "2026-04-26",
+                "lastPublishDate":      "2026-04-27",
                 "providers":            [ "[variables('solutionName')]" ],
-                "categories":           { "domains": [ "Security - Threat Protection" ] }
+                "categories":           { "domains": [ "Security - Threat Protection" ], "verticals": [] },
+                "isPreview":            "true",
+                "isNew":                "true",
+                "threatAnalysisTactics":    [ "InitialAccess", "Persistence", "PrivilegeEscalation", "DefenseEvasion", "CredentialAccess", "Discovery", "LateralMovement", "Collection", "CommandAndControl", "Exfiltration", "Impact" ],
+                "threatAnalysisTechniques": [ "T1078", "T1098", "T1136", "T1530", "T1548", "T1556", "T1562", "T1595" ]
               }
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
-              "apiVersion": "2023-04-01-preview",
+              "apiVersion": "2021-03-01-preview",
               "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', variables('dataConnectorId'))]",
               "location": "[parameters('workspaceLocation')]",
-              "kind": "StaticUI",
+              "kind": "GenericUI",
               "properties": {
                 "connectorUiConfig": {
                   "id":                  "[variables('dataConnectorId')]",
@@ -646,12 +651,56 @@
                     { "description": "Suppression rules modified in the last 24h",  "query": "MDE_SuppressionRules_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, RawJson" }
                   ],
                   "dataTypes": [
-                    { "name": "MDE_Heartbeat_CL",        "lastDataReceivedQuery": "MDE_Heartbeat_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-                    { "name": "MDE_AuthTestResult_CL",   "lastDataReceivedQuery": "MDE_AuthTestResult_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-                    { "name": "MDE_AdvancedFeatures_CL", "lastDataReceivedQuery": "MDE_AdvancedFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
+                    { "name": "MDE_Heartbeat_CL",                "lastDataReceivedQuery": "MDE_Heartbeat_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_AuthTestResult_CL",           "lastDataReceivedQuery": "MDE_AuthTestResult_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_AdvancedFeatures_CL",         "lastDataReceivedQuery": "MDE_AdvancedFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_PreviewFeatures_CL",          "lastDataReceivedQuery": "MDE_PreviewFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_AlertServiceConfig_CL",       "lastDataReceivedQuery": "MDE_AlertServiceConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_AlertTuning_CL",              "lastDataReceivedQuery": "MDE_AlertTuning_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_SuppressionRules_CL",         "lastDataReceivedQuery": "MDE_SuppressionRules_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_CustomDetections_CL",         "lastDataReceivedQuery": "MDE_CustomDetections_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_DeviceControlPolicy_CL",      "lastDataReceivedQuery": "MDE_DeviceControlPolicy_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_WebContentFiltering_CL",      "lastDataReceivedQuery": "MDE_WebContentFiltering_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_SmartScreenConfig_CL",        "lastDataReceivedQuery": "MDE_SmartScreenConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_LiveResponseConfig_CL",       "lastDataReceivedQuery": "MDE_LiveResponseConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_AuthenticatedTelemetry_CL",   "lastDataReceivedQuery": "MDE_AuthenticatedTelemetry_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_PUAConfig_CL",                "lastDataReceivedQuery": "MDE_PUAConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_AntivirusPolicy_CL",          "lastDataReceivedQuery": "MDE_AntivirusPolicy_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_TenantAllowBlock_CL",         "lastDataReceivedQuery": "MDE_TenantAllowBlock_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_CustomCollection_CL",         "lastDataReceivedQuery": "MDE_CustomCollection_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_DataExportSettings_CL",       "lastDataReceivedQuery": "MDE_DataExportSettings_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_ConnectedApps_CL",            "lastDataReceivedQuery": "MDE_ConnectedApps_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_TenantContext_CL",            "lastDataReceivedQuery": "MDE_TenantContext_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_TenantWorkloadStatus_CL",     "lastDataReceivedQuery": "MDE_TenantWorkloadStatus_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_StreamingApiConfig_CL",       "lastDataReceivedQuery": "MDE_StreamingApiConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_IntuneConnection_CL",         "lastDataReceivedQuery": "MDE_IntuneConnection_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_PurviewSharing_CL",           "lastDataReceivedQuery": "MDE_PurviewSharing_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_RbacDeviceGroups_CL",         "lastDataReceivedQuery": "MDE_RbacDeviceGroups_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_UnifiedRbacRoles_CL",         "lastDataReceivedQuery": "MDE_UnifiedRbacRoles_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_AssetRules_CL",               "lastDataReceivedQuery": "MDE_AssetRules_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_SAClassification_CL",         "lastDataReceivedQuery": "MDE_SAClassification_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_XspmInitiatives_CL",          "lastDataReceivedQuery": "MDE_XspmInitiatives_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_ExposureSnapshots_CL",        "lastDataReceivedQuery": "MDE_ExposureSnapshots_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_SecureScoreBreakdown_CL",     "lastDataReceivedQuery": "MDE_SecureScoreBreakdown_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_ExposureRecommendations_CL",  "lastDataReceivedQuery": "MDE_ExposureRecommendations_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_XspmAttackPaths_CL",          "lastDataReceivedQuery": "MDE_XspmAttackPaths_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_XspmChokePoints_CL",          "lastDataReceivedQuery": "MDE_XspmChokePoints_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_XspmTopTargets_CL",           "lastDataReceivedQuery": "MDE_XspmTopTargets_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_SecurityBaselines_CL",        "lastDataReceivedQuery": "MDE_SecurityBaselines_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_IdentityOnboarding_CL",       "lastDataReceivedQuery": "MDE_IdentityOnboarding_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_IdentityServiceAccounts_CL",  "lastDataReceivedQuery": "MDE_IdentityServiceAccounts_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_DCCoverage_CL",               "lastDataReceivedQuery": "MDE_DCCoverage_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_IdentityAlertThresholds_CL",  "lastDataReceivedQuery": "MDE_IdentityAlertThresholds_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_RemediationAccounts_CL",      "lastDataReceivedQuery": "MDE_RemediationAccounts_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_ActionCenter_CL",             "lastDataReceivedQuery": "MDE_ActionCenter_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_ThreatAnalytics_CL",          "lastDataReceivedQuery": "MDE_ThreatAnalytics_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_UserPreferences_CL",          "lastDataReceivedQuery": "MDE_UserPreferences_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_MtoTenants_CL",               "lastDataReceivedQuery": "MDE_MtoTenants_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_LicenseReport_CL",            "lastDataReceivedQuery": "MDE_LicenseReport_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_CloudAppsConfig_CL",          "lastDataReceivedQuery": "MDE_CloudAppsConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
                   ],
                   "connectivityCriterias": [
-                    { "type": "IsConnectedQuery", "value": [ "MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | count | where Count > 0" ] }
+                    { "type": "IsConnectedQuery", "value": [ "MDE_Heartbeat_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(1h)" ] }
                   ],
                   "availability": { "status": 1, "isPreview": true },
                   "permissions": {
@@ -690,7 +739,7 @@
               "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/DataConnector-', variables('dataConnectorId'))]",
               "location": "[parameters('workspaceLocation')]",
               "properties": {
-                "parentId":  "[resourceId('Microsoft.OperationalInsights/workspaces/providers/dataConnectors', parameters('workspaceName'), 'Microsoft.SecurityInsights', variables('dataConnectorId'))]",
+                "parentId":  "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')), 'Microsoft.SecurityInsights/dataConnectors', variables('dataConnectorId'))]",
                 "contentId": "[variables('dataConnectorId')]",
                 "kind":      "DataConnector",
                 "version":   "[parameters('solutionVersion')]",

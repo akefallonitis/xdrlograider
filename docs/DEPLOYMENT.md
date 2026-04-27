@@ -168,7 +168,7 @@ Workbooks are deployed ready:
 
 ## Upgrade (future releases)
 
-1. Change `functionAppZipVersion` parameter and redeploy (or let `latest` auto-pull).
+1. Change `functionAppZipVersion` parameter to the new pinned tag (e.g. `0.2.0`) and redeploy. **Do NOT use `latest`** — GitHub `/releases/latest/download/...` excludes pre-release tags by design and resolves to 404, leaving the FA with no code (`Runtime: Error`). Always pin to an explicit semver tag.
 2. FA pulls the new ZIP on next restart. App Insights will show the cold-start log.
 3. Any new streams in a future release require a redeploy of the ARM template to create the new LA tables + DCR stream declarations.
 

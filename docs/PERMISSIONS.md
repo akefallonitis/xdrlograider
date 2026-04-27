@@ -40,7 +40,7 @@ Consolidated reference for every permission XdrLogRaider needs — at setup time
 
 **Why two roles on the workspace**:
 - `Log Analytics Contributor` covers the data-plane objects: workspace tables (`Microsoft.OperationalInsights/workspaces/tables/write`) + saved searches (parsers + hunting queries use `savedSearches`).
-- `Microsoft Sentinel Contributor` covers Sentinel-specific resources: analytic rules (`Microsoft.SecurityInsights/alertRules/write`), Solution package (`Microsoft.OperationalInsights/workspaces/providers/contentPackages/write`), data-connector card (`Microsoft.OperationalInsights/workspaces/providers/dataConnectors/write` of kind `StaticUI`), Solution+DataConnector metadata links (`.../metadata/write`), workbooks (`Microsoft.Insights/workbooks/write`).
+- `Microsoft Sentinel Contributor` covers Sentinel-specific resources: analytic rules (`Microsoft.SecurityInsights/alertRules/write`), Solution package (`Microsoft.OperationalInsights/workspaces/providers/contentPackages/write`), data-connector card (`Microsoft.OperationalInsights/workspaces/providers/dataConnectors/write` of kind `GenericUI` — canonical for community FA-based connectors), DataConnector metadata link (`.../metadata/write`), workbooks (`Microsoft.Insights/workbooks/write`).
 
 Owner on the workspace RG implicitly grants both.
 
@@ -106,6 +106,50 @@ See [`TESTING.md`](TESTING.md) for the full four-quadrant testing setup.
 - Run: `pwsh ./tests/Run-Tests.ps1 -Category e2e`
 
 **CI does not run online tests.** GitHub Actions has no Azure credentials by design. The entire test-against-live-tenant path is laptop-only.
+
+### Audit / SRE service principal (for `Post-DeploymentVerification.ps1` 14-phase gauntlet)
+
+The full 14-phase post-deploy verification (`tools/Post-DeploymentVerification.ps1`) authenticates via a **dedicated audit SP** stored in `tests/.env.local`. The SP needs **4 RBAC roles** to exercise every phase:
+
+| Role | Scope | Why needed |
+|---|---|---|
+| `Contributor` | Connector RG (`xdrlograider`) | P1 ARM resource enumeration; P12 SAMI role assignments; covers Reader needs |
+| `Log Analytics Contributor` | Workspace (`Sentinel-Workspace`) | P2 table enumeration; P4-P9 KQL queries against `MDE_*_CL` tables |
+| **`Microsoft Sentinel Reader`** | Workspace | P3 Sentinel REST API calls (contentPackages + dataConnectors + metadata reads); without it: 401 InvalidAuthenticationToken |
+| **`Key Vault Secrets User`** | KV (`xdrlr-prod-kv-*`) | P3.5 Key Vault secret list + value verification (data-plane API). Without it: management-plane API has eventual consistency issues — newly-uploaded secrets may not appear for several minutes |
+
+The two **bolded** roles are added in iter 13 to fix the corresponding P3 / P3.5 verification gaps that surfaced during live audit.
+
+**One-shot grant via Azure CLI** (run as someone with Owner on connector RG + KV + workspace):
+
+```bash
+SP_OBJECT_ID="<your audit SP's object ID>"
+SUB="<subscription id>"
+WORKSPACE_RG="Sentinel-Workspace"
+WORKSPACE_NAME="Sentinel-Workspace"
+KV_RG="xdrlograider"
+
+# 1. Contributor on connector RG
+az role assignment create --assignee $SP_OBJECT_ID --role "Contributor" \
+  --scope "/subscriptions/$SUB/resourceGroups/$KV_RG"
+
+# 2. Log Analytics Contributor on workspace
+az role assignment create --assignee $SP_OBJECT_ID --role "Log Analytics Contributor" \
+  --scope "/subscriptions/$SUB/resourceGroups/$WORKSPACE_RG/providers/Microsoft.OperationalInsights/workspaces/$WORKSPACE_NAME"
+
+# 3. Microsoft Sentinel Reader on workspace
+az role assignment create --assignee $SP_OBJECT_ID --role "Microsoft Sentinel Reader" \
+  --scope "/subscriptions/$SUB/resourceGroups/$WORKSPACE_RG/providers/Microsoft.OperationalInsights/workspaces/$WORKSPACE_NAME"
+
+# 4. Key Vault Secrets User on KV (find the KV name first)
+KV_ID=$(az keyvault list --resource-group $KV_RG --query "[0].id" -o tsv)
+az role assignment create --assignee $SP_OBJECT_ID --role "Key Vault Secrets User" \
+  --scope "$KV_ID"
+```
+
+**Important — this audit SP is NOT what the Function App runtime uses.** The FA uses System-Assigned Managed Identity (SAMI) with 3 narrow roles (KV Secrets User + Storage Table Data Contributor + Monitoring Metrics Publisher) auto-granted at deploy time. The audit SP only runs during operator verification + does not interact with the runtime.
+
+`tools/Initialize-XdrLogRaiderSP.ps1` automates the SP creation + all 4 role grants + writes `tests/.env.local`.
 
 ## Cross-RG deployment scenarios
 

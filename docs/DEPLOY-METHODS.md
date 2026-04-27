@@ -40,7 +40,7 @@ az deployment group create \
         githubRepo='akefallonitis/xdrlograider'
 ```
 
-Parameters map 1:1 to the wizard fields. Set `functionAppZipVersion=latest` to track the most recent release; pin to `1.0.1` for reproducibility.
+Parameters map 1:1 to the wizard fields. Set `functionAppZipVersion` to an explicit pinned semver tag (e.g. `0.1.0-beta`, `0.2.0`). **Do NOT use `latest`** — GitHub `/releases/latest/download/...` excludes pre-release tags and returns 404, leaving the Function App with no code (`Runtime: Error`).
 
 ---
 

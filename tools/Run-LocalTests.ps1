@@ -127,7 +127,7 @@ Run-Phase 6 'Post-deploy verification' {
     if (-not (Test-Path './tests/.env.local')) { throw 'tests/.env.local not present' }
     & ./tools/Post-DeploymentVerification.ps1 -ErrorAction Stop
     if ($LASTEXITCODE -ne 0) { throw "Post-DeploymentVerification exit code $LASTEXITCODE" }
-    '13 phases passed'
+    '14 phases passed'
 }
 
 Run-Phase 7 'Production-readiness verdict' {

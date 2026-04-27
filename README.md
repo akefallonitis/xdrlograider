@@ -2,7 +2,7 @@
 
 **A Microsoft Sentinel Solution that ingests Defender XDR portal-only telemetry — configuration, compliance, drift, exposure, governance — that is not exposed by public Graph Security, Defender XDR, or MDE public APIs.**
 
-> **⚠ v0.1.0-beta — BETA.** Production-readiness verified pre-deploy (1162 offline tests green, 36 of 45 endpoints live-captured against a real admin account, all auth paths tested, preflight PRE-DEPLOY READY: YES). Promote to v0.1.0 GA after a 30-day tenant soak; v1.0.0 after ≥2 external operators complete their own soak. See [ROADMAP.md](docs/ROADMAP.md).
+> **⚠ v0.1.0-beta — BETA.** Production-readiness verified pre-deploy (1184 offline tests green, 36 of 45 endpoints live-captured against a real admin account, all auth paths tested, preflight PRE-DEPLOY READY: YES). Promote to v0.1.0 GA after a 30-day tenant soak; v1.0.0 after ≥2 external operators complete their own soak. See [ROADMAP.md](docs/ROADMAP.md).
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fv0.1.0-beta%2Fdeploy%2Fcompiled%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fv0.1.0-beta%2Fdeploy%2Fcompiled%2FcreateUiDefinition.json)
 [![CI](https://github.com/akefallonitis/xdrlograider/actions/workflows/ci.yml/badge.svg)](https://github.com/akefallonitis/xdrlograider/actions/workflows/ci.yml)

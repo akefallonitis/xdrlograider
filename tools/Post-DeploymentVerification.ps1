@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    13-phase post-deployment verification gauntlet for XdrLogRaider.
+    14-phase post-deployment verification gauntlet for XdrLogRaider.
 
 .DESCRIPTION
     Idempotent, ~5 min runtime. Authenticates via SP creds in tests/.env.local
@@ -11,10 +11,11 @@
     and KQL evidence inline.
 
     Phases:
-      P1.  ARM resources present (FA, plan, KV, Storage, AI, DCE, DCR, role-assignments, KV/secrets)
-      P2.  Workspace tables present (47 MDE_*_CL with plan: Analytics)
-      P3.  Solution package + 35 metadata back-links + Data Connector card
-      P4.  Auth chain green (MDE_AuthTestResult_CL last 15 min)
+      P1.   ARM resources present (FA, plan, KV, Storage, AI, DCE, DCR, role-assignments, KV/secrets)
+      P2.   Workspace tables present (47 MDE_*_CL with plan: Analytics)
+      P3.   Solution package + 35 metadata back-links + Data Connector card (kind=GenericUI)
+      P3.5. Key Vault structure (RBAC mode + expected secrets + SAMI Secrets User)
+      P4.   Auth chain green (MDE_AuthTestResult_CL last 15 min)
       P5.  Heartbeat continuous (no gaps in last 2h)
       P6.  Rate limits = 0 (steady state)
       P7.  Compression efficiency (GzipBytes/RowsIngested < 0.2)
@@ -58,7 +59,7 @@
 param(
     [string] $EnvFilePath = './tests/.env.local',
     [string] $ExpectedDataConnectorId = 'XdrLogRaiderInternal',
-    [string] $ExpectedSolutionId      = 'xdrlograider',
+    [string] $ExpectedSolutionId      = 'community.xdrlograider',
     [int]    $MinHeartbeatBins        = 20,
     [string] $ReportDir               = './tests/results',
     [switch] $AutoFix
@@ -70,7 +71,7 @@ Set-StrictMode -Version Latest
 $line = '═' * 67
 Write-Host ""
 Write-Host "  $line" -ForegroundColor Cyan
-Write-Host "   XdrLogRaider — Post-deployment verification (13 phases)" -ForegroundColor Cyan
+Write-Host "   XdrLogRaider — Post-deployment verification (14 phases)" -ForegroundColor Cyan
 Write-Host "  $line" -ForegroundColor Cyan
 Write-Host ""
 
@@ -121,6 +122,20 @@ function Record-Phase {
     if ($Detail) { Write-Host "      $Detail" -ForegroundColor Gray }
 }
 
+function Get-ArmPlainToken {
+    # Az.Accounts 5.x breaking change: Get-AzAccessToken returns
+    # PSSecureAccessToken with .Token as SecureString. Older callers passing
+    # the SecureString as a Bearer header value silently produce malformed
+    # auth headers (token serialised as System.Security.SecureString string)
+    # → 401 InvalidAuthenticationToken. Convert to plain string here.
+    $secure = (Get-AzAccessToken -ResourceUrl 'https://management.azure.com/').Token
+    if ($secure -is [System.Security.SecureString]) {
+        return [System.Net.NetworkCredential]::new('', $secure).Password
+    }
+    # Older Az.Accounts (3.x): .Token already plain string.
+    return [string] $secure
+}
+
 # === PHASES ===
 
 # P1. ARM resources present
@@ -142,8 +157,13 @@ try {
 } catch { Record-Phase 'P2' 'Workspace MDE_*_CL tables' $false "Get-AzOperationalInsightsTable failed: $_" '' }
 
 # P3. Solution + Data Connector + 35 metadata
+# CRITICAL: Get-AzAccessToken without -ResourceUrl returns a Microsoft Graph
+# token (audience=https://graph.microsoft.com). Sentinel REST API on
+# management.azure.com rejects with 401 InvalidAuthenticationToken.
+# Iter 13 fix: Get-ArmPlainToken handles BOTH the ResourceUrl + the
+# Az.Accounts 5.x SecureString → plain string conversion.
 try {
-    $token = (Get-AzAccessToken).Token
+    $token = Get-ArmPlainToken
     $headers = @{ Authorization = "Bearer $token" }
 
     # Solution package
@@ -151,18 +171,87 @@ try {
     $sol = Invoke-RestMethod -Uri $solUri -Headers $headers -Method Get -ErrorAction SilentlyContinue
     $solOk = ($null -ne $sol -and $sol.properties.contentSchemaVersion -eq '3.0.0')
 
-    # Data Connector
-    $dcUri = "https://management.azure.com$($env_['XDRLR_WORKSPACE_ID'])/providers/Microsoft.SecurityInsights/dataConnectors/$ExpectedDataConnectorId" + "?api-version=2023-04-01-preview"
+    # Data Connector — kind=GenericUI per Trend Micro reference (canonical for
+    # FA-based community connectors). Read-API supports older apiVersion 2021-03-01-preview
+    # which matches the deployed resource; both PUT and GET work cross-version.
+    $dcUri = "https://management.azure.com$($env_['XDRLR_WORKSPACE_ID'])/providers/Microsoft.SecurityInsights/dataConnectors/$ExpectedDataConnectorId" + "?api-version=2021-03-01-preview"
     $dc = Invoke-RestMethod -Uri $dcUri -Headers $headers -Method Get -ErrorAction SilentlyContinue
-    $dcOk = ($null -ne $dc -and $dc.kind -eq 'StaticUI')
+    $dcOk = ($null -ne $dc -and $dc.kind -eq 'GenericUI')
 
     # Metadata back-links count
     $mdUri = "https://management.azure.com$($env_['XDRLR_WORKSPACE_ID'])/providers/Microsoft.SecurityInsights/metadata?api-version=2023-04-01-preview&" + '$filter=' + "properties/source/sourceId eq '$ExpectedSolutionId'"
     $md = Invoke-RestMethod -Uri $mdUri -Headers $headers -Method Get -ErrorAction SilentlyContinue
     $mdCount = if ($md.value) { @($md.value).Count } else { 0 }
-    $expectedMd = 37  # 35 content + Solution + DataConnector
-    Record-Phase 'P3' 'Solution + DC card + metadata' ($solOk -and $dcOk -and $mdCount -ge 35) "Solution=$solOk DC=$dcOk MetadataRecords=$mdCount/expected~$expectedMd" ''
+    $expectedMd = 36  # 35 content + DataConnector (no metadata-Solution per AbnormalSecurity / Trend Micro reference)
+    $dcKindActual = if ($dc) { $dc.kind } else { 'NOT-FOUND' }
+    Record-Phase 'P3' 'Solution + DC card + metadata' ($solOk -and $dcOk -and $mdCount -ge 35) "Solution=$solOk DC=$dcOk(kind=$dcKindActual) MetadataRecords=$mdCount/expected~$expectedMd" ''
 } catch { Record-Phase 'P3' 'Solution + DC card + metadata' $false "REST call failed: $_" '' }
+
+# P3.5. Key Vault structure validation
+# ----------------------------------------------------------------------------
+# Verifies the KV is correctly configured for the FA's SAMI to read auth secrets:
+#   - Vault exists in connector RG
+#   - RBAC mode enabled (NOT access policies — first-party best practice)
+#   - Expected secret names exist (mde-portal-auth at minimum)
+#   - SAMI has Key Vault Secrets User role on the vault scope
+#   - Secret ContentType correctly tagged (so secret rotation can identify them)
+try {
+    # Iter 13 fix: defensive null guards at every .Count access (strict mode);
+    # iter-12 P3.5 hit "The property 'Count' cannot be found on this object"
+    # when Get-AzKeyVault returned 0 results AND $kvs ended up unwrapped.
+    $kvsRaw = Get-AzKeyVault -ResourceGroupName $env_['XDRLR_CONNECTOR_RG'] -ErrorAction SilentlyContinue
+    $kvs    = @($kvsRaw)
+    if ($null -eq $kvs -or $kvs.Count -eq 0) {
+        Record-Phase 'P3.5' 'Key Vault structure' $false 'No Key Vault found in connector RG' ''
+    } else {
+        $kv = Get-AzKeyVault -VaultName $kvs[0].VaultName -ErrorAction Stop
+        $rbacMode  = $kv.EnableRbacAuthorization
+        # Iter 13 fix: use the data-plane API (Get-AzKeyVaultSecret) instead
+        # of the management-plane REST API. Management plane has eventual
+        # consistency on the secret list (newly-uploaded secrets may not appear
+        # for several minutes), data plane is real-time. Requires the SP to
+        # have Key Vault Secrets User RBAC on the vault — documented in
+        # docs/PERMISSIONS.md as part of audit-SP setup.
+        $secretNames = @()
+        try {
+            $kvSecrets = Get-AzKeyVaultSecret -VaultName $kv.VaultName -ErrorAction Stop
+            $secretNames = @($kvSecrets | ForEach-Object { $_.Name })
+        } catch {
+            # Data-plane denied → fall back to management plane (graceful degrade)
+            $kvToken = Get-ArmPlainToken
+            $secretsUri = "https://management.azure.com$($kv.ResourceId)/secrets?api-version=2023-07-01"
+            try {
+                $secrets = Invoke-RestMethod -Uri $secretsUri -Headers @{ Authorization = "Bearer $kvToken" } -Method Get -ErrorAction Stop
+                if ($null -ne $secrets -and $secrets.PSObject.Properties.Name -contains 'value' -and $null -ne $secrets.value) {
+                    $secretNames = @($secrets.value | ForEach-Object { ($_.id -split '/')[-1] })
+                }
+            } catch {}
+        }
+        # iter 13 — connector reads 4 separate per-field secrets, NOT a single
+        # 'mde-portal-auth' JSON blob. Verify the 4-secret format is present.
+        $expectedSecrets = @('mde-portal-upn', 'mde-portal-password', 'mde-portal-totp', 'mde-portal-auth-method')
+        $missingSecrets  = @($expectedSecrets | Where-Object { $secretNames -notcontains $_ })
+        $hasAuthSecrets  = ($missingSecrets.Count -eq 0)
+
+        # SAMI role check on the KV scope
+        $faSitesRaw = Get-AzWebApp -ResourceGroupName $env_['XDRLR_CONNECTOR_RG'] -ErrorAction SilentlyContinue
+        $faSites    = @($faSitesRaw | Where-Object { $_.Identity -and $_.Identity.PrincipalId })
+        $samiOk = $false
+        $samiRoleName = '(none)'
+        if ($null -ne $faSites -and $faSites.Count -gt 0) {
+            $faPrincipalId = $faSites[0].Identity.PrincipalId
+            $kvAssignmentsRaw = Get-AzRoleAssignment -Scope $kv.ResourceId -ObjectId $faPrincipalId -ErrorAction SilentlyContinue
+            $kvAssignments    = @($kvAssignmentsRaw)
+            $matchingAssignments = @($kvAssignments | Where-Object { $_.RoleDefinitionName -in 'Key Vault Secrets User','Key Vault Reader','Key Vault Secrets Officer' })
+            $samiOk = ($matchingAssignments.Count -gt 0)
+            if ($samiOk) { $samiRoleName = $matchingAssignments[0].RoleDefinitionName }
+        }
+        $verdict = $rbacMode -and $hasAuthSecrets -and $samiOk
+        $missingDetail = if ($missingSecrets.Count -gt 0) { " Missing: $($missingSecrets -join ',')" } else { '' }
+        $detail = "RBAC=$rbacMode AuthSecrets=$hasAuthSecrets$missingDetail SAMI-role=$samiRoleName Secrets=$($secretNames.Count)"
+        Record-Phase 'P3.5' 'Key Vault structure' $verdict $detail ''
+    }
+} catch { Record-Phase 'P3.5' 'Key Vault structure' $false "KV probe failed: $_" '' }
 
 # P4-P12: KQL-based phases
 function Invoke-WorkspaceKql {

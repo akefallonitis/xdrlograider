@@ -77,7 +77,7 @@
   "connectivityCriteria": [
     {
       "type": "IsConnectedQuery",
-      "value": [ "MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | count | where Count > 0" ]
+      "value": [ "MDE_Heartbeat_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(1h)" ]
     }
   ],
   "availability": {

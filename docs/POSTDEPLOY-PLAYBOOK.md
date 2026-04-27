@@ -1,6 +1,8 @@
 # Post-deployment playbook
 
-**Pre-req**: you've run `pwsh ./tools/Prove-EndToEnd.ps1 -Skip 'deploy,postdeploy'` and Phase 1 (offline) + Phase 2 (pre-deploy live) are both green. If either failed, don't deploy yet.
+**Pre-req**: you've run `pwsh ./tools/Preflight-Deployment.ps1` (offline) + `pwsh ./tools/Run-LocalTests.ps1 -Mode PreDeploy` (live) and both are green. If either failed, don't deploy yet.
+
+**Post-deploy verification**: after the operator clicks Deploy-to-Azure and the deployment completes, run `pwsh ./tools/Post-DeploymentVerification.ps1` for the 14-phase end-to-end audit (markdown evidence report at `tests/results/post-deploy-<UtcStamp>.md`).
 
 This playbook covers every concrete check you run **AFTER** clicking Deploy-to-Azure, in order. Each step has an explicit success criterion + what-to-do-if-it-fails.
 
@@ -219,7 +221,7 @@ The manifest ships with 25 verified streams + 27 marked for follow-up. To enable
 $env:XDRLR_ONLINE = 'true'
 $env:XDRLR_TEST_RG = 'xdrlr-prod-rg'
 $env:XDRLR_TEST_WORKSPACE = 'your-workspace'
-pwsh ./tools/Prove-EndToEnd.ps1 -Skip 'offline,predeploy,deploy'
+pwsh ./tools/Post-DeploymentVerification.ps1
 ```
 
 Runs Phase 4 only. Green → you're good. Red → the specific assertion tells you which health check failed + what to check.

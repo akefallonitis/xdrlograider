@@ -273,8 +273,8 @@
             "name": "functionAppZipVersion",
             "type": "Microsoft.Common.TextBox",
             "label": "Function App version",
-            "toolTip": "'latest' pulls the newest GitHub Release; or pin a specific version like 1.0.0.",
-            "defaultValue": "latest",
+            "toolTip": "Pinned release tag (e.g. '0.1.0-beta'). Do NOT use 'latest' — GitHub /releases/latest excludes pre-releases.",
+            "defaultValue": "0.1.0-beta",
             "constraints": {
               "required": true
             }

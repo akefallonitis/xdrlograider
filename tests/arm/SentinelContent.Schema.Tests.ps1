@@ -158,6 +158,62 @@ Describe 'Analytic rules YAML schema compliance' {
         }
     }
 
+    It 'compiled sentinelContent.json: every metadata.parentId resolves to a content resource of the matching kind' {
+        # The metadata.parentId field must contain a resourceId() expression that
+        # references an actual content resource of the matching kind:
+        #   AnalyticsRule  → Microsoft.SecurityInsights/alertRules
+        #   HuntingQuery   → Microsoft.OperationalInsights/workspaces/savedSearches
+        #   Parser         → Microsoft.OperationalInsights/workspaces/savedSearches
+        #   Workbook       → Microsoft.Insights/workbooks
+        # If a metadata back-link points at a non-existent content item, Sentinel
+        # silently breaks the "From: <Solution>" badge — content appears orphaned.
+        $compiledPath = Join-Path $script:RepoRoot 'deploy' 'compiled' 'sentinelContent.json'
+        $compiled = Get-Content $compiledPath -Raw | ConvertFrom-Json
+        $metadata = @($compiled.resources | Where-Object {
+            $_.type -eq 'Microsoft.OperationalInsights/workspaces/providers/metadata'
+        })
+
+        # Build a map of every content resource type/name in the same template.
+        # The parentId is an ARM expression — match the substring of resource
+        # names referenced via resourceId() / extensionResourceId() calls.
+        $contentResources = @($compiled.resources | Where-Object {
+            $_.type -in @(
+                'Microsoft.OperationalInsights/workspaces/providers/alertRules',
+                'Microsoft.OperationalInsights/workspaces/savedSearches',
+                'Microsoft.Insights/workbooks'
+            )
+        })
+
+        $expectedTypes = @{
+            'AnalyticsRule' = @('alertRules')
+            'HuntingQuery'  = @('savedSearches')
+            'Parser'        = @('savedSearches')
+            'Workbook'      = @('workbooks')
+        }
+
+        foreach ($m in $metadata) {
+            $kind = $m.properties.kind
+            $expectedTypeFragments = $expectedTypes[$kind]
+            $expectedTypeFragments | Should -Not -BeNullOrEmpty -Because "metadata kind '$kind' is not one of AnalyticsRule/HuntingQuery/Parser/Workbook"
+
+            $parentId = $m.properties.parentId
+            $parentId | Should -Not -BeNullOrEmpty -Because "metadata '$($m.name)' has empty parentId"
+
+            # ParentId must reference one of the expected content resource types.
+            $matched = $false
+            foreach ($frag in $expectedTypeFragments) {
+                if ($parentId -match $frag) { $matched = $true; break }
+            }
+            $matched | Should -BeTrue -Because "metadata '$($m.name)' (kind=$kind) parentId '$parentId' does not reference any of: $($expectedTypeFragments -join ', ')"
+        }
+
+        # Sanity: counts of metadata kinds should match counts of corresponding
+        # content resource types within the same template.
+        $alertRuleCount = @($compiled.resources | Where-Object { $_.type -match 'alertRules$' }).Count
+        $analyticsMetaCount = @($metadata | Where-Object { $_.properties.kind -eq 'AnalyticsRule' }).Count
+        $analyticsMetaCount | Should -Be $alertRuleCount -Because 'one AnalyticsRule metadata back-link per alertRule resource'
+    }
+
     It 'compiled sentinelContent.json: every alertRule emits tactics + techniques as JSON arrays' {
         # Bug bash: Sentinel API rejects scalars on these fields with
         # `Error converting value "DefenseEvasion" to type 'AttackTactic[]'`.

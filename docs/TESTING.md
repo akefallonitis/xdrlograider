@@ -4,7 +4,7 @@ The XdrLogRaider test matrix has **four quadrants** — organised around *when* 
 
 | | **Local / offline** | **Online** |
 |---|---|---|
-| **Pre-deploy** | `all-offline` — 307 tests, zero external deps | `local-online` — real portal sign-in from laptop |
+| **Pre-deploy** | `all-offline` — 1184 tests (v0.1.0-beta iter 12), zero external deps | `local-online` — real portal sign-in from laptop |
 | **Post-deploy** | — | `e2e` — KQL verification of deployed workspace |
 
 **No service principals. No app registrations. No stored Azure credentials in CI.** CI only runs the offline quadrant. You run online tests from your own laptop with your own `Connect-AzAccount` session.

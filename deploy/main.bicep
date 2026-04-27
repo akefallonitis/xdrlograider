@@ -5,8 +5,11 @@
 // itself. It deploys:
 //   - Connector resources in the target RG (Function App + plan + KV + Storage + App Insights + DCE + DCR)
 //   - 47 custom tables (45 data + Heartbeat + AuthTestResult) inside the customer's workspace (cross-RG if needed)
-//   - A Sentinel Solution package (XdrLogRaider) + StaticUI Data Connector card so the connector
+//   - A Sentinel Solution package (XdrLogRaider) + GenericUI Data Connector card so the connector
 //     appears in Sentinel → Data Connectors alongside Microsoft Defender XDR / MDE / etc.
+//     (kind=GenericUI + apiVersion=2021-03-01-preview is the canonical pair for FA-based
+//     community connectors per Trend Micro Vision One reference, verified active in
+//     Azure-Sentinel master 2026-04-24)
 //   - Sentinel content (parsers + 14 analytic rules + 9 hunting queries + 6 workbooks)
 //     when deploySentinelContent=true (default)
 //
@@ -52,8 +55,8 @@ param authMethod string = 'credentials_totp'
 @allowed([ 'Y1', 'EP1', 'EP2' ])
 param functionPlanSku string = 'Y1'
 
-@description('Function App code version. "latest" pulls newest GitHub Release; or pin with v1.0.0.')
-param functionAppZipVersion string = 'latest'
+@description('Pinned release tag (e.g. "0.1.0-beta"). DO NOT use "latest" — GitHub /releases/latest excludes pre-releases and returns 302→nothing, leaving the FA with no code.')
+param functionAppZipVersion string = '0.1.0-beta'
 
 @description('GitHub repo owner/name for the Function App code ZIP. Override only if you forked.')
 param githubRepo string = 'akefallonitis/xdrlograider'
@@ -115,11 +118,15 @@ module customTables 'modules/custom-tables.bicep' = {
   }
 }
 
-// Sentinel Solution package + Data Connector card. Emits 4 workspace sub-
-// resources (contentPackages + Solution metadata + StaticUI dataConnector +
-// DataConnector metadata) so XdrLogRaider appears in Content Hub AND in the
-// Data Connectors blade alongside Microsoft Defender XDR / MDE / etc. — same
-// shape Microsoft uses for first-party solutions.
+// Sentinel Solution package + Data Connector card. Emits 3 workspace sub-
+// resources (contentPackages + GenericUI dataConnector + DataConnector
+// metadata) so XdrLogRaider appears in Content Hub AND in the Data Connectors
+// blade alongside Microsoft Defender XDR / MDE / etc. — same shape Microsoft
+// uses for community FA-based connectors (Trend Micro Vision One, Auth0, etc.,
+// per Azure-Sentinel master verified 2026-04-26).
+//
+// (Iter 9 dropped metadata kind=Solution per AbnormalSecurity 2026-02-17
+// reference; keeping it triggered a Sentinel API parentId/contentId mismatch.)
 //
 // Always deploys (no condition) so the connector card and Solution wrapper
 // are present even when deploySentinelContent=false. Per-item metadata links

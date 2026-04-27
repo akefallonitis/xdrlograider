@@ -312,6 +312,29 @@ if (-not (Test-Path $mainTemplatePath)) {
                 if ($cp.properties.PSObject.Properties['contentSchemaVersion'] -and $cp.properties.contentSchemaVersion -notmatch '^\d+\.\d+\.\d+$') {
                     Write-Host ("WARN : contentPackages.contentSchemaVersion = '$($cp.properties.contentSchemaVersion)' should be a semver string like '3.0.0'") -ForegroundColor Yellow
                 }
+
+                # ITER 13: prevent "DEPRECATED" + "no info" Content Hub UI display.
+                # Per Microsoft official ARM schema (verified 2026-04-27 against
+                # https://learn.microsoft.com/en-us/azure/templates/microsoft.securityinsights/2023-04-01-preview/contentpackages):
+                # plain `description` (NOT just descriptionHtml) is the field
+                # Sentinel UI's detail panel reads. Without it, the info panel
+                # shows empty. Plus categories.verticals (empty array OK) is in
+                # the canonical schema.
+                if (-not $cp.properties.PSObject.Properties['description'] -or [string]::IsNullOrWhiteSpace($cp.properties.description)) {
+                    Write-Host ("FAIL : contentPackages.properties.description (plain text) is missing or empty. Sentinel UI detail panel reads this field, NOT descriptionHtml. Without it: empty info panel + may trigger DEPRECATED auto-tag.") -ForegroundColor Red
+                    $anyFail = $true
+                } else {
+                    Write-Host ("OK   : contentPackages.description is plain-text populated ($($cp.properties.description.Length) chars)") -ForegroundColor Green
+                }
+                if (-not $cp.properties.categories.PSObject.Properties['verticals']) {
+                    Write-Host ("FAIL : contentPackages.properties.categories.verticals is missing. Canonical schema requires the array (empty OK).") -ForegroundColor Red
+                    $anyFail = $true
+                } else {
+                    Write-Host ("OK   : contentPackages.categories has both domains + verticals") -ForegroundColor Green
+                }
+                if (-not $cp.properties.PSObject.Properties['isPreview']) {
+                    Write-Host ("WARN : contentPackages.properties.isPreview not set. v0.1.0-beta should declare 'true' explicitly per Microsoft schema (string flag).") -ForegroundColor Yellow
+                }
             }
         }
 
@@ -424,8 +447,9 @@ if (Test-Path $mainPath) {
     } else {
         Write-Host ("OK   : 'solution-*' nested deploy present (cross-RG into workspace RG)") -ForegroundColor Green
         # Inner template must contain: contentPackages (the Solution wrapper)
-        # + dataConnectors (StaticUI connector card) + DataConnector metadata
-        # back-link. NO metadata kind=Solution: AbnormalSecurity reference
+        # + dataConnectors (GenericUI connector card per Trend Micro reference)
+        # + DataConnector metadata back-link. NO metadata kind=Solution:
+        # AbnormalSecurity reference
         # solution (2026-02-17, contentSchemaVersion 3.0.0) confirms newer
         # solutions use only contentPackages — adding a separate metadata-Solution
         # triggers Sentinel's `Invalid data model - solutions expect contentId
@@ -456,13 +480,194 @@ if (Test-Path $mainPath) {
             }
         }
         if ($haveDataConnector) {
-            $kind = $haveDataConnector[0].kind
-            if ($kind -ne 'StaticUI') {
-                Write-Host ("FAIL : dataConnectors kind = '$kind'; expected 'StaticUI' (the kind first-party MS solutions use for cards without interactive Connect flow)") -ForegroundColor Red
+            # ITER 13: dataTypes count gate — embedded mainTemplate.json copy
+            # must list ALL 47 tables (45 data + Heartbeat + AuthTestResult),
+            # not the 3-table stub we shipped pre-iter-13. Standalone
+            # XdrLogRaider_DataConnector.json was already complete; this
+            # gate locks the embedded copy in sync.
+            $dt = $haveDataConnector[0].properties.connectorUiConfig.dataTypes
+            $dtCount = if ($dt) { @($dt).Count } else { 0 }
+            if ($dtCount -ne 47) {
+                Write-Host ("FAIL : dataConnector.connectorUiConfig.dataTypes.Count = $dtCount; expected 47 (45 streams + Heartbeat + AuthTestResult)") -ForegroundColor Red
                 $anyFail = $true
             } else {
-                Write-Host ("OK   : dataConnectors kind = StaticUI") -ForegroundColor Green
+                Write-Host ("OK   : dataConnector.dataTypes lists 47 tables") -ForegroundColor Green
             }
+
+            # ITER 13: connectivityCriterias query strength gate — must use
+            # `summarize ... | project IsConnected = ...` modern pattern, not
+            # legacy `| count | where Count > 0`. Sentinel UI status indicator
+            # is more reliable with the modern pattern (Trend Micro Vision One
+            # / AbnormalSecurity references).
+            $conQuery = $haveDataConnector[0].properties.connectorUiConfig.connectivityCriterias[0].value[0]
+            if ($conQuery -notmatch 'IsConnected\s*=\s*LastLogReceived') {
+                Write-Host ("FAIL : connectivityCriterias query uses legacy pattern. Got: $conQuery") -ForegroundColor Red
+                Write-Host ("       Expected: 'MDE_Heartbeat_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(1h)'") -ForegroundColor Yellow
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : connectivityCriterias query uses modern summarize+project IsConnected pattern") -ForegroundColor Green
+            }
+
+            # CANONICAL DATA-CONNECTOR SHAPE LOCK
+            # ----------------------------------------------------------------
+            # Per Trend Micro Vision One reference solution (the production
+            # working example of a Function-App-based community connector that
+            # surfaces in Sentinel → Data Connectors blade after direct ARM
+            # deploy), the canonical pair is:
+            #   kind:        GenericUI
+            #   apiVersion:  2021-03-01-preview
+            # StaticUI is documented for first-party Microsoft solutions
+            # (Defender XDR, MDE, Office 365). The Sentinel UI blade indexer
+            # treats StaticUI from non-Microsoft publishers differently than
+            # from MSFT, causing the connector card to stay hidden after
+            # direct ARM deploy. apiVersion 2023-04-01-preview newer but the
+            # Trend Micro reference uses 2021-03-01-preview — keeping that
+            # match avoids any indexer-pickup quirks.
+            $dcKind       = $haveDataConnector[0].kind
+            $dcApiVersion = $haveDataConnector[0].apiVersion
+            $dcType       = $haveDataConnector[0].type
+            if ($dcKind -ne 'GenericUI') {
+                Write-Host ("FAIL : dataConnectors kind = '$dcKind'; expected 'GenericUI' (canonical for FA-based community connectors per Trend Micro Vision One reference)") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : dataConnectors kind = GenericUI (canonical for community FA-based connectors)") -ForegroundColor Green
+            }
+            if ($dcApiVersion -ne '2021-03-01-preview') {
+                Write-Host ("FAIL : dataConnectors apiVersion = '$dcApiVersion'; expected '2021-03-01-preview' (matches Trend Micro reference)") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : dataConnectors apiVersion = 2021-03-01-preview") -ForegroundColor Green
+            }
+            if ($dcType -ne 'Microsoft.OperationalInsights/workspaces/providers/dataConnectors') {
+                Write-Host ("FAIL : dataConnectors type = '$dcType'; expected 'Microsoft.OperationalInsights/workspaces/providers/dataConnectors'") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : dataConnectors type = Microsoft.OperationalInsights/workspaces/providers/dataConnectors") -ForegroundColor Green
+            }
+        }
+
+        if ($haveDataConnectorMeta) {
+            # The metadata kind=DataConnector parentId must use the
+            # extensionResourceId() form per Trend Micro reference:
+            #   [extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', <ws>),
+            #                        'Microsoft.SecurityInsights/dataConnectors', <id>)]
+            # The hierarchical resourceId() form (workspaces/providers/dataConnectors)
+            # produces a DIFFERENT canonical resource ID that the Sentinel UI
+            # blade indexer doesn't always chain back to the connector card.
+            $parentId = $haveDataConnectorMeta[0].properties.parentId
+            if ($parentId -notmatch 'extensionResourceId\(') {
+                Write-Host ("FAIL : DataConnector metadata.parentId does not use extensionResourceId() form. Got: $parentId") -ForegroundColor Red
+                $anyFail = $true
+            } elseif ($parentId -notmatch 'Microsoft\.SecurityInsights/dataConnectors') {
+                Write-Host ("FAIL : DataConnector metadata.parentId extensionResourceId() does not target 'Microsoft.SecurityInsights/dataConnectors'. Got: $parentId") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : DataConnector metadata.parentId uses extensionResourceId(workspace, 'Microsoft.SecurityInsights/dataConnectors', ...) form") -ForegroundColor Green
+            }
+        }
+    }
+}
+
+# ============================================================================
+# FUNCTION-APP RUNTIME — Linux Consumption Legion managed-dependencies gate.
+# Iter 13 root cause: src/requirements.psd1 listed Az modules → Linux
+# Consumption "Legion" runtime fails to install via Managed Dependencies →
+# every function load throws "Failed to install function app dependencies".
+# Microsoft's official fix (https://aka.ms/functions-powershell-include-modules):
+# bundle modules into Modules/ inside the zip + set host.json
+# managedDependency.Enabled=false. This gate catches regressions to either.
+# ============================================================================
+
+Write-Host ""
+Write-Host "=== Function App runtime — Linux Consumption Legion compatibility ===" -ForegroundColor Cyan
+
+$reqPsd1Path  = 'src/requirements.psd1'
+$hostJsonPath = 'src/host.json'
+
+# 1) requirements.psd1 must be empty (no Az.* references)
+if (Test-Path $reqPsd1Path) {
+    $reqContent = Get-Content $reqPsd1Path -Raw
+    # Strip comment lines for analysis
+    $codeOnly = ($reqContent -split "`n") | Where-Object { $_ -notmatch '^\s*#' } | Out-String
+    if ($codeOnly -match "(?m)^\s*'?Az\.") {
+        Write-Host ("FAIL : src/requirements.psd1 has Az.* module references. Linux Consumption Legion runtime does NOT support Managed Dependencies — every function load will fail with 'Failed to install function app dependencies'. Empty the file and bundle modules into Modules/ via Save-Module in release.yml.") -ForegroundColor Red
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : src/requirements.psd1 is module-free (Legion-compatible)") -ForegroundColor Green
+    }
+}
+
+# 2) host.json managedDependency.Enabled must be false
+if (Test-Path $hostJsonPath) {
+    $hostJson = Get-Content $hostJsonPath -Raw | ConvertFrom-Json
+    $managedDepEnabled = $hostJson.managedDependency.Enabled
+    if ($managedDepEnabled) {
+        Write-Host ("FAIL : host.json managedDependency.Enabled = true. Must be false on Linux Consumption Legion (and Flex Consumption v0.2.0+) — bundled modules under Modules/ are the supported pattern.") -ForegroundColor Red
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : host.json managedDependency.Enabled = false (bundled-modules mode)") -ForegroundColor Green
+    }
+}
+
+# ============================================================================
+# FUNCTION-APP DEPLOYMENT URL — package version pinning gate.
+# GitHub /releases/latest/download/... endpoint excludes pre-release tags by
+# design (returns 302 → 404). Default 'latest' silently leaves the FA with no
+# code → "Runtime: Error", 0 functions loaded, 0 heartbeats, hidden connector
+# card. v0.1.0-beta first deploy attempt hit exactly this. Lock the default to
+# an explicit pinned tag.
+# ============================================================================
+
+Write-Host ""
+Write-Host "=== Function App package URL ===" -ForegroundColor Cyan
+
+$mainTplPath = 'deploy/compiled/mainTemplate.json'
+$createUiPath = 'deploy/compiled/createUiDefinition.json'
+$bicepPath    = 'deploy/main.bicep'
+
+# 1) mainTemplate.json default
+if (Test-Path $mainTplPath) {
+    $main = Get-Content $mainTplPath -Raw | ConvertFrom-Json
+    if ($main.parameters.PSObject.Properties.Name -contains 'functionAppZipVersion') {
+        $faDef = $main.parameters.functionAppZipVersion.defaultValue
+        if ($faDef -eq 'latest') {
+            Write-Host ("FAIL : mainTemplate.json functionAppZipVersion default = 'latest'. GitHub /releases/latest excludes pre-releases — FA gets no code, 'Runtime: Error'. Pin to an explicit tag like '0.1.0-beta'.") -ForegroundColor Red
+            $anyFail = $true
+        } elseif ($faDef -notmatch '^\d+\.\d+\.\d+(-[a-z0-9.]+)?$') {
+            Write-Host ("WARN : mainTemplate.json functionAppZipVersion default '$faDef' is not a semver string. Confirm the corresponding GitHub Release tag exists at /releases/download/v$faDef/function-app.zip.") -ForegroundColor Yellow
+        } else {
+            Write-Host ("OK   : mainTemplate.json functionAppZipVersion default = '$faDef' (pinned, not 'latest')") -ForegroundColor Green
+        }
+    }
+}
+
+# 2) createUiDefinition.json default
+if (Test-Path $createUiPath) {
+    $ui = Get-Content $createUiPath -Raw | ConvertFrom-Json
+    $faTextBox = $null
+    # The wizard textbox lives somewhere in the steps tree. Recursive search.
+    $stepsBlob = ($ui | ConvertTo-Json -Depth 50)
+    if ($stepsBlob -match '"name"\s*:\s*"functionAppZipVersion"[^}]*"defaultValue"\s*:\s*"([^"]+)"') {
+        $uiDef = $Matches[1]
+        if ($uiDef -eq 'latest') {
+            Write-Host ("FAIL : createUiDefinition.json functionAppZipVersion default = 'latest' (same /releases/latest 404 trap as mainTemplate). Pin to an explicit tag.") -ForegroundColor Red
+            $anyFail = $true
+        } else {
+            Write-Host ("OK   : createUiDefinition.json functionAppZipVersion default = '$uiDef' (pinned)") -ForegroundColor Green
+        }
+    }
+}
+
+# 3) Bicep parameter default
+if (Test-Path $bicepPath) {
+    $bicep = Get-Content $bicepPath -Raw
+    if ($bicep -match "param\s+functionAppZipVersion\s+string\s*=\s*'([^']+)'") {
+        $bicepDef = $Matches[1]
+        if ($bicepDef -eq 'latest') {
+            Write-Host ("FAIL : main.bicep functionAppZipVersion default = 'latest' (same trap). Pin to an explicit tag.") -ForegroundColor Red
+            $anyFail = $true
+        } else {
+            Write-Host ("OK   : main.bicep functionAppZipVersion default = '$bicepDef' (pinned)") -ForegroundColor Green
         }
     }
 }

@@ -1,4 +1,5 @@
 {
+  "description": "30-minute poll (Tier P1 — Pipeline / 4 streams). Pulls data-pipeline integration health: data export settings, Streaming API config, Intune connector status, Purview sharing config. Writes to MDE_DataExportSettings_CL, MDE_StreamingApiConfig_CL, MDE_IntuneConnection_CL, MDE_PurviewSharing_CL. Tier P1 = pipeline integration (mid-frequency).",
   "bindings": [
     {
       "schedule": "0 35 * * * *",

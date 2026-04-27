@@ -32,9 +32,13 @@ jobs:
         run: |
           # Lint each tree individually — older PSScriptAnalyzer versions on
           # the Ubuntu runner reject -Path with a string array. Loop + accumulate.
+          # -ErrorAction Continue: PSSA occasionally throws non-fatal internal
+          # NullReferenceException ("dynamic module" parser warnings) on Linux
+          # runners that should not fail the release. We gate on actual
+          # Error-severity findings, matching CI behavior (ci.yml:46).
           $allFindings = @()
           foreach ($p in @('./src', './tools', './tests')) {
-              $allFindings += Invoke-ScriptAnalyzer -Path $p -Recurse -Settings './.config/PSScriptAnalyzerSettings.psd1'
+              $allFindings += Invoke-ScriptAnalyzer -Path $p -Recurse -Settings './.config/PSScriptAnalyzerSettings.psd1' -ErrorAction Continue
           }
           $errs = $allFindings | Where-Object Severity -eq 'Error'
           if ($errs) {
@@ -161,45 +165,166 @@ jobs:
           }
           Write-Host "✓ Solution package built: $zipPath" -ForegroundColor Green
 
-      - name: Build Function App ZIP
+      - name: Build Function App ZIP (with bundled Az modules per Linux Consumption Legion)
         shell: pwsh
         run: |
-          # Ubuntu pwsh does NOT glob-expand `-Path *` inside Compress-Archive;
-          # it treats the literal star as a filename and silently produces a
-          # 9-byte (empty header) zip. Resolve the file list ourselves.
-          $srcItems = Get-ChildItem -Path ./src -Exclude 'local.settings.json' |
-              Select-Object -ExpandProperty FullName
-          if (-not $srcItems) { throw "No files found under ./src — aborting zip build" }
+          # CRITICAL — Two invariants this step must enforce:
+          #
+          #  (1) FLAT structure: function dirs (heartbeat-5m, poll-*, etc.)
+          #      must be at the zip ROOT, NOT under a `functions/` wrapper.
+          #      Azure Functions PowerShell runtime walks the root for
+          #      function.json discovery.
+          #
+          #  (2) BUNDLED Az modules: requirements.psd1 must be empty + Az.*
+          #      modules must ship pre-installed under Modules/. Linux
+          #      Consumption "Legion" runtime does NOT support Managed
+          #      Dependencies (every function load throws "Failed to install
+          #      function app dependencies"). Microsoft official guidance:
+          #      https://aka.ms/functions-powershell-include-modules
+          #      Same approach is also required by Flex Consumption (v0.2.0
+          #      migration target), so this work isn't temporary.
+          #
+          # Stage to a temp dir with canonical flat layout + Save-Module Az.*,
+          # prune docs/help post-Save-Module (~30% size reduction), then zip.
 
-          # Compress-Archive preserves the paths RELATIVE to $PWD. To get the
-          # intended structure (files/folders at the ROOT of the zip, not
-          # nested under src/), invoke from inside ./src.
-          Push-Location ./src
-          $relItems = Get-ChildItem -Exclude 'local.settings.json' |
+          $stage = Join-Path $env:RUNNER_TEMP 'func-app-zip-build'
+          if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+
+          # === STAGE: src/* → $stage/ (flatten) ===
+
+          # Root-level config + custom Modules/ (XdrLogRaider.Auth/Client/Ingest).
+          Copy-Item ./src/host.json, ./src/profile.ps1, ./src/requirements.psd1 -Destination $stage
+          Copy-Item ./src/Modules -Destination (Join-Path $stage 'Modules') -Recurse
+
+          # FLATTEN: src/functions/<name>/  →  $stage/<name>/
+          $funcDirs = Get-ChildItem -Path ./src/functions -Directory
+          if (-not $funcDirs) { throw 'No function directories under ./src/functions — aborting zip build' }
+          foreach ($fd in $funcDirs) {
+              Copy-Item -Path $fd.FullName -Destination (Join-Path $stage $fd.Name) -Recurse
+          }
+          Write-Host ("Staged: {0} function dirs + custom Modules/ + config files" -f $funcDirs.Count) -ForegroundColor Cyan
+
+          # === BUNDLE: Save-Module Az.{Accounts,KeyVault,Storage} → $stage/Modules/ ===
+          # MinimumVersion (not RequiredVersion) so we get latest patch within the
+          # major version line at build time — security updates flow through.
+          # If a pinned-version build is needed for compliance, switch to
+          # -RequiredVersion <semver>.
+
+          $modulesDir = Join-Path $stage 'Modules'
+          Write-Host "Saving Az modules into $modulesDir ..." -ForegroundColor Cyan
+
+          # PSGallery is the source. Trust required to suppress prompts.
+          if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne 'Trusted') {
+              Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          }
+
+          $azModules = @(
+              @{ Name = 'Az.Accounts'; MinVersion = '5.0.0' }
+              @{ Name = 'Az.KeyVault'; MinVersion = '6.0.0' }
+              @{ Name = 'Az.Storage';  MinVersion = '7.0.0' }
+          )
+          foreach ($m in $azModules) {
+              Save-Module -Name $m.Name -MinimumVersion $m.MinVersion -Path $modulesDir -Repository PSGallery -Force
+              Write-Host "  ✓ $($m.Name) saved (>= $($m.MinVersion))" -ForegroundColor Green
+          }
+
+          # === PRUNE: remove docs/help/samples from Az modules (size optimization) ===
+          # Docs ship with PSGallery packages but are not needed at runtime; safe
+          # to remove. Estimated reduction: 25-40% of the bundled module weight.
+          $beforePrune = (Get-ChildItem -Path $modulesDir -Recurse -File | Measure-Object Length -Sum).Sum
+
+          $prunePatterns = @('*.md', '*.txt', '*.html', '*.cdxml', 'samples', 'docs')
+          # Help XML files are heavy and not needed in production: en-US/*.xml
+          # patterns. Remove them while preserving .psd1/.psm1/.dll/.ps1.
+          foreach ($pat in $prunePatterns) {
+              Get-ChildItem -Path $modulesDir -Recurse -Force -ErrorAction SilentlyContinue |
+                  Where-Object { $_.Name -like $pat -or $_.Name -ieq $pat } |
+                  Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          }
+          # Remove en-US/*-help.xml (heavy, runtime not used)
+          Get-ChildItem -Path $modulesDir -Recurse -Filter '*-Help.xml' -ErrorAction SilentlyContinue |
+              Remove-Item -Force -ErrorAction SilentlyContinue
+
+          $afterPrune = (Get-ChildItem -Path $modulesDir -Recurse -File | Measure-Object Length -Sum).Sum
+          $savedMB = [int](($beforePrune - $afterPrune) / 1MB)
+          $totalMB = [int]($afterPrune / 1MB)
+          Write-Host "Module pruning: saved $savedMB MB; total Modules/ = $totalMB MB" -ForegroundColor Cyan
+
+          # === ZIP: Compress-Archive from $stage root ===
+          Push-Location $stage
+          $relItems = Get-ChildItem -Exclude 'local.settings.json*' |
               Select-Object -ExpandProperty Name
-          Compress-Archive -Path $relItems -DestinationPath ../function-app.zip -Force
+          Compress-Archive -Path $relItems -DestinationPath "$env:GITHUB_WORKSPACE/function-app.zip" -Force
           Pop-Location
 
           $size = (Get-Item ./function-app.zip).Length
-          if ($size -lt 10000) {
-              throw "function-app.zip is only $size bytes — Compress-Archive didn't pick up src contents. Aborting."
-          }
-          Write-Host "function-app.zip: $([int]($size / 1024)) KB" -ForegroundColor Green
+          $zipMB = [int]($size / 1MB)
 
-          # Sanity-check the zip contains profile.ps1 + host.json + Modules/
+          # === SIZE BUDGET GATE ===
+          # Bundled Az modules with pruning compress ~3:1 via Compress-Archive
+          # deflate. Empirical: 54 MB raw Modules/ → 18 MB zip. Pre-iter-13 zip
+          # (no Az bundle) was 67 KB. So:
+          #   < 10 MB: definitely missing Az modules → re-trigger Legion bug.
+          #   > 100 MB: unintended trees leaked (huge regression).
+          if ($zipMB -lt 10) {
+              throw "function-app.zip is only $zipMB MB — too small. Save-Module probably failed; Az modules missing. Aborting."
+          }
+          if ($zipMB -gt 100) {
+              throw "function-app.zip is $zipMB MB — exceeds 100 MB budget. Suggests unintended trees in zip; investigate."
+          }
+          Write-Host "function-app.zip: $zipMB MB (within 10-100 MB budget)" -ForegroundColor Green
+
+          # === VERIFY: post-build assertions on zip structure ===
           $entries = [IO.Compression.ZipFile]::OpenRead((Resolve-Path ./function-app.zip).Path).Entries.FullName
+
+          # 1. Required root-level files
           foreach ($required in 'profile.ps1', 'host.json', 'requirements.psd1') {
               if ($entries -notcontains $required) {
-                  throw "function-app.zip is missing required file: $required"
+                  throw "function-app.zip is missing required root file: $required"
               }
           }
+          # 2. Modules/ directory must exist at root
           if (-not ($entries | Where-Object { $_ -like 'Modules/*' })) {
               throw "function-app.zip is missing the Modules/ directory"
           }
-          if (-not ($entries | Where-Object { $_ -like 'functions/*' })) {
-              throw "function-app.zip is missing the functions/ directory"
+          # 3. NO `functions/` wrapper (Azure runtime requirement)
+          if ($entries | Where-Object { $_ -like 'functions/*' }) {
+              throw "function-app.zip has a 'functions/' wrapper. Function directories MUST be at root for Azure Functions runtime to load them."
           }
-          Write-Host "function-app.zip structure verified: $($entries.Count) entries" -ForegroundColor Green
+          # 4. All 9 expected function dirs at root with function.json
+          $expectedFuncs = @(
+              'heartbeat-5m','poll-p0-compliance-1h','poll-p1-pipeline-30m',
+              'poll-p2-governance-1d','poll-p3-exposure-1h','poll-p5-identity-1d',
+              'poll-p6-audit-10m','poll-p7-metadata-1d','validate-auth-selftest'
+          )
+          foreach ($func in $expectedFuncs) {
+              if ($entries -notcontains "$func/function.json") {
+                  throw "function-app.zip is missing required function: $func/function.json (must be at root, not under functions/)"
+              }
+              if ($entries -notcontains "$func/run.ps1") {
+                  throw "function-app.zip is missing $func/run.ps1"
+              }
+          }
+          # 5. No development artefacts (the .example file or local.settings.json)
+          if ($entries | Where-Object { $_ -like 'local.settings.json*' }) {
+              throw "function-app.zip contains a local.settings.json* file (dev artefact must not ship)"
+          }
+          # 6. Az.* modules bundled (Legion fix invariant) — at least one .psd1 manifest each
+          foreach ($azMod in 'Az.Accounts', 'Az.KeyVault', 'Az.Storage') {
+              $manifest = $entries | Where-Object { $_ -match "^Modules/$azMod/[\d\.]+/$azMod\.psd1$" } | Select-Object -First 1
+              if (-not $manifest) {
+                  throw "function-app.zip is missing bundled $azMod (Modules/$azMod/<version>/$azMod.psd1). Save-Module failed or pruning was too aggressive."
+              }
+              Write-Host "  ✓ Bundled module: $manifest" -ForegroundColor Green
+          }
+          # 7. requirements.psd1 must NOT have module references (Legion fix invariant)
+          $reqContent = Get-Content "$env:GITHUB_WORKSPACE/src/requirements.psd1" -Raw
+          if ($reqContent -match "(?m)^\s*'Az\." -or $reqContent -match "(?m)^\s*Az\." ) {
+              throw "src/requirements.psd1 still has Az module references — must be empty. Linux Consumption Legion will fail to load functions."
+          }
+
+          Write-Host "function-app.zip structure verified: $($entries.Count) entries, $($expectedFuncs.Count) function dirs at root, 3 Az modules bundled, requirements.psd1 module-free, no dev artefacts" -ForegroundColor Green
 
       - name: Stage solution zip for release attachment
         shell: pwsh

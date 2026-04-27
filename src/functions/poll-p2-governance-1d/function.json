@@ -1,4 +1,5 @@
 {
+  "description": "Daily poll at 02:00 UTC (Tier P2 — Governance / 4 streams). Pulls RBAC + asset governance: RBAC device groups, Unified RBAC roles, asset rules, sensitivity-aware classification (SAClassification). Writes to MDE_RbacDeviceGroups_CL, MDE_UnifiedRbacRoles_CL, MDE_AssetRules_CL, MDE_SAClassification_CL. Tier P2 = governance baseline (low-frequency).",
   "bindings": [
     {
       "schedule": "0 0 2 * * *",

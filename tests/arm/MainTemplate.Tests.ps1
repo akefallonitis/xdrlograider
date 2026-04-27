@@ -44,6 +44,17 @@ Describe 'mainTemplate.json — schema + structure' {
         $p.maxLength | Should -Be 12
     }
 
+    It 'functionAppZipVersion parameter default is a pinned tag, NOT "latest"' {
+        # GitHub /releases/latest/download/... endpoint excludes pre-release
+        # tags by design (returns 302 → 404). v0.1.0-beta first deploy attempt
+        # hit exactly this — FA got no code, "Runtime: Error", 0 functions
+        # loaded, hidden connector card. Default must be an explicit tag.
+        $p = $script:MainTemplate.parameters.functionAppZipVersion
+        $p                | Should -Not -BeNullOrEmpty
+        $p.defaultValue   | Should -Not -Be 'latest' -Because 'GitHub /releases/latest excludes pre-releases — FA gets no code'
+        $p.defaultValue   | Should -Match '^\d+\.\d+\.\d+(-[a-z0-9.]+)?$' -Because 'must be a semver release tag like 0.1.0-beta'
+    }
+
     It 'declares authMethod parameter with validation' {
         $p = $script:MainTemplate.parameters.authMethod
         $p | Should -Not -BeNullOrEmpty
@@ -245,10 +256,11 @@ Describe 'Bicep source — files present' {
     }
 
     It 'main.bicep wires Sentinel Solution module (sentinelSolution) before sentinelContent' {
-        # v0.1.0-beta iteration 5: connector now appears in the Sentinel Data
-        # Connectors blade like Microsoft Defender XDR / MDE / Office 365 do —
-        # via a Sentinel Solution package + StaticUI dataConnector. Lock that
-        # main.bicep wires the module under the canonical name.
+        # v0.1.0-beta iteration 12: connector now appears in the Sentinel Data
+        # Connectors blade like community FA-based connectors (Trend Micro Vision
+        # One reference) — via a Sentinel Solution package + GenericUI
+        # dataConnector. Lock that main.bicep wires the module under the
+        # canonical name.
         $bicep = Get-Content $script:BicepMainPath -Raw
         $bicep | Should -Match "module sentinelSolution 'modules/data-connector\.bicep'"
         $bicep | Should -Match "name: 'solution-\$\{uniq\}'"
@@ -261,12 +273,13 @@ Describe 'Bicep source — files present' {
 }
 
 Describe 'Sentinel Solution shape — connector visible in Data Connectors blade' {
-    # v0.1.0-beta iteration 5: the connector now appears in Sentinel → Data
-    # Connectors alongside Microsoft Defender XDR / MDE / Office 365 — same
-    # resource shape Microsoft uses for first-party connectors. The compiled
-    # mainTemplate must contain a 'solution-*' nested deployment with the 4
-    # canonical resources: contentPackages + Solution metadata + StaticUI
-    # dataConnector + DataConnector metadata.
+    # v0.1.0-beta iteration 12: the connector appears in Sentinel → Data
+    # Connectors alongside Microsoft Defender XDR / MDE / Office 365 — using
+    # the canonical shape for community FA-based connectors per Trend Micro
+    # Vision One reference (kind=GenericUI + apiVersion=2021-03-01-preview).
+    # The compiled mainTemplate must contain a 'solution-*' nested deployment
+    # with 3 canonical resources: contentPackages + GenericUI dataConnector +
+    # DataConnector metadata. (No metadata-Solution per AbnormalSecurity ref.)
     BeforeAll {
         $script:SolutionDeploy = $script:MainTemplate.resources |
             Where-Object { $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'solution-' } |
@@ -290,18 +303,46 @@ Describe 'Sentinel Solution shape — connector visible in Data Connectors blade
         ($deps -join '|') | Should -Match 'customTables-' -Because 'connector dataTypes reference tables that must exist'
     }
 
-    It 'inner template emits 3 canonical resources: contentPackages + StaticUI dataConnector + DataConnector metadata (NO redundant Solution metadata)' {
+    It 'inner template emits 3 canonical resources: contentPackages + GenericUI dataConnector + DataConnector metadata (NO redundant Solution metadata)' {
         # Per AbnormalSecurity 2026-02-17 reference (contentSchemaVersion 3.0.0):
         # newer Sentinel solutions use ONLY contentPackages as the Solution wrapper.
         # Adding a separate metadata kind=Solution triggers Sentinel's `Invalid data
         # model - solutions expect contentId to match parentId` because that
         # metadata's parentId is a full resourceId while contentId is the slug —
         # they can never match by string.
+        # Per Trend Micro Vision One reference (the canonical FA-based community
+        # connector that surfaces correctly in Data Connectors blade after direct
+        # ARM deploy): kind=GenericUI is the right kind; StaticUI is reserved for
+        # first-party Microsoft connectors and is treated differently by the
+        # Sentinel UI blade indexer when the publisher is non-Microsoft.
         $inner = @($script:SolutionDeploy.properties.template.resources)
         @($inner | Where-Object { $_.type -match 'contentPackages$' }).Count                                                       | Should -BeGreaterOrEqual 1
         @($inner | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'Solution' }).Count                       | Should -Be 0 -Because 'metadata kind=Solution causes Sentinel API rejection in cross-RG nested deploys'
-        @($inner | Where-Object { $_.type -match 'dataConnectors$' -and $_.kind -eq 'StaticUI' }).Count                            | Should -BeGreaterOrEqual 1
+        @($inner | Where-Object { $_.type -match 'dataConnectors$' -and $_.kind -eq 'GenericUI' }).Count                           | Should -BeGreaterOrEqual 1 -Because 'GenericUI is the canonical kind for community FA-based connectors per Trend Micro reference'
         @($inner | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'DataConnector' }).Count                  | Should -BeGreaterOrEqual 1
+    }
+
+    It 'dataConnector apiVersion is 2021-03-01-preview (canonical FA-community version per Trend Micro reference)' {
+        # Trend Micro Vision One — the production reference for FA-push community
+        # connectors that surface in Sentinel → Data Connectors after direct ARM
+        # deploy — uses 2021-03-01-preview. Newer 2023-04-01-preview is documented
+        # for first-party MS solutions; mixing it with a non-MS publisher caused
+        # iter 11 connector card to stay hidden.
+        $inner = @($script:SolutionDeploy.properties.template.resources)
+        $dc    = $inner | Where-Object { $_.type -match 'dataConnectors$' } | Select-Object -First 1
+        $dc.apiVersion | Should -Be '2021-03-01-preview' -Because 'Trend Micro reference uses this apiVersion for FA-community connectors'
+    }
+
+    It 'dataConnector metadata.parentId uses extensionResourceId() form (Sentinel UI indexer chains correctly)' {
+        # The hierarchical resourceId() form
+        # ('Microsoft.OperationalInsights/workspaces/providers/dataConnectors')
+        # produces a different canonical resource ID string than the extension
+        # form ('Microsoft.SecurityInsights/dataConnectors'). The Sentinel UI
+        # blade indexer expects the latter when chaining metadata back-links.
+        $inner = @($script:SolutionDeploy.properties.template.resources)
+        $meta  = $inner | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'DataConnector' } | Select-Object -First 1
+        $meta.properties.parentId | Should -Match 'extensionResourceId\('                              -Because 'Trend Micro reference uses extensionResourceId, not hierarchical resourceId'
+        $meta.properties.parentId | Should -Match "Microsoft\.SecurityInsights/dataConnectors"          -Because 'extension form targets Microsoft.SecurityInsights/dataConnectors, not OI workspaces/providers/dataConnectors'
     }
 
     It 'Solution package contentKind = Solution and the inner template defines XdrLogRaider' {
@@ -316,7 +357,7 @@ Describe 'Sentinel Solution shape — connector visible in Data Connectors blade
         $vars.solutionId   | Should -Be 'community.xdrlograider'
     }
 
-    It 'StaticUI dataConnector has connectivityCriterias (Sentinel uses this for Connected status)' {
+    It 'GenericUI dataConnector has connectivityCriterias (Sentinel uses this for Connected status)' {
         $inner = @($script:SolutionDeploy.properties.template.resources)
         $dc    = $inner | Where-Object { $_.type -match 'dataConnectors$' } | Select-Object -First 1
         $dc.properties.connectorUiConfig.connectivityCriterias | Should -Not -BeNullOrEmpty

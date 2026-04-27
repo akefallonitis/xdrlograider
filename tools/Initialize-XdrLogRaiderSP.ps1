@@ -168,7 +168,21 @@ $connectorRgScope = "/subscriptions/$subId/resourceGroups/$ConnectorResourceGrou
 Grant-Role -Role 'Contributor'                -Scope $connectorRgScope -ScopeLabel "RG $ConnectorResourceGroup"
 Grant-Role -Role 'Log Analytics Contributor'  -Scope $WorkspaceId      -ScopeLabel "workspace $wsName"
 
+# Iter 13: Two additional roles required for the full 14-phase
+# Post-DeploymentVerification.ps1 audit. Without them P3 (Sentinel REST) +
+# P3.5 (KV secret list) phases fail despite the deploy being healthy.
+Grant-Role -Role 'Microsoft Sentinel Reader'  -Scope $WorkspaceId      -ScopeLabel "workspace $wsName (Sentinel REST API access for P3)"
+
+# Find the deployed Key Vault by RG (only first match — typical case is 1 KV per connector RG)
+$kvList = az keyvault list --resource-group $ConnectorResourceGroup --query "[0].id" --output tsv 2>$null
+if ($kvList) {
+    Grant-Role -Role 'Key Vault Secrets User' -Scope $kvList -ScopeLabel "KV (data-plane secret read for P3.5)"
+} else {
+    Write-Host "        Key Vault not yet deployed — Key Vault Secrets User grant deferred. Re-run after deploy." -ForegroundColor Yellow
+}
+
 if ($GrantKeyVaultOfficer) {
+    # Optional — for operators who need to ROTATE secrets via the audit SP
     $kvScope = "$connectorRgScope/providers/Microsoft.KeyVault/vaults/$KeyVaultName"
     Grant-Role -Role 'Key Vault Secrets Officer' -Scope $kvScope -ScopeLabel "KV $KeyVaultName"
 }

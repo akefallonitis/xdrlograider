@@ -29,8 +29,25 @@ Symptom → cause → fix for common issues.
 **Fix**: `az keyvault purge --name <name> --location <region>` then redeploy.
 
 ### Function App times out during first run
-**Cause**: module dependencies installing from `requirements.psd1` on cold start.
+**Cause**: module dependencies installing from `requirements.psd1` on cold start (legacy pre-iter-13 behavior). v0.1.0-beta iter 13+ ships pre-bundled modules under `Modules/` so this should NOT happen.
 **Fix**: wait ~10 minutes. Check Function App → Monitor → Invocations. If still stuck, restart the Function App.
+
+### Function App fails every invocation with "Failed to install function app dependencies (Managed Dependencies / Legion)"
+**Cause**: Linux Consumption "Legion" runtime (Microsoft's current compute platform for Y1 PowerShell function apps) does NOT support Managed Dependencies. If `requirements.psd1` lists Az modules + `host.json` `managedDependency.Enabled = true`, every function load throws:
+```
+Failed to install function app dependencies. Error: 'Managed Dependencies is not
+supported in Linux Consumption on Legion. Please remove all module references
+from requirements.psd1 and include the function app dependencies with the
+function app content.'
+```
+**Symptoms downstream of this bug**: heartbeat sporadic (3 of 24 5-min bins), MDE_AuthTestResult_CL has 0 rows, 44 of 47 tables empty, App Insights `AppExceptions` shows 200+ exceptions/h with this exact message.
+**Fix**: redeploy from `v0.1.0-beta` tag (post iter 13). Iter 13 ships:
+- `requirements.psd1` empty (module references removed)
+- `host.json` `managedDependency.Enabled = false`
+- Az.Accounts/Az.KeyVault/Az.Storage bundled INSIDE `function-app.zip` under `Modules/` via `Save-Module` in `release.yml`
+- New release-time + Pester regression gates lock the invariants
+**Reference**: [Microsoft official guidance — Including modules in app content](https://aka.ms/functions-powershell-include-modules) + [GitHub Issue #944](https://github.com/Azure/azure-functions-powershell-worker/issues/944).
+**Forward-compat**: same approach is required by Flex Consumption (Microsoft's strategic Y1 replacement, retiring Linux Consumption Sept 30 2028).
 
 ### Function App fails at cold start with "profile.ps1 FATAL — missing required environment variable(s)"
 **Cause**: one or more of the 8 app settings the FA needs (`KEY_VAULT_URI`, `DCE_ENDPOINT`, etc.) has been deleted or mutated manually.
@@ -103,16 +120,66 @@ See also: [RUNBOOK.md § Auth self-test failure](RUNBOOK.md#auth-self-test-failu
 ## Connector UI issues
 
 ### Sentinel → Data Connectors doesn't show XdrLogRaider
-**Cause**: the `solution-*` cross-RG nested deploy did not run (workspace permissions, race condition, or an early-rolled mainTemplate from before iteration 5). The connector appears via a `Microsoft.OperationalInsights/workspaces/providers/dataConnectors` resource of kind `StaticUI` plus its parent `contentPackages` Solution and the two `metadata` back-links.
+**Cause**: the `solution-*` cross-RG nested deploy did not run (workspace permissions, race condition, or an early-rolled mainTemplate from before iteration 12). The connector appears via a `Microsoft.OperationalInsights/workspaces/providers/dataConnectors` resource of kind `GenericUI` (apiVersion `2021-03-01-preview` — canonical for community FA-based connectors per Trend Micro Vision One reference, verified in Azure-Sentinel master 2026-04-26) plus its parent `contentPackages` Solution and the `DataConnector` metadata back-link.
 **Fix**:
-1. Confirm the deployed `mainTemplate.json` SHA matches `raw.githubusercontent.com/akefallonitis/xdrlograider/v0.1.0-beta/...` (older versions hand-flattened the bicep and dropped the data-connector module entirely).
-2. Run `pwsh ./tools/Validate-ArmJson.ps1` on the deployed template — it asserts the `solution-*` nested deploy is present with all 4 inner resources.
+1. Confirm the deployed `mainTemplate.json` SHA matches `raw.githubusercontent.com/akefallonitis/xdrlograider/v0.1.0-beta/...` (older versions used `kind: StaticUI` which Sentinel's UI blade indexer treats differently for non-Microsoft publishers, leaving the card hidden).
+2. Run `pwsh ./tools/Validate-ArmJson.ps1` on the deployed template — it asserts the `solution-*` nested deploy is present with `kind=GenericUI` + `apiVersion=2021-03-01-preview` + `extensionResourceId()`-form metadata parentId.
 3. Check the deployment history in your workspace RG for a `solution-<suffix>` deployment status. Re-run the ARM template if it's missing.
 4. Verify the workspace IS Sentinel-enabled (`Microsoft.SecurityInsights/onboardingStates` exists).
+
+### Function App in "Runtime: Error" state — no functions loaded
+**Cause**: pre-iter-12 builds shipped `function-app.zip` with a `functions/` wrapper directory. Azure Functions PowerShell runtime walks the zip ROOT for function dirs containing `function.json`. With the wrapper, runtime found 0 functions → "Runtime: Error", 0 heartbeat rows, hidden connector card.
+**Fix**: redeploy from `v0.1.0-beta` tag (post iter 12). The current `function-app.zip` is flat — 9 function dirs at root, no wrapper, no `local.settings.json*` stowaways. Verified by `tests/unit/FunctionAppZip.Structure.Tests.ps1` (Pester gate) + `release.yml` post-build assertion.
 
 ### Connector card shows "Not connected"
 **Cause**: `MDE_Heartbeat_CL` has no rows in the last hour.
 **Fix**: check Function App is running; check self-test has passed.
+
+### Sentinel Content Hub shows "DEPRECATED" tag on XdrLogRaider — duplicate entries visible
+**Cause**: Sentinel `contentPackages` resources live in the WORKSPACE RG, not the connector RG. Deleting the connector RG (`xdrlograider`) does NOT remove the workspace-side Solution; it persists. If a previous iteration deployed with a different `contentId` (e.g., iter-11 used `'xdrlograider'`, iter-12+ uses `'community.xdrlograider'`), BOTH packages persist in Content Hub. Sentinel auto-flags duplicate-displayName solutions as DEPRECATED to nudge cleanup.
+
+**Per Microsoft official docs** ([Sentinel Solution lifecycle](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solution-deprecation)):
+> "Solutions marked as DEPRECATED are no longer supported by their respective providers."
+
+The tag normally comes from the publisher (manual via Marketplace) OR from Microsoft Content Hub auto-scanning. For our case it's the auto-scan triggered by duplicate displayNames + missing canonical fields.
+
+**Fix (manual cleanup before redeploy)**:
+
+```powershell
+# 1. List ALL XdrLogRaider Solution packages in the workspace
+$ws = Get-AzOperationalInsightsWorkspace -ResourceGroupName <workspace-rg> -Name <workspace-name>
+$token = (Get-AzAccessToken -ResourceUrl 'https://management.azure.com/').Token
+if ($token -is [System.Security.SecureString]) { $token = [System.Net.NetworkCredential]::new('', $token).Password }
+$headers = @{ Authorization = "Bearer $token" }
+
+$packagesUri = "https://management.azure.com$($ws.ResourceId)/providers/Microsoft.SecurityInsights/contentPackages?api-version=2023-04-01-preview"
+$pkgs = Invoke-RestMethod -Uri $packagesUri -Headers $headers -Method Get
+$pkgs.value | Where-Object { $_.properties.displayName -eq 'XdrLogRaider' } |
+    Select-Object @{n='Id';e={$_.name}}, @{n='ContentId';e={$_.properties.contentId}}, @{n='Version';e={$_.properties.version}}
+
+# 2. Delete each old package (and its associated metadata, dataConnectors, content)
+foreach ($p in @('xdrlograider', 'community.xdrlograider', '<other-stale-id>')) {
+    $delUri = "https://management.azure.com$($ws.ResourceId)/providers/Microsoft.SecurityInsights/contentPackages/$p`?api-version=2023-04-01-preview"
+    Invoke-RestMethod -Uri $delUri -Headers $headers -Method Delete -ErrorAction SilentlyContinue
+}
+
+# 3. Also delete the corresponding dataConnectors + metadata back-links
+$dcUri = "https://management.azure.com$($ws.ResourceId)/providers/Microsoft.SecurityInsights/dataConnectors/XdrLogRaiderInternal?api-version=2021-03-01-preview"
+Invoke-RestMethod -Uri $dcUri -Headers $headers -Method Delete -ErrorAction SilentlyContinue
+```
+
+**Or (UI cleanup — slower but safer)**:
+
+1. Sentinel → Content Hub → search "XdrLogRaider" → ALL matching entries
+2. For each: Manage → Uninstall (Microsoft's UI handles cascade delete of metadata)
+3. Wait 2-3 min for indexer to settle
+
+**Then redeploy from `v0.1.0-beta` tag** — iter-13+ now ships canonical fields (`description` plain text, `categories.verticals`, `isPreview`/`isNew`), preventing the DEPRECATED auto-tag on fresh installs. Iter-13 also locks `contentId='community.xdrlograider'` (qualified) so future version bumps won't create displayName-collision duplicates.
+
+**Permanent prevention** (iter 13 hardening):
+- New `tools/Validate-ArmJson.ps1` gate: `description` (plain text) MUST be present + `categories.verticals` MUST be defined
+- `contentId` is now stable (`community.xdrlograider`) — won't change between v0.1.0-beta → v0.1.0 GA → v1.0.0
+- `docs/UPGRADE.md` documents the cleanup-before-rename procedure for any future displayName / contentId changes
 
 ## Cost issues
 
