@@ -181,7 +181,15 @@ function Invoke-MDEPortalRequest {
             $resp = & $invoke $false
             break  # success — exit retry loop
         } catch [System.Net.WebException], [Microsoft.PowerShell.Commands.HttpResponseException] {
-            $status = $_.Exception.Response.StatusCode
+            # Iter 13.5: defensive .Response access. Edge cases (TLS/DNS errors
+            # wrapped in WebException, mock fixtures) may have null .Response.
+            $status = $null
+            if ($null -ne $_.Exception -and
+                $_.Exception.PSObject.Properties['Response'] -and
+                $null -ne $_.Exception.Response -and
+                $_.Exception.Response.PSObject.Properties['StatusCode']) {
+                $status = $_.Exception.Response.StatusCode
+            }
             $statusInt = try { [int]$status } catch { 0 }
 
             # 429 Too Many Requests — backoff with Retry-After + jitter.

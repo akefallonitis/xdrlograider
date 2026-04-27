@@ -152,8 +152,14 @@ function Send-ToLogAnalytics {
                     break
                 }
             } catch {
+                # Iter 13.5: defensive .Response access. Only WebException / HttpResponseException
+                # have .Response; for DNS/TLS/timeout the property may be missing entirely.
+                # Strict mode + missing property → crash that masks the real failure.
                 $statusCode = $null
-                if ($_.Exception.Response) {
+                if ($null -ne $_.Exception -and
+                    $_.Exception.PSObject.Properties['Response'] -and
+                    $null -ne $_.Exception.Response -and
+                    $_.Exception.Response.PSObject.Properties['StatusCode']) {
                     $statusCode = [int]$_.Exception.Response.StatusCode
                 }
 
@@ -243,10 +249,20 @@ function Get-MonitorIngestionToken {
         $tokenResponse.Token
     }
 
-    $expiry = if ($tokenResponse.ExpiresOn -is [datetimeoffset]) {
-        $tokenResponse.ExpiresOn.UtcDateTime
+    # Iter 13.5: defensive ExpiresOn extraction. Older Az.Accounts emits string,
+    # newer (5.x) emits DateTimeOffset, mock contexts may emit $null. Strict mode
+    # crashes on $tokenResponse.ExpiresOn if the property is absent.
+    $rawExpiry = $null
+    if ($null -ne $tokenResponse -and $tokenResponse.PSObject.Properties['ExpiresOn']) {
+        $rawExpiry = $tokenResponse.ExpiresOn
+    }
+    $expiry = if ($rawExpiry -is [datetimeoffset]) {
+        $rawExpiry.UtcDateTime
+    } elseif ($null -ne $rawExpiry) {
+        try { [datetime]::Parse($rawExpiry).ToUniversalTime() } catch { [datetime]::UtcNow.AddMinutes(55) }
     } else {
-        [datetime]::Parse($tokenResponse.ExpiresOn).ToUniversalTime()
+        # No expiry info → assume short-lived (55 min) so we'll re-acquire soon
+        [datetime]::UtcNow.AddMinutes(55)
     }
 
     $script:MonitorTokenCache = $token
