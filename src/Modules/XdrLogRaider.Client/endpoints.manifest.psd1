@@ -70,15 +70,28 @@
     #                                                 higher role. Activates with
     #                                                 role elevation.
     #
-    # Counts (v0.1.0-beta.1, confirmed by live re-capture 2026-04-23):
-    #   P0 = 15 streams (10 live + 4 tenant-gated + 1 role-gated)
-    #   P1 = 7  streams (3 live + 4 tenant-gated)
-    #   P2 = 4  streams (4 live) — 2 WRITE endpoints REMOVED
-    #   P3 = 8  streams (6 live + 2 tenant-gated)
+    # Counts (iter-13.8 audit, 2026-04-27):
+    #   - role-gated category eliminated: per Microsoft Learn (Security Admin
+    #     auto-grants Full Access in MCAS + MDE settings management), 403s on
+    #     a Security-Admin SA cannot be role-blocking — re-categorised to
+    #     tenant-gated. See per-entry comments.
+    #   - MDE_CustomCollection_CL path corrected '/model' → '/rules' per
+    #     XDRInternals canonical source (Get-/New-/Set-XdrEndpointConfiguration
+    #     CustomCollectionRule.ps1 all use '/rules' GET/POST/PUT).
+    #   - MDE_StreamingApiConfig_CL marked deprecated: canonical surface is
+    #     '/apiproxy/mtp/wdatpApi/dataexportsettings' which is already used by
+    #     MDE_DataExportSettings_CL — keep entry for one cycle so deprecated
+    #     parsers/rules can be cleanly removed in v0.2.0.
+    #
+    # Per-tier breakdown (verified by Pester gate):
+    #   P0 = 15 streams (12 live + 3 tenant-gated)
+    #   P1 = 7  streams (6 live + 1 deprecated)
+    #   P2 = 4  streams (4 live) — 2 WRITE endpoints REMOVED in v0.1.0-beta.1
+    #   P3 = 8  streams (7 live + 1 tenant-gated)
     #   P5 = 5  streams (2 live + 3 tenant-gated)
     #   P6 = 2  streams (2 live)
-    #   P7 = 4  streams (1 live + 2 tenant-gated + 1 role-gated)
-    #   TOTAL: 45 data streams (28 live + 15 tenant-gated + 2 role-gated)
+    #   P7 = 4  streams (3 live + 1 tenant-gated)
+    #   TOTAL: 45 data streams (36 live + 8 tenant-gated + 1 deprecated)
     #
     # XSPM endpoints update (v0.1.0-beta live capture 2026-04-24):
     # All 3 XSPM POST endpoints (AttackPaths, ChokePoints, TopTargets) returned
@@ -125,8 +138,16 @@
         @{ Stream = 'MDE_AntivirusPolicy_CL';           Path = '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters'; Tier = 'P0'; Availability = 'tenant-gated' }
         @{ Stream = 'MDE_TenantAllowBlock_CL';          Path = '/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues';            Tier = 'P0'; Availability = 'tenant-gated' }
 
-        # P0 role-gated — activate when service account role elevated
-        @{ Stream = 'MDE_CustomCollection_CL';          Path = '/apiproxy/mtp/mdeCustomCollection/model';                                          Tier = 'P0'; Availability = 'role-gated' }
+        # P0 — iter 13.8 path correction: was '/mdeCustomCollection/model' (returned 403),
+        # now '/mdeCustomCollection/rules' per XDRInternals canonical source code.
+        # Citations: Get-/New-/Set-XdrEndpointConfigurationCustomCollectionRule.ps1 in
+        # github.com/MSCloudInternals/XDRInternals all use '/rules' (GET/POST/PUT).
+        # Re-categorised to 'tenant-gated' (was 'role-gated'): per Microsoft Learn
+        # 'defender-cloud-apps/manage-admins' — Security Administrator auto-grants
+        # Full Access in MDE settings management, so a 403 from a Security-Admin SA
+        # cannot be role-blocking; remaining 403s indicate the underlying MDE Custom
+        # Collection feature isn't licensed/provisioned in this tenant.
+        @{ Stream = 'MDE_CustomCollection_CL';          Path = '/apiproxy/mtp/mdeCustomCollection/rules';                                          Tier = 'P0'; Availability = 'tenant-gated' }
 
         # ---- P1 Pipeline (7 streams, 30-min) ---------------------------------------
         @{ Stream = 'MDE_DataExportSettings_CL';        Path = '/apiproxy/mtp/wdatpApi/dataexportsettings';                                        Tier = 'P1'; Availability = 'live' }
@@ -142,7 +163,15 @@
             Headers = @{ 'mtoproxyurl' = 'MTO' }
             Availability = 'live'
         }
-        @{ Stream = 'MDE_StreamingApiConfig_CL';        Path = '/apiproxy/mtp/streamingapi/streamingApiConfiguration';                             Tier = 'P1'; Availability = 'tenant-gated' }
+        # Iter 13.8 — DEPRECATED: per XDRInternals research, the canonical
+        # streaming-api-config surface is '/apiproxy/mtp/wdatpApi/dataexportsettings',
+        # which is already covered by MDE_DataExportSettings_CL above. The
+        # '/streamingapi/streamingApiConfiguration' path returns 404 because it
+        # was renamed by Microsoft. Marked deprecated rather than removed to
+        # preserve evidence of the bug class; will be cleanly removed in v0.2.0
+        # after one full operator cycle confirms no downstream consumer relies
+        # on the parser/analytic-rule references. See docs/STREAMS-REMOVED.md.
+        @{ Stream = 'MDE_StreamingApiConfig_CL';        Path = '/apiproxy/mtp/streamingapi/streamingApiConfiguration';                             Tier = 'P1'; Availability = 'deprecated' }
         # Paths corrected 2026-04-24 vs XDRInternals v1.0.3
         # (Get-XdrEndpointConfigurationIntuneConnection.ps1,
         #  Get-XdrEndpointConfigurationPurviewSharing.ps1).
@@ -298,7 +327,15 @@ AttackPathsV2
         # Response has `sums` property wrapping the array per XDRInternals impl.
         @{ Stream = 'MDE_LicenseReport_CL';             Path = '/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machines/skuReport';             Tier = 'P7'; UnwrapProperty = 'sums'; Availability = 'live' }
 
-        # P7 role-gated
-        @{ Stream = 'MDE_CloudAppsConfig_CL';           Path = '/apiproxy/mcas/cas/api/v1/settings';                                               Tier = 'P7'; Availability = 'role-gated' }
+        # P7 — was tagged role-gated; iter 13.8 audit re-categorised to tenant-gated.
+        # Per Microsoft Learn (defender-cloud-apps/manage-admins): "you cannot
+        # override Microsoft Entra roles that grant Full access (Global
+        # administrator, Security administrator, and Cloud App Security
+        # administrator)". So Entra Security Administrator AUTO-grants Full
+        # Access in MCAS — meaning if a Security Admin SA gets 403 here,
+        # the cause is NOT role; either MCAS isn't licensed in the tenant or
+        # this proxy path no longer exists in the security.microsoft.com surface
+        # (MCAS native API is on <tenant>.portal.cloudappsecurity.com).
+        @{ Stream = 'MDE_CloudAppsConfig_CL';           Path = '/apiproxy/mcas/cas/api/v1/settings';                                               Tier = 'P7'; Availability = 'tenant-gated' }
     )
 }

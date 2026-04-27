@@ -12,7 +12,7 @@
 |---|---|
 | Platform | Azure Functions (PowerShell 7.4), Log Analytics, Sentinel |
 | Auth | Three unattended auto-refreshing methods: Credentials+TOTP, Software Passkey, DirectCookies (diagnostic) |
-| Scope | Defender XDR portal (`security.microsoft.com`) — **45 telemetry streams** across 7 compliance tiers, every one with path + method + body + headers documented against XDRInternals v1.0.3 + live-captured against admin account. **36 live** (return 200); **7 tenant-feature-gated** (activate when tenant provisions the feature — MDI, TVM add-on, Streaming API, AV policies, Papin indicators); **2 role-gated** (activate with Defender XDR Operator / MCAS Administrator role elevation). No "deferred" placeholders. |
+| Scope | Defender XDR portal (`security.microsoft.com`) — **45 telemetry streams** across 7 compliance tiers, every one with path + method + body + headers documented against XDRInternals v1.0.3 + live-captured against admin account. **36 live** (return 200); **8 tenant-feature-gated** (activate when tenant provisions MDI / TVM / MCAS / Intune AV / MDO Allow-Block / Custom Collection); **1 deprecated** (`MDE_StreamingApiConfig_CL` — XDRInternals canonical path collides with another stream; v0.2.0 will remove). Iter-13.8 retired the role-gated category per Microsoft Learn (Security Admin auto-grants Full Access in MCAS + MDE settings). No "deferred" placeholders. |
 | Prerequisite | **Existing Sentinel-enabled Log Analytics workspace** (any RG / subscription in the same tenant). This template does NOT create a workspace. |
 | Deployment | One-click **Deploy to Azure** (button above) + one `./tools/Initialize-XdrLogRaiderAuth.ps1` run post-deploy. Cross-RG / cross-region workspace supported. |
 | Content | 6 workbooks · 14 analytic rules · 9 hunting queries · 6 KQL drift parsers + 47 custom LA tables (45 telemetry + Heartbeat + AuthTestResult) — all auto-deployed via nested ARM. Every parser / rule / query / workbook column reference verified against live fixtures in CI. |
@@ -68,7 +68,7 @@ Production polling timers activate automatically once the self-test passes. With
 - [Auth](docs/AUTH.md) — both methods explained, CA compatibility, rotation
 - [Getting Auth Material](docs/GETTING-AUTH-MATERIAL.md) — how to obtain TOTP / passkey / cookies
 - [Bring Your Own Passkey](docs/BRING-YOUR-OWN-PASSKEY.md) — generating a software passkey JSON
-- [Streams](docs/STREAMS.md) — full catalogue of 45 telemetry streams (33 live + 10 tenant-feature-gated + 2 role-gated, as of v0.1.0-beta live-capture)
+- [Streams](docs/STREAMS.md) — full catalogue of 45 telemetry streams (36 live + 8 tenant-feature-gated + 1 deprecated, as of iter-13.8 audit 2026-04-27)
 - [Streams removed](docs/STREAMS-REMOVED.md) — 7 streams removed in v1.0.2 + v0.1.0-beta.1 with evidence
 - [Workbooks](docs/WORKBOOKS.md) — what each dashboard shows
 - [Drift](docs/DRIFT.md) — pure-KQL drift model explained

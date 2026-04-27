@@ -89,37 +89,43 @@ Describe 'Endpoint manifest contract' {
         $byTier['P7'] | Should -Be 4
     }
 
-    It 'has 36 live streams — v0.1.0-beta (Availability=live)' {
+    It 'has 36 live streams — iter-13.8 (Availability=live)' {
         # StrictMode-safe: ContainsKey() before dot-access.
-        # v0.1.0-beta (2026-04-24 live audit against user's full-access admin
-        # account): 36/45 streams return 200 live. Of those, 2 (CustomCollection
-        # + CloudAppsConfig) still need role elevation in production customer
-        # deployments and are classified role-gated even though admin sees 200;
-        # so manifest tags 34 as 'live' + 9 tenant-gated + 2 role-gated. When
-        # tenants provision the gated features, the tag auto-upgrades via
-        # tools/Audit-Endpoints-Live.ps1 re-capture.
+        # Iter-13.8 audit (2026-04-27): 36/45 streams return 200 live against the
+        # full-access admin account. Of the 9 non-200s, 8 are tenant-feature-gated
+        # (auto-activate when tenant provisions the underlying feature) and 1 is
+        # deprecated (MDE_StreamingApiConfig_CL — XDRInternals canonical path
+        # collides with MDE_DataExportSettings_CL). The role-gated category was
+        # retired in iter-13.8 per Microsoft Learn (Security Admin auto-grants
+        # Full Access in MCAS + MDE settings management; 403 cannot be role-blocking).
         $m = Get-MDEEndpointManifest
         $live = $m.Values | Where-Object { $_.ContainsKey('Availability') -and $_.Availability -eq 'live' }
         @($live).Count | Should -Be 36
     }
 
-    It 'has 7 tenant-gated streams — activate when tenant provisions feature' {
+    It 'has 8 tenant-gated streams — activate when tenant provisions feature' {
         $m = Get-MDEEndpointManifest
         $gated = $m.Values | Where-Object { $_.ContainsKey('Availability') -and $_.Availability -eq 'tenant-gated' }
-        @($gated).Count | Should -Be 7
+        @($gated).Count | Should -Be 8
     }
 
-    It 'has 2 role-gated streams — activate with role elevation' {
+    It 'has 0 role-gated streams (category retired in iter-13.8 per Microsoft Learn)' {
         $m = Get-MDEEndpointManifest
         $gated = $m.Values | Where-Object { $_.ContainsKey('Availability') -and $_.Availability -eq 'role-gated' }
-        @($gated).Count | Should -Be 2
+        @($gated).Count | Should -Be 0 -Because 'iter-13.8: Security Admin auto-grants Full Access in MCAS + MDE settings, so 403 cannot be role-blocking; all role-gated re-categorised to tenant-gated'
     }
 
-    It 'every entry carries an Availability tag (live|tenant-gated|role-gated)' {
+    It 'has 1 deprecated stream (path renamed by Microsoft; v0.2.0 will remove)' {
+        $m = Get-MDEEndpointManifest
+        $deprecated = $m.Values | Where-Object { $_.ContainsKey('Availability') -and $_.Availability -eq 'deprecated' }
+        @($deprecated).Count | Should -Be 1 -Because 'iter-13.8: MDE_StreamingApiConfig_CL canonical path collides with MDE_DataExportSettings_CL'
+    }
+
+    It 'every entry carries an Availability tag in the iter-13.8 enum (live|tenant-gated|deprecated)' {
         $m = Get-MDEEndpointManifest
         foreach ($entry in $m.Values) {
             $entry.ContainsKey('Availability') | Should -BeTrue -Because "stream $($entry.Stream) must have an Availability tag"
-            $entry.Availability | Should -BeIn @('live','tenant-gated','role-gated') -Because "Availability for $($entry.Stream) must be one of the 3 valid values"
+            $entry.Availability | Should -BeIn @('live','tenant-gated','deprecated') -Because "Availability for $($entry.Stream) must be one of the iter-13.8 enum values (role-gated retired)"
         }
     }
 

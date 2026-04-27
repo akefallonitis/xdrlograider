@@ -1,6 +1,16 @@
-# Removed streams
+# Removed + deprecated streams
 
-Streams that appeared in earlier releases but do NOT ship in `v0.1.0-beta.1`. Each has evidence for why it can't be a proven endpoint under the current manifest contract. All 47 removals (5 in v1.0.2 + 2 in v0.1.0-beta.1) are audited against XDRInternals, nodoc, and DefenderHarvester.
+Streams that appeared in earlier releases but do NOT ship in `v0.1.0-beta.1` (removed) or are tagged `Availability='deprecated'` for cleanup in v0.2.0. Each has evidence against XDRInternals, nodoc, and DefenderHarvester.
+
+---
+
+## iter-13.8 deprecation (1 — path renamed by Microsoft)
+
+| Stream | Manifest path | Deprecation reason |
+|---|---|---|
+| `MDE_StreamingApiConfig_CL` | `/apiproxy/mtp/streamingapi/streamingApiConfiguration` | Returns 404 on live audit. Per XDRInternals `Get-XdrStreamingApiConfiguration.ps1`, the canonical surface is `/apiproxy/mtp/wdatpApi/dataexportsettings` — but that path is already used by `MDE_DataExportSettings_CL` (which returns 200). The two streams describe the same underlying configuration. Marked `Availability='deprecated'` in iter-13.8 rather than removed so that operators can complete one full upgrade cycle and downstream parsers/analytic-rules can be cleanly removed in v0.2.0 without leaving dangling references. |
+
+**Read substitute**: `MDE_DataExportSettings_CL` (already in manifest, live).
 
 If your tenant has a feature that makes any of these callable (with a correct read-only path + body + headers), open an issue + PR with evidence — happy to add.
 

@@ -93,10 +93,11 @@ Describe 'Manifest Availability schema (declarative contract)' {
     }
 
     It 'manifest contains the expected baseline of <ExpectedCount> endpoints (drift detector)' -ForEach @(
-        @{ Description = 'total endpoints';                ExpectedCount = 45; Filter = { $true } }
-        @{ Description = 'live endpoints (~80% target)';   ExpectedCount = 36; Filter = { $args[0].Availability -eq 'live' } }
-        @{ Description = 'role-gated endpoints';           ExpectedCount = 2;  Filter = { $args[0].Availability -eq 'role-gated' } }
-        @{ Description = 'tenant-gated endpoints';         ExpectedCount = 7;  Filter = { $args[0].Availability -eq 'tenant-gated' } }
+        @{ Description = 'total endpoints';                                ExpectedCount = 45; Filter = { $true } }
+        @{ Description = 'live endpoints (~80% target)';                   ExpectedCount = 36; Filter = { $args[0].Availability -eq 'live' } }
+        @{ Description = 'role-gated endpoints (iter 13.8 retired category)'; ExpectedCount = 0; Filter = { $args[0].Availability -eq 'role-gated' } }
+        @{ Description = 'tenant-gated endpoints';                         ExpectedCount = 8; Filter = { $args[0].Availability -eq 'tenant-gated' } }
+        @{ Description = 'deprecated endpoints (iter 13.8: StreamingApiConfig path collision)'; ExpectedCount = 1; Filter = { $args[0].Availability -eq 'deprecated' } }
     ) {
         param($Description, $ExpectedCount, $Filter)
         $matching = @($script:Entries | Where-Object { & $Filter $_ })

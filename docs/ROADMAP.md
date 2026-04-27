@@ -11,9 +11,11 @@ change documented in CHANGELOG.md + UPGRADE.md.
 
 Complete-beta release. Production-hardened on all dimensions the plan scoped:
 
-- **45 portal-only streams** (26 v0.1.0-beta.1 live + 7 newly-unlocked live via
-  URL corrections + XSPM header-passthrough fix = 33 live-verified against
-  full-access admin account), 10 tenant-feature-gated, 2 role-gated.
+- **45 portal-only streams** (36 live-verified against full-access admin account
+  on 2026-04-27 after iter-13.8 path-research audit corrected
+  `MDE_CustomCollection_CL` /model→/rules per XDRInternals canonical source),
+  8 tenant-feature-gated (MDI / MCAS / TVM / Intune AV / MDO / Custom Collection),
+  1 deprecated (`MDE_StreamingApiConfig_CL` collides with `MDE_DataExportSettings_CL`).
 - **Auth**: CredentialsTotp + Passkey auto-refresh for unattended production;
   DirectCookies retained as laptop-only test path (KV writer refuses cookies
   as a production secret). 429 Retry-After honoured, session TTL 3h30m.

@@ -2,7 +2,7 @@
 
 **45 portal-only streams** across 7 compliance tiers, all with documented path + method + body + headers verified against XDRInternals v1.0.3 + live-captured against a full-access admin account on 2026-04-24.
 
-**36 streams return 200 + usable data** against our test admin account (live-verified 2026-04-24). The remaining 9 are either **tenant-feature-gated** (7 — feature not provisioned on tenant: MDI, TVM add-on, Streaming API, AV policies, Papin indicators) or **role-gated** (2 — service account needs Defender XDR Operator / MCAS Administrator role beyond Security Admin). Shipping all 45 with correct wire contract because the "correct call" is our contract; what a given tenant emits depends on its feature provisioning + service-account role assignments, not our code.
+**36 streams return 200 + usable data** against our test admin account (live-verified 2026-04-24). Iter-13.8 path-research audit reclassified the remaining 9: **8 tenant-feature-gated** (feature not provisioned on tenant: MDI sensors, TVM baselines, MCAS, Intune AV policies, MDO Tenant Allow/Block, MDE Custom Collection model, Streaming API surface) + **1 deprecated** (`MDE_StreamingApiConfig_CL` — XDRInternals canonical path collides with `MDE_DataExportSettings_CL`; will be cleanly removed in v0.2.0). Iter-13.8 retired the `role-gated` category: per Microsoft Learn `defender-cloud-apps/manage-admins`, Security Administrator auto-grants Full Access in MCAS + MDE settings management, so 403 with that role can only be tenant-feature-blocking, not role-blocking. Shipping all 45 with correct wire contract because the "correct call" is our contract; what a given tenant emits depends on its feature provisioning, not our code.
 
 **v0.1.0-beta manifest corrections** (all live-verified against admin account): 5 URL fixes vs XDRInternals v1.0.3 (PUAConfig, IntuneConnection, PurviewSharing, AuthenticatedTelemetry, LicenseReport) moved these streams from `tenant-gated` → `live`; `MDE_XspmAttackPaths_CL` body `options.top` corrected from 100 → 0 to match XDRInternals' default; `MDE_SecurityBaselines_CL` gained required pagination query-string; `MDE_MtoTenants_CL` gained `mtoproxyurl: MTO` header + `UnwrapProperty = 'tenantInfoList'`. XspmChokePoints + XspmTopTargets confirmed live once the audit tool Headers-passthrough bug was fixed.
 
@@ -15,16 +15,16 @@ The source of truth is [`src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1
 | Tag | Meaning | Zero-row expectation |
 |---|---|---|
 | `live` | Returns 200 with data on our test tenant. | Non-zero every poll cycle where state exists. |
-| `tenant-gated` | Path + method + body correct; 4xx because tenant hasn't provisioned the feature (MDI sensors, MTO, Intune connector, Streaming API, TVM add-on, PUA, etc). | Activates automatically when feature enabled. No code change needed. |
-| `role-gated` | Path + method + body correct; 403 because service account lacks a higher role (Defender XDR Operator, MCAS Administrator). | Activates with role elevation. |
+| `tenant-gated` | Path + method + body correct; 4xx because tenant hasn't provisioned the feature (MDI sensors, MCAS, MTO, Intune connector, TVM add-on, etc). | Activates automatically when feature enabled. No code change needed. |
+| `deprecated` | Stream entry retained for one cycle so parsers/analytic-rules can be cleanly removed in v0.2.0; the underlying portal endpoint has been renamed/retired by Microsoft. | Always zero rows. Do NOT add new entries with this tag. |
 
-A `tenant-gated` or `role-gated` stream is **not a bug**. It's correct behaviour for a tenant without the gating feature/role.
+A `tenant-gated` stream is **not a bug**. It's correct behaviour for a tenant without the gating feature.
 
 ---
 
 ## P0 Compliance (hourly, 15 streams)
 
-**12 live · 2 tenant-gated · 1 role-gated** (v0.1.0-beta: PUAConfig + AuthenticatedTelemetry promoted to `live` after URL correction)
+**12 live · 3 tenant-gated** (iter-13.8: `MDE_CustomCollection_CL` recategorised role-gated → tenant-gated + path corrected `/model` → `/rules` per XDRInternals canonical source)
 
 | Stream | Path | Method | Availability |
 |---|---|---|---|
@@ -42,11 +42,11 @@ A `tenant-gated` or `role-gated` stream is **not a bug**. It's correct behaviour
 | `MDE_AuthenticatedTelemetry_CL` | `/apiproxy/mtp/responseApiPortal/senseauth/allownonauthsense` | GET | live |
 | `MDE_PUAConfig_CL` | `/apiproxy/mtp/autoIr/ui/properties/` | GET | live |
 | `MDE_TenantAllowBlock_CL` | `/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues` | GET | tenant-gated |
-| `MDE_CustomCollection_CL` | `/apiproxy/mtp/mdeCustomCollection/model` | GET | role-gated *(Defender XDR Operator)* |
+| `MDE_CustomCollection_CL` | `/apiproxy/mtp/mdeCustomCollection/rules` | GET | tenant-gated *(MDE Custom Collection feature licensed)* |
 
 ## P1 Pipeline (30 min, 7 streams)
 
-**6 live · 1 tenant-gated** (v0.1.0-beta: IntuneConnection + PurviewSharing promoted to `live` after URL correction; TenantWorkloadStatus promoted to `live` after audit-tool Headers-passthrough fix + mtoproxyurl:MTO header confirmed)
+**6 live · 1 deprecated** (iter-13.8: `MDE_StreamingApiConfig_CL` deprecated — canonical XDRInternals path is `/apiproxy/mtp/wdatpApi/dataexportsettings` which is already used by `MDE_DataExportSettings_CL`)
 
 | Stream | Path | Availability |
 |---|---|---|
@@ -54,7 +54,7 @@ A `tenant-gated` or `role-gated` stream is **not a bug**. It's correct behaviour
 | `MDE_ConnectedApps_CL` | `/apiproxy/mtp/responseApiPortal/apps/all` | live |
 | `MDE_TenantContext_CL` | `/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true` | live |
 | `MDE_TenantWorkloadStatus_CL` | `/apiproxy/mtoapi/tenantGroups` | tenant-gated *(MTO not configured)* |
-| `MDE_StreamingApiConfig_CL` | `/apiproxy/mtp/streamingapi/streamingApiConfiguration` | tenant-gated *(no Event Hub/Storage destination)* |
+| `MDE_StreamingApiConfig_CL` | `/apiproxy/mtp/streamingapi/streamingApiConfiguration` | deprecated *(path renamed by Microsoft; canonical surface collides with MDE_DataExportSettings_CL)* |
 | `MDE_IntuneConnection_CL` | `/apiproxy/mtp/responseApiPortal/onboarding/intune/status` | live |
 | `MDE_PurviewSharing_CL` | `/apiproxy/mtp/wdatpInternalApi/compliance/alertSharing/status` | live |
 
@@ -107,14 +107,14 @@ A `tenant-gated` or `role-gated` stream is **not a bug**. It's correct behaviour
 
 ## P7 Metadata (daily, 4 streams)
 
-**3 live · 0 tenant-gated · 1 role-gated** (v0.1.0-beta: LicenseReport promoted to `live` after URL correction + UnwrapProperty=sums; MtoTenants promoted to `live` after audit-tool Headers-passthrough fix; CloudAppsConfig remains role-gated — requires MCAS Administrator elevation)
+**3 live · 1 tenant-gated** (iter-13.8: `MDE_CloudAppsConfig_CL` recategorised role-gated → tenant-gated. Per Microsoft Learn `defender-cloud-apps/manage-admins`, Security Administrator auto-grants Full Access in MCAS — so the 403 is MCAS not licensed in tenant, not a role gap. Path stays canonical `/apiproxy/mcas/cas/api/v1/settings`.)
 
 | Stream | Path | Availability |
 |---|---|---|
 | `MDE_UserPreferences_CL` | `/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference` | live |
 | `MDE_MtoTenants_CL` | `/apiproxy/mtoapi/tenants/TenantPicker` | tenant-gated *(MTO not configured)* |
 | `MDE_LicenseReport_CL` | `/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machines/skuReport` | live *(UnwrapProperty = 'sums')* |
-| `MDE_CloudAppsConfig_CL` | `/apiproxy/mcas/cas/api/v1/settings` | role-gated *(MCAS Administrator)* |
+| `MDE_CloudAppsConfig_CL` | `/apiproxy/mcas/cas/api/v1/settings` | tenant-gated *(MCAS / Defender for Cloud Apps licensed)* |
 
 ## Operational streams (system)
 
@@ -144,7 +144,7 @@ Plus 2 operational tables (Heartbeat + AuthTestResult) = **47 custom LA tables**
 
 Every manifest entry has a fixture under `tests/fixtures/live-responses/`:
 
-- **33 real captures** — `<Stream>-raw.json` + `<Stream>-ingest.json` from the live tenant (PII-scrubbed; captured 2026-04-24 against full-access admin account).
-- **17 markers** — one-line `<Stream>-raw.json` with `{"_availability":"tenant-gated","_reason":"…"}` so offline tests detect "expected 4xx — skip" rather than fail missing-file.
+- **36 real captures** — `<Stream>-raw.json` + `<Stream>-ingest.json` from the live tenant (PII-scrubbed; captured 2026-04-24 against full-access admin account).
+- **9 markers** — one-line `<Stream>-raw.json` with `{"_availability":"tenant-gated","_reason":"…"}` so offline tests detect "expected 4xx — skip" rather than fail missing-file.
 
 Downstream tests (`tests/unit/FA.ParsingPipeline.Tests.ps1`, `DCR.SchemaConsistency.Tests.ps1`, `tests/kql/*`) read these fixtures to validate parser + rule + workbook column refs are correct for the shape our connector actually ingests.

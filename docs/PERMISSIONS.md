@@ -76,19 +76,55 @@ The ARM template creates a **System-Assigned Managed Identity (SAMI)** on the Fu
 
 ## Portal permissions (the service account in Defender XDR)
 
-These live in the Entra tenant + MDE RBAC. The Function App authenticates AS the service account when calling `security.microsoft.com`:
+These live in the Entra tenant + MDE RBAC. The Function App authenticates AS the service account when calling `security.microsoft.com`.
+
+### ⚠️ Critical: least-privilege is mandatory for unattended service accounts
+
+A connector that runs unattended for 30+ days with stored credentials has a different threat model from an interactive admin. Over-privileged unattended accounts are the single highest-blast-radius credential class in any tenant. Use these two **read-only** roles and nothing else:
 
 | Role | Type | What it grants |
 |---|---|---|
 | `Security Reader` | Entra built-in | Tenant security config read: ASR rules, AV, PUA, exclusions, data-export settings, RBAC, critical assets, XSPM, etc. |
 | `Defender XDR Analyst` | MDE RBAC | AIR decisions (read), Action Center history, alerts, custom detections (read), hunting (read) |
 
-Both are **read-only**. Even if the credentials leak, the blast radius is limited to read access on security posture.
+Both are **read-only**. Blast radius if credentials leak: the attacker reads (does not modify) the same data the connector ingests. Compare to the over-privileged alternatives:
 
-**Do NOT** grant any of these:
-- `Global Administrator`, `Security Administrator`, or any `*Administrator` role
-- Write-capable Defender roles (`Defender XDR Operator`, `Incident Manager`, etc.)
-- Any Microsoft Graph permission
+| Role | Why people pick it | Why it's wrong here |
+|---|---|---|
+| `Security Administrator` | "I want everything to just work" | Write capability — leak = attacker disables AV, suppresses alerts, exfiltrates via DEX |
+| `Global Administrator` | "Most permissive, no debugging" | Tenant takeover on credential leak |
+| `Defender XDR Operator` | "Need Action Center detail" | Can dismiss alerts, run live response, isolate machines |
+
+**Do NOT** grant any of these. The connector has zero use for write capability. If you currently have the SA on `Security Administrator`, **downgrade to `Security Reader` now** — the 36 live endpoints continue returning 200, no functionality regression.
+
+### Tenant features / endpoint surfaces required for the gated streams
+
+Nine streams ship with `Availability = 'tenant-gated'`. They return 4xx because the tenant doesn't have the underlying feature **provisioned** (or the underlying portal endpoint isn't surfaced for this tenant), NOT because the SA lacks a role. **Role elevation does not activate them** — even Security Administrator (which auto-grants Full Access in MCAS per Microsoft Learn) returned 403/404/400/500 for these in our live audit:
+
+| Stream | Required tenant feature / surface | Live audit status (Security Admin SA) |
+|---|---|---|
+| `MDE_AntivirusPolicy_CL` | Intune / MEM integration with MDE | 400 — request rejected without Intune connection |
+| `MDE_TenantAllowBlock_CL` | Defender for Office 365 (E5 Security) | 500 — feature endpoint not active |
+| `MDE_DCCoverage_CL`, `MDE_IdentityAlertThresholds_CL`, `MDE_RemediationAccounts_CL` | Microsoft Defender for Identity sensors deployed | 404 — `/aatp/api/...` paths not present without MDI |
+| `MDE_StreamingApiConfig_CL` | MDE Streaming API enabled in settings | 404 — Streaming API surface not configured |
+| `MDE_SecurityBaselines_CL` | Threat & Vulnerability Mgmt baseline profiles created | 400 — endpoint requires at least one baseline |
+| `MDE_CustomCollection_CL` | MDE Custom Collection model surface licensed/provisioned (E5/P2) | 403 — feature surface not present even with Security Administrator |
+| `MDE_CloudAppsConfig_CL` | MCAS active in tenant + `/apiproxy/mcas/cas/api/v1/settings` proxy alive | 403 — proxy path likely retired; MCAS native API lives on `<tenant>.portal.cloudappsecurity.com` |
+
+These activate **automatically** when the customer enables the corresponding feature — no manifest change, no redeploy. The connector keeps attempting them and surfaces the 4xx via heartbeat metadata.
+
+**Why no `role-gated` category in iter 13.8+**: live evidence (Security Administrator SA → still 403 on the 2 previously-tagged role-gated streams) plus Microsoft Learn confirming Security Administrator auto-grants Full Access in MCAS proves the gate is *tenant-feature*, not *role*. The two streams stay in the manifest (they cost nothing to attempt) but operators should not chase additional role grants — those won't fix the 403.
+
+### Operational posture for unattended SAs
+
+| Concern | Mitigation |
+|---|---|
+| Password rotation | Set "Password never expires" (or extend > poll cadence). Rotate manually when org policy mandates → re-run `Initialize-XdrLogRaiderAuth.ps1` |
+| Conditional Access blocking sign-in | Add an exclusion for the SA on policies that require interactive MFA. The connector handles TOTP programmatically; CA-mandated WebAuthn / FIDO2 will block it |
+| Sign-in alerts noise | Document the SA in your IDM as a service identity so SOC doesn't page on every cookie refresh |
+| Credential storage | KV-only (managed identity reads). No creds in env vars, code, ARM params, or repo. `Initialize-XdrLogRaiderAuth.ps1` is the only path that handles them in plaintext (briefly, on the operator's laptop) |
+| Cookie reuse | sccauth caches ~50 min; refresh uses TOTP from KV. No persistent session anywhere |
+| Audit | Entra sign-in logs + MDE audit logs show every SA action. Enable both feeds in Sentinel for visibility |
 
 ## Testing permissions (dev-time, CI-time)
 
