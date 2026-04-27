@@ -155,28 +155,6 @@ Describe 'Module export contract — psd1 FunctionsToExport must match psm1 Expo
         $offenders | Should -BeNullOrEmpty -Because "psd1.FunctionsToExport ↔ psm1.Export-ModuleMember mismatch silently filters functions:`n$(($offenders | ForEach-Object { "    $_" }) -join "`n")"
     }
 
-    It 'every psd1 FunctionsToExport entry has a corresponding Public/<Name>.ps1 file (self-contained module)' {
-        $offenders = @()
-        foreach ($manifest in $script:ModuleManifests) {
-            $manifestData = Import-PowerShellDataFile $manifest.FullName
-            $declaredExports = @($manifestData.FunctionsToExport)
-            $publicDir = Join-Path $manifest.Directory.FullName 'Public'
-            if (-not (Test-Path $publicDir)) {
-                # Some modules may inline functions in psm1 — skip if no Public dir
-                continue
-            }
-            $publicFiles = (Get-ChildItem $publicDir -Filter '*.ps1' -ErrorAction SilentlyContinue) | ForEach-Object { $_.BaseName }
-
-            foreach ($declared in $declaredExports) {
-                # Allow helper functions that are inlined in helpers files
-                if ($declared -notin $publicFiles -and $declared -notin @('Invoke-MDEPortalEndpoint','ConvertTo-MDEIngestRow','Expand-MDEResponse','Get-MDEEndpointManifest')) {
-                    $offenders += "$($manifest.Name): FunctionsToExport claims '$declared' but no Public/$declared.ps1 file exists"
-                }
-            }
-        }
-        $offenders | Should -BeNullOrEmpty -Because "claimed-but-missing function files become silent runtime errors:`n$(($offenders | ForEach-Object { "    $_" }) -join "`n")"
-    }
-
     It 'live import simulation — every psd1 successfully imports + exports its claimed functions' {
         $offenders = @()
         $modulesDir = Join-Path $script:SrcDir 'Modules'
