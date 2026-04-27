@@ -376,6 +376,8 @@
             { "name": "FUNCTIONS_EXTENSION_VERSION",            "value": "~4" },
             { "name": "FUNCTIONS_WORKER_RUNTIME",               "value": "powershell" },
             { "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",       "value": "7.4" },
+            { "name": "FUNCTIONS_WORKER_PROCESS_COUNT",         "value": "1" },
+            { "name": "PSWorkerInProcConcurrencyUpperBound",    "value": "1" },
             { "name": "AzureWebJobsStorage",                    "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2023-05-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]" },
             { "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",  "value": "[reference(resourceId('Microsoft.Insights/components', variables('aiName')), '2020-02-02').ConnectionString]" },
             { "name": "WEBSITE_RUN_FROM_PACKAGE",               "value": "[variables('packageUrl')]" },

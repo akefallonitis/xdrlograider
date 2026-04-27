@@ -16,8 +16,10 @@ function Invoke-TierPollWithHeartbeat {
         The helper enforces the canonical execution shape end-to-end:
 
           1. Strict mode + $ErrorActionPreference = 'Stop'.
-          2. Global config must be present ($global:XdrLogRaiderConfig — populated
-             by profile.ps1 at cold start). Throws hard if missing.
+          2. Config built directly from $env:* (process-scoped, always
+             present per profile.ps1 required-env-vars validation). Iter 13.3
+             eliminated runspace-local global state dependency to fix the
+             multi-runspace propagation bug.
           3. Auth-self-test gate: skip with an informational heartbeat row if
              validate-auth-selftest hasn't turned green yet. Never silently
              no-ops — operators see a gated row, not zero rows.
@@ -83,9 +85,28 @@ function Invoke-TierPollWithHeartbeat {
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     Write-Information "$FunctionName starting (Tier=$Tier Portal=$Portal)"
 
-    $config = $global:XdrLogRaiderConfig
-    if (-not $config) {
-        throw "Global config not initialized; profile.ps1 must run before timer functions. FunctionName=$FunctionName"
+    # Iter 13.3: read config directly from $env:* (process-scoped, always
+    # present). Eliminates multi-runspace $global propagation bug that caused
+    # "$global:XdrLogRaiderConfig not set" crashes in iter 13.x. Each timer
+    # tick is now self-sufficient — does not depend on profile.ps1 having
+    # populated runspace-local $global state.
+    $config = [pscustomobject]@{
+        KeyVaultUri        = $env:KEY_VAULT_URI
+        AuthSecretName     = $env:AUTH_SECRET_NAME
+        AuthMethod         = $env:AUTH_METHOD
+        ServiceAccountUpn  = $env:SERVICE_ACCOUNT_UPN
+        DceEndpoint        = $env:DCE_ENDPOINT
+        DcrImmutableId     = $env:DCR_IMMUTABLE_ID
+        StorageAccountName = $env:STORAGE_ACCOUNT_NAME
+        CheckpointTable    = $env:CHECKPOINT_TABLE_NAME
+        ExpectedTenantId   = $env:TENANT_ID
+    }
+    # Defensive: ensure required env vars actually populated (deploy-time
+    # appSettings should guarantee, but fail fast if missing).
+    foreach ($req in 'KeyVaultUri', 'AuthSecretName', 'AuthMethod', 'DceEndpoint', 'DcrImmutableId', 'StorageAccountName', 'CheckpointTable') {
+        if ([string]::IsNullOrWhiteSpace($config.$req)) {
+            throw "Required config '$req' (env var) is not set. ARM appSettings deploy may be broken. FunctionName=$FunctionName"
+        }
     }
 
     # Auth-self-test gate: refuse to poll until validate-auth-selftest has

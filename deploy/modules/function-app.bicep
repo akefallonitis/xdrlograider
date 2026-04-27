@@ -121,8 +121,15 @@ resource functionAppSettings 'Microsoft.Web/sites/config@2023-12-01' = {
       // - WORKER_PROCESS_COUNT=1 is the PowerShell single-threaded model
       //   default; making it explicit prevents accidental multi-worker
       //   spawning (which fragments module caches + confuses App Insights).
+      // - PSWorkerInProcConcurrencyUpperBound=1 disables the multi-runspace
+      //   concurrency model (default 1000). With it >1, profile.ps1 runs per
+      //   runspace and $global state may not propagate consistently — caused
+      //   iter 13.x "$global:XdrLogRaiderConfig not set" production errors.
+      //   Our timer functions never run concurrently within an instance, so
+      //   single-runspace mode is correct AND fixes the propagation bug.
       WEBSITE_SKIP_RUNNING_KUDUAGENT: 'true'
       FUNCTIONS_WORKER_PROCESS_COUNT: '1'
+      PSWorkerInProcConcurrencyUpperBound: '1'
     },
     appSettings
   )

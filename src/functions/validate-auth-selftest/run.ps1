@@ -11,10 +11,17 @@ Set-StrictMode -Version Latest
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
 $fnName = 'validate-auth-selftest'
 
-$config = $global:XdrLogRaiderConfig
-if (-not $config) {
-    Write-Warning "${fnName}:global config not initialized"
-    return
+# Iter 13.3: read config directly from $env:* (strict-mode-safe, no $global dep)
+$config = [pscustomobject]@{
+    KeyVaultUri        = $env:KEY_VAULT_URI
+    AuthSecretName     = $env:AUTH_SECRET_NAME
+    AuthMethod         = $env:AUTH_METHOD
+    ServiceAccountUpn  = $env:SERVICE_ACCOUNT_UPN
+    DceEndpoint        = $env:DCE_ENDPOINT
+    DcrImmutableId     = $env:DCR_IMMUTABLE_ID
+    StorageAccountName = $env:STORAGE_ACCOUNT_NAME
+    CheckpointTable    = $env:CHECKPOINT_TABLE_NAME
+    ExpectedTenantId   = $env:TENANT_ID
 }
 
 $context = $null

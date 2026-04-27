@@ -104,23 +104,29 @@ if (-not $global:XdrPortalAuthCache) {
     $global:XdrPortalAuthCache = @{}
 }
 
-# Runtime config — resolved once at cold start from the validated env vars above.
-# Timer functions consume this via $global:XdrLogRaiderConfig; no re-reads from
-# $env:* inside hot paths.
-$global:XdrLogRaiderConfig = @{
-    KeyVaultUri        = $env:KEY_VAULT_URI
-    AuthSecretName     = $env:AUTH_SECRET_NAME
-    AuthMethod         = $env:AUTH_METHOD
-    ServiceAccountUpn  = $env:SERVICE_ACCOUNT_UPN
-    DceEndpoint        = $env:DCE_ENDPOINT
-    DcrImmutableId     = $env:DCR_IMMUTABLE_ID
-    StorageAccountName = $env:STORAGE_ACCOUNT_NAME
-    CheckpointTable    = $env:CHECKPOINT_TABLE_NAME
-    # Optional: if TENANT_ID appSetting is set, tier-poll cross-checks the
-    # session-discovered tenant matches. Guards against credential rotation
-    # accidentally pointing at a different tenant. If unset, connector
-    # auto-discovers from the auth chain (zero-config default).
-    ExpectedTenantId   = $env:TENANT_ID
+# Runtime config — resolved at cold start from the validated env vars above.
+# Iter 13.3: also exposed as a function `Get-XdrLogRaiderConfig` so timer
+# function run.ps1 files can defensively re-build the config from env vars
+# WITHOUT depending on $global state propagating across runspaces. With
+# PSWorkerInProcConcurrencyUpperBound=1 (set in mainTemplate.json appSettings),
+# the propagation bug doesn't trigger — but the helper is cheap insurance.
+
+function global:Get-XdrLogRaiderConfig {
+    [pscustomobject]@{
+        KeyVaultUri        = $env:KEY_VAULT_URI
+        AuthSecretName     = $env:AUTH_SECRET_NAME
+        AuthMethod         = $env:AUTH_METHOD
+        ServiceAccountUpn  = $env:SERVICE_ACCOUNT_UPN
+        DceEndpoint        = $env:DCE_ENDPOINT
+        DcrImmutableId     = $env:DCR_IMMUTABLE_ID
+        StorageAccountName = $env:STORAGE_ACCOUNT_NAME
+        CheckpointTable    = $env:CHECKPOINT_TABLE_NAME
+        ExpectedTenantId   = $env:TENANT_ID
+    }
 }
 
-Write-Information "profile.ps1: XdrLogRaider Function App initialised — $(($global:XdrLogRaiderConfig.Keys).Count) config values loaded"
+# Eager-init for warm-runspace performance — but every function ALSO calls
+# Get-XdrLogRaiderConfig defensively, so missing $global state isn't fatal.
+$global:XdrLogRaiderConfig = Get-XdrLogRaiderConfig
+
+Write-Information "profile.ps1: XdrLogRaider Function App initialised — $(@($global:XdrLogRaiderConfig.PSObject.Properties).Count) config values loaded"

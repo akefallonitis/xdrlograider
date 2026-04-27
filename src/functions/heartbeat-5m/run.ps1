@@ -9,10 +9,20 @@ Set-StrictMode -Version Latest
 
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
 
-$config = $global:XdrLogRaiderConfig
-if (-not $config) {
-    Write-Warning "heartbeat-5m: global config not initialized; skipping"
-    return
+# Iter 13.3: read config directly from $env:* (process-scoped, always present
+# per profile.ps1 required-env-vars validation). Eliminates multi-runspace
+# $global state propagation bug that caused "$global:XdrLogRaiderConfig not set"
+# crashes when PSWorkerInProcConcurrencyUpperBound > 1.
+$config = [pscustomobject]@{
+    KeyVaultUri        = $env:KEY_VAULT_URI
+    AuthSecretName     = $env:AUTH_SECRET_NAME
+    AuthMethod         = $env:AUTH_METHOD
+    ServiceAccountUpn  = $env:SERVICE_ACCOUNT_UPN
+    DceEndpoint        = $env:DCE_ENDPOINT
+    DcrImmutableId     = $env:DCR_IMMUTABLE_ID
+    StorageAccountName = $env:STORAGE_ACCOUNT_NAME
+    CheckpointTable    = $env:CHECKPOINT_TABLE_NAME
+    ExpectedTenantId   = $env:TENANT_ID
 }
 
 try {
