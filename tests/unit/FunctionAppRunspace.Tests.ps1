@@ -85,7 +85,7 @@ Describe '$env-direct config pattern — each timer function reads from process-
                 $offenders += $file.FullName.Replace($script:RepoRoot, '.')
             }
         }
-        $offenders | Should -BeNullOrEmpty -Because "poll-* run.ps1 must NOT access $global state directly:`n$(($offenders | ForEach-Object { '    ' + $_ }) -join "`n")"
+        $offenders | Should -BeNullOrEmpty -Because ('poll-* run.ps1 must NOT access $global state directly:' + [Environment]::NewLine + (($offenders | ForEach-Object { '    ' + $_ }) -join [Environment]::NewLine))
     }
 
     It 'heartbeat-5m run.ps1 reads config from $env (no $global dependency)' {
@@ -151,6 +151,6 @@ Describe 'Strict-mode safety — config retrieval must never throw on missing $g
                 }
             }
         }
-        $offenders | Should -BeNullOrEmpty -Because "iter 13.3: all global reads replaced with env-direct reads. Offenders:`n$(($offenders | ForEach-Object { '    ' + $_ }) -join "`n")"
+        $offenders | Should -BeNullOrEmpty -Because ('iter 13.3: all global reads replaced with env-direct reads. Offenders:' + [Environment]::NewLine + (($offenders | ForEach-Object { '    ' + $_ }) -join [Environment]::NewLine))
     }
 }
