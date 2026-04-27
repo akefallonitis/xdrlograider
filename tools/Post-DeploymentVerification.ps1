@@ -139,12 +139,15 @@ function Get-ArmPlainToken {
 # === PHASES ===
 
 # P1. ARM resources present
+# Iter 13.4 — defensive @() coercion at every collection access. Get-AzResource
+# can return $null (RG empty), a single object (RG with 1 resource), or array.
+# Strict-mode .Count fails on null/single-object → wrap with @() always.
 try {
-    $resources = Get-AzResource -ResourceGroupName $env_['XDRLR_CONNECTOR_RG'] -ErrorAction Stop
+    $resources = @(Get-AzResource -ResourceGroupName $env_['XDRLR_CONNECTOR_RG'] -ErrorAction Stop)
     $expected = @('Microsoft.Web/sites','Microsoft.Web/serverfarms','Microsoft.KeyVault/vaults','Microsoft.Storage/storageAccounts','Microsoft.Insights/components','Microsoft.Insights/dataCollectionEndpoints','Microsoft.Insights/dataCollectionRules')
     $missing = @()
-    foreach ($t in $expected) { if (-not ($resources | Where-Object ResourceType -eq $t)) { $missing += $t } }
-    Record-Phase 'P1' 'ARM resources present' ($missing.Count -eq 0) "Found $($resources.Count) resources" "Missing types: $($missing -join ', ')"
+    foreach ($t in $expected) { if (-not (@($resources) | Where-Object ResourceType -eq $t)) { $missing += $t } }
+    Record-Phase 'P1' 'ARM resources present' (@($missing).Count -eq 0) "Found $(@($resources).Count) resources" "Missing types: $($missing -join ', ')"
 } catch { Record-Phase 'P1' 'ARM resources present' $false "Get-AzResource failed: $_" '' }
 
 # P2. Workspace tables (47 MDE_*_CL)
@@ -317,15 +320,25 @@ Record-Phase 'P10' 'Parser round-trip' $true 'Verified via offline Pester tests 
 Record-Phase 'P11' 'Drift consistency' $true 'Verified via offline Pester tests (tests/arm/MainTemplate.Tests.ps1)' ''
 
 # P12. SAMI verification
+# Iter 13.4 — defensive null-guard at every step. RG may be empty (deletion
+# in flight), FA may have no Identity (not yet provisioned), Get-AzRoleAssignment
+# may return null/single object. Every access wraps with @() and null-checks.
 try {
-    $faName = (Get-AzResource -ResourceGroupName $env_['XDRLR_CONNECTOR_RG'] -ResourceType 'Microsoft.Web/sites' | Select-Object -First 1).Name
+    $sites = @(Get-AzResource -ResourceGroupName $env_['XDRLR_CONNECTOR_RG'] -ResourceType 'Microsoft.Web/sites' -ErrorAction SilentlyContinue)
+    $firstSite = if ($sites.Count -gt 0) { $sites[0] } else { $null }
+    $faName = if ($null -ne $firstSite -and $firstSite.PSObject.Properties['Name']) { $firstSite.Name } else { $null }
     if ($faName) {
-        $fa = Get-AzWebApp -ResourceGroupName $env_['XDRLR_CONNECTOR_RG'] -Name $faName
-        $principalId = $fa.Identity.PrincipalId
-        $assignments = Get-AzRoleAssignment -ObjectId $principalId -ErrorAction SilentlyContinue
-        $expected3 = @('Key Vault Secrets User','Storage Table Data Contributor','Monitoring Metrics Publisher')
-        $found = @($assignments | Where-Object { $expected3 -contains $_.RoleDefinitionName })
-        Record-Phase 'P12' 'SAMI 3-role check' ($found.Count -ge 3) "FA=$faName Principal=$principalId  Found $($found.Count)/3 expected roles" "Roles: $($found.RoleDefinitionName -join ', ')"
+        $fa = Get-AzWebApp -ResourceGroupName $env_['XDRLR_CONNECTOR_RG'] -Name $faName -ErrorAction SilentlyContinue
+        $principalId = if ($null -ne $fa -and $null -ne $fa.Identity -and $fa.Identity.PSObject.Properties['PrincipalId']) { $fa.Identity.PrincipalId } else { $null }
+        if (-not $principalId) {
+            Record-Phase 'P12' 'SAMI 3-role check' $false "FA=$faName has no Managed Identity assigned (cold start may not have completed)" ''
+        } else {
+            $assignments = @(Get-AzRoleAssignment -ObjectId $principalId -ErrorAction SilentlyContinue)
+            $expected3 = @('Key Vault Secrets User','Storage Table Data Contributor','Monitoring Metrics Publisher')
+            $found = @($assignments | Where-Object { $expected3 -contains $_.RoleDefinitionName })
+            $foundNames = if ($found.Count -gt 0) { $found.RoleDefinitionName -join ', ' } else { '(none)' }
+            Record-Phase 'P12' 'SAMI 3-role check' ($found.Count -ge 3) "FA=$faName Principal=$principalId  Found $($found.Count)/3 expected roles" "Roles: $foundNames"
+        }
     } else {
         Record-Phase 'P12' 'SAMI 3-role check' $false 'No Function App found in connector RG' ''
     }

@@ -142,12 +142,42 @@ function Invoke-MDEEndpoint {
             # Expand-MDEResponse may emit pairs with $null Entity for edge-case
             # responses (primitives, empty scalars). Synthesise an empty object so
             # ConvertTo-MDEIngestRow's mandatory -Raw is always bindable.
-            $entity = if ($null -ne $pair.Entity) { $pair.Entity } else { [pscustomobject]@{} }
+            # Iter 13.4: triple-defense — $pair itself may be empty array under
+            # certain edge-cases (live evidence from MDE_ActionCenter_CL real
+            # portal response: "Cannot bind argument to parameter 'Raw' because
+            # it is null"). Final null-coalesce makes -Raw NEVER null no matter
+            # what shape $pair has.
+            $rawEntity = $null
+            if ($null -ne $pair) {
+                if ($pair -is [hashtable] -and $pair.ContainsKey('Entity')) {
+                    $rawEntity = $pair['Entity']
+                } elseif ($pair.PSObject.Properties['Entity']) {
+                    $rawEntity = $pair.Entity
+                }
+            }
+            # Mandatory parameter binding rejects $null AND empty pipeline (which
+            # an empty array @() effectively is when splatted to a single param).
+            # Both must be replaced with a non-empty defensive sentinel.
+            $entity = $rawEntity
+            if ($null -eq $entity -or ($entity -is [array] -and @($entity).Count -eq 0)) {
+                $entity = [pscustomobject]@{}
+            }
+
+            $rawId = $null
+            if ($null -ne $pair) {
+                if ($pair -is [hashtable] -and $pair.ContainsKey('Id')) {
+                    $rawId = $pair['Id']
+                } elseif ($pair.PSObject.Properties['Id']) {
+                    $rawId = $pair.Id
+                }
+            }
+            if ([string]::IsNullOrWhiteSpace([string]$rawId)) { $rawId = 'unknown' }
+
             $entityId = if ($PathParams.Count -gt 0) {
                 # Prefix with path-param values to keep IDs unique across devices/investigations
-                (($PathParams.Values | ForEach-Object { [string]$_ }) + $pair.Id) -join '-'
+                (($PathParams.Values | ForEach-Object { [string]$_ }) + $rawId) -join '-'
             } else {
-                $pair.Id
+                [string]$rawId
             }
             ConvertTo-MDEIngestRow -Stream $Stream -EntityId $entityId -Raw $entity -Extras $extras
         }
