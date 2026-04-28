@@ -15,6 +15,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.1.0-beta] - 2026-04-24
 
+### Iteration 13.10 — ActionCenter rollback + larac2shell cross-apply (2026-04-28)
+
+Live-evidence-driven hotfix: post iter-13.9, `Audit-Endpoints-Live.ps1` dropped
+36/45 → 35/45. The single regression was `MDE_ActionCenter_CL` going 200 → 400
+because the iter-13.9 audit-1-recommended query-string params
+(`?type=history&useMtpApi=true&pageIndex=1&pageSize=1000&sortByField=...`)
+were incorrect for the current portal endpoint. Either the param-set was
+version-specific to a different XDRInternals cmdlet or the params don't
+combine cleanly. Reverted to the original parameter-less path which returns
+200 reliably.
+
+**Verified post-rollback**: live audit returns to 36/45. No other endpoint
+regressed from the iter-13.9 query-string improvements (PreviewFeatures,
+AlertServiceConfig, CustomDetections, LiveResponseConfig, RbacDeviceGroups,
+SecurityBaselines, CloudAppsConfig — 7/8 of the iter-13.9 drift fixes hold).
+
+**Cross-applied to larac2shell** (commit `1d17e49`):
+- C3 — UPN context in auth-error throws (Auth-Internal.ps1:521 + 564)
+- O1 — Write-Warning on unknown pgid (Auth-Internal.ps1:1466 area)
+Both repos now have observability parity for production-grade auth-chain
+diagnostics.
+
 ### Iteration 13.9 — Final production-readiness consolidation (2026-04-28)
 
 **Synthesized from 9 parallel deep audits + entire conversation history. The
