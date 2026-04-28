@@ -79,7 +79,21 @@ try {
 }
 
 # --- Write the gating flag to Storage so poll timers know ---
+# Iter 13.14: switched from AzTable's Add-AzTableRow to direct REST API
+# because AzTable 2.1.0 + New-AzStorageContext -UseConnectedAccount doesn't
+# reliably propagate the MI auth token to AzTable's older
+# Microsoft.Azure.Cosmos.Table SDK. Symptom (live evidence post iter-13.13
+# deploy): Add-AzTableRow throws 'Exception calling "Execute" with "1"
+# argument(s): "The specified resource does not exist."' even though the
+# table exists and SAMI has Storage Table Data Contributor.
+# Direct REST with Get-AzAccessToken honors MI auth natively.
 try {
+    $tokenObj = Get-AzAccessToken -ResourceUrl 'https://storage.azure.com/'
+    $tableToken = if ($tokenObj.Token -is [System.Security.SecureString]) {
+        [System.Net.NetworkCredential]::new('', $tokenObj.Token).Password
+    } else {
+        [string]$tokenObj.Token
+    }
     $entity = [ordered]@{
         PartitionKey  = 'auth-selftest'
         RowKey        = 'latest'
@@ -88,13 +102,18 @@ try {
         FailureReason = if ($result.FailureReason) { $result.FailureReason } else { '' }
         LastRunUtc    = [datetime]::UtcNow.ToString('o')
     }
-    Add-AzTableRow -Table $table.CloudTable `
-        -PartitionKey 'auth-selftest' `
-        -RowKey 'latest' `
-        -Property $entity `
-        -UpdateExisting | Out-Null
+    $tableUri = "https://$($config.StorageAccountName).table.core.windows.net/$($config.CheckpointTable)(PartitionKey='auth-selftest',RowKey='latest')"
+    $headers = @{
+        Authorization  = "Bearer $tableToken"
+        'x-ms-version' = '2020-12-06'
+        'x-ms-date'    = [datetime]::UtcNow.ToString('R')
+        'Content-Type' = 'application/json'
+        'Accept'       = 'application/json;odata=nometadata'
+        'If-Match'     = '*'  # MERGE upsert — overwrite existing if present
+    }
+    Invoke-RestMethod -Method Merge -Uri $tableUri -Headers $headers -Body ($entity | ConvertTo-Json -Compress) -ErrorAction Stop | Out-Null
 } catch {
-    Write-Warning "${fnName}:failed to persist gating flag: $_"
+    Write-Warning "${fnName}:failed to persist gating flag (direct REST): $($_.Exception.Message)"
 }
 
 # --- Heartbeat ---

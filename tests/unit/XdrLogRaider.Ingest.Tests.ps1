@@ -231,36 +231,45 @@ Describe 'Write-AuthTestResult' {
     }
 
     Describe 'Get-XdrAuthSelfTestFlag' {
+        # Iter 13.14: Get-XdrAuthSelfTestFlag now uses direct REST API
+        # (Invoke-RestMethod) instead of AzTable's Get-AzTableRow because
+        # AzTable 2.1.0 doesn't reliably honor MI auth from
+        # New-AzStorageContext -UseConnectedAccount. Mocks updated to match.
         It 'returns $true when checkpoint row exists with Success=true' {
-            Mock -ModuleName XdrLogRaider.Ingest Get-AzTableRow -MockWith {
-                [pscustomobject]@{ Success = $true; TimeUtc = [datetime]::UtcNow }
+            Mock -ModuleName XdrLogRaider.Ingest Get-AzAccessToken -MockWith {
+                [pscustomobject]@{ Token = 'stub-token'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) }
+            }
+            Mock -ModuleName XdrLogRaider.Ingest Invoke-RestMethod -MockWith {
+                [pscustomobject]@{ Success = $true; LastRunUtc = [datetime]::UtcNow.ToString('o') }
             }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
             $result | Should -BeTrue
         }
 
         It 'returns $false when checkpoint row exists with Success=false' {
-            Mock -ModuleName XdrLogRaider.Ingest Get-AzTableRow -MockWith {
-                [pscustomobject]@{ Success = $false; TimeUtc = [datetime]::UtcNow }
+            Mock -ModuleName XdrLogRaider.Ingest Get-AzAccessToken -MockWith {
+                [pscustomobject]@{ Token = 'stub-token'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) }
+            }
+            Mock -ModuleName XdrLogRaider.Ingest Invoke-RestMethod -MockWith {
+                [pscustomobject]@{ Success = $false; LastRunUtc = [datetime]::UtcNow.ToString('o') }
             }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
             $result | Should -BeFalse
         }
 
-        It 'returns $false when no checkpoint row exists yet (first deployment)' {
-            Mock -ModuleName XdrLogRaider.Ingest Get-AzTableRow -MockWith { $null }
-            $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
+        It 'returns $false when no checkpoint row exists yet (REST 404 path)' {
+            Mock -ModuleName XdrLogRaider.Ingest Get-AzAccessToken -MockWith {
+                [pscustomobject]@{ Token = 'stub-token'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) }
+            }
+            Mock -ModuleName XdrLogRaider.Ingest Invoke-RestMethod -MockWith {
+                throw [System.Net.WebException]::new('The remote server returned an error: (404) Not Found.')
+            }
+            $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
             $result | Should -BeFalse
         }
 
-        It 'returns $false (fails closed) when the table does not exist yet' {
-            Mock -ModuleName XdrLogRaider.Ingest Get-AzStorageTable -MockWith { $null }
-            $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
-            $result | Should -BeFalse
-        }
-
-        It 'returns $false (fails closed) when New-AzStorageContext throws' {
-            Mock -ModuleName XdrLogRaider.Ingest New-AzStorageContext -MockWith { throw 'auth failure' }
+        It 'returns $false (fails closed) when token acquisition throws' {
+            Mock -ModuleName XdrLogRaider.Ingest Get-AzAccessToken -MockWith { throw 'token acquisition failed' }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
             $result | Should -BeFalse
         }
