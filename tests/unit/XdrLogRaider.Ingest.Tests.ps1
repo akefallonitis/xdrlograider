@@ -40,13 +40,16 @@ AfterAll {
 }
 
 Describe 'XdrLogRaider.Ingest module surface' {
-    It 'exports Send-ToLogAnalytics, Write-Heartbeat, Write-AuthTestResult, Get-CheckpointTimestamp, Set-CheckpointTimestamp' {
+    It 'exports Send-ToLogAnalytics, Write-Heartbeat, Write-AuthTestResult, Get/Set-CheckpointTimestamp, Get-XdrAuthSelfTestFlag, Invoke-XdrStorageTableEntity' {
         $exported = (Get-Module XdrLogRaider.Ingest).ExportedFunctions.Keys
         $exported | Should -Contain 'Send-ToLogAnalytics'
         $exported | Should -Contain 'Write-Heartbeat'
         $exported | Should -Contain 'Write-AuthTestResult'
         $exported | Should -Contain 'Get-CheckpointTimestamp'
         $exported | Should -Contain 'Set-CheckpointTimestamp'
+        $exported | Should -Contain 'Get-XdrAuthSelfTestFlag'
+        # Iter 13.15: unified Storage Table HttpClient helper
+        $exported | Should -Contain 'Invoke-XdrStorageTableEntity'
     }
 
     It 'has PowerShell 7.4+ requirement' {
@@ -231,15 +234,13 @@ Describe 'Write-AuthTestResult' {
     }
 
     Describe 'Get-XdrAuthSelfTestFlag' {
-        # Iter 13.14: Get-XdrAuthSelfTestFlag now uses direct REST API
-        # (Invoke-RestMethod) instead of AzTable's Get-AzTableRow because
-        # AzTable 2.1.0 doesn't reliably honor MI auth from
-        # New-AzStorageContext -UseConnectedAccount. Mocks updated to match.
+        # Iter 13.15: Get-XdrAuthSelfTestFlag now delegates to
+        # Invoke-XdrStorageTableEntity (the unified Storage Table HttpClient
+        # helper). Mocks target the helper directly so we exercise the
+        # function's mapping logic (helper returns null vs entity → bool flag)
+        # without depending on REST/HTTP semantics.
         It 'returns $true when checkpoint row exists with Success=true' {
-            Mock -ModuleName XdrLogRaider.Ingest Get-AzAccessToken -MockWith {
-                [pscustomobject]@{ Token = 'stub-token'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) }
-            }
-            Mock -ModuleName XdrLogRaider.Ingest Invoke-RestMethod -MockWith {
+            Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity -MockWith {
                 [pscustomobject]@{ Success = $true; LastRunUtc = [datetime]::UtcNow.ToString('o') }
             }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
@@ -247,29 +248,21 @@ Describe 'Write-AuthTestResult' {
         }
 
         It 'returns $false when checkpoint row exists with Success=false' {
-            Mock -ModuleName XdrLogRaider.Ingest Get-AzAccessToken -MockWith {
-                [pscustomobject]@{ Token = 'stub-token'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) }
-            }
-            Mock -ModuleName XdrLogRaider.Ingest Invoke-RestMethod -MockWith {
+            Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity -MockWith {
                 [pscustomobject]@{ Success = $false; LastRunUtc = [datetime]::UtcNow.ToString('o') }
             }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
             $result | Should -BeFalse
         }
 
-        It 'returns $false when no checkpoint row exists yet (REST 404 path)' {
-            Mock -ModuleName XdrLogRaider.Ingest Get-AzAccessToken -MockWith {
-                [pscustomobject]@{ Token = 'stub-token'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) }
-            }
-            Mock -ModuleName XdrLogRaider.Ingest Invoke-RestMethod -MockWith {
-                throw [System.Net.WebException]::new('The remote server returned an error: (404) Not Found.')
-            }
+        It 'returns $false when no checkpoint row exists yet (helper returns $null on 404)' {
+            Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity -MockWith { $null }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
             $result | Should -BeFalse
         }
 
-        It 'returns $false (fails closed) when token acquisition throws' {
-            Mock -ModuleName XdrLogRaider.Ingest Get-AzAccessToken -MockWith { throw 'token acquisition failed' }
+        It 'returns $false (fails closed) when the helper throws' {
+            Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity -MockWith { throw 'token acquisition failed' }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
             $result | Should -BeFalse
         }

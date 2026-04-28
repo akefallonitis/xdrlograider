@@ -60,75 +60,49 @@ Describe 'Update-XsrfToken (Xdr.Portal.Auth)' {
     }
 }
 
-Describe 'Get-XdrAuthSelfTestFlag — all return paths' {
+Describe 'Get-XdrAuthSelfTestFlag — all return paths (iter-13.15: via Invoke-XdrStorageTableEntity)' {
+    # Iter 13.15: Get-XdrAuthSelfTestFlag now delegates to the unified
+    # Invoke-XdrStorageTableEntity helper. Tests target that single seam so
+    # we exercise the function's null/throw/Success-false → $false mapping
+    # without re-asserting REST/HTTP semantics (those are covered by
+    # tests/unit/Invoke-XdrStorageTableEntity.Tests.ps1).
 
-    BeforeAll {
-        # Inject stubs INSIDE the module scope so when XdrLogRaider.Ingest's
-        # Get-XdrAuthSelfTestFlag calls New-AzStorageContext / Get-AzStorageTable
-        # / Get-AzTableRow, PowerShell resolves to our stubs (not the real Az
-        # cmdlets) — which on Linux CI have strict Context parameter validators
-        # that would bypass Pester's Mock intercept.
+    It 'returns false when the helper throws (transient/permission error → fail closed)' {
         InModuleScope XdrLogRaider.Ingest {
-            if (-not (Get-Command New-AzStorageContext -ErrorAction SilentlyContinue -CommandType Function)) {
-                function script:New-AzStorageContext { param($StorageAccountName, [switch]$UseConnectedAccount, $ErrorAction) @{} }
-            }
-            if (-not (Get-Command Get-AzStorageTable -ErrorAction SilentlyContinue -CommandType Function)) {
-                function script:Get-AzStorageTable { param($Name, $Context, $ErrorAction) @{ CloudTable = @{} } }
-            }
-            if (-not (Get-Command Get-AzTableRow -ErrorAction SilentlyContinue -CommandType Function)) {
-                function script:Get-AzTableRow { param($Table, $PartitionKey, $RowKey, $ErrorAction) $null }
-            }
-        }
-    }
-
-    It 'returns false when storage context creation throws' {
-        InModuleScope XdrLogRaider.Ingest {
-            Mock New-AzStorageContext { throw 'storage not found' }
-            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'missing' -CheckpointTable 'cp'
+            Mock Invoke-XdrStorageTableEntity { throw 'storage table not reachable' }
+            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'missing' -CheckpointTable 'cp' -WarningAction SilentlyContinue
             $r | Should -BeFalse
         }
     }
 
-    It 'returns false when checkpoint table is missing' {
+    It 'returns false when the helper returns null (404 → row not present yet)' {
         InModuleScope XdrLogRaider.Ingest {
-            Mock New-AzStorageContext { @{} }
-            Mock Get-AzStorageTable { $null }
+            Mock Invoke-XdrStorageTableEntity { $null }
             $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
             $r | Should -BeFalse
         }
     }
 
-    It 'returns false when flag row is missing (REST 404 path)' {
+    It 'returns true when flag row has Success=true' {
         InModuleScope XdrLogRaider.Ingest {
-            # Iter 13.14: switched to direct REST. 404 = row not present yet.
-            Mock Get-AzAccessToken { [pscustomobject]@{ Token = 'stub-token'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
-            Mock Invoke-RestMethod {
-                $resp = New-Object System.Net.HttpWebResponse
-                $err = New-Object System.Net.WebException('Resource not found', $null, 'ProtocolError', $resp)
-                # Throw a HttpResponseException-shaped exception with StatusCode=404
-                $statusCode = [System.Net.HttpStatusCode]::NotFound
-                $ex = [System.Net.WebException]::new('The remote server returned an error: (404) Not Found.')
-                throw $ex
-            }
-            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
-            $r | Should -BeFalse
-        }
-    }
-
-    It 'returns true when flag row has Success=true (REST 200 path)' {
-        InModuleScope XdrLogRaider.Ingest {
-            Mock Get-AzAccessToken { [pscustomobject]@{ Token = 'stub-token'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
-            Mock Invoke-RestMethod { [pscustomobject]@{ Success = $true } }
+            Mock Invoke-XdrStorageTableEntity { [pscustomobject]@{ Success = $true } }
             $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
             $r | Should -BeTrue
         }
     }
 
-    It 'returns false when flag row has Success=false (REST 200 path)' {
+    It 'returns false when flag row has Success=false' {
         InModuleScope XdrLogRaider.Ingest {
-            Mock Get-AzAccessToken { [pscustomobject]@{ Token = 'stub-token'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
-            Mock Invoke-RestMethod { [pscustomobject]@{ Success = $false } }
+            Mock Invoke-XdrStorageTableEntity { [pscustomobject]@{ Success = $false } }
             $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
+            $r | Should -BeFalse
+        }
+    }
+
+    It 'returns false when flag row has Success missing entirely (defensive)' {
+        InModuleScope XdrLogRaider.Ingest {
+            Mock Invoke-XdrStorageTableEntity { [pscustomobject]@{ LastRunUtc = '2026-04-28T00:00:00Z' } }
+            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp' -WarningAction SilentlyContinue
             $r | Should -BeFalse
         }
     }

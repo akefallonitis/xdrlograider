@@ -63,3 +63,11 @@ Desktop.ini
 .scratch/
 NOTES.local.md
 TODO.local.md
+
+# Iter 13.15: dev-only ad-hoc diagnostic tools (one-off root-cause investigation
+# scripts) — do not ship in production-ready repo. Operator-facing tools
+# (Initialize-XdrLogRaider*, Post-DeploymentVerification, Run-LocalTests,
+# Validate-ArmJson, Preflight-Deployment, Build-Sentinel*) are tracked normally.
+tools/Diagnose-*.ps1
+tools/_*.ps1
+tools/Prove-EndToEnd.ps1

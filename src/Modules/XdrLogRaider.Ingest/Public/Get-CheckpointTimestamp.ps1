@@ -21,7 +21,10 @@ function Get-CheckpointTimestamp {
         [datetime] UTC. MinValue if no prior checkpoint.
 
     .NOTES
-        Uses Az.Storage / Az.Table. Inherits managed identity auth.
+        Iter 13.15: refactored to use Invoke-XdrStorageTableEntity (HttpClient
+        + MI token via Get-AzAccessToken -ResourceUrl https://storage.azure.com/).
+        Replaces AzTable 2.1.0 + New-AzStorageContext path which did not
+        reliably honor MI auth (root cause of iter-13.13 production breakage).
     #>
     [CmdletBinding()]
     [OutputType([datetime])]
@@ -32,15 +35,14 @@ function Get-CheckpointTimestamp {
     )
 
     try {
-        $context = New-AzStorageContext -StorageAccountName $StorageAccountName -UseConnectedAccount -ErrorAction Stop
-        $table = Get-AzStorageTable -Name $TableName -Context $context -ErrorAction SilentlyContinue
-        if (-not $table) {
-            Write-Verbose "Checkpoint table '$TableName' does not exist; returning MinValue for first run"
-            return [datetime]::MinValue
-        }
+        $entity = Invoke-XdrStorageTableEntity `
+            -StorageAccountName $StorageAccountName `
+            -TableName $TableName `
+            -PartitionKey $StreamName `
+            -RowKey 'latest' `
+            -Operation Get -ErrorAction Stop
 
-        $entity = Get-AzTableRow -Table $table.CloudTable -PartitionKey $StreamName -RowKey 'latest' -ErrorAction SilentlyContinue
-        if (-not $entity) {
+        if ($null -eq $entity) {
             Write-Verbose "No checkpoint for '$StreamName'; returning MinValue"
             return [datetime]::MinValue
         }
@@ -57,7 +59,7 @@ function Get-CheckpointTimestamp {
             return [datetime]::MinValue
         }
     } catch {
-        Write-Warning "Failed to read checkpoint for '$StreamName': $_"
+        Write-Warning "Failed to read checkpoint for '$StreamName': $($_.Exception.Message)"
         return [datetime]::MinValue
     }
 }

@@ -10,6 +10,14 @@ $script:Rate429Count = 0
 # avoid tripping reactive 401/440 refreshes mid-tier-poll.
 $script:SessionMaxAgeMinutes = 210
 
+# Iter 13.15 Phase C — WebSession rotation policy.
+# Beyond the time-based 3h30m refresh, also rotate after a request-count
+# threshold to bound replay-window risk if the FA process is compromised.
+# Defense-in-depth: we already do reactive 401/440 refresh + 50-min cache
+# eviction in Connect-MDEPortal — this adds a count-based cap.
+$script:RequestCount = 0
+$script:RequestCountRotationThreshold = 100
+
 function Invoke-MDEPortalRequest {
     <#
     .SYNOPSIS
@@ -93,36 +101,52 @@ function Invoke-MDEPortalRequest {
     if ($Path -notmatch '^/') { $Path = "/$Path" }
     $uri = "https://$portalHost$Path"
 
+    # Iter 13.15 Phase C — count-based rotation. Forces a fresh auth chain
+    # after $script:RequestCountRotationThreshold (default 100) successful
+    # requests. Combined with the time-based 3h30m proactive refresh and
+    # reactive 401/440 reauth, this caps the replay-window risk on the
+    # cached sccauth cookie if the FA process is compromised.
+    $script:RequestCount++
+    $countTriggeredRotation = ($script:RequestCount -ge $script:RequestCountRotationThreshold)
+    if ($countTriggeredRotation) {
+        Write-Verbose "Invoke-MDEPortalRequest: request count $($script:RequestCount) >= $($script:RequestCountRotationThreshold) — forcing fresh auth"
+        $script:RequestCount = 0
+    }
+
     # Session TTL check — proactively refresh at 3h30m to stay well under the
     # undocumented ~4h portal session cap. Reactive 401/440 reauth still runs
     # below as a safety net for tenants with shorter TTL.
     # Iter 13.9 (C1): explicit $null -ne distinguishes "property absent" from
     # "property present but $null" — protects line below from strict-mode crash
     # if a future caller passes a Session object with AcquiredUtc=$null.
+    $needsRotation = $countTriggeredRotation
     if ($Session.PSObject.Properties['AcquiredUtc'] -and $null -ne $Session.AcquiredUtc) {
         $sessionAge = [datetime]::UtcNow - $Session.AcquiredUtc
         if ($sessionAge.TotalMinutes -gt $script:SessionMaxAgeMinutes) {
             Write-Verbose "Invoke-MDEPortalRequest: session age $([int]$sessionAge.TotalMinutes)m > ${script:SessionMaxAgeMinutes}m — forcing fresh auth"
-            $cacheKey = "$($Session.Upn)::$portalHost"
-            if ($script:SessionCache -and $script:SessionCache.ContainsKey($cacheKey)) {
-                $cached = $script:SessionCache[$cacheKey]
-                # Iter 13.2 fix: strict-mode-safe key existence check.
-                # DirectCookies path doesn't set _Method/_Credential — accessing
-                # those keys directly throws PropertyNotFoundException.
-                $hasReauthInfo = $false
-                if ($cached -is [System.Collections.IDictionary]) {
-                    $hasReauthInfo = $cached.Contains('_Method') -and $cached.Contains('_Credential') -and $cached['_Method'] -and $cached['_Credential']
-                } elseif ($cached.PSObject.Properties['_Method'] -and $cached.PSObject.Properties['_Credential']) {
-                    $hasReauthInfo = $null -ne $cached._Method -and $null -ne $cached._Credential
-                }
-                if ($hasReauthInfo) {
-                    try {
-                        $fresh = Connect-MDEPortal -Method $cached._Method -Credential $cached._Credential -PortalHost $portalHost -Force
-                        $Session.Session     = $fresh.Session
-                        $Session.AcquiredUtc = $fresh.AcquiredUtc
-                    } catch {
-                        Write-Warning "Invoke-MDEPortalRequest: proactive TTL refresh failed — continuing with old session (will retry on 401): $($_.Exception.Message)"
-                    }
+            $needsRotation = $true
+        }
+    }
+    if ($needsRotation -and $Session.PSObject.Properties['AcquiredUtc']) {
+        $cacheKey = "$($Session.Upn)::$portalHost"
+        if ($script:SessionCache -and $script:SessionCache.ContainsKey($cacheKey)) {
+            $cached = $script:SessionCache[$cacheKey]
+            # Iter 13.2 fix: strict-mode-safe key existence check.
+            # DirectCookies path doesn't set _Method/_Credential — accessing
+            # those keys directly throws PropertyNotFoundException.
+            $hasReauthInfo = $false
+            if ($cached -is [System.Collections.IDictionary]) {
+                $hasReauthInfo = $cached.Contains('_Method') -and $cached.Contains('_Credential') -and $cached['_Method'] -and $cached['_Credential']
+            } elseif ($cached.PSObject.Properties['_Method'] -and $cached.PSObject.Properties['_Credential']) {
+                $hasReauthInfo = $null -ne $cached._Method -and $null -ne $cached._Credential
+            }
+            if ($hasReauthInfo) {
+                try {
+                    $fresh = Connect-MDEPortal -Method $cached._Method -Credential $cached._Credential -PortalHost $portalHost -Force
+                    $Session.Session     = $fresh.Session
+                    $Session.AcquiredUtc = $fresh.AcquiredUtc
+                } catch {
+                    Write-Warning "Invoke-MDEPortalRequest: proactive TTL refresh failed — continuing with old session (will retry on 401): $($_.Exception.Message)"
                 }
             }
         }

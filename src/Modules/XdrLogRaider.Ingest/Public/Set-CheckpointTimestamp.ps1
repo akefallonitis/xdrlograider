@@ -14,6 +14,13 @@ function Set-CheckpointTimestamp {
 
     .PARAMETER Timestamp
         UTC timestamp to persist (default: now).
+
+    .NOTES
+        Iter 13.15: refactored to use Invoke-XdrStorageTableEntity Upsert
+        (PUT WITHOUT If-Match = Insert-Or-Replace). Replaces AzTable's
+        Add-AzTableRow -UpdateExisting which did not reliably honor MI auth
+        (root cause of iter-13.13 production breakage). Table is pre-created
+        by Bicep at deploy time, so runtime table-creation logic is removed.
     #>
     [CmdletBinding()]
     param(
@@ -24,20 +31,18 @@ function Set-CheckpointTimestamp {
     )
 
     try {
-        $context = New-AzStorageContext -StorageAccountName $StorageAccountName -UseConnectedAccount -ErrorAction Stop
-        $table = Get-AzStorageTable -Name $TableName -Context $context -ErrorAction SilentlyContinue
-        if (-not $table) {
-            $table = New-AzStorageTable -Name $TableName -Context $context -ErrorAction Stop
+        $entity = @{
+            LastPolledUtc = $Timestamp.ToString('o')
         }
 
-        $entity = [ordered]@{
-            PartitionKey   = $StreamName
-            RowKey         = 'latest'
-            LastPolledUtc  = $Timestamp.ToString('o')
-        }
-
-        Add-AzTableRow -Table $table.CloudTable -PartitionKey $StreamName -RowKey 'latest' -Property $entity -UpdateExisting | Out-Null
+        Invoke-XdrStorageTableEntity `
+            -StorageAccountName $StorageAccountName `
+            -TableName $TableName `
+            -PartitionKey $StreamName `
+            -RowKey 'latest' `
+            -Operation Upsert `
+            -Entity $entity -ErrorAction Stop | Out-Null
     } catch {
-        Write-Warning "Failed to write checkpoint for '$StreamName': $_"
+        Write-Warning "Failed to write checkpoint for '$StreamName': $($_.Exception.Message)"
     }
 }

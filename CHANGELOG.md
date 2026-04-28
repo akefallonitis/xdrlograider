@@ -15,6 +15,181 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.1.0-beta] - 2026-04-24
 
+### Iteration 13.15 — Storage Table HttpClient unification + 3-tier `hostingPlan` + threat-model hardening (2026-04-28)
+
+**The comprehensive Tier-1 fix bringing v0.1.0-beta to production-ready.** Synthesized
+from a 71-finding end-to-end audit (3 parallel agents: STRIDE security, operator-
+experience, best-practices/Marketplace), threat-model analysis that surfaced a
+HIGH-severity privilege escalation chain prior audits had missed, and consolidation
+of all operator-selectable parameters into a canonical 16-parameter matrix.
+
+#### Phase A — Storage Table HttpClient unification
+
+- **F1**: NEW `src/Modules/XdrLogRaider.Ingest/Public/Invoke-XdrStorageTableEntity.ps1`
+  (~150 lines) — single canonical helper for all Storage Table entity ops
+  (Get/Upsert/Delete) using `System.Net.Http.HttpClient` + `Get-AzAccessToken`
+  with cached HttpClient (`$script:XdrTableHttpClient`). Replaces 4 scattered
+  call sites that mixed AzTable cmdlets (iter-13.13 root cause) and ad-hoc
+  `Invoke-RestMethod` blocks (iter-13.14 root cause: `If-Match: '*'` converted
+  PUT from Insert-Or-Replace to Update-only, 404 on first run).
+- Refactored 4 call sites to use the helper:
+  - `src/functions/validate-auth-selftest/run.ps1`
+  - `src/Modules/XdrLogRaider.Ingest/Public/Get-XdrAuthSelfTestFlag.ps1`
+  - `src/Modules/XdrLogRaider.Ingest/Public/Get-CheckpointTimestamp.ps1`
+  - `src/Modules/XdrLogRaider.Ingest/Public/Set-CheckpointTimestamp.ps1`
+- Removed `AzTable` + `Az.Resources` from `release.yml` `$azModules`. Added
+  negative-bundle gate that asserts they remain absent in future builds.
+- NEW `tests/unit/Invoke-XdrStorageTableEntity.Tests.ps1` (~17 tests) — full
+  parameter-binding + source-level contract assertions.
+- NEW `tests/unit/StorageTableHelper.UpsertSemantic.Tests.ps1` — single-purpose
+  regression gate that asserts the Upsert branch NEVER calls
+  `TryAddWithoutValidation('If-Match', ...)`. Locks the iter-13.14 root cause.
+- Refactored existing tests (`Checkpoint.RoundTrip`, `XdrLogRaider.Ingest`,
+  `ModuleCoverage.Extended`, `Ingest.Extended`, `AzModulePinning`,
+  `CmdletProviderCoverage`) to mock the new helper via `Mock -ModuleName`
+  pattern (bare `function global:` overrides do NOT intercept module-internal
+  calls when the function is module-owned).
+
+#### Phase B — Bicep security hardening (post threat-model audit)
+
+**Threat model**: Y1 Linux Consumption requires the Storage Account Key in
+`AzureWebJobsStorage` + `WEBSITE_CONTENTAZUREFILECONNECTIONSTRING` (Microsoft
+platform limit on Y1 — MI not supported for content share). Anyone with
+`Microsoft.Web/sites/config/list/action` (FA Contributor — much lower bar than
+Storage Owner) extracts the key, gets full data-plane access including the
+Files share that hosts the FA runtime code mount → arbitrary code execution
+as SAMI → KV read of `mde-portal-auth` → Defender XDR tenant compromise.
+CWE-269 privilege escalation, severity HIGH.
+
+- **NEW `hostingPlan` 3-tier enum parameter** in `deploy/main.bicep`:
+  `consumption-y1` (DEFAULT, $0–10/mo, residual key risk on content share) /
+  `flex-fc1` ($10–30/mo, full MI, closed PrivEsc) / `premium-ep1`
+  ($140–300/mo, regulated tier, always-warm). Operator owns the cost-vs-security
+  trade-off explicitly. v1.2 Marketplace flips default to `flex-fc1`.
+- **Tiered Bicep conditional logic** in `function-app.bicep`:
+  `AzureWebJobsStorage` and `WEBSITE_CONTENTAZUREFILECONNECTIONSTRING` use
+  `__accountName` (MI) form when `useFullManagedIdentity = true`
+  (`hostingPlan != consumption-y1`), shared-key form otherwise.
+- **Tiered SAMI role assignments** in `role-assignments.bicep`: 5 unconditional
+  roles (Key Vault Secrets User, Storage Table Data Contributor, Monitoring
+  Metrics Publisher, Storage Blob Data Owner, Storage Queue Data Contributor)
+  + 1 conditional role (Storage File Data SMB Share Contributor, only when
+  `useFullManagedIdentity = true`). All scoped to specific resources, no
+  RG/subscription-level grants.
+- **NEW `restrictPublicNetwork` bool parameter** (default `false` for
+  v0.1.0-beta deployability; flips to `true` in v1.2 Marketplace). Gates
+  Storage / Key Vault / App Insights public network access.
+- **NEW `enableKeyVaultDiagnostics` bool parameter** (default `true`).
+  Deploys `Microsoft.Insights/diagnosticSettings` on KV to send AuditEvent
+  logs to the Sentinel workspace — required for forensic visibility on
+  credential access.
+- **NEW `tests/arm/HostingPlanMatrix.Tests.ps1`** (~24 tests, table-driven)
+  — asserts each plan tier produces the right serverfarm SKU, env-var form,
+  SAMI role set, and `allowSharedKeyAccess` setting.
+- **NEW `tests/arm/LeastPrivilege.Tests.ps1`** (~9 tests, plan-independent)
+  — asserts every role assignment uses a specific resource scope (no
+  subscription/RG), no broad `Contributor` roles, `principalType:
+  ServicePrincipal` everywhere, deterministic `guid()` names.
+- **NEW `docs/HOSTING-PLANS.md`** — full operator decision aid: side-by-side
+  comparison, threat model, decision tree, migration path between plans,
+  comparison to Microsoft's own connector defaults.
+- **NEW `docs/SECURITY-NOTES.md`** — full security posture: threat model,
+  per-plan residual risk, SAMI role matrix, why `restrictPublicNetwork`
+  default is `false` for v0.1.0-beta, v1.2 Marketplace hardening roadmap,
+  legitimate-auth posture vs. cookie-persistence/PRT-abuse bypass techniques.
+
+#### Phase C — Memory + connection lifecycle
+
+- **F5 SecureString disposal**: `Get-EstsCookie.ps1` `Complete-CredentialsFlow`
+  wraps password + TOTP-secret-bearing variables in `try { ... } finally
+  { Remove-Variable -Force }` so secrets are removed from local scope on every
+  exit path (including exceptions). Best-effort given PowerShell strings are
+  GC-managed (cannot zero memory) but reduces lifetime to GC discretion vs
+  parent-scope cleanup.
+- **F6 WebSession rotation**: `Invoke-MDEPortalRequest.ps1` adds module-scope
+  `$script:RequestCount` counter and `$script:RequestCountRotationThreshold`
+  (default 100). After 100 successful requests OR every 60 min OR on session
+  age > 3h30m, forces a fresh `Connect-MDEPortal -Force`. Defense-in-depth on
+  top of the 50-min cache eviction + reactive 401/440 reauth.
+
+#### Forward-compat hooks (enable v0.2.0 → v2.0 without restart)
+
+- `hostingPlan` enum already supports FC1 (v0.2.0 Flex Consumption migration
+  is now a parameter flip) and EP1 (v1.2 Marketplace regulated tier).
+- `restrictPublicNetwork` parameter already shipped (v1.2 just flips the default).
+- `enableKeyVaultDiagnostics` parameter already shipped.
+- Every operator parameter is purely additive — existing deploys keep their
+  values, re-deploys preserve `connectorCheckpoints` state.
+
+#### Test counts
+
+- All-offline: **1355 tests / 0 failures / 33 skipped (online-only)**, up from
+  1031 at iter-13.10 baseline (+324 new tests).
+
+### Iteration 13.14 — gate flag write switched to direct REST (2026-04-28)
+
+After iter-13.13 fixed the AzTable transitive dependency (Az.Resources was
+needed for AzureRmStorageTableCoreHelper.psm1's #Requires header), live
+evidence showed `Add-AzTableRow` STILL throwing "The specified resource does
+not exist" — even with all 5 modules bundled and SAMI having Storage Table
+Data Contributor on the storage account.
+
+Root cause: AzTable 2.1.0's underlying Microsoft.Azure.Cosmos.Table SDK does
+not reliably propagate the MI auth token from `New-AzStorageContext
+-UseConnectedAccount`. Switched both `validate-auth-selftest/run.ps1`
+(gate-flag write) and `Get-XdrAuthSelfTestFlag.ps1` (gate-flag read) to use
+direct Azure Tables REST API via `Invoke-RestMethod` + `Get-AzAccessToken
+-ResourceUrl 'https://storage.azure.com/'`.
+
+This was the right approach BUT used `If-Match: '*'` header on the PUT, which
+converts the verb from "Insert-Or-Replace Entity" to "Update Entity"
+(returns 404 if the row doesn't exist). First-run validate-auth-selftest
+created an empty table but couldn't write the row → all poll-* timers stayed
+gated → 0 ingestion. Iter-13.15 fixes this comprehensively via the
+`Invoke-XdrStorageTableEntity` helper which uses PUT WITHOUT If-Match for
+true upsert.
+
+### Iteration 13.13 — Az.Resources transitive dependency bundle (2026-04-28)
+
+Live evidence post iter-13.12 deploy: `Add-AzTableRow` from
+`validate-auth-selftest/run.ps1` failed with cryptic
+`CommandNotFoundException` on Linux Consumption Y1. Root cause: AzTable's
+`AzureRmStorageTableCoreHelper.psm1` declares
+`#Requires -Modules Az.Resources` at the top. Without `Az.Resources` bundled
+in the function-app.zip, the helper silently fails to load, then `Add-AzTableRow`
+isn't available.
+
+Added `Az.Resources` 7.10.0 (latest 7.x compatible with Az.Accounts 5.3.4)
+to `release.yml` `$azModules`. Updated `AzModulePinning.Tests.ps1` to assert
+its presence. Iter-13.15 superseded this fix entirely by removing AzTable
++ Az.Resources from the bundle.
+
+### Iteration 13.12 — `authMethod` snake_case ARM passthrough fix (2026-04-28)
+
+ARM template parameter `authMethod` allowed values are `credentials_totp`
+and `passkey` (snake_case, per Bicep convention). PowerShell module's
+`ValidateSet` on `Connect-MDEPortal -Method` parameter rejected snake_case
+values, accepting only PascalCase (`CredentialsTotp`, `Passkey`). Result:
+deployed FA threw on first auth chain: `"Cannot bind parameter 'Method'.
+Cannot validate argument: snake_case rejected"`.
+
+Fixed by:
+- Adding snake_case aliases to ValidateSet: `'CredentialsTotp', 'Passkey',
+  'credentials_totp', 'passkey'` in both `Connect-MDEPortal.ps1` and
+  `Test-MDEPortalAuth.ps1`.
+- Internal normalization: `switch ($Method) { 'credentials_totp' { 'CredentialsTotp' } 'passkey' { 'Passkey' } default { $Method } }` so downstream paths see PascalCase.
+- NEW `tests/unit/AuthMethod.SnakeCaseArmPassthrough.Tests.ps1` (10 tests
+  locking the contract).
+
+### Iteration 13.11 — apiVersion 2021-03-01-preview verified (2026-04-26)
+
+Reference verification pass: confirmed Trend Micro Vision One, Auth0, and
+Abnormal Security Sentinel connectors all use `kind: GenericUI` +
+`apiVersion: 2021-03-01-preview` for their Function App-based connector
+cards. Our `deploy/solution/Data Connectors/XdrLogRaider_DataConnector.json`
+matches this canonical pair. No source change; documentation pass only
+(updated `docs/SENTINEL-SOLUTION-SUBMISSION.md` references).
+
 ### Iteration 13.10 — ActionCenter rollback + larac2shell cross-apply (2026-04-28)
 
 Live-evidence-driven hotfix: post iter-13.9, `Audit-Endpoints-Live.ps1` dropped

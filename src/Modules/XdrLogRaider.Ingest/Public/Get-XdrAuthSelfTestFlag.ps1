@@ -45,41 +45,25 @@ function Get-XdrAuthSelfTestFlag {
         [string] $CheckpointTable
     )
 
-    # Iter 13.14: switched from AzTable's Get-AzTableRow to direct REST API.
-    # Same root cause as the validate-auth-selftest gate-flag write — AzTable
-    # 2.1.0's older Microsoft.Azure.Cosmos.Table SDK doesn't reliably honor
-    # New-AzStorageContext -UseConnectedAccount MI auth. Direct REST with
-    # Get-AzAccessToken honors MI auth natively.
+    # Iter 13.15: refactored to use Invoke-XdrStorageTableEntity (unified
+    # HttpClient-based Storage Table helper). Replaces inline Invoke-RestMethod
+    # block. Helper returns $null on 404 (row doesn't exist yet) so we map that
+    # to $false (gate not yet flipped on first deploy).
     try {
-        $tokenObj = Get-AzAccessToken -ResourceUrl 'https://storage.azure.com/'
-        $tableToken = if ($tokenObj.Token -is [System.Security.SecureString]) {
-            [System.Net.NetworkCredential]::new('', $tokenObj.Token).Password
-        } else {
-            [string]$tokenObj.Token
+        $row = Invoke-XdrStorageTableEntity `
+            -StorageAccountName $StorageAccountName `
+            -TableName $CheckpointTable `
+            -PartitionKey 'auth-selftest' `
+            -RowKey 'latest' `
+            -Operation Get -ErrorAction Stop
+
+        if ($null -eq $row) {
+            # Row doesn't exist yet — auth-selftest hasn't run / hasn't succeeded
+            return $false
         }
-        $tableUri = "https://$StorageAccountName.table.core.windows.net/$CheckpointTable(PartitionKey='auth-selftest',RowKey='latest')"
-        $headers = @{
-            Authorization  = "Bearer $tableToken"
-            'x-ms-version' = '2020-12-06'
-            'x-ms-date'    = [datetime]::UtcNow.ToString('R')
-            'Accept'       = 'application/json;odata=nometadata'
-        }
-        try {
-            $row = Invoke-RestMethod -Method Get -Uri $tableUri -Headers $headers -ErrorAction Stop
-        } catch [System.Net.WebException], [Microsoft.PowerShell.Commands.HttpResponseException] {
-            $status = $null
-            if ($null -ne $_.Exception -and $_.Exception.PSObject.Properties['Response'] -and $null -ne $_.Exception.Response -and $_.Exception.Response.PSObject.Properties['StatusCode']) {
-                $status = [int]$_.Exception.Response.StatusCode
-            }
-            if ($status -eq 404) {
-                # Row doesn't exist yet — auth-selftest hasn't run / hasn't succeeded
-                return $false
-            }
-            throw  # other errors propagate
-        }
-        return ($null -ne $row) -and ($row.Success -eq $true)
+        return ($row.Success -eq $true)
     } catch {
-        Write-Warning "Get-XdrAuthSelfTestFlag: failed to read checkpoint table (direct REST) -- $($_.Exception.Message)"
+        Write-Warning "Get-XdrAuthSelfTestFlag: failed to read checkpoint table -- $($_.Exception.Message)"
         return $false
     }
 }

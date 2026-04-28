@@ -232,34 +232,15 @@ Describe 'Write-AuthTestResult — schema' {
     }
 }
 
-Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases' {
-
-    BeforeAll {
-        InModuleScope XdrLogRaider.Ingest {
-            if (-not (Get-Command New-AzStorageContext -ErrorAction SilentlyContinue -CommandType Function)) {
-                function script:New-AzStorageContext { param($StorageAccountName, [switch]$UseConnectedAccount, $ErrorAction) @{} }
-            }
-            if (-not (Get-Command Get-AzStorageTable -ErrorAction SilentlyContinue -CommandType Function)) {
-                function script:Get-AzStorageTable { param($Name, $Context, $ErrorAction) @{ CloudTable = @{} } }
-            }
-            if (-not (Get-Command New-AzStorageTable -ErrorAction SilentlyContinue -CommandType Function)) {
-                function script:New-AzStorageTable { param($Name, $Context, $ErrorAction) @{ CloudTable = @{} } }
-            }
-            if (-not (Get-Command Add-AzTableRow -ErrorAction SilentlyContinue -CommandType Function)) {
-                function script:Add-AzTableRow { param($Table, $PartitionKey, $RowKey, $Property, [switch]$UpdateExisting, $ErrorAction) $null }
-            }
-            if (-not (Get-Command Get-AzTableRow -ErrorAction SilentlyContinue -CommandType Function)) {
-                function script:Get-AzTableRow { param($Table, $PartitionKey, $RowKey, $ErrorAction) $null }
-            }
-        }
-    }
+Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (iter-13.15: via Invoke-XdrStorageTableEntity)' {
+    # Iter 13.15: tests refactored to mock the unified helper instead of the
+    # legacy AzTable / Az.Storage cmdlet chain. Public function contracts
+    # (MinValue on missing/error, parses LastPolledUtc, no throw on first call)
+    # are preserved across the refactor.
 
     It 'Get-CheckpointTimestamp returns MinValue when no row exists (first run)' {
         InModuleScope XdrLogRaider.Ingest {
-            Mock New-AzStorageContext { @{} }
-            Mock Get-AzStorageTable { @{ CloudTable = @{} } }
-            Mock Get-AzTableRow { $null }
-
+            Mock Invoke-XdrStorageTableEntity { $null }
             $r = Get-CheckpointTimestamp -StorageAccountName 'sa' -TableName 'cp' -StreamName 'MDE_Foo_CL'
             # Function returns [datetime]::MinValue sentinel (not $null) — caller
             # compares against MinValue to decide "first run? use default window".
@@ -269,12 +250,9 @@ Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases' {
 
     It 'Get-CheckpointTimestamp parses stored UTC ISO-8601 from LastPolledUtc field' {
         InModuleScope XdrLogRaider.Ingest {
-            Mock New-AzStorageContext { @{} }
-            Mock Get-AzStorageTable { @{ CloudTable = @{} } }
-            Mock Get-AzTableRow {
+            Mock Invoke-XdrStorageTableEntity {
                 [pscustomobject]@{ LastPolledUtc = '2026-04-23T10:00:00Z' }
             }
-
             $r = Get-CheckpointTimestamp -StorageAccountName 'sa' -TableName 'cp' -StreamName 'MDE_Foo_CL'
             $r | Should -Not -BeNullOrEmpty
             $r.Year  | Should -Be 2026
@@ -283,25 +261,30 @@ Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases' {
         }
     }
 
-    It 'Get-CheckpointTimestamp returns MinValue on table-missing (fails closed)' {
+    It 'Get-CheckpointTimestamp returns MinValue when helper throws (fails closed)' {
         InModuleScope XdrLogRaider.Ingest {
-            Mock New-AzStorageContext { @{} }
-            Mock Get-AzStorageTable { $null }
-
-            $r = Get-CheckpointTimestamp -StorageAccountName 'sa' -TableName 'cp' -StreamName 'MDE_Foo_CL'
+            Mock Invoke-XdrStorageTableEntity { throw 'simulated table failure' }
+            $r = Get-CheckpointTimestamp -StorageAccountName 'sa' -TableName 'cp' -StreamName 'MDE_Foo_CL' -WarningAction SilentlyContinue
             $r | Should -Be ([datetime]::MinValue)
         }
     }
 
-    It 'Set-CheckpointTimestamp does not throw on first call (creates table if missing)' {
+    It 'Set-CheckpointTimestamp does not throw on first call (helper Upsert creates row)' {
         InModuleScope XdrLogRaider.Ingest {
-            Mock New-AzStorageContext { @{} }
-            Mock Get-AzStorageTable  { $null }                         # table missing
-            Mock New-AzStorageTable  { @{ CloudTable = @{} } }         # will be created
-            Mock Add-AzTableRow {}
-
+            Mock Invoke-XdrStorageTableEntity {}
             { Set-CheckpointTimestamp -StorageAccountName 'sa' -TableName 'cp' -StreamName 'MDE_Foo_CL' } |
                 Should -Not -Throw
+        }
+    }
+
+    It 'Set-CheckpointTimestamp uses Upsert operation (not Get/Delete) — iter-13.15 contract' {
+        InModuleScope XdrLogRaider.Ingest {
+            $script:capturedOp = $null
+            Mock Invoke-XdrStorageTableEntity {
+                $script:capturedOp = $Operation
+            } -ParameterFilter { $true }
+            Set-CheckpointTimestamp -StorageAccountName 'sa' -TableName 'cp' -StreamName 'MDE_Foo_CL' -WarningAction SilentlyContinue
+            $script:capturedOp | Should -Be 'Upsert' -Because 'Set must call helper with -Operation Upsert (PUT WITHOUT If-Match = Insert-Or-Replace)'
         }
     }
 }

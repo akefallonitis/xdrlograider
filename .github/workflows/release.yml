@@ -219,27 +219,26 @@ jobs:
               Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           }
 
-          # CRITICAL: pin EXACT versions, not MinimumVersion. Az.Storage 8+
-          # removed Get-AzStorageTable / New-AzStorageTable / Add-AzTableRow /
-          # Get-AzTableRow — those moved to the separate community module
-          # `AzTable` (or to the modern Az.Data.Tables). Pinning to 7.5.0
-          # keeps the table cmdlets bundled with Az.Storage. ALSO bundling
-          # AzTable as a belt-and-suspenders fallback for legacy code paths.
-          # MinimumVersion = floating dependency hell where each release
-          # silently picks a different snapshot — breaks reproducibility.
-          # Iter 13.13: live evidence (App Insights post iter-13.12 deploy):
-          # AzTable's AzureRmStorageTableCoreHelper.psm1 has `#Requires -Modules
-          # Az.Resources` — without that module bundled, Add-AzTableRow /
-          # Get-AzTableRow fail to load → validate-auth-selftest can't write
-          # the gate flag → all poll-* timers stay gated → 0 rows ingested.
-          # Az.Resources 7.10.0 is the latest 7.x stable compatible with
-          # Az.Accounts 5.3.4 (October 2025 release window).
+          # CRITICAL: pin EXACT versions, not MinimumVersion. MinimumVersion =
+          # floating dependency hell where each release silently picks a
+          # different snapshot — breaks reproducibility.
+          #
+          # Iter 13.15: AzTable + Az.Resources REMOVED.
+          # Storage Table entity ops are now handled by the unified
+          # Invoke-XdrStorageTableEntity helper (System.Net.Http.HttpClient +
+          # Get-AzAccessToken -ResourceUrl https://storage.azure.com/) which
+          # honors Managed Identity auth natively without depending on the
+          # AzTable community module's Microsoft.Azure.Cosmos.Table SDK
+          # (which did NOT reliably propagate MI tokens — root cause of
+          # iter-13.13 + iter-13.14 production breakages).
+          #
+          # Az.Storage 7.5.0 retained: still useful for blob/queue ops and
+          # for the test scaffolding that creates SDK-style contexts. No
+          # runtime dependency on its table cmdlets.
           $azModules = @(
               @{ Name = 'Az.Accounts';  RequiredVersion = '5.3.4' }
               @{ Name = 'Az.KeyVault';  RequiredVersion = '6.4.3' }
               @{ Name = 'Az.Storage';   RequiredVersion = '7.5.0' }
-              @{ Name = 'Az.Resources'; RequiredVersion = '7.10.0' }
-              @{ Name = 'AzTable';      RequiredVersion = '2.1.0' }
           )
           foreach ($m in $azModules) {
               Save-Module -Name $m.Name -RequiredVersion $m.RequiredVersion -Path $modulesDir -Repository PSGallery -Force
@@ -327,27 +326,26 @@ jobs:
           if ($entries | Where-Object { $_ -like 'local.settings.json*' }) {
               throw "function-app.zip contains a local.settings.json* file (dev artefact must not ship)"
           }
-          # 6. Az.* + AzTable modules bundled (Legion fix invariant) — at least one .psd1 manifest each
-          foreach ($azMod in 'Az.Accounts', 'Az.KeyVault', 'Az.Storage', 'AzTable') {
+          # 6. Az.* modules bundled (Legion fix invariant) — at least one .psd1 manifest each.
+          # Iter 13.15: AzTable + Az.Resources removed; Storage Table ops now use
+          # System.Net.Http.HttpClient via Invoke-XdrStorageTableEntity helper.
+          foreach ($azMod in 'Az.Accounts', 'Az.KeyVault', 'Az.Storage') {
               $manifest = $entries | Where-Object { $_ -match "^Modules/$azMod/[\d\.]+/$azMod\.psd1$" } | Select-Object -First 1
               if (-not $manifest) {
                   throw "function-app.zip is missing bundled $azMod (Modules/$azMod/<version>/$azMod.psd1). Save-Module failed or pruning was too aggressive."
               }
               Write-Host "  ✓ Bundled module: $manifest" -ForegroundColor Green
           }
-          # 6b. AzTable cmdlets must resolve from the staged Modules dir.
-          # We can't import in this CI step (PSModulePath not extended), but
-          # we can verify the .psd1 declares the expected functions.
-          $azTableManifest = Get-ChildItem -Path $stage/Modules/AzTable -Recurse -Filter 'AzTable.psd1' | Select-Object -First 1
-          if ($azTableManifest) {
-              $azTableData = Import-PowerShellDataFile $azTableManifest.FullName
-              $expectedTableFns = @('Get-AzTableRow', 'Add-AzTableRow', 'Update-AzTableRow', 'Remove-AzTableRow')
-              $missingTableFns = @($expectedTableFns | Where-Object { $_ -notin @($azTableData.FunctionsToExport) })
-              if ($missingTableFns.Count -gt 0) {
-                  throw "AzTable manifest is missing expected cmdlets: $($missingTableFns -join ', '). Bundled version may be wrong."
+          # 6b. Iter 13.15 negative-bundle gate: AzTable + Az.Resources MUST NOT
+          # be present in the zip (we explicitly removed them; ensures no stale
+          # cache or accidental re-add reintroduces the iter-13.13/14 bug class).
+          foreach ($removedMod in 'AzTable', 'Az.Resources') {
+              $stale = $entries | Where-Object { $_ -match "^Modules/$removedMod/" } | Select-Object -First 1
+              if ($stale) {
+                  throw "function-app.zip contains $removedMod ($stale) — iter-13.15 removed this module. The Storage Table HttpClient helper replaces it."
               }
-              Write-Host "  ✓ AzTable manifest declares Get/Add/Update/Remove-AzTableRow" -ForegroundColor Green
           }
+          Write-Host "  ✓ AzTable + Az.Resources confirmed NOT bundled (iter-13.15 transition)" -ForegroundColor Green
           # 7. requirements.psd1 must NOT have module references (Legion fix invariant)
           $reqContent = Get-Content "$env:GITHUB_WORKSPACE/src/requirements.psd1" -Raw
           if ($reqContent -match "(?m)^\s*'Az\." -or $reqContent -match "(?m)^\s*Az\." ) {

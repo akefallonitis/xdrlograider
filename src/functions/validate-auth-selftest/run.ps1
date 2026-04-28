@@ -24,17 +24,10 @@ $config = [pscustomobject]@{
     ExpectedTenantId   = $env:TENANT_ID
 }
 
-$context = $null
-try {
-    $context = New-AzStorageContext -StorageAccountName $config.StorageAccountName -UseConnectedAccount -ErrorAction Stop
-    $table = Get-AzStorageTable -Name $config.CheckpointTable -Context $context -ErrorAction SilentlyContinue
-    if (-not $table) {
-        $table = New-AzStorageTable -Name $config.CheckpointTable -Context $context
-    }
-} catch {
-    Write-Error "${fnName}:failed to initialize Storage Table: $_"
-    return
-}
+# Iter 13.15: removed runtime Storage Table init (New-AzStorageContext + New-AzStorageTable).
+# The connectorCheckpoints table is pre-created by Bicep at deploy time
+# (deploy/modules/storage.bicep). Entity ops below use Invoke-XdrStorageTableEntity
+# which goes directly via HttpClient + MI token to the table data plane.
 
 # --- Run the auth chain ---
 $result = $null
@@ -79,41 +72,28 @@ try {
 }
 
 # --- Write the gating flag to Storage so poll timers know ---
-# Iter 13.14: switched from AzTable's Add-AzTableRow to direct REST API
-# because AzTable 2.1.0 + New-AzStorageContext -UseConnectedAccount doesn't
-# reliably propagate the MI auth token to AzTable's older
-# Microsoft.Azure.Cosmos.Table SDK. Symptom (live evidence post iter-13.13
-# deploy): Add-AzTableRow throws 'Exception calling "Execute" with "1"
-# argument(s): "The specified resource does not exist."' even though the
-# table exists and SAMI has Storage Table Data Contributor.
-# Direct REST with Get-AzAccessToken honors MI auth natively.
+# Iter 13.15: refactored to use Invoke-XdrStorageTableEntity Upsert
+# (unified HttpClient + MI token helper). Replaces ad-hoc Invoke-RestMethod
+# block. CRITICAL: helper does NOT send If-Match header on Upsert, so PUT
+# behaves as Insert-Or-Replace (creates row if missing, replaces if exists).
+# This was the root cause of iter-13.14: PUT + If-Match: * = Update Entity
+# which 404s on first run when the row doesn't exist yet.
 try {
-    $tokenObj = Get-AzAccessToken -ResourceUrl 'https://storage.azure.com/'
-    $tableToken = if ($tokenObj.Token -is [System.Security.SecureString]) {
-        [System.Net.NetworkCredential]::new('', $tokenObj.Token).Password
-    } else {
-        [string]$tokenObj.Token
-    }
-    $entity = [ordered]@{
-        PartitionKey  = 'auth-selftest'
-        RowKey        = 'latest'
+    $entity = @{
         Success       = $result.Success
         Stage         = $result.Stage
         FailureReason = if ($result.FailureReason) { $result.FailureReason } else { '' }
         LastRunUtc    = [datetime]::UtcNow.ToString('o')
     }
-    $tableUri = "https://$($config.StorageAccountName).table.core.windows.net/$($config.CheckpointTable)(PartitionKey='auth-selftest',RowKey='latest')"
-    $headers = @{
-        Authorization  = "Bearer $tableToken"
-        'x-ms-version' = '2020-12-06'
-        'x-ms-date'    = [datetime]::UtcNow.ToString('R')
-        'Content-Type' = 'application/json'
-        'Accept'       = 'application/json;odata=nometadata'
-        'If-Match'     = '*'  # MERGE upsert — overwrite existing if present
-    }
-    Invoke-RestMethod -Method Merge -Uri $tableUri -Headers $headers -Body ($entity | ConvertTo-Json -Compress) -ErrorAction Stop | Out-Null
+    Invoke-XdrStorageTableEntity `
+        -StorageAccountName $config.StorageAccountName `
+        -TableName $config.CheckpointTable `
+        -PartitionKey 'auth-selftest' `
+        -RowKey 'latest' `
+        -Operation Upsert `
+        -Entity $entity -ErrorAction Stop | Out-Null
 } catch {
-    Write-Warning "${fnName}:failed to persist gating flag (direct REST): $($_.Exception.Message)"
+    Write-Warning "${fnName}:failed to persist gating flag: $($_.Exception.Message)"
 }
 
 # --- Heartbeat ---

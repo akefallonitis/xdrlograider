@@ -320,47 +320,64 @@ function Complete-CredentialsFlow {
     if (-not $password)   { throw "CredentialsTotp requires 'password'" }
     if (-not $totpBase32) { throw "CredentialsTotp requires 'totpBase32'" }
 
-    # Credential POST. client_id is MANDATORY for web-client flows — omitting
-    # triggers AADSTS900144.
-    $credBody = @{
-        login        = $upn
-        passwd       = $password
-        type         = 11
-        ps           = 2
-        client_id    = $ClientId
-        flowToken    = Get-EntraField -Object $SessionInfo -Name 'sFT'
-        ctx          = Get-EntraField -Object $SessionInfo -Name 'sCtx'
-        canary       = Get-EntraField -Object $SessionInfo -Name 'canary'
-        hpgrequestid = Get-EntraField -Object $SessionInfo -Name 'correlationId' -Default $CorrelationId
-    }
+    # Iter 13.15 (Phase C): wrap secret-bearing variables in try/finally so
+    # the password (and downstream credBody) are removed from the local scope
+    # as soon as control leaves this function — including on exception paths.
+    # Note: PowerShell strings are .NET immutable strings (GC-managed); this
+    # cannot zero the underlying memory but it does reduce lifetime to GC
+    # discretion vs leaving the binding alive until parent-scope cleanup.
+    try {
+        # Credential POST. client_id is MANDATORY for web-client flows — omitting
+        # triggers AADSTS900144.
+        $credBody = @{
+            login        = $upn
+            passwd       = $password
+            type         = 11
+            ps           = 2
+            client_id    = $ClientId
+            flowToken    = Get-EntraField -Object $SessionInfo -Name 'sFT'
+            ctx          = Get-EntraField -Object $SessionInfo -Name 'sCtx'
+            canary       = Get-EntraField -Object $SessionInfo -Name 'canary'
+            hpgrequestid = Get-EntraField -Object $SessionInfo -Name 'correlationId' -Default $CorrelationId
+        }
 
-    Write-Verbose "Complete-CredentialsFlow: POST credentials to $UrlPost"
-    $credResponse = Invoke-WebRequest -Uri $UrlPost `
-        -WebSession $Session -Method Post -Body $credBody `
-        -UseBasicParsing -MaximumRedirection 0 -SkipHttpErrorCheck
+        Write-Verbose "Complete-CredentialsFlow: POST credentials to $UrlPost"
+        $credResponse = Invoke-WebRequest -Uri $UrlPost `
+            -WebSession $Session -Method Post -Body $credBody `
+            -UseBasicParsing -MaximumRedirection 0 -SkipHttpErrorCheck
 
-    $authState = Get-EntraConfigBlob -Html $credResponse.Content
-    if (-not $authState) {
-        throw "Password POST returned no response `$Config. Tenant may use a federated IdP not supported by non-browser auth."
-    }
+        $authState = Get-EntraConfigBlob -Html $credResponse.Content
+        if (-not $authState) {
+            throw "Password POST returned no response `$Config. Tenant may use a federated IdP not supported by non-browser auth."
+        }
 
-    $errCode = Get-EntraField -Object $authState -Name 'sErrorCode'
-    if ($errCode) {
-        $errTxt = Get-EntraField -Object $authState -Name 'sErrTxt' -Default ''
-        $msg = Get-EntraErrorMessage -Code $errCode -DefaultText $errTxt
-        # Iter 13.9 (C3): include UPN so operators can triage from
-        # MDE_Heartbeat_CL.Notes alone without correlating App Insights.
-        throw "Authentication failed for UPN='$upn' (AADSTS$errCode): $msg"
-    }
+        $errCode = Get-EntraField -Object $authState -Name 'sErrorCode'
+        if ($errCode) {
+            $errTxt = Get-EntraField -Object $authState -Name 'sErrTxt' -Default ''
+            $msg = Get-EntraErrorMessage -Code $errCode -DefaultText $errTxt
+            # Iter 13.9 (C3): include UPN so operators can triage from
+            # MDE_Heartbeat_CL.Notes alone without correlating App Insights.
+            throw "Authentication failed for UPN='$upn' (AADSTS$errCode): $msg"
+        }
 
-    $pgid = Get-EntraField -Object $authState -Name 'pgid' -Default ''
-    if ($pgid -eq 'ConvergedTFA') {
-        $mfa = Complete-TotpMfa -Session $Session -AuthState $authState `
-            -TotpBase32 $totpBase32 -CorrelationId $CorrelationId
-        return $mfa
+        $pgid = Get-EntraField -Object $authState -Name 'pgid' -Default ''
+        if ($pgid -eq 'ConvergedTFA') {
+            $mfa = Complete-TotpMfa -Session $Session -AuthState $authState `
+                -TotpBase32 $totpBase32 -CorrelationId $CorrelationId
+            return $mfa
+        }
+        Write-Verbose "Complete-CredentialsFlow: no MFA (pgid=$pgid)"
+        return @{ State = $authState; LastResponse = $credResponse }
+    } finally {
+        # Iter 13.15 Phase C — explicit secret cleanup. Best-effort; PS strings
+        # are GC-managed so memory zero is not guaranteed, but binding removal
+        # is.
+        Remove-Variable -Name password -Force -ErrorAction SilentlyContinue
+        Remove-Variable -Name totpBase32 -Force -ErrorAction SilentlyContinue
+        if (Get-Variable -Name credBody -Scope Local -ErrorAction SilentlyContinue) {
+            Remove-Variable -Name credBody -Force -ErrorAction SilentlyContinue
+        }
     }
-    Write-Verbose "Complete-CredentialsFlow: no MFA (pgid=$pgid)"
-    return @{ State = $authState; LastResponse = $credResponse }
 }
 
 function Complete-TotpMfa {

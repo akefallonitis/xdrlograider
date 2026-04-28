@@ -18,7 +18,8 @@
         'Write-AuthTestResult',
         'Get-CheckpointTimestamp',
         'Set-CheckpointTimestamp',
-        'Get-XdrAuthSelfTestFlag'
+        'Get-XdrAuthSelfTestFlag',
+        'Invoke-XdrStorageTableEntity'
     )
     CmdletsToExport       = @()
     VariablesToExport     = @()

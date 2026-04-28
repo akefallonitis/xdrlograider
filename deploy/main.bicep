@@ -51,8 +51,18 @@ param serviceAccountUpn string
 @allowed([ 'credentials_totp', 'passkey' ])
 param authMethod string = 'credentials_totp'
 
-@description('Function App plan SKU. Y1 = Consumption (recommended; free tier for typical workload).')
-@allowed([ 'Y1', 'EP1', 'EP2' ])
+@description('Function App hosting plan tier. Trade-off: cost vs security/reliability. See docs/HOSTING-PLANS.md.\n  consumption-y1 (DEFAULT): cheapest ($0-10/mo); partial MI (AzureWebJobsStorage MI; content share still uses shared key — Microsoft platform limit on Y1 Linux); residual PrivEsc risk if a FA Contributor identity is compromised. Recommended for lab / dev / cost-constrained / non-sensitive XDR data.\n  flex-fc1     : production-hardened ($10-30/mo); FULL Managed Identity (no shared keys anywhere); closed PrivEsc chain. Recommended for production / business-critical.\n  premium-ep1  : regulated/compliance ($140-300/mo); full MI + always-warm + private-endpoint capable. Recommended for financial / healthcare / government.')
+@allowed([ 'consumption-y1', 'flex-fc1', 'premium-ep1' ])
+param hostingPlan string = 'consumption-y1'
+
+@description('Restrict public network access on Storage / Key Vault / App Insights to the Function App outbound IP range. Default false for v0.1.0-beta (works in any tenant). Set true for Marketplace v1.2 / regulated deploys (operator must have VNet + private endpoints ready).')
+param restrictPublicNetwork bool = false
+
+@description('Enable Azure Diagnostic Settings on Key Vault to send audit logs (Get/List Secrets, etc.) to the Sentinel workspace. Default true. Required for forensic visibility on credential access.')
+param enableKeyVaultDiagnostics bool = true
+
+@description('DEPRECATED: use `hostingPlan` instead. Retained for backward-compat; if `hostingPlan` is unset, this maps consumption-y1=Y1 / flex-fc1=FC1 / premium-ep1=EP1.')
+@allowed([ 'Y1', 'FC1', 'EP1', 'EP2' ])
 param functionPlanSku string = 'Y1'
 
 @description('Pinned release tag (e.g. "0.1.0-beta"). DO NOT use "latest" — GitHub /releases/latest excludes pre-releases and returns 302→nothing, leaving the FA with no code.')
@@ -102,6 +112,28 @@ var workspaceName           = last(split(existingWorkspaceId, '/'))
 var packageUrl = functionAppZipVersion == 'latest'
   ? 'https://github.com/${githubRepo}/releases/latest/download/function-app.zip'
   : 'https://github.com/${githubRepo}/releases/download/v${functionAppZipVersion}/function-app.zip'
+
+// Iter 13.15: hostingPlan tier derivations.
+// `useFullManagedIdentity` is true when the operator picked a tier where Azure
+// Functions supports MI for BOTH AzureWebJobsStorage AND
+// WEBSITE_CONTENTAZUREFILECONNECTIONSTRING. Y1 Linux Consumption only supports
+// MI for the former (Microsoft platform limit), so it falls back to shared
+// key on the content share — that's the documented residual risk.
+var useFullManagedIdentity = hostingPlan != 'consumption-y1'
+
+// `disableSharedKey` flips `allowSharedKeyAccess: false` on the storage account.
+// Only safe when both env vars use MI; on Y1, the content share still requires
+// the shared key, so we MUST keep allowSharedKeyAccess: true on Y1.
+var disableSharedKey = useFullManagedIdentity
+
+// `serverfarmSku` maps hostingPlan → the actual SKU passed to Microsoft.Web/serverfarms.
+var serverfarmSku = hostingPlan == 'consumption-y1' ? 'Y1' : (hostingPlan == 'flex-fc1' ? 'FC1' : 'EP1')
+
+// `serverfarmTier` is the elastic-tier label. Y1 = Dynamic; FC1 = FlexConsumption; EP* = ElasticPremium.
+var serverfarmTier = hostingPlan == 'consumption-y1' ? 'Dynamic' : (hostingPlan == 'flex-fc1' ? 'FlexConsumption' : 'ElasticPremium')
+
+// `alwaysOn` = supported for EP*; on Y1 it's not allowed; on FC1 controlled by AlwaysReady instances (default 0).
+var alwaysOn = hostingPlan == 'premium-ep1'
 
 // ============================================================================
 // MODULES — workspace-scoped (cross-RG into the customer's Sentinel RG)
@@ -168,6 +200,8 @@ module storage 'modules/storage.bicep' = {
   params: {
     storageAccountName: stName
     location: connectorLocation
+    disableSharedKey: disableSharedKey
+    restrictPublicNetwork: restrictPublicNetwork
   }
 }
 
@@ -177,6 +211,9 @@ module keyVault 'modules/key-vault.bicep' = {
   params: {
     keyVaultName: kvName
     location: connectorLocation
+    restrictPublicNetwork: restrictPublicNetwork
+    enableDiagnostics: enableKeyVaultDiagnostics
+    workspaceResourceId: existingWorkspaceId
   }
 }
 
@@ -187,6 +224,7 @@ module appInsights 'modules/app-insights.bicep' = {
     appInsightsName: aiName
     location: connectorLocation
     workspaceResourceId: existingWorkspaceId
+    restrictPublicNetwork: restrictPublicNetwork
   }
 }
 
@@ -199,7 +237,10 @@ module functionApp 'modules/function-app.bicep' = {
     location: connectorLocation
     storageAccountName: storage.outputs.storageAccountName
     appInsightsConnectionString: appInsights.outputs.connectionString
-    planSku: functionPlanSku
+    serverfarmSku: serverfarmSku
+    serverfarmTier: serverfarmTier
+    useFullManagedIdentity: useFullManagedIdentity
+    alwaysOn: alwaysOn
     packageUrl: packageUrl
     appSettings: {
       AUTH_METHOD:           authMethod
@@ -214,8 +255,9 @@ module functionApp 'modules/function-app.bicep' = {
   }
 }
 
-// Role assignments: grant the FA's Managed Identity the 3 minimum roles it needs
-// (all scoped to connector-local resources — no cross-RG role grants required).
+// Role assignments: grant the FA's Managed Identity the minimum roles it needs.
+// Iter 13.15: expanded from 3 to up to 6 roles depending on hostingPlan tier.
+// All scoped to connector-local resources — no cross-RG / RG-level grants.
 module roles 'modules/role-assignments.bicep' = {
   name: 'roles-${uniq}'
   params: {
@@ -223,6 +265,7 @@ module roles 'modules/role-assignments.bicep' = {
     keyVaultName:           keyVault.outputs.vaultName
     storageAccountName:     storage.outputs.storageAccountName
     dcrResourceId:          dceDcr.outputs.dcrResourceId
+    useFullManagedIdentity: useFullManagedIdentity
   }
 }
 

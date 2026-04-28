@@ -21,4 +21,8 @@ foreach ($file in $public) {
 $script:MonitorTokenCache = $null
 $script:MonitorTokenExpiry = [datetime]::MinValue
 
+# Iter 13.15: cached HttpClient for Invoke-XdrStorageTableEntity (socket-pool
+# efficiency). Initialized to $null so strict-mode reads succeed.
+$script:XdrTableHttpClient = $null
+
 Export-ModuleMember -Function $public.BaseName
