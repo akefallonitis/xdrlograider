@@ -81,7 +81,7 @@ BeforeAll {
 
         # ---- P6 ----
         '/apiproxy/mtp/threatAnalytics/outbreaks'                                                          = 'XDRInternals:Get-XdrThreatAnalytic.ps1'
-        '/apiproxy/mtp/actionCenter/actioncenterui/history-actions/?type=history&useMtpApi=true&pageIndex=1&pageSize=1000&sortByField=ActionCreationTime&sortOrder=Descending' = 'XDRInternals:Get-XdrActionsCenterHistory.ps1 (iter-13.9 added required type/useMtpApi/pageSize)'
+        '/apiproxy/mtp/actionCenter/actioncenterui/history-actions'                                        = 'XDRInternals:Get-XdrActionsCenterHistory.ps1 (iter-13.10 rolled back query-string after live audit returned 400; original param-less form is correct)'
 
         # ---- P7 ----
         '/apiproxy/mtoapi/tenants/TenantPicker'                                                            = 'XDRInternals:Get-XdrMtoTenant.ps1 (mtoproxyurl:MTO header required)'

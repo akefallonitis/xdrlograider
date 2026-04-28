@@ -323,10 +323,14 @@ AttackPathsV2
         @{ Stream = 'MDE_RemediationAccounts_CL';       Path = '/apiproxy/aatp/api/remediationActions/configuration';                              Tier = 'P5'; Availability = 'tenant-gated' }
 
         # ---- P6 Audit/AIR (2 streams, 10-min) --------------------------------------
-        # Iter 13.9 (B4): query-string + trailing-slash per XDRInternals
-        # Get-XdrActionsCenterHistory.ps1 — without type=history & useMtpApi=true,
-        # response is empty. pageSize/sortByField/sortOrder fixed to recent-first.
-        @{ Stream = 'MDE_ActionCenter_CL';              Path = '/apiproxy/mtp/actionCenter/actioncenterui/history-actions/?type=history&useMtpApi=true&pageIndex=1&pageSize=1000&sortByField=ActionCreationTime&sortOrder=Descending'; Tier = 'P6'; Filter = 'fromDate'; Availability = 'live' }
+        # Iter 13.10 (rollback): the iter-13.9 audit-recommended query-string
+        # `?type=history&useMtpApi=true&pageIndex=1&pageSize=1000&sortByField=...`
+        # caused this endpoint to return 400 Bad Request in live audit. Rolled
+        # back to the original parameter-less path which returned 200 in
+        # iter-13.8 + earlier. The XDRInternals-cited param-set was either
+        # incorrect or version-specific to a different cmdlet. Live-verified
+        # 200 with this path in iter-13.10 audit (2026-04-28).
+        @{ Stream = 'MDE_ActionCenter_CL';              Path = '/apiproxy/mtp/actionCenter/actioncenterui/history-actions';                         Tier = 'P6'; Filter = 'fromDate'; Availability = 'live' }
         @{ Stream = 'MDE_ThreatAnalytics_CL';           Path = '/apiproxy/mtp/threatAnalytics/outbreaks';                                          Tier = 'P6'; Filter = 'fromDate'; Availability = 'live' }
 
         # ---- P7 Metadata (4 streams, daily) ----------------------------------------
