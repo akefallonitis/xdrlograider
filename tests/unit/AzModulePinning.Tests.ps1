@@ -21,10 +21,11 @@ BeforeAll {
     $script:ReleaseYmlContent = Get-Content $script:ReleaseYmlPath -Raw
 
     $script:RequiredModules = @{
-        'Az.Accounts' = '5.3.4'
-        'Az.KeyVault' = '6.4.3'
-        'Az.Storage'  = '7.5.0'  # CRITICAL: 8+ removed table cmdlets
-        'AzTable'     = '2.1.0'  # Community module; provides Get/Add/Update/Remove-AzTableRow
+        'Az.Accounts'  = '5.3.4'
+        'Az.KeyVault'  = '6.4.3'
+        'Az.Storage'   = '7.5.0'  # CRITICAL: 8+ removed table cmdlets
+        'Az.Resources' = '7.10.0' # Iter 13.13: AzTable's AzureRmStorageTableCoreHelper.psm1 #Requires -Modules Az.Resources
+        'AzTable'      = '2.1.0'  # Community module; provides Get/Add/Update/Remove-AzTableRow
     }
 }
 
@@ -64,13 +65,24 @@ Describe 'Az.* module bundling — RequiredVersion enforcement (no floating vers
         $expected = $script:RequiredModules['AzTable']
         $script:ReleaseYmlContent | Should -Match "Name\s*=\s*'AzTable';\s*RequiredVersion\s*=\s*'$([regex]::Escape($expected))'" -Because 'AzTable provides Get/Add/Update/Remove-AzTableRow used by Get-CheckpointTimestamp + Set-CheckpointTimestamp + Get-XdrAuthSelfTestFlag + validate-auth-selftest. Without it, ALL polls silently no-op.'
     }
+
+    It 'release.yml bundles Az.Resources (iter-13.13) — AzTable transitive dependency' {
+        $expected = $script:RequiredModules['Az.Resources']
+        $script:ReleaseYmlContent | Should -Match "Name\s*=\s*'Az\.Resources';\s*RequiredVersion\s*=\s*'$([regex]::Escape($expected))'" -Because (
+            'iter-13.13 live evidence: AzTable 2.1.0 ships AzureRmStorageTableCoreHelper.psm1 ' +
+            'with `#Requires -Modules Az.Resources`. Without Az.Resources bundled, ' +
+            'Add-AzTableRow / Get-AzTableRow fail to load → validate-auth-selftest cannot ' +
+            'write the gate flag → all poll-* timers stay gated → 0 rows ingested.'
+        )
+    }
 }
 
 Describe 'release.yml post-build gates — bundle integrity assertions' {
 
     It 'release.yml asserts every bundled Az.* + AzTable module .psd1 is present in zip' {
-        # The post-build verification loop must enumerate ALL 4 expected modules.
-        $script:ReleaseYmlContent | Should -Match "Az\.Accounts.*Az\.KeyVault.*Az\.Storage.*AzTable" -Because 'release.yml validation loop must check all 4 bundled modules — missing AzTable was the iter-13 silent no-op bug'
+        # iter-13.13: now 5 expected modules (Az.Accounts, Az.KeyVault, Az.Storage,
+        # Az.Resources, AzTable) — missing any one re-triggers a silent no-op bug.
+        $script:ReleaseYmlContent | Should -Match "Az\.Accounts.*Az\.KeyVault.*Az\.Storage.*AzTable" -Because 'release.yml validation loop must check all bundled modules — missing AzTable was the iter-13 silent no-op bug; missing Az.Resources was the iter-13.13 silent gate-flag bug'
     }
 
     It 'release.yml asserts AzTable manifest declares the expected table cmdlets' {

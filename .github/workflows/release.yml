@@ -227,11 +227,19 @@ jobs:
           # AzTable as a belt-and-suspenders fallback for legacy code paths.
           # MinimumVersion = floating dependency hell where each release
           # silently picks a different snapshot — breaks reproducibility.
+          # Iter 13.13: live evidence (App Insights post iter-13.12 deploy):
+          # AzTable's AzureRmStorageTableCoreHelper.psm1 has `#Requires -Modules
+          # Az.Resources` — without that module bundled, Add-AzTableRow /
+          # Get-AzTableRow fail to load → validate-auth-selftest can't write
+          # the gate flag → all poll-* timers stay gated → 0 rows ingested.
+          # Az.Resources 7.10.0 is the latest 7.x stable compatible with
+          # Az.Accounts 5.3.4 (October 2025 release window).
           $azModules = @(
-              @{ Name = 'Az.Accounts'; RequiredVersion = '5.3.4' }
-              @{ Name = 'Az.KeyVault'; RequiredVersion = '6.4.3' }
-              @{ Name = 'Az.Storage';  RequiredVersion = '7.5.0' }
-              @{ Name = 'AzTable';     RequiredVersion = '2.1.0' }
+              @{ Name = 'Az.Accounts';  RequiredVersion = '5.3.4' }
+              @{ Name = 'Az.KeyVault';  RequiredVersion = '6.4.3' }
+              @{ Name = 'Az.Storage';   RequiredVersion = '7.5.0' }
+              @{ Name = 'Az.Resources'; RequiredVersion = '7.10.0' }
+              @{ Name = 'AzTable';      RequiredVersion = '2.1.0' }
           )
           foreach ($m in $azModules) {
               Save-Module -Name $m.Name -RequiredVersion $m.RequiredVersion -Path $modulesDir -Repository PSGallery -Force
