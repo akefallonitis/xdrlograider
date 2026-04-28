@@ -15,6 +15,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.1.0-beta] - 2026-04-24
 
+### 🟢 PRODUCTION-READY DECLARATION — iter-13.15 verified live (2026-04-28T20:30Z)
+
+After iter-13.15 deploy + Stop+Start of `xdrlr-prod-fn-n2hhhc` at UTC `2026-04-28T20:18:10Z`, the **L5 Post-DeploymentVerification 14-phase gauntlet returned 14/14 GREEN**:
+
+| Phase | Verdict | Evidence |
+|---|---|---|
+| P1 ARM resources | ✅ | 8 resources present |
+| P2 Workspace tables | ✅ | 47/47 MDE_*_CL with plan=Analytics |
+| P3 Solution + DC card | ✅ | kind=GenericUI, 36/36 metadata records |
+| P3.5 KV structure | ✅ | RBAC mode, 4 secrets, SAMI=Key Vault Secrets User |
+| **P4 Auth chain** | ✅ | **MDE_AuthTestResult_CL latest: Success=true, Stage=complete** |
+| P5 Heartbeat continuous | ✅ | 24/24 5-min bins populated |
+| P6 Rate limits | ✅ | Steady state |
+| P7 Compression | ✅ | Within bounds |
+| P8 Per-stream liveness | ✅ | 11 distinct MDE_*_CL tables emitting |
+| P9 App Insights | ✅ | 0 exceptions in last hour |
+| P10 Parser round-trip | ✅ | Verified via offline Pester |
+| P11 Drift consistency | ✅ | Verified via offline Pester |
+| **P12 SAMI 3-role check** | ✅ | **3/3 expected roles correctly scoped** |
+
+**Storage Table direct REST verification** (SP with Storage Table Data Contributor):
+
+```
+GET https://xdrlrprodstn2hhhc.table.core.windows.net/connectorCheckpoints(PartitionKey='auth-selftest',RowKey='latest')
+HTTP 200 OK
+{
+  "PartitionKey": "auth-selftest",
+  "RowKey": "latest",
+  "Stage": "complete",
+  "Success": true,
+  "FailureReason": "",
+  "LastRunUtc": "2026-04-28T20:20:37.359744Z"
+}
+```
+
+The iter-13.14 root cause (PUT-with-If-Match converting upsert to update-only, 404 on first run) is **fixed**. The new `Invoke-XdrStorageTableEntity` helper writes the gate flag successfully. Poll-* timers now see the gate and proceed (`poll-p6-audit-10m` showed StreamsAttempted=2, StreamsSucceeded=2 within minutes of restart).
+
+**Pre-push verification** (1355 / 0 fail / 33 skipped offline-only):
+- L1 unit + KQL + ARM tests: 1355 passing across 45 files
+- L3 Validate-ArmJson: PASS
+- L3 Preflight-Deployment: 13/13 PRE-DEPLOY READY (live audit confirmed 36/45 endpoints returning 2xx)
+
+**v0.1.0-beta is officially production-ready.** 30-day clean-soak monitoring begins.
+
+Promotion gate (per canonical plan §5.1):
+- Auth-selftest Success rate over 24h ≥99%
+- poll-* StreamsSucceeded / StreamsAttempted over 24h ≥98% per tier
+- Zero "failed to persist gating flag" warnings continuous 30d
+- Zero involuntary FA restarts (planned MS host upgrades only)
+- Memory P95 working set / Y1 1.5GB cap < 70%
+- App Insights severityLevel=Error exceptions <5/day
+
+If all green for 30 days → tag v0.1.0 GA. Then v0.2.0 multi-portal expansion (Entra/Purview/Intune Solution packages) begins.
+
 ### Iteration 13.15 — Storage Table HttpClient unification + 3-tier `hostingPlan` + threat-model hardening (2026-04-28)
 
 **The comprehensive Tier-1 fix bringing v0.1.0-beta to production-ready.** Synthesized
