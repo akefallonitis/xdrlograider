@@ -31,13 +31,24 @@ function Test-MDEPortalAuth {
     [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet('CredentialsTotp', 'Passkey')]
+        # Iter 13.12: accept BOTH PascalCase + snake_case so the ARM template's
+        # `authMethod` parameter ('credentials_totp' / 'passkey' per main.bicep)
+        # can flow directly through profile.ps1 → $env:AUTH_METHOD → here without
+        # an intermediate normalization step. Normalized internally below.
+        [ValidateSet('CredentialsTotp', 'Passkey', 'credentials_totp', 'passkey')]
         [string] $Method,
 
         [Parameter(Mandatory)] [hashtable] $Credential,
 
         [string] $PortalHost = 'security.microsoft.com'
     )
+
+    # Normalize snake_case -> PascalCase so downstream code paths see one shape.
+    $Method = switch ($Method) {
+        'credentials_totp' { 'CredentialsTotp' }
+        'passkey'          { 'Passkey' }
+        default            { $Method }
+    }
 
     $result = [ordered]@{
         TimeGenerated = [datetime]::UtcNow

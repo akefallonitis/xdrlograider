@@ -65,7 +65,8 @@ function Connect-MDEPortal {
     [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet('CredentialsTotp', 'Passkey')]
+        # Iter 13.12: accept snake_case alias from ARM env var passthrough.
+        [ValidateSet('CredentialsTotp', 'Passkey', 'credentials_totp', 'passkey')]
         [string] $Method,
 
         [Parameter(Mandatory)]
@@ -77,6 +78,13 @@ function Connect-MDEPortal {
 
         [switch] $Force
     )
+
+    # Iter 13.12: normalize snake_case → PascalCase so downstream paths see one shape.
+    $Method = switch ($Method) {
+        'credentials_totp' { 'CredentialsTotp' }
+        'passkey'          { 'Passkey' }
+        default            { $Method }
+    }
 
     $upn = $Credential.upn
     if (-not $upn) { throw "Credential hashtable must include 'upn'" }
