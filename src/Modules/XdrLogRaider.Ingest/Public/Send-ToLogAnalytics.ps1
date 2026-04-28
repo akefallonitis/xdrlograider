@@ -67,6 +67,18 @@ function Send-ToLogAnalytics {
         }
     }
 
+    # Iter 13.9 (C4): sanity-check DcrImmutableId prefix + non-emptiness before
+    # issuing the request. Real DCR IDs are `dcr-<32 hex chars>` but we use a
+    # loose regex (`^dcr-\S+$`) so that test fixtures with shorter stubs
+    # (`dcr-stub`, `dcr-12345`) keep passing while still catching obvious typos
+    # (empty string, missing prefix, URL pasted instead of ID, whitespace-only).
+    # A malformed value otherwise surfaces as opaque 400 Bad Request inside
+    # the catch block — operators can't distinguish config error from server
+    # flake.
+    if ([string]::IsNullOrWhiteSpace($DcrImmutableId) -or $DcrImmutableId -notmatch '^dcr-\S+$') {
+        throw "Send-ToLogAnalytics: invalid DcrImmutableId '$DcrImmutableId'. Expected 'dcr-<id>'. Check FA appSettings DCR_IMMUTABLE_ID — value may be from a deleted/recreated DCR, missing the 'dcr-' prefix, or have a copy/paste error."
+    }
+
     # Acquire monitor.azure.com token (MI-backed)
     $token = Get-MonitorIngestionToken
 

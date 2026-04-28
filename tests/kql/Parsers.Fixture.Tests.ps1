@@ -33,10 +33,14 @@ BeforeDiscovery {
     $manifestPath = Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
     $manifest     = Import-PowerShellDataFile -Path $manifestPath
 
-    # Tier-to-streams map, all streams (active + deferred) because parsers union over
-    # the custom tables — deferred streams produce no rows but must still be listed.
+    # Iter 13.9 (S1 lock): tier-to-streams map EXCLUDES deprecated streams.
+    # Parsers should not unconditionally union deprecated tables (they produce
+    # zero rows post-deprecation; the unconditional union creates dead source-
+    # table list entries that mislead rule authors). Pair with
+    # tests/kql/Parsers.NoDeprecatedUnion.Tests.ps1 which locks the inverse.
     $script:StreamsByTier = @{}
     foreach ($e in $manifest.Endpoints) {
+        if ($e.Availability -eq 'deprecated') { continue }
         if (-not $script:StreamsByTier.ContainsKey($e.Tier)) {
             $script:StreamsByTier[$e.Tier] = @()
         }

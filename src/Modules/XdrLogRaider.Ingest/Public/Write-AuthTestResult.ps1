@@ -49,9 +49,22 @@ function Write-AuthTestResult {
         }
     }
     # SccauthAcquiredUtc may be missing on some failure paths. Defensive null-check.
+    # Iter 13.9 (C6): also type-guard — `.ToString('o')` only safe on [datetime]
+    # / [datetimeoffset]. If a future caller passes an already-formatted ISO-8601
+    # string, treat it as the formatted value directly.
     $sccauthAcquiredUtc = $null
     if ($TestResult.PSObject.Properties['SccauthAcquiredUtc'] -and $null -ne $TestResult.SccauthAcquiredUtc) {
-        $sccauthAcquiredUtc = $TestResult.SccauthAcquiredUtc.ToString('o')
+        $raw = $TestResult.SccauthAcquiredUtc
+        if ($raw -is [datetime] -or $raw -is [datetimeoffset]) {
+            $sccauthAcquiredUtc = $raw.ToString('o')
+        } elseif ($raw -is [string]) {
+            $sccauthAcquiredUtc = $raw
+        } else {
+            # Unknown type — best-effort string conversion; never throw on a
+            # diagnostic emission (heartbeat/auth-test are observability, not
+            # critical paths).
+            $sccauthAcquiredUtc = [string]$raw
+        }
     }
 
     $row = [ordered]@{

@@ -179,7 +179,10 @@ function Get-EstsCookie {
             }
             Write-Host "[DEBUG] LastResponse InputFields: $(if ($inputNames) { $inputNames -join ',' } else { '<none>' })"
             # Snippet of content (first 500 chars, no HTML tags for readability)
-            if ($lr.Content) {
+            # Iter 13.9 (C2): guard $lr null AND $lr.Content null. If $lr is null
+            # (very-edge web exception path), strict-mode access to $lr.Content
+            # throws before the `if` test resolves.
+            if ($null -ne $lr -and $lr.Content) {
                 $snippet = $lr.Content.Substring(0, [math]::Min(400, $lr.Content.Length)) -replace '\s+', ' '
                 Write-Host "[DEBUG] LastResponse snippet: $snippet"
             }
@@ -345,7 +348,9 @@ function Complete-CredentialsFlow {
     if ($errCode) {
         $errTxt = Get-EntraField -Object $authState -Name 'sErrTxt' -Default ''
         $msg = Get-EntraErrorMessage -Code $errCode -DefaultText $errTxt
-        throw "Authentication failed (AADSTS$errCode): $msg"
+        # Iter 13.9 (C3): include UPN so operators can triage from
+        # MDE_Heartbeat_CL.Notes alone without correlating App Insights.
+        throw "Authentication failed for UPN='$upn' (AADSTS$errCode): $msg"
     }
 
     $pgid = Get-EntraField -Object $authState -Name 'pgid' -Default ''
@@ -660,6 +665,18 @@ function Resolve-InterruptPage {
                 }
             }
             default {
+                # Iter 13.9 (O1): unknown pgid is a diagnostic event — Entra
+                # introduced a new interrupt page we don't handle yet (e.g. a
+                # newer "trust this tenant" / IdentityVerificationRequired /
+                # ConfirmTenantSwitch surface). Capture diagnostic context at
+                # Warning level so operators can root-cause from App Insights
+                # traces. The auth chain still fails downstream (no sccauth)
+                # but at least operators have actionable evidence.
+                $sErrorCode = Get-EntraField -Object $state -Name 'sErrorCode' -Default ''
+                $sErrTxt    = Get-EntraField -Object $state -Name 'sErrTxt'    -Default ''
+                $contentLen = if ($lastResponse -and $lastResponse.Content) { $lastResponse.Content.Length } else { 0 }
+                Write-Warning ("Resolve-InterruptPage: UNKNOWN pgid '$pgid' (sErrorCode='$sErrorCode' sErrTxt='$sErrTxt' contentLen=$contentLen). " +
+                               "Auth chain cannot proceed. If this recurs, capture the HTML response and add a handler in Get-EstsCookie.ps1.")
                 Write-Verbose "Resolve-InterruptPage: unknown pgid '$pgid' — exiting"
                 break
             }

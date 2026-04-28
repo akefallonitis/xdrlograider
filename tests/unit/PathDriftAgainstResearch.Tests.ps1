@@ -34,15 +34,15 @@ BeforeAll {
     $script:CanonicalPathMap = @{
         # ---- P0 ----
         '/apiproxy/mtp/settings/GetAdvancedFeaturesSetting'                                                = 'XDRInternals:Get-XdrEndpointConfigurationAdvancedFeature.ps1'
-        '/apiproxy/mtp/settings/GetPreviewExperienceSetting'                                               = 'XDRInternals:Get-XdrEndpointConfigurationPreviewExperience.ps1'
-        '/apiproxy/mtp/alertsApiService/workloads/disabled'                                                = 'XDRInternals:Get-XdrAlertServiceConfiguration.ps1'
-        '/apiproxy/mtp/alertsEmailNotifications/email_notifications'                                       = 'XDRInternals:Get-XdrAlertEmailNotification.ps1'
+        '/apiproxy/mtp/settings/GetPreviewExperienceSetting?context=MdatpContext'                          = 'XDRInternals:Get-XdrConfigurationPreviewFeatures.ps1 (iter-13.9 added context query-string)'
+        '/apiproxy/mtp/alertsApiService/workloads/disabled?includeDetails=true'                            = 'XDRInternals:Get-XdrConfigurationAlertServiceSetting.ps1 (iter-13.9 added includeDetails)'
+        '/apiproxy/mtp/alertsEmailNotifications/email_notifications'                                       = 'nodoc:alert-tuning surface (XDRInternals has no Get-Xdr*AlertTuning cmdlet)'
         '/apiproxy/mtp/suppressionRulesService/suppressionRules'                                           = 'XDRInternals:Get-XdrSuppressionRule.ps1'
-        '/apiproxy/mtp/huntingService/rules/unified'                                                       = 'XDRInternals:Get-XdrCustomDetectionRule.ps1'
+        '/apiproxy/mtp/huntingService/rules/unified?pageIndex=1&pageSize=10000&sortOrder=Ascending&isUnifiedRulesListEnabled=true' = 'XDRInternals:Get-XdrAdvancedHuntingUnifiedDetectionRules.ps1 (iter-13.9 added pagination + unifiedRulesList flag)'
         '/apiproxy/mtp/siamApi/Onboarding'                                                                 = 'XDRInternals:Get-XdrEndpointConfigurationDeviceControl.ps1 / Get-XdrIdentityOnboarding.ps1'
         '/apiproxy/mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories'                = 'XDRInternals:Get-XdrEndpointConfigurationWebContentFiltering.ps1'
         '/apiproxy/mtp/webThreatProtection/webThreats/reports/webThreatSummary'                            = 'XDRInternals:Get-XdrEndpointConfigurationSmartScreen.ps1'
-        '/apiproxy/mtp/liveResponseApi/get_properties'                                                     = 'XDRInternals:Get-XdrEndpointConfigurationLiveResponse.ps1'
+        '/apiproxy/mtp/liveResponseApi/get_properties?useV2Api=true&useV3Api=true'                         = 'XDRInternals:Get-XdrEndpointConfigurationLiveResponse.ps1 (iter-13.9 added V2/V3 api flags)'
         '/apiproxy/mtp/responseApiPortal/senseauth/allownonauthsense'                                      = 'XDRInternals:Get-XdrEndpointConfigurationAuthenticatedTelemetry.ps1'
         '/apiproxy/mtp/autoIr/ui/properties/'                                                              = 'XDRInternals:Get-XdrEndpointConfigurationPotentiallyUnwantedApplications.ps1'
         '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters'         = 'MS Learn:defender-endpoint/mde-security-settings-management (Intune-bridge surface)'
@@ -59,8 +59,8 @@ BeforeAll {
         '/apiproxy/mtp/wdatpInternalApi/compliance/alertSharing/status'                                    = 'XDRInternals:Get-XdrEndpointConfigurationPurviewSharing.ps1'
 
         # ---- P2 ----
-        '/apiproxy/mtp/rbacManagementApi/rbac/machine_groups'                                              = 'XDRInternals:Get-XdrRbacDeviceGroup.ps1'
-        '/apiproxy/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions'                    = 'XDRInternals:Get-XdrUnifiedRbacRole.ps1'
+        '/apiproxy/mtp/rbacManagementApi/rbac/machine_groups?addAadGroupNames=true&addMachineGroupCount=false' = 'XDRInternals:Get-XdrEndpointDeviceRbacGroup.ps1 (iter-13.9 added addAadGroupNames + UnwrapProperty=items)'
+        '/apiproxy/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions'                    = 'nodoc:URBAC roleDefinitions (XDRInternals Get-XdrConfigurationUnifiedRBACWorkload uses /tenantinfo/, different surface)'
         '/apiproxy/mtp/xspmatlas/assetrules'                                                               = 'XDRInternals:Get-XdrXspmAssetRule.ps1'
         '/apiproxy/radius/api/radius/serviceaccounts/classificationrule/getall'                            = 'XDRInternals:Get-XdrIdentityServiceAccountClassification.ps1'
 
@@ -81,13 +81,13 @@ BeforeAll {
 
         # ---- P6 ----
         '/apiproxy/mtp/threatAnalytics/outbreaks'                                                          = 'XDRInternals:Get-XdrThreatAnalytic.ps1'
-        '/apiproxy/mtp/actionCenter/actioncenterui/history-actions'                                        = 'XDRInternals:Get-XdrActionCenterHistory.ps1'
+        '/apiproxy/mtp/actionCenter/actioncenterui/history-actions/?type=history&useMtpApi=true&pageIndex=1&pageSize=1000&sortByField=ActionCreationTime&sortOrder=Descending' = 'XDRInternals:Get-XdrActionsCenterHistory.ps1 (iter-13.9 added required type/useMtpApi/pageSize)'
 
         # ---- P7 ----
         '/apiproxy/mtoapi/tenants/TenantPicker'                                                            = 'XDRInternals:Get-XdrMtoTenant.ps1 (mtoproxyurl:MTO header required)'
         '/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference'                     = 'XDRInternals:Get-XdrUserPreference.ps1'
         '/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machines/skuReport'                             = 'XDRInternals:Get-XdrLicenseReport.ps1 (UnwrapProperty=sums)'
-        '/apiproxy/mcas/cas/api/v1/settings'                                                               = 'XDRInternals:Get-XdrCloudAppsGeneralSetting.ps1 (MS Learn /defender-cloud-apps confirms /api/v1/settings/ canonical)'
+        '/apiproxy/mcas/cas/api/v1/settings/'                                                              = 'XDRInternals:Get-XdrCloudAppsGeneralSetting.ps1 (iter-13.9 added trailing slash; MS Learn /defender-cloud-apps confirms canonical)'
     }
 }
 

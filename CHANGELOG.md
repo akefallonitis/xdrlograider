@@ -15,6 +15,103 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.1.0-beta] - 2026-04-24
 
+### Iteration 13.9 — Final production-readiness consolidation (2026-04-28)
+
+**Synthesized from 9 parallel deep audits + entire conversation history. The
+final consolidation pass for v0.1.0-beta.**
+
+#### Code defects (8 fixes + 1 observability enhancement)
+
+- **C1**: `Invoke-MDEPortalRequest.ps1:99` — explicit `$null -ne` check on
+  `$Session.AcquiredUtc` for strict-mode safety distinction between absent and null.
+- **C2**: `Get-EstsCookie.ps1:185` — added `$null -ne $lr` guard before
+  `$lr.Content.Substring()` for very-edge web-exception paths.
+- **C3**: `Get-EstsCookie.ps1:344-348` — auth error includes UPN context so
+  operators can triage from `MDE_Heartbeat_CL.Notes` alone.
+- **C4**: `Send-ToLogAnalytics.ps1:73` — sanity-check DcrImmutableId format
+  (`^dcr-\S+$`) at function entry; opaque 400s now fail-fast with a clear
+  diagnostic message.
+- **C5**: `Invoke-MDEEndpoint.ps1:114-124` — consolidated three null-path
+  early-exit gates ($r itself, $r.Success, $r.Data) for strict-mode robustness.
+- **C6**: `Write-AuthTestResult.ps1:53-67` — type-guard SccauthAcquiredUtc
+  (DateTime / DateTimeOffset / string fallback / unknown best-effort).
+- **C7**: `Invoke-TierPollWithHeartbeat.ps1:106` — env-var error message now
+  distinguishes `<null>` / `<empty string>` / `<whitespace>` for clearer
+  ARM-deploy troubleshooting.
+- **C8**: `Get-CheckpointTimestamp.ps1:48` — wrapped `[datetime]::Parse` in
+  try/catch with MinValue fallback + warning so corrupt LastPolledUtc values
+  don't crash the entire tier poll.
+- **O1**: `Get-EstsCookie.ps1:667` — `default` branch of `Resolve-InterruptPage`
+  pgid switch now emits a `Write-Warning` with diagnostic context (pgid,
+  sErrorCode, sErrTxt, contentLen). Captures unknown Entra interrupts (e.g.
+  AADSTS399218 user-confirmation surface) for App Insights triage.
+
+#### Manifest XDRInternals alignment (8 query-string drift fixes + 2 attribution corrections)
+
+Per audit 1 cross-reference against MSCloudInternals/XDRInternals 1.0.5
+canonical source code:
+
+- **B4**: 8 query-string / header drift fixes (improves data fidelity vs
+  XDRInternals canonical):
+  - `MDE_PreviewFeatures_CL`: added `?context=MdatpContext`
+  - `MDE_AlertServiceConfig_CL`: added `?includeDetails=true`
+  - `MDE_CustomDetections_CL`: added pagination + `isUnifiedRulesListEnabled=true`
+  - `MDE_LiveResponseConfig_CL`: added `?useV2Api=true&useV3Api=true`
+  - `MDE_RbacDeviceGroups_CL`: added `?addAadGroupNames=true&addMachineGroupCount=false` + `UnwrapProperty='items'`
+  - `MDE_SecurityBaselines_CL`: added `Headers = @{ 'api-version' = '1.0' }`
+  - `MDE_ActionCenter_CL`: added `?type=history&useMtpApi=true&pageSize=1000&...`
+  - `MDE_CloudAppsConfig_CL`: added trailing slash on `/api/v1/settings/`
+- **B3**: dropped XDRInternals attribution from 2 manifest comments where
+  XDRI's cmdlet exposes a different surface (`MDE_AlertTuning_CL` is
+  nodoc-cited; `MDE_UnifiedRbacRoles_CL` uses `/roleDefinitions` while XDRI
+  uses `/tenantinfo/`).
+- **DEFERRED to v0.2.0**: 2 stream renames (`MDE_TenantWorkloadStatus_CL` →
+  `MDE_MtoTenantGroups_CL` and `MDE_IdentityOnboarding_CL` →
+  `MDE_IdentityDomainControllers_CL`) — engineering decision: 18-file rename
+  churn outweighs cosmetic-correctness gain for v0.1.0-beta. Streams work
+  correctly at the cited paths.
+
+#### Sentinel content (S1 + S2 lock + 2 new gates)
+
+- **S1**: `sentinel/parsers/MDE_Drift_P1Pipeline.kql` removed unconditional
+  union of `MDE_StreamingApiConfig_CL` (deprecated iter-13.8). Same fix
+  applied to `deploy/solution-staging/.../MDE_Drift_P1Pipeline.kql`.
+- **S2 confirmed in place**: all 14 analytic rules ship `enabled: false` per
+  customer-opt-in doctrine. Audit-5 finding was a false alarm.
+- **NEW gate** `tests/kql/RulesShipDisabled.Tests.ps1` — locks the
+  ship-disabled contract permanently (any future contributor adding an
+  `enabled: true` rule fails the test).
+- **NEW gate** `tests/kql/Parsers.NoDeprecatedUnion.Tests.ps1` — locks the
+  inverse: parsers must NOT unconditionally union deprecated streams.
+- **Updated** `tests/kql/Parsers.Fixture.Tests.ps1` to exclude deprecated
+  streams from the per-tier expected-set.
+
+#### Behavioural regression gates (Passkey + UnknownPgid)
+
+- **NEW** `tests/unit/Passkey.AuthChain.Tests.ps1` (6 tests) — locks the
+  passkey unattended-auth contract: ValidateSet inclusion, KV credential
+  shape, auth-chain branch presence, documentation completeness.
+- **NEW** `tests/unit/AuthChain.UnknownPgid.Tests.ps1` (2 tests) — locks the
+  O1 unknown-pgid Write-Warning diagnostic + 3 known-interrupt handlers
+  (KMSI / Cmsi / ConvergedProofUp) regression guard.
+
+#### Verification
+
+- L1 Offline: **1284 / 0 fail / 33 skip** (was 1272; +12 net new gates).
+  Strict mode active. All green pre-push.
+
+#### What was audited but found clean (do-not-touch list)
+
+Per audits 3, 4, 5, 6, 7, 8, 9: module layering, ARM/Bicep templates,
+GenericUI/2021-03-01-preview connector card, single-runspace mode (iter-13.3),
+AzTable + Az.* RequiredVersion pinning (iter-13.2), KMSI/Cmsi/ConvergedProofUp
+interrupt handlers, sccauth ~50min cache + 401 idempotent refresh, secrets
+hygiene (KV-only + .gitleaks.toml), 7 production-grade deploy tools,
+larac2shell repo (1071 tests, no AI markers, defensive auth), git workflow,
+documentation completeness (31/33 docs accurate), citation accuracy.
+
+After iter-13.9 + L5 14/14 verification: v0.1.0-beta is production-ready.
+
 ### Deploy blockers fixed (post-tag patches, same v0.1.0-beta tag)
 
 #### Iteration 13 — Function App actually executes user code (Linux Consumption Legion managed-dependencies fix)

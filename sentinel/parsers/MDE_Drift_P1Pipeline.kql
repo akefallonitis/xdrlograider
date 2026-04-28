@@ -10,9 +10,14 @@
 
 let lookback = 24h;
 let window = 30m;
+// Iter 13.9 (S1): MDE_StreamingApiConfig_CL removed from union — marked
+// Availability='deprecated' in iter-13.8 (path renamed by Microsoft;
+// canonical surface collides with MDE_DataExportSettings_CL which IS in the
+// union below). The deprecated table will always be empty post-deploy, so
+// including it adds no signal. Will be cleanly removed (manifest + DCR +
+// custom-tables + this parser + StreamingApiNewTarget rule) in v0.2.0.
 let sources = union withsource=_Table
     MDE_DataExportSettings_CL,
-    MDE_StreamingApiConfig_CL,
     MDE_IntuneConnection_CL,
     MDE_PurviewSharing_CL,
     MDE_ConnectedApps_CL,

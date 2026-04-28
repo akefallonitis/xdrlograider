@@ -45,7 +45,17 @@ function Get-CheckpointTimestamp {
             return [datetime]::MinValue
         }
 
-        return [datetime]::Parse($entity.LastPolledUtc).ToUniversalTime()
+        # Iter 13.9 (C8): explicit try/catch around DateTime.Parse so a
+        # corrupt LastPolledUtc value (manually edited, locale issue,
+        # truncated row) returns MinValue + warning instead of crashing
+        # the entire tier poll. Outer try/catch already exists for storage
+        # failures; this one specifically handles the parse step.
+        try {
+            return [datetime]::Parse($entity.LastPolledUtc).ToUniversalTime()
+        } catch {
+            Write-Warning ("Get-CheckpointTimestamp: corrupt LastPolledUtc='{0}' for stream '{1}' — falling back to MinValue. Storage row may need manual cleanup. Error: {2}" -f $entity.LastPolledUtc, $StreamName, $_.Exception.Message)
+            return [datetime]::MinValue
+        }
     } catch {
         Write-Warning "Failed to read checkpoint for '$StreamName': $_"
         return [datetime]::MinValue

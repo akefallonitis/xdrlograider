@@ -113,7 +113,7 @@ Describe 'Send-ToLogAnalytics — exception .Response defensive handling' {
                 try {
                     Send-ToLogAnalytics `
                         -DceEndpoint    'https://dce.test/' `
-                        -DcrImmutableId 'dcr' `
+                        -DcrImmutableId 'dcr-stub' `
                         -StreamName     'Custom-MDE_Test_CL' `
                         -Rows           @([pscustomobject]@{ TimeGenerated = (Get-Date).ToString('o'); EntityId = '1'; SourceStream = 'MDE_Test_CL'; RawJson = '{}' }) `
                         -MaxRetries     1

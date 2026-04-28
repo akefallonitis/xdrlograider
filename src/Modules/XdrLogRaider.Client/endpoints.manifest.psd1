@@ -118,15 +118,26 @@
     Endpoints = @(
         # ---- P0 Compliance (15 streams, hourly) ------------------------------------
         @{ Stream = 'MDE_AdvancedFeatures_CL';          Path = '/apiproxy/mtp/settings/GetAdvancedFeaturesSetting';                                Tier = 'P0'; Availability = 'live' }
-        @{ Stream = 'MDE_PreviewFeatures_CL';           Path = '/apiproxy/mtp/settings/GetPreviewExperienceSetting';                               Tier = 'P0'; Availability = 'live' }
-        @{ Stream = 'MDE_AlertServiceConfig_CL';        Path = '/apiproxy/mtp/alertsApiService/workloads/disabled';                                Tier = 'P0'; Availability = 'live' }
+        # Iter 13.9 (B4): query-string drift fix per XDRInternals canonical source
+        # — Get-XdrConfigurationPreviewFeatures.ps1 uses ?context=MdatpContext.
+        @{ Stream = 'MDE_PreviewFeatures_CL';           Path = '/apiproxy/mtp/settings/GetPreviewExperienceSetting?context=MdatpContext';          Tier = 'P0'; Availability = 'live' }
+        # Iter 13.9 (B4): ?includeDetails=true per Get-XdrConfigurationAlertServiceSetting.ps1
+        # — without it, response omits .reasons / .feedback / .disabledTime.
+        @{ Stream = 'MDE_AlertServiceConfig_CL';        Path = '/apiproxy/mtp/alertsApiService/workloads/disabled?includeDetails=true';            Tier = 'P0'; Availability = 'live' }
+        # Iter 13.9 (B3): nodoc-cited path — XDRInternals has no Get-Xdr*AlertTuning cmdlet
+        # exposing this surface; manifest path verified live 2026-04-28.
         @{ Stream = 'MDE_AlertTuning_CL';               Path = '/apiproxy/mtp/alertsEmailNotifications/email_notifications';                       Tier = 'P0'; Availability = 'live' }
         @{ Stream = 'MDE_SuppressionRules_CL';          Path = '/apiproxy/mtp/suppressionRulesService/suppressionRules';                           Tier = 'P0'; Filter = 'fromDate'; Availability = 'live' }
-        @{ Stream = 'MDE_CustomDetections_CL';          Path = '/apiproxy/mtp/huntingService/rules/unified';                                       Tier = 'P0'; Filter = 'fromDate'; UnwrapProperty = 'Rules'; Availability = 'live' }
+        # Iter 13.9 (B4): pagination + unified-rules-list flag per XDRInternals
+        # Get-XdrAdvancedHuntingUnifiedDetectionRules.ps1 — without pageSize=10000
+        # the response is truncated to the default-page count.
+        @{ Stream = 'MDE_CustomDetections_CL';          Path = '/apiproxy/mtp/huntingService/rules/unified?pageIndex=1&pageSize=10000&sortOrder=Ascending&isUnifiedRulesListEnabled=true'; Tier = 'P0'; Filter = 'fromDate'; UnwrapProperty = 'Rules'; Availability = 'live' }
         @{ Stream = 'MDE_DeviceControlPolicy_CL';       Path = '/apiproxy/mtp/siamApi/Onboarding';                                                 Tier = 'P0'; Availability = 'live' }
         @{ Stream = 'MDE_WebContentFiltering_CL';       Path = '/apiproxy/mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories'; Tier = 'P0'; Availability = 'live' }
         @{ Stream = 'MDE_SmartScreenConfig_CL';         Path = '/apiproxy/mtp/webThreatProtection/webThreats/reports/webThreatSummary';            Tier = 'P0'; Availability = 'live' }
-        @{ Stream = 'MDE_LiveResponseConfig_CL';        Path = '/apiproxy/mtp/liveResponseApi/get_properties';                                     Tier = 'P0'; Availability = 'live' }
+        # Iter 13.9 (B4): ?useV2Api=true&useV3Api=true per Get-XdrEndpointConfigurationLiveResponse.ps1
+        # — without these, response omits the modern script-library + tab-completion fields.
+        @{ Stream = 'MDE_LiveResponseConfig_CL';        Path = '/apiproxy/mtp/liveResponseApi/get_properties?useV2Api=true&useV3Api=true';        Tier = 'P0'; Availability = 'live' }
 
         # P0 tenant-gated — paths corrected 2026-04-24 vs XDRInternals v1.0.3
         # (Get-XdrEndpointConfigurationAuthenticatedTelemetry.ps1,
@@ -182,7 +193,12 @@
         # v0.1.0-beta.1: REMOVED MDE_CriticalAssets_CL + MDE_DeviceCriticality_CL —
         # XDRInternals confirms both are WRITE endpoints (Set-Xdr* functions);
         # calling as reads corrupts tenant data. See docs/STREAMS-REMOVED.md.
-        @{ Stream = 'MDE_RbacDeviceGroups_CL';          Path = '/apiproxy/mtp/rbacManagementApi/rbac/machine_groups';                              Tier = 'P2'; Availability = 'live' }
+        # Iter 13.9 (B4): query-string + UnwrapProperty per Get-XdrEndpointDeviceRbacGroup.ps1.
+        # Without addAadGroupNames=true, Aad group references appear as GUIDs only.
+        @{ Stream = 'MDE_RbacDeviceGroups_CL';          Path = '/apiproxy/mtp/rbacManagementApi/rbac/machine_groups?addAadGroupNames=true&addMachineGroupCount=false'; Tier = 'P2'; UnwrapProperty = 'items'; Availability = 'live' }
+        # Iter 13.9 (B3): nodoc-cited — XDRInternals' Get-XdrConfigurationUnifiedRBACWorkload
+        # uses /tenantinfo/, NOT /roleDefinitions. Our path returns role definitions
+        # (different surface). Verified live 2026-04-28.
         @{ Stream = 'MDE_UnifiedRbacRoles_CL';          Path = '/apiproxy/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions';    Tier = 'P2'; Availability = 'live' }
         @{ Stream = 'MDE_AssetRules_CL';                Path = '/apiproxy/mtp/xspmatlas/assetrules';                                               Tier = 'P2'; Availability = 'live' }
         @{ Stream = 'MDE_SAClassification_CL';          Path = '/apiproxy/radius/api/radius/serviceaccounts/classificationrule/getall';           Tier = 'P2'; Availability = 'live' }
@@ -274,7 +290,9 @@ AttackPathsV2
         # exactly. Returns 400 on tenants without TVM add-on / unconfigured
         # baseline profiles — tenant-feature-gated. Activates automatically
         # once customer configures baseline profiles in their TVM licence.
-        @{ Stream = 'MDE_SecurityBaselines_CL';         Path = '/apiproxy/mtp/tvm/analytics/baseline/profiles?pageIndex=0&pageSize=25';            Tier = 'P3'; Availability = 'tenant-gated' }
+        # Iter 13.9 (B4): TVM endpoints REQUIRE 'api-version: 1.0' header per
+        # Get-XdrVulnerabilityManagementBaseline.ps1 — without it, TVM API returns 400.
+        @{ Stream = 'MDE_SecurityBaselines_CL';         Path = '/apiproxy/mtp/tvm/analytics/baseline/profiles?pageIndex=0&pageSize=25';            Tier = 'P3'; Headers = @{ 'api-version' = '1.0' }; Availability = 'tenant-gated' }
 
         # ---- P5 Identity (5 streams, daily) ----------------------------------------
         @{ Stream = 'MDE_IdentityOnboarding_CL';        Path = '/apiproxy/mtp/siamApi/domaincontrollers/list';                                     Tier = 'P5'; UnwrapProperty = 'DomainControllers'; Availability = 'live' }
@@ -305,7 +323,10 @@ AttackPathsV2
         @{ Stream = 'MDE_RemediationAccounts_CL';       Path = '/apiproxy/aatp/api/remediationActions/configuration';                              Tier = 'P5'; Availability = 'tenant-gated' }
 
         # ---- P6 Audit/AIR (2 streams, 10-min) --------------------------------------
-        @{ Stream = 'MDE_ActionCenter_CL';              Path = '/apiproxy/mtp/actionCenter/actioncenterui/history-actions';                         Tier = 'P6'; Filter = 'fromDate'; Availability = 'live' }
+        # Iter 13.9 (B4): query-string + trailing-slash per XDRInternals
+        # Get-XdrActionsCenterHistory.ps1 — without type=history & useMtpApi=true,
+        # response is empty. pageSize/sortByField/sortOrder fixed to recent-first.
+        @{ Stream = 'MDE_ActionCenter_CL';              Path = '/apiproxy/mtp/actionCenter/actioncenterui/history-actions/?type=history&useMtpApi=true&pageIndex=1&pageSize=1000&sortByField=ActionCreationTime&sortOrder=Descending'; Tier = 'P6'; Filter = 'fromDate'; Availability = 'live' }
         @{ Stream = 'MDE_ThreatAnalytics_CL';           Path = '/apiproxy/mtp/threatAnalytics/outbreaks';                                          Tier = 'P6'; Filter = 'fromDate'; Availability = 'live' }
 
         # ---- P7 Metadata (4 streams, daily) ----------------------------------------
@@ -336,6 +357,7 @@ AttackPathsV2
         # the cause is NOT role; either MCAS isn't licensed in the tenant or
         # this proxy path no longer exists in the security.microsoft.com surface
         # (MCAS native API is on <tenant>.portal.cloudappsecurity.com).
-        @{ Stream = 'MDE_CloudAppsConfig_CL';           Path = '/apiproxy/mcas/cas/api/v1/settings';                                               Tier = 'P7'; Availability = 'tenant-gated' }
+        # Iter 13.9 (B4): trailing slash per XDRInternals Get-XdrCloudAppsGeneralSetting.ps1.
+        @{ Stream = 'MDE_CloudAppsConfig_CL';           Path = '/apiproxy/mcas/cas/api/v1/settings/';                                              Tier = 'P7'; Availability = 'tenant-gated' }
     )
 }

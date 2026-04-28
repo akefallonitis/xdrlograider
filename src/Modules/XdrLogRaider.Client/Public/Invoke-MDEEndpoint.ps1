@@ -111,17 +111,30 @@ function Invoke-MDEEndpoint {
 
     # --- Call ---
     $r = Invoke-MDEPortalEndpoint -Session $Session -Path $path -Method $httpMethod -Body $postBody -AdditionalHeaders $extraHeaders
+
+    # Iter 13.9 (C5): consolidate the early-exit gates. Three failure modes
+    # all map to "return empty array, no error":
+    #   1. $r itself is null (helper returned nothing — pathological)
+    #   2. $r.Success is false (HTTP error caught by Invoke-MDEPortalEndpoint)
+    #   3. $r.Data is null (200 with empty body — common on POST-only surfaces)
+    # All three previously had separate guards; consolidating reduces the
+    # surface area for strict-mode crashes if a future helper returns a
+    # different shape.
+    if ($null -eq $r) {
+        Write-Warning "Invoke-MDEEndpoint Stream='$Stream' failed: Invoke-MDEPortalEndpoint returned null (helper-side bug)"
+        return ,@()
+    }
     if (-not $r.Success) {
         Write-Warning "Invoke-MDEEndpoint Stream='$Stream' failed: $($r.Error)"
         return ,@()
     }
-
-    # --- Expand + normalise ---
-    # StrictMode-safe: skip expansion if the portal returned no body (common for
-    # POST-only endpoints that responded with 500 + empty payload).
     if ($null -eq $r.Data) {
+        # 200 with empty body — observed on POST-only / scalar-response surfaces
+        Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' returned 200 with empty body — 0 rows"
         return ,@()
     }
+
+    # --- Expand + normalise ---
     $expandArgs = @{ Response = $r.Data }
     if ($entry.ContainsKey('IdProperty') -and $entry.IdProperty) {
         $expandArgs['IdProperty'] = [string[]]$entry.IdProperty

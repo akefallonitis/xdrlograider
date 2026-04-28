@@ -96,7 +96,10 @@ function Invoke-MDEPortalRequest {
     # Session TTL check — proactively refresh at 3h30m to stay well under the
     # undocumented ~4h portal session cap. Reactive 401/440 reauth still runs
     # below as a safety net for tenants with shorter TTL.
-    if ($Session.PSObject.Properties['AcquiredUtc'] -and $Session.AcquiredUtc) {
+    # Iter 13.9 (C1): explicit $null -ne distinguishes "property absent" from
+    # "property present but $null" — protects line below from strict-mode crash
+    # if a future caller passes a Session object with AcquiredUtc=$null.
+    if ($Session.PSObject.Properties['AcquiredUtc'] -and $null -ne $Session.AcquiredUtc) {
         $sessionAge = [datetime]::UtcNow - $Session.AcquiredUtc
         if ($sessionAge.TotalMinutes -gt $script:SessionMaxAgeMinutes) {
             Write-Verbose "Invoke-MDEPortalRequest: session age $([int]$sessionAge.TotalMinutes)m > ${script:SessionMaxAgeMinutes}m — forcing fresh auth"

@@ -103,9 +103,14 @@ function Invoke-TierPollWithHeartbeat {
     }
     # Defensive: ensure required env vars actually populated (deploy-time
     # appSettings should guarantee, but fail fast if missing).
+    # Iter 13.9 (C7): include current value (may be empty/whitespace) in error
+    # so operator can distinguish "env var not set at all" vs "set but blank"
+    # — both surface as IsNullOrWhiteSpace, but the troubleshooting steps differ.
     foreach ($req in 'KeyVaultUri', 'AuthSecretName', 'AuthMethod', 'DceEndpoint', 'DcrImmutableId', 'StorageAccountName', 'CheckpointTable') {
         if ([string]::IsNullOrWhiteSpace($config.$req)) {
-            throw "Required config '$req' (env var) is not set. ARM appSettings deploy may be broken. FunctionName=$FunctionName"
+            $rawValue = $config.$req
+            $valueRepr = if ($null -eq $rawValue) { '<null>' } elseif ($rawValue -eq '') { '<empty string>' } else { "<whitespace: '" + ($rawValue -replace '[\s\r\n\t]', ' ') + "'>" }
+            throw "Required config '$req' (env var) is blank or not set (currently=$valueRepr). ARM appSettings deploy may be broken. FunctionName=$FunctionName"
         }
     }
 
