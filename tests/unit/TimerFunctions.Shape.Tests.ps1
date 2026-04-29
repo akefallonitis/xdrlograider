@@ -37,7 +37,7 @@ BeforeDiscovery {
 
 BeforeAll {
     $script:FunctionsRoot = Join-Path $PSScriptRoot '..' '..' 'src' 'functions'
-    $script:HelperPath    = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
+    $script:HelperPath    = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
 
     $script:RemovedFunctions = @(
         'Exchange-SccauthCookie',

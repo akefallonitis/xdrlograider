@@ -48,9 +48,9 @@
       "name": "panel-1",
       "content": {
         "queryType": 0,
-        "title": "Primary view",
+        "title": "Active attack paths",
         "size": 0,
-        "query": "MDE_XspmAttackPaths_CL | summarize arg_max(TimeGenerated, *) by EntityId | extend EntryNode = tostring(parse_json(RawJson).entryNode), TargetNode = tostring(parse_json(RawJson).targetNode), Hops = toint(parse_json(RawJson).hops) | project EntryNode, TargetNode, Hops",
+        "query": "MDE_XspmAttackPaths_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by EntityId\n| project PathId, Source, Target, HopCount, Severity, Status, CreatedTime, TimeGenerated\n| order by Severity asc, HopCount asc",
         "version": "KqlItem/1.0"
       },
       "type": 3
@@ -59,9 +59,9 @@
       "name": "panel-2",
       "content": {
         "queryType": 0,
-        "title": "Drift / trend",
+        "title": "Exposure score trend",
         "size": 0,
-        "query": "MDE_ExposureSnapshots_CL | extend Score = todouble(parse_json(RawJson).score) | summarize AvgScore = avg(Score) by bin(TimeGenerated, 1d) | render timechart",
+        "query": "MDE_ExposureSnapshots_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize AvgScore = avg(Score) by bin(TimeGenerated, 1d)\n| render timechart",
         "version": "KqlItem/1.0"
       },
       "type": 3

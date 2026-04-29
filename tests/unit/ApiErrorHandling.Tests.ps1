@@ -32,21 +32,30 @@
 
 BeforeAll {
     $script:Root = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
-    Import-Module "$script:Root/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"     -Force
-    Import-Module "$script:Root/src/Modules/XdrLogRaider.Ingest/XdrLogRaider.Ingest.psd1" -Force
-    Import-Module "$script:Root/src/Modules/XdrLogRaider.Client/XdrLogRaider.Client.psd1" -Force
+    # iter-14.0: target the L2 module directly so InModuleScope can mock
+    # Update-XsrfToken + Connect-DefenderPortal (the real implementations).
+    # Xdr.Portal.Auth is still imported so the surface tests at module level
+    # continue to find Connect-MDEPortal etc., but the request-level error
+    # tests work against the L2 module where the actual logic lives.
+    Import-Module "$script:Root/src/Modules/Xdr.Common.Auth/Xdr.Common.Auth.psd1"         -Force
+    Import-Module "$script:Root/src/Modules/Xdr.Defender.Auth/Xdr.Defender.Auth.psd1"     -Force
+    Import-Module "$script:Root/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"         -Force
+    Import-Module "$script:Root/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1" -Force
+    Import-Module "$script:Root/src/Modules/Xdr.Defender.Client/Xdr.Defender.Client.psd1" -Force
 }
 
 AfterAll {
-    Remove-Module XdrLogRaider.Client -Force -ErrorAction SilentlyContinue
-    Remove-Module XdrLogRaider.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Defender.Auth   -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Common.Auth     -Force -ErrorAction SilentlyContinue
 }
 
-Describe 'API error handling — Invoke-MDEPortalRequest' {
+Describe 'API error handling — Invoke-DefenderPortalRequest (iter-14.0 home)' {
 
     It 'surfaces 403 Forbidden without attempting reauth' {
-        InModuleScope Xdr.Portal.Auth {
+        InModuleScope Xdr.Defender.Auth {
             $fakeSess = [pscustomobject]@{
                 Session     = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
                 Upn         = 'svc@test.com'
@@ -54,19 +63,19 @@ Describe 'API error handling — Invoke-MDEPortalRequest' {
                 AcquiredUtc = [datetime]::UtcNow
             }
             Mock Update-XsrfToken { 'xsrf' }
-            Mock Connect-MDEPortal {}   # must NOT be called on 403
+            Mock Connect-DefenderPortal {}   # must NOT be called on 403
             Mock Invoke-WebRequest {
                 $resp = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::Forbidden)
                 throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Forbidden', $resp)
             }
 
-            { Invoke-MDEPortalRequest -Session $fakeSess -Path '/api/x' } | Should -Throw -ExpectedMessage '*Forbidden*'
-            Should -Invoke Connect-MDEPortal -Times 0 -Exactly
+            { Invoke-DefenderPortalRequest -Session $fakeSess -Path '/api/x' } | Should -Throw -ExpectedMessage '*Forbidden*'
+            Should -Invoke Connect-DefenderPortal -Times 0 -Exactly
         }
     }
 
     It 'surfaces 500 Internal Server Error without attempting reauth' {
-        InModuleScope Xdr.Portal.Auth {
+        InModuleScope Xdr.Defender.Auth {
             $fakeSess = [pscustomobject]@{
                 Session     = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
                 Upn         = 'svc@test.com'
@@ -74,19 +83,19 @@ Describe 'API error handling — Invoke-MDEPortalRequest' {
                 AcquiredUtc = [datetime]::UtcNow
             }
             Mock Update-XsrfToken { 'xsrf' }
-            Mock Connect-MDEPortal {}
+            Mock Connect-DefenderPortal {}
             Mock Invoke-WebRequest {
                 $resp = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::InternalServerError)
                 throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Internal Server Error', $resp)
             }
 
-            { Invoke-MDEPortalRequest -Session $fakeSess -Path '/api/x' } | Should -Throw
-            Should -Invoke Connect-MDEPortal -Times 0 -Exactly
+            { Invoke-DefenderPortalRequest -Session $fakeSess -Path '/api/x' } | Should -Throw
+            Should -Invoke Connect-DefenderPortal -Times 0 -Exactly
         }
     }
 
     It 'throws clear message when 401 hits a session with no cached _Credential' {
-        InModuleScope Xdr.Portal.Auth {
+        InModuleScope Xdr.Defender.Auth {
             $script:SessionCache.Clear()
             $fakeSess = [pscustomobject]@{
                 Session     = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
@@ -100,7 +109,7 @@ Describe 'API error handling — Invoke-MDEPortalRequest' {
                 throw [Microsoft.PowerShell.Commands.HttpResponseException]::new('Unauthorized', $resp)
             }
 
-            { Invoke-MDEPortalRequest -Session $fakeSess -Path '/api/x' } |
+            { Invoke-DefenderPortalRequest -Session $fakeSess -Path '/api/x' } |
                 Should -Throw -ExpectedMessage '*no cached*'
         }
     }
@@ -109,7 +118,7 @@ Describe 'API error handling — Invoke-MDEPortalRequest' {
 Describe 'API error handling — Invoke-MDEPortalEndpoint (structured failures)' {
 
     It 'returns Success true with Data on happy path' {
-        InModuleScope XdrLogRaider.Client {
+        InModuleScope Xdr.Defender.Client {
             Mock Invoke-MDEPortalRequest { @{ hello = 'world' } }
             $r = Invoke-MDEPortalEndpoint -Session ([pscustomobject]@{}) -Path '/api/x'
             $r.Success | Should -BeTrue
@@ -119,7 +128,7 @@ Describe 'API error handling — Invoke-MDEPortalEndpoint (structured failures)'
     }
 
     It 'returns Success false with Error on any exception' {
-        InModuleScope XdrLogRaider.Client {
+        InModuleScope Xdr.Defender.Client {
             Mock Invoke-MDEPortalRequest { throw 'simulated portal blowup' }
             $r = Invoke-MDEPortalEndpoint -Session ([pscustomobject]@{}) -Path '/api/x'
             $r.Success | Should -BeFalse
@@ -129,7 +138,7 @@ Describe 'API error handling — Invoke-MDEPortalEndpoint (structured failures)'
     }
 
     It 'does not throw — caller must check .Success' {
-        InModuleScope XdrLogRaider.Client {
+        InModuleScope Xdr.Defender.Client {
             Mock Invoke-MDEPortalRequest { throw 'boom' }
             { Invoke-MDEPortalEndpoint -Session ([pscustomobject]@{}) -Path '/api/x' } | Should -Not -Throw
         }
@@ -154,7 +163,7 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
     }
 
     It 'one stream failing does NOT stop subsequent streams in the tier' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
             param($Sess, $Cfg)
             $script:invoked = @()
             Mock Invoke-MDEEndpoint {
@@ -168,15 +177,15 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             Mock Get-CheckpointTimestamp { $null }
 
             $result = Invoke-MDETierPoll -Session $Sess -Tier 'P6' -Config $Cfg
-            $result.StreamsAttempted | Should -Be 2
-            $result.StreamsSucceeded | Should -Be 1
+            $result.StreamsAttempted | Should -Be 3
+            $result.StreamsSucceeded | Should -Be 2
             $result.Errors['MDE_ThreatAnalytics_CL'] | Should -Be 'boom'
-            $script:invoked.Count | Should -Be 2 -Because 'Both streams in tier P6 should have been tried'
+            $script:invoked.Count | Should -Be 3 -Because 'All streams in tier P6 should have been tried'
         }
     }
 
     It 'checkpoint is NOT advanced on per-stream failure' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
             param($Sess, $Cfg)
             Mock Invoke-MDEEndpoint { throw 'blow up' }
             Mock Send-ToLogAnalytics { @{ RowsSent = 0 } }
@@ -190,7 +199,7 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
     }
 
     It 'tier with NO streams declared returns zero-count result (no throw)' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
             param($Sess, $Cfg)
             # P4 was intentionally dropped — no streams carry Tier='P4' in the manifest.
             # But ValidateSet rejects P4 directly. Simulate empty tier by mocking manifest.
@@ -203,7 +212,7 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
 Describe 'API error handling — Send-ToLogAnalytics (retry + backoff)' {
 
     It 'retries on HTTP 429 (rate limit) and succeeds on a later attempt' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'fake-token' }
             Mock Start-Sleep { }  # avoid real waits
 
@@ -230,7 +239,7 @@ Describe 'API error handling — Send-ToLogAnalytics (retry + backoff)' {
     }
 
     It 'retries on HTTP 503 (transient server error)' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'fake-token' }
             Mock Start-Sleep { }
 
@@ -255,7 +264,7 @@ Describe 'API error handling — Send-ToLogAnalytics (retry + backoff)' {
     }
 
     It 'hard-fails on HTTP 400 Bad Request (no retry)' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'fake-token' }
             Mock Start-Sleep { }
 
@@ -273,7 +282,7 @@ Describe 'API error handling — Send-ToLogAnalytics (retry + backoff)' {
     }
 
     It 'stops after MaxRetries (5) even for a persistent 429' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'fake-token' }
             Mock Start-Sleep { }
 
@@ -291,7 +300,7 @@ Describe 'API error handling — Send-ToLogAnalytics (retry + backoff)' {
     }
 
     It 'row >= MaxBatchBytes is skipped with a warning (not thrown)' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'fake-token' }
             Mock Start-Sleep { }
             Mock Invoke-WebRequest { @{ StatusCode = 204 } }
@@ -312,7 +321,7 @@ Describe 'API error handling — Send-ToLogAnalytics (retry + backoff)' {
     }
 
     It 'empty Rows returns RowsSent=0 without any HTTP call' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken {}
             Mock Invoke-WebRequest {}
             $result = Send-ToLogAnalytics `

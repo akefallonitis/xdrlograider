@@ -22,7 +22,7 @@
 
 BeforeAll {
     $script:RepoRoot     = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:HelperPath   = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Ingest' 'Public' 'Invoke-XdrStorageTableEntity.ps1'
+    $script:HelperPath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Public' 'Invoke-XdrStorageTableEntity.ps1'
     $script:HelperSource = Get-Content $script:HelperPath -Raw
 }
 

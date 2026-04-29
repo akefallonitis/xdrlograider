@@ -14,8 +14,8 @@ The xdrlograider connector polls Microsoft Defender XDR portal endpoints unatten
 | Key Vault secrets | SAMI has `Key Vault Secrets User` — read-only on secrets only | `enableKeyVaultDiagnostics: true` (default) sends audit logs to Sentinel; alert on access from non-FA identities |
 | sccauth cookie replay | If FA process is compromised within 50-min cache window, attacker replays cookie | 50-min cap (default); `portalSessionRotationMinutes` parameter (v0.3.0) lets high-security operators tighten to 10 min |
 | Service-account credential exfiltration | Attacker reads `mde-portal-auth` from KV → has UPN + password + TOTP secret | Use `authMethod = passkey` for origin-bound signatures (smaller blast radius); rotate password on operator's tenant policy cadence (60–90 days) |
-| ZIP supply chain | Attacker tampered Function App ZIP on GitHub | Iter 13.15 Phase F adds SHA256 manifest emission + verification |
-| PSGallery supply chain | Attacker tampered Az.* modules on PSGallery | Iter 13.15 Phase F adds GPG-signed checksum verification |
+| ZIP supply chain | Attacker tampered Function App ZIP on GitHub | SHA256 manifest emission + verification on every release |
+| PSGallery supply chain | Attacker tampered Az.* modules on PSGallery | GPG-signed checksum verification of pinned Az module set |
 
 ## Privilege escalation chain (active on `consumption-y1`)
 

@@ -22,8 +22,8 @@
 ### What changes in the manifest
 
 - **2 streams regressed** to `tenant-gated` due to upstream Defender XDR portal API drift: `MDE_XspmChokePoints_CL` + `MDE_XspmTopTargets_CL`. These returned 200 in v0.1.0-beta.1 but now return 400 with the committed bodies. They remain in the manifest so the tables keep existing — they just produce zero rows until a future release ships a corrected body.
-- **Iter-13.8 path-research audit (2026-04-27)**: `MDE_CustomCollection_CL` path corrected `/apiproxy/mtp/mdeCustomCollection/model` → `/rules` per XDRInternals canonical source; `MDE_StreamingApiConfig_CL` marked `Availability='deprecated'` (canonical XDRInternals path collides with `MDE_DataExportSettings_CL` — will be cleanly removed in v0.2.0); `role-gated` category retired (Microsoft Learn confirms Security Admin auto-grants Full Access in MCAS + MDE settings).
-- Everything else (36 live, 8 feature-gated, 1 deprecated) classified by live capture on 2026-04-27 against a full-access admin account post iter-13.8.
+- **Path-research audit (2026-04-27)**: `MDE_CustomCollection_CL` path corrected `/apiproxy/mtp/mdeCustomCollection/model` → `/rules` per XDRInternals canonical source; `MDE_StreamingApiConfig_CL` marked `Availability='deprecated'` (canonical XDRInternals path collides with `MDE_DataExportSettings_CL` — will be cleanly removed in v0.2.0); `role-gated` category retired (Microsoft Learn confirms Security Admin auto-grants Full Access in MCAS + MDE settings).
+- Everything else (36 live, 8 feature-gated, 1 deprecated) classified by live capture on 2026-04-27 against a full-access admin account.
 
 ### Upgrade sequence
 

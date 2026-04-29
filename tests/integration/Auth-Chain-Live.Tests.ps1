@@ -39,8 +39,8 @@ BeforeDiscovery {
 BeforeAll {
     # Modules needed for live auth + dispatcher calls
     $authPsd1   = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Portal.Auth'     'Xdr.Portal.Auth.psd1'
-    $ingestPsd1 = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1'
-    $clientPsd1 = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client' 'XdrLogRaider.Client.psd1'
+    $ingestPsd1 = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
+    $clientPsd1 = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
 
     Import-Module $authPsd1   -Force -ErrorAction Stop
     Import-Module $ingestPsd1 -Force -ErrorAction Stop
@@ -99,8 +99,8 @@ BeforeAll {
 }
 
 AfterAll {
-    Remove-Module XdrLogRaider.Client -Force -ErrorAction SilentlyContinue
-    Remove-Module XdrLogRaider.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
 }
 
@@ -226,7 +226,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
         # to require a real storage account for this laptop test — but the manifest-
         # driven delta behaviour itself IS live.
 
-        InModuleScope XdrLogRaider.Client -Parameters @{
+        InModuleScope Xdr.Defender.Client -Parameters @{
             Session = (script:New-LiveSession -AuthMethod $script:AuthMethod -Credential $script:Credential -PortalHost $script:PortalHost)
         } {
             param($Session)

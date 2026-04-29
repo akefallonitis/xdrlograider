@@ -16,7 +16,7 @@
 
 BeforeAll {
     $script:RepoRoot     = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:ManifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $script:ManifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $script:FunctionsDir = Join-Path $script:RepoRoot 'src' 'functions'
 
     $script:Manifest = Import-PowerShellDataFile $script:ManifestPath

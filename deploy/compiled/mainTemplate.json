@@ -19,7 +19,12 @@
       "type": "string",
       "defaultValue": "prod",
       "allowedValues": [ "dev", "staging", "prod" ],
-      "metadata": { "description": "Environment tag." }
+      "metadata": { "description": "Environment tag. Used in resource names when legacyEnvInName=true (default for in-place upgrade compatibility with existing deployments); always emitted as the `environment` Azure resource tag regardless." }
+    },
+    "legacyEnvInName": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": { "description": "When true (default), resource names include the environment token (e.g. xdrlr-prod-fn-n2hhhc) for backward-compat with existing deployments. When false, resource names are environment-neutral (e.g. xdrlr-fn-n2hhhc) and environment is applied as a tag on every resource. The v1.2 Marketplace baseline flips this to false." }
     },
     "connectorLocation": {
       "type": "string",
@@ -86,14 +91,15 @@
   "variables": {
     "uniq": "[uniqueString(resourceGroup().id, parameters('projectPrefix'), parameters('env'))]",
     "suffix": "[substring(variables('uniq'), 0, 6)]",
-    "prefix": "[concat(parameters('projectPrefix'), '-', parameters('env'))]",
-    "funcName": "[concat(variables('prefix'), '-fn-', variables('suffix'))]",
-    "planName": "[concat(variables('prefix'), '-plan')]",
-    "kvName": "[concat(variables('prefix'), '-kv-', variables('suffix'))]",
-    "stName": "[toLower(replace(concat(parameters('projectPrefix'), parameters('env'), 'st', variables('suffix')), '-', ''))]",
-    "dceName": "[concat(variables('prefix'), '-dce')]",
-    "dcrName": "[concat(variables('prefix'), '-dcr')]",
-    "aiName": "[concat(variables('prefix'), '-ai')]",
+    "envSegment": "[if(parameters('legacyEnvInName'), concat(parameters('env'), '-'), '')]",
+    "stEnvSegment": "[if(parameters('legacyEnvInName'), parameters('env'), '')]",
+    "funcName": "[concat(parameters('projectPrefix'), '-', variables('envSegment'), 'fn-', variables('suffix'))]",
+    "planName": "[concat(parameters('projectPrefix'), '-', variables('envSegment'), 'plan')]",
+    "kvName": "[concat(parameters('projectPrefix'), '-', variables('envSegment'), 'kv-', variables('suffix'))]",
+    "stName": "[toLower(replace(concat(parameters('projectPrefix'), variables('stEnvSegment'), 'st', variables('suffix')), '-', ''))]",
+    "dceName": "[concat(parameters('projectPrefix'), '-', variables('envSegment'), 'dce')]",
+    "dcrName": "[concat(parameters('projectPrefix'), '-', variables('envSegment'), 'dcr')]",
+    "aiName": "[concat(parameters('projectPrefix'), '-', variables('envSegment'), 'ai')]",
     "packageUrl": "[if(equals(parameters('functionAppZipVersion'), 'latest'), concat('https://github.com/', parameters('githubRepo'), '/releases/latest/download/function-app.zip'), concat('https://github.com/', parameters('githubRepo'), '/releases/download/v', parameters('functionAppZipVersion'), '/function-app.zip'))]",
     "workspaceSubscriptionId": "[split(parameters('existingWorkspaceId'), '/')[2]]",
     "workspaceResourceGroup": "[split(parameters('existingWorkspaceId'), '/')[4]]",
@@ -102,8 +108,10 @@
     "storageTableContributorRoleId": "0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3",
     "monitoringMetricsPublisherRoleId": "3913510d-42f4-4e42-8a64-420c390055eb",
     "commonTag": {
-      "workload": "XdrLogRaider",
+      "managed-by": "XdrLogRaider",
       "environment": "[parameters('env')]",
+      "project": "[parameters('projectPrefix')]",
+      "workload": "XdrLogRaider",
       "managedBy": "ARM"
     }
   },
@@ -193,51 +201,52 @@
       "properties": {
         "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
         "streamDeclarations": {
-          "Custom-MDE_AdvancedFeatures_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_PreviewFeatures_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_AuthenticatedTelemetry_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_PUAConfig_CL":              { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_AntivirusPolicy_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_DeviceControlPolicy_CL":    { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_WebContentFiltering_CL":    { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_SmartScreenConfig_CL":      { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_TenantAllowBlock_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_CustomCollection_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_LiveResponseConfig_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_AlertServiceConfig_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_AlertTuning_CL":            { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_SuppressionRules_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_CustomDetections_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_DataExportSettings_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_StreamingApiConfig_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_IntuneConnection_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_PurviewSharing_CL":         { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_ConnectedApps_CL":          { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_TenantContext_CL":          { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_TenantWorkloadStatus_CL":   { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_RbacDeviceGroups_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_UnifiedRbacRoles_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_AssetRules_CL":             { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_SAClassification_CL":       { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_XspmAttackPaths_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_XspmChokePoints_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_XspmTopTargets_CL":         { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_XspmInitiatives_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_ExposureSnapshots_CL":      { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_SecureScoreBreakdown_CL":   { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_SecurityBaselines_CL":      { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_ExposureRecommendations_CL":{ "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_IdentityServiceAccounts_CL":{ "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_IdentityOnboarding_CL":     { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_DCCoverage_CL":             { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_IdentityAlertThresholds_CL":{ "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_RemediationAccounts_CL":    { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_ActionCenter_CL":           { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_ThreatAnalytics_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_LicenseReport_CL":          { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_UserPreferences_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_MtoTenants_CL":             { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
-          "Custom-MDE_CloudAppsConfig_CL":        { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream", "type": "string" }, { "name": "EntityId", "type": "string" }, { "name": "RawJson", "type": "dynamic" } ] },
+          "Custom-MDE_ActionCenter_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "ActionDecision", "type": "string" }, { "name": "ActionId", "type": "string" }, { "name": "ActionSource", "type": "string" }, { "name": "ActionStatus", "type": "string" }, { "name": "ActionType", "type": "string" }, { "name": "Comment", "type": "string" }, { "name": "ComputerName", "type": "string" }, { "name": "EndTime", "type": "datetime" }, { "name": "EntityType", "type": "string" }, { "name": "EventTime", "type": "datetime" }, { "name": "InvestigationId", "type": "string" }, { "name": "MachineId", "type": "string" }, { "name": "Operator", "type": "string" }, { "name": "Product", "type": "string" }, { "name": "StartTime", "type": "datetime" }, { "name": "UserPrincipalName", "type": "string" } ] },
+          "Custom-MDE_AdvancedFeatures_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AatpIntegrationEnabled", "type": "boolean" }, { "name": "AutoResolveInvestigatedAlerts", "type": "boolean" }, { "name": "EnableMcasIntegration", "type": "boolean" }, { "name": "EnableWdavAntiTampering", "type": "boolean" }, { "name": "FeatureName", "type": "string" } ] },
+          "Custom-MDE_AlertServiceConfig_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "LastModifiedUtc", "type": "datetime" }, { "name": "ModifiedBy", "type": "string" }, { "name": "Name", "type": "string" }, { "name": "WorkloadId", "type": "string" } ] },
+          "Custom-MDE_AlertTuning_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CreatedBy", "type": "string" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "Name", "type": "string" }, { "name": "RuleId", "type": "string" }, { "name": "Severity", "type": "string" } ] },
+          "Custom-MDE_AntivirusPolicy_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "FilterName", "type": "string" }, { "name": "FilterValue", "type": "string" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "Platform", "type": "string" }, { "name": "Scope", "type": "string" } ] },
+          "Custom-MDE_AssetRules_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AffectedAssetsCount", "type": "int" }, { "name": "AssetType", "type": "string" }, { "name": "ClassificationValue", "type": "string" }, { "name": "CreatedBy", "type": "string" }, { "name": "CriticalityLevel", "type": "int" }, { "name": "Description", "type": "string" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "Name", "type": "string" }, { "name": "RuleId", "type": "string" }, { "name": "RuleType", "type": "string" } ] },
+          "Custom-MDE_AuthenticatedTelemetry_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AllowNonAuthSense", "type": "boolean" }, { "name": "FeatureName", "type": "string" }, { "name": "IsEnabled", "type": "boolean" } ] },
+          "Custom-MDE_CloudAppsConfig_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "ModifiedBy", "type": "string" }, { "name": "Region", "type": "string" }, { "name": "SettingId", "type": "string" } ] },
+          "Custom-MDE_ConnectedApps_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AppId", "type": "string" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "LatestConnectivity", "type": "datetime" }, { "name": "Name", "type": "string" }, { "name": "SettingsLink", "type": "string" } ] },
+          "Custom-MDE_CustomCollection_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CreatedBy", "type": "string" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "Name", "type": "string" }, { "name": "RuleId", "type": "string" }, { "name": "Scope", "type": "string" } ] },
+          "Custom-MDE_CustomDetections_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CreatedBy", "type": "string" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "LastModifiedUtc", "type": "datetime" }, { "name": "LastRunStatus", "type": "string" }, { "name": "Name", "type": "string" }, { "name": "RuleId", "type": "string" }, { "name": "Severity", "type": "string" } ] },
+          "Custom-MDE_DataExportSettings_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "ConfigId", "type": "string" }, { "name": "Destination", "type": "string" }, { "name": "EnabledLogs", "type": "string" }, { "name": "LogsCount", "type": "int" }, { "name": "ResourceGroup", "type": "string" }, { "name": "SubscriptionId", "type": "string" }, { "name": "Workspace", "type": "string" } ] },
+          "Custom-MDE_DCCoverage_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "DCName", "type": "string" }, { "name": "Domain", "type": "string" }, { "name": "IsActive", "type": "boolean" }, { "name": "LastSeenUtc", "type": "datetime" }, { "name": "Risk", "type": "string" } ] },
+          "Custom-MDE_DeviceControlPolicy_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "FeatureName", "type": "string" }, { "name": "HasPermissions", "type": "boolean" }, { "name": "NotOnboarded", "type": "int" }, { "name": "Onboarded", "type": "int" } ] },
+          "Custom-MDE_DeviceTimeline_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "EventId", "type": "string" }, { "name": "EventTime", "type": "datetime" }, { "name": "EventType", "type": "string" }, { "name": "FileName", "type": "string" }, { "name": "MachineId", "type": "string" }, { "name": "ProcessName", "type": "string" }, { "name": "Severity", "type": "string" } ] },
+          "Custom-MDE_ExposureRecommendations_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "Category", "type": "string" }, { "name": "ImplementationCost", "type": "string" }, { "name": "IsDisabled", "type": "boolean" }, { "name": "LastSyncedUtc", "type": "datetime" }, { "name": "MaxScore", "type": "real" }, { "name": "Product", "type": "string" }, { "name": "RecommendationId", "type": "string" }, { "name": "Score", "type": "real" }, { "name": "Severity", "type": "string" }, { "name": "Source", "type": "string" }, { "name": "Status", "type": "string" }, { "name": "Title", "type": "string" }, { "name": "UserImpact", "type": "string" } ] },
+          "Custom-MDE_ExposureSnapshots_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "InitiativeId", "type": "string" }, { "name": "MetricId", "type": "string" }, { "name": "Score", "type": "real" }, { "name": "ScoreChange", "type": "real" }, { "name": "SnapshotId", "type": "string" } ] },
+          "Custom-MDE_IdentityAlertThresholds_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AlertType", "type": "string" }, { "name": "ExpiresUtc", "type": "datetime" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "ModifiedBy", "type": "string" }, { "name": "Threshold", "type": "real" }, { "name": "ThresholdId", "type": "string" } ] },
+          "Custom-MDE_IdentityOnboarding_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "DCName", "type": "string" }, { "name": "Domain", "type": "string" }, { "name": "IpAddress", "type": "string" }, { "name": "IsActive", "type": "boolean" }, { "name": "LastSeenUtc", "type": "datetime" }, { "name": "SensorHealth", "type": "string" } ] },
+          "Custom-MDE_IdentityServiceAccounts_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AccountSid", "type": "string" }, { "name": "AccountType", "type": "string" }, { "name": "AccountUpn", "type": "string" }, { "name": "Domain", "type": "string" }, { "name": "IsActive", "type": "boolean" }, { "name": "LastSeenUtc", "type": "datetime" }, { "name": "Risk", "type": "string" } ] },
+          "Custom-MDE_IntuneConnection_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "FeatureName", "type": "string" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "Status", "type": "int" } ] },
+          "Custom-MDE_LicenseReport_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "DetectedUsers", "type": "int" }, { "name": "DeviceCount", "type": "int" }, { "name": "SkuName", "type": "string" } ] },
+          "Custom-MDE_LiveResponseConfig_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AutomatedIrLiveResponse", "type": "boolean" }, { "name": "AutomatedIrUnsignedScripts", "type": "boolean" }, { "name": "FeatureName", "type": "string" }, { "name": "LiveResponseForServers", "type": "boolean" } ] },
+          "Custom-MDE_MachineActions_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "ActionId", "type": "string" }, { "name": "ActionStatus", "type": "string" }, { "name": "ActionType", "type": "string" }, { "name": "CompletedTime", "type": "datetime" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "InvestigationId", "type": "string" }, { "name": "MachineId", "type": "string" }, { "name": "Operator", "type": "string" }, { "name": "ScriptOutput", "type": "dynamic" } ] },
+          "Custom-MDE_MtoTenants_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "IsHomeTenant", "type": "boolean" }, { "name": "IsSelected", "type": "boolean" }, { "name": "LostAccess", "type": "boolean" }, { "name": "TenantAadEnvironment", "type": "int" }, { "name": "TenantId", "type": "string" }, { "name": "TenantName", "type": "string" } ] },
+          "Custom-MDE_PreviewFeatures_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "IsOptIn", "type": "boolean" }, { "name": "SettingId", "type": "string" }, { "name": "SliceId", "type": "int" } ] },
+          "Custom-MDE_PUAConfig_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AutomatedIrPuaAsSuspicious", "type": "boolean" }, { "name": "FeatureName", "type": "string" }, { "name": "IsAutomatedIrContainDeviceEnabled", "type": "boolean" } ] },
+          "Custom-MDE_PurviewSharing_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AlertSharingEnabled", "type": "boolean" }, { "name": "FeatureName", "type": "string" }, { "name": "IsEnabled", "type": "boolean" } ] },
+          "Custom-MDE_RbacDeviceGroups_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AutoRemediationLevel", "type": "int" }, { "name": "Description", "type": "string" }, { "name": "GroupId", "type": "int" }, { "name": "IsUnassigned", "type": "boolean" }, { "name": "LastUpdated", "type": "datetime" }, { "name": "MachineCount", "type": "int" }, { "name": "Name", "type": "string" }, { "name": "Priority", "type": "int" }, { "name": "RuleCount", "type": "int" } ] },
+          "Custom-MDE_RemediationAccounts_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AccountType", "type": "string" }, { "name": "AccountUpn", "type": "string" }, { "name": "Domain", "type": "string" }, { "name": "IsActive", "type": "boolean" }, { "name": "LastSeenUtc", "type": "datetime" } ] },
+          "Custom-MDE_SAClassification_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AccountType", "type": "string" }, { "name": "Domain", "type": "string" }, { "name": "IsActive", "type": "boolean" }, { "name": "LastSeenUtc", "type": "datetime" }, { "name": "Name", "type": "string" }, { "name": "RuleId", "type": "string" } ] },
+          "Custom-MDE_SecurityBaselines_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "BenchmarkName", "type": "string" }, { "name": "Compliance", "type": "boolean" }, { "name": "DeviceCount", "type": "int" }, { "name": "LastScanUtc", "type": "datetime" }, { "name": "Name", "type": "string" }, { "name": "ProfileId", "type": "string" }, { "name": "Score", "type": "real" } ] },
+          "Custom-MDE_SmartScreenConfig_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CustomIndicator", "type": "int" }, { "name": "Exploit", "type": "int" }, { "name": "FeatureName", "type": "string" }, { "name": "LastModifiedUtc", "type": "datetime" }, { "name": "Malicious", "type": "int" }, { "name": "Phishing", "type": "int" }, { "name": "TotalThreats", "type": "int" } ] },
+          "Custom-MDE_StreamingApiConfig_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" } ] },
+          "Custom-MDE_SuppressionRules_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "Action", "type": "int" }, { "name": "AlertTitle", "type": "string" }, { "name": "CreatedBy", "type": "string" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "IsReadOnly", "type": "boolean" }, { "name": "MatchingAlertsCount", "type": "int" }, { "name": "Name", "type": "string" }, { "name": "RuleId", "type": "string" }, { "name": "Scope", "type": "int" }, { "name": "UpdateTime", "type": "datetime" } ] },
+          "Custom-MDE_TenantAllowBlock_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "Action", "type": "string" }, { "name": "CreatedBy", "type": "string" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "ExpiryTime", "type": "datetime" }, { "name": "IndicatorType", "type": "string" } ] },
+          "Custom-MDE_TenantContext_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AccountType", "type": "string" }, { "name": "DataCenter", "type": "string" }, { "name": "EnvironmentName", "type": "string" }, { "name": "IsHomeTenant", "type": "boolean" }, { "name": "IsMdatpActive", "type": "boolean" }, { "name": "IsSentinelActive", "type": "boolean" }, { "name": "Region", "type": "string" }, { "name": "TenantId", "type": "string" }, { "name": "TenantName", "type": "string" } ] },
+          "Custom-MDE_TenantWorkloadStatus_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AllTenantsCount", "type": "int" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "EntityType", "type": "string" }, { "name": "LastUpdated", "type": "datetime" }, { "name": "LastUpdatedByUpn", "type": "string" }, { "name": "TenantGroupId", "type": "string" }, { "name": "TenantId", "type": "string" }, { "name": "TenantName", "type": "string" } ] },
+          "Custom-MDE_ThreatAnalytics_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CreatedOn", "type": "datetime" }, { "name": "IsVNext", "type": "boolean" }, { "name": "Keywords", "type": "string" }, { "name": "LastUpdatedOn", "type": "datetime" }, { "name": "LastVisitTime", "type": "datetime" }, { "name": "OutbreakId", "type": "string" }, { "name": "ReportType", "type": "string" }, { "name": "Severity", "type": "int" }, { "name": "StartedOn", "type": "datetime" }, { "name": "Tags", "type": "string" }, { "name": "Title", "type": "string" } ] },
+          "Custom-MDE_UnifiedRbacRoles_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "IsBuiltIn", "type": "boolean" }, { "name": "ModifiedBy", "type": "string" }, { "name": "Name", "type": "string" }, { "name": "RoleId", "type": "string" }, { "name": "Scope", "type": "string" } ] },
+          "Custom-MDE_UserPreferences_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CreatedBy", "type": "string" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "IsEnabled", "type": "boolean" }, { "name": "Name", "type": "string" }, { "name": "Scope", "type": "string" }, { "name": "SettingId", "type": "string" } ] },
+          "Custom-MDE_WebContentFiltering_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "ActivityDeltaPercentage", "type": "int" }, { "name": "CategoryName", "type": "string" }, { "name": "FeatureName", "type": "string" }, { "name": "TotalAccessRequests", "type": "int" }, { "name": "TotalBlockedCount", "type": "int" }, { "name": "UpdateTime", "type": "datetime" } ] },
+          "Custom-MDE_XspmAttackPaths_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "CreatedTime", "type": "datetime" }, { "name": "HopCount", "type": "int" }, { "name": "PathId", "type": "string" }, { "name": "Severity", "type": "string" }, { "name": "Source", "type": "string" }, { "name": "SourceId", "type": "string" }, { "name": "Status", "type": "string" }, { "name": "Target", "type": "string" }, { "name": "TargetId", "type": "string" } ] },
+          "Custom-MDE_XspmChokePoints_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AttackPathsCount", "type": "int" }, { "name": "EntityType", "type": "string" }, { "name": "NodeId", "type": "string" }, { "name": "NodeName", "type": "string" }, { "name": "NodeType", "type": "string" }, { "name": "Severity", "type": "string" } ] },
+          "Custom-MDE_XspmInitiatives_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "ActiveMetricCount", "type": "int" }, { "name": "InitiativeId", "type": "string" }, { "name": "IsFavorite", "type": "boolean" }, { "name": "MetricCount", "type": "int" }, { "name": "Name", "type": "string" }, { "name": "Programs", "type": "string" }, { "name": "TargetValue", "type": "real" } ] },
+          "Custom-MDE_XspmTopTargets_CL": { "columns": [ { "name": "TimeGenerated", "type": "datetime" }, { "name": "SourceStream",  "type": "string" }, { "name": "EntityId",      "type": "string" }, { "name": "RawJson",       "type": "dynamic" }, { "name": "AttackPathsCount", "type": "int" }, { "name": "Source", "type": "string" }, { "name": "Status", "type": "string" }, { "name": "TargetId", "type": "string" }, { "name": "TargetName", "type": "string" } ] },
           "Custom-MDE_Heartbeat_CL": {
             "columns": [
               { "name": "TimeGenerated",    "type": "datetime" },
@@ -315,9 +324,9 @@
               "Custom-MDE_XspmTopTargets_CL",
               "Custom-MDE_XspmInitiatives_CL",
               "Custom-MDE_ExposureSnapshots_CL",
-              "Custom-MDE_SecureScoreBreakdown_CL",
               "Custom-MDE_SecurityBaselines_CL",
-              "Custom-MDE_ExposureRecommendations_CL"
+              "Custom-MDE_ExposureRecommendations_CL",
+              "Custom-MDE_DeviceTimeline_CL"
             ],
             "destinations": [ "la-destination" ]
           },
@@ -330,6 +339,7 @@
               "Custom-MDE_RemediationAccounts_CL",
               "Custom-MDE_ActionCenter_CL",
               "Custom-MDE_ThreatAnalytics_CL",
+              "Custom-MDE_MachineActions_CL",
               "Custom-MDE_LicenseReport_CL",
               "Custom-MDE_UserPreferences_CL",
               "Custom-MDE_MtoTenants_CL",
@@ -390,7 +400,8 @@
             { "name": "DCE_ENDPOINT",                           "value": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]" },
             { "name": "DCR_IMMUTABLE_ID",                       "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName')), '2023-03-11').immutableId]" },
             { "name": "STORAGE_ACCOUNT_NAME",                   "value": "[variables('stName')]" },
-            { "name": "CHECKPOINT_TABLE_NAME",                  "value": "connectorCheckpoints" }
+            { "name": "CHECKPOINT_TABLE_NAME",                  "value": "connectorCheckpoints" },
+            { "name": "APPLICATIONINSIGHTS_TELEMETRY_SAMPLING_EXCLUDED_TYPES", "value": "AuthChain.AADSTSError;AuthChain.RateLimited;AuthChain.BoundaryMarker" }
           ]
         }
       },
@@ -468,73 +479,1170 @@
             "workspaceName":    { "type": "string" },
             "retentionInDays":  { "type": "int", "defaultValue": 90 }
           },
-          "variables": {
-            "commonSchema": [
-              { "name": "TimeGenerated", "type": "datetime" },
-              { "name": "SourceStream",  "type": "string"   },
-              { "name": "EntityId",      "type": "string"   },
-              { "name": "RawJson",       "type": "dynamic"  }
-            ],
-            "heartbeatSchema": [
-              { "name": "TimeGenerated",    "type": "datetime" },
-              { "name": "FunctionName",     "type": "string" },
-              { "name": "Tier",             "type": "string" },
-              { "name": "StreamsAttempted", "type": "int" },
-              { "name": "StreamsSucceeded", "type": "int" },
-              { "name": "RowsIngested",     "type": "int" },
-              { "name": "LatencyMs",        "type": "int" },
-              { "name": "HostName",         "type": "string" },
-              { "name": "Notes",            "type": "dynamic" }
-            ],
-            "authTestResultSchema": [
-              { "name": "TimeGenerated",       "type": "datetime" },
-              { "name": "Method",              "type": "string" },
-              { "name": "PortalHost",          "type": "string" },
-              { "name": "Upn",                 "type": "string" },
-              { "name": "Success",             "type": "boolean" },
-              { "name": "Stage",               "type": "string" },
-              { "name": "FailureReason",       "type": "string" },
-              { "name": "EstsMs",              "type": "int" },
-              { "name": "SccauthMs",           "type": "int" },
-              { "name": "SampleCallHttpCode",  "type": "int" },
-              { "name": "SampleCallLatencyMs", "type": "int" },
-              { "name": "SccauthAcquiredUtc",  "type": "string" }
-            ],
-            "tableNames": [
-              "MDE_AdvancedFeatures_CL","MDE_PreviewFeatures_CL","MDE_AuthenticatedTelemetry_CL",
-              "MDE_PUAConfig_CL","MDE_AntivirusPolicy_CL",
-              "MDE_DeviceControlPolicy_CL","MDE_WebContentFiltering_CL","MDE_SmartScreenConfig_CL",
-              "MDE_TenantAllowBlock_CL","MDE_CustomCollection_CL","MDE_LiveResponseConfig_CL",
-              "MDE_AlertServiceConfig_CL","MDE_AlertTuning_CL","MDE_SuppressionRules_CL",
-              "MDE_CustomDetections_CL","MDE_DataExportSettings_CL","MDE_StreamingApiConfig_CL",
-              "MDE_IntuneConnection_CL","MDE_PurviewSharing_CL","MDE_ConnectedApps_CL",
-              "MDE_TenantContext_CL","MDE_TenantWorkloadStatus_CL","MDE_RbacDeviceGroups_CL",
-              "MDE_UnifiedRbacRoles_CL",
-              "MDE_AssetRules_CL","MDE_SAClassification_CL",
-              "MDE_XspmAttackPaths_CL","MDE_XspmChokePoints_CL","MDE_XspmTopTargets_CL",
-              "MDE_XspmInitiatives_CL","MDE_ExposureSnapshots_CL","MDE_SecureScoreBreakdown_CL",
-              "MDE_SecurityBaselines_CL","MDE_ExposureRecommendations_CL","MDE_IdentityServiceAccounts_CL",
-              "MDE_IdentityOnboarding_CL","MDE_DCCoverage_CL","MDE_IdentityAlertThresholds_CL",
-              "MDE_RemediationAccounts_CL","MDE_ActionCenter_CL","MDE_ThreatAnalytics_CL",
-              "MDE_LicenseReport_CL","MDE_UserPreferences_CL","MDE_MtoTenants_CL",
-              "MDE_CloudAppsConfig_CL"
-            ]
-          },
           "resources": [
             {
               "type": "Microsoft.OperationalInsights/workspaces/tables",
               "apiVersion": "2023-09-01",
-              "name": "[concat(parameters('workspaceName'), '/', variables('tableNames')[copyIndex()])]",
-              "copy": {
-                "name": "customTableLoop",
-                "count": "[length(variables('tableNames'))]"
-              },
+              "name": "[concat(parameters('workspaceName'), '/MDE_ActionCenter_CL')]",
               "properties": {
+                "plan": "Analytics",
                 "retentionInDays": "[parameters('retentionInDays')]",
                 "totalRetentionInDays": "[parameters('retentionInDays')]",
                 "schema": {
-                  "name":    "[variables('tableNames')[copyIndex()]]",
-                  "columns": "[variables('commonSchema')]"
+                  "name":    "MDE_ActionCenter_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "ActionDecision", "type": "string" },
+                    { "name": "ActionId", "type": "string" },
+                    { "name": "ActionSource", "type": "string" },
+                    { "name": "ActionStatus", "type": "string" },
+                    { "name": "ActionType", "type": "string" },
+                    { "name": "Comment", "type": "string" },
+                    { "name": "ComputerName", "type": "string" },
+                    { "name": "EndTime", "type": "datetime" },
+                    { "name": "EntityType", "type": "string" },
+                    { "name": "EventTime", "type": "datetime" },
+                    { "name": "InvestigationId", "type": "string" },
+                    { "name": "MachineId", "type": "string" },
+                    { "name": "Operator", "type": "string" },
+                    { "name": "Product", "type": "string" },
+                    { "name": "StartTime", "type": "datetime" },
+                    { "name": "UserPrincipalName", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_AdvancedFeatures_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_AdvancedFeatures_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AatpIntegrationEnabled", "type": "boolean" },
+                    { "name": "AutoResolveInvestigatedAlerts", "type": "boolean" },
+                    { "name": "EnableMcasIntegration", "type": "boolean" },
+                    { "name": "EnableWdavAntiTampering", "type": "boolean" },
+                    { "name": "FeatureName", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_AlertServiceConfig_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_AlertServiceConfig_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "LastModifiedUtc", "type": "datetime" },
+                    { "name": "ModifiedBy", "type": "string" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "WorkloadId", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_AlertTuning_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_AlertTuning_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CreatedBy", "type": "string" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "RuleId", "type": "string" },
+                    { "name": "Severity", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_AntivirusPolicy_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_AntivirusPolicy_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "FilterName", "type": "string" },
+                    { "name": "FilterValue", "type": "string" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "Platform", "type": "string" },
+                    { "name": "Scope", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_AssetRules_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_AssetRules_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AffectedAssetsCount", "type": "int" },
+                    { "name": "AssetType", "type": "string" },
+                    { "name": "ClassificationValue", "type": "string" },
+                    { "name": "CreatedBy", "type": "string" },
+                    { "name": "CriticalityLevel", "type": "int" },
+                    { "name": "Description", "type": "string" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "RuleId", "type": "string" },
+                    { "name": "RuleType", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_AuthenticatedTelemetry_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_AuthenticatedTelemetry_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AllowNonAuthSense", "type": "boolean" },
+                    { "name": "FeatureName", "type": "string" },
+                    { "name": "IsEnabled", "type": "boolean" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_CloudAppsConfig_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_CloudAppsConfig_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "ModifiedBy", "type": "string" },
+                    { "name": "Region", "type": "string" },
+                    { "name": "SettingId", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_ConnectedApps_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_ConnectedApps_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AppId", "type": "string" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "LatestConnectivity", "type": "datetime" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "SettingsLink", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_CustomCollection_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_CustomCollection_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CreatedBy", "type": "string" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "RuleId", "type": "string" },
+                    { "name": "Scope", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_CustomDetections_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_CustomDetections_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CreatedBy", "type": "string" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "LastModifiedUtc", "type": "datetime" },
+                    { "name": "LastRunStatus", "type": "string" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "RuleId", "type": "string" },
+                    { "name": "Severity", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_DataExportSettings_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_DataExportSettings_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "ConfigId", "type": "string" },
+                    { "name": "Destination", "type": "string" },
+                    { "name": "EnabledLogs", "type": "string" },
+                    { "name": "LogsCount", "type": "int" },
+                    { "name": "ResourceGroup", "type": "string" },
+                    { "name": "SubscriptionId", "type": "string" },
+                    { "name": "Workspace", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_DCCoverage_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_DCCoverage_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "DCName", "type": "string" },
+                    { "name": "Domain", "type": "string" },
+                    { "name": "IsActive", "type": "boolean" },
+                    { "name": "LastSeenUtc", "type": "datetime" },
+                    { "name": "Risk", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_DeviceControlPolicy_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_DeviceControlPolicy_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "FeatureName", "type": "string" },
+                    { "name": "HasPermissions", "type": "boolean" },
+                    { "name": "NotOnboarded", "type": "int" },
+                    { "name": "Onboarded", "type": "int" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_DeviceTimeline_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_DeviceTimeline_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "EventId", "type": "string" },
+                    { "name": "EventTime", "type": "datetime" },
+                    { "name": "EventType", "type": "string" },
+                    { "name": "FileName", "type": "string" },
+                    { "name": "MachineId", "type": "string" },
+                    { "name": "ProcessName", "type": "string" },
+                    { "name": "Severity", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_ExposureRecommendations_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_ExposureRecommendations_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "Category", "type": "string" },
+                    { "name": "ImplementationCost", "type": "string" },
+                    { "name": "IsDisabled", "type": "boolean" },
+                    { "name": "LastSyncedUtc", "type": "datetime" },
+                    { "name": "MaxScore", "type": "real" },
+                    { "name": "Product", "type": "string" },
+                    { "name": "RecommendationId", "type": "string" },
+                    { "name": "Score", "type": "real" },
+                    { "name": "Severity", "type": "string" },
+                    { "name": "Source", "type": "string" },
+                    { "name": "Status", "type": "string" },
+                    { "name": "Title", "type": "string" },
+                    { "name": "UserImpact", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_ExposureSnapshots_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_ExposureSnapshots_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "InitiativeId", "type": "string" },
+                    { "name": "MetricId", "type": "string" },
+                    { "name": "Score", "type": "real" },
+                    { "name": "ScoreChange", "type": "real" },
+                    { "name": "SnapshotId", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_IdentityAlertThresholds_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_IdentityAlertThresholds_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AlertType", "type": "string" },
+                    { "name": "ExpiresUtc", "type": "datetime" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "ModifiedBy", "type": "string" },
+                    { "name": "Threshold", "type": "real" },
+                    { "name": "ThresholdId", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_IdentityOnboarding_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_IdentityOnboarding_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "DCName", "type": "string" },
+                    { "name": "Domain", "type": "string" },
+                    { "name": "IpAddress", "type": "string" },
+                    { "name": "IsActive", "type": "boolean" },
+                    { "name": "LastSeenUtc", "type": "datetime" },
+                    { "name": "SensorHealth", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_IdentityServiceAccounts_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_IdentityServiceAccounts_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AccountSid", "type": "string" },
+                    { "name": "AccountType", "type": "string" },
+                    { "name": "AccountUpn", "type": "string" },
+                    { "name": "Domain", "type": "string" },
+                    { "name": "IsActive", "type": "boolean" },
+                    { "name": "LastSeenUtc", "type": "datetime" },
+                    { "name": "Risk", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_IntuneConnection_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_IntuneConnection_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "FeatureName", "type": "string" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "Status", "type": "int" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_LicenseReport_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_LicenseReport_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "DetectedUsers", "type": "int" },
+                    { "name": "DeviceCount", "type": "int" },
+                    { "name": "SkuName", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_LiveResponseConfig_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_LiveResponseConfig_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AutomatedIrLiveResponse", "type": "boolean" },
+                    { "name": "AutomatedIrUnsignedScripts", "type": "boolean" },
+                    { "name": "FeatureName", "type": "string" },
+                    { "name": "LiveResponseForServers", "type": "boolean" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_MachineActions_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_MachineActions_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "ActionId", "type": "string" },
+                    { "name": "ActionStatus", "type": "string" },
+                    { "name": "ActionType", "type": "string" },
+                    { "name": "CompletedTime", "type": "datetime" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "InvestigationId", "type": "string" },
+                    { "name": "MachineId", "type": "string" },
+                    { "name": "Operator", "type": "string" },
+                    { "name": "ScriptOutput", "type": "dynamic" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_MtoTenants_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_MtoTenants_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "IsHomeTenant", "type": "boolean" },
+                    { "name": "IsSelected", "type": "boolean" },
+                    { "name": "LostAccess", "type": "boolean" },
+                    { "name": "TenantAadEnvironment", "type": "int" },
+                    { "name": "TenantId", "type": "string" },
+                    { "name": "TenantName", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_PreviewFeatures_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_PreviewFeatures_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "IsOptIn", "type": "boolean" },
+                    { "name": "SettingId", "type": "string" },
+                    { "name": "SliceId", "type": "int" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_PUAConfig_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_PUAConfig_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AutomatedIrPuaAsSuspicious", "type": "boolean" },
+                    { "name": "FeatureName", "type": "string" },
+                    { "name": "IsAutomatedIrContainDeviceEnabled", "type": "boolean" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_PurviewSharing_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_PurviewSharing_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AlertSharingEnabled", "type": "boolean" },
+                    { "name": "FeatureName", "type": "string" },
+                    { "name": "IsEnabled", "type": "boolean" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_RbacDeviceGroups_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_RbacDeviceGroups_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AutoRemediationLevel", "type": "int" },
+                    { "name": "Description", "type": "string" },
+                    { "name": "GroupId", "type": "int" },
+                    { "name": "IsUnassigned", "type": "boolean" },
+                    { "name": "LastUpdated", "type": "datetime" },
+                    { "name": "MachineCount", "type": "int" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "Priority", "type": "int" },
+                    { "name": "RuleCount", "type": "int" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_RemediationAccounts_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_RemediationAccounts_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AccountType", "type": "string" },
+                    { "name": "AccountUpn", "type": "string" },
+                    { "name": "Domain", "type": "string" },
+                    { "name": "IsActive", "type": "boolean" },
+                    { "name": "LastSeenUtc", "type": "datetime" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_SAClassification_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_SAClassification_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AccountType", "type": "string" },
+                    { "name": "Domain", "type": "string" },
+                    { "name": "IsActive", "type": "boolean" },
+                    { "name": "LastSeenUtc", "type": "datetime" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "RuleId", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_SecurityBaselines_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_SecurityBaselines_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "BenchmarkName", "type": "string" },
+                    { "name": "Compliance", "type": "boolean" },
+                    { "name": "DeviceCount", "type": "int" },
+                    { "name": "LastScanUtc", "type": "datetime" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "ProfileId", "type": "string" },
+                    { "name": "Score", "type": "real" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_SmartScreenConfig_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_SmartScreenConfig_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CustomIndicator", "type": "int" },
+                    { "name": "Exploit", "type": "int" },
+                    { "name": "FeatureName", "type": "string" },
+                    { "name": "LastModifiedUtc", "type": "datetime" },
+                    { "name": "Malicious", "type": "int" },
+                    { "name": "Phishing", "type": "int" },
+                    { "name": "TotalThreats", "type": "int" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_StreamingApiConfig_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_StreamingApiConfig_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_SuppressionRules_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_SuppressionRules_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "Action", "type": "int" },
+                    { "name": "AlertTitle", "type": "string" },
+                    { "name": "CreatedBy", "type": "string" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "IsReadOnly", "type": "boolean" },
+                    { "name": "MatchingAlertsCount", "type": "int" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "RuleId", "type": "string" },
+                    { "name": "Scope", "type": "int" },
+                    { "name": "UpdateTime", "type": "datetime" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_TenantAllowBlock_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_TenantAllowBlock_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "Action", "type": "string" },
+                    { "name": "CreatedBy", "type": "string" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "ExpiryTime", "type": "datetime" },
+                    { "name": "IndicatorType", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_TenantContext_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_TenantContext_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AccountType", "type": "string" },
+                    { "name": "DataCenter", "type": "string" },
+                    { "name": "EnvironmentName", "type": "string" },
+                    { "name": "IsHomeTenant", "type": "boolean" },
+                    { "name": "IsMdatpActive", "type": "boolean" },
+                    { "name": "IsSentinelActive", "type": "boolean" },
+                    { "name": "Region", "type": "string" },
+                    { "name": "TenantId", "type": "string" },
+                    { "name": "TenantName", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_TenantWorkloadStatus_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_TenantWorkloadStatus_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AllTenantsCount", "type": "int" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "EntityType", "type": "string" },
+                    { "name": "LastUpdated", "type": "datetime" },
+                    { "name": "LastUpdatedByUpn", "type": "string" },
+                    { "name": "TenantGroupId", "type": "string" },
+                    { "name": "TenantId", "type": "string" },
+                    { "name": "TenantName", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_ThreatAnalytics_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_ThreatAnalytics_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CreatedOn", "type": "datetime" },
+                    { "name": "IsVNext", "type": "boolean" },
+                    { "name": "Keywords", "type": "string" },
+                    { "name": "LastUpdatedOn", "type": "datetime" },
+                    { "name": "LastVisitTime", "type": "datetime" },
+                    { "name": "OutbreakId", "type": "string" },
+                    { "name": "ReportType", "type": "string" },
+                    { "name": "Severity", "type": "int" },
+                    { "name": "StartedOn", "type": "datetime" },
+                    { "name": "Tags", "type": "string" },
+                    { "name": "Title", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_UnifiedRbacRoles_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_UnifiedRbacRoles_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "IsBuiltIn", "type": "boolean" },
+                    { "name": "ModifiedBy", "type": "string" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "RoleId", "type": "string" },
+                    { "name": "Scope", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_UserPreferences_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_UserPreferences_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CreatedBy", "type": "string" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "Scope", "type": "string" },
+                    { "name": "SettingId", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_WebContentFiltering_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_WebContentFiltering_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "ActivityDeltaPercentage", "type": "int" },
+                    { "name": "CategoryName", "type": "string" },
+                    { "name": "FeatureName", "type": "string" },
+                    { "name": "TotalAccessRequests", "type": "int" },
+                    { "name": "TotalBlockedCount", "type": "int" },
+                    { "name": "UpdateTime", "type": "datetime" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_XspmAttackPaths_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_XspmAttackPaths_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "HopCount", "type": "int" },
+                    { "name": "PathId", "type": "string" },
+                    { "name": "Severity", "type": "string" },
+                    { "name": "Source", "type": "string" },
+                    { "name": "SourceId", "type": "string" },
+                    { "name": "Status", "type": "string" },
+                    { "name": "Target", "type": "string" },
+                    { "name": "TargetId", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_XspmChokePoints_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_XspmChokePoints_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AttackPathsCount", "type": "int" },
+                    { "name": "EntityType", "type": "string" },
+                    { "name": "NodeId", "type": "string" },
+                    { "name": "NodeName", "type": "string" },
+                    { "name": "NodeType", "type": "string" },
+                    { "name": "Severity", "type": "string" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_XspmInitiatives_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_XspmInitiatives_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "ActiveMetricCount", "type": "int" },
+                    { "name": "InitiativeId", "type": "string" },
+                    { "name": "IsFavorite", "type": "boolean" },
+                    { "name": "MetricCount", "type": "int" },
+                    { "name": "Name", "type": "string" },
+                    { "name": "Programs", "type": "string" },
+                    { "name": "TargetValue", "type": "real" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2023-09-01",
+              "name": "[concat(parameters('workspaceName'), '/MDE_XspmTopTargets_CL')]",
+              "properties": {
+                "plan": "Analytics",
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "totalRetentionInDays": "[parameters('retentionInDays')]",
+                "schema": {
+                  "name":    "MDE_XspmTopTargets_CL",
+                  "columns": [
+                    { "name": "TimeGenerated", "type": "datetime" },
+                    { "name": "SourceStream", "type": "string" },
+                    { "name": "EntityId", "type": "string" },
+                    { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AttackPathsCount", "type": "int" },
+                    { "name": "Source", "type": "string" },
+                    { "name": "Status", "type": "string" },
+                    { "name": "TargetId", "type": "string" },
+                    { "name": "TargetName", "type": "string" }
+                  ]
                 }
               }
             },
@@ -543,11 +1651,22 @@
               "apiVersion": "2023-09-01",
               "name": "[concat(parameters('workspaceName'), '/MDE_Heartbeat_CL')]",
               "properties": {
+                "plan": "Analytics",
                 "retentionInDays": "[parameters('retentionInDays')]",
                 "totalRetentionInDays": "[parameters('retentionInDays')]",
                 "schema": {
                   "name":    "MDE_Heartbeat_CL",
-                  "columns": "[variables('heartbeatSchema')]"
+                  "columns": [
+                    { "name": "TimeGenerated",    "type": "datetime" },
+                    { "name": "FunctionName",     "type": "string" },
+                    { "name": "Tier",             "type": "string" },
+                    { "name": "StreamsAttempted", "type": "int" },
+                    { "name": "StreamsSucceeded", "type": "int" },
+                    { "name": "RowsIngested",     "type": "int" },
+                    { "name": "LatencyMs",        "type": "int" },
+                    { "name": "HostName",         "type": "string" },
+                    { "name": "Notes",            "type": "dynamic" }
+                  ]
                 }
               }
             },
@@ -556,11 +1675,25 @@
               "apiVersion": "2023-09-01",
               "name": "[concat(parameters('workspaceName'), '/MDE_AuthTestResult_CL')]",
               "properties": {
+                "plan": "Analytics",
                 "retentionInDays": "[parameters('retentionInDays')]",
                 "totalRetentionInDays": "[parameters('retentionInDays')]",
                 "schema": {
                   "name":    "MDE_AuthTestResult_CL",
-                  "columns": "[variables('authTestResultSchema')]"
+                  "columns": [
+                    { "name": "TimeGenerated",       "type": "datetime" },
+                    { "name": "Method",              "type": "string" },
+                    { "name": "PortalHost",          "type": "string" },
+                    { "name": "Upn",                 "type": "string" },
+                    { "name": "Success",             "type": "boolean" },
+                    { "name": "Stage",               "type": "string" },
+                    { "name": "FailureReason",       "type": "string" },
+                    { "name": "EstsMs",              "type": "int" },
+                    { "name": "SccauthMs",           "type": "int" },
+                    { "name": "SampleCallHttpCode",  "type": "int" },
+                    { "name": "SampleCallLatencyMs", "type": "int" },
+                    { "name": "SccauthAcquiredUtc",  "type": "string" }
+                  ]
                 }
               }
             }
@@ -674,7 +1807,7 @@
                     { "name": "MDE_ConnectedApps_CL",            "lastDataReceivedQuery": "MDE_ConnectedApps_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_TenantContext_CL",            "lastDataReceivedQuery": "MDE_TenantContext_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_TenantWorkloadStatus_CL",     "lastDataReceivedQuery": "MDE_TenantWorkloadStatus_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-                    { "name": "MDE_StreamingApiConfig_CL",       "lastDataReceivedQuery": "MDE_StreamingApiConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_DeviceTimeline_CL",           "lastDataReceivedQuery": "MDE_DeviceTimeline_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_IntuneConnection_CL",         "lastDataReceivedQuery": "MDE_IntuneConnection_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_PurviewSharing_CL",           "lastDataReceivedQuery": "MDE_PurviewSharing_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_RbacDeviceGroups_CL",         "lastDataReceivedQuery": "MDE_RbacDeviceGroups_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
@@ -683,7 +1816,6 @@
                     { "name": "MDE_SAClassification_CL",         "lastDataReceivedQuery": "MDE_SAClassification_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_XspmInitiatives_CL",          "lastDataReceivedQuery": "MDE_XspmInitiatives_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_ExposureSnapshots_CL",        "lastDataReceivedQuery": "MDE_ExposureSnapshots_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-                    { "name": "MDE_SecureScoreBreakdown_CL",     "lastDataReceivedQuery": "MDE_SecureScoreBreakdown_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_ExposureRecommendations_CL",  "lastDataReceivedQuery": "MDE_ExposureRecommendations_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_XspmAttackPaths_CL",          "lastDataReceivedQuery": "MDE_XspmAttackPaths_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_XspmChokePoints_CL",          "lastDataReceivedQuery": "MDE_XspmChokePoints_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
@@ -699,7 +1831,8 @@
                     { "name": "MDE_UserPreferences_CL",          "lastDataReceivedQuery": "MDE_UserPreferences_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_MtoTenants_CL",               "lastDataReceivedQuery": "MDE_MtoTenants_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_LicenseReport_CL",            "lastDataReceivedQuery": "MDE_LicenseReport_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-                    { "name": "MDE_CloudAppsConfig_CL",          "lastDataReceivedQuery": "MDE_CloudAppsConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
+                    { "name": "MDE_CloudAppsConfig_CL",          "lastDataReceivedQuery": "MDE_CloudAppsConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "MDE_MachineActions_CL",           "lastDataReceivedQuery": "MDE_MachineActions_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
                   ],
                   "connectivityCriterias": [
                     { "type": "IsConnectedQuery", "value": [ "MDE_Heartbeat_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(1h)" ] }

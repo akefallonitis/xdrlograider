@@ -3,44 +3,59 @@
 //
 // PARAMETERS:
 //   lookback - How far back to consider "previous". Default 7d.
-//   window   - How recent is "current". Default 1d.
+//   window   - How recent is "current". Default 1h.
 //
 // INVOCATION:
-//   MDE_Drift_P5Identity(7d, 1d)
+//   MDE_Drift_P5Identity(7d, 1h)
+//   MDE_Drift_P5Identity()         // applies defaults
+//
+// NOTES:
+//   - Parameterized as a KQL function so workbooks/rules can plumb
+//     {TimeRange:value} from the time-picker.
+//   - Drift is computed over the per-stream typed columns (DCR-projected at
+//     ingest); RawJson is preserved on each table as a fallback for fields
+//     not in the manifest's ProjectionMap, but the parser never re-parses it.
 
-let lookback = 7d;
-let window = 1d;
-let sources = union withsource=_Table
-    MDE_IdentityServiceAccounts_CL,
-    MDE_IdentityOnboarding_CL,
-    MDE_DCCoverage_CL,
-    MDE_IdentityAlertThresholds_CL,
-    MDE_RemediationAccounts_CL
-    | where TimeGenerated > ago(lookback);
-let current = sources
-    | where TimeGenerated > ago(window)
-    | summarize arg_max(TimeGenerated, *) by _Table, EntityId;
-let previous = sources
-    | where TimeGenerated between (ago(lookback) .. ago(window))
-    | summarize arg_max(TimeGenerated, *) by _Table, EntityId;
-current
-| join kind=leftouter previous on _Table, EntityId
-| where hash(tostring(RawJson)) != hash(tostring(RawJson1)) or isnull(RawJson1)
-| extend CurrentFields  = bag_keys(parse_json(RawJson))
-| extend PreviousFields = iff(isnull(RawJson1), dynamic([]), bag_keys(parse_json(RawJson1)))
-| mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (
-    extend
-        NewValue = tostring(parse_json(RawJson)[tostring(field)]),
-        OldValue = tostring(iff(isnull(RawJson1), '', parse_json(RawJson1)[tostring(field)]))
-    | where NewValue != OldValue
-  )
-| project
-    TimeGenerated,
-    StreamName       = _Table,
-    EntityId,
-    FieldName        = tostring(field),
-    OldValue,
-    NewValue,
-    SnapshotCurrent  = TimeGenerated,
-    SnapshotPrevious = TimeGenerated1,
-    ChangeType       = iff(isnull(RawJson1), "Added", iff(isnull(parse_json(RawJson)[tostring(field)]), "Removed", "Modified"))
+let MDE_Drift_P5Identity = (lookback:timespan = 7d, window:timespan = 1h) {
+    // Metadata + envelope columns to exclude from field-level diff (these are
+    // bookkeeping; only typed data columns from the manifest ProjectionMap
+    // count as "fields" for drift detection).
+    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);
+    let sources = union withsource=_Table
+        MDE_IdentityServiceAccounts_CL,
+        MDE_IdentityOnboarding_CL,
+        MDE_DCCoverage_CL,
+        MDE_IdentityAlertThresholds_CL,
+        MDE_RemediationAccounts_CL
+        | where TimeGenerated > ago(lookback);
+    let current = sources
+        | where TimeGenerated > ago(window)
+        | summarize arg_max(TimeGenerated, *) by _Table, EntityId
+        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);
+    let previous = sources
+        | where TimeGenerated between (ago(lookback) .. ago(window))
+        | summarize arg_max(TimeGenerated, *) by _Table, EntityId
+        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);
+    current
+    | join kind=leftouter previous on _Table, EntityId
+    | where hash(tostring(TypedBag)) != hash(tostring(TypedBag1)) or isnull(TypedBag1)
+    | extend CurrentFields  = bag_keys(TypedBag)
+    | extend PreviousFields = iff(isnull(TypedBag1), dynamic([]), bag_keys(TypedBag1))
+    | mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (
+        extend
+            NewValue = tostring(TypedBag[tostring(field)]),
+            OldValue = tostring(iff(isnull(TypedBag1), '', TypedBag1[tostring(field)]))
+        | where NewValue != OldValue
+      )
+    | project
+        TimeGenerated,
+        StreamName       = _Table,
+        EntityId,
+        FieldName        = tostring(field),
+        OldValue,
+        NewValue,
+        SnapshotCurrent  = TimeGenerated,
+        SnapshotPrevious = TimeGenerated1,
+        ChangeType       = iff(isnull(TypedBag1), "Added", iff(isnull(TypedBag[tostring(field)]), "Removed", "Modified"))
+};
+MDE_Drift_P5Identity

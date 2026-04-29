@@ -100,6 +100,44 @@ Until fixed, **no data flows** — the auth-selftest gate is intentional (see `d
 5. Re-run `Initialize-XdrLogRaiderAuth.ps1`
 6. Review `MDE_Drift_*` for the period of compromise — look for policy changes made by the compromised account
 
+## App Insights structured-logging KQL
+
+The connector emits Microsoft-best-practices structured logging to App Insights.
+Auth-chain failures, rate-limit pressure and ingest gaps land as
+`customEvents` with stable property bags + `operation_Id` correlation. Three
+critical event types (`AuthChain.AADSTSError`, `AuthChain.RateLimited`,
+`AuthChain.BoundaryMarker`) are excluded from adaptive sampling so they're
+never dropped under load.
+
+```kql
+// AADSTS error breakdown — pivot by code + auth method
+customEvents
+| where name == 'AuthChain.AADSTSError'
+| summarize count() by tostring(customDimensions.AADSTSCode), tostring(customDimensions.Method)
+
+// Per-stream latency P95 (Stream.Polled fires once per stream per tier-poll)
+customEvents
+| where name == 'Stream.Polled'
+| extend Stream = tostring(customDimensions.Stream), Latency = todouble(customDimensions.LatencyMs)
+| summarize P95 = percentile(Latency, 95) by Stream
+
+// 429 pressure over the last hour
+customEvents
+| where name == 'AuthChain.RateLimited' and timestamp > ago(1h)
+| summarize Retries = count(), MaxRetryAfterMs = max(toint(customDimensions.RetryAfterMs)) by tostring(customDimensions.Path)
+
+// Boundary markers — distinguishes "API working but no data" from "API failed"
+customEvents
+| where name == 'Ingest.BoundaryMarker'
+| summarize count() by tostring(customDimensions.Stream), tostring(customDimensions.Reason)
+```
+
+End-to-end transaction stitching: every Connect-DefenderPortal call mints one
+`OperationId` (GUID) cached on the session. Downstream
+Invoke-DefenderPortalRequest + Invoke-MDETierPoll reuse it, so AI's
+transaction view shows the full auth-chain -> portal request -> per-stream
+poll graph for a single auth attempt.
+
 ## Contact
 
 - Repo: https://github.com/akefallonitis/xdrlograider

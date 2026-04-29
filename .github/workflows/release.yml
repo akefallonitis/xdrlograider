@@ -13,7 +13,7 @@ jobs:
     name: Build and release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
 
       - name: Install Pester
         shell: pwsh
@@ -193,7 +193,9 @@ jobs:
 
           # === STAGE: src/* → $stage/ (flatten) ===
 
-          # Root-level config + custom Modules/ (XdrLogRaider.Auth/Client/Ingest).
+          # Root-level config + custom Modules/ (Xdr.Common.Auth, Xdr.Sentinel.Ingest,
+          # Xdr.Defender.Auth, Xdr.Defender.Client, Xdr.Connector.Orchestrator,
+          # plus the Xdr.Portal.Auth + XdrLogRaider.Client + XdrLogRaider.Ingest shims).
           Copy-Item ./src/host.json, ./src/profile.ps1, ./src/requirements.psd1 -Destination $stage
           Copy-Item ./src/Modules -Destination (Join-Path $stage 'Modules') -Recurse
 
@@ -364,7 +366,7 @@ jobs:
               "./xdrlograider-solution-$version.zip"
 
       - name: Generate SBOM (SPDX)
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0.24.0
         continue-on-error: true  # SBOM upload is nice-to-have; do not block release
         with:
           path: .
@@ -397,7 +399,7 @@ jobs:
           }
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2
         with:
           files: |
             function-app.zip

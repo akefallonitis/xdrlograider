@@ -4,15 +4,19 @@ param storageAccountName string
 @description('Azure region.')
 param location string
 
-@description('Iter 13.15: when true, sets allowSharedKeyAccess: false. Only safe when AzureWebJobsStorage + WEBSITE_CONTENTAZUREFILECONNECTIONSTRING use Managed Identity (i.e., hostingPlan != consumption-y1). Y1 Linux Consumption keeps shared-key on the content share due to a Microsoft platform limit.')
+@description('When true, sets allowSharedKeyAccess: false. Only safe when AzureWebJobsStorage + WEBSITE_CONTENTAZUREFILECONNECTIONSTRING use Managed Identity (i.e., hostingPlan != consumption-y1). Y1 Linux Consumption keeps shared-key on the content share due to a Microsoft platform limit.')
 param disableSharedKey bool = false
 
-@description('Iter 13.15: when true, restricts public network access on the storage account (default deny + AzureServices bypass). Default false for v0.1.0-beta deployability; flips to true in v1.2 Marketplace baseline.')
+@description('When true, restricts public network access on the storage account (default deny + AzureServices bypass). Default false for v0.1.0-beta deployability; flips to true in the v1.2 Marketplace baseline.')
 param restrictPublicNetwork bool = false
+
+@description('Tags applied to every resource emitted by this module. The `environment` tag carries the env signal regardless of whether legacyEnvInName=true or false, so operators can filter by environment via Azure tag query.')
+param tags object = {}
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName
   location: location
+  tags: tags
   kind: 'StorageV2'
   sku: {
     name: 'Standard_LRS'

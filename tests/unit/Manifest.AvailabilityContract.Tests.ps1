@@ -25,19 +25,19 @@
 
 BeforeDiscovery {
     $script:RepoRoot     = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:ManifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $script:ManifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $script:Manifest     = Import-PowerShellDataFile -Path $script:ManifestPath
     $script:Entries      = @($script:Manifest.Endpoints)
 }
 
 BeforeAll {
     $script:RepoRoot         = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:ManifestPath     = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $script:ManifestPath     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $script:Manifest         = Import-PowerShellDataFile -Path $script:ManifestPath
     $script:Entries          = @($script:Manifest.Endpoints)
     $script:AuthModulePath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'   'Xdr.Portal.Auth.psd1'
-    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1'
-    $script:ClientModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'XdrLogRaider.Client.psd1'
+    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
+    $script:ClientModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
     $script:FixtureDir       = Join-Path $script:RepoRoot 'tests' 'fixtures' 'live-responses'
 
     function global:Get-AzAccessToken { param([string]$ResourceUrl) [pscustomobject]@{ Token = 'stub'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
@@ -93,11 +93,11 @@ Describe 'Manifest Availability schema (declarative contract)' {
     }
 
     It 'manifest contains the expected baseline of <ExpectedCount> endpoints (drift detector)' -ForEach @(
-        @{ Description = 'total endpoints';                                ExpectedCount = 45; Filter = { $true } }
-        @{ Description = 'live endpoints (~80% target)';                   ExpectedCount = 36; Filter = { $args[0].Availability -eq 'live' } }
-        @{ Description = 'role-gated endpoints (iter 13.8 retired category)'; ExpectedCount = 0; Filter = { $args[0].Availability -eq 'role-gated' } }
-        @{ Description = 'tenant-gated endpoints';                         ExpectedCount = 8; Filter = { $args[0].Availability -eq 'tenant-gated' } }
-        @{ Description = 'deprecated endpoints (iter 13.8: StreamingApiConfig path collision)'; ExpectedCount = 1; Filter = { $args[0].Availability -eq 'deprecated' } }
+        @{ Description = 'total endpoints (2 added: DeviceTimeline + MachineActions; 1 dropped: SecureScoreBreakdown — Graph /security/secureScores covers)'; ExpectedCount = 46; Filter = { $true } }
+        @{ Description = 'live endpoints (~80% target)';                   ExpectedCount = 35; Filter = { $args[0].Availability -eq 'live' } }
+        @{ Description = 'role-gated endpoints (retired category)'; ExpectedCount = 0; Filter = { $args[0].Availability -eq 'role-gated' } }
+        @{ Description = 'tenant-gated endpoints';                         ExpectedCount = 10; Filter = { $args[0].Availability -eq 'tenant-gated' } }
+        @{ Description = 'deprecated endpoints (StreamingApiConfig path collision)'; ExpectedCount = 1; Filter = { $args[0].Availability -eq 'deprecated' } }
     ) {
         param($Description, $ExpectedCount, $Filter)
         $matching = @($script:Entries | Where-Object { & $Filter $_ })
@@ -108,23 +108,23 @@ Describe 'Manifest Availability schema (declarative contract)' {
 Describe 'Invoke-MDETierPoll — per-stream failure isolation (behavioral gate)' {
 
     It 'one stream throwing does NOT abort the rest of the tier' {
-        $outcome = InModuleScope XdrLogRaider.Client {
+        $outcome = InModuleScope Xdr.Defender.Client {
             $manifest = Get-MDEEndpointManifest
             $p0Streams = @($manifest.Values | Where-Object { $_.Tier -eq 'P0' })
 
             $script:CallNumber = 0
-            Mock Invoke-MDEEndpoint -ModuleName XdrLogRaider.Client {
+            Mock Invoke-MDEEndpoint -ModuleName Xdr.Defender.Client {
                 $script:CallNumber++
                 if ($script:CallNumber -eq 1) {
                     throw "simulated 4xx for first stream (role-gated)"
                 }
                 ,@([pscustomobject]@{ TimeGenerated = (Get-Date).ToString('o'); EntityId = 'x'; SourceStream = 'MDE_Test_CL'; RawJson = '{}' })
             }
-            Mock Send-ToLogAnalytics -ModuleName XdrLogRaider.Client {
+            Mock Send-ToLogAnalytics -ModuleName Xdr.Defender.Client {
                 [pscustomobject]@{ RowsSent = 1; BatchesSent = 1; LatencyMs = 10; GzipBytes = 100 }
             }
-            Mock Set-CheckpointTimestamp -ModuleName XdrLogRaider.Client {}
-            Mock Get-CheckpointTimestamp -ModuleName XdrLogRaider.Client { $null }
+            Mock Set-CheckpointTimestamp -ModuleName Xdr.Defender.Client {}
+            Mock Get-CheckpointTimestamp -ModuleName Xdr.Defender.Client { $null }
 
             $session = [pscustomobject]@{ PortalHost = 'security.microsoft.com'; TenantId = 't'; Cookies = @{} }
             $config  = [pscustomobject]@{
@@ -149,10 +149,10 @@ Describe 'Invoke-MDETierPoll — per-stream failure isolation (behavioral gate)'
     }
 
     It 'all streams in a tier returning 4xx still produces a structured result (no fatal)' {
-        $outcome = InModuleScope XdrLogRaider.Client {
-            Mock Invoke-MDEEndpoint -ModuleName XdrLogRaider.Client { throw "simulated 403 Forbidden -- role-gated" }
-            Mock Get-CheckpointTimestamp -ModuleName XdrLogRaider.Client { $null }
-            Mock Set-CheckpointTimestamp -ModuleName XdrLogRaider.Client {}
+        $outcome = InModuleScope Xdr.Defender.Client {
+            Mock Invoke-MDEEndpoint -ModuleName Xdr.Defender.Client { throw "simulated 403 Forbidden -- role-gated" }
+            Mock Get-CheckpointTimestamp -ModuleName Xdr.Defender.Client { $null }
+            Mock Set-CheckpointTimestamp -ModuleName Xdr.Defender.Client {}
 
             $session = [pscustomobject]@{ PortalHost = 'security.microsoft.com'; TenantId = 't'; Cookies = @{} }
             $config  = [pscustomobject]@{

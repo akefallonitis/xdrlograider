@@ -107,7 +107,7 @@ Describe 'Service-account role consistency across docs' {
     }
 
     It 'iter-13.8 manifest has zero role-gated streams (category retired)' {
-        $manifestPath = Join-Path $script:RepoRoot 'src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1'
+        $manifestPath = Join-Path $script:RepoRoot 'src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1'
         $manifest = Import-PowerShellDataFile -Path $manifestPath
         # Strict-mode-safe: enumerate first, THEN .Count. The .Stream chain
         # produces $null when zero matches, and $null.Count crashes under strict.
@@ -116,7 +116,7 @@ Describe 'Service-account role consistency across docs' {
     }
 
     It 'manifest tenant-gated streams match the PERMISSIONS.md tenant-feature detail table' {
-        $manifestPath = Join-Path $script:RepoRoot 'src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1'
+        $manifestPath = Join-Path $script:RepoRoot 'src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1'
         $permPath     = Join-Path $script:RepoRoot 'docs/PERMISSIONS.md'
 
         $manifest = Import-PowerShellDataFile -Path $manifestPath

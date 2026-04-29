@@ -15,8 +15,10 @@
 #   b) the columns the DCR declares for the same stream (from the compiled ARM
 #      at deploy/compiled/mainTemplate.json)
 #
-# Baseline invariant for data streams: both sides must be exactly
-# {TimeGenerated, SourceStream, EntityId, RawJson}.
+# Per-stream invariant: every active stream's DCR streamDeclaration carries the
+# 4 base columns (TimeGenerated/SourceStream/EntityId/RawJson) PLUS typed columns
+# derived from the manifest ProjectionMap. The FA-side ConvertTo-MDEIngestRow
+# uses the same ProjectionMap, so the row column set matches exactly.
 #
 # System-stream invariant:
 #   MDE_Heartbeat_CL     — must include the 9 fields Write-Heartbeat emits
@@ -24,7 +26,7 @@
 
 BeforeDiscovery {
     $repoRoot     = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
-    $manifestPath = Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $manifestPath = Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $manifest     = Import-PowerShellDataFile -Path $manifestPath
 
     # StrictMode-safe enumeration: ContainsKey() before dot-access.
@@ -63,6 +65,18 @@ BeforeAll {
         $name = $prop.Name -replace '^Custom-', ''
         $script:DcrStreamDecls[$name] = @($prop.Value.columns | ForEach-Object { $_.name })
     }
+
+    # Manifest's ProjectionMap is the source of truth for typed cols. Build a
+    # lookup so per-stream tests can compute the expected column set.
+    $manifestData = Import-PowerShellDataFile -Path (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1')
+    $script:ManifestProjections = @{}
+    foreach ($entry in $manifestData.Endpoints) {
+        if ($entry.ContainsKey('ProjectionMap')) {
+            $script:ManifestProjections[$entry.Stream] = $entry.ProjectionMap
+        } else {
+            $script:ManifestProjections[$entry.Stream] = @{}
+        }
+    }
 }
 
 Describe 'DCR stream declarations — invariants' {
@@ -88,17 +102,31 @@ Describe 'DCR stream declarations — invariants' {
         $extras.Count | Should -Be 0 -Because "DCR AuthTestResult schema has extra columns: $($extras -join ', ')"
     }
 
-    It 'DCR declares exactly 47 streams (45 data + 2 system)' {
-        $script:DcrStreamDecls.Count | Should -Be 47
+    It 'DCR declares exactly 48 streams (46 data + 2 system)' {
+        $script:DcrStreamDecls.Count | Should -Be 48
     }
 }
 
-Describe 'Per-data-stream: DCR baseline 4-col schema' -ForEach $script:ActiveStreams {
-    It 'DCR declares <Stream> with the 4-col baseline (TimeGenerated, SourceStream, EntityId, RawJson)' {
+Describe 'Per-data-stream: DCR typed-column schema matches manifest' -ForEach $script:ActiveStreams {
+    It 'DCR declares <Stream> with base 4 columns + manifest ProjectionMap typed columns' {
         $cols = $script:DcrStreamDecls[$_.Stream]
         $cols | Should -Not -BeNullOrEmpty -Because "<Stream> must have a DCR streamDeclaration"
-        # Exactly the baseline, no more no less.
-        Compare-Object -ReferenceObject $script:BaselineCols -DifferenceObject $cols | Should -BeNullOrEmpty -Because "DCR columns for $($_.Stream) must match the 4-col baseline exactly"
+        # Base 4 columns are always present.
+        foreach ($base in $script:BaselineCols) {
+            $cols | Should -Contain $base -Because "DCR for $($_.Stream) must include base column '$base'"
+        }
+        # Typed columns derived from the manifest ProjectionMap must appear.
+        $proj = $script:ManifestProjections[$_.Stream]
+        if ($proj -and @($proj.Keys).Count -gt 0) {
+            foreach ($typedCol in $proj.Keys) {
+                $cols | Should -Contain $typedCol -Because "DCR for $($_.Stream) must include manifest-projected column '$typedCol'"
+            }
+        }
+        # Expected total = base 4 + ProjectionMap keys.
+        $projKeyCount = 0
+        if ($proj) { $projKeyCount = @($proj.Keys).Count }
+        $expectedCount = $script:BaselineCols.Count + $projKeyCount
+        $cols.Count | Should -Be $expectedCount -Because "DCR for $($_.Stream) has $($cols.Count) cols; expected base 4 + $projKeyCount ProjectionMap cols = $expectedCount"
     }
 }
 
@@ -120,8 +148,8 @@ Describe 'Per-data-stream: ingest row matches DCR schema' -ForEach $script:Activ
             function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
         }
         Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Portal.Auth'     'Xdr.Portal.Auth.psd1')     -Force -ErrorAction Stop
-        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1') -Force -ErrorAction Stop
-        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'XdrLogRaider.Client.psd1') -Force -ErrorAction Stop
+        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -ErrorAction Stop
+        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -ErrorAction Stop
 
         # Re-parse DCR — Pester 5 runs -ForEach Describes in their own scope.
         $arm = Get-Content -Raw -Path (Join-Path $repoRoot 'deploy' 'compiled' 'mainTemplate.json') | ConvertFrom-Json
@@ -165,7 +193,20 @@ Describe 'Per-data-stream: ingest row matches DCR schema' -ForEach $script:Activ
         if ($null -eq $entity -or ($entity -is [array] -and @($entity).Count -eq 0)) {
             $entity = [pscustomobject]@{}
         }
-        $row = ConvertTo-MDEIngestRow -Stream $_.Stream -EntityId $pair.Id -Raw $entity
+
+        # Pass the manifest's ProjectionMap so the row gets typed columns
+        # alongside the 4 base columns — matches the FA dispatcher path
+        # (Invoke-MDEEndpoint resolves ProjectionMap from the manifest entry).
+        $streamName = $_.Stream
+        $manifestData = Import-PowerShellDataFile -Path (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1')
+        $projMap = $null
+        foreach ($e in $manifestData.Endpoints) {
+            if ($e.Stream -eq $streamName) {
+                if ($e.ContainsKey('ProjectionMap')) { $projMap = $e.ProjectionMap }
+                break
+            }
+        }
+        $row = ConvertTo-MDEIngestRow -Stream $streamName -EntityId $pair.Id -Raw $entity -ProjectionMap $projMap
 
         $rowCols = @($row.PSObject.Properties.Name)
         $dcrCols = $script:DcrStreamDecls[$_.Stream]

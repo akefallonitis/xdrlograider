@@ -13,9 +13,63 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 > v0.1.0-beta.1 → v0.1.0 GA (after 30-day tenant soak) → v1.0.0 production
 > (after ≥2 external operators complete soak). See docs/ROADMAP.md.
 
+## [Unreleased]
+
+### Status
+
+v0.1.0-beta in active development. Production-ready promotion pending content-quality enhancements: a small set of operator-experience bugs and architectural improvements layered on the functional foundation (auth chain works end-to-end, rows land in Log Analytics, no destructive failures). Operators may continue to deploy v0.1.0-beta for evaluation; the items below describe what is changing on the path to v0.1.0 GA.
+
+### Added
+
+- Connector-side typed-column ingest — per-stream projection map extracts typed columns at ingest, DCR custom tables get typed columns plus `transformKql` defense-in-depth, RawJson preserved alongside for forensic queries. Operators query typed columns directly (e.g. `MDE_ActionCenter_CL | where ActionStatus == "Completed"`) instead of `parse_json(RawJson) | extend …` everywhere.
+- 2 new portal-only telemetry streams: `MDE_DeviceTimeline_CL` (per-device unified process/file/network/registry timeline — portal-only correlation; no public-API equivalent) and `MDE_MachineActions_CL` (per-action Live Response script output plus Automated Investigation linkage — hybrid: covered by MDE Public `/api/machineactions` for metadata, portal exposes per-step LR stdout/stderr and AIR linkage). Full projection map, functional category, DCR schema, custom-table, parser-union extension, and workbook integration. Three originally-proposed streams (`MDE_IncidentDetails_CL`, `MDE_AlertDetails_CL`, `MDE_AdvancedHuntingSchema_CL`) were dropped — Microsoft 365 Defender Public API and Microsoft Graph Security cover them; operators should use the official Sentinel data connectors for those.
+- Multi-portal auth foundation — Entra-layer TOTP/Passkey primitives factored into a portal-generic L1 module so additional Microsoft 365 portals plug in cleanly in v0.2.0 (Defender ships today; Entra, Purview, Intune planned next).
+- Structured Application Insights events for the auth chain, per-stream poll completion, rate-limit pressure, and ingest boundaries (null-response and empty-array) so operators can KQL-query connector behaviour without parsing free-text traces.
+- 10-category functional taxonomy on every stream alongside the existing tier label — operators can filter by intent (Endpoint Device Management, Vulnerability Management, Exposure Management, Threat Analytics, Action Center, etc.) as well as cadence.
+- Per-rule operator-readable description on all 14 analytic rules.
+- `legacyEnvInName` deployment parameter — preserves the existing environment-in-resource-name pattern for in-place upgrade compatibility; future deployments may flip to environment-as-tag.
+- Per-workbook `galleryItem.json` metadata for upcoming Marketplace publication.
+- New Action Center workbook covering Incident, Alert, and Machine Action streams.
+- Pre-commit hook blocking accidental AI-attribution trailers in commit messages.
+
+### Changed
+
+- Auth modules split — portal-generic Entra-layer primitives (`Xdr.Common.Auth`) separated from per-portal cookie exchange (`Xdr.Defender.Auth`); a backward-compatibility shim (`Xdr.Portal.Auth`) keeps existing operator scripts and tests working unchanged.
+- Connector-orchestrator routes streams to per-portal clients so adding a portal becomes a manifest entry plus a per-portal client module rather than a wide refactor.
+- Parsers parameterized for `lookback` and `window` via KQL function query parameters.
+- Default `IdProperty` heuristic expanded (now includes `ActionId`, `InvestigationId`, `incidentId`, `alertId`, `attackPathId`, `machineId`, `deviceId` plus their PascalCase variants) so streams whose primary key uses those names get correct EntityIds without per-stream override.
+- GitHub Actions workflows pinned to commit SHAs (no moveable `@v4` tags).
+- Resource tags now include the `environment` tag on every connector-local resource regardless of whether the environment token is embedded in resource names.
+- Default deployment parameter pattern preserved for in-place upgrade — existing deployments retain their resource names; `legacyEnvInName=false` is available for clean deployments.
+
+### Fixed
+
+- EntityId wrapper-key bug — streams returning `{Results:[…], Count:N}` shapes now emit per-entity rows (using a manifest-declared `UnwrapProperty`) instead of a pair of wrapper-key rows. Affects `MDE_ActionCenter_CL`, `MDE_AdvancedFeatures_CL`, `MDE_AlertServiceConfig_CL`, `MDE_SuppressionRules_CL`, `MDE_LiveResponseEvents_CL`, `MDE_DataExportSettings_CL`, `MDE_AntimalwareConfig_CL`, `MDE_ExclusionsAv_CL`, `MDE_ExclusionsEdr_CL`, `MDE_FolderExclusions_CL`, `MDE_NetworkProtectionRules_CL`.
+- Workbook time-picker plumbing — all six workbooks now respect the operator-selected time range instead of hardcoded windows.
+- AuditLogs join in the compliance dashboard switched to ±5-minute time-proximity matching (correctly attributes settings changes to actor accounts; equality on EntityId vs `TargetResources[0].displayName` was producing zero rows).
+- Governance-scorecard panel — typed columns instead of `RawJson` dump.
+- Response-audit workbook now invokes its parser correctly.
+- Analytic rule `RbacRoleToUnusualAccount.yaml` uses exact-match field comparison instead of `contains` substring.
+- Hunting query `ExclusionAdditionsPastQuarter.yaml` now detects ADDED items only (was returning the full snapshot).
+- Hunting query `AfterHoursDrift.yaml` now uses int operands for `dayofweek()` (was using timespan literals).
+- Manifest path corrections — `MDE_CustomCollection_CL` path corrected to `/rules`.
+- `MDE_StreamingApiConfig_CL` marked deprecated — canonical surface is `MDE_DataExportSettings_CL` (same underlying configuration; clean removal in v0.2.0 keeps one upgrade cycle for downstream parser/rule cleanup).
+
+### Removed
+
+- `MDE_SecureScoreBreakdown_CL` — Microsoft Graph `/security/secureScores` covers the same data and is well-documented, RBAC-aware, and ingested natively by the Sentinel content-hub Graph Security data connector. Operators should use the official Graph Security data connector instead. The matching custom table, DCR stream entry, parser union row, and Sentinel-solution data-type are all dropped; the live-response fixture is preserved for historical reference.
+
+### Security
+
+- GitHub Actions workflows pinned to commit SHAs to eliminate moveable-tag supply-chain risk.
+- Application Insights events emit secrets-redacted custom dimensions — keys named `password`, `totpBase32`, `sccauth`, `xsrfToken`, `passkey`, `privateKey` (case-insensitive) have their values replaced with `<redacted>` before the property bag reaches the TelemetryClient.
+- Service-account credentials are never logged at any verbosity level.
+
+---
+
 ## [0.1.0-beta] - 2026-04-24
 
-### 🟢 PRODUCTION-READY DECLARATION — iter-13.15 verified live (2026-04-28T20:30Z)
+### ⚠ Production-ready re-declaration deferred 2026-04-29 (see [Unreleased] above) — iter-13.15 verified live (2026-04-28T20:30Z)
 
 After iter-13.15 deploy + Stop+Start of `xdrlr-prod-fn-n2hhhc` at UTC `2026-04-28T20:18:10Z`, the **L5 Post-DeploymentVerification 14-phase gauntlet returned 14/14 GREEN**:
 

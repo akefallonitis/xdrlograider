@@ -9,17 +9,17 @@
 
 BeforeAll {
     $script:Root = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
-    Import-Module "$script:Root/src/Modules/XdrLogRaider.Ingest/XdrLogRaider.Ingest.psd1" -Force
+    Import-Module "$script:Root/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1" -Force
 }
 
 AfterAll {
-    Remove-Module XdrLogRaider.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
 }
 
 Describe 'Send-ToLogAnalytics — batching' {
 
     It 'splits a large row set into multiple batches under MaxBatchBytes' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'fake-token' }
             Mock Start-Sleep {}
             $script:posts = 0
@@ -46,7 +46,7 @@ Describe 'Send-ToLogAnalytics — batching' {
     }
 
     It 'single small row produces exactly 1 batch' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'fake-token' }
             Mock Start-Sleep {}
             Mock Invoke-WebRequest { @{ StatusCode = 204 } }
@@ -63,7 +63,7 @@ Describe 'Send-ToLogAnalytics — batching' {
     }
 
     It 'surfaces LatencyMs in the result' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'fake-token' }
             Mock Start-Sleep {}
             Mock Invoke-WebRequest { @{ StatusCode = 204 } }
@@ -83,7 +83,7 @@ Describe 'Send-ToLogAnalytics — batching' {
 Describe 'Get-MonitorIngestionToken — caching' {
 
     It 'caches the token across calls until within the 5-min expiry buffer' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             $script:MonitorTokenCache = 'cached-token'
             $script:MonitorTokenExpiry = [datetime]::UtcNow.AddMinutes(30)
             $token = Get-MonitorIngestionToken
@@ -92,7 +92,7 @@ Describe 'Get-MonitorIngestionToken — caching' {
     }
 
     It 'refreshes when within 5-min buffer' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             # Stub Get-AzAccessToken so Mock has a command to intercept
             if (-not (Get-Command Get-AzAccessToken -ErrorAction SilentlyContinue)) {
                 function script:Get-AzAccessToken { param($ResourceUrl, $ErrorAction) @{ Token = 'stub'; ExpiresOn = [datetime]::UtcNow.AddHours(1) } }
@@ -121,7 +121,7 @@ Describe 'Write-Heartbeat — schema' {
     # cleanly in Pester 5).
 
     It 'builds a row with all required fields + POSTs to DCE' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'tok' }
             Mock Start-Sleep {}
             $script:sent = $null
@@ -160,7 +160,7 @@ Describe 'Write-Heartbeat — schema' {
     }
 
     It 'serialises Notes object into the row' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'tok' }
             Mock Start-Sleep {}
             $script:sent = $null
@@ -198,7 +198,7 @@ Describe 'Write-Heartbeat — schema' {
 Describe 'Write-AuthTestResult — schema' {
 
     It 'invokes Send-ToLogAnalytics with the correct stream name + Success field' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             $script:sentStream = $null
             $script:sentSuccess = $null
             Mock Send-ToLogAnalytics {
@@ -239,7 +239,7 @@ Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (iter
     # are preserved across the refactor.
 
     It 'Get-CheckpointTimestamp returns MinValue when no row exists (first run)' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Invoke-XdrStorageTableEntity { $null }
             $r = Get-CheckpointTimestamp -StorageAccountName 'sa' -TableName 'cp' -StreamName 'MDE_Foo_CL'
             # Function returns [datetime]::MinValue sentinel (not $null) — caller
@@ -249,7 +249,7 @@ Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (iter
     }
 
     It 'Get-CheckpointTimestamp parses stored UTC ISO-8601 from LastPolledUtc field' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Invoke-XdrStorageTableEntity {
                 [pscustomobject]@{ LastPolledUtc = '2026-04-23T10:00:00Z' }
             }
@@ -262,7 +262,7 @@ Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (iter
     }
 
     It 'Get-CheckpointTimestamp returns MinValue when helper throws (fails closed)' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Invoke-XdrStorageTableEntity { throw 'simulated table failure' }
             $r = Get-CheckpointTimestamp -StorageAccountName 'sa' -TableName 'cp' -StreamName 'MDE_Foo_CL' -WarningAction SilentlyContinue
             $r | Should -Be ([datetime]::MinValue)
@@ -270,7 +270,7 @@ Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (iter
     }
 
     It 'Set-CheckpointTimestamp does not throw on first call (helper Upsert creates row)' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Invoke-XdrStorageTableEntity {}
             { Set-CheckpointTimestamp -StorageAccountName 'sa' -TableName 'cp' -StreamName 'MDE_Foo_CL' } |
                 Should -Not -Throw
@@ -278,7 +278,7 @@ Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (iter
     }
 
     It 'Set-CheckpointTimestamp uses Upsert operation (not Get/Delete) — iter-13.15 contract' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             $script:capturedOp = $null
             Mock Invoke-XdrStorageTableEntity {
                 $script:capturedOp = $Operation

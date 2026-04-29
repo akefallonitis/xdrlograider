@@ -48,9 +48,9 @@
       "name": "panel-1",
       "content": {
         "queryType": 0,
-        "title": "Primary view",
+        "title": "Domain controller sensor coverage",
         "size": 0,
-        "query": "MDE_DCCoverage_CL | summarize arg_max(TimeGenerated, *) by EntityId | extend Covered = tostring(parse_json(RawJson).hasSensor) | summarize Coverage = countif(Covered == \"true\"), Total = count() | extend CoveragePct = todouble(Coverage) / todouble(Total) * 100",
+        "query": "MDE_DCCoverage_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by EntityId\n| summarize Coverage = countif(IsActive == true), Total = count()\n| extend CoveragePct = todouble(Coverage) / todouble(Total) * 100",
         "version": "KqlItem/1.0"
       },
       "type": 3
@@ -59,9 +59,9 @@
       "name": "panel-2",
       "content": {
         "queryType": 0,
-        "title": "Drift / trend",
+        "title": "Identity drift over time",
         "size": 0,
-        "query": "MDE_Drift_P5Identity(30d, 1d) | summarize Changes = count() by StreamName, bin(TimeGenerated, 1d) | render timechart",
+        "query": "MDE_Drift_P5Identity({TimeRange:value}, 1d)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1d)\n| render timechart",
         "version": "KqlItem/1.0"
       },
       "type": 3

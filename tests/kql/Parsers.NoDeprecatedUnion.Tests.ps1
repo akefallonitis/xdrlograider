@@ -19,7 +19,7 @@
 BeforeAll {
     $script:RepoRoot      = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
     $script:ParsersDir    = Join-Path $script:RepoRoot 'sentinel' 'parsers'
-    $script:ManifestPath  = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $script:ManifestPath  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $script:Manifest      = Import-PowerShellDataFile -Path $script:ManifestPath
     $script:DeprecatedStreams = @($script:Manifest.Endpoints | Where-Object { $_.Availability -eq 'deprecated' }).Stream
 }

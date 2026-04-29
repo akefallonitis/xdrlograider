@@ -51,8 +51,8 @@ BeforeDiscovery {
 BeforeAll {
     $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
     Import-Module "$repoRoot/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"         -Force
-    Import-Module "$repoRoot/src/Modules/XdrLogRaider.Ingest/XdrLogRaider.Ingest.psd1" -Force
-    Import-Module "$repoRoot/src/Modules/XdrLogRaider.Client/XdrLogRaider.Client.psd1" -Force
+    Import-Module "$repoRoot/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1" -Force
+    Import-Module "$repoRoot/src/Modules/Xdr.Defender.Client/Xdr.Defender.Client.psd1" -Force
 
     $script:RunLive = ($env:XDRLR_ONLINE -eq 'true') -and $env:XDRLR_TEST_UPN
     if (-not $script:RunLive) {
@@ -71,8 +71,8 @@ BeforeAll {
 }
 
 AfterAll {
-    Remove-Module XdrLogRaider.Client -Force -ErrorAction SilentlyContinue
-    Remove-Module XdrLogRaider.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
 }
 

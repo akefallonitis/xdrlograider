@@ -26,7 +26,7 @@
 
 BeforeAll {
     $script:RepoRoot     = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:ManifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $script:ManifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
 
     # Canonical path → research-source citation map.
     # When adding a manifest entry, add its path here with the citation.
@@ -65,9 +65,11 @@ BeforeAll {
         '/apiproxy/radius/api/radius/serviceaccounts/classificationrule/getall'                            = 'XDRInternals:Get-XdrIdentityServiceAccountClassification.ps1'
 
         # ---- P3 ----
+        # iter-14.0 (2026-04-29): MDE_SecureScoreBreakdown_CL DROPPED — publicly-API-covered
+        # by Microsoft Graph /security/secureScores. Citation removed because the path no
+        # longer corresponds to any manifest entry (orphan-citation gate).
         '/apiproxy/mtp/posture/oversight/initiatives'                                                      = 'XDRInternals:Get-XdrXspmInitiative.ps1'
         '/apiproxy/mtp/posture/oversight/updates'                                                          = 'XDRInternals:Get-XdrXspmExposureSnapshot.ps1'
-        '/apiproxy/mtp/secureScore/security/secureScoresV2'                                                = 'XDRInternals:Get-XdrSecureScore.ps1'
         '/apiproxy/mtp/posture/oversight/recommendations'                                                  = 'XDRInternals:Get-XdrExposureRecommendation.ps1'
         '/apiproxy/mtp/xspmatlas/attacksurface/query'                                                      = 'XDRInternals:Invoke-XdrXspmHuntingQuery.ps1 (POST + x-tid + x-ms-scenario-name)'
         '/apiproxy/mtp/tvm/analytics/baseline/profiles?pageIndex=0&pageSize=25'                            = 'XDRInternals:Get-XdrVulnerabilityManagementBaseline.ps1'
@@ -79,9 +81,13 @@ BeforeAll {
         '/apiproxy/aatp/api/remediationActions/configuration'                                              = 'XDRInternals:Get-XdrIdentityConfigurationRemediationActionAccount.ps1'
         '/apiproxy/mdi/identity/userapiservice/serviceAccounts'                                            = 'XDRInternals:Get-XdrIdentityServiceAccount.ps1'
 
+        # ---- P3 (cont.) — portal-only device timeline ----
+        '/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machinetimeline'                                = 'XDRInternals:Get-XdrEndpointDeviceTimeline.ps1'
+
         # ---- P6 ----
         '/apiproxy/mtp/threatAnalytics/outbreaks'                                                          = 'XDRInternals:Get-XdrThreatAnalytic.ps1'
         '/apiproxy/mtp/actionCenter/actioncenterui/history-actions'                                        = 'XDRInternals:Get-XdrActionsCenterHistory.ps1 (iter-13.10 rolled back query-string after live audit returned 400; original param-less form is correct)'
+        '/apiproxy/mtp/responseApiPortal/machineactions'                                                   = 'XDRInternals:Get-XdrEndpointDeviceActionResult.ps1'
 
         # ---- P7 ----
         '/apiproxy/mtoapi/tenants/TenantPicker'                                                            = 'XDRInternals:Get-XdrMtoTenant.ps1 (mtoproxyurl:MTO header required)'

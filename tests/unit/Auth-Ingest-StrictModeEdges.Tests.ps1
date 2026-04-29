@@ -25,7 +25,7 @@
 BeforeAll {
     $script:RepoRoot         = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
     $script:AuthModulePath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'   'Xdr.Portal.Auth.psd1'
-    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1'
+    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
 
     # Stub Az.* deps before module import (Ingest module resolves at runtime).
     function global:Get-AzAccessToken { param([string]$ResourceUrl) [pscustomobject]@{ Token = 'stub'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
@@ -49,15 +49,15 @@ Describe 'Send-ToLogAnalytics — Get-AzAccessToken response shape robustness' {
         ) {
             param($Description, $TokenObj)
 
-            InModuleScope XdrLogRaider.Ingest -Parameters @{ TokenObj = $TokenObj } {
+            InModuleScope Xdr.Sentinel.Ingest -Parameters @{ TokenObj = $TokenObj } {
                 param($TokenObj)
 
                 # Reset module-scope token cache so each iteration re-acquires.
                 $script:MonitorTokenCache  = $null
                 $script:MonitorTokenExpiry = [datetime]::MinValue
 
-                Mock Get-AzAccessToken -ModuleName XdrLogRaider.Ingest { $TokenObj } -ParameterFilter { $true }
-                Mock Invoke-WebRequest -ModuleName XdrLogRaider.Ingest { [pscustomobject]@{ StatusCode = 204 } } -ParameterFilter { $true }
+                Mock Get-AzAccessToken -ModuleName Xdr.Sentinel.Ingest { $TokenObj } -ParameterFilter { $true }
+                Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest { [pscustomobject]@{ StatusCode = 204 } } -ParameterFilter { $true }
 
                 # The thing we MOST care about: Send-ToLogAnalytics must not
                 # strict-mode-crash on the token-shape variance. Capture both
@@ -95,15 +95,15 @@ Describe 'Send-ToLogAnalytics — exception .Response defensive handling' {
         ) {
             param($Description, $MakeException)
 
-            InModuleScope XdrLogRaider.Ingest -Parameters @{ ExFactory = $MakeException } {
+            InModuleScope Xdr.Sentinel.Ingest -Parameters @{ ExFactory = $MakeException } {
                 param($ExFactory)
 
                 # Force fresh token acquisition
                 $script:MonitorTokenCache  = $null
                 $script:MonitorTokenExpiry = [datetime]::MinValue
 
-                Mock Get-AzAccessToken -ModuleName XdrLogRaider.Ingest { [pscustomobject]@{ Token = 't'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } } -ParameterFilter { $true }
-                Mock Invoke-WebRequest -ModuleName XdrLogRaider.Ingest { throw (& $ExFactory) } -ParameterFilter { $true }
+                Mock Get-AzAccessToken -ModuleName Xdr.Sentinel.Ingest { [pscustomobject]@{ Token = 't'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } } -ParameterFilter { $true }
+                Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest { throw (& $ExFactory) } -ParameterFilter { $true }
 
                 # The exception is non-transient (no statusCode) → after MaxRetries
                 # retries, Send-ToLogAnalytics throws with a descriptive message.

@@ -6,7 +6,7 @@
     {
       "name": "header",
       "content": {
-        "json": "# MDE Response Audit\n\nAction Center history with approvers, comments, and time-to-action metrics."
+        "json": "# MDE Response Audit\n\nAction Center history with operators, comments, and time-to-action metrics."
       },
       "type": 1
     },
@@ -48,9 +48,9 @@
       "name": "panel-1",
       "content": {
         "queryType": 0,
-        "title": "Primary view",
+        "title": "Action Center summary by type and status",
         "size": 0,
-        "query": "MDE_ActionCenter_CL | where TimeGenerated > ago(30d) | extend ActionType = tostring(parse_json(RawJson).actionType), Status = tostring(parse_json(RawJson).status), Approver = tostring(parse_json(RawJson).approverUpn) | summarize Count = count() by ActionType, Status | render barchart",
+        "query": "MDE_ActionCenter_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize Count = count() by ActionType, ActionStatus\n| render barchart",
         "version": "KqlItem/1.0"
       },
       "type": 3
@@ -59,9 +59,9 @@
       "name": "panel-2",
       "content": {
         "queryType": 0,
-        "title": "Drift / trend",
+        "title": "Time-to-action by action type",
         "size": 0,
-        "query": "MDE_ActionCenter_CL | where TimeGenerated > ago(7d) | extend ActionType = tostring(parse_json(RawJson).actionType), Status = tostring(parse_json(RawJson).status), Created = todatetime(parse_json(RawJson).creationDateTimeUtc), Completed = todatetime(parse_json(RawJson).completionDateTimeUtc) | extend TimeToAction = datetime_diff(\"minute\", Completed, Created) | project TimeGenerated, EntityId, ActionType, Status, TimeToAction",
+        "query": "MDE_ActionCenter_CL\n| where TimeGenerated > ago({TimeRange:value})\n| where isnotnull(StartTime) and isnotnull(EndTime)\n| extend TimeToActionMinutes = datetime_diff('minute', EndTime, StartTime)\n| project TimeGenerated, ActionId, ActionType, ActionStatus, ActionDecision, Operator, MachineId, ComputerName, TimeToActionMinutes\n| order by TimeGenerated desc",
         "version": "KqlItem/1.0"
       },
       "type": 3

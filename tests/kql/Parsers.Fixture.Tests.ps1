@@ -30,7 +30,7 @@
 
 BeforeDiscovery {
     $repoRoot     = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
-    $manifestPath = Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $manifestPath = Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $manifest     = Import-PowerShellDataFile -Path $manifestPath
 
     # Iter 13.9 (S1 lock): tier-to-streams map EXCLUDES deprecated streams.
@@ -314,8 +314,11 @@ Describe 'Parser-tier coverage — live fixture shape compatibility' {
     }
 
     It 'P3 parser has at least one live fixture' {
+        # iter-14.0: SecureScoreBreakdown removed from P3 manifest (Graph
+        # /security/secureScores covers); fixture preserved historically but
+        # no longer required for parser-fixture coverage.
         @(Get-ChildItem $script:LiveFixturesDir -Filter 'MDE_*_CL-raw.json' | Where-Object {
-            $_.BaseName -match '^MDE_(ExposureRecommendations|ExposureSnapshots|SecureScoreBreakdown|SecurityBaselines|XspmAttackPaths|XspmChokePoints|XspmInitiatives|XspmTopTargets)_CL-raw$'
+            $_.BaseName -match '^MDE_(ExposureRecommendations|ExposureSnapshots|SecurityBaselines|XspmAttackPaths|XspmChokePoints|XspmInitiatives|XspmTopTargets)_CL-raw$'
         }).Count | Should -BeGreaterThan 0
     }
 

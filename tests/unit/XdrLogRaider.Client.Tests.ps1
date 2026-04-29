@@ -2,16 +2,16 @@
 
 BeforeDiscovery {
     # -ForEach cases are evaluated at discovery, so materialise the manifest early.
-    $script:ClientModuleDir = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client'
+    $script:ClientModuleDir = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client'
     $script:ManifestEntries = @(
         (Import-PowerShellDataFile (Join-Path $script:ClientModuleDir 'endpoints.manifest.psd1')).Endpoints
     )
 }
 
 BeforeAll {
-    $script:ClientModulePath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client' 'XdrLogRaider.Client.psd1'
+    $script:ClientModulePath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
     $script:AuthModulePath   = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Portal.Auth' 'Xdr.Portal.Auth.psd1'
-    $script:IngestModulePath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1'
+    $script:IngestModulePath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
 
     # Stub the Az.* dependencies the Ingest module resolves lazily at runtime
     # (it doesn't list them in RequiredModules so import works without Az locally).
@@ -38,8 +38,8 @@ BeforeAll {
 }
 
 AfterAll {
-    Remove-Module XdrLogRaider.Client  -Force -ErrorAction SilentlyContinue
-    Remove-Module XdrLogRaider.Ingest  -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Defender.Client  -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Sentinel.Ingest  -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Portal.Auth         -Force -ErrorAction SilentlyContinue
 }
 
@@ -49,7 +49,7 @@ Describe 'Module surface (post-consolidation)' {
         # in psm1 to match the FunctionsToExport list in psd1. Was missing →
         # poll-* functions threw "The term 'Invoke-TierPollWithHeartbeat' is
         # not recognized" in production.
-        $exported = (Get-Module XdrLogRaider.Client).ExportedFunctions.Keys | Sort-Object
+        $exported = (Get-Module Xdr.Defender.Client).ExportedFunctions.Keys | Sort-Object
         $expected = @(
             'ConvertTo-MDEIngestRow',
             'Expand-MDEResponse',
@@ -63,15 +63,15 @@ Describe 'Module surface (post-consolidation)' {
     }
 
     It 'exports zero legacy Get-MDE_* wrappers' {
-        $exported = (Get-Module XdrLogRaider.Client).ExportedFunctions.Keys
+        $exported = (Get-Module Xdr.Defender.Client).ExportedFunctions.Keys
         $exported | Where-Object { $_ -like 'Get-MDE_*' } | Should -BeNullOrEmpty
     }
 }
 
 Describe 'Endpoint manifest contract' {
-    It 'loads exactly 45 endpoints (v0.1.0-beta.1 — 2 WRITE endpoints removed vs v1.0.2)' {
+    It 'loads exactly 46 endpoints (2 added: DeviceTimeline + MachineActions; 1 dropped: SecureScoreBreakdown — Graph /security/secureScores covers)' {
         $m = Get-MDEEndpointManifest
-        $m.Count | Should -Be 45
+        $m.Count | Should -Be 46
     }
 
     It 'groups streams into the expected tier buckets (no P4)' {
@@ -82,31 +82,33 @@ Describe 'Endpoint manifest contract' {
         $byTier['P0'] | Should -Be 15
         $byTier['P1'] | Should -Be 7
         $byTier['P2'] | Should -Be 4    # v0.1.0-beta.1: removed MDE_CriticalAssets_CL + MDE_DeviceCriticality_CL (write endpoints)
-        $byTier['P3'] | Should -Be 8
+        $byTier['P3'] | Should -Be 8    # 7 base + 1 added DeviceTimeline (SecureScoreBreakdown dropped — Graph /security/secureScores covers)
         $byTier.ContainsKey('P4') | Should -BeFalse
         $byTier['P5'] | Should -Be 5
-        $byTier['P6'] | Should -Be 2
+        $byTier['P6'] | Should -Be 3    # ActionCenter + ThreatAnalytics + MachineActions
         $byTier['P7'] | Should -Be 4
     }
 
-    It 'has 36 live streams — iter-13.8 (Availability=live)' {
+    It 'has 35 live streams — iter-14.0 (Availability=live)' {
         # StrictMode-safe: ContainsKey() before dot-access.
-        # Iter-13.8 audit (2026-04-27): 36/45 streams return 200 live against the
-        # full-access admin account. Of the 9 non-200s, 8 are tenant-feature-gated
-        # (auto-activate when tenant provisions the underlying feature) and 1 is
-        # deprecated (MDE_StreamingApiConfig_CL — XDRInternals canonical path
-        # collides with MDE_DataExportSettings_CL). The role-gated category was
-        # retired in iter-13.8 per Microsoft Learn (Security Admin auto-grants
-        # Full Access in MCAS + MDE settings management; 403 cannot be role-blocking).
+        # Iter-13.8 audit (2026-04-27) found 36/45 streams live. Iter-14.0 portal-only
+        # audit (2026-04-29) DROPPED MDE_SecureScoreBreakdown_CL (publicly-API-covered
+        # by Microsoft Graph /security/secureScores), shifting the baseline to 35/44.
+        # Of the 9 non-200s remaining, 8 are tenant-feature-gated (auto-activate when
+        # tenant provisions the underlying feature) and 1 is deprecated
+        # (MDE_StreamingApiConfig_CL — XDRInternals canonical path collides with
+        # MDE_DataExportSettings_CL). The role-gated category was retired in iter-13.8
+        # per Microsoft Learn (Security Admin auto-grants Full Access in MCAS + MDE
+        # settings management; 403 cannot be role-blocking).
         $m = Get-MDEEndpointManifest
         $live = $m.Values | Where-Object { $_.ContainsKey('Availability') -and $_.Availability -eq 'live' }
-        @($live).Count | Should -Be 36
+        @($live).Count | Should -Be 35
     }
 
-    It 'has 8 tenant-gated streams — activate when tenant provisions feature' {
+    It 'has 10 tenant-gated streams — activate when tenant provisions feature' {
         $m = Get-MDEEndpointManifest
         $gated = $m.Values | Where-Object { $_.ContainsKey('Availability') -and $_.Availability -eq 'tenant-gated' }
-        @($gated).Count | Should -Be 8
+        @($gated).Count | Should -Be 10
     }
 
     It 'has 0 role-gated streams (category retired in iter-13.8 per Microsoft Learn)' {
@@ -169,24 +171,23 @@ Describe 'Endpoint manifest contract' {
         [object]::ReferenceEquals($a, $b) | Should -BeFalse
     }
 
-    It 'AirDecisions + InvestigationPackage + DeviceTimeline are NOT in the manifest (dropped in v1.0)' {
+    It 'AirDecisions + InvestigationPackage are NOT in the manifest (dropped in v1.0)' {
         $m = Get-MDEEndpointManifest
         $m.Keys | Should -Not -Contain 'MDE_AirDecisions_CL'
         $m.Keys | Should -Not -Contain 'MDE_InvestigationPackage_CL'
-        $m.Keys | Should -Not -Contain 'MDE_DeviceTimeline_CL'
     }
 }
 
 Describe 'Invoke-MDEEndpoint dispatcher' {
     It 'rejects unknown Stream names' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession } {
             param($Sess)
             { Invoke-MDEEndpoint -Session $Sess -Stream 'MDE_DoesNotExist_CL' } | Should -Throw
         }
     }
 
     It 'returns empty array on downstream failure' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession } {
             param($Sess)
             Mock Invoke-MDEPortalEndpoint { @{ Success = $false; Error = 'simulated 500'; Path = $Path } }
             $rows = Invoke-MDEEndpoint -Session $Sess -Stream 'MDE_PUAConfig_CL'
@@ -195,7 +196,7 @@ Describe 'Invoke-MDEEndpoint dispatcher' {
     }
 
     It 'returns one row per entity on array response' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession } {
             param($Sess)
             $fake = @(
                 [pscustomobject]@{ id = '1'; enabled = $true }
@@ -209,7 +210,7 @@ Describe 'Invoke-MDEEndpoint dispatcher' {
     }
 
     It 'appends fromDate= query-string when Filter is declared + -FromUtc supplied' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession } {
             param($Sess)
             $observedPath = $null
             Mock Invoke-MDEPortalEndpoint {
@@ -223,7 +224,7 @@ Describe 'Invoke-MDEEndpoint dispatcher' {
     }
 
     It 'propagates manifest Headers to Invoke-MDEPortalEndpoint, resolving {TenantId} token (v0.1.0-beta.1)' {
-        InModuleScope XdrLogRaider.Client {
+        InModuleScope Xdr.Defender.Client {
             $observedHeaders = $null
             Mock Invoke-MDEPortalEndpoint {
                 param($Session, $Path, $Method, $Body, $TimeoutSec, $AdditionalHeaders)
@@ -248,7 +249,7 @@ Describe 'Invoke-MDEEndpoint dispatcher' {
     }
 
     It 'honors manifest UnwrapProperty to flatten wrapper objects (v0.1.0-beta.1)' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession } {
             param($Sess)
             # MDE_IdentityServiceAccounts_CL has UnwrapProperty='ServiceAccounts'.
             # Without unwrap, Expand-MDEResponse would treat {ServiceAccounts:[...]}
@@ -270,7 +271,7 @@ Describe 'Invoke-MDEEndpoint dispatcher' {
     }
 
     It 'does NOT append fromDate when endpoint has no Filter declared' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession } {
             param($Sess)
             Mock Invoke-MDEPortalEndpoint {
                 param($Session, $Path, $Method)
@@ -295,14 +296,14 @@ Describe 'Invoke-MDETierPoll' {
     }
 
     It 'rejects P4 at the ValidateSet (P4 dropped in v1.0)' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
             param($Sess, $Cfg)
             { Invoke-MDETierPoll -Session $Sess -Tier 'P4' -Config $Cfg } | Should -Throw
         }
     }
 
     It 'iterates every stream in the tier (v0.1.0-beta.1 — no Deferred filter)' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
             param($Sess, $Cfg)
             Mock Invoke-MDEEndpoint { ,@([pscustomobject]@{ id = 'x' }) }
             Mock Send-ToLogAnalytics { @{ RowsSent = 1 } }
@@ -322,7 +323,7 @@ Describe 'Invoke-MDETierPoll' {
         # v0.1.0-beta.1 removes the Deferred flag from the manifest, but the
         # code path still handles it for back-compat with older manifests.
         # This test uses a synthetic manifest with a Deferred entry.
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
             param($Sess, $Cfg)
             # Craft a 2-entry synthetic tier where one is legacy-Deferred.
             Mock Get-MDEEndpointManifest {
@@ -345,7 +346,7 @@ Describe 'Invoke-MDETierPoll' {
     }
 
     It 'passes -FromUtc from checkpoint to filterable endpoints' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
             param($Sess, $Cfg)
             $script:calls = @()
             Mock Invoke-MDEEndpoint {
@@ -381,7 +382,7 @@ Describe 'Invoke-MDETierPoll' {
     }
 
     It 'isolates per-stream failures (one stream failing does not stop the tier)' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession; Cfg = $script:FakeConfig } {
             param($Sess, $Cfg)
             Mock Invoke-MDEEndpoint {
                 param($Session, $Stream)
@@ -392,8 +393,8 @@ Describe 'Invoke-MDETierPoll' {
             Mock Set-CheckpointTimestamp { }
             Mock Get-CheckpointTimestamp { $null }
             $result = Invoke-MDETierPoll -Session $Sess -Tier 'P6' -Config $Cfg
-            $result.StreamsAttempted | Should -Be 2
-            $result.StreamsSucceeded | Should -Be 1
+            $result.StreamsAttempted | Should -Be 3
+            $result.StreamsSucceeded | Should -Be 2
             $result.Errors['MDE_ThreatAnalytics_CL'] | Should -Be 'boom'
         }
     }
@@ -401,7 +402,7 @@ Describe 'Invoke-MDETierPoll' {
 
 Describe 'Endpoint helper functions (ConvertTo-MDEIngestRow, Expand-MDEResponse, Invoke-MDEPortalEndpoint)' {
     It 'ConvertTo-MDEIngestRow produces standard shape' {
-        InModuleScope XdrLogRaider.Client {
+        InModuleScope Xdr.Defender.Client {
             $row = ConvertTo-MDEIngestRow -Stream 'MDE_Test_CL' -EntityId 'entity-123' -Raw @{ foo = 'bar' }
             $row.SourceStream  | Should -Be 'MDE_Test_CL'
             $row.EntityId      | Should -Be 'entity-123'
@@ -412,7 +413,7 @@ Describe 'Endpoint helper functions (ConvertTo-MDEIngestRow, Expand-MDEResponse,
     }
 
     It 'ConvertTo-MDEIngestRow adds Extras columns' {
-        InModuleScope XdrLogRaider.Client {
+        InModuleScope Xdr.Defender.Client {
             $row = ConvertTo-MDEIngestRow -Stream 'MDE_Test_CL' -EntityId 'x' -Raw @{} -Extras @{ MachineId = 'abc'; Mode = 'Block' }
             $row.MachineId | Should -Be 'abc'
             $row.Mode      | Should -Be 'Block'
@@ -420,7 +421,7 @@ Describe 'Endpoint helper functions (ConvertTo-MDEIngestRow, Expand-MDEResponse,
     }
 
     It 'Expand-MDEResponse handles array input' {
-        InModuleScope XdrLogRaider.Client {
+        InModuleScope Xdr.Defender.Client {
             $arr = @(
                 [pscustomobject]@{ id = '1'; name = 'a' }
                 [pscustomobject]@{ id = '2'; name = 'b' }
@@ -433,7 +434,7 @@ Describe 'Endpoint helper functions (ConvertTo-MDEIngestRow, Expand-MDEResponse,
     }
 
     It 'Expand-MDEResponse falls back to name then index when id missing' {
-        InModuleScope XdrLogRaider.Client {
+        InModuleScope Xdr.Defender.Client {
             $arr = @(
                 [pscustomobject]@{ name = 'feature-a'; enabled = $true }
                 [pscustomobject]@{ enabled = $false }
@@ -445,7 +446,7 @@ Describe 'Endpoint helper functions (ConvertTo-MDEIngestRow, Expand-MDEResponse,
     }
 
     It 'Expand-MDEResponse handles object input (each property = entity)' {
-        InModuleScope XdrLogRaider.Client {
+        InModuleScope Xdr.Defender.Client {
             $obj = [pscustomobject]@{ featA = $true; featB = $false }
             $pairs = Expand-MDEResponse -Response $obj
             $pairs.Count | Should -Be 2
@@ -453,15 +454,20 @@ Describe 'Endpoint helper functions (ConvertTo-MDEIngestRow, Expand-MDEResponse,
         }
     }
 
-    It 'Expand-MDEResponse returns empty for null' {
-        InModuleScope XdrLogRaider.Client {
+    It 'Expand-MDEResponse returns boundary-marker for null (iter-14.0 Phase 3.5)' {
+        # iter-14.0 Phase 3.5: null/empty responses no longer collapse to @().
+        # They emit a single marker row with __boundary_marker=$true so heartbeat
+        # can distinguish "API working but no data" from "API failed".
+        InModuleScope Xdr.Defender.Client {
             $pairs = Expand-MDEResponse -Response $null
-            ($pairs | Measure-Object).Count | Should -Be 0
+            ($pairs | Measure-Object).Count | Should -Be 1
+            $pairs[0].Entity.__boundary_marker | Should -Be $true
+            $pairs[0].Entity.__reason | Should -Be 'api-returned-null'
         }
     }
 
     It 'Invoke-MDEPortalEndpoint returns Success=$true on response' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession } {
             param($Sess)
             Mock Invoke-MDEPortalRequest { return @{ foo = 'bar' } }
             $r = Invoke-MDEPortalEndpoint -Session $Sess -Path '/api/test'
@@ -471,7 +477,7 @@ Describe 'Endpoint helper functions (ConvertTo-MDEIngestRow, Expand-MDEResponse,
     }
 
     It 'Invoke-MDEPortalEndpoint returns Success=$false on exception' {
-        InModuleScope XdrLogRaider.Client -Parameters @{ Sess = $script:FakeSession } {
+        InModuleScope Xdr.Defender.Client -Parameters @{ Sess = $script:FakeSession } {
             param($Sess)
             Mock Invoke-MDEPortalRequest { throw 'mocked HTTP 500' }
             $r = Invoke-MDEPortalEndpoint -Session $Sess -Path '/api/test'
@@ -484,7 +490,7 @@ Describe 'Endpoint helper functions (ConvertTo-MDEIngestRow, Expand-MDEResponse,
 Describe 'Invoke-MDETierPoll — v0.1.0-beta hardening (jitter + Rate429 + GzipBytes)' {
 
     It 'source invokes Start-Sleep with 80-320ms jitter before each Invoke-MDEEndpoint call' {
-        $pollSrc = Get-Content (Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client' 'Public' 'Invoke-MDETierPoll.ps1') -Raw
+        $pollSrc = Get-Content (Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Public' 'Invoke-MDETierPoll.ps1') -Raw
         # The jitter-sleep line must be present and use 80-320ms Get-Random bounds.
         $pollSrc | Should -Match 'Start-Sleep -Milliseconds \(Get-Random' -Because 'per-call jitter prevents burst-detection throttling'
         $pollSrc | Should -Match '-Minimum 80'
@@ -492,13 +498,13 @@ Describe 'Invoke-MDETierPoll — v0.1.0-beta hardening (jitter + Rate429 + GzipB
     }
 
     It 'source resets the cumulative 429 counter at the start of each tier poll' {
-        $pollSrc = Get-Content (Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client' 'Public' 'Invoke-MDETierPoll.ps1') -Raw
+        $pollSrc = Get-Content (Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Public' 'Invoke-MDETierPoll.ps1') -Raw
         $pollSrc | Should -Match 'Reset-XdrPortalRate429Count' -Because 'counter reset per tier so heartbeat reflects this tier only'
         $pollSrc | Should -Match 'Get-XdrPortalRate429Count'   -Because 'counter read at end of tier poll for heartbeat'
     }
 
     It 'result object includes Rate429Count + GzipBytes fields' {
-        $pollSrc = Get-Content (Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client' 'Public' 'Invoke-MDETierPoll.ps1') -Raw
+        $pollSrc = Get-Content (Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Public' 'Invoke-MDETierPoll.ps1') -Raw
         $pollSrc | Should -Match 'Rate429Count\s*=' -Because 'return object must carry Rate429Count for heartbeat'
         $pollSrc | Should -Match 'GzipBytes\s*=' -Because 'return object must carry GzipBytes for heartbeat'
     }
@@ -507,7 +513,7 @@ Describe 'Invoke-MDETierPoll — v0.1.0-beta hardening (jitter + Rate429 + GzipB
 Describe 'Invoke-TierPollWithHeartbeat — helper contract (v0.1.0-beta)' {
 
     BeforeAll {
-        $script:HelperPath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
+        $script:HelperPath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
     }
 
     It 'passes Rate429Count + GzipBytes through to Heartbeat Notes' {

@@ -3,15 +3,11 @@
     ModuleVersion         = '1.0.0'
     CompatiblePSEditions  = @('Core')
     PowerShellVersion     = '7.4'
-    GUID                  = '2f3bc6a8-4e1d-45b2-9a04-8c7f1d2b5e9a'
+    GUID                  = '7c1e9aa3-2d68-4b4f-91a7-08e6f4d5b921'
     Author                = 'Alex Kefallonitis'
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
-    Description           = 'Log Analytics ingestion via DCE/DCR for XdrLogRaider: batch writer, heartbeat, checkpoint persistence. Requires Az.Accounts at runtime (declared in src/requirements.psd1 for Function App; checked lazily for local dev).'
-    # Note: Az.Accounts is a runtime requirement loaded by Azure Functions managed dependencies
-    # via src/requirements.psd1. We do NOT declare it in RequiredModules so the module can
-    # be imported for unit tests even without Az installed locally; runtime calls fail with
-    # a clear error if Az.Accounts isn't present.
+    Description           = 'Backward-compat shim. Imports Xdr.Sentinel.Ingest (L1 portal-generic Sentinel ingest layer) and re-exports the legacy function names (Send-ToLogAnalytics, Write-Heartbeat, Get-CheckpointTimestamp, Set-CheckpointTimestamp, Get-XdrAuthSelfTestFlag, Invoke-XdrStorageTableEntity, Send-XdrAppInsights*). New code SHOULD reference Xdr.Sentinel.Ingest directly; this shim stays through the v0.1.0 GA window for operator-script + test-mock backward-compat.'
     FunctionsToExport     = @(
         'Send-ToLogAnalytics',
         'Write-Heartbeat',
@@ -19,17 +15,21 @@
         'Get-CheckpointTimestamp',
         'Set-CheckpointTimestamp',
         'Get-XdrAuthSelfTestFlag',
-        'Invoke-XdrStorageTableEntity'
+        'Invoke-XdrStorageTableEntity',
+        'Send-XdrAppInsightsTrace',
+        'Send-XdrAppInsightsCustomEvent',
+        'Send-XdrAppInsightsCustomMetric',
+        'Send-XdrAppInsightsException'
     )
     CmdletsToExport       = @()
     VariablesToExport     = @()
     AliasesToExport       = @()
     PrivateData           = @{
         PSData = @{
-            Tags         = @('LogAnalytics', 'DCE', 'DCR', 'Sentinel')
+            Tags         = @('LogAnalytics', 'DCE', 'DCR', 'Sentinel', 'Compat')
             LicenseUri   = 'https://github.com/akefallonitis/xdrlograider/blob/main/LICENSE'
             ProjectUri   = 'https://github.com/akefallonitis/xdrlograider'
-            ReleaseNotes = 'Initial release. Part of XdrLogRaider v1.0.0.'
+            ReleaseNotes = 'Backward-compat shim. Re-exports the renamed Xdr.Sentinel.Ingest surface under the legacy XdrLogRaider.Ingest name.'
         }
     }
 }

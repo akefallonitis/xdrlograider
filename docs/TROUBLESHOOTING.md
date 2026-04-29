@@ -191,6 +191,36 @@ Invoke-RestMethod -Uri $dcUri -Headers $headers -Method Delete -ErrorAction Sile
 **Cause**: Stuck timer keeps retrying.
 **Fix**: check App Insights → Failures. If a specific endpoint is 100%-failing, disable that stream in the tier poller pending investigation.
 
+## App Insights structured logging
+
+The connector emits structured `customEvents` for the auth chain and per-stream poll. Use these when `AppExceptions` / `AppTraces` doesn't surface enough context.
+
+### "Auth fails but I can't see why in App Insights"
+**Cause**: structured event missing — earlier deployments emitted `Write-Warning` strings without structured fields.
+**Fix**: query `customEvents | where name == 'AuthChain.AADSTSError'` — every AADSTS-coded throw emits a structured event with `AADSTSCode`, `Method`, `Upn`, `Stage`, and `Message` in `customDimensions` BEFORE rethrowing.
+
+```kql
+customEvents
+| where timestamp > ago(24h) and name == 'AuthChain.AADSTSError'
+| project timestamp, AADSTSCode = tostring(customDimensions.AADSTSCode), Method = tostring(customDimensions.Method), Stage = tostring(customDimensions.Stage)
+```
+
+### "Operations look disconnected — I can't trace one auth attempt end-to-end"
+**Cause**: `operation_Id` not propagated by an older build.
+**Fix**: every Connect-DefenderPortal invocation generates a `CorrelationId` GUID stamped on the session and reused by Invoke-DefenderPortalRequest + Invoke-MDETierPoll. Filter `customEvents` and `traces` on `operation_Id == '<guid>'` for end-to-end stitching.
+
+### "AuthChain.AADSTSError or RateLimited events are missing from KQL"
+**Cause**: AI adaptive sampling is dropping events under load (default 5 events/sec/instance).
+**Fix**: redeploy from a current build — `APPLICATIONINSIGHTS_TELEMETRY_SAMPLING_EXCLUDED_TYPES = AuthChain.AADSTSError;AuthChain.RateLimited;AuthChain.BoundaryMarker` is in the FA appSettings. Verify via Portal → Function App → Configuration.
+
+### "Send-XdrAppInsights* not exporting / unit tests fail"
+**Cause**: `XdrLogRaider.Ingest.psd1` `FunctionsToExport` must list all 4 entry points; `XdrLogRaider.Ingest.psm1` exports them via the manifest's list (the bundle file `Send-XdrAppInsightsEvent.ps1` contains all 4).
+**Fix**: re-run `./tests/Run-Tests.ps1 -Category all-offline` and check the `Logging.iter14.Tests.ps1` suite output.
+
+### "Secret leaked into App Insights customDimensions"
+**Cause**: caller passed a key in `-Properties` that matches `password|totpBase32|sccauth|xsrfToken|passkey|privateKey` (case-insensitive) but redaction failed.
+**Fix**: redaction is in `ConvertTo-XdrAiSafeProperties` (private helper). Test gate `Logging.NoSecretsLeaked` covers all 6 keys; if a new secret type appears, ADD it to `$script:XdrAiSecretKeyPattern` in `Send-XdrAppInsightsEvent.ps1` AND extend the test.
+
 ## Getting help
 
 1. Search existing issues on the repo

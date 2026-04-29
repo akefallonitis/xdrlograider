@@ -1,8 +1,8 @@
 # Streams catalogue (v0.1.0-beta)
 
-**45 portal-only streams** across 7 compliance tiers, all with documented path + method + body + headers verified against XDRInternals v1.0.3 + live-captured against a full-access admin account on 2026-04-24.
+**44 portal-only streams** across 7 compliance tiers, all with documented path + method + body + headers verified against XDRInternals v1.0.3 + live-captured against a full-access admin account on 2026-04-24. The portal-only audit (2026-04-29) DROPPED `MDE_SecureScoreBreakdown_CL` — publicly-API-covered by Microsoft Graph `/security/secureScores`; operators should use the official Graph Security data connector for that data. See `docs/STREAMS-REMOVED.md` for the full DROPPED entry.
 
-**36 streams return 200 + usable data** against our test admin account (live-verified 2026-04-24). Iter-13.8 path-research audit reclassified the remaining 9: **8 tenant-feature-gated** (feature not provisioned on tenant: MDI sensors, TVM baselines, MCAS, Intune AV policies, MDO Tenant Allow/Block, MDE Custom Collection model, Streaming API surface) + **1 deprecated** (`MDE_StreamingApiConfig_CL` — XDRInternals canonical path collides with `MDE_DataExportSettings_CL`; will be cleanly removed in v0.2.0). Iter-13.8 retired the `role-gated` category: per Microsoft Learn `defender-cloud-apps/manage-admins`, Security Administrator auto-grants Full Access in MCAS + MDE settings management, so 403 with that role can only be tenant-feature-blocking, not role-blocking. Shipping all 45 with correct wire contract because the "correct call" is our contract; what a given tenant emits depends on its feature provisioning, not our code.
+**35 streams return 200 + usable data** against our test admin account (live-verified 2026-04-24; baseline shifted from 36/45 to 35/44 after the portal-only audit). The path-research audit reclassified the remaining 9: **8 tenant-feature-gated** (feature not provisioned on tenant: MDI sensors, TVM baselines, MCAS, Intune AV policies, MDO Tenant Allow/Block, MDE Custom Collection model, Streaming API surface) + **1 deprecated** (`MDE_StreamingApiConfig_CL` — XDRInternals canonical path collides with `MDE_DataExportSettings_CL`; will be cleanly removed in v0.2.0). The `role-gated` category was retired: per Microsoft Learn `defender-cloud-apps/manage-admins`, Security Administrator auto-grants Full Access in MCAS + MDE settings management, so 403 with that role can only be tenant-feature-blocking, not role-blocking. Shipping all 44 with correct wire contract because the "correct call" is our contract; what a given tenant emits depends on its feature provisioning, not our code.
 
 **v0.1.0-beta manifest corrections** (all live-verified against admin account): 5 URL fixes vs XDRInternals v1.0.3 (PUAConfig, IntuneConnection, PurviewSharing, AuthenticatedTelemetry, LicenseReport) moved these streams from `tenant-gated` → `live`; `MDE_XspmAttackPaths_CL` body `options.top` corrected from 100 → 0 to match XDRInternals' default; `MDE_SecurityBaselines_CL` gained required pagination query-string; `MDE_MtoTenants_CL` gained `mtoproxyurl: MTO` header + `UnwrapProperty = 'tenantInfoList'`. XspmChokePoints + XspmTopTargets confirmed live once the audit tool Headers-passthrough bug was fixed.
 
@@ -24,7 +24,7 @@ A `tenant-gated` stream is **not a bug**. It's correct behaviour for a tenant wi
 
 ## P0 Compliance (hourly, 15 streams)
 
-**12 live · 3 tenant-gated** (iter-13.8: `MDE_CustomCollection_CL` recategorised role-gated → tenant-gated + path corrected `/model` → `/rules` per XDRInternals canonical source)
+**12 live · 3 tenant-gated** (`MDE_CustomCollection_CL` recategorised role-gated → tenant-gated and path corrected `/model` → `/rules` per XDRInternals canonical source)
 
 | Stream | Path | Method | Availability |
 |---|---|---|---|
@@ -46,7 +46,7 @@ A `tenant-gated` stream is **not a bug**. It's correct behaviour for a tenant wi
 
 ## P1 Pipeline (30 min, 7 streams)
 
-**6 live · 1 deprecated** (iter-13.8: `MDE_StreamingApiConfig_CL` deprecated — canonical XDRInternals path is `/apiproxy/mtp/wdatpApi/dataexportsettings` which is already used by `MDE_DataExportSettings_CL`)
+**6 live · 1 deprecated** (`MDE_StreamingApiConfig_CL` deprecated — canonical XDRInternals path is `/apiproxy/mtp/wdatpApi/dataexportsettings` which is already used by `MDE_DataExportSettings_CL`)
 
 | Stream | Path | Availability |
 |---|---|---|
@@ -69,15 +69,14 @@ A `tenant-gated` stream is **not a bug**. It's correct behaviour for a tenant wi
 | `MDE_AssetRules_CL` | `/apiproxy/mtp/xspmatlas/assetrules` | live |
 | `MDE_SAClassification_CL` | `/apiproxy/radius/api/radius/serviceaccounts/classificationrule/getall` | live |
 
-## P3 Exposure / XSPM (hourly, 8 streams)
+## P3 Exposure / XSPM (hourly, 7 streams)
 
-**7 live · 1 tenant-gated** (v0.1.0-beta: all 3 XSPM endpoints — AttackPaths + ChokePoints + TopTargets — confirmed live after audit-tool Headers-passthrough fix + XspmAttackPaths body correction to top=0; SecurityBaselines remains tenant-gated on tenants without TVM add-on + configured baseline profiles)
+**6 live · 1 tenant-gated** (v0.1.0-beta: all 3 XSPM endpoints — AttackPaths + ChokePoints + TopTargets — confirmed live after audit-tool Headers-passthrough fix + XspmAttackPaths body correction to top=0; SecurityBaselines remains tenant-gated on tenants without TVM add-on + configured baseline profiles. `MDE_SecureScoreBreakdown_CL` was dropped — publicly-API-covered by Microsoft Graph `/security/secureScores`; see `docs/STREAMS-REMOVED.md`.)
 
 | Stream | Path | Method | Availability |
 |---|---|---|---|
 | `MDE_XspmInitiatives_CL` | `/apiproxy/mtp/posture/oversight/initiatives` | GET | live |
 | `MDE_ExposureSnapshots_CL` | `/apiproxy/mtp/posture/oversight/updates` | GET | live |
-| `MDE_SecureScoreBreakdown_CL` | `/apiproxy/mtp/secureScore/security/secureScoresV2` | GET | live |
 | `MDE_ExposureRecommendations_CL` | `/apiproxy/mtp/posture/oversight/recommendations` | GET | live |
 | `MDE_XspmChokePoints_CL` | `/apiproxy/mtp/xspmatlas/attacksurface/query` (inline KQL body) | POST | live |
 | `MDE_XspmTopTargets_CL` | `/apiproxy/mtp/xspmatlas/attacksurface/query` (inline KQL body) | POST | live |
@@ -107,7 +106,7 @@ A `tenant-gated` stream is **not a bug**. It's correct behaviour for a tenant wi
 
 ## P7 Metadata (daily, 4 streams)
 
-**3 live · 1 tenant-gated** (iter-13.8: `MDE_CloudAppsConfig_CL` recategorised role-gated → tenant-gated. Per Microsoft Learn `defender-cloud-apps/manage-admins`, Security Administrator auto-grants Full Access in MCAS — so the 403 is MCAS not licensed in tenant, not a role gap. Path stays canonical `/apiproxy/mcas/cas/api/v1/settings`.)
+**3 live · 1 tenant-gated** (`MDE_CloudAppsConfig_CL` recategorised role-gated → tenant-gated. Per Microsoft Learn `defender-cloud-apps/manage-admins`, Security Administrator auto-grants Full Access in MCAS — so the 403 is MCAS not licensed in tenant, not a role gap. Path stays canonical `/apiproxy/mcas/cas/api/v1/settings`.)
 
 | Stream | Path | Availability |
 |---|---|---|

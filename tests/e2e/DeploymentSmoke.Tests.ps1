@@ -145,7 +145,7 @@ Describe 'E2E — per-tier ingestion coverage' -Tag 'e2e', 'tier-coverage' {
         @{ Tier = 'P0'; Streams = @('MDE_AdvancedFeatures_CL','MDE_PreviewFeatures_CL','MDE_AlertServiceConfig_CL','MDE_SuppressionRules_CL') ; MinPopulated = 2 }
         @{ Tier = 'P1'; Streams = @('MDE_ConnectedApps_CL','MDE_DataExportSettings_CL','MDE_TenantContext_CL')                                ; MinPopulated = 2 }
         @{ Tier = 'P2'; Streams = @('MDE_RbacDeviceGroups_CL','MDE_UnifiedRbacRoles_CL','MDE_AssetRules_CL','MDE_SAClassification_CL')        ; MinPopulated = 2 }
-        @{ Tier = 'P3'; Streams = @('MDE_SecureScoreBreakdown_CL','MDE_XspmInitiatives_CL','MDE_ExposureRecommendations_CL')                  ; MinPopulated = 1 }
+        @{ Tier = 'P3'; Streams = @('MDE_ExposureSnapshots_CL','MDE_XspmInitiatives_CL','MDE_ExposureRecommendations_CL')                    ; MinPopulated = 1 }
         @{ Tier = 'P5'; Streams = @('MDE_IdentityOnboarding_CL')                                                                              ; MinPopulated = 1 }
         @{ Tier = 'P6'; Streams = @('MDE_ThreatAnalytics_CL','MDE_ActionCenter_CL')                                                           ; MinPopulated = 1 }
         @{ Tier = 'P7'; Streams = @('MDE_UserPreferences_CL','MDE_MtoTenants_CL')                                                             ; MinPopulated = 1 }

@@ -4,7 +4,7 @@
     {
       "type": 1,
       "content": {
-        "json": "# MDE Compliance Dashboard\n\nCurrent state of Defender XDR tenant security configuration, with recent drift highlighted.\n\n**Data source**: 19 `MDE_*_CL` P0 streams polled hourly by the XdrLogRaider Function App."
+        "json": "# MDE Compliance Dashboard\n\nCurrent state of Defender XDR tenant security configuration, with recent drift highlighted.\n\n**Data source**: P0 tenant-configuration streams polled hourly by the XdrLogRaider Function App."
       },
       "name": "header"
     },
@@ -38,7 +38,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_Heartbeat_CL\n| where TimeGenerated > ago(1h)\n| where Tier == 'P0'\n| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by FunctionName\n| extend Status = iff(LastSeen > ago(30m), '\u2705 Healthy', '\u274c Stale')",
+        "query": "MDE_Heartbeat_CL\n| where TimeGenerated > ago(1h)\n| where Tier == 'P0'\n| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by FunctionName\n| extend Status = iff(LastSeen > ago(30m), 'Healthy', 'Stale')",
         "size": 0,
         "title": "Connector health (last hour)",
         "queryType": 0,
@@ -50,9 +50,9 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_Drift_P0Compliance(24h, 1h)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1h)\n| render timechart",
+        "query": "MDE_Drift_P0Compliance({TimeRange:value}, 1h)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1h)\n| render timechart",
         "size": 0,
-        "title": "P0 drift events (last 24h)",
+        "title": "P0 drift events",
         "queryType": 0
       },
       "name": "drift-timechart"
@@ -61,7 +61,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_LiveResponseConfig_CL\n| summarize arg_max(TimeGenerated, *) by EntityId\n| extend AllowUnsignedScripts = tostring(parse_json(RawJson).allowUnsignedScripts)\n| project EntityId, AllowUnsignedScripts, TimeGenerated",
+        "query": "MDE_LiveResponseConfig_CL\n| summarize arg_max(TimeGenerated, *) by EntityId\n| project EntityId, FeatureName, AutomatedIrLiveResponse, AutomatedIrUnsignedScripts, LiveResponseForServers, TimeGenerated",
         "size": 0,
         "title": "Live Response config",
         "queryType": 0,
@@ -73,7 +73,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_Drift_P0Compliance(24h, 1h)\n| join kind=leftouter (AuditLogs | where TimeGenerated > ago(24h) | project TargetResource = tostring(TargetResources[0].displayName), InitiatedByUpn = tostring(InitiatedBy.user.userPrincipalName)) on $left.EntityId == $right.TargetResource\n| project TimeGenerated, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType, InitiatedByUpn\n| order by TimeGenerated desc",
+        "query": "let drift = MDE_Drift_P0Compliance({TimeRange:value}, 1h)\n    | extend DriftTime = TimeGenerated, DriftBin = bin(TimeGenerated, 5min);\nlet audits = AuditLogs\n    | where TimeGenerated > ago({TimeRange:value})\n    | project AuditTime = TimeGenerated, OperationName, InitiatedByUpn = tostring(InitiatedBy.user.userPrincipalName), AuditBin = bin(TimeGenerated, 5min);\ndrift\n| join kind=leftouter audits on $left.DriftBin == $right.AuditBin\n| where isnull(AuditTime) or (AuditTime between ((DriftTime - 5min) .. (DriftTime + 5min)))\n| extend DeltaSec = iff(isnull(AuditTime), int(null), abs(datetime_diff('second', AuditTime, DriftTime)))\n| summarize arg_min(DeltaSec, OperationName, InitiatedByUpn, AuditTime) by DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType\n| project TimeGenerated = DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType, OperationName, InitiatedByUpn\n| order by TimeGenerated desc",
         "size": 0,
         "title": "Recent changes with attribution",
         "queryType": 0,

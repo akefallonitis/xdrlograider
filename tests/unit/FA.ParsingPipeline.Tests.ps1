@@ -23,7 +23,7 @@
 
 BeforeDiscovery {
     $repoRoot        = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
-    $manifestPath    = Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $manifestPath    = Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $manifest        = Import-PowerShellDataFile -Path $manifestPath
     # v0.1.0-beta.1: iterate only 'live' streams — tenant-gated + role-gated
     # entries have correct wire contract but don't emit rows on our test tenant,
@@ -54,8 +54,8 @@ BeforeAll {
     function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
 
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Portal.Auth'     'Xdr.Portal.Auth.psd1')     -Force -ErrorAction Stop
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1') -Force -ErrorAction Stop
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'XdrLogRaider.Client.psd1') -Force -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -ErrorAction Stop
 
     $script:FixturesDir = Join-Path $repoRoot 'tests' 'fixtures' 'live-responses'
     $script:ExpectedBaselineColumns = @('TimeGenerated', 'SourceStream', 'EntityId', 'RawJson')
@@ -89,8 +89,8 @@ Describe 'Pipeline: raw -> Expand-MDEResponse -> ConvertTo-MDEIngestRow' -ForEac
             function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
         }
         Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Portal.Auth'     'Xdr.Portal.Auth.psd1')     -Force -ErrorAction Stop
-        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1') -Force -ErrorAction Stop
-        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'XdrLogRaider.Client.psd1') -Force -ErrorAction Stop
+        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -ErrorAction Stop
+        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -ErrorAction Stop
 
         $script:RawPath    = Join-Path $script:FixturesDir "$($_.Stream)-raw.json"
         $script:IngestPath = Join-Path $script:FixturesDir "$($_.Stream)-ingest.json"

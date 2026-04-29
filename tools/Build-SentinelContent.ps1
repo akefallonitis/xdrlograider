@@ -155,6 +155,7 @@ foreach ($file in Get-ChildItem -Path $workbooksDir -Filter '*.json') {
     $serialized = $parsed | ConvertTo-Json -Depth 30 -Compress
 
     $displayName = switch ($name) {
+        'MDE_ActionCenter'         { 'MDE Action Center' }
         'MDE_ComplianceDashboard'  { 'MDE Compliance Dashboard' }
         'MDE_DriftReport'          { 'MDE Drift Report' }
         'MDE_GovernanceScorecard'  { 'MDE Governance Scorecard' }
@@ -312,6 +313,98 @@ foreach ($r in $rules) {
     }
 }
 
+# Solution Content Hub metadata blocks — register each parser, workbook,
+# analytic rule, and hunting query under Microsoft.SecurityInsights so the
+# Content Hub UI groups them under the XdrLogRaider solution row.
+
+# Parsers (kind = Parser, parent = savedSearches function)
+foreach ($p in $parsers) {
+    $armResources += [ordered]@{
+        type       = 'Microsoft.OperationalInsights/workspaces/providers/metadata'
+        apiVersion = '2023-04-01-preview'
+        name       = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Parser-$($p.Name)')]"
+        location   = "[parameters('location')]"
+        properties = [ordered]@{
+            parentId  = "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), '$($p.Name)')]"
+            contentId = $p.Name
+            kind      = 'Parser'
+            version   = "[variables('solutionVersion')]"
+            source    = "[variables('solutionSource')]"
+            author    = "[variables('solutionAuthor')]"
+            support   = "[variables('solutionSupport')]"
+        }
+        dependsOn = @(
+            "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), '$($p.Name)')]"
+        )
+    }
+}
+
+# Hunting queries (kind = HuntingQuery, parent = savedSearches in Hunting Queries)
+foreach ($q in $huntingQueries) {
+    $armResources += [ordered]@{
+        type       = 'Microsoft.OperationalInsights/workspaces/providers/metadata'
+        apiVersion = '2023-04-01-preview'
+        name       = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-$($q.File)')]"
+        location   = "[parameters('location')]"
+        properties = [ordered]@{
+            parentId  = "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), '$($q.File)')]"
+            contentId = $q.File
+            kind      = 'HuntingQuery'
+            version   = "[variables('solutionVersion')]"
+            source    = "[variables('solutionSource')]"
+            author    = "[variables('solutionAuthor')]"
+            support   = "[variables('solutionSupport')]"
+        }
+        dependsOn = @(
+            "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), '$($q.File)')]"
+        )
+    }
+}
+
+# Workbooks (kind = Workbook, parent = Microsoft.Insights/workbooks resource)
+foreach ($w in $workbooks) {
+    $armResources += [ordered]@{
+        type       = 'Microsoft.OperationalInsights/workspaces/providers/metadata'
+        apiVersion = '2023-04-01-preview'
+        name       = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Workbook-$($w.Name)')]"
+        location   = "[parameters('location')]"
+        properties = [ordered]@{
+            parentId  = "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, '$($w.Name)'))]"
+            contentId = $w.Name
+            kind      = 'Workbook'
+            version   = "[variables('solutionVersion')]"
+            source    = "[variables('solutionSource')]"
+            author    = "[variables('solutionAuthor')]"
+            support   = "[variables('solutionSupport')]"
+        }
+        dependsOn = @(
+            "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, '$($w.Name)'))]"
+        )
+    }
+}
+
+# Analytic rules (kind = AnalyticsRule, parent = alertRules)
+foreach ($r in $rules) {
+    $armResources += [ordered]@{
+        type       = 'Microsoft.OperationalInsights/workspaces/providers/metadata'
+        apiVersion = '2023-04-01-preview'
+        name       = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-$($r.Id)')]"
+        location   = "[parameters('location')]"
+        properties = [ordered]@{
+            parentId  = "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '$($r.Id)')]"
+            contentId = $r.Id
+            kind      = 'AnalyticsRule'
+            version   = "[variables('solutionVersion')]"
+            source    = "[variables('solutionSource')]"
+            author    = "[variables('solutionAuthor')]"
+            support   = "[variables('solutionSupport')]"
+        }
+        dependsOn = @(
+            "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '$($r.Id)')]"
+        )
+    }
+}
+
 # --- 6. Wrap in ARM template ---
 
 $armTemplate = [ordered]@{
@@ -331,7 +424,17 @@ $armTemplate = [ordered]@{
             defaultValue = '[resourceGroup().location]'
         }
     }
-    variables  = @{}
+    # Solution Content Hub variables — every metadata block above references
+    # these so the Sentinel UI groups installed content under the XdrLogRaider
+    # solution row.
+    variables  = [ordered]@{
+        solutionId      = 'community.xdrlograider'
+        solutionName    = 'XdrLogRaider'
+        solutionVersion = '0.1.0-beta'
+        solutionSource  = [ordered]@{ kind = 'Solution'; name = 'XdrLogRaider'; sourceId = 'community.xdrlograider' }
+        solutionAuthor  = [ordered]@{ name = 'Alex Kefallonitis'; email = 'al.kefallonitis@gmail.com' }
+        solutionSupport = [ordered]@{ name = 'XdrLogRaider'; email = 'al.kefallonitis@gmail.com'; tier = 'Community'; link = 'https://github.com/akefallonitis/xdrlograider' }
+    }
     resources  = $armResources
     outputs    = @{
         parsersCount = @{ type = 'int'; value = $parsers.Count }

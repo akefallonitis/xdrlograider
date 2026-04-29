@@ -7,7 +7,7 @@
 # token via Get-AzAccessToken). Because the helper is now MODULE-OWNED (it
 # lives in XdrLogRaider.Ingest), bare `function global:` overrides do NOT
 # intercept it — module-internal function lookups resolve to the module's own
-# definition first. We use Pester's `Mock -ModuleName XdrLogRaider.Ingest`
+# definition first. We use Pester's `Mock -ModuleName Xdr.Sentinel.Ingest`
 # pattern to inject a fake helper at the module-internal call seam.
 #
 # Notes on the public function contract (preserved across the refactor):
@@ -16,12 +16,12 @@
 #   - Param names are -StreamName (not -Stream) and -TableName (not -Table).
 
 BeforeAll {
-    $script:IngestModulePath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1'
+    $script:IngestModulePath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
     Import-Module $script:IngestModulePath -Force -ErrorAction Stop
 }
 
 AfterAll {
-    Remove-Module XdrLogRaider.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
 }
 
 Describe 'Checkpoint round-trip' {
@@ -35,7 +35,7 @@ Describe 'Checkpoint round-trip' {
         $script:UpsertCallsSoFar   = 0
         $script:LastSeenTableName  = $null
 
-        Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity {
+        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity {
             param(
                 [string]$StorageAccountName,
                 [string]$TableName,
@@ -119,7 +119,7 @@ Describe 'Checkpoint round-trip' {
 
     It 'returns MinValue when the helper throws (table missing / permissions / transient)' {
         # Override the mock just for this test to always throw on Get.
-        Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity {
+        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity {
             throw "simulated table missing"
         }
         $r = Get-CheckpointTimestamp -StorageAccountName 'sta' -StreamName 'MDE_AlertTuning_CL' -WarningAction SilentlyContinue

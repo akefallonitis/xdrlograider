@@ -1,7 +1,16 @@
 id: 0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08
 name: MDE RBAC role to unusual account
 description: |
-  A Defender RBAC role was assigned to a user account that has no previous history of admin activity.
+  A Defender unified-RBAC role assignment was added in the last 24h. Fires on
+  the *principal* identity fields specifically (not on every nested role
+  attribute) so this rule alerts on "who got a new role" rather than every
+  role-definition tweak. The FieldName filter uses exact-match (not substring)
+  to avoid false positives on benign role re-evaluations.
+
+  Operator response (suggested):
+    1. Verify the principalId from the Drift row resolves to a known + sanctioned admin account
+    2. If unknown account: investigate via SigninLogs cross-reference + recent privilege grants
+    3. If sanctioned: tag the rule's tunable threshold to suppress this principal for 30d
 severity: High
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:
@@ -18,7 +27,10 @@ tactics:
 relevantTechniques:
   - T1078
 query: |
-  MDE_Drift_P2Governance(7d, 1d) | where StreamName == "MDE_UnifiedRbacRoles_CL" | where ChangeType == "Added" | where FieldName contains "principalId" or FieldName contains "principalName"
+  MDE_Drift_P2Governance(7d, 1d)
+  | where StreamName == "MDE_UnifiedRbacRoles_CL"
+  | where ChangeType == "Added"
+  | where FieldName == "principalId" or FieldName == "principalName"
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

@@ -12,7 +12,7 @@ change documented in CHANGELOG.md + UPGRADE.md.
 Complete-beta release. Production-hardened on all dimensions the plan scoped:
 
 - **45 portal-only streams** (36 live-verified against full-access admin account
-  on 2026-04-27 after iter-13.8 path-research audit corrected
+  on 2026-04-27 after the path-research audit corrected
   `MDE_CustomCollection_CL` /model→/rules per XDRInternals canonical source),
   8 tenant-feature-gated (MDI / MCAS / TVM / Intune AV / MDO / Custom Collection),
   1 deprecated (`MDE_StreamingApiConfig_CL` collides with `MDE_DataExportSettings_CL`).
@@ -56,7 +56,7 @@ Scope: **additive only** — no breaking changes to v0.1.0 manifest. Use the
 forward-scalable `Portal=` infrastructure laid down in v0.1.0-beta.
 
 - **+15-20 new streams** from `docs/CANDIDATE-STREAMS-V0.2.0.md` (researched
-  during v0.1.0-beta Phase 3). Candidates include:
+  during v0.1.0-beta development). Candidates include:
   - `MDE_XspmTopEntryPoint_CL` (XSPM atlas, scenario `AttackPathOverview_get_attack_paths_top_entry_points`)
   - `MDE_AdvancedHuntingUserHistory_CL` (auditing)
   - `MDE_DatalakeDatabase_CL` + `MDE_DatalakeTableSchema_CL`

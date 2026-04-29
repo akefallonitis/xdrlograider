@@ -30,6 +30,11 @@ $config = [pscustomobject]@{
 # which goes directly via HttpClient + MI token to the table data plane.
 
 # --- Run the auth chain ---
+# New code may prefer the L4 orchestrator entry point:
+#   $result = Test-XdrPortalAuth -Portal 'Defender' -Method $config.AuthMethod `
+#                                -Credential $credential -PortalHost 'security.microsoft.com'
+# The legacy Test-MDEPortalAuth call below is retained for backward-compat and
+# routes through the Xdr.Portal.Auth shim → Xdr.Defender.Auth identically.
 $result = $null
 try {
     $credential = Get-MDEAuthFromKeyVault `

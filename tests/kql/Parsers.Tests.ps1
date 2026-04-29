@@ -42,10 +42,14 @@ Describe 'KQL parsers — content validation' {
         $Content | Should -Match '(?m)^//\s*SYNOPSIS'
     }
 
-    It 'each parser declares lookback and window' -ForEach $script:Parsers {
+    It 'each parser declares lookback and window as function parameters' -ForEach $script:Parsers {
         param($Name, $Content)
-        $Content | Should -Match 'let\s+lookback\s*='
-        $Content | Should -Match 'let\s+window\s*='
+        # iter-14.0 Phase 5: parsers are now KQL functions with typed parameters,
+        # not raw KQL with `let lookback = ...; let window = ...;`. Workbooks/rules
+        # can override the defaults by passing args (e.g. {TimeRange:value} from
+        # the workbook time-picker in Phase 7).
+        $Content | Should -Match 'lookback\s*:\s*timespan'
+        $Content | Should -Match 'window\s*:\s*timespan'
     }
 
     It 'each parser uses union withsource=_Table' -ForEach $script:Parsers {

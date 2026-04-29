@@ -1,7 +1,7 @@
 #Requires -Modules Pester
 
 BeforeAll {
-    $script:IngestModulePath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1'
+    $script:IngestModulePath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
 
     # Az.Accounts + Az.Storage + Az.Table are runtime dependencies (declared in
     # src/requirements.psd1 for the Function App). For unit tests they're stubbed.
@@ -36,12 +36,12 @@ BeforeAll {
 }
 
 AfterAll {
-    Remove-Module XdrLogRaider.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
 }
 
 Describe 'XdrLogRaider.Ingest module surface' {
     It 'exports Send-ToLogAnalytics, Write-Heartbeat, Write-AuthTestResult, Get/Set-CheckpointTimestamp, Get-XdrAuthSelfTestFlag, Invoke-XdrStorageTableEntity' {
-        $exported = (Get-Module XdrLogRaider.Ingest).ExportedFunctions.Keys
+        $exported = (Get-Module Xdr.Sentinel.Ingest).ExportedFunctions.Keys
         $exported | Should -Contain 'Send-ToLogAnalytics'
         $exported | Should -Contain 'Write-Heartbeat'
         $exported | Should -Contain 'Write-AuthTestResult'
@@ -61,7 +61,7 @@ Describe 'XdrLogRaider.Ingest module surface' {
 
 Describe 'Send-ToLogAnalytics' {
     It 'returns zero-row summary for empty input' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             $result = Send-ToLogAnalytics `
                 -DceEndpoint 'https://test.ingest.monitor.azure.com' `
                 -DcrImmutableId 'dcr-abc' `
@@ -73,7 +73,7 @@ Describe 'Send-ToLogAnalytics' {
     }
 
     It 'batches rows and POSTs to the correct URI' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { return 'test-token' }
             Mock Invoke-WebRequest { return @{ StatusCode = 204 } }
 
@@ -101,7 +101,7 @@ Describe 'Send-ToLogAnalytics' {
     }
 
     It 'retries on 429 transient failure' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { return 'test-token' }
             $script:callCount = 0
             Mock Invoke-WebRequest {
@@ -129,7 +129,7 @@ Describe 'Send-ToLogAnalytics' {
     }
 
     It 'splits large payloads across multiple batches' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { return 'test-token' }
             Mock Invoke-WebRequest { return @{ StatusCode = 204 } }
 
@@ -156,7 +156,7 @@ Describe 'Send-ToLogAnalytics' {
     }
 
     It 'skips rows that individually exceed MaxBatchBytes' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { return 'test-token' }
             Mock Invoke-WebRequest { return @{ StatusCode = 204 } }
 
@@ -177,7 +177,7 @@ Describe 'Send-ToLogAnalytics' {
 
 Describe 'Write-Heartbeat' {
     It 'builds and POSTs a heartbeat row' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Send-ToLogAnalytics { return [pscustomobject]@{ RowsSent = 1; BatchesSent = 1; LatencyMs = 42 } }
 
             Write-Heartbeat `
@@ -203,7 +203,7 @@ Describe 'Write-Heartbeat' {
 
 Describe 'Write-AuthTestResult' {
     It 'builds and POSTs an auth-test-result row' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Send-ToLogAnalytics { return [pscustomobject]@{ RowsSent = 1; BatchesSent = 1; LatencyMs = 20 } }
 
             $testResult = [pscustomobject]@{
@@ -240,7 +240,7 @@ Describe 'Write-AuthTestResult' {
         # function's mapping logic (helper returns null vs entity → bool flag)
         # without depending on REST/HTTP semantics.
         It 'returns $true when checkpoint row exists with Success=true' {
-            Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity -MockWith {
+            Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith {
                 [pscustomobject]@{ Success = $true; LastRunUtc = [datetime]::UtcNow.ToString('o') }
             }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
@@ -248,7 +248,7 @@ Describe 'Write-AuthTestResult' {
         }
 
         It 'returns $false when checkpoint row exists with Success=false' {
-            Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity -MockWith {
+            Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith {
                 [pscustomobject]@{ Success = $false; LastRunUtc = [datetime]::UtcNow.ToString('o') }
             }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
@@ -256,13 +256,13 @@ Describe 'Write-AuthTestResult' {
         }
 
         It 'returns $false when no checkpoint row exists yet (helper returns $null on 404)' {
-            Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity -MockWith { $null }
+            Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith { $null }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
             $result | Should -BeFalse
         }
 
         It 'returns $false (fails closed) when the helper throws' {
-            Mock -ModuleName XdrLogRaider.Ingest Invoke-XdrStorageTableEntity -MockWith { throw 'token acquisition failed' }
+            Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith { throw 'token acquisition failed' }
             $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
             $result | Should -BeFalse
         }
@@ -272,7 +272,7 @@ Describe 'Write-AuthTestResult' {
 Describe 'Send-ToLogAnalytics — gzip compression (v0.1.0-beta)' {
 
     It 'compresses body with Content-Encoding: gzip by default and returns GzipBytes' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'tok' }
             Mock Start-Sleep {}
             $script:captured = $null
@@ -301,7 +301,7 @@ Describe 'Send-ToLogAnalytics — gzip compression (v0.1.0-beta)' {
     }
 
     It 'sends raw JSON body (not byte[]) when -DisableGzip is passed' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'tok' }
             Mock Start-Sleep {}
             $script:captured = $null
@@ -331,7 +331,7 @@ Describe 'Send-ToLogAnalytics — gzip compression (v0.1.0-beta)' {
 Describe 'Send-ToLogAnalytics — 413 split-and-retry (v0.1.0-beta)' {
 
     It 'halves the batch and recurses when DCE returns 413 Payload Too Large' {
-        InModuleScope XdrLogRaider.Ingest {
+        InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'tok' }
             Mock Start-Sleep {}
             $script:postCount = 0

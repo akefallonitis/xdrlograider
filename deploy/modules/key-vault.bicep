@@ -17,9 +17,13 @@ param enableDiagnostics bool = true
 @description('Sentinel workspace resource ID (target for diagnostic settings). Required only when enableDiagnostics=true.')
 param workspaceResourceId string = ''
 
+@description('Tags applied to every resource emitted by this module. The `environment` tag carries the env signal regardless of whether legacyEnvInName=true or false, so operators can filter by environment via Azure tag query.')
+param tags object = {}
+
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: keyVaultName
   location: location
+  tags: tags
   properties: {
     tenantId: subscription().tenantId
     sku: {

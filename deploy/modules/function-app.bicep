@@ -36,6 +36,9 @@ param packageUrl string
 @description('Key-value app settings to set on the Function App.')
 param appSettings object
 
+@description('Tags applied to every resource emitted by this module. The `environment` tag carries the env signal regardless of whether legacyEnvInName=true or false, so operators can filter by environment via Azure tag query.')
+param tags object = {}
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
   name: storageAccountName
 }
@@ -43,6 +46,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' existing 
 resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: planName
   location: location
+  tags: tags
   sku: {
     name: serverfarmSku
     tier: serverfarmTier
@@ -88,6 +92,7 @@ var websiteContentBase = useFullManagedIdentity ? {
 resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: functionAppName
   location: location
+  tags: tags
   kind: 'functionapp,linux'
   identity: {
     type: 'SystemAssigned'

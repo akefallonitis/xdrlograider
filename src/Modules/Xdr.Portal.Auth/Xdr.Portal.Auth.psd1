@@ -7,7 +7,7 @@
     Author                = 'Alex Kefallonitis'
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
-    Description           = 'Portal-agnostic authentication chain for Microsoft portals (security.microsoft.com, intune.microsoft.com, etc). Supports Credentials+TOTP and Software Passkey for unattended production (DirectCookies is testing-only — no auto-refresh). v0.1.0-beta: 429 Retry-After backoff with jitter, proactive session TTL refresh at 3h30m, cumulative Rate429Count surfaced to heartbeat.'
+    Description           = 'Backward-compat shim. Imports Xdr.Common.Auth (L1 Entra layer) and Xdr.Defender.Auth (L2 Defender cookie exchange) and re-exports the legacy MDE-prefixed function names (Connect-MDEPortal, Invoke-MDEPortalRequest, Test-MDEPortalAuth, Get-MDEAuthFromKeyVault, Connect-MDEPortalWithCookies, Get-XdrPortalRate429Count, Reset-XdrPortalRate429Count) as wrappers. New code SHOULD reference Xdr.Common.Auth + Xdr.Defender.Auth directly; this shim stays through the v0.1.0 GA window for operator-script + test-mock backward-compat.'
     FunctionsToExport     = @(
         'Connect-MDEPortal',
         'Connect-MDEPortalWithCookies',

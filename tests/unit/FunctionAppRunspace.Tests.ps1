@@ -35,7 +35,7 @@ BeforeAll {
     $script:MainTemplatePath  = Join-Path $script:RepoRoot 'deploy' 'compiled' 'mainTemplate.json'
     $script:FunctionAppBicepPath = Join-Path $script:RepoRoot 'deploy' 'modules' 'function-app.bicep'
     $script:FunctionsDir      = Join-Path $script:RepoRoot 'src' 'functions'
-    $script:OrchestratorPath  = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
+    $script:OrchestratorPath  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
 }
 
 Describe 'Single-runspace mode — FA app settings (mainTemplate.json + bicep)' {

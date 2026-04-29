@@ -26,9 +26,9 @@
 
 BeforeAll {
     $script:RepoRoot         = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:ClientModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'XdrLogRaider.Client.psd1'
+    $script:ClientModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
     $script:AuthModulePath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'   'Xdr.Portal.Auth.psd1'
-    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1'
+    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
 
     # Stub Az.* deps the Ingest module resolves at runtime
     function global:Get-AzAccessToken { param([string]$ResourceUrl) [pscustomobject]@{ Token = 'stub'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
@@ -72,10 +72,10 @@ Describe 'Invoke-MDEEndpoint — null/edge-case response handling (iter 13.4 reg
 
             # Mock Invoke-MDEPortalRequest at the module scope so Invoke-MDEEndpoint
             # picks up the stub instead of making a real HTTP call.
-            InModuleScope XdrLogRaider.Client -Parameters @{ MockReturn = $MockReturn; Session = $script:Session } {
+            InModuleScope Xdr.Defender.Client -Parameters @{ MockReturn = $MockReturn; Session = $script:Session } {
                 param($MockReturn, $Session)
 
-                Mock Invoke-MDEPortalRequest -ModuleName XdrLogRaider.Client { $MockReturn } -ParameterFilter { $true }
+                Mock Invoke-MDEPortalRequest -ModuleName Xdr.Defender.Client { $MockReturn } -ParameterFilter { $true }
 
                 # Behavioral assertion: function MUST NOT throw "Cannot bind
                 # argument to parameter 'Raw'" no matter what shape the upstream

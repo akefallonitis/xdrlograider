@@ -29,9 +29,12 @@ targetScope = 'resourceGroup'
 @maxLength(12)
 param projectPrefix string = 'xdrlr'
 
-@description('Environment tag. Used in resource names.')
+@description('Environment tag. Used in resource names when legacyEnvInName=true (default for in-place upgrade compatibility with existing deployments); always emitted as the `environment` Azure resource tag regardless.')
 @allowed([ 'dev', 'staging', 'prod' ])
 param env string = 'prod'
+
+@description('When true (default), resource names include the environment token (e.g. xdrlr-prod-fn-n2hhhc) for backward-compat with existing deployments. When false, resource names are environment-neutral (e.g. xdrlr-fn-n2hhhc) and environment is applied as a tag on every resource. The v1.2 Marketplace baseline flips this to false.')
+param legacyEnvInName bool = true
 
 @description('Region for connector resources (Function App, KV, Storage, App Insights). Defaults to the target RG region.')
 param connectorLocation string = resourceGroup().location
@@ -92,16 +95,38 @@ param passkeyJson string = ''
 
 var uniq      = uniqueString(resourceGroup().id, projectPrefix, env)
 var suffix    = substring(uniq, 0, 6)
-var prefix    = '${projectPrefix}-${env}'
+
+// iter-14.0 Phase 9: when legacyEnvInName=true, resource names embed the env
+// token (xdrlr-prod-fn-n2hhhc) — preserves iter-13.15 names for in-place upgrade.
+// When false, env-neutral names (xdrlr-fn-n2hhhc) and the env signal is carried
+// solely by the `environment` Azure tag (see commonTags below).
+//
+// Pattern: `${projectPrefix}-${envSegment}<typeShort>-${suffix}`
+//   legacyEnvInName=true  → envSegment = '${env}-'   → xdrlr-prod-fn-abc123
+//   legacyEnvInName=false → envSegment = ''          → xdrlr-fn-abc123
+// Storage account form differs only by the missing dashes (3-24 lowercase alnum).
+var envSegment    = legacyEnvInName ? '${env}-' : ''
+var stEnvSegment  = legacyEnvInName ? env : ''
 
 // Connector-local resource names (all live in the target RG, at connectorLocation)
-var funcName  = '${prefix}-fn-${suffix}'
-var planName  = '${prefix}-plan'
-var kvName    = '${prefix}-kv-${suffix}'
-var stName    = toLower(replace('${projectPrefix}${env}st${suffix}', '-', ''))
-var dceName   = '${prefix}-dce'
-var dcrName   = '${prefix}-dcr'
-var aiName    = '${prefix}-ai'
+var funcName  = '${projectPrefix}-${envSegment}fn-${suffix}'
+var planName  = '${projectPrefix}-${envSegment}plan'
+var kvName    = '${projectPrefix}-${envSegment}kv-${suffix}'
+// Storage account name MUST be 3-24 lowercase alphanumeric, no hyphens.
+var stName    = toLower(replace('${projectPrefix}${stEnvSegment}st${suffix}', '-', ''))
+var dceName   = '${projectPrefix}-${envSegment}dce'
+var dcrName   = '${projectPrefix}-${envSegment}dcr'
+var aiName    = '${projectPrefix}-${envSegment}ai'
+
+// iter-14.0 Phase 9: env-as-tag pattern. Every connector-local resource carries
+// these tags so the environment signal is carried by ARM tags regardless of
+// whether legacyEnvInName=true or false. The `environment` tag is the canonical
+// signal; the others document provenance for operators.
+var commonTags = {
+  'managed-by':       'XdrLogRaider'
+  environment:        env
+  project:            projectPrefix
+}
 
 // Parse the workspace resource ID to extract subscription + RG for cross-RG deploys.
 // Format: /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.OperationalInsights/workspaces/<name>
@@ -188,6 +213,7 @@ module dceDcr 'modules/dce-dcr.bicep' = {
     dcrName: dcrName
     location: workspaceLocation              // MUST match workspace region
     workspaceResourceId: existingWorkspaceId // full cross-RG resource ID
+    tags: commonTags
   }
   dependsOn: [
     customTables
@@ -202,6 +228,7 @@ module storage 'modules/storage.bicep' = {
     location: connectorLocation
     disableSharedKey: disableSharedKey
     restrictPublicNetwork: restrictPublicNetwork
+    tags: commonTags
   }
 }
 
@@ -214,6 +241,7 @@ module keyVault 'modules/key-vault.bicep' = {
     restrictPublicNetwork: restrictPublicNetwork
     enableDiagnostics: enableKeyVaultDiagnostics
     workspaceResourceId: existingWorkspaceId
+    tags: commonTags
   }
 }
 
@@ -225,6 +253,7 @@ module appInsights 'modules/app-insights.bicep' = {
     location: connectorLocation
     workspaceResourceId: existingWorkspaceId
     restrictPublicNetwork: restrictPublicNetwork
+    tags: commonTags
   }
 }
 
@@ -242,6 +271,7 @@ module functionApp 'modules/function-app.bicep' = {
     useFullManagedIdentity: useFullManagedIdentity
     alwaysOn: alwaysOn
     packageUrl: packageUrl
+    tags: commonTags
     appSettings: {
       AUTH_METHOD:           authMethod
       SERVICE_ACCOUNT_UPN:   serviceAccountUpn
@@ -251,6 +281,13 @@ module functionApp 'modules/function-app.bicep' = {
       DCR_IMMUTABLE_ID:      dceDcr.outputs.dcrImmutableId
       STORAGE_ACCOUNT_NAME:  storage.outputs.storageAccountName
       CHECKPOINT_TABLE_NAME: 'connectorCheckpoints'
+      // iter-14.0 Phase 14B: Microsoft App Insights adaptive-sampling exemption.
+      // These three custom-event names carry critical operator-actionable
+      // signal (auth failures, rate-limit pressure, ingest gaps) and MUST NOT
+      // be dropped under load. The Functions host honours this env var across
+      // its TelemetryProcessor pipeline. See:
+      //   https://learn.microsoft.com/azure/azure-monitor/app/sampling-classic-api
+      APPLICATIONINSIGHTS_TELEMETRY_SAMPLING_EXCLUDED_TYPES: 'AuthChain.AADSTSError;AuthChain.RateLimited;AuthChain.BoundaryMarker'
     }
   }
 }

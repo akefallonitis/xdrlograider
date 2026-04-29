@@ -1,49 +1,71 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Asserts the v0.1.0-beta J2 forward-scalable architecture — adding a new
-    Microsoft portal (e.g. admin.microsoft.com, entra.microsoft.com) in v0.2.0+
-    must be additive-only: no changes required to Xdr.Portal.Auth,
-    XdrLogRaider.Ingest, or the timer helper internals.
+    Asserts the iter-14.0 J2 forward-scalable architecture — adding a new
+    Microsoft portal (e.g. compliance.microsoft.com, intune.microsoft.com,
+    entra.microsoft.com) in v0.2.0+ must be additive-only: no changes required
+    to L1 Xdr.Common.Auth, XdrLogRaider.Ingest, or the timer helper internals.
 
 .DESCRIPTION
-    Verifies four invariants that make the connector safe to extend:
+    iter-14.0 split the legacy Xdr.Portal.Auth module into three:
+      - L1 Xdr.Common.Auth   (portal-generic Entra layer; TOTP, passkey, ESTS)
+      - L2 Xdr.Defender.Auth (Defender-specific cookie exchange)
+      - Xdr.Portal.Auth      (backward-compat shim for the legacy MDE-prefixed names)
 
+    v0.2.0 multi-portal expansion is then a 1-day file-add operation: copy
+    Xdr.Defender.Auth, change the public-client ID + portal host + cookie
+    names, register in profile.ps1. L1 unchanged.
+
+    Verified invariants:
       1. Manifest Defaults.Portal = 'security.microsoft.com' applied at load.
          Every entry loaded via Get-MDEEndpointManifest has a Portal field
          regardless of whether the entry declared one.
 
       2. Invoke-TierPollWithHeartbeat accepts optional -Portal param (defaults
-         security.microsoft.com). New portals can reuse the helper with zero
-         signature change.
+         security.microsoft.com).
 
       3. Module dependency graph is strictly acyclic:
-             XdrLogRaider.Client -> Xdr.Portal.Auth
-             XdrLogRaider.Ingest: no module deps (standalone)
-         No cyclic references; safe to add a sibling XdrLogRaider.*.Client
-         for other portals without touching Auth/Ingest.
+             XdrLogRaider.Client -> Xdr.Portal.Auth (shim) -> Xdr.Defender.Auth -> Xdr.Common.Auth
+             XdrLogRaider.Ingest: no auth-module deps (standalone)
+         No cyclic references; safe to add a sibling Xdr.<Portal>.Auth + a
+         sibling Xdr.<Portal>.Client without touching the other layers.
 
-      4. Xdr.Portal.Auth is portal-agnostic — takes -PortalHost on
-         Connect-MDEPortal and all request primitives. No hard-coded
-         security.microsoft.com in the auth chain except as a default.
+      4. L1 Xdr.Common.Auth is PORTAL-AGNOSTIC — Get-EntraEstsAuth takes
+         -ClientId and -PortalHost as parameters; no Defender-specific symbols.
+         (Hard-asserted by tests/unit/AuthLayerBoundaries.Tests.ps1.)
+
+      5. L2 Xdr.Defender.Auth is portal-aware — Connect-DefenderPortal +
+         Invoke-DefenderPortalRequest accept/use -PortalHost. v0.2.0 sibling
+         L2 modules follow the identical template (only their hardcoded
+         constants differ).
+
+      6. Adding a new portal in v0.2.0 = additive-only: no edits to existing
+         Public/Private files in L1 or in the Defender L2 module are required.
 #>
 
 BeforeAll {
-    $script:RepoRoot = Join-Path $PSScriptRoot '..' '..'
-    $script:ClientPsd1   = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client'  'XdrLogRaider.Client.psd1'
-    $script:AuthPsd1     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'      'Xdr.Portal.Auth.psd1'
-    $script:IngestPsd1   = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Ingest'  'XdrLogRaider.Ingest.psd1'
-    $script:HelperPath   = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client'  'Public' 'Invoke-TierPollWithHeartbeat.ps1'
-    $script:ManifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Client'  'endpoints.manifest.psd1'
-    $script:ConnectPath  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'      'Public' 'Connect-MDEPortal.ps1'
+    $script:RepoRoot       = Join-Path $PSScriptRoot '..' '..'
+    $script:ClientPsd1     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
+    $script:CommonAuthPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth'      'Xdr.Common.Auth.psd1'
+    $script:DefAuthPsd1    = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth'    'Xdr.Defender.Auth.psd1'
+    $script:PortalShimPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'      'Xdr.Portal.Auth.psd1'
+    $script:IngestPsd1     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
+    $script:HelperPath     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
+    $script:ManifestPath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
+    $script:ConnectDefPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth'    'Public' 'Connect-DefenderPortal.ps1'
+    $script:InvokeDefPath  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth'    'Public' 'Invoke-DefenderPortalRequest.ps1'
 
-    Import-Module $script:AuthPsd1   -Force -ErrorAction Stop
-    Import-Module $script:ClientPsd1 -Force -ErrorAction Stop
+    Import-Module $script:CommonAuthPsd1 -Force -ErrorAction Stop
+    Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
+    Import-Module $script:PortalShimPsd1 -Force -ErrorAction Stop
+    Import-Module $script:ClientPsd1     -Force -ErrorAction Stop
 }
 
 AfterAll {
-    Remove-Module XdrLogRaider.Client -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Defender.Auth   -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Common.Auth     -Force -ErrorAction SilentlyContinue
 }
 
 Describe 'J2 invariant 1 — manifest Defaults.Portal applied at load' {
@@ -114,69 +136,140 @@ Describe 'J2 invariant 2 — Invoke-TierPollWithHeartbeat helper accepts optiona
     }
 }
 
-Describe 'J2 invariant 3 — strictly acyclic module dependency graph' {
+Describe 'J2 invariant 3 — strictly acyclic L1 -> L2 -> shim -> client dependency graph' {
 
-    It 'XdrLogRaider.Client declares RequiredModules = Xdr.Portal.Auth' {
+    It 'XdrLogRaider.Client declares RequiredModules referencing the auth surface (Xdr.Portal.Auth shim is acceptable)' {
         $manifest = Import-PowerShellDataFile -Path $script:ClientPsd1
         $req = @($manifest.RequiredModules)
-        $req | Should -Contain 'Xdr.Portal.Auth' -Because 'client depends on auth'
+        # Either the legacy shim name OR the new direct L2 name is acceptable.
+        # iter-14.0 keeps the shim reference for backward-compat; Phase 8 will
+        # rename XdrLogRaider.Client → Xdr.Defender.Client and update this to Xdr.Defender.Auth.
+        $hasAuthDep = ($req -contains 'Xdr.Portal.Auth') -or ($req -contains 'Xdr.Defender.Auth')
+        $hasAuthDep | Should -BeTrue -Because 'client depends on the auth surface (via shim today; via direct L2 in Phase 8)'
     }
 
-    It 'XdrLogRaider.Ingest has no RequiredModules (portal-agnostic leaf)' {
+    It 'XdrLogRaider.Ingest has no auth-module RequiredModules (standalone leaf)' {
         $manifest = Import-PowerShellDataFile -Path $script:IngestPsd1
-        # Ingest may either omit RequiredModules entirely or declare an empty array
-        # Accept both; what we reject is any forward-dependency on Client or Auth.
         if ($manifest.ContainsKey('RequiredModules')) {
             $req = @($manifest.RequiredModules)
             $req | Should -Not -Contain 'XdrLogRaider.Client'
             $req | Should -Not -Contain 'Xdr.Portal.Auth'
+            $req | Should -Not -Contain 'Xdr.Defender.Auth'
+            $req | Should -Not -Contain 'Xdr.Common.Auth'
         }
     }
 
-    It 'Xdr.Portal.Auth has no RequiredModules (root of the graph)' {
-        $manifest = Import-PowerShellDataFile -Path $script:AuthPsd1
-        # Must be a pure leaf with respect to the connector modules — no cyclic
-        # or forward deps. May declare Az.* at runtime but those are ambient.
+    It 'L1 Xdr.Common.Auth has no auth-module RequiredModules (root of the graph)' {
+        $manifest = Import-PowerShellDataFile -Path $script:CommonAuthPsd1
         if ($manifest.ContainsKey('RequiredModules')) {
             $req = @($manifest.RequiredModules)
             $req | Should -Not -Contain 'XdrLogRaider.Client'
             $req | Should -Not -Contain 'XdrLogRaider.Ingest'
+            $req | Should -Not -Contain 'Xdr.Defender.Auth' -Because 'L1 must not depend on L2 (would be a cycle)'
+            $req | Should -Not -Contain 'Xdr.Portal.Auth'   -Because 'L1 must not depend on the shim'
+        }
+    }
+
+    It 'L2 Xdr.Defender.Auth does not depend on the shim or on the client (only on L1, optionally)' {
+        $manifest = Import-PowerShellDataFile -Path $script:DefAuthPsd1
+        if ($manifest.ContainsKey('RequiredModules')) {
+            $req = @($manifest.RequiredModules)
+            $req | Should -Not -Contain 'XdrLogRaider.Client'
+            $req | Should -Not -Contain 'XdrLogRaider.Ingest'
+            $req | Should -Not -Contain 'Xdr.Portal.Auth' -Because 'L2 must not depend on the shim (would be a cycle: shim imports L2)'
         }
     }
 }
 
-Describe 'J2 invariant 4 — Xdr.Portal.Auth is portal-agnostic' {
+Describe 'J2 invariant 4 — L1 Xdr.Common.Auth is portal-agnostic' {
 
-    It 'Connect-MDEPortal accepts -PortalHost param (not hardcoded security.microsoft.com)' {
+    It 'Get-EntraEstsAuth requires -ClientId and -PortalHost as parameters' {
+        $tokens = $null; $errs = $null
+        $entraPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Public' 'Get-EntraEstsAuth.ps1'
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+            $entraPath, [ref]$tokens, [ref]$errs)
+        $params = $ast.FindAll({
+            param($n) $n -is [System.Management.Automation.Language.ParameterAst]
+        }, $true)
+        $clientId = $params | Where-Object { $_.Name.VariablePath.UserPath -ieq 'ClientId' } | Select-Object -First 1
+        $portalHost = $params | Where-Object { $_.Name.VariablePath.UserPath -ieq 'PortalHost' } | Select-Object -First 1
+        $clientId   | Should -Not -BeNullOrEmpty -Because 'L1 must take -ClientId so each L2 portal passes its own public-client ID'
+        $portalHost | Should -Not -BeNullOrEmpty -Because 'L1 must take -PortalHost so each L2 portal passes its own host'
+    }
+
+    It 'L1 Get-EntraEstsAuth defines $ClientId/$PortalHost as MANDATORY parameters (no defaults)' {
+        # The full "no Defender-specific symbols in L1 code" gate is enforced by
+        # AuthLayerBoundaries.Tests.ps1 with comment-tolerance. Here we just check
+        # the param shape that makes L1 portal-generic.
+        $tokens = $null; $errs = $null
+        $entraPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Public' 'Get-EntraEstsAuth.ps1'
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+            $entraPath, [ref]$tokens, [ref]$errs)
+        $params = $ast.FindAll({
+            param($n) $n -is [System.Management.Automation.Language.ParameterAst]
+        }, $true)
+        foreach ($paramName in @('ClientId', 'PortalHost')) {
+            $p = $params | Where-Object { $_.Name.VariablePath.UserPath -ieq $paramName } | Select-Object -First 1
+            $p | Should -Not -BeNullOrEmpty -Because "Get-EntraEstsAuth must define -$paramName"
+            $mandatoryAttr = $p.Attributes | Where-Object { $_.TypeName.Name -eq 'Parameter' } |
+                ForEach-Object { $_.NamedArguments } | Where-Object { $_.ArgumentName -ieq 'Mandatory' } |
+                Select-Object -First 1
+            $mandatoryAttr | Should -Not -BeNullOrEmpty -Because "-$paramName must be Mandatory (each L2 portal supplies its own)"
+            $p.DefaultValue | Should -BeNullOrEmpty -Because "-$paramName must have NO default in L1 (defaults are L2's concern)"
+        }
+    }
+}
+
+Describe 'J2 invariant 5 — L2 Xdr.Defender.Auth is portal-aware (template for v0.2.0 siblings)' {
+
+    It 'Connect-DefenderPortal accepts -PortalHost param (default security.microsoft.com)' {
         $tokens = $null; $errs = $null
         $ast = [System.Management.Automation.Language.Parser]::ParseFile(
-            $script:ConnectPath, [ref]$tokens, [ref]$errs)
+            $script:ConnectDefPath, [ref]$tokens, [ref]$errs)
         $params = $ast.FindAll({
             param($n) $n -is [System.Management.Automation.Language.ParameterAst]
         }, $true)
         $portalHost = $params | Where-Object { $_.Name.VariablePath.UserPath -ieq 'PortalHost' } | Select-Object -First 1
-        $portalHost | Should -Not -BeNullOrEmpty -Because 'Connect-MDEPortal must take PortalHost param so v0.2.0 portals reuse the auth chain'
+        $portalHost | Should -Not -BeNullOrEmpty -Because 'Connect-DefenderPortal must take PortalHost for the v0.2.0 L2 template'
+        $portalHost.DefaultValue.Extent.Text | Should -Match 'security\.microsoft\.com'
     }
 
-    It 'Invoke-MDEPortalRequest uses $portalHost variable not literal string' {
-        $reqPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth' 'Public' 'Invoke-MDEPortalRequest.ps1'
-        $src = Get-Content $reqPath -Raw
+    It 'Invoke-DefenderPortalRequest builds URI from $portalHost variable, not a literal' {
+        $src = Get-Content $script:InvokeDefPath -Raw
         $src | Should -Match '\$uri\s*=\s*"https://\$portalHost' -Because 'URI must be built from $portalHost variable, not a hardcoded security.microsoft.com'
-        # Absence of hardcoded literal in URI construction:
+        # Absence of literal Defender host in URI construction:
         $uriLines = $src -split "`n" | Where-Object { $_ -match 'https://' }
         ($uriLines | Where-Object { $_ -match 'https://security\.microsoft\.com/[^"]' }) | Should -BeNullOrEmpty -Because 'no literal security.microsoft.com in URI construction paths'
     }
+
+    It 'Xdr.Defender.Auth.psm1 hardcodes Defender public-client ID (this is the L2 template marker)' {
+        $defPsm1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psm1'
+        $src = Get-Content $defPsm1 -Raw
+        $src | Should -Match '\$script:DefenderClientId\s*=\s*''80ccca67-54bd-44ab-8625-4b79c4dc7775''' -Because 'L2 hardcodes its own portal client ID; v0.2.0 sibling modules will hardcode their own'
+    }
 }
 
-Describe 'J2 invariant 5 — adding a new portal in v0.2.0 requires only additive changes' {
+Describe 'J2 invariant 6 — adding a new portal in v0.2.0 requires only additive changes' {
 
     It 'Get-MDEEndpointManifest filter-by-Portal works' {
         $m = Get-MDEEndpointManifest -Force
         $security = $m.Values | Where-Object { $_.Portal -eq 'security.microsoft.com' }
         @($security).Count | Should -Be $m.Count -Because 'v0.1.0-beta: 100% security-portal'
 
-        # Simulate v0.2.0 filter-by-Portal — no entries yet for admin, should be 0
-        $admin = $m.Values | Where-Object { $_.Portal -eq 'admin.microsoft.com' }
-        @($admin).Count | Should -Be 0 -Because 'no admin-portal entries yet; forward-scalable path is empty-but-valid'
+        # Simulate v0.2.0 filter-by-Portal — no entries yet for compliance/intune/entra
+        $compliance = $m.Values | Where-Object { $_.Portal -eq 'compliance.microsoft.com' }
+        @($compliance).Count | Should -Be 0 -Because 'no Purview-portal entries yet; forward-scalable path is empty-but-valid'
+        $intune = $m.Values | Where-Object { $_.Portal -eq 'intune.microsoft.com' }
+        @($intune).Count | Should -Be 0 -Because 'no Intune-portal entries yet; forward-scalable path is empty-but-valid'
+    }
+
+    It 'docs/PORTAL-COOKIE-CATALOG.md documents the L2 template for v0.2.0 portal additions' {
+        $catalog = Join-Path $script:RepoRoot 'docs' 'PORTAL-COOKIE-CATALOG.md'
+        Test-Path -LiteralPath $catalog | Should -BeTrue -Because 'iter-14.0 Phase 1.5 deliverable — v0.2.0 portal-add reference'
+        $content = Get-Content -LiteralPath $catalog -Raw
+        $content | Should -Match 'Defender XDR.*security\.microsoft\.com'
+        $content | Should -Match 'Purview.*compliance\.microsoft\.com'
+        $content | Should -Match 'Intune.*intune\.microsoft\.com'
+        $content | Should -Match 'L2 template'
     }
 }

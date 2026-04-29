@@ -4,7 +4,7 @@
     Single-command production-readiness gauntlet. Orchestrates offline + live + post-deploy.
 
 .DESCRIPTION
-    Phases:
+    Steps:
       1. Offline Pester (1200+ tests in tests/{unit,arm,kql})
       2. PSScriptAnalyzer (zero errors threshold)
       3. ARM validators (Validate-ArmJson + ARM-TTK if available)
@@ -13,17 +13,17 @@
       6. Post-deploy verification (Tier 2 SP)
       7. Production-readiness verdict
 
-    Each phase is independent; -SkipPhases can be used to skip any subset.
+    Each step is independent; -SkipPhases can be used to skip any subset.
     Markdown summary written to tests/results/local-tests-<UtcStamp>.md.
 
 .PARAMETER Mode
-    All       — every phase
-    Offline   — Phase 1+2+3 (no Azure access required)
-    Live      — Phase 4+5+6 (requires deployed connector + tests/.env.local)
-    PreDeploy — Phase 1+2+3+4+5 (everything except post-deploy gates)
+    All       — every step
+    Offline   — steps 1+2+3 (no Azure access required)
+    Live      — steps 4+5+6 (requires deployed connector + tests/.env.local)
+    PreDeploy — steps 1+2+3+4+5 (everything except post-deploy gates)
 
 .PARAMETER SkipPhases
-    Comma-separated phase numbers to skip, e.g. '4,5'.
+    Comma-separated step numbers to skip, e.g. '4,5'.
 
 .EXAMPLE
     pwsh ./tools/Run-LocalTests.ps1 -Mode Offline
@@ -61,7 +61,7 @@ $phasesToRun = $phaseMap[$Mode] | Where-Object { $SkipPhases -notcontains $_ }
 $results = [ordered]@{}
 $startTime = Get-Date
 
-function Run-Phase {
+function Run-Step {
     param([int]$Number, [string]$Name, [scriptblock]$Body)
     if ($phasesToRun -notcontains $Number) {
         $results["P$Number"] = [pscustomobject]@{ N=$Number; Name=$Name; Pass=$null; Detail='SKIPPED'; Duration=0 }
@@ -84,7 +84,7 @@ function Run-Phase {
 
 # === PHASES ===
 
-Run-Phase 1 'Offline Pester (unit + arm + kql)' {
+Run-Step 1 'Offline Pester (unit + arm + kql)' {
     Import-Module Pester -MinimumVersion 5.5.0 -Force
     $cfg = New-PesterConfiguration
     $cfg.Run.Path = @('./tests/unit','./tests/arm','./tests/kql')
@@ -96,7 +96,7 @@ Run-Phase 1 'Offline Pester (unit + arm + kql)' {
     "Passed=$($r.PassedCount) Skipped=$($r.SkippedCount)"
 }
 
-Run-Phase 2 'PSScriptAnalyzer' {
+Run-Step 2 'PSScriptAnalyzer' {
     Import-Module PSScriptAnalyzer -Force
     $errs = @()
     foreach ($p in @('./src','./tools','./tests')) {
@@ -107,30 +107,30 @@ Run-Phase 2 'PSScriptAnalyzer' {
     'zero errors'
 }
 
-Run-Phase 3 'ARM validators' {
+Run-Step 3 'ARM validators' {
     & ./tools/Validate-ArmJson.ps1 -ErrorAction Stop
     if ($LASTEXITCODE -ne 0) { throw "Validate-ArmJson exit code $LASTEXITCODE" }
     'PASS'
 }
 
-Run-Phase 4 'Live auth (3 methods)' {
+Run-Step 4 'Live auth (3 methods)' {
     if (-not (Test-Path './tests/.env.local')) { throw 'tests/.env.local not present — run Initialize-XdrLogRaiderSP.ps1 first' }
     'SKIPPED — placeholder for tests/Run-Tests.ps1 -Category local-online'
 }
 
-Run-Phase 5 'Live endpoint audit (45 streams)' {
+Run-Step 5 'Live endpoint audit (45 streams)' {
     if (-not (Test-Path './tests/.env.local')) { throw 'tests/.env.local not present' }
     'SKIPPED — placeholder for tests/integration/Audit-Endpoints-Live.ps1'
 }
 
-Run-Phase 6 'Post-deploy verification' {
+Run-Step 6 'Post-deploy verification' {
     if (-not (Test-Path './tests/.env.local')) { throw 'tests/.env.local not present' }
     & ./tools/Post-DeploymentVerification.ps1 -ErrorAction Stop
     if ($LASTEXITCODE -ne 0) { throw "Post-DeploymentVerification exit code $LASTEXITCODE" }
     '14 phases passed'
 }
 
-Run-Phase 7 'Production-readiness verdict' {
+Run-Step 7 'Production-readiness verdict' {
     $failed = @($results.Values | Where-Object { $_.Pass -eq $false })
     if ($failed.Count -gt 0) { throw "$($failed.Count) phase(s) failed: $($failed.Name -join ', ')" }
     "$(@($results.Values | Where-Object Pass).Count) phases green / $(@($results.Values | Where-Object { $_.Pass -eq $false }).Count) red — READY"

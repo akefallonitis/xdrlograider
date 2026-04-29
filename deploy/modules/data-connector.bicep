@@ -184,7 +184,7 @@ resource dataConnector 'Microsoft.OperationalInsights/workspaces/providers/dataC
         { name: 'MDE_SAClassification_CL',         lastDataReceivedQuery: 'MDE_SAClassification_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_XspmInitiatives_CL',          lastDataReceivedQuery: 'MDE_XspmInitiatives_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_ExposureSnapshots_CL',        lastDataReceivedQuery: 'MDE_ExposureSnapshots_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
-        { name: 'MDE_SecureScoreBreakdown_CL',     lastDataReceivedQuery: 'MDE_SecureScoreBreakdown_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
+        // iter-14.0: MDE_SecureScoreBreakdown_CL removed — Graph /security/secureScores covers
         { name: 'MDE_ExposureRecommendations_CL',  lastDataReceivedQuery: 'MDE_ExposureRecommendations_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_XspmAttackPaths_CL',          lastDataReceivedQuery: 'MDE_XspmAttackPaths_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_XspmChokePoints_CL',          lastDataReceivedQuery: 'MDE_XspmChokePoints_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }

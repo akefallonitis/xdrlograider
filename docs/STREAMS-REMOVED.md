@@ -4,11 +4,27 @@ Streams that appeared in earlier releases but do NOT ship in `v0.1.0-beta.1` (re
 
 ---
 
-## iter-13.8 deprecation (1 — path renamed by Microsoft)
+## Portal-only audit DROPPED (1 — publicly-API-covered)
+
+The portal-only audit (2026-04-29) re-scoped the connector to "telemetry not exposed by Microsoft public APIs". Streams whose data is already first-class on Microsoft Graph / Defender XDR APIs are now out of scope — operators should use the official Microsoft data connector for those, not duplicate the ingestion path.
+
+| Stream | Manifest path (retired) | Public API equivalent |
+|---|---|---|
+| `MDE_SecureScoreBreakdown_CL` | `/apiproxy/mtp/secureScore/security/secureScoresV2` | Microsoft Graph `/security/secureScores` (well-documented, RBAC-aware, Sentinel content-hub Graph Security data connector ingests it natively). |
+
+**Why dropped, not deprecated**: deprecation keeps a manifest entry around for one cycle so downstream parsers/rules can be cleanly removed in v0.2.0. SecureScoreBreakdown was newly added in v0.1.0-beta (no production deployments shipped it yet) and the Graph-Security path is a direct first-class substitute, so a clean drop avoids carrying dead schema forward. The matching custom-table, DCR stream entry, parser union row, and Sentinel-solution data-type are all removed; the live-response fixture is preserved historically.
+
+**Read substitute**: enable the Sentinel content-hub "Microsoft 365 Defender" / "Microsoft Graph Security" data connector and query `SecurityRecommendation` / Graph `secureScores` directly.
+
+The manifest-schema gate (`tests/unit/Manifest.iter14Schema.Tests.ps1`) hard-rejects any future entry with `AuditScope='public-api-covered'` so the bug class can't recur.
+
+---
+
+## Deprecation (1 — path renamed by Microsoft)
 
 | Stream | Manifest path | Deprecation reason |
 |---|---|---|
-| `MDE_StreamingApiConfig_CL` | `/apiproxy/mtp/streamingapi/streamingApiConfiguration` | Returns 404 on live audit. Per XDRInternals `Get-XdrStreamingApiConfiguration.ps1`, the canonical surface is `/apiproxy/mtp/wdatpApi/dataexportsettings` — but that path is already used by `MDE_DataExportSettings_CL` (which returns 200). The two streams describe the same underlying configuration. Marked `Availability='deprecated'` in iter-13.8 rather than removed so that operators can complete one full upgrade cycle and downstream parsers/analytic-rules can be cleanly removed in v0.2.0 without leaving dangling references. |
+| `MDE_StreamingApiConfig_CL` | `/apiproxy/mtp/streamingapi/streamingApiConfiguration` | Returns 404 on live audit. Per XDRInternals `Get-XdrStreamingApiConfiguration.ps1`, the canonical surface is `/apiproxy/mtp/wdatpApi/dataexportsettings` — but that path is already used by `MDE_DataExportSettings_CL` (which returns 200). The two streams describe the same underlying configuration. Marked `Availability='deprecated'` rather than removed so that operators can complete one full upgrade cycle and downstream parsers/analytic-rules can be cleanly removed in v0.2.0 without leaving dangling references. |
 
 **Read substitute**: `MDE_DataExportSettings_CL` (already in manifest, live).
 

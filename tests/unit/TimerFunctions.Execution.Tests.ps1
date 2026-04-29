@@ -24,7 +24,7 @@
 #>
 
 BeforeAll {
-    $script:HelperPath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
+    $script:HelperPath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
 
     $tokens = $null; $errs = $null
     $script:Ast = [System.Management.Automation.Language.Parser]::ParseFile(

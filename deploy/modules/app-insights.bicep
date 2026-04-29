@@ -7,12 +7,16 @@ param location string
 @description('Log Analytics workspace resource ID to link to.')
 param workspaceResourceId string
 
-@description('Iter 13.15: when true, restricts public network access for query (operator must use Bastion or private endpoint to query traces). Ingestion stays open so the FA can write telemetry without VNet integration. Default false for v0.1.0-beta deployability; flips to true in v1.2 Marketplace baseline.')
+@description('When true, restricts public network access for query (operator must use Bastion or private endpoint to query traces). Ingestion stays open so the FA can write telemetry without VNet integration. Default false for v0.1.0-beta deployability; flips to true in the v1.2 Marketplace baseline.')
 param restrictPublicNetwork bool = false
+
+@description('Tags applied to every resource emitted by this module. The `environment` tag carries the env signal regardless of whether legacyEnvInName=true or false, so operators can filter by environment via Azure tag query.')
+param tags object = {}
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightsName
   location: location
+  tags: tags
   kind: 'web'
   properties: {
     Application_Type: 'web'

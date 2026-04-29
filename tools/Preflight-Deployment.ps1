@@ -256,10 +256,10 @@ try {
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Portal.Auth' 'Xdr.Portal.Auth.psd1')     -Force -ErrorAction Stop
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'XdrLogRaider.Client.psd1') -Force -ErrorAction Stop
     $manifest = Get-MDEEndpointManifest -Force
-    if ($manifest.Count -eq 45) {
-        Add-Check -Section '6-Schema' -Name 'Manifest = 45 streams' -Status Pass -Detail "$($manifest.Count) streams"
+    if ($manifest.Count -eq 46) {
+        Add-Check -Section '6-Schema' -Name 'Manifest = 46 streams' -Status Pass -Detail "$($manifest.Count) streams"
     } else {
-        Add-Check -Section '6-Schema' -Name 'Manifest = 45 streams' -Status Fail -Detail "$($manifest.Count) (expected 45)"
+        Add-Check -Section '6-Schema' -Name 'Manifest = 46 streams' -Status Fail -Detail "$($manifest.Count) (expected 46)"
     }
 
     # Every manifest entry has required fields

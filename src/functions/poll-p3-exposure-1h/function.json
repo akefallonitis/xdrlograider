@@ -1,5 +1,5 @@
 {
-  "description": "Hourly poll at :25 (Tier P3 - Exposure / 8 streams). Pulls XSPM (Exposure Management) telemetry: MDE_XspmInitiatives_CL, MDE_ExposureSnapshots_CL, MDE_SecureScoreBreakdown_CL, MDE_ExposureRecommendations_CL, MDE_XspmAttackPaths_CL, MDE_XspmChokePoints_CL, MDE_XspmTopTargets_CL, MDE_SecurityBaselines_CL. Tier P3 = exposure posture.",
+  "description": "Hourly poll at :25 (Tier P3 - Exposure / 8 streams). Pulls XSPM (Exposure Management) telemetry: MDE_XspmInitiatives_CL, MDE_ExposureSnapshots_CL, MDE_ExposureRecommendations_CL, MDE_XspmAttackPaths_CL, MDE_XspmChokePoints_CL, MDE_XspmTopTargets_CL, MDE_SecurityBaselines_CL, MDE_DeviceTimeline_CL. Tier P3 = exposure posture. (Microsoft Graph SecureScores breakdown is out of scope — operators should use the official Graph Security data connector for that data.)",
   "bindings": [
     {
       "schedule": "0 25 * * * *",

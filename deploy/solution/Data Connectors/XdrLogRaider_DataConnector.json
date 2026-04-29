@@ -47,7 +47,7 @@
     { "name": "MDE_ConnectedApps_CL",            "lastDataReceivedQuery": "MDE_ConnectedApps_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_TenantContext_CL",            "lastDataReceivedQuery": "MDE_TenantContext_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_TenantWorkloadStatus_CL",     "lastDataReceivedQuery": "MDE_TenantWorkloadStatus_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_StreamingApiConfig_CL",       "lastDataReceivedQuery": "MDE_StreamingApiConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_DeviceTimeline_CL",           "lastDataReceivedQuery": "MDE_DeviceTimeline_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_IntuneConnection_CL",         "lastDataReceivedQuery": "MDE_IntuneConnection_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_PurviewSharing_CL",           "lastDataReceivedQuery": "MDE_PurviewSharing_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_RbacDeviceGroups_CL",         "lastDataReceivedQuery": "MDE_RbacDeviceGroups_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
@@ -56,7 +56,6 @@
     { "name": "MDE_SAClassification_CL",         "lastDataReceivedQuery": "MDE_SAClassification_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_XspmInitiatives_CL",          "lastDataReceivedQuery": "MDE_XspmInitiatives_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_ExposureSnapshots_CL",        "lastDataReceivedQuery": "MDE_ExposureSnapshots_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_SecureScoreBreakdown_CL",     "lastDataReceivedQuery": "MDE_SecureScoreBreakdown_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_ExposureRecommendations_CL",  "lastDataReceivedQuery": "MDE_ExposureRecommendations_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_XspmAttackPaths_CL",          "lastDataReceivedQuery": "MDE_XspmAttackPaths_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_XspmChokePoints_CL",          "lastDataReceivedQuery": "MDE_XspmChokePoints_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
@@ -72,7 +71,8 @@
     { "name": "MDE_UserPreferences_CL",          "lastDataReceivedQuery": "MDE_UserPreferences_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_MtoTenants_CL",               "lastDataReceivedQuery": "MDE_MtoTenants_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_LicenseReport_CL",            "lastDataReceivedQuery": "MDE_LicenseReport_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_CloudAppsConfig_CL",          "lastDataReceivedQuery": "MDE_CloudAppsConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
+    { "name": "MDE_CloudAppsConfig_CL",          "lastDataReceivedQuery": "MDE_CloudAppsConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+    { "name": "MDE_MachineActions_CL",           "lastDataReceivedQuery": "MDE_MachineActions_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
   ],
   "connectivityCriteria": [
     {

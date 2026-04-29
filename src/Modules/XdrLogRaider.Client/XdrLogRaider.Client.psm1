@@ -1,41 +1,124 @@
-# XdrLogRaider.Client — Defender XDR portal-only telemetry client
+# XdrLogRaider.Client — backward-compat shim for v0.1.0-beta operators + tests.
 #
-# Architecture (v1.0):
-#   endpoints.manifest.psd1         single catalogue of 52 streams (Tier, Path, Filter, IdProperty)
-#   Endpoints/_EndpointHelpers.ps1  shared helpers:
-#                                     Get-MDEEndpointManifest  (cached manifest loader)
-#                                     Invoke-MDEPortalEndpoint (structured HTTP wrapper)
-#                                     ConvertTo-MDEIngestRow   (row normaliser)
-#                                     Expand-MDEResponse       (response flattener)
-#   Public/Invoke-MDEEndpoint.ps1   single per-stream dispatcher
-#   Public/Invoke-MDETierPoll.ps1   per-tier loop used by the 7 scheduled timer functions
+# Phase 8 of the module-split work renamed this module to Xdr.Defender.Client
+# (so the L3 Defender-portal layer sits cleanly alongside Xdr.Defender.Auth).
+# This shim keeps the legacy XdrLogRaider.Client name + the legacy MDE-prefixed
+# function names (Invoke-MDEEndpoint, Invoke-MDETierPoll, ...) by importing
+# the renamed module and re-exporting its public surface unchanged.
 #
-# Callers use exactly one entry point:
-#   - Scheduled tier polling:     Invoke-MDETierPoll  -Session $s -Tier 'P0' -Config $c
-#   - Direct single-stream call:  Invoke-MDEEndpoint  -Session $s -Stream 'MDE_PUAConfig_CL' [-FromUtc $since]
+# Operator scripts that `Import-Module XdrLogRaider.Client` and call
+# Invoke-MDEEndpoint / Invoke-MDETierPoll / Invoke-TierPollWithHeartbeat keep
+# working without change. Pester tests that `Mock -ModuleName XdrLogRaider.Client'
+# need to migrate to '-ModuleName Xdr.Defender.Client' (the mock target must
+# match where the function actually lives).
 #
-# Scope: READ-ONLY. No action-triggering endpoints. All entries are HTTP GETs.
+# v0.2.0+ may deprecate this shim once operators migrate to the L4
+# Xdr.Connector.Orchestrator surface (Invoke-XdrTierPoll -Portal 'Defender').
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-# 1) Helpers first (required by everything else).
-. (Join-Path $PSScriptRoot 'Endpoints' '_EndpointHelpers.ps1')
+# Import the renamed module. profile.ps1 imports Xdr.Defender.Client before
+# this shim, so Get-Module finds it already loaded. Tests that import this
+# shim directly trigger lazy load below.
+$defenderClient = Get-Module -Name 'Xdr.Defender.Client'
 
-# 2) Public entry points (dispatcher + tier poller).
-$publicFiles = @(Get-ChildItem -Path (Join-Path $PSScriptRoot 'Public') -Filter *.ps1 -ErrorAction SilentlyContinue)
-foreach ($file in $publicFiles) {
-    try {
-        . $file.FullName
-    } catch {
-        Write-Error "Failed to load $($file.FullName): $_"
-        throw
+if (-not $defenderClient) {
+    $renamedPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
+    if (Test-Path -LiteralPath $renamedPath) {
+        Import-Module $renamedPath -Force -Global -ErrorAction Stop
+    } else {
+        throw "XdrLogRaider.Client shim: cannot locate Xdr.Defender.Client at $renamedPath. Both modules must live under src/Modules/."
     }
 }
 
-# 3) Warm the manifest cache at import time so any first-call latency stays in
-#    cold-start rather than first real poll.
-$null = Get-MDEEndpointManifest
+# Re-export every public function from the renamed module under the same
+# legacy name. The function names didn't change (Invoke-MDEEndpoint, etc.) so
+# a simple Export-ModuleMember of the renamed module's surface is enough.
+# Pester mocks that target '-ModuleName XdrLogRaider.Client' will resolve
+# against this re-export.
+
+function Invoke-MDEEndpoint {
+    [CmdletBinding()]
+    [OutputType([object[]])]
+    param(
+        [Parameter(Mandatory)] [pscustomobject] $Session,
+        [Parameter(Mandatory)] [string] $Stream,
+        [datetime] $FromUtc,
+        [hashtable] $PathParams
+    )
+    & (Get-Module -Name 'Xdr.Defender.Client') Invoke-MDEEndpoint @PSBoundParameters
+}
+
+function Invoke-MDETierPoll {
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param(
+        [Parameter(Mandatory)] [pscustomobject] $Session,
+        [Parameter(Mandatory)]
+        [ValidateSet('P0', 'P1', 'P2', 'P3', 'P5', 'P6', 'P7')]
+        [string] $Tier,
+        [Parameter(Mandatory)] $Config,
+        [switch] $IncludeDeferred
+    )
+    & (Get-Module -Name 'Xdr.Defender.Client') Invoke-MDETierPoll @PSBoundParameters
+}
+
+function Invoke-TierPollWithHeartbeat {
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet('P0', 'P1', 'P2', 'P3', 'P5', 'P6', 'P7')]
+        [string] $Tier,
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $FunctionName,
+        [ValidateNotNullOrEmpty()]
+        [string] $Portal = 'security.microsoft.com'
+    )
+    & (Get-Module -Name 'Xdr.Defender.Client') Invoke-TierPollWithHeartbeat @PSBoundParameters
+}
+
+function Get-MDEEndpointManifest {
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param(
+        [switch] $Force
+    )
+    & (Get-Module -Name 'Xdr.Defender.Client') Get-MDEEndpointManifest @PSBoundParameters
+}
+
+function Invoke-MDEPortalEndpoint {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] [pscustomobject] $Session,
+        [Parameter(Mandatory)] [string] $Path,
+        [string] $Method = 'GET',
+        [hashtable] $AdditionalHeaders,
+        $Body = $null
+    )
+    & (Get-Module -Name 'Xdr.Defender.Client') Invoke-MDEPortalEndpoint @PSBoundParameters
+}
+
+function ConvertTo-MDEIngestRow {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] $Entity,
+        [Parameter(Mandatory)] [string] $Stream,
+        [hashtable] $StaticFields
+    )
+    & (Get-Module -Name 'Xdr.Defender.Client') ConvertTo-MDEIngestRow @PSBoundParameters
+}
+
+function Expand-MDEResponse {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] $Response,
+        [string] $UnwrapProperty
+    )
+    & (Get-Module -Name 'Xdr.Defender.Client') Expand-MDEResponse @PSBoundParameters
+}
 
 Export-ModuleMember -Function @(
     'Invoke-MDEEndpoint',

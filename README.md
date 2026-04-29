@@ -1,8 +1,8 @@
 # XdrLogRaider
 
-**A Microsoft Sentinel Solution that ingests Defender XDR portal-only telemetry — configuration, compliance, drift, exposure, governance — that is not exposed by public Graph Security, Defender XDR, or MDE public APIs.**
+**A Microsoft Sentinel custom data connector that ingests Microsoft Defender XDR portal-only telemetry — configuration, compliance, drift, exposure, governance — that public Microsoft APIs (Graph Security, Microsoft 365 Defender, MDE) don't expose.**
 
-> **⚠ v0.1.0-beta — BETA.** Production-readiness verified pre-deploy (**1355+ offline tests green** — iter-13.15: Storage Table HttpClient unification, 3-tier `hostingPlan`, full SAMI least-privilege gate; 36 of 45 endpoints live-captured against a real admin account, all auth paths tested, preflight PRE-DEPLOY READY: YES). Promote to v0.1.0 GA after a 30-day tenant soak; v1.0.0 after ≥2 external operators complete their own soak. See [ROADMAP.md](docs/ROADMAP.md). **Operator decision aids**: [docs/HOSTING-PLANS.md](docs/HOSTING-PLANS.md) (cost vs security tier choice), [docs/SECURITY-NOTES.md](docs/SECURITY-NOTES.md) (threat model + per-plan residual risk).
+> **⚠ v0.1.0-beta — BETA.** Production-ready promotion pending content-quality enhancements. Operators may deploy for **evaluation** — data lands in Log Analytics with no destructive failures. Promote to v0.1.0 GA after a 30-day tenant soak; v1.0.0 after ≥2 external operators complete their own soak. See [CHANGELOG.md](CHANGELOG.md) `[Unreleased]` for the current scope and [ROADMAP.md](docs/ROADMAP.md) for the promotion path. **Operator decision aids**: [docs/HOSTING-PLANS.md](docs/HOSTING-PLANS.md) (cost vs security tier choice), [docs/SECURITY-NOTES.md](docs/SECURITY-NOTES.md) (threat model + per-plan residual risk).
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fv0.1.0-beta%2Fdeploy%2Fcompiled%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fv0.1.0-beta%2Fdeploy%2Fcompiled%2FcreateUiDefinition.json)
 [![CI](https://github.com/akefallonitis/xdrlograider/actions/workflows/ci.yml/badge.svg)](https://github.com/akefallonitis/xdrlograider/actions/workflows/ci.yml)
@@ -11,8 +11,8 @@
 | Feature | Detail |
 |---|---|
 | Platform | Azure Functions (PowerShell 7.4), Log Analytics, Sentinel |
-| Auth | Three unattended auto-refreshing methods: Credentials+TOTP, Software Passkey, DirectCookies (diagnostic) |
-| Scope | Defender XDR portal (`security.microsoft.com`) — **45 telemetry streams** across 7 compliance tiers, every one with path + method + body + headers documented against XDRInternals v1.0.3 + live-captured against admin account. **36 live** (return 200); **8 tenant-feature-gated** (activate when tenant provisions MDI / TVM / MCAS / Intune AV / MDO Allow-Block / Custom Collection); **1 deprecated** (`MDE_StreamingApiConfig_CL` — XDRInternals canonical path collides with another stream; v0.2.0 will remove). Iter-13.8 retired the role-gated category per Microsoft Learn (Security Admin auto-grants Full Access in MCAS + MDE settings). No "deferred" placeholders. |
+| Auth | Two unattended auto-refreshing methods: Credentials+TOTP, Software Passkey. DirectCookies for diagnostic / one-shot use. |
+| Scope | Microsoft Defender XDR portal (`security.microsoft.com`) — telemetry streams across 10 functional categories (Endpoint Device Management, Endpoint Configuration, Vulnerability Management, Identity Protection, Configuration & Settings, Exposure Management, Threat Analytics, Action Center, Multi-Tenant Operations, Streaming API). Every stream documented + live-captured. Some streams activate only when the tenant provisions the underlying feature (MDI / TVM / MCAS / Intune / MDO / Custom Collection). |
 | Prerequisite | **Existing Sentinel-enabled Log Analytics workspace** (any RG / subscription in the same tenant). This template does NOT create a workspace. |
 | Deployment | One-click **Deploy to Azure** (button above) + one `./tools/Initialize-XdrLogRaiderAuth.ps1` run post-deploy. Cross-RG / cross-region workspace supported. |
 | Content | 6 workbooks · 14 analytic rules · 9 hunting queries · 6 KQL drift parsers + 47 custom LA tables (45 telemetry + Heartbeat + AuthTestResult) — all auto-deployed via nested ARM. Every parser / rule / query / workbook column reference verified against live fixtures in CI. |
@@ -68,8 +68,8 @@ Production polling timers activate automatically once the self-test passes. With
 - [Auth](docs/AUTH.md) — both methods explained, CA compatibility, rotation
 - [Getting Auth Material](docs/GETTING-AUTH-MATERIAL.md) — how to obtain TOTP / passkey / cookies
 - [Bring Your Own Passkey](docs/BRING-YOUR-OWN-PASSKEY.md) — generating a software passkey JSON
-- [Streams](docs/STREAMS.md) — full catalogue of 45 telemetry streams (36 live + 8 tenant-feature-gated + 1 deprecated, as of iter-13.8 audit 2026-04-27)
-- [Streams removed](docs/STREAMS-REMOVED.md) — 7 streams removed in v1.0.2 + v0.1.0-beta.1 with evidence
+- [Streams](docs/STREAMS.md) — full catalogue of telemetry streams + per-stream tier + category
+- [Streams removed](docs/STREAMS-REMOVED.md) — historical record of removed streams with evidence
 - [Workbooks](docs/WORKBOOKS.md) — what each dashboard shows
 - [Drift](docs/DRIFT.md) — pure-KQL drift model explained
 - [Runbook](docs/RUNBOOK.md) — daily ops, incidents, rotation

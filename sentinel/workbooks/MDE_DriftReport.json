@@ -48,9 +48,9 @@
       "name": "panel-1",
       "content": {
         "queryType": 0,
-        "title": "Primary view",
+        "title": "Drift events over time, by category",
         "size": 0,
-        "query": "union (MDE_Drift_P0Compliance(7d, 1h) | extend Category = \"P0 Config\"), (MDE_Drift_P1Pipeline(7d, 30m) | extend Category = \"P1 Pipeline\"), (MDE_Drift_P2Governance(7d, 1d) | extend Category = \"P2 Governance\"), (MDE_Drift_P5Identity(7d, 1d) | extend Category = \"P5 Identity\"), (MDE_Drift_P7Metadata(30d, 1d) | extend Category = \"P7 Metadata\") | summarize Changes = count() by Category, bin(TimeGenerated, 1h) | render timechart",
+        "query": "union\n  (MDE_Drift_P0Compliance({TimeRange:value}, 1h) | extend Category = \"P0 Config\"),\n  (MDE_Drift_P1Pipeline({TimeRange:value}, 30m) | extend Category = \"P1 Pipeline\"),\n  (MDE_Drift_P2Governance({TimeRange:value}, 1d) | extend Category = \"P2 Governance\"),\n  (MDE_Drift_P5Identity({TimeRange:value}, 1d) | extend Category = \"P5 Identity\"),\n  (MDE_Drift_P7Metadata({TimeRange:value}, 1d) | extend Category = \"P7 Metadata\")\n| summarize Changes = count() by Category, bin(TimeGenerated, 1h)\n| render timechart",
         "version": "KqlItem/1.0"
       },
       "type": 3
@@ -59,9 +59,9 @@
       "name": "panel-2",
       "content": {
         "queryType": 0,
-        "title": "Drift / trend",
+        "title": "Recent drift events (all categories)",
         "size": 0,
-        "query": "union (MDE_Drift_P0Compliance(7d, 1h)), (MDE_Drift_P1Pipeline(7d, 30m)), (MDE_Drift_P2Governance(7d, 1d)), (MDE_Drift_P5Identity(7d, 1d)), (MDE_Drift_P7Metadata(30d, 1d)) | order by TimeGenerated desc | take 100",
+        "query": "union\n  (MDE_Drift_P0Compliance({TimeRange:value}, 1h)),\n  (MDE_Drift_P1Pipeline({TimeRange:value}, 30m)),\n  (MDE_Drift_P2Governance({TimeRange:value}, 1d)),\n  (MDE_Drift_P5Identity({TimeRange:value}, 1d)),\n  (MDE_Drift_P7Metadata({TimeRange:value}, 1d))\n| project TimeGenerated, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType\n| order by TimeGenerated desc\n| take 100",
         "version": "KqlItem/1.0"
       },
       "type": 3

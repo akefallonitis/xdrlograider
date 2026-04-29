@@ -3,9 +3,9 @@
 # Cross-layer drift guard. Every MDE data stream MUST be declared in three places
 # that must agree:
 #
-#   1. src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1  (45 entries, v0.1.0-beta.1)
-#   2. DCR streamDeclarations                                   (45 data + 2 system = 47)
-#   3. Custom-tables list in the workspace deployment           (45 data + 2 system = 47)
+#   1. src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1  (46 entries)
+#   2. DCR streamDeclarations                                   (46 data + 2 system = 48)
+#   3. Custom-tables list in the workspace deployment           (46 data + 2 system = 48)
 #
 # Preferred source of declarations 2 and 3 is the compiled ARM
 # (deploy/compiled/mainTemplate.json) — it's what actually gets deployed. Bicep
@@ -14,7 +14,7 @@
 BeforeDiscovery {
     $repoRoot           = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
 
-    $script:ManifestPath     = Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $script:ManifestPath     = Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $script:MainTemplatePath = Join-Path $repoRoot 'deploy' 'compiled' 'mainTemplate.json'
     $script:CustomTablesBicep = Join-Path $repoRoot 'deploy' 'modules' 'custom-tables.bicep'
     $script:DceDcrBicep       = Join-Path $repoRoot 'deploy' 'modules' 'dce-dcr.bicep'
@@ -25,7 +25,7 @@ BeforeDiscovery {
 
 BeforeAll {
     $repoRoot           = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
-    $script:ManifestPath     = Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1'
+    $script:ManifestPath     = Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $script:MainTemplatePath = Join-Path $repoRoot 'deploy' 'compiled' 'mainTemplate.json'
     $script:CustomTablesBicep = Join-Path $repoRoot 'deploy' 'modules' 'custom-tables.bicep'
     $script:DceDcrBicep       = Join-Path $repoRoot 'deploy' 'modules' 'dce-dcr.bicep'
@@ -140,16 +140,16 @@ BeforeAll {
 
 Describe 'Manifest / DCR / custom-tables consistency' {
 
-    It 'manifest contains exactly 45 streams (v0.1.0-beta.1 — 2 write endpoints removed vs v1.0.2)' {
-        $script:ManifestStreams.Count | Should -Be 45
+    It 'manifest contains exactly 46 streams' {
+        $script:ManifestStreams.Count | Should -Be 46
     }
 
-    It 'DCR declares exactly 47 streams (45 data + 2 system)' {
-        $script:DcrStreams.Count | Should -Be 47
+    It 'DCR declares exactly 48 streams (46 data + 2 system)' {
+        $script:DcrStreams.Count | Should -Be 48
     }
 
-    It 'custom-tables declares exactly 47 tables (45 data + 2 system)' {
-        $script:CustomTables.Count | Should -Be 47
+    It 'custom-tables declares exactly 48 tables (46 data + 2 system)' {
+        $script:CustomTables.Count | Should -Be 48
     }
 
     It 'DCR contains both system streams (Heartbeat + AuthTestResult)' {
@@ -171,7 +171,7 @@ Describe 'Manifest / DCR / custom-tables consistency' {
 Describe 'Per-stream DCR coverage' -ForEach @(
     # One It per manifest stream, so failure picks out the bad row precisely.
     # BeforeDiscovery doesn't run the Import, so we re-read the manifest here.
-    (Import-PowerShellDataFile -Path (Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'XdrLogRaider.Client' 'endpoints.manifest.psd1')).Endpoints |
+    (Import-PowerShellDataFile -Path (Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1')).Endpoints |
         ForEach-Object { @{ StreamName = $_.Stream; Tier = $_.Tier } }
 ) {
 

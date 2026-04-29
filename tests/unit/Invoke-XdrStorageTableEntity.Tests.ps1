@@ -21,9 +21,9 @@
 
 BeforeAll {
     $script:RepoRoot       = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:HelperPath     = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Ingest' 'Public' 'Invoke-XdrStorageTableEntity.ps1'
+    $script:HelperPath     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Public' 'Invoke-XdrStorageTableEntity.ps1'
     $script:HelperSource   = Get-Content $script:HelperPath -Raw
-    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psd1'
+    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
 
     # Stub Get-AzAccessToken before importing the module so the helper has
     # something to call. The real cmdlet would attempt actual MI auth.
@@ -39,14 +39,14 @@ BeforeAll {
 }
 
 AfterAll {
-    Remove-Module XdrLogRaider.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
     Remove-Item function:Get-AzAccessToken -ErrorAction SilentlyContinue
 }
 
 Describe 'Invoke-XdrStorageTableEntity — module surface + parameter binding' {
 
     It 'is exported from XdrLogRaider.Ingest' {
-        $exported = (Get-Module XdrLogRaider.Ingest).ExportedFunctions.Keys
+        $exported = (Get-Module Xdr.Sentinel.Ingest).ExportedFunctions.Keys
         $exported | Should -Contain 'Invoke-XdrStorageTableEntity'
     }
 

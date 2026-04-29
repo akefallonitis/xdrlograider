@@ -21,8 +21,8 @@ Get-Content "$repoRoot/tests/.env.local" | ForEach-Object {
 }
 
 Import-Module "$repoRoot/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"         -Force
-Import-Module "$repoRoot/src/Modules/XdrLogRaider.Ingest/XdrLogRaider.Ingest.psd1" -Force
-Import-Module "$repoRoot/src/Modules/XdrLogRaider.Client/XdrLogRaider.Client.psd1" -Force
+Import-Module "$repoRoot/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1" -Force
+Import-Module "$repoRoot/src/Modules/Xdr.Defender.Client/Xdr.Defender.Client.psd1" -Force
 
 $portalHost = if ($env:XDRLR_TEST_PORTAL_HOST) { $env:XDRLR_TEST_PORTAL_HOST } else { 'security.microsoft.com' }
 $authMethod = if ($env:XDRLR_TEST_AUTH_METHOD) { $env:XDRLR_TEST_AUTH_METHOD } else { 'CredentialsTotp' }

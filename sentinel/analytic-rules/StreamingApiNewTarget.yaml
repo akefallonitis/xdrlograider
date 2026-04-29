@@ -3,13 +3,13 @@ name: MDE streaming API new target
 description: |
   A new Event Hub or Storage target was configured for Defender telemetry streaming.
 
-  NOTE — DEPRECATION ADVISORY (iter-13.15): Microsoft has signaled the
-  /apiproxy/mtp/streamingApi endpoint may be retired in favor of newer
-  Defender XDR streaming-data feeds. This rule will continue to work as
-  long as the endpoint is reachable (we surface 403/404 in heartbeat
-  diagnostics). When Microsoft confirms retirement, remove this rule and
-  rely on equivalent detections in the post-retirement endpoint family.
-  See docs/STREAMS.md for current endpoint-availability tracking.
+  Deprecation advisory: Microsoft has signaled the /apiproxy/mtp/streamingApi
+  endpoint may be retired in favor of newer Defender XDR streaming-data feeds.
+  This rule will continue to work as long as the endpoint is reachable (we
+  surface 403/404 in heartbeat diagnostics). When Microsoft confirms
+  retirement, remove this rule and rely on equivalent detections in the
+  post-retirement endpoint family. See docs/STREAMS.md for current
+  endpoint-availability tracking.
 severity: Medium
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

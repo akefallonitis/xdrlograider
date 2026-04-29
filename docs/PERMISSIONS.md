@@ -99,7 +99,7 @@ Both are **read-only**. Blast radius if credentials leak: the attacker reads (do
 
 ### Tenant features / endpoint surfaces required for the gated streams
 
-Nine streams ship with `Availability = 'tenant-gated'`. They return 4xx because the tenant doesn't have the underlying feature **provisioned** (or the underlying portal endpoint isn't surfaced for this tenant), NOT because the SA lacks a role. **Role elevation does not activate them** — even Security Administrator (which auto-grants Full Access in MCAS per Microsoft Learn) returned 403/404/400/500 for these in our live audit:
+Ten streams ship with `Availability = 'tenant-gated'`. They return 4xx because the tenant doesn't have the underlying feature **provisioned** (or the underlying portal endpoint isn't surfaced for this tenant), NOT because the SA lacks a role. **Role elevation does not activate them** — even Security Administrator (which auto-grants Full Access in MCAS per Microsoft Learn) returned 403/404/400/500 for these in our live audit:
 
 | Stream | Required tenant feature / surface | Live audit status (Security Admin SA) |
 |---|---|---|
@@ -110,6 +110,8 @@ Nine streams ship with `Availability = 'tenant-gated'`. They return 4xx because 
 | `MDE_SecurityBaselines_CL` | Threat & Vulnerability Mgmt baseline profiles created | 400 — endpoint requires at least one baseline |
 | `MDE_CustomCollection_CL` | MDE Custom Collection model surface licensed/provisioned (E5/P2) | 403 — feature surface not present even with Security Administrator |
 | `MDE_CloudAppsConfig_CL` | MCAS active in tenant + `/apiproxy/mcas/cas/api/v1/settings` proxy alive | 403 — proxy path likely retired; MCAS native API lives on `<tenant>.portal.cloudappsecurity.com` |
+| `MDE_DeviceTimeline_CL` | Tenant entitlement gated; surfaces when XDR Hunter unified timeline is provisioned (feature-flag dependent per tenant region + Defender license tier) | First-capture-pending — activates once a recent device timeline query is available |
+| `MDE_MachineActions_CL` | At least one machine action invoked in tenant (Live Response session, isolation, AV scan, etc.); hybrid surface — public `/api/machineactions` covers metadata, portal exposes per-step Live Response script output + AIR linkage not in public API | First-capture-pending — empty until a machine action is invoked |
 
 These activate **automatically** when the customer enables the corresponding feature — no manifest change, no redeploy. The connector keeps attempting them and surfaces the 4xx via heartbeat metadata.
 

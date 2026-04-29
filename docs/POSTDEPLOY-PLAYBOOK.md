@@ -224,4 +224,4 @@ $env:XDRLR_TEST_WORKSPACE = 'your-workspace'
 pwsh ./tools/Post-DeploymentVerification.ps1
 ```
 
-Runs Phase 4 only. Green → you're good. Red → the specific assertion tells you which health check failed + what to check.
+Runs the P4 (auth-chain) check only. Green → you're good. Red → the specific assertion tells you which health check failed + what to check.
