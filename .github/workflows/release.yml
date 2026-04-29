@@ -102,8 +102,8 @@ jobs:
                   $streamCount += ($dcr.properties.streamDeclarations.PSObject.Properties.Name).Count
               }
           }
-          if ($streamCount -ne 47) {
-              throw "Gate 1 FAIL: DCR streamDeclarations count = $streamCount (expected 47 = 45 data + Heartbeat + AuthTestResult)"
+          if ($streamCount -ne 48) {
+              throw "Gate 1 FAIL: DCR streamDeclarations count = $streamCount (expected 48 = 46 data + Heartbeat + AuthTestResult)"
           }
           Write-Host "Gate 1 OK: DCR streamDeclarations.Count = $streamCount" -ForegroundColor Green
 
