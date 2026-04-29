@@ -189,7 +189,7 @@ Describe 'Manifest.NoPublicApiCovered (SecureScoreBreakdown DROP)' {
 
     It 'loader throws when fed an entry with AuditScope = public-api-covered' {
         # Synthesize a manifest in a temp dir and verify the loader rejects it.
-        $tmp = New-Item -Path (Join-Path $env:TEMP "xdrlr-loader-$(Get-Random)") -ItemType Directory -Force
+        $tmp = New-Item -Path (Join-Path ([System.IO.Path]::GetTempPath()) "xdrlr-loader-$(Get-Random)") -ItemType Directory -Force
         try {
             $bogusManifest = Join-Path $tmp 'endpoints.manifest.psd1'
             @"

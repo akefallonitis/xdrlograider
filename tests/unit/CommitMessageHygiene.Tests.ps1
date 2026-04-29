@@ -54,7 +54,7 @@ BeforeAll {
             if ($resolved -and (Test-Path -LiteralPath $resolved)) { $resolved } else { $null }
         } else { $null }
     }
-    $script:TempDir = New-Item -Path (Join-Path $env:TEMP "xdrlr-hookgate-$(Get-Random)") -ItemType Directory -Force
+    $script:TempDir = New-Item -Path (Join-Path ([System.IO.Path]::GetTempPath()) "xdrlr-hookgate-$(Get-Random)") -ItemType Directory -Force
 }
 
 AfterAll {
