@@ -54,7 +54,7 @@ param serviceAccountUpn string
 @allowed([ 'credentials_totp', 'passkey' ])
 param authMethod string = 'credentials_totp'
 
-@description('Function App hosting plan tier. Trade-off: cost vs security/reliability. See docs/HOSTING-PLANS.md.\n  consumption-y1 (DEFAULT): cheapest ($0-10/mo); partial MI (AzureWebJobsStorage MI; content share still uses shared key — Microsoft platform limit on Y1 Linux); residual PrivEsc risk if a FA Contributor identity is compromised. Recommended for lab / dev / cost-constrained / non-sensitive XDR data.\n  flex-fc1     : production-hardened ($10-30/mo); FULL Managed Identity (no shared keys anywhere); closed PrivEsc chain. Recommended for production / business-critical.\n  premium-ep1  : regulated/compliance ($140-300/mo); full MI + always-warm + private-endpoint capable. Recommended for financial / healthcare / government.')
+@description('Function App hosting plan tier. Trade-off: cost vs security/reliability. See docs/HOSTING-PLANS.md.\n  consumption-y1 (DEFAULT): cheapest (~$0-10/mo); partial Managed Identity (AzureWebJobsStorage uses MI; the content share still uses a shared key — Microsoft platform limit on Y1 Linux); residual PrivEsc risk if a Function App Contributor identity is compromised. Recommended for lab / dev / cost-constrained / non-sensitive XDR data.\n  flex-fc1     : production-hardened (~$10-30/mo); FULL Managed Identity (no shared keys anywhere); closed PrivEsc chain. Recommended for production / business-critical.\n  premium-ep1  : regulated / compliance (~$140-300/mo); full MI + always-warm + private-endpoint capable. Recommended for financial / healthcare / government.')
 @allowed([ 'consumption-y1', 'flex-fc1', 'premium-ep1' ])
 param hostingPlan string = 'consumption-y1'
 
@@ -64,7 +64,7 @@ param restrictPublicNetwork bool = false
 @description('Enable Azure Diagnostic Settings on Key Vault to send audit logs (Get/List Secrets, etc.) to the Sentinel workspace. Default true. Required for forensic visibility on credential access.')
 param enableKeyVaultDiagnostics bool = true
 
-@description('DEPRECATED: use `hostingPlan` instead. Retained for backward-compat; if `hostingPlan` is unset, this maps consumption-y1=Y1 / flex-fc1=FC1 / premium-ep1=EP1.')
+@description('DEPRECATED: use `hostingPlan` instead. Retained for backward-compatibility with existing deployments; if `hostingPlan` is unset, this maps consumption-y1=Y1 / flex-fc1=FC1 / premium-ep1=EP1.')
 @allowed([ 'Y1', 'FC1', 'EP1', 'EP2' ])
 param functionPlanSku string = 'Y1'
 
@@ -96,10 +96,11 @@ param passkeyJson string = ''
 var uniq      = uniqueString(resourceGroup().id, projectPrefix, env)
 var suffix    = substring(uniq, 0, 6)
 
-// iter-14.0 Phase 9: when legacyEnvInName=true, resource names embed the env
-// token (xdrlr-prod-fn-n2hhhc) — preserves iter-13.15 names for in-place upgrade.
-// When false, env-neutral names (xdrlr-fn-n2hhhc) and the env signal is carried
-// solely by the `environment` Azure tag (see commonTags below).
+// When legacyEnvInName=true, resource names embed the env token
+// (xdrlr-prod-fn-n2hhhc) — preserves the names of existing deployments for
+// in-place upgrade. When false, names are env-neutral (xdrlr-fn-n2hhhc) and
+// the env signal is carried solely by the `environment` Azure tag (see
+// commonTags below). The v1.2 Marketplace baseline flips this to false.
 //
 // Pattern: `${projectPrefix}-${envSegment}<typeShort>-${suffix}`
 //   legacyEnvInName=true  → envSegment = '${env}-'   → xdrlr-prod-fn-abc123
@@ -118,9 +119,9 @@ var dceName   = '${projectPrefix}-${envSegment}dce'
 var dcrName   = '${projectPrefix}-${envSegment}dcr'
 var aiName    = '${projectPrefix}-${envSegment}ai'
 
-// iter-14.0 Phase 9: env-as-tag pattern. Every connector-local resource carries
-// these tags so the environment signal is carried by ARM tags regardless of
-// whether legacyEnvInName=true or false. The `environment` tag is the canonical
+// Env-as-tag pattern. Every connector-local resource carries these tags so the
+// environment signal is carried by ARM tags regardless of whether
+// legacyEnvInName=true or false. The `environment` tag is the canonical
 // signal; the others document provenance for operators.
 var commonTags = {
   'managed-by':       'XdrLogRaider'
@@ -138,7 +139,7 @@ var packageUrl = functionAppZipVersion == 'latest'
   ? 'https://github.com/${githubRepo}/releases/latest/download/function-app.zip'
   : 'https://github.com/${githubRepo}/releases/download/v${functionAppZipVersion}/function-app.zip'
 
-// Iter 13.15: hostingPlan tier derivations.
+// hostingPlan tier derivations.
 // `useFullManagedIdentity` is true when the operator picked a tier where Azure
 // Functions supports MI for BOTH AzureWebJobsStorage AND
 // WEBSITE_CONTENTAZUREFILECONNECTIONSTRING. Y1 Linux Consumption only supports
@@ -182,8 +183,9 @@ module customTables 'modules/custom-tables.bicep' = {
 // uses for community FA-based connectors (Trend Micro Vision One, Auth0, etc.,
 // per Azure-Sentinel master verified 2026-04-26).
 //
-// (Iter 9 dropped metadata kind=Solution per AbnormalSecurity 2026-02-17
-// reference; keeping it triggered a Sentinel API parentId/contentId mismatch.)
+// metadata kind=Solution is intentionally NOT emitted (per AbnormalSecurity
+// reference, 2026-02-17): keeping it triggered a Sentinel API
+// parentId/contentId mismatch on FA-based community connectors.
 //
 // Always deploys (no condition) so the connector card and Solution wrapper
 // are present even when deploySentinelContent=false. Per-item metadata links
@@ -281,11 +283,11 @@ module functionApp 'modules/function-app.bicep' = {
       DCR_IMMUTABLE_ID:      dceDcr.outputs.dcrImmutableId
       STORAGE_ACCOUNT_NAME:  storage.outputs.storageAccountName
       CHECKPOINT_TABLE_NAME: 'connectorCheckpoints'
-      // iter-14.0 Phase 14B: Microsoft App Insights adaptive-sampling exemption.
-      // These three custom-event names carry critical operator-actionable
-      // signal (auth failures, rate-limit pressure, ingest gaps) and MUST NOT
-      // be dropped under load. The Functions host honours this env var across
-      // its TelemetryProcessor pipeline. See:
+      // App Insights adaptive-sampling exemption. These three custom-event
+      // names carry critical operator-actionable signal (auth failures,
+      // rate-limit pressure, ingest gaps) and MUST NOT be dropped under load.
+      // The Functions host honours this env var across its TelemetryProcessor
+      // pipeline. See:
       //   https://learn.microsoft.com/azure/azure-monitor/app/sampling-classic-api
       APPLICATIONINSIGHTS_TELEMETRY_SAMPLING_EXCLUDED_TYPES: 'AuthChain.AADSTSError;AuthChain.RateLimited;AuthChain.BoundaryMarker'
     }
@@ -293,7 +295,8 @@ module functionApp 'modules/function-app.bicep' = {
 }
 
 // Role assignments: grant the FA's Managed Identity the minimum roles it needs.
-// Iter 13.15: expanded from 3 to up to 6 roles depending on hostingPlan tier.
+// Up to 6 roles depending on hostingPlan tier (3 for Y1; 6 for FC1/EP1 where
+// the content share also moves to Managed Identity).
 // All scoped to connector-local resources — no cross-RG / RG-level grants.
 module roles 'modules/role-assignments.bicep' = {
   name: 'roles-${uniq}'
@@ -311,26 +314,19 @@ module roles 'modules/role-assignments.bicep' = {
 // ============================================================================
 
 output functionAppName     string = functionApp.outputs.functionAppName
-output functionAppId       string = functionApp.outputs.functionAppId
-output principalId         string = functionApp.outputs.principalId
 output keyVaultName        string = keyVault.outputs.vaultName
-output keyVaultUri         string = keyVault.outputs.vaultUri
+output storageAccountName  string = storage.outputs.storageAccountName
 output dceEndpoint         string = dceDcr.outputs.dceIngestionEndpoint
 output dcrImmutableId      string = dceDcr.outputs.dcrImmutableId
-output storageAccountName  string = storage.outputs.storageAccountName
 output workspaceId         string = existingWorkspaceId
 output workspaceRg         string = workspaceResourceGroup
 output workspaceLocation   string = workspaceLocation
 
-output postDeployInstructions string = '''
-Next step — upload your auth secrets to Key Vault:
-
-  ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName ${keyVault.outputs.vaultName}
-
-The Function App self-test runs within 5 minutes of secret upload.
-Check results in your Sentinel workspace:
-
-  MDE_AuthTestResult_CL | order by TimeGenerated desc | take 1
-
-Runbook: docs/RUNBOOK.md
-'''
+// Conditional next-step text. When the wizard supplied all required auth
+// secrets via the secure parameters, the connector is fully bootstrapped and
+// the operator only needs to wait for the self-test. Otherwise, surface the
+// exact command to upload the secrets via the helper script.
+var wizardSecretsProvided = (authMethod == 'credentials_totp' && length(servicePassword) > 0 && length(totpSeed) > 0) || (authMethod == 'passkey' && length(passkeyJson) > 0)
+output postDeployCommand string = wizardSecretsProvided
+  ? 'Auth secrets uploaded by deploy. Self-test result expected within 5 minutes in workspace: MDE_AuthTestResult_CL | top 1 by TimeGenerated. KV: ${kvName}'
+  : 'git clone https://github.com/${githubRepo} && cd xdrlograider && ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName ${kvName}'

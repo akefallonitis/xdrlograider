@@ -1,13 +1,16 @@
 // SYNOPSIS:
-//   Drift detection for P3 Exposure/XSPM streams — set-diff flavor.
+//   Computes drift across P3 Exposure / XSPM streams (attack paths,
+//   chokepoints, top targets, initiatives, exposure snapshots, baselines,
+//   recommendations, device timeline) — set-diff flavor.
 //
-//   Unlike P0/P1/P2/P5/P7 which do field-level diff, XSPM streams are graph-structured
-//   (attack paths, chokepoints, entry points). Drift here means "which entities were
-//   added/removed between snapshots", not "which fields changed within an entity".
+//   Unlike P0/P1/P2/P5/P7 which do field-level diff, XSPM streams are
+//   graph-structured (attack paths, chokepoints, entry points). Drift here
+//   means "which entities were added/removed between snapshots", not "which
+//   fields changed within an entity".
 //
 // PARAMETERS:
-//   lookback - default 7d
-//   window   - default 1h
+//   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 1h. How recent counts as "current".
 //
 // INVOCATION:
 //   MDE_Drift_P3Exposure(7d, 1h) | where ChangeType == "Added"
@@ -15,19 +18,18 @@
 //
 // NOTES:
 //   - Parameterized as a KQL function so workbooks/rules can plumb
-//     {TimeRange:value} from the time-picker.
+//     {TimeRange:value} from the time-picker without forking the parser body.
 //   - Snapshot identity is the per-stream typed-column bag (DCR-projected at
 //     ingest); RawJson is preserved on each table as a fallback for fields
 //     not in the manifest's ProjectionMap, but the parser never re-parses it.
+//   - MDE_SecureScoreBreakdown_CL is intentionally omitted: it is publicly
+//     covered by Microsoft Graph /security/secureScores. Use the Graph Security
+//     data connector for that data.
+//   - MDE_DeviceTimeline_CL is tenant-gated. The table is created at deploy
+//     time; unioning it when the tenant has not provisioned the timeline
+//     surface yields zero rows but keeps the parser's source list stable.
+//   - Removed-stream history lives in docs/STREAMS-REMOVED.md + CHANGELOG.md.
 
-// MDE_SecureScoreBreakdown_CL removed from union (2026-04-29) — publicly
-// API-covered by Microsoft Graph /security/secureScores; operators should use
-// the Graph Security data connector for that data.
-//
-// MDE_DeviceTimeline_CL is tenant-gated (per-tenant feature flag); the table
-// is always created at deployment time, so unioning it when the tenant has
-// not provisioned the underlying timeline surface yields zero rows but keeps
-// the parser's source-table list complete and stable.
 let MDE_Drift_P3Exposure = (lookback:timespan = 7d, window:timespan = 1h) {
     // Metadata + envelope columns to exclude from the snapshot identity (these
     // are bookkeeping; only typed data columns from the manifest ProjectionMap

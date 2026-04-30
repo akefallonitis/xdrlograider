@@ -2,10 +2,7 @@ id: 2c03e5f6-7b9a-4c1e-d4f6-0a9b2e7c5d0a
 name: MDE XSPM path to critical asset
 description: |
   An attack path terminates at a device tagged Critical. Immediate remediation candidate.
-  NOTE: In v1.0.2 MDE_XspmAttackPaths_CL is deferred (POST_BODY_UNKNOWN). The rule is
-  deployed + enabled but stays dormant until the operator un-defers the stream
-  in endpoints.manifest.psd1 (requires HAR capture of the POST body from the
-  Attack Surface Map page).
+  Note: the MDE_XspmAttackPaths_CL stream is opt-in. The rule is deployed but stays dormant until the stream is enabled in the connector configuration.
 severity: High
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

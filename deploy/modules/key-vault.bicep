@@ -8,10 +8,10 @@ param location string
 @allowed([ 'standard', 'premium' ])
 param sku string = 'standard'
 
-@description('Iter 13.15: when true, restricts public network access on the Key Vault. Default false for v0.1.0-beta deployability; flips to true in v1.2 Marketplace baseline.')
+@description('When true, restricts public network access on the Key Vault. Default false for v0.1.0-beta deployability; flips to true in the v1.2 Marketplace baseline.')
 param restrictPublicNetwork bool = false
 
-@description('Iter 13.15: when true, deploys Microsoft.Insights/diagnosticSettings to send Key Vault audit logs (GetSecret/ListSecrets/etc.) to the Sentinel workspace. Default true — required for forensic visibility on credential access.')
+@description('When true, deploys Microsoft.Insights/diagnosticSettings to send Key Vault audit logs (GetSecret/ListSecrets/etc.) to the Sentinel workspace. Default true — required for forensic visibility on credential access.')
 param enableDiagnostics bool = true
 
 @description('Sentinel workspace resource ID (target for diagnostic settings). Required only when enableDiagnostics=true.')
@@ -43,7 +43,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
 }
 
 // ============================================================================
-// Iter 13.15: KV diagnostic settings → Sentinel workspace
+// Key Vault diagnostic settings → Sentinel workspace
 // ============================================================================
 // Captures AuditEvent (every secret read/write/list) for forensic visibility.
 // This is the audit trail an operator needs after a suspected breach to know

@@ -1,18 +1,22 @@
 // SYNOPSIS:
-//   Drift detection for P2Governance streams.
+//   Computes drift across P2 governance streams (RBAC device groups, unified
+//   RBAC roles, asset rules, security-admin classification).
+//
+//   One row per (StreamName, EntityId, FieldName) that changed between the
+//   previous and current observation windows. Used by workbooks and analytic
+//   rules to surface configuration changes.
 //
 // PARAMETERS:
-//   lookback - How far back to consider "previous". Default 7d.
-//   window   - How recent is "current". Default 4h (daily-cadence streams,
-//              wider sliding window than the P0/P1/P3 1h default).
+//   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 4h. Daily-cadence streams use a wider sliding window than the 1h default on P0/P1/P3.
 //
 // INVOCATION:
-//   MDE_Drift_P2Governance(7d, 4h)
+//   MDE_Drift_P2Governance(7d, 4h) | where StreamName == "MDE_UnifiedRbacRoles_CL"
 //   MDE_Drift_P2Governance()       // applies defaults
 //
 // NOTES:
 //   - Parameterized as a KQL function so workbooks/rules can plumb
-//     {TimeRange:value} from the time-picker.
+//     {TimeRange:value} from the time-picker without forking the parser body.
 //   - Drift is computed over the per-stream typed columns (DCR-projected at
 //     ingest); RawJson is preserved on each table as a fallback for fields
 //     not in the manifest's ProjectionMap, but the parser never re-parses it.

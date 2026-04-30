@@ -37,7 +37,7 @@ Estimated monthly Azure costs for a typical XdrLogRaider deployment.
 
 2. **Batch DCE POST** — streams within a tier are sent as one HTTP POST to DCE (vs one per stream). Saves ~50× DCE requests.
 
-3. **Conditional ingestion via hash compare** — skip emitting rows if `hash(RawJson)` matches prior snapshot. Saves 40-80% ingestion on low-volatility configs.
+3. **Conditional ingestion via hash compare** — skip emitting rows if the typed-column-bag hash matches the prior snapshot. Saves 40-80% ingestion on low-volatility configs.
 
 4. **Consumption plan (Y1)** — free tier covers typical workload. Premium plan (EP1) would add ~$160/month baseline.
 

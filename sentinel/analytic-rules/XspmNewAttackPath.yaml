@@ -1,9 +1,8 @@
 id: 1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09
 name: MDE XSPM new attack path discovered
 description: |
-  A new attack path was identified in Defender Exposure Management XSPM — a route from an entry point to a critical asset.
-  NOTE: In v1.0.2 MDE_XspmAttackPaths_CL is deferred (POST_BODY_UNKNOWN).
-  Rule stays dormant until operator un-defers the stream.
+  A new attack path was identified in Defender Exposure Management (XSPM) — a route from an entry point to a critical asset.
+  Note: the MDE_XspmAttackPaths_CL stream is opt-in. The rule is deployed but stays dormant until the stream is enabled in the connector configuration.
 severity: Medium
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

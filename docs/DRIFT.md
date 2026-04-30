@@ -47,7 +47,7 @@ Each parser:
 3. Summarizes `arg_max(TimeGenerated, *)` per `(StreamName, EntityId)` to get "current"
 4. Same for `previous` (between `ago(lookback)` and `ago(window)`)
 5. Joins current vs previous on `(StreamName, EntityId)`
-6. `hash(tostring(RawJson))` comparison for fast inequality check
+6. `hash(tostring(TypedBag))` comparison (where `TypedBag = pack_all() - metaCols` over the manifest-projected typed columns) for a fast inequality check
 7. `mv-apply` over `bag_keys` to enumerate field-level diff
 8. Project to the output schema
 

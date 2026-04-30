@@ -1,8 +1,7 @@
 # Hosting plans — operator decision aid
 
-> Iter 13.15 introduces the `hostingPlan` deploy parameter as a 3-tier enum.
-> This document is the operator decision aid: how to choose, what each tier
-> costs, what each tier secures, and how to migrate between them.
+> The `hostingPlan` deploy parameter is a 3-tier enum: how to choose, what
+> each tier costs, what each tier secures, and how to migrate between them.
 
 ## TL;DR — pick one
 

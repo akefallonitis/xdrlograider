@@ -1,6 +1,6 @@
 # Workbooks
 
-Six Sentinel workbooks ship with XdrLogRaider.
+Seven Sentinel workbooks ship with XdrLogRaider.
 
 ## 1. MDE Compliance Dashboard
 **File**: `sentinel/workbooks/MDE_ComplianceDashboard.json`
@@ -46,6 +46,14 @@ Six Sentinel workbooks ship with XdrLogRaider.
 **Shows**:
 - Action Center events by type + status (bar chart)
 - Time-to-action per action (table)
+
+## 7. MDE Action Center
+**File**: `sentinel/workbooks/MDE_ActionCenter.json`
+**Audience**: IR, SOC analyst
+**Shows**:
+- Action Center summary by status (bar chart)
+- Per-device timeline events (table, last 200)
+- Machine actions detail with Live Response output and AIR linkage
 
 ## Customizing
 

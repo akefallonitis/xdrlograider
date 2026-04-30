@@ -137,7 +137,7 @@ resource dataConnector 'Microsoft.OperationalInsights/workspaces/providers/dataC
       id:                  dataConnectorContentId
       title:               dataConnectorTitle
       publisher:           solutionPublisher
-      descriptionMarkdown: 'Ingests Defender XDR portal-only telemetry — 45 streams of configuration, compliance, drift, exposure, governance, identity (MDI), audit, metadata that is **not** exposed by public Microsoft Graph Security / Defender XDR / MDE APIs.\n\n- 47 custom tables (45 data + Heartbeat + AuthTestResult)\n- 6 KQL parsers (drift via `hash(RawJson)`)\n- 14 analytic rules (ship disabled per best practice)\n- 9 hunting queries\n- 6 workbooks\n\nPowered by an unattended PowerShell Azure Function App authenticating to `security.microsoft.com` via Credentials+TOTP or Software Passkey.'
+      descriptionMarkdown: 'Ingests Defender XDR portal-only telemetry — 45 streams of configuration, compliance, drift, exposure, governance, identity (MDI), audit, metadata that is **not** exposed by public Microsoft Graph Security / Defender XDR / MDE APIs.\n\n- 47 custom tables (45 data + Heartbeat + AuthTestResult)\n- Per-stream typed columns at ingest via projection map; `RawJson` preserved alongside\n- 6 KQL parsers (drift detection via typed-column bag)\n- 14 analytic rules (ship disabled per Microsoft Sentinel best practice)\n- 9 hunting queries\n- 7 workbooks (incl. Action Center for Device Timeline + Machine Actions)\n\nPowered by an unattended PowerShell Azure Function App authenticating to `security.microsoft.com` via Credentials+TOTP or Software Passkey. Multi-portal forward-compat foundation (Defender ships today; Entra, Purview, Intune planned).'
       graphQueriesTableName: 'MDE_Heartbeat_CL'
       graphQueries: [
         {
@@ -184,7 +184,7 @@ resource dataConnector 'Microsoft.OperationalInsights/workspaces/providers/dataC
         { name: 'MDE_SAClassification_CL',         lastDataReceivedQuery: 'MDE_SAClassification_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_XspmInitiatives_CL',          lastDataReceivedQuery: 'MDE_XspmInitiatives_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_ExposureSnapshots_CL',        lastDataReceivedQuery: 'MDE_ExposureSnapshots_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
-        // iter-14.0: MDE_SecureScoreBreakdown_CL removed — Graph /security/secureScores covers
+        // MDE_SecureScoreBreakdown_CL removed — Graph /security/secureScores covers it.
         { name: 'MDE_ExposureRecommendations_CL',  lastDataReceivedQuery: 'MDE_ExposureRecommendations_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_XspmAttackPaths_CL',          lastDataReceivedQuery: 'MDE_XspmAttackPaths_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_XspmChokePoints_CL',          lastDataReceivedQuery: 'MDE_XspmChokePoints_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }

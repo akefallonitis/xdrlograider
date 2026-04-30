@@ -1,17 +1,9 @@
 id: 8c69e1f2-3b5a-4c7e-d0f2-6a5b8e3c1d10
 name: MDE config changes by UPN
 description: |
-  Correlate Defender XDR config drift with AuditLogs actor UPNs to surface
-  "who changed what". Useful for post-incident retro + change control.
+  Correlate Defender XDR configuration drift with AuditLogs actor UPNs to surface "who changed what". Useful for post-incident retrospective and change-control reviews.
 
-  v0.1.0-beta: fixed BUG #4 — previous version joined `drift.EntityId` (a
-  stream-specific UUID) to `AuditLogs.TargetResources[0].displayName` (a
-  resource-name string), which produced empty / false-positive results.
-  The corrected query filters AuditLogs by Defender-related categories
-  and correlates by time proximity (within 1h of the drift event), then
-  summarises by actor UPN + drift stream. EntityId-to-actor joins at the
-  record level aren't reliable across these two data sources — approximate
-  by actor + time window + category instead.
+  Note: drift EntityIds and AuditLogs target identifiers are not reliable to join at the record level. This query approximates by actor UPN within a time window of the drift event, filtered to Defender-related audit categories.
 author: Alex Kefallonitis
 version: 1.0.0
 tags:

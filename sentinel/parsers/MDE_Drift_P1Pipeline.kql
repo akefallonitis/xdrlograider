@@ -1,27 +1,26 @@
 // SYNOPSIS:
-//   Drift detection for P1Pipeline streams.
+//   Computes drift across P1 pipeline streams (data export, Intune, Purview,
+//   connected apps, tenant context).
+//
+//   One row per (StreamName, EntityId, FieldName) that changed between the
+//   previous and current observation windows. Used by workbooks and analytic
+//   rules to surface configuration changes.
 //
 // PARAMETERS:
-//   lookback - How far back to consider "previous". Default 7d.
-//   window   - How recent is "current". Default 1h.
+//   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 1h. How recent counts as "current".
 //
 // INVOCATION:
-//   MDE_Drift_P1Pipeline(7d, 1h)
-//   MDE_Drift_P1Pipeline()         // applies defaults
+//   MDE_Drift_P1Pipeline(7d, 1h) | where StreamName == "MDE_DataExportSettings_CL"
+//   MDE_Drift_P1Pipeline()       // applies defaults
 //
 // NOTES:
 //   - Parameterized as a KQL function so workbooks/rules can plumb
-//     {TimeRange:value} from the time-picker.
+//     {TimeRange:value} from the time-picker without forking the parser body.
 //   - Drift is computed over the per-stream typed columns (DCR-projected at
 //     ingest); RawJson is preserved on each table as a fallback for fields
 //     not in the manifest's ProjectionMap, but the parser never re-parses it.
 
-// MDE_StreamingApiConfig_CL removed from union — marked
-// Availability='deprecated' (path renamed by Microsoft; canonical surface
-// collides with MDE_DataExportSettings_CL which IS in the union below). The
-// deprecated table will always be empty post-deploy, so including it adds no
-// signal. Will be cleanly removed (manifest + DCR + custom-tables + this
-// parser + StreamingApiNewTarget rule) in v0.2.0.
 let MDE_Drift_P1Pipeline = (lookback:timespan = 7d, window:timespan = 1h) {
     // Metadata + envelope columns to exclude from field-level diff (these are
     // bookkeeping; only typed data columns from the manifest ProjectionMap

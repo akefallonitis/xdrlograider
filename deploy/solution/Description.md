@@ -22,11 +22,12 @@ portal web UI, not through public APIs. That leaves a visibility gap for:
 - **AIR / Action Center** — "what auto-remediations ran and who approved?"
 
 XdrLogRaider fills the gap by polling the portal's internal APIs on a
-schedule (poll cadence matches data-refresh rate per tier), normalising the
-responses into `RawJson` custom-table rows, and running KQL drift parsers
-that compare current snapshots to previous ones via `hash(RawJson)`. The
-result: workbooks, analytic rules, and hunting queries that answer
-"what changed, when, and how".
+schedule (poll cadence matches data-refresh rate per tier), projecting the
+responses into per-stream typed columns at ingest (with `RawJson`
+preserved alongside for forensic queries), and running KQL drift parsers
+that compare current snapshots to previous ones over the typed-column
+bag. The result: workbooks, analytic rules, and hunting queries that
+answer "what changed, when, and how".
 
 ## What you get
 
@@ -34,10 +35,10 @@ result: workbooks, analytic rules, and hunting queries that answer
 |-------|------:|-------|
 | Custom Log Analytics tables | **47** | 45 data streams + `MDE_Heartbeat_CL` + `MDE_AuthTestResult_CL` |
 | Data streams (endpoints polled) | **45** | Across 7 compliance tiers (P0 Compliance, P1 Pipeline, P2 Governance, P3 Exposure, P5 Identity, P6 Audit/AIR, P7 Metadata) |
-| KQL drift parsers | **6** | Per-tier `MDE_Drift_P*` — schema-agnostic hash-based diff |
+| KQL drift parsers | **6** | Per-tier `MDE_Drift_P*` — typed-column-bag diff (`pack_all() - metaCols`) |
 | Analytic rules | **14** | Ship `enabled: false` — customer enables selectively after review |
 | Hunting queries | **9** | MITRE-tagged drift-detection queries |
-| Workbooks | **6** | Compliance Dashboard, Drift Report, Exposure Map, Governance Scorecard, Identity Posture, Response Audit |
+| Workbooks | **7** | Action Center, Compliance Dashboard, Drift Report, Exposure Map, Governance Scorecard, Identity Posture, Response Audit |
 | Data Connector card | 1 | Lists all 47 tables; `IsConnectedQuery` monitors heartbeat |
 
 ## How it works
@@ -77,8 +78,11 @@ another 5 minutes.
 
 ## Design principles
 
-- **Design A (RawJson + KQL drift)** — schema-agnostic. Unofficial API
-  drift doesn't silently drop rows; drift is computed query-time.
+- **Typed columns + RawJson fallback** — the manifest's per-stream
+  `ProjectionMap` projects portal responses into typed DCR columns at
+  ingest. `RawJson` is preserved on every row alongside the typed
+  columns so unofficial API drift never silently drops fields, and KQL
+  parsers can re-extract on demand.
 - **Evidence-based endpoint inclusion** — every endpoint ships with
   XDRInternals v1.0.3 / nodoc / MDEAutomator / DefenderHarvester backing
   AND a live-captured 200 against a real admin account.
@@ -87,9 +91,12 @@ another 5 minutes.
 - **Defence-in-depth observability** — every timer fire writes a
   heartbeat row; `Rate429Count` + `GzipBytes` surface rate-limit pressure
   + DCE compression effectiveness in the same row.
-- **Forward-scalable** — manifest `Portal=` field + helper `-Portal` param
-  ready for v0.2.0 multi-portal expansion (admin/entra/compliance) with
-  zero refactor of the auth or ingest modules.
+- **Multi-portal forward-compat foundation** — L1 portal-generic Entra
+  auth + L2 per-portal cookie modules + L3 per-portal manifest dispatcher
+  + L4 portal-routing orchestrator. Defender ships today; Entra,
+  Purview, and Intune in v0.2.0 are an additive `Xdr.<Portal>.Auth/` +
+  `Xdr.<Portal>.Client/` module pair plus manifest entries — no refactor
+  of the auth, ingest, or orchestrator modules.
 
 ## Support
 

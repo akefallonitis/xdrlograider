@@ -1,7 +1,6 @@
 # Xdr.Portal.Auth — backward-compat shim for v0.1.0-beta operators + tests.
 #
-# iter-14.0 Phase 1 split this monolithic module into two cleanly-separated
-# layers:
+# The previous monolithic module was split into two cleanly-separated layers:
 #   L1 Xdr.Common.Auth   — portal-generic Entra layer (TOTP, passkey, ESTS auth,
 #                          MFA + interrupt handling, KV loader)
 #   L2 Xdr.Defender.Auth — Defender-portal-specific cookie exchange (sccauth +
@@ -11,7 +10,7 @@
 # This shim retains the original module name + the original MDE-prefixed
 # function names (Connect-MDEPortal, Invoke-MDEPortalRequest, …) by importing
 # the two new modules and exposing pass-through wrapper functions. So:
-#   - The 32 + 34 files in the repo that reference Xdr.Portal.Auth /
+#   - Existing files in the repo that reference Xdr.Portal.Auth /
 #     Connect-MDEPortal / Invoke-MDEPortalRequest / Test-MDEPortalAuth /
 #     Get-MDEAuthFromKeyVault / Connect-MDEPortalWithCookies all keep working
 #     unchanged.
@@ -21,7 +20,7 @@
 #     names keep working.
 #
 # v0.2.0 will deprecate this shim (operators migrate to Connect-DefenderPortal /
-# Invoke-DefenderPortalRequest / etc). The shim STAYS during the iter-14.0 →
+# Invoke-DefenderPortalRequest / etc). The shim STAYS during the v0.1.0-beta →
 # v0.1.0 GA window so existing operators have zero migration friction.
 
 $ErrorActionPreference = 'Stop'

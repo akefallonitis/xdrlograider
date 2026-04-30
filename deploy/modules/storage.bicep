@@ -25,12 +25,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
     supportsHttpsTrafficOnly: true
     minimumTlsVersion: 'TLS1_2'
     allowBlobPublicAccess: false
-    // Iter 13.15: shared-key access is gated by disableSharedKey, which the
-    // top-level main.bicep derives from hostingPlan. consumption-y1 leaves
-    // it true (Y1 Linux platform requires it for the Files content share);
+    // Shared-key access is gated by disableSharedKey, which the top-level
+    // main.bicep derives from hostingPlan. consumption-y1 leaves it true
+    // (Y1 Linux platform requires it for the Files content share);
     // flex-fc1 / premium-ep1 set it false (full MI on both env vars).
     allowSharedKeyAccess: !disableSharedKey
-    // Iter 13.15: public network access is gated by restrictPublicNetwork.
+    // Public network access is gated by restrictPublicNetwork.
     // When true, defaultAction: 'Deny' + AzureServices bypass lets the FA
     // still reach the table data plane via its trusted-services exemption.
     publicNetworkAccess: restrictPublicNetwork ? 'Enabled' : 'Enabled'  // both states keep API enabled; deny is via networkAcls

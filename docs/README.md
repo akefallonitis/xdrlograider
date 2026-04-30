@@ -9,6 +9,7 @@ Welcome to XdrLogRaider docs. Each page targets a specific audience.
 - **[PERMISSIONS.md](PERMISSIONS.md)** — Consolidated permissions reference (setup + runtime + cross-RG scenarios)
 - **[GETTING-AUTH-MATERIAL.md](GETTING-AUTH-MATERIAL.md)** — How to obtain a TOTP Base32 secret / passkey / cookies for the service account (read this BEFORE running `Initialize-XdrLogRaiderAuth.ps1`)
 - **[AUTH.md](AUTH.md)** — Auth methods, Conditional Access compatibility, rotation
+- **[UNATTENDED-AUTH.md](UNATTENDED-AUTH.md)** — How the connector authenticates without a human, at any worker/cold-start
 - **[BRING-YOUR-OWN-PASSKEY.md](BRING-YOUR-OWN-PASSKEY.md)** — How to generate a passkey JSON
 - **[POSTDEPLOY-PLAYBOOK.md](POSTDEPLOY-PLAYBOOK.md)** — Verification steps after the deploy completes
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — Symptom → cause → fix
@@ -19,9 +20,12 @@ Welcome to XdrLogRaider docs. Each page targets a specific audience.
 
 - **[STREAMS.md](STREAMS.md)** — Catalogue of all 45 telemetry streams
 - **[STREAMS-REMOVED.md](STREAMS-REMOVED.md)** — Streams removed in earlier releases (with evidence)
+- **[SCHEMA-CATALOG.md](SCHEMA-CATALOG.md)** — Per-stream typed-column reference for KQL authors
+- **[QUERY-MIGRATION-GUIDE.md](QUERY-MIGRATION-GUIDE.md)** — Migrating queries from `RawJson` extraction to typed columns
 - **[WORKBOOKS.md](WORKBOOKS.md)** — What each workbook shows
 - **[DRIFT.md](DRIFT.md)** — KQL drift model, parsers, tuning
 - **[ANALYTIC-RULES.md](ANALYTIC-RULES.md)** — Each rule: purpose, query, tuning
+- **[ANALYTIC-RULES-VETTING.md](ANALYTIC-RULES-VETTING.md)** — Pre-enable vetting + tuning narratives per rule
 - **[HUNTING-QUERIES.md](HUNTING-QUERIES.md)** — Analyst-facing query catalogue
 
 ## For operators
@@ -33,6 +37,7 @@ Welcome to XdrLogRaider docs. Each page targets a specific audience.
 ## For contributors
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Component overview, diagrams, data flow
+- **[PORTAL-COOKIE-CATALOG.md](PORTAL-COOKIE-CATALOG.md)** — Per-portal cookie + OIDC-callback reference for adding a new portal in v0.2.0+
 - **[CONTRIBUTING.md](../CONTRIBUTING.md)** — Dev setup, coding standards, PR flow
 - **[TESTING.md](TESTING.md)** — The four-quadrant test model (offline / local-online / e2e) + how to run each
 - **[RELEASE-PROCESS.md](RELEASE-PROCESS.md)** — How releases are cut

@@ -13,18 +13,18 @@ param storageAccountName string
 @description('App Insights connection string.')
 param appInsightsConnectionString string
 
-@description('Iter 13.15: serverfarm SKU derived from hostingPlan. Y1 = Consumption Dynamic; FC1 = Flex Consumption; EP1 = ElasticPremium.')
+@description('Serverfarm SKU derived from hostingPlan. Y1 = Consumption Dynamic; FC1 = Flex Consumption; EP1 = ElasticPremium.')
 @allowed([ 'Y1', 'FC1', 'EP1', 'EP2' ])
 param serverfarmSku string = 'Y1'
 
-@description('Iter 13.15: serverfarm tier label. Dynamic for Y1; FlexConsumption for FC1; ElasticPremium for EP*.')
+@description('Serverfarm tier label. Dynamic for Y1; FlexConsumption for FC1; ElasticPremium for EP*.')
 @allowed([ 'Dynamic', 'FlexConsumption', 'ElasticPremium' ])
 param serverfarmTier string = 'Dynamic'
 
-@description('Iter 13.15: when true, both AzureWebJobsStorage AND WEBSITE_CONTENTAZUREFILECONNECTIONSTRING use the identity-based __accountName form. Only safe on FC1/EP1 (Y1 Linux content-share is platform-limited to shared key).')
+@description('When true, both AzureWebJobsStorage AND WEBSITE_CONTENTAZUREFILECONNECTIONSTRING use the identity-based __accountName form. Only safe on FC1/EP1 (Y1 Linux content-share is platform-limited to shared key).')
 param useFullManagedIdentity bool = false
 
-@description('Iter 13.15: AlwaysOn supported only on EP* tier. Y1 / FC1 reject it.')
+@description('AlwaysOn — supported only on EP* tier. Y1 / FC1 reject it.')
 param alwaysOn bool = false
 
 @description('PowerShell version.')
@@ -58,7 +58,7 @@ resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
 }
 
 // ============================================================================
-// Iter 13.15: tiered AzureWebJobsStorage + WEBSITE_CONTENTAZUREFILECONNECTIONSTRING
+// Tiered AzureWebJobsStorage + WEBSITE_CONTENTAZUREFILECONNECTIONSTRING
 // ============================================================================
 // Y1 Linux Consumption: shared-key (Microsoft platform limit on content share).
 // FC1 / EP1: identity-based (__accountName) — full MI, closes PrivEsc chain.
@@ -104,7 +104,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
       linuxFxVersion: 'POWERSHELL|${powerShellVersion}'
       powerShellVersion: powerShellVersion
       use32BitWorkerProcess: false
-      // Iter 13.15: AlwaysOn only valid on EP*. Y1 + FC1 with AlwaysReady=0 cold-start.
+      // AlwaysOn only valid on EP*. Y1 + FC1 with AlwaysReady=0 cold-start.
       alwaysOn: alwaysOn
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
@@ -129,11 +129,11 @@ resource functionAppSettings 'Microsoft.Web/sites/config@2023-12-01' = {
       FUNCTIONS_WORKER_RUNTIME_VERSION: powerShellVersion
       APPLICATIONINSIGHTS_CONNECTION_STRING: appInsightsConnectionString
       WEBSITE_RUN_FROM_PACKAGE: packageUrl
-      // Iter 13.15: cold-start optimisations (per Microsoft Linux Consumption guidance)
+      // Cold-start optimisations (per Microsoft Linux Consumption guidance)
       WEBSITE_SKIP_RUNNING_KUDUAGENT: 'true'
-      // Iter 13.3: single-runspace mode prevents $global state propagation
-      // bugs across runspaces. Our timer functions never run concurrently
-      // within an instance, so this is correct + safe.
+      // Single-runspace mode prevents $global state propagation bugs across
+      // runspaces. Our timer functions never run concurrently within an
+      // instance, so this is correct + safe.
       FUNCTIONS_WORKER_PROCESS_COUNT: '1'
       PSWorkerInProcConcurrencyUpperBound: '1'
     },

@@ -1,6 +1,6 @@
 # Security notes — xdrlograider
 
-> Iter 13.15 threat model + per-plan residual risk + Marketplace v1.2 hardening roadmap.
+> Threat model, per-hosting-plan residual risk, and Marketplace v1.2 hardening roadmap.
 > Living document — updated each release window.
 
 ## Threat model

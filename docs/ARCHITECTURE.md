@@ -208,17 +208,23 @@ RawJson        dynamic    (the entire response row preserved verbatim)
 ```
 
 Drift detection happens **query-time** in the 6 `sentinel/parsers/MDE_Drift_P*.kql`
-files via `hash(RawJson)` comparison across time windows. This is Design A —
-chosen over Design C (typed DCR columns per stream) for three reasons:
+files via a typed-column-bag diff: each parser builds a snapshot bag with
+`pack_all() - metaCols` over the manifest's projected typed columns and
+compares the current bag to the previous one via `hash(tostring(TypedBag))`.
+The chosen approach combines the best of typed-at-ingest and
+schema-agnostic-at-query:
 
-1. **Unofficial API drift doesn't silently drop rows.** Portal APIs change
-   shape without notice. A typed DCR would reject rows with new/missing
-   fields; we preserve them as `RawJson.dynamic` and let KQL parsers evolve.
-2. **Schema is tunable without redeploy.** Parsers can add new extract-keys
-   or change drift sensitivity without ARM redeployment; they're just
-   `savedSearches` resources updated via `Build-SentinelContent.ps1`.
-3. **Re-parseability.** If a v0.1.0-beta parser is imperfect, v0.2.0 can
-   improve the query and re-run against the same historical `RawJson` rows.
+1. **Per-stream typed columns at ingest.** The manifest's `ProjectionMap`
+   projects portal responses into typed DCR columns so workbooks and
+   rules query named columns directly (no JSON parsing in hot paths).
+2. **Unofficial API drift doesn't silently drop rows.** `RawJson` is
+   preserved on every row alongside the typed columns. New or renamed
+   portal fields land in `RawJson` and stay queryable; the manifest's
+   `ProjectionMap` evolves in a follow-up release without DCR redeploy
+   pain.
+3. **Re-parseability.** If a v0.1.0-beta projection is imperfect, v0.2.0
+   can improve the projection and re-run drift against the same
+   historical `RawJson` rows.
 
 Trade-off: query-time compute instead of ingest-time compute. Acceptable
 for the low-volume config-drift domain where workbooks run intermittently

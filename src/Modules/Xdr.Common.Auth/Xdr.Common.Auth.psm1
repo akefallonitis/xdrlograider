@@ -1,9 +1,10 @@
 # Xdr.Common.Auth — L1 portal-generic Entra-layer auth primitives.
 #
-# Architecture (iter-14.0):
-#   L1 Xdr.Common.Auth   ← THIS MODULE (Entra layer; portal-agnostic)
-#   L2 Xdr.<Portal>.Auth ← per-portal cookie exchange (Defender today; Purview/Intune/Entra v0.2.0)
-#   L3 Xdr.<Portal>.Client / L4 Xdr.Connector.Orchestrator ← Phase 8
+# Architecture:
+#   L1 Xdr.Common.Auth          ← THIS MODULE (Entra layer; portal-agnostic)
+#   L2 Xdr.<Portal>.Auth        ← per-portal cookie exchange (Defender today; Purview / Intune / Entra in v0.2.0)
+#   L3 Xdr.<Portal>.Client      ← per-portal manifest dispatcher
+#   L4 Xdr.Connector.Orchestrator ← portal-routing dispatcher
 #
 # Boundaries (test-gated by tests/unit/AuthLayerBoundaries.Tests.ps1):
 #   - This module MUST NOT contain hardcoded portal hostnames (security.microsoft.com etc).

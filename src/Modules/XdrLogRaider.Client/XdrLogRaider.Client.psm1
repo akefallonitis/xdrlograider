@@ -1,8 +1,8 @@
 # XdrLogRaider.Client — backward-compat shim for v0.1.0-beta operators + tests.
 #
-# Phase 8 of the module-split work renamed this module to Xdr.Defender.Client
-# (so the L3 Defender-portal layer sits cleanly alongside Xdr.Defender.Auth).
-# This shim keeps the legacy XdrLogRaider.Client name + the legacy MDE-prefixed
+# The module-split work renamed this module to Xdr.Defender.Client (so the L3
+# Defender-portal layer sits cleanly alongside Xdr.Defender.Auth). This shim
+# keeps the legacy XdrLogRaider.Client name + the legacy MDE-prefixed
 # function names (Invoke-MDEEndpoint, Invoke-MDETierPoll, ...) by importing
 # the renamed module and re-exporting its public surface unchanged.
 #

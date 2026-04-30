@@ -10,7 +10,7 @@ param storageAccountName string
 @description('DCR resource ID.')
 param dcrResourceId string
 
-@description('Iter 13.15: when true (FC1/EP1 hosting plans), grants the additional Storage roles needed for full Managed Identity AzureWebJobsStorage + WEBSITE_CONTENTAZUREFILECONNECTIONSTRING. When false (Y1), Storage Blob Data Owner + Storage Queue Data Contributor are still granted (FA runtime needs blob+queue), but Storage File Data SMB Share Contributor is NOT granted (Y1 uses shared key for the content share — Microsoft platform limit).')
+@description('When true (FC1/EP1 hosting plans), grants the additional Storage roles needed for full Managed Identity AzureWebJobsStorage + WEBSITE_CONTENTAZUREFILECONNECTIONSTRING. When false (Y1), Storage Blob Data Owner + Storage Queue Data Contributor are still granted (FA runtime needs blob+queue), but Storage File Data SMB Share Contributor is NOT granted (Y1 uses shared key for the content share — Microsoft platform limit).')
 param useFullManagedIdentity bool = false
 
 // ============================================================================

@@ -1,16 +1,12 @@
 id: 0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08
 name: MDE RBAC role to unusual account
 description: |
-  A Defender unified-RBAC role assignment was added in the last 24h. Fires on
-  the *principal* identity fields specifically (not on every nested role
-  attribute) so this rule alerts on "who got a new role" rather than every
-  role-definition tweak. The FieldName filter uses exact-match (not substring)
-  to avoid false positives on benign role re-evaluations.
+  A Defender unified-RBAC role was assigned to a new principal. Alerts on "who got a new role" — not on every role-definition tweak.
 
-  Operator response (suggested):
-    1. Verify the principalId from the Drift row resolves to a known + sanctioned admin account
-    2. If unknown account: investigate via SigninLogs cross-reference + recent privilege grants
-    3. If sanctioned: tag the rule's tunable threshold to suppress this principal for 30d
+  Suggested operator response:
+    1. Confirm the principalId resolves to a known and sanctioned admin account.
+    2. If unknown: cross-reference SigninLogs and recent privilege grants for related activity.
+    3. If sanctioned: suppress this principal for 30 days via the rule's suppression settings.
 severity: High
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

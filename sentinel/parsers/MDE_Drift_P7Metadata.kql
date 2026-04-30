@@ -1,17 +1,22 @@
 // SYNOPSIS:
-//   Drift detection for P7Metadata streams.
+//   Computes drift across P7 metadata streams (license report, user
+//   preferences, multi-tenant org, cloud apps config).
+//
+//   One row per (StreamName, EntityId, FieldName) that changed between the
+//   previous and current observation windows. Used by workbooks and analytic
+//   rules to surface configuration changes.
 //
 // PARAMETERS:
-//   lookback - How far back to consider "previous". Default 7d.
-//   window   - How recent is "current". Default 1h.
+//   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 1h. How recent counts as "current".
 //
 // INVOCATION:
-//   MDE_Drift_P7Metadata(7d, 1h)
-//   MDE_Drift_P7Metadata()         // applies defaults
+//   MDE_Drift_P7Metadata(7d, 1h) | where StreamName == "MDE_LicenseReport_CL"
+//   MDE_Drift_P7Metadata()       // applies defaults
 //
 // NOTES:
 //   - Parameterized as a KQL function so workbooks/rules can plumb
-//     {TimeRange:value} from the time-picker.
+//     {TimeRange:value} from the time-picker without forking the parser body.
 //   - Drift is computed over the per-stream typed columns (DCR-projected at
 //     ingest); RawJson is preserved on each table as a fallback for fields
 //     not in the manifest's ProjectionMap, but the parser never re-parses it.

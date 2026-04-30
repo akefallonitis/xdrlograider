@@ -1,8 +1,8 @@
 # XdrLogRaider.Ingest — backward-compat shim for v0.1.0-beta operators + tests.
 #
-# Phase 8 of the module-split work renamed this module to Xdr.Sentinel.Ingest
-# (so the L1 portal-generic ingest layer sits cleanly alongside Xdr.Common.Auth).
-# This shim keeps the legacy XdrLogRaider.Ingest name + the legacy function
+# The module-split work renamed this module to Xdr.Sentinel.Ingest (so the L1
+# portal-generic ingest layer sits cleanly alongside Xdr.Common.Auth). This
+# shim keeps the legacy XdrLogRaider.Ingest name + the legacy function
 # names (Send-ToLogAnalytics, Write-Heartbeat, Get-CheckpointTimestamp, ...)
 # by importing the renamed module and re-exporting its public surface.
 #
