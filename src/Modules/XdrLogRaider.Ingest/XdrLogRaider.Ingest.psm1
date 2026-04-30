@@ -28,9 +28,11 @@ if (-not $sentinelIngest) {
     }
 }
 
-# Re-export every public function from the renamed module. Function names did
-# not change, so each shim wrapper is a thin pass-through to the renamed
-# module's copy via `& (Get-Module ...) <fn> @PSBoundParameters`.
+# Re-export every public function from the renamed module. Each shim wrapper
+# declares the EXACT param signature of the renamed module's copy so
+# `@PSBoundParameters` splatting forwards every named arg unchanged. Wrong
+# signatures here cause silent parameter-binding errors at the shim layer
+# even though the real function would accept the call.
 
 function Send-ToLogAnalytics {
     [CmdletBinding()]
@@ -67,10 +69,7 @@ function Write-AuthTestResult {
     param(
         [Parameter(Mandatory)] [string] $DceEndpoint,
         [Parameter(Mandatory)] [string] $DcrImmutableId,
-        [Parameter(Mandatory)] [bool] $Success,
-        [string] $Reason,
-        [string] $Method,
-        [int] $LatencyMs = 0
+        [Parameter(Mandatory)] [pscustomobject] $TestResult
     )
     & (Get-Module -Name 'Xdr.Sentinel.Ingest') Write-AuthTestResult @PSBoundParameters
 }
@@ -109,40 +108,75 @@ function Get-XdrAuthSelfTestFlag {
 
 function Invoke-XdrStorageTableEntity {
     [CmdletBinding()]
+    [OutputType([pscustomobject])]
     param(
-        [Parameter(Mandatory)] [string] $StorageAccountName,
-        [Parameter(Mandatory)] [string] $TableName,
-        [Parameter(Mandatory)] [string] $PartitionKey,
-        [Parameter(Mandatory)] [string] $RowKey,
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $StorageAccountName,
+
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $TableName,
+
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $PartitionKey,
+
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $RowKey,
+
         [Parameter(Mandatory)]
         [ValidateSet('Get', 'Upsert', 'Delete')]
         [string] $Operation,
-        [hashtable] $Properties
+
+        [hashtable] $Entity = $null
     )
     & (Get-Module -Name 'Xdr.Sentinel.Ingest') Invoke-XdrStorageTableEntity @PSBoundParameters
 }
 
 function Send-XdrAppInsightsTrace {
     [CmdletBinding()]
-    param([Parameter(ValueFromRemainingArguments)] $Args)
+    param(
+        [Parameter(Mandatory)] [string] $Message,
+        [ValidateSet('Verbose','Information','Warning','Error','Critical')]
+        [string] $SeverityLevel = 'Information',
+        [hashtable] $Properties,
+        [string] $OperationId
+    )
     & (Get-Module -Name 'Xdr.Sentinel.Ingest') Send-XdrAppInsightsTrace @PSBoundParameters
 }
 
 function Send-XdrAppInsightsCustomEvent {
     [CmdletBinding()]
-    param([Parameter(ValueFromRemainingArguments)] $Args)
+    param(
+        [Parameter(Mandatory)] [string] $EventName,
+        [hashtable] $Properties,
+        [string] $OperationId
+    )
     & (Get-Module -Name 'Xdr.Sentinel.Ingest') Send-XdrAppInsightsCustomEvent @PSBoundParameters
 }
 
 function Send-XdrAppInsightsCustomMetric {
     [CmdletBinding()]
-    param([Parameter(ValueFromRemainingArguments)] $Args)
+    param(
+        [Parameter(Mandatory)] [string] $MetricName,
+        [Parameter(Mandatory)] [double] $Value,
+        [hashtable] $Properties,
+        [string] $OperationId
+    )
     & (Get-Module -Name 'Xdr.Sentinel.Ingest') Send-XdrAppInsightsCustomMetric @PSBoundParameters
 }
 
 function Send-XdrAppInsightsException {
     [CmdletBinding()]
-    param([Parameter(ValueFromRemainingArguments)] $Args)
+    param(
+        [Parameter(Mandatory)] [System.Exception] $Exception,
+        [hashtable] $Properties,
+        [ValidateSet('Warning','Error','Critical')]
+        [string] $SeverityLevel = 'Error',
+        [string] $OperationId
+    )
     & (Get-Module -Name 'Xdr.Sentinel.Ingest') Send-XdrAppInsightsException @PSBoundParameters
 }
 
