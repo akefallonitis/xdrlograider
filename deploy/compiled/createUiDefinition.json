@@ -255,19 +255,33 @@
         "bladeTitle": "Advanced settings",
         "elements": [
           {
-            "name": "functionPlanSku",
+            "name": "hostingPlan",
             "type": "Microsoft.Common.DropDown",
-            "label": "Function App plan",
-            "toolTip": "Consumption (Y1) is recommended — fits within Azure Functions free tier for typical workload.",
-            "defaultValue": "Consumption (Y1)",
+            "label": "Function App hosting plan",
+            "toolTip": "Cost vs security trade-off. consumption-y1 is the cheapest entry point (free tier on typical workload). flex-fc1 is the production-hardened tier with full Managed Identity. premium-ep1 is the regulated / compliance tier with always-warm and private endpoint capability. See docs/HOSTING-PLANS.md for the full matrix.",
+            "defaultValue": "Consumption (Y1) - lab / dev / cost-constrained",
             "constraints": {
               "required": true,
               "allowedValues": [
-                { "label": "Consumption (Y1) — lab / dev / cost-constrained",                          "value": "consumption-y1" },
-                { "label": "Flex (FC1) — production-hardened, full Managed Identity",                  "value": "flex-fc1" },
-                { "label": "Premium (EP1) — regulated / compliance, always-warm + private endpoints",  "value": "premium-ep1" }
+                { "label": "Consumption (Y1) - lab / dev / cost-constrained",                         "value": "consumption-y1" },
+                { "label": "Flex (FC1) - production-hardened, full Managed Identity",                 "value": "flex-fc1" },
+                { "label": "Premium (EP1) - regulated / compliance, always-warm + private endpoints", "value": "premium-ep1" }
               ]
             }
+          },
+          {
+            "name": "restrictPublicNetwork",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Restrict public network access (requires VNet + private endpoints)",
+            "toolTip": "Set to true for regulated deploys; default false works in any tenant. When true, Storage / Key Vault / App Insights deny public traffic and the Function App must reach them via VNet integration + private endpoints. Operator must have the network plumbing ready before enabling.",
+            "defaultValue": false
+          },
+          {
+            "name": "enableKeyVaultDiagnostics",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Enable Key Vault audit logging to Sentinel",
+            "toolTip": "Sends Key Vault Get/List Secrets events to the workspace for forensic visibility. Required for the post-breach audit trail of who read the connector's service-account credentials. Default true; only disable for cost-constrained labs that don't need the audit trail.",
+            "defaultValue": true
           },
           {
             "name": "githubRepo",
@@ -309,9 +323,11 @@
       "servicePassword":       "[if(and(equals(steps('authSettings').authMethod, 'credentials_totp'), equals(steps('authSettings').uploadSecretsNow, 'wizard')), steps('authSettings').servicePassword, '')]",
       "totpSeed":              "[if(and(equals(steps('authSettings').authMethod, 'credentials_totp'), equals(steps('authSettings').uploadSecretsNow, 'wizard')), steps('authSettings').totpSeed, '')]",
       "passkeyJson":           "[if(and(equals(steps('authSettings').authMethod, 'passkey'), equals(steps('authSettings').uploadSecretsNow, 'wizard')), steps('authSettings').passkeyJson, '')]",
-      "functionPlanSku":       "[steps('advanced').functionPlanSku]",
-      "githubRepo":            "[steps('advanced').githubRepo]",
-      "deploySentinelContent": "[steps('advanced').deploySentinelContent]"
+      "hostingPlan":             "[steps('advanced').hostingPlan]",
+      "restrictPublicNetwork":   "[steps('advanced').restrictPublicNetwork]",
+      "enableKeyVaultDiagnostics":"[steps('advanced').enableKeyVaultDiagnostics]",
+      "githubRepo":              "[steps('advanced').githubRepo]",
+      "deploySentinelContent":   "[steps('advanced').deploySentinelContent]"
     }
   }
 }

@@ -51,11 +51,21 @@
       "allowedValues": [ "credentials_totp", "passkey" ],
       "metadata": { "description": "Authentication method for the Defender XDR portal." }
     },
-    "functionPlanSku": {
+    "hostingPlan": {
       "type": "string",
-      "defaultValue": "Y1",
-      "allowedValues": [ "Y1", "EP1", "EP2" ],
-      "metadata": { "description": "Function App plan SKU. Y1 = Consumption." }
+      "defaultValue": "consumption-y1",
+      "allowedValues": [ "consumption-y1", "flex-fc1", "premium-ep1" ],
+      "metadata": { "description": "Function App hosting plan tier. consumption-y1 = lab/dev (cheapest, partial MI). flex-fc1 = production (full MI, no shared keys). premium-ep1 = regulated/compliance (full MI + always-warm + private endpoints capable). See docs/HOSTING-PLANS.md for cost vs security trade-offs." }
+    },
+    "restrictPublicNetwork": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": { "description": "Restrict public network access on Storage / Key Vault / App Insights. Default false (works in any tenant). Set true for regulated deploys (operator must have VNet + private endpoints ready)." }
+    },
+    "enableKeyVaultDiagnostics": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": { "description": "Enable Azure Diagnostic Settings on Key Vault to send audit logs (Get/List Secrets) to the Sentinel workspace. Default true. Required for forensic visibility on credential access." }
     },
     "githubRepo": {
       "type": "string",
@@ -102,6 +112,9 @@
     "kvSecretsUserRoleId": "4633458b-17de-408a-b874-0445c86b69e6",
     "storageTableContributorRoleId": "0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3",
     "monitoringMetricsPublisherRoleId": "3913510d-42f4-4e42-8a64-420c390055eb",
+    "serverfarmSku": "[if(equals(parameters('hostingPlan'), 'consumption-y1'), 'Y1', if(equals(parameters('hostingPlan'), 'flex-fc1'), 'FC1', 'EP1'))]",
+    "serverfarmTier": "[if(equals(parameters('hostingPlan'), 'consumption-y1'), 'Dynamic', if(equals(parameters('hostingPlan'), 'flex-fc1'), 'FlexConsumption', 'ElasticPremium'))]",
+    "useFullManagedIdentity": "[not(equals(parameters('hostingPlan'), 'consumption-y1'))]",
     "commonTag": {
       "managed-by": "XdrLogRaider",
       "environment": "[parameters('env')]",
@@ -123,8 +136,12 @@
         "supportsHttpsTrafficOnly": true,
         "minimumTlsVersion": "TLS1_2",
         "allowBlobPublicAccess": false,
-        "allowSharedKeyAccess": true,
-        "networkAcls": { "defaultAction": "Allow", "bypass": "AzureServices" }
+        "allowSharedKeyAccess": "[not(variables('useFullManagedIdentity'))]",
+        "publicNetworkAccess": "[if(parameters('restrictPublicNetwork'), 'Disabled', 'Enabled')]",
+        "networkAcls": {
+          "defaultAction": "[if(parameters('restrictPublicNetwork'), 'Deny', 'Allow')]",
+          "bypass": "AzureServices"
+        }
       }
     },
     {
@@ -156,8 +173,31 @@
         "enableSoftDelete": true,
         "softDeleteRetentionInDays": 7,
         "enablePurgeProtection": true,
-        "publicNetworkAccess": "Enabled",
-        "networkAcls": { "bypass": "AzureServices", "defaultAction": "Allow" }
+        "publicNetworkAccess": "[if(parameters('restrictPublicNetwork'), 'Disabled', 'Enabled')]",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "[if(parameters('restrictPublicNetwork'), 'Deny', 'Allow')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "apiVersion": "2021-05-01-preview",
+      "condition": "[parameters('enableKeyVaultDiagnostics')]",
+      "name": "send-to-sentinel",
+      "scope": "[concat('Microsoft.KeyVault/vaults/', variables('kvName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
+      ],
+      "properties": {
+        "workspaceId": "[parameters('existingWorkspaceId')]",
+        "logs": [
+          { "categoryGroup": "audit",   "enabled": true },
+          { "categoryGroup": "allLogs", "enabled": true }
+        ],
+        "metrics": [
+          { "category": "AllMetrics", "enabled": true }
+        ]
       }
     },
     {
@@ -170,7 +210,9 @@
       "properties": {
         "Application_Type": "web",
         "WorkspaceResourceId": "[parameters('existingWorkspaceId')]",
-        "IngestionMode": "LogAnalytics"
+        "IngestionMode": "LogAnalytics",
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "[if(parameters('restrictPublicNetwork'), 'Disabled', 'Enabled')]"
       }
     },
     {
@@ -337,10 +379,10 @@
       "location": "[parameters('connectorLocation')]",
       "tags": "[variables('commonTag')]",
       "sku": {
-        "name": "[parameters('functionPlanSku')]",
-        "tier": "[if(equals(parameters('functionPlanSku'), 'Y1'), 'Dynamic', 'ElasticPremium')]"
+        "name": "[variables('serverfarmSku')]",
+        "tier": "[variables('serverfarmTier')]"
       },
-      "kind": "[if(equals(parameters('functionPlanSku'), 'Y1'), 'functionapp', 'elastic')]",
+      "kind": "[if(equals(variables('serverfarmSku'), 'Y1'), 'functionapp', 'elastic')]",
       "properties": { "reserved": true }
     },
     {

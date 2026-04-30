@@ -64,10 +64,6 @@ param restrictPublicNetwork bool = false
 @description('Enable Azure Diagnostic Settings on Key Vault to send audit logs (Get/List Secrets, etc.) to the Sentinel workspace. Default true. Required for forensic visibility on credential access.')
 param enableKeyVaultDiagnostics bool = true
 
-@description('DEPRECATED: use `hostingPlan` instead. Retained for backward-compatibility with existing deployments; if `hostingPlan` is unset, this maps consumption-y1=Y1 / flex-fc1=FC1 / premium-ep1=EP1.')
-@allowed([ 'Y1', 'FC1', 'EP1', 'EP2' ])
-param functionPlanSku string = 'Y1'
-
 @description('GitHub repo owner/name for the Function App code ZIP. Override only if you forked.')
 param githubRepo string = 'akefallonitis/xdrlograider'
 

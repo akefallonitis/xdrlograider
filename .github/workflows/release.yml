@@ -132,13 +132,22 @@ jobs:
       - name: Compile Bicep → ARM (syntax check only, scratch path)
         shell: pwsh
         run: |
-          # Compile to scratch path — we ship the hand-authored ARM in
-          # deploy/compiled/mainTemplate.json, NOT a Bicep-generated variant
-          # (Bicep emits nested-modules ARM that breaks our committed Pester tests).
+          # Architecture: deploy/compiled/mainTemplate.json is hand-authored.
+          # deploy/main.bicep is the operator-facing source-of-truth for the
+          # parameter contract (decorators, descriptions, allowedValues), but
+          # Bicep's nested-module ARM output doesn't match the shape our
+          # committed Pester gates assert against (DCR streams, Sentinel
+          # Solution shape, cross-RG nested deploys). Drift between the two
+          # is caught by tests/arm/MainTemplateBicepConsistency.Tests.ps1
+          # and tests/arm/CreateUiDefinitionConsistency.Tests.ps1 (Pester
+          # gates that run in the offline category every release).
+          #
+          # This step's job: run the Bicep CLI as a syntax checker so a
+          # malformed main.bicep can't slip through. The output is discarded.
           if (Test-Path ./deploy/main.bicep) {
               $scratch = Join-Path $env:RUNNER_TEMP 'mainTemplate.from-bicep.json'
               az bicep build --file ./deploy/main.bicep --outfile $scratch
-              Write-Host "OK: Bicep syntax check passed — committed mainTemplate.json is the release artefact" -ForegroundColor Green
+              Write-Host "OK: Bicep syntax check passed — committed mainTemplate.json remains the release artefact" -ForegroundColor Green
           } else {
               Write-Host "WARN: No deploy/main.bicep" -ForegroundColor Yellow
           }

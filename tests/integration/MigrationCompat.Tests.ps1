@@ -40,12 +40,12 @@ BeforeAll {
 
     $script:ArmJson = Get-Content -LiteralPath $script:CompiledArm -Raw | ConvertFrom-Json -Depth 30
 
-    # iter-13.15 parameters — operators may have these baked into their deployment
-    # parameter files. iter-14.0 must accept ALL of these (additions are fine; renames break).
-    # NOTE: these are the ACTUAL parameter names in the compiled mainTemplate.json
-    # at iter-13.15 time. Plan §3's "canonical" parameter names (hostingPlan etc)
-    # are the v1.2 Marketplace target — Phase 9 of iter-14.0 will add aliases /
-    # rename, but for now the iter-13.15 names are the operator-binding contract.
+    # v0.1.0-beta first-publish operator-binding parameters. The compiled ARM
+    # MUST keep these names so existing parameter files keep working. The
+    # functionPlanSku and functionAppZipVersion parameters were retired in
+    # v0.1.0-beta first publish (functionPlanSku replaced by the canonical
+    # 3-tier `hostingPlan` enum; functionAppZipVersion replaced by the
+    # /releases/latest/download URL pattern).
     $script:LegacyParameters = @(
         'existingWorkspaceId',
         'workspaceLocation',
@@ -53,10 +53,9 @@ BeforeAll {
         'serviceAccountUpn',
         'authMethod',
         'projectPrefix',
-        'functionPlanSku',
+        'hostingPlan',
         'env',
         'githubRepo',
-        'functionAppZipVersion',
         'deploySentinelContent'
     )
 
@@ -95,17 +94,18 @@ Describe 'Migration.NoBreakingParameters' {
         $allowed | Should -Contain 'passkey'
     }
 
-    It 'functionPlanSku parameter still accepts the iter-13.15 values (Y1, FC1, EP1)' {
-        # Plan §3 uses canonical names hostingPlan + consumption-y1/flex-fc1/premium-ep1
-        # but iter-13.15 ARM uses functionPlanSku + Y1/FC1/EP1. Phase 9 may add aliases.
-        $param = $script:ArmJson.parameters.functionPlanSku
-        if ($param.allowedValues) {
-            $allowed = @($param.allowedValues)
-            $allowed.Count | Should -BeGreaterThan 0 -Because 'iter-14.0 must continue to accept the iter-13.15 SKU values'
-        } else {
-            # No allowedValues constraint — operators can still pass any SKU. OK.
-            $param.type | Should -Be 'string'
-        }
+    It 'hostingPlan parameter exposes the canonical 3-tier enum (consumption-y1, flex-fc1, premium-ep1)' {
+        # v0.1.0-beta first-publish locked this contract: the wizard, the
+        # ARM template, and docs/HOSTING-PLANS.md all use the same 3-tier
+        # semantic enum. Cost-vs-security trade-off is operator-readable in
+        # the value name itself.
+        $param = $script:ArmJson.parameters.hostingPlan
+        $param | Should -Not -BeNullOrEmpty
+        $allowed = @($param.allowedValues)
+        $allowed | Should -Contain 'consumption-y1'
+        $allowed | Should -Contain 'flex-fc1'
+        $allowed | Should -Contain 'premium-ep1'
+        $param.defaultValue | Should -Be 'consumption-y1' -Because 'cheapest entry point per Microsoft connector parity; v1.2 Marketplace flips this to flex-fc1'
     }
 }
 
