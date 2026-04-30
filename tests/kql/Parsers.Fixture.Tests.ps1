@@ -1,15 +1,17 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Fixture-driven contract tests for the 6 drift parsers.
+    Fixture-driven contract tests for the 4 cadence-tier drift parsers.
 
 .DESCRIPTION
     Two layers of verification, offline:
 
-    (A) Static parser audit (every parser under sentinel/parsers/MDE_Drift_P*.kql):
+    (A) Static parser audit (every parser under sentinel/parsers/MDE_Drift_*.kql):
         1. File parses as KQL text with no obvious syntax garbage.
-        2. The tier union list matches the manifest's streams for that tier
-           (no references to REMOVED streams; every active+deferred stream is listed).
+        2. The tier union list matches the manifest's streams for that cadence
+           tier (no references to REMOVED streams; every active stream is listed).
+           The Maintenance parser also excludes the deprecated stream from its
+           union (deprecated streams are NEVER unioned by any parser).
         3. The `| project` emits exactly the 9 documented drift columns:
            TimeGenerated, StreamName, EntityId, FieldName, OldValue, NewValue,
            SnapshotCurrent, SnapshotPrevious, ChangeType.
@@ -20,12 +22,16 @@
            expectedDrift match the before/after diff (computed here in PS, not KQL).
 
     This does NOT execute KQL against a live Kusto engine — the NuGet Kusto.Language
-    validator is scoped for v1.1. Today we guarantee: the parsers REFERENCE the right
-    tables, EMIT the right columns, and the fixtures MEAN what they claim.
+    validator is scoped for v1.1. Today we guarantee: the parsers REFERENCE the
+    right tables, EMIT the right columns, and the fixtures MEAN what they claim.
 
-.NOTES
-    v1.0.2: removed obsolete MDE_AsrRulesConfig_drift_scenario fixture (stream
-    removed in v1.0.2 for NO_PUBLIC_API).
+    Tier mapping (parser → cadence-tier streams from manifest):
+        MDE_Drift_Exposure       → exposure
+        MDE_Drift_Configuration  → config
+        MDE_Drift_Inventory      → inventory
+        MDE_Drift_Maintenance    → maintenance (active streams only)
+    The 'fast' tier (Action Center events) has NO parser — those streams carry
+    occurrences, not snapshots, so field-level drift is undefined.
 #>
 
 BeforeDiscovery {
@@ -33,10 +39,10 @@ BeforeDiscovery {
     $manifestPath = Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $manifest     = Import-PowerShellDataFile -Path $manifestPath
 
-    # Iter 13.9 (S1 lock): tier-to-streams map EXCLUDES deprecated streams.
-    # Parsers should not unconditionally union deprecated tables (they produce
-    # zero rows post-deprecation; the unconditional union creates dead source-
-    # table list entries that mislead rule authors). Pair with
+    # Tier-to-streams map EXCLUDES deprecated streams. Parsers should not
+    # unconditionally union deprecated tables (they produce zero rows
+    # post-deprecation; the unconditional union creates dead source-table list
+    # entries that mislead rule authors). Pair with
     # tests/kql/Parsers.NoDeprecatedUnion.Tests.ps1 which locks the inverse.
     $script:StreamsByTier = @{}
     foreach ($e in $manifest.Endpoints) {
@@ -47,18 +53,24 @@ BeforeDiscovery {
         $script:StreamsByTier[$e.Tier] += $e.Stream
     }
 
-    # One discovery case per parser file with the tier pre-resolved.
+    # Parser-name → tier map. The 'fast' tier has no parser.
+    $parserTierMap = @{
+        'MDE_Drift_Exposure'      = 'exposure'
+        'MDE_Drift_Configuration' = 'config'
+        'MDE_Drift_Inventory'     = 'inventory'
+        'MDE_Drift_Maintenance'   = 'maintenance'
+    }
+
     $parsersDir = Join-Path $repoRoot 'sentinel' 'parsers'
     $script:ParserCases = @()
     foreach ($p in Get-ChildItem $parsersDir -Filter 'MDE_Drift_*.kql') {
-        # Filename pattern: MDE_Drift_<Tier><Label>.kql — e.g. MDE_Drift_P0Compliance.kql
-        if ($p.BaseName -match '^MDE_Drift_(P\d)') {
+        if ($parserTierMap.ContainsKey($p.BaseName)) {
+            $tier = $parserTierMap[$p.BaseName]
             $script:ParserCases += @{
-                Path    = $p.FullName
-                Name    = $p.Name
-                Tier    = $matches[1]
-                # Manifest-expected streams for this tier
-                Expected = if ($script:StreamsByTier.ContainsKey($matches[1])) { $script:StreamsByTier[$matches[1]] } else { @() }
+                Path     = $p.FullName
+                Name     = $p.Name
+                Tier     = $tier
+                Expected = if ($script:StreamsByTier.ContainsKey($tier)) { $script:StreamsByTier[$tier] } else { @() }
             }
         }
     }
@@ -70,61 +82,33 @@ BeforeAll {
     $script:FixtureDir       = Join-Path $repoRoot 'tests' 'fixtures' 'sample-snapshots'
     $script:LiveFixturesDir  = Join-Path $repoRoot 'tests' 'fixtures' 'live-responses'
 
-    # v1.0.2 parsers output these 9 columns. Any change here is a breaking change
-    # for every analytic rule / hunting query / workbook that consumes parser output.
+    # v0.1.0-beta parsers output these 9 columns. Any change here is a breaking
+    # change for every analytic rule / hunting query / workbook that consumes
+    # parser output.
     $script:ExpectedParserColumns = @(
         'TimeGenerated', 'StreamName', 'EntityId', 'FieldName',
         'OldValue', 'NewValue', 'SnapshotCurrent', 'SnapshotPrevious', 'ChangeType'
     )
 
-    # v1.0.2 removed streams — parsers MUST NOT reference these.
+    # Removed streams — parsers MUST NOT reference these.
     $script:RemovedStreams = @(
         'MDE_AsrRulesConfig_CL', 'MDE_AntiRansomwareConfig_CL', 'MDE_ControlledFolderAccess_CL',
-        'MDE_NetworkProtectionConfig_CL', 'MDE_ApprovalAssignments_CL'
+        'MDE_NetworkProtectionConfig_CL', 'MDE_ApprovalAssignments_CL',
+        'MDE_SecureScoreBreakdown_CL'  # Graph /security/secureScores covers it
     )
-
-    # Helper — extract MDE_*_CL stream tokens inside the `union withsource=_Table ...`
-    # block. Also extract the `project ... =` aliases (output columns).
-    function script:Get-ParserReferences {
-        param([string] $KqlPath)
-        $text = Get-Content $KqlPath -Raw
-        # union block: from "union withsource=_Table" to the first "| where" or end
-        $unionMatch = [regex]::Match($text, 'union\s+withsource=_Table\s+([\s\S]*?)(?=\|\s*where|\|\s*summarize|\|\s*extend|\Z)', 'IgnoreCase')
-        $tables = @()
-        if ($unionMatch.Success) {
-            $tables = [regex]::Matches($unionMatch.Groups[1].Value, '\bMDE_[A-Za-z0-9]+_CL\b') |
-                ForEach-Object { $_.Value } | Sort-Object -Unique
-        }
-        # project columns: look for `project\s+ <col1>, <col2>, ... <colN>` capturing aliases before `=` or bare names
-        $projectMatch = [regex]::Match($text, '\|\s*project\s+([\s\S]+?)$', 'IgnoreCase')
-        $columns = @()
-        if ($projectMatch.Success) {
-            $pBlock = $projectMatch.Groups[1].Value
-            # Each column is either "Name" or "Name = expr"; split on commas, take
-            # the identifier before "=" (or the bare name).
-            foreach ($seg in ($pBlock -split '(?<![^,]{0,200}\()\s*,\s*(?![^,]{0,200}\))')) {
-                $seg = $seg.Trim()
-                if ($seg -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*(=|$)') {
-                    $columns += $matches[1]
-                }
-            }
-        }
-        [pscustomobject]@{ Tables = $tables; Columns = ($columns | Sort-Object -Unique) }
-    }
 }
 
-Describe 'Parser static audit — per tier' -ForEach $script:ParserCases {
+Describe 'Parser static audit — per cadence tier' -ForEach $script:ParserCases {
     BeforeAll {
-        # Pester 5 per-Describe scope — re-resolve paths + helper from parent context.
         $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
-        $script:LiveFixturesDir       = Join-Path $repoRoot 'tests' 'fixtures' 'live-responses'
         $script:ExpectedParserColumns = @(
             'TimeGenerated', 'StreamName', 'EntityId', 'FieldName',
             'OldValue', 'NewValue', 'SnapshotCurrent', 'SnapshotPrevious', 'ChangeType'
         )
         $script:RemovedStreams = @(
             'MDE_AsrRulesConfig_CL', 'MDE_AntiRansomwareConfig_CL', 'MDE_ControlledFolderAccess_CL',
-            'MDE_NetworkProtectionConfig_CL', 'MDE_ApprovalAssignments_CL'
+            'MDE_NetworkProtectionConfig_CL', 'MDE_ApprovalAssignments_CL',
+            'MDE_SecureScoreBreakdown_CL'
         )
 
         $text = Get-Content $_.Path -Raw
@@ -135,21 +119,15 @@ Describe 'Parser static audit — per tier' -ForEach $script:ParserCases {
                 ForEach-Object { $_.Value } | Sort-Object -Unique
         }
 
-        # Column extraction: find the LAST `| project` block (P3 parser has 3) and
-        # scan it for every identifier that could be an output column:
-        #   alias-projected:  Foo = <expr>     -> capture "Foo"
-        #   bare column     :  Bar,            -> capture "Bar"
-        #   final bare col  :  Baz             -> capture "Baz"  (at EOF)
+        # Column extraction: find the LAST `| project` block and scan it for
+        # every identifier that could be an output column.
         $projectIdxes = [regex]::Matches($text, '\|\s*project\b', 'IgnoreCase')
         $script:ParserColumns = @()
         if ($projectIdxes.Count -gt 0) {
             $last = $projectIdxes[$projectIdxes.Count - 1]
             $pBlock = $text.Substring($last.Index + $last.Length)
-            # Grab all "Identifier = " (explicit aliases — these are always output columns)
             $aliased = [regex]::Matches($pBlock, '(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=') |
                 ForEach-Object { $_.Groups[1].Value }
-            # Grab bare identifiers (just "Identifier," or "Identifier" terminating the project).
-            # Line must start with identifier + either "," or end-of-line (no "=" follows).
             $bare = [regex]::Matches($pBlock, '(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*,?\s*$') |
                 ForEach-Object { $_.Groups[1].Value }
             $script:ParserColumns = @($aliased + $bare | Sort-Object -Unique)
@@ -162,14 +140,13 @@ Describe 'Parser static audit — per tier' -ForEach $script:ParserCases {
     }
 
     It 'parser <Name> references exactly the manifest streams for tier <Tier>' {
-        # Set equality (order-independent).
         Compare-Object -ReferenceObject $_.Expected -DifferenceObject $script:ParserTables |
-            Should -BeNullOrEmpty -Because "parser must list every tier-<Tier> stream from the manifest and nothing else"
+            Should -BeNullOrEmpty -Because "parser must list every active <$($_.Tier)> stream from the manifest and nothing else"
     }
 
-    It 'parser <Name> references NO v1.0.2 REMOVED streams' {
+    It 'parser <Name> references NO removed streams' {
         foreach ($r in $script:RemovedStreams) {
-            $script:ParserTables | Should -Not -Contain $r -Because "parser references $r which was removed in v1.0.2 (NO_PUBLIC_API)"
+            $script:ParserTables | Should -Not -Contain $r -Because "parser references $r which has been removed (NO_PUBLIC_API or public-API-covered)"
         }
     }
 
@@ -185,12 +162,12 @@ Describe 'Sample-snapshot fixture files — presence and structure' {
         Test-Path $script:FixtureDir | Should -BeTrue
     }
 
-    It 'at least 2 fixture files present (post v1.0.2 ASR removal)' {
+    It 'at least 2 fixture files present' {
         $files = Get-ChildItem -Path $script:FixtureDir -Filter '*.json'
         $files.Count | Should -BeGreaterOrEqual 2
     }
 
-    It 'no fixture references a v1.0.2 REMOVED stream' {
+    It 'no fixture references a removed stream' {
         foreach ($file in Get-ChildItem -Path $script:FixtureDir -Filter '*.json') {
             $content = Get-Content $file.FullName -Raw
             foreach ($r in $script:RemovedStreams) {
@@ -244,7 +221,7 @@ Describe 'MDE_AdvancedFeatures before/after snapshot pair' {
     }
 }
 
-Describe 'MDE_XspmAttackPaths set-diff drift scenario' {
+Describe 'MDE_XspmAttackPaths set-diff drift scenario (exposure tier)' {
     BeforeAll {
         $script:XspmScenarioPath = Join-Path $script:FixtureDir 'MDE_XspmAttackPaths_drift_scenario.json'
         $script:XspmScenario = Get-Content $script:XspmScenarioPath -Raw | ConvertFrom-Json
@@ -260,8 +237,8 @@ Describe 'MDE_XspmAttackPaths set-diff drift scenario' {
     It 'expectedDrift contains an Added path and a Removed path (set-diff shape)' {
         $added   = $script:XspmScenario.expectedDrift | Where-Object ChangeType -eq 'Added'
         $removed = $script:XspmScenario.expectedDrift | Where-Object ChangeType -eq 'Removed'
-        $added.Count   | Should -BeGreaterThan 0 -Because 'P3 parser set-diff must surface Added entities'
-        $removed.Count | Should -BeGreaterThan 0 -Because 'P3 parser set-diff must surface Removed entities'
+        $added.Count   | Should -BeGreaterThan 0 -Because 'Exposure parser set-diff must surface Added entities'
+        $removed.Count | Should -BeGreaterThan 0 -Because 'Exposure parser set-diff must surface Removed entities'
     }
 
     It 'Added path IDs exist in after but NOT in before' {
@@ -293,44 +270,29 @@ Describe 'MDE_XspmAttackPaths set-diff drift scenario' {
 
 Describe 'Parser-tier coverage — live fixture shape compatibility' {
     # For each parser, there should be at least ONE live-response fixture for a
-    # stream in its tier so KQL drift against live data is possible post-deployment.
-    It 'P0 parser has at least one live fixture' {
+    # stream in its cadence tier so KQL drift against live data is possible
+    # post-deployment.
+    It 'Exposure parser has at least one live fixture' {
         @(Get-ChildItem $script:LiveFixturesDir -Filter 'MDE_*_CL-raw.json' | Where-Object {
-            # All P0 streams from manifest
-            $_.BaseName -match '^MDE_(AdvancedFeatures|PUAConfig|AntivirusPolicy|DeviceControlPolicy|WebContentFiltering|SmartScreenConfig|TenantAllowBlock|CustomCollection|LiveResponseConfig|AlertServiceConfig|AlertTuning|SuppressionRules|CustomDetections|AuthenticatedTelemetry|PreviewFeatures)_CL-raw$'
+            $_.BaseName -match '^MDE_(AssetRules|XspmInitiatives|ExposureSnapshots|ExposureRecommendations|XspmAttackPaths|XspmChokePoints|XspmTopTargets)_CL-raw$'
         }).Count | Should -BeGreaterThan 0
     }
 
-    It 'P1 parser has at least one live fixture' {
+    It 'Configuration parser has at least one live fixture' {
         @(Get-ChildItem $script:LiveFixturesDir -Filter 'MDE_*_CL-raw.json' | Where-Object {
-            $_.BaseName -match '^MDE_(ConnectedApps|DataExportSettings|IntuneConnection|PurviewSharing|StreamingApiConfig|TenantContext|TenantWorkloadStatus)_CL-raw$'
+            $_.BaseName -match '^MDE_(PreviewFeatures|AlertServiceConfig|AlertTuning|SuppressionRules|CustomDetections|TenantAllowBlock|ConnectedApps|IntuneConnection|PurviewSharing|RbacDeviceGroups|UnifiedRbacRoles|ThreatAnalytics|UserPreferences|CloudAppsConfig)_CL-raw$'
         }).Count | Should -BeGreaterThan 0
     }
 
-    It 'P2 parser has at least one live fixture' {
+    It 'Inventory parser has at least one live fixture' {
         @(Get-ChildItem $script:LiveFixturesDir -Filter 'MDE_*_CL-raw.json' | Where-Object {
-            $_.BaseName -match '^MDE_(AssetRules|CriticalAssets|DeviceCriticality|RbacDeviceGroups|SAClassification|UnifiedRbacRoles)_CL-raw$'
+            $_.BaseName -match '^MDE_(AdvancedFeatures|DeviceControlPolicy|WebContentFiltering|SmartScreenConfig|LiveResponseConfig|AuthenticatedTelemetry|PUAConfig|AntivirusPolicy|CustomCollection|TenantContext|TenantWorkloadStatus|SAClassification|IdentityOnboarding|IdentityServiceAccounts|DCCoverage|IdentityAlertThresholds|RemediationAccounts|SecurityBaselines|MtoTenants|LicenseReport|DeviceTimeline)_CL-raw$'
         }).Count | Should -BeGreaterThan 0
     }
 
-    It 'P3 parser has at least one live fixture' {
-        # iter-14.0: SecureScoreBreakdown removed from P3 manifest (Graph
-        # /security/secureScores covers); fixture preserved historically but
-        # no longer required for parser-fixture coverage.
+    It 'Maintenance parser has at least one live fixture (DataExportSettings)' {
         @(Get-ChildItem $script:LiveFixturesDir -Filter 'MDE_*_CL-raw.json' | Where-Object {
-            $_.BaseName -match '^MDE_(ExposureRecommendations|ExposureSnapshots|SecurityBaselines|XspmAttackPaths|XspmChokePoints|XspmInitiatives|XspmTopTargets)_CL-raw$'
-        }).Count | Should -BeGreaterThan 0
-    }
-
-    It 'P5 parser has at least one live fixture' {
-        @(Get-ChildItem $script:LiveFixturesDir -Filter 'MDE_*_CL-raw.json' | Where-Object {
-            $_.BaseName -match '^MDE_(DCCoverage|IdentityAlertThresholds|IdentityOnboarding|IdentityServiceAccounts|RemediationAccounts)_CL-raw$'
-        }).Count | Should -BeGreaterThan 0
-    }
-
-    It 'P7 parser has at least one live fixture' {
-        @(Get-ChildItem $script:LiveFixturesDir -Filter 'MDE_*_CL-raw.json' | Where-Object {
-            $_.BaseName -match '^MDE_(CloudAppsConfig|LicenseReport|MtoTenants|UserPreferences)_CL-raw$'
+            $_.BaseName -match '^MDE_DataExportSettings_CL-raw$'
         }).Count | Should -BeGreaterThan 0
     }
 }

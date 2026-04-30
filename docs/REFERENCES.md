@@ -8,7 +8,7 @@ Every source cited in the codebase or docs, with context and accessed date.
 Accessed 2026-04-22. Documents 594 undocumented portal operations across 18 Microsoft portals (Defender XDR, Intune, Purview, Entra, M365 Admin, Exchange, Teams, SharePoint, etc.). Foundation for our endpoint catalogue. Authors describe APIs as "undocumented, unsupported by Microsoft, and may change without notice".
 
 ### [XDRInternals — MSCloudInternals (Fabian Bader, Nathan McNulty)](https://github.com/MSCloudInternals/XDRInternals)
-Accessed 2026-04-22. 100+ cmdlets for programmatic Defender XDR portal access. Reference implementation of the `sccauth` cookie chain, MFA handling, and passkey-assertion flow in PowerShell. Demonstrates feasibility of the undocumented-API approach. We built our `Xdr.Portal.Auth` module from scratch using publicly documented specs rather than porting this code, but architectural patterns are similar.
+Accessed 2026-04-22. 100+ cmdlets for programmatic Defender XDR portal access. Reference implementation of the `sccauth` cookie chain, MFA handling, and passkey-assertion flow in PowerShell. Demonstrates feasibility of the undocumented-API approach. We built our `Xdr.Defender.Auth` module from scratch using publicly documented specs rather than porting this code, but architectural patterns are similar.
 
 ### [DefenderHarvester — Olaf Hartong](https://github.com/olafhartong/DefenderHarvester)
 Accessed 2026-04-22. Go-based tool that historically extracted MDE telemetry from portal endpoints. README notes Microsoft has hardened the APIs it used ("essentially kills this tool for now"). The `main.go` source confirms 12 endpoint paths (machineactions, customdetections, suppressionrules, machinegroups, dataexportsettings, advanced features, alert service settings, timeline, etc.) — we verified these are still accessible as of 2026-04 with the updated auth chain. Serves as evidence that per-endpoint breakage is the operational risk, not auth chain itself.
@@ -25,7 +25,7 @@ Accessed 2026-04-22. Peer-reviewed paper on MDE sensor architecture. Provides in
 Accessed 2026-04-22. Disclosed April 2026. The `sccauth` cookie from security.microsoft.com acts as an alternative token broker bypassing Conditional Access. MSRC classified moderate-severity, "does not meet Microsoft's bar for immediate servicing" — as of publication the pattern remains available. Key endpoint: `/api/Auth/getToken` can mint access tokens for Graph, ARM, Security Center API, Log Analytics, Purview, and Threat Intelligence Portal. This is the auth chain foundation for all internal-portal connectors. We treat it as a risk (see risk register in the project plan and `docs/RUNBOOK.md`).
 
 ### [RFC 6238 — TOTP: Time-Based One-Time Password Algorithm](https://datatracker.ietf.org/doc/html/rfc6238)
-Specifies HMAC-SHA1 truncation for time-based codes. Used directly in `Xdr.Portal.Auth` TOTP implementation. Test vectors in Appendix B used for unit tests.
+Specifies HMAC-SHA1 truncation for time-based codes. Used directly in `Xdr.Defender.Auth` TOTP implementation. Test vectors in Appendix B used for unit tests.
 
 ### [W3C WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/)
 Specifies the Web Authentication API, including the CBOR attestation / assertion formats used by FIDO2 passkeys. Our passkey signing implementation builds the client-data-JSON and performs ECDSA-P256 signing per § 7.2 "Verifying an Authentication Assertion".

@@ -51,14 +51,26 @@ See [docs/GETTING-AUTH-MATERIAL.md](docs/GETTING-AUTH-MATERIAL.md) for how to ob
 
 ### 3. Verify ingestion
 
-Within 5 minutes the Function App self-test timer writes the first row to `MDE_AuthTestResult_CL`:
+Within 5-10 minutes the heartbeat timer + first-cadence-tier polls fire. Auth chain diagnostics live in App Insights `customEvents`; connector liveness lives in `MDE_Heartbeat_CL`.
 
 ```kql
-MDE_AuthTestResult_CL | order by TimeGenerated desc | take 1
-// Expected: Success = true, Stage = complete
+// Workspace — connector health (drives Sentinel data-connector card status)
+MDE_Heartbeat_CL
+| where TimeGenerated > ago(1h)
+| where StreamsSucceeded > 0
+| order by TimeGenerated desc
+| take 1
 ```
 
-Production polling timers activate automatically once the self-test passes. Within one hour the P0 tier streams (`MDE_AdvancedFeatures_CL`, `MDE_AlertServiceConfig_CL`, `MDE_SuppressionRules_CL`, ...) begin emitting rows.
+```kql
+// App Insights — auth chain diagnostics
+customEvents
+| where name in ('AuthChain.AADSTSError', 'AuthChain.Completed')
+| order by timestamp desc
+| take 5
+```
+
+Production polling timers fire on their cadence: `fast` (10 min) ingests Action Center events first; `inventory` (daily 02:00 UTC) ingests the long-tail settings + identity + metadata streams. See [docs/STREAMS.md](docs/STREAMS.md) for the full per-tier breakdown.
 
 ## Documentation
 

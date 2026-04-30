@@ -62,9 +62,9 @@ Even on tenants that don't require phishing-resistant MFA, an unattended service
 
 1. Entra → Protection → Conditional Access → your interactive-MFA policy → Exclude → Users → add the connector SA (`svc-xdrlr-...@...`).
 2. (Optional) Add a named-location IP rule allowing the Function App's outbound IPs (Portal → Function App → Networking → Outbound IPs).
-3. Verify post-deploy: `MDE_AuthTestResult_CL | top 1 by TimeGenerated desc` should show `Success=true Stage=complete` within 10 min of the first timer fire.
+3. Verify post-deploy: `App Insights customEvents | top 1 by TimeGenerated desc` should show `Success=true Stage=complete` within 10 min of the first timer fire.
 
-If sign-in fails post-deploy with `AADSTS50076` (MFA required) or `AADSTS50079` (proof up required), the SA wasn't excluded — fix the policy and re-fire `validate-auth-selftest` (`Function App → Functions → validate-auth-selftest → Test/Run`).
+If sign-in fails post-deploy with `AADSTS50076` (MFA required) or `AADSTS50079` (proof up required), the SA wasn't excluded — fix the policy and re-fire `(auth chain — see App Insights customEvents)` (`Function App → Functions → (auth chain — see App Insights customEvents) → Test/Run`).
 
 **Why this matters for production**: an interactive-MFA prompt on a programmatic flow is the #1 cause of "auth-test green for an hour then suddenly red" — the policy fired during a refresh cycle. Document the exemption AT DEPLOY TIME so you don't troubleshoot it at 3 AM.
 

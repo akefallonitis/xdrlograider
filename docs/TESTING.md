@@ -108,7 +108,7 @@ pwsh ./tests/Run-Tests.ps1 -Category local-online
 **Needs**:
 - A completed XdrLogRaider deployment
 - Auth secrets uploaded via `Initialize-XdrLogRaiderAuth.ps1`
-- At least 5 minutes elapsed since upload (for `MDE_AuthTestResult_CL`) or 1 hour (for first P0 rows)
+- At least 5 minutes elapsed since upload (for `App Insights customEvents`) or 1 hour (for first P0 rows)
 - You (the runner) signed into Azure with at least `Log Analytics Reader` on the workspace
 
 **Run**:
@@ -124,7 +124,7 @@ pwsh ./tests/Run-Tests.ps1 -Category e2e
 
 **Expected**: 3-block Pester run covering:
 - **Resource group contains expected resources** — FA, KV, Storage, DCE, DCR all present
-- **Ingestion signal** — `MDE_Heartbeat_CL` has recent rows; `MDE_AuthTestResult_CL.Success=true`; `MDE_AdvancedFeatures_CL` has at least one row; ≥3 of 5 sampled P0 streams have data
+- **Ingestion signal** — `MDE_Heartbeat_CL` has recent rows; `App Insights customEvents.Success=true`; `MDE_AdvancedFeatures_CL` has at least one row; ≥3 of 5 sampled P0 streams have data
 - **Sentinel content deployed** — parser functions registered (≥6); hunting queries registered (≥10); Compliance Dashboard workbook exists
 
 If blocks fail:

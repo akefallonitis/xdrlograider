@@ -17,7 +17,7 @@ tactics:
 relevantTechniques:
   - T1562.001
 query: |
-  MDE_Drift_P0Compliance(2h, 15m) | where StreamName == "MDE_PUAConfig_CL" | where FieldName == "enabled" and NewValue == "false"
+  MDE_Drift_Inventory(2h, 15m) | where StreamName == "MDE_PUAConfig_CL" | where FieldName == "enabled" and NewValue == "false"
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

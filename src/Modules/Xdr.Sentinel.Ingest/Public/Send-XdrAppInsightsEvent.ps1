@@ -113,9 +113,9 @@ function Get-XdrAiVersion {
     }
 
     # Read the Ingest module manifest's ModuleVersion. PSScriptRoot points at
-    # XdrLogRaider.Ingest/Public — manifest is two levels up.
+    # Xdr.Sentinel.Ingest/Public — manifest is one level up.
     try {
-        $manifestPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'XdrLogRaider.Ingest.psd1'
+        $manifestPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'Xdr.Sentinel.Ingest.psd1'
         if (Test-Path -LiteralPath $manifestPath) {
             $data = Import-PowerShellDataFile -Path $manifestPath
             if ($data -and $data.ModuleVersion) {

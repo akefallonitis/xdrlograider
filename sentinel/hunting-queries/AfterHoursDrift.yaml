@@ -26,7 +26,7 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
-  union (MDE_Drift_P0Compliance(7d, 1h)), (MDE_Drift_P1Pipeline(7d, 30m))
+  union (MDE_Drift_Inventory(7d, 1d)), (MDE_Drift_Configuration(7d, 6h)), (MDE_Drift_Maintenance(30d, 7d))
   | extend HourOfDay = datetime_part("Hour", TimeGenerated)
   | extend DayOfWeek = dayofweek(TimeGenerated)
   | where HourOfDay < 9 or HourOfDay >= 17 or DayOfWeek == time(0d) or DayOfWeek == time(6d)

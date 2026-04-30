@@ -5,31 +5,34 @@ Daily, weekly, and quarterly operational tasks for XdrLogRaider.
 ## Daily (2 min)
 
 ```kql
-// Is the connector alive?
+// Is the connector alive? (heartbeat-5m + 5 cadence-tier polls)
 MDE_Heartbeat_CL
 | where TimeGenerated > ago(1h)
 | summarize LastSeen = max(TimeGenerated) by FunctionName
 | extend AgeMinutes = datetime_diff("minute", now(), LastSeen)
 
-// Is auth healthy?
-MDE_AuthTestResult_CL
-| order by TimeGenerated desc
-| take 1
-| project TimeGenerated, Success, Stage, FailureReason
+// Is auth healthy? (auth chain diagnostics live in App Insights customEvents)
+customEvents
+| where name in ('AuthChain.AADSTSError', 'AuthChain.Completed')
+| order by timestamp desc
+| take 5
+| project timestamp, name, customDimensions
 
-// Any P0 streams failing silently?
+// Any inventory-tier streams failing silently?
 MDE_Heartbeat_CL
-| where TimeGenerated > ago(2h) and Tier == 'P0'
+| where TimeGenerated > ago(2h) and Tier == 'inventory'
 | summarize Success = max(StreamsSucceeded), Attempted = max(StreamsAttempted) by FunctionName
 | where Success < Attempted
 ```
 
 ## Weekly (10 min)
 
-- Review `MDE_Drift_P0Compliance(7d, 1h)` — any unexpected changes?
+- Review `MDE_Drift_Inventory(30d, 1d)` — any unexpected daily-cadence changes?
+- Review `MDE_Drift_Configuration(7d, 6h)` — any rule / RBAC drift?
+- Review `MDE_Drift_Exposure(7d, 1h)` — any new XSPM attack paths?
 - Review `sentinel/analytic-rules/*` firings — tune false positives
 - Check Azure cost report for XdrLogRaider RG — any spikes?
-- Verify service account hasn't been modified: `MDE_Drift_P2Governance(7d, 1d) | where EntityId contains service-account-upn`
+- Verify service account hasn't been modified: `MDE_Drift_Configuration(7d, 6h) | where EntityId contains service-account-upn`
 
 ## Monthly
 
@@ -47,26 +50,29 @@ MDE_Heartbeat_CL
 
 ## Incident response
 
-### Auth self-test failure (MDE_AuthTestResult_CL.Success=false)
+### Auth chain failure (no AuthChain.Completed in App Insights)
 
-**Symptom**: most recent row of `MDE_AuthTestResult_CL` shows `Success=false`. All tier pollers refuse to run (they gate on the flag) so nothing ingests until this resolves.
+**Symptom**: `customEvents` in App Insights shows `AuthChain.AADSTSError` events with no recent `AuthChain.Completed`, and `MDE_Heartbeat_CL` rows show `StreamsSucceeded = 0`. All tier pollers refuse to run (they gate on the auth-selftest flag) so nothing ingests until this resolves.
 
 ```kql
-MDE_AuthTestResult_CL
-| order by TimeGenerated desc
-| take 1
-| project TimeGenerated, Success, Stage, FailureReason, SampleCallHttpCode
+// App Insights — most recent auth chain event
+customEvents
+| where timestamp > ago(1h)
+| where name startswith 'AuthChain.'
+| order by timestamp desc
+| take 5
+| project timestamp, name, customDimensions
 ```
 
-**Diagnose by `Stage`**:
+**Diagnose by `name` + `customDimensions.Stage`**:
 
-| Stage | Most likely cause | First action |
+| Event / Stage | Most likely cause | First action |
 |---|---|---|
-| `credentials` | KV read failed | Check FA's MI has `Key Vault Secrets User`; verify secrets exist (`mde-portal-upn`, `mde-portal-password`, `mde-portal-totp` OR `mde-portal-passkey`) |
-| `ests-cookie` | Entra sign-in blocked | Check Entra sign-in logs for the service account — look for Conditional Access deny, password expired, or MFA enrolment lapse |
-| `sccauth-exchange` | Portal rejected ESTS cookie | Service account lacks portal access — verify Defender RBAC role (`Defender XDR Analyst` or equivalent read role) |
-| `sample-call` | HTTP 401/403 on sample endpoint | Service account roles missing — verify both `Security Reader` (Entra) + Defender RBAC are assigned |
-| `complete` with `Success=false` | Sample call returned non-200 | Check `SampleCallHttpCode` — 429 = throttled (wait); 5xx = Microsoft transient; 403 = permissions |
+| `AuthChain.AADSTSError` (any AADSTSCode) | Entra sign-in blocked | Check Entra sign-in logs for the service account — look for Conditional Access deny, password expired, or MFA enrolment lapse |
+| `Stage = credentials` | KV read failed | Check FA's MI has `Key Vault Secrets User`; verify secrets exist (`mde-portal-upn`, `mde-portal-password`, `mde-portal-totp` OR `mde-portal-passkey`) |
+| `Stage = auth-chain` (sccauth not issued) | Portal rejected ESTS cookie | Service account lacks portal access — verify Defender RBAC role (`Defender XDR Analyst` or equivalent read role) |
+| `Stage = sample-call` (HTTP 401/403) | Service account roles missing | Verify both `Security Reader` (Entra) + Defender RBAC are assigned |
+| `AuthChain.RateLimited` repeatedly | Rate limits hit | Check `customDimensions.RetryAfterMs`; reduce poll cadence in the affected tier; investigate noisy stream |
 
 **Resolution paths**:
 1. **Password expired**: reset in Entra → re-run `Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName <name>`
@@ -98,7 +104,7 @@ Until fixed, **no data flows** — the auth-selftest gate is intentional (see `d
 3. Purge Key Vault secrets: `Remove-AzKeyVaultSecret`
 4. Create new service account + creds + passkey
 5. Re-run `Initialize-XdrLogRaiderAuth.ps1`
-6. Review `MDE_Drift_*` for the period of compromise — look for policy changes made by the compromised account
+6. Review `MDE_Drift_Configuration` + `MDE_Drift_Inventory` for the period of compromise — look for policy / RBAC / settings changes made by the compromised account
 
 ## App Insights structured-logging KQL
 

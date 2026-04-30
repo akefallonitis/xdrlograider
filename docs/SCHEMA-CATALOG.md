@@ -62,7 +62,7 @@ This pattern continues to work indefinitely; the typed columns are additive, not
 Two tables are emitted by the connector itself, not polled from the portal, and follow their own fixed schema (no projection map):
 
 - `MDE_Heartbeat_CL` — one row per timer invocation. Columns: `TimeGenerated, FunctionName, Tier, StreamsAttempted, StreamsSucceeded, RowsIngested, LatencyMs, HostName, Notes(dynamic)`. See [OPERATIONS.md](OPERATIONS.md) for the heartbeat KQL cookbook.
-- `MDE_AuthTestResult_CL` — one row per auth self-test. Columns: `TimeGenerated, Method, PortalHost, Upn, Success, Stage, FailureReason, EstsMs, SccauthMs, SampleCallHttpCode, SampleCallLatencyMs, SccauthAcquiredUtc`. See [UNATTENDED-AUTH.md](UNATTENDED-AUTH.md).
+- `App Insights customEvents (AuthChain.* events)` — one row per auth self-test. Columns: `TimeGenerated, Method, PortalHost, Upn, Success, Stage, FailureReason, EstsMs, SccauthMs, SampleCallHttpCode, SampleCallLatencyMs, SccauthAcquiredUtc`. See [UNATTENDED-AUTH.md](UNATTENDED-AUTH.md).
 
 The remainder of this document covers the 46 telemetry streams.
 
@@ -70,7 +70,7 @@ The remainder of this document covers the 46 telemetry streams.
 
 ## P0 Compliance — hourly polling
 
-Tenant-configuration and policy state. Drift here typically maps to a Sentinel detection. Aggregated by [`MDE_Drift_P0Compliance`](../sentinel/parsers/MDE_Drift_P0Compliance.kql).
+Tenant-configuration and policy state. Drift here typically maps to a Sentinel detection. Aggregated by [`MDE_Drift_Inventory`](../sentinel/parsers/MDE_Drift_Inventory.kql).
 
 ### `MDE_AdvancedFeatures_CL`
 
@@ -434,7 +434,7 @@ MDE_CustomCollection_CL
 
 ## P1 Pipeline — 30-minute polling
 
-Tenant-integration plumbing: data export, connected apps, tenant context. Aggregated by [`MDE_Drift_P1Pipeline`](../sentinel/parsers/MDE_Drift_P1Pipeline.kql).
+Tenant-integration plumbing: data export, connected apps, tenant context. Aggregated by [`MDE_Drift_Configuration`](../sentinel/parsers/MDE_Drift_Configuration.kql).
 
 ### `MDE_DataExportSettings_CL`
 
@@ -594,7 +594,7 @@ MDE_PurviewSharing_CL
 
 ## P2 Governance — daily polling
 
-RBAC, asset-classification, service-account governance. Aggregated by [`MDE_Drift_P2Governance`](../sentinel/parsers/MDE_Drift_P2Governance.kql).
+RBAC, asset-classification, service-account governance. Aggregated by [`MDE_Drift_Configuration`](../sentinel/parsers/MDE_Drift_Configuration.kql).
 
 ### `MDE_RbacDeviceGroups_CL`
 
@@ -704,7 +704,7 @@ MDE_SAClassification_CL
 
 ## P3 Exposure / XSPM — hourly polling
 
-Exposure-management surfaces: posture, attack paths, recommendations. Aggregated by [`MDE_Drift_P3Exposure`](../sentinel/parsers/MDE_Drift_P3Exposure.kql) (set-diff semantics).
+Exposure-management surfaces: posture, attack paths, recommendations. Aggregated by [`MDE_Drift_Exposure`](../sentinel/parsers/MDE_Drift_Exposure.kql) (set-diff semantics).
 
 ### `MDE_XspmInitiatives_CL`
 
@@ -923,7 +923,7 @@ MDE_DeviceTimeline_CL
 
 ## P5 Identity — daily polling
 
-Defender for Identity surfaces: DC onboarding, service-account inventory, alert thresholds. Aggregated by [`MDE_Drift_P5Identity`](../sentinel/parsers/MDE_Drift_P5Identity.kql).
+Defender for Identity surfaces: DC onboarding, service-account inventory, alert thresholds. Aggregated by [`MDE_Drift_Inventory`](../sentinel/parsers/MDE_Drift_Inventory.kql).
 
 ### `MDE_IdentityOnboarding_CL`
 
@@ -1159,7 +1159,7 @@ MDE_MachineActions_CL
 
 ## P7 Metadata — daily polling
 
-Tenant-metadata surfaces: per-analyst preferences, MTO tenant picker, license rollups. Aggregated by [`MDE_Drift_P7Metadata`](../sentinel/parsers/MDE_Drift_P7Metadata.kql).
+Tenant-metadata surfaces: per-analyst preferences, MTO tenant picker, license rollups. Aggregated by [`MDE_Drift_Configuration`](../sentinel/parsers/MDE_Drift_Configuration.kql).
 
 ### `MDE_UserPreferences_CL`
 

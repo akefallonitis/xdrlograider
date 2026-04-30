@@ -40,7 +40,7 @@ How v1.x releases are cut.
 1. **Verify Release page** shows all 6 assets with correct sizes
 2. **Test Deploy-to-Azure button** on a clean non-prod subscription with a real Sentinel workspace
 3. **Run the helper**: `./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName <from-output>`
-4. **Wait 5 min**, verify `MDE_AuthTestResult_CL.Success=true`
+4. **Wait 5 min**, verify `App Insights customEvents.Success=true`
 5. **Run post-deploy e2e** from your laptop:
    ```powershell
    Connect-AzAccount

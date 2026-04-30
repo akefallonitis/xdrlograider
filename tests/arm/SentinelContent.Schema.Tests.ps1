@@ -134,25 +134,26 @@ Describe 'Analytic rules YAML schema compliance' {
         }
     }
 
-    It 'compiled sentinelContent.json has 36 per-content metadata back-links to the XdrLogRaider Solution' {
+    It 'compiled sentinelContent.json has 34 per-content metadata back-links to the XdrLogRaider Solution' {
         # One metadata resource per content item — 14 alertRules, 9 hunting
-        # savedSearches, 7 workbooks (added MDE_ActionCenter for the Phase 6
-        # portal-only Action Center / Device Timeline / Machine Actions
-        # surfaces), 6 parser savedSearches = 36. Without these back-links,
-        # deployed content shows as "not from a solution" in Sentinel UI even
-        # though the Solution package exists.
+        # savedSearches, 7 workbooks (incl. MDE_ActionCenter for Action Center +
+        # Device Timeline + Machine Actions surfaces), 4 parser savedSearches
+        # (one per cadence tier with snapshot semantics; the fast tier carries
+        # events not snapshots so has no parser) = 34. Without these
+        # back-links, deployed content shows as "not from a solution" in
+        # Sentinel UI even though the Solution package exists.
         $compiledPath = Join-Path $script:RepoRoot 'deploy' 'compiled' 'sentinelContent.json'
         $compiled = Get-Content $compiledPath -Raw | ConvertFrom-Json
         $metadata = @($compiled.resources | Where-Object {
             $_.type -eq 'Microsoft.OperationalInsights/workspaces/providers/metadata'
         })
-        @($metadata).Count | Should -Be 36 -Because 'expect 14 AnalyticsRule + 9 HuntingQuery + 7 Workbook + 6 Parser metadata back-links'
+        @($metadata).Count | Should -Be 34 -Because 'expect 14 AnalyticsRule + 9 HuntingQuery + 7 Workbook + 4 Parser metadata back-links'
 
         $byKind = $metadata | Group-Object { $_.properties.kind }
         ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 14
         ($byKind | Where-Object Name -eq 'HuntingQuery').Count  | Should -Be 9
         ($byKind | Where-Object Name -eq 'Workbook').Count      | Should -Be 7
-        ($byKind | Where-Object Name -eq 'Parser').Count        | Should -Be 6
+        ($byKind | Where-Object Name -eq 'Parser').Count        | Should -Be 4
 
         # Every metadata back-link must reference the canonical Solution
         foreach ($m in $metadata) {
@@ -323,8 +324,8 @@ Describe 'Data Connector card schema compliance' {
         }
     }
 
-    It 'dataTypes array lists all 47 tables (45 active streams + Heartbeat + AuthTestResult; deprecated streams excluded from data connector card)' {
-        @($script:Dc.dataTypes).Count | Should -Be 47
+    It 'dataTypes array lists 46 tables (45 active streams + Heartbeat; deprecated stream excluded from data connector card; AuthTestResult retired)' {
+        @($script:Dc.dataTypes).Count | Should -Be 46
     }
 
     It 'every dataType has name + lastDataReceivedQuery' {

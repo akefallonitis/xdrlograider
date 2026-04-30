@@ -22,7 +22,7 @@ Operators choose one at deploy time via the `authMethod` parameter. The choice a
 ```
                            Function App worker
                        ┌─────────────────────────┐
-                       │ poll-p0-compliance-1h   │ (timer fires)
+                       │ poll-inventory-1d   │ (timer fires)
                        └────────────┬────────────┘
                                     │
                                     ▼
@@ -76,7 +76,7 @@ Operators choose one at deploy time via the `authMethod` parameter. The choice a
 
 - **L2 Xdr.Defender.Auth** knows the Defender-specific cookie names (`sccauth`, `XSRF-TOKEN`) + the portal's TenantContext probe path. It wraps L1 with the `Connect-DefenderPortal` cache and the `Invoke-DefenderPortalRequest` retry/refresh logic. v0.2.0 sibling modules (`Xdr.Purview.Auth`, `Xdr.Intune.Auth`, `Xdr.Entra.Auth`) follow the same template — only their cookie names + client IDs differ.
 
-- **Backward-compat shim** `Xdr.Portal.Auth` re-exports `Connect-MDEPortal`, `Invoke-MDEPortalRequest`, `Test-MDEPortalAuth`, `Get-MDEAuthFromKeyVault`, `Connect-MDEPortalWithCookies` as wrappers that delegate to the L2 functions. Existing operator scripts that call MDE-prefixed names keep working unchanged.
+- **Backward-compat shim** `Xdr.Defender.Auth` re-exports `Connect-DefenderPortal`, `Invoke-DefenderPortalRequest`, `Test-DefenderPortalAuth`, `Get-XdrAuthFromKeyVault`, `Connect-DefenderPortalWithCookies` as wrappers that delegate to the L2 functions. Existing operator scripts that call MDE-prefixed names keep working unchanged.
 
 ## What the connector handles automatically
 
@@ -107,16 +107,16 @@ Operators choose one at deploy time via the `authMethod` parameter. The choice a
 
 ## How to verify your auth chain works
 
-Run the validate-auth-selftest timer manually (or wait for its hourly fire):
+Run the (auth chain — see App Insights customEvents) timer manually (or wait for its hourly fire):
 
 ```powershell
-# In Azure portal: Function App → Functions → validate-auth-selftest → Code+Test → Run
+# In Azure portal: Function App → Functions → (auth chain — see App Insights customEvents) → Code+Test → Run
 ```
 
 Then check the result:
 
 ```kql
-MDE_AuthTestResult_CL
+App Insights customEvents
 | order by TimeGenerated desc
 | take 1
 | project TimeGenerated, Method, PortalHost, Upn, Success, Stage, FailureReason, SampleCallHttpCode, SampleCallLatencyMs

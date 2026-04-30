@@ -43,9 +43,10 @@ BeforeDiscovery {
 BeforeAll {
     $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
 
-    # XdrLogRaider.Client declares Xdr.Portal.Auth + XdrLogRaider.Ingest as RequiredModules
-    # — both must be imported first. The Ingest module lazily resolves Az.* cmdlets at
-    # runtime; stub them so offline tests don't require Az.Accounts/Az.KeyVault/Az.Storage.
+    # Xdr.Defender.Client declares Xdr.Defender.Auth as a RequiredModule;
+    # Xdr.Sentinel.Ingest is a sibling L1 module. Both must be imported first.
+    # The Ingest module lazily resolves Az.* cmdlets at runtime; stub them
+    # so offline tests don't require Az.Accounts / Az.KeyVault / Az.Storage.
     function global:Get-AzAccessToken { param([string]$ResourceUrl) [pscustomobject]@{ Token = 'stub'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
     function global:New-AzStorageContext { param([string]$StorageAccountName, [switch]$UseConnectedAccount) [pscustomobject]@{ StorageAccountName = $StorageAccountName } }
     function global:Get-AzStorageTable   { param([string]$Name, $Context) [pscustomobject]@{ Name = $Name; CloudTable = [pscustomobject]@{ Name = $Name } } }
@@ -53,8 +54,9 @@ BeforeAll {
     function global:Get-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey) $null }
     function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
 
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Portal.Auth'     'Xdr.Portal.Auth.psd1')     -Force -ErrorAction Stop
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1') -Force -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1') -Force -ErrorAction Stop
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -ErrorAction Stop
 
     $script:FixturesDir = Join-Path $repoRoot 'tests' 'fixtures' 'live-responses'
@@ -88,8 +90,9 @@ Describe 'Pipeline: raw -> Expand-MDEResponse -> ConvertTo-MDEIngestRow' -ForEac
             function global:Get-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey) $null }
             function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
         }
-        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Portal.Auth'     'Xdr.Portal.Auth.psd1')     -Force -ErrorAction Stop
         Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -ErrorAction Stop
+        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1') -Force -ErrorAction Stop
+        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1') -Force -ErrorAction Stop
         Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -ErrorAction Stop
 
         $script:RawPath    = Join-Path $script:FixturesDir "$($_.Stream)-raw.json"

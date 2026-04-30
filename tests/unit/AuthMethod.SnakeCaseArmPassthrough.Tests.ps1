@@ -1,83 +1,79 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Iter 13.12 lock: ARM template passes `authMethod = 'credentials_totp'` (snake_case)
-    to the Function App. Profile.ps1 reads it as `$env:AUTH_METHOD` and timer
-    functions pass it through to Test-MDEPortalAuth + Connect-MDEPortal.
+    Lock: ARM template passes `authMethod = 'credentials_totp'` (snake_case)
+    to the Function App. profile.ps1 reads it as `$env:AUTH_METHOD` and timer
+    functions pass it through to Test-DefenderPortalAuth + Connect-DefenderPortal.
 
     These functions' `-Method` ValidateSet MUST accept BOTH PascalCase
     (`CredentialsTotp`, `Passkey`) AND snake_case (`credentials_totp`,
     `passkey`) — and normalize internally.
 
 .DESCRIPTION
-    LIVE EVIDENCE (post iter-13.11 deploy, App Insights 2026-04-28):
-        38 exceptions/h from validate-auth-selftest:
-        "Cannot validate argument on parameter 'Method'.
-         The argument 'credentials_totp' does not belong to the set
-         'CredentialsTotp,Passkey' specified by the ValidateSet attribute."
+    Historical root cause: when the ARM template's `authMethod` parameter is
+    documented as `credentials_totp | passkey` (snake_case), profile.ps1
+    surfaces this via `$env:AUTH_METHOD`. Timer functions pass
+    `$config.AuthMethod` directly to portal-auth functions; if those
+    functions' ValidateSet accepted only PascalCase the FA would crash
+    before reaching the auth chain.
 
-    Root cause: ARM template's `authMethod` parameter is documented as
-    `credentials_totp | passkey` (snake_case), and profile.ps1 surfaces this
-    via `$env:AUTH_METHOD`. Timer functions pass `$config.AuthMethod` directly
-    to portal-auth functions, but those functions' ValidateSet accepts only
-    PascalCase. Result: every validate-auth-selftest invocation crashed before
-    reaching the auth chain → MDE_AuthTestResult_CL never populated → all
-    poll-* timers gated → zero rows ingested.
-
-    Iter 13.12 fix:
-      - Test-MDEPortalAuth accepts both cases + normalizes internally
-      - Connect-MDEPortal accepts both cases + normalizes internally
+    Permanent fix preserved across the v0.1.0-beta first publish refactor:
+      - Test-DefenderPortalAuth accepts both cases + normalizes internally
+      - Connect-DefenderPortal accepts both cases + normalizes internally
+      - Get-XdrAuthFromKeyVault accepts both cases
       - This test locks the contract permanently
 #>
 
 BeforeAll {
     $script:RepoRoot       = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:AuthModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth' 'Xdr.Portal.Auth.psd1'
-    Import-Module $script:AuthModulePath -Force -ErrorAction Stop
+    $script:CommonAuthPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
+    $script:DefAuthPsd1    = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
+    Import-Module $script:CommonAuthPsd1 -Force -ErrorAction Stop
+    Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
     Set-StrictMode -Version Latest
 }
 
-Describe 'AuthMethod ARM passthrough — snake_case ValidateSet acceptance (iter 13.12)' {
+Describe 'AuthMethod ARM passthrough — snake_case ValidateSet acceptance' {
 
-    It 'Test-MDEPortalAuth -Method ValidateSet accepts <Method>' -ForEach @(
+    It 'Test-DefenderPortalAuth -Method ValidateSet accepts <Method>' -ForEach @(
         @{ Method = 'CredentialsTotp' }
         @{ Method = 'Passkey' }
         @{ Method = 'credentials_totp' }
         @{ Method = 'passkey' }
     ) {
-        $cmd = Get-Command -Module Xdr.Portal.Auth -Name Test-MDEPortalAuth -ErrorAction Stop
+        $cmd = Get-Command -Module Xdr.Defender.Auth -Name Test-DefenderPortalAuth -ErrorAction Stop
         $methodParam = $cmd.Parameters['Method']
         $validateSet = $methodParam.Attributes |
             Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
         $validateSet | Should -Not -BeNullOrEmpty
         $validateSet.ValidValues | Should -Contain $Method -Because (
-            "iter-13.12: ARM template uses snake_case auth-method names. " +
-            "Test-MDEPortalAuth must accept both cases."
+            "ARM template uses snake_case auth-method names. " +
+            "Test-DefenderPortalAuth must accept both cases."
         )
     }
 
-    It 'Connect-MDEPortal -Method ValidateSet accepts <Method>' -ForEach @(
+    It 'Connect-DefenderPortal -Method ValidateSet accepts <Method>' -ForEach @(
         @{ Method = 'CredentialsTotp' }
         @{ Method = 'Passkey' }
         @{ Method = 'credentials_totp' }
         @{ Method = 'passkey' }
     ) {
-        $cmd = Get-Command -Module Xdr.Portal.Auth -Name Connect-MDEPortal -ErrorAction Stop
+        $cmd = Get-Command -Module Xdr.Defender.Auth -Name Connect-DefenderPortal -ErrorAction Stop
         $methodParam = $cmd.Parameters['Method']
         $validateSet = $methodParam.Attributes |
             Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
         $validateSet | Should -Not -BeNullOrEmpty
         $validateSet.ValidValues | Should -Contain $Method -Because (
-            "iter-13.12: Connect-MDEPortal must accept the same shape Test-MDEPortalAuth does."
+            "Connect-DefenderPortal must accept the same shape Test-DefenderPortalAuth does."
         )
     }
 
-    It 'Get-MDEAuthFromKeyVault -AuthMethod ValidateSet already accepts snake_case (regression guard for iter 13.x)' {
-        $cmd = Get-Command -Module Xdr.Portal.Auth -Name Get-MDEAuthFromKeyVault -ErrorAction Stop
+    It 'Get-XdrAuthFromKeyVault -AuthMethod ValidateSet accepts snake_case (regression guard)' {
+        $cmd = Get-Command -Module Xdr.Common.Auth -Name Get-XdrAuthFromKeyVault -ErrorAction Stop
         $methodParam = $cmd.Parameters['AuthMethod']
         $validateSet = $methodParam.Attributes |
             Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
-        $validateSet.ValidValues | Should -Contain 'credentials_totp' -Because 'KV credential function has supported snake_case since iter 13.x'
+        $validateSet.ValidValues | Should -Contain 'credentials_totp' -Because 'KV credential function must accept the snake_case form ARM passes through'
         $validateSet.ValidValues | Should -Contain 'passkey'
     }
 

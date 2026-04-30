@@ -41,7 +41,7 @@ These endpoints exist in the portal but are **write (Set-*) paths**, not reads. 
 | `MDE_CriticalAssets_CL` | `POST /apiproxy/mtp/ndr/machines/criticalityLevel` | XDRInternals `Set-XdrEndpointDeviceCriticalityLevel.ps1:67-70` — body `{ CriticalityLevel: int, DeviceIds: string[] }`. Write semantics. |
 | `MDE_DeviceCriticality_CL` | `POST /apiproxy/mtp/ndr/machines/assetValues` | XDRInternals `Set-XdrEndpointDeviceAssetValue.ps1:53-56` — body `{ AssetValue: 'Low'\|'Normal'\|'High', SenseMachineIds: string[] }`. Write semantics. |
 
-**Read substitute** for both: XSPM hunting queries via `MDE_Drift_P3Exposure` parser against `MDE_AssetRules_CL` (already in manifest, live).
+**Read substitute** for both: XSPM hunting queries via `MDE_Drift_Exposure` parser against `MDE_AssetRules_CL` (already in manifest, live).
 
 ---
 

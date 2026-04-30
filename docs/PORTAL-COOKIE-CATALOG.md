@@ -121,7 +121,7 @@ What stays the same (everything else): the entire L1 auth flow (TOTP/Passkey + M
 | `tests/unit/AuthLayerBoundaries.Tests.ps1` | Xdr.Common.Auth contains ZERO Defender-specific strings (sccauth, signin-oidc, security.microsoft.com, sccManagement, mtp/, X-XSRF-TOKEN-*) | `Xdr.Common.Auth` source files |
 | `tests/unit/Xdr.Common.Auth.Tests.ps1` | L1 Public + Private functions work in isolation | `Xdr.Common.Auth` |
 | `tests/unit/Xdr.Defender.Auth.Tests.ps1` | L2 Defender Public functions work end-to-end | `Xdr.Defender.Auth` (mocks L1) |
-| `tests/unit/Xdr.Portal.Auth.Tests.ps1` | Backward-compat shim wrappers delegate correctly | `Xdr.Portal.Auth` |
+| `tests/unit/Xdr.Defender.Auth.Tests.ps1` | Backward-compat shim wrappers delegate correctly | `Xdr.Defender.Auth` |
 
 When adding a new portal in v0.2.0, add `tests/unit/Xdr.<Portal>.Auth.Tests.ps1` mirroring the Defender test structure.
 
@@ -131,7 +131,7 @@ When adding a new portal in v0.2.0, add `tests/unit/Xdr.<Portal>.Auth.Tests.ps1`
 
 - L1 module: [`src/Modules/Xdr.Common.Auth/`](../src/Modules/Xdr.Common.Auth/)
 - L2 Defender: [`src/Modules/Xdr.Defender.Auth/`](../src/Modules/Xdr.Defender.Auth/)
-- Backward-compat shim: [`src/Modules/Xdr.Portal.Auth/`](../src/Modules/Xdr.Portal.Auth/)
+- Backward-compat shim: [`src/Modules/Xdr.Defender.Auth/`](../src/Modules/Xdr.Defender.Auth/)
 - Architecture overview: [docs/ARCHITECTURE.md](ARCHITECTURE.md)
 - Auth deep-dive: [docs/AUTH.md](AUTH.md)
 - Conditional Access × auth-method matrix: [docs/CONDITIONAL-ACCESS-COMPATIBILITY.md](CONDITIONAL-ACCESS-COMPATIBILITY.md)

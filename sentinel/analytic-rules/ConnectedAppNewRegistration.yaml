@@ -17,7 +17,7 @@ tactics:
 relevantTechniques:
   - T1098
 query: |
-  MDE_Drift_P1Pipeline(1h, 10m) | where StreamName == "MDE_ConnectedApps_CL" | where ChangeType == "Added"
+  MDE_Drift_Configuration(6h, 10m) | where StreamName == "MDE_ConnectedApps_CL" | where ChangeType == "Added"
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

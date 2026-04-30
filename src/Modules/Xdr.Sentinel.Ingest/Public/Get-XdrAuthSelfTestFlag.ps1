@@ -1,7 +1,7 @@
 function Get-XdrAuthSelfTestFlag {
     <#
     .SYNOPSIS
-        Checks whether the validate-auth-selftest timer has successfully signed into
+        Checks whether the auth-selftest flag setter (first successful poll-* sign-in) has successfully signed into
         the Defender XDR portal at least once.
 
     .DESCRIPTION
@@ -9,7 +9,7 @@ function Get-XdrAuthSelfTestFlag {
         real polling until the self-test timer has produced a Success=true checkpoint
         row. This prevents runaway 401 storms when auth material is misconfigured.
 
-        The checkpoint table row is written by validate-auth-selftest (run.ps1) with:
+        The checkpoint table row is written by (first successful poll-* sign-in) with:
           PartitionKey = 'auth-selftest'
           RowKey       = 'latest'
           Success      = $true/$false

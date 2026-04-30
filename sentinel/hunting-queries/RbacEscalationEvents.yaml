@@ -17,4 +17,4 @@ tactics:
 relevantTechniques:
   - T1078
 query: |
-  MDE_Drift_P2Governance(30d, 1d) | where StreamName == "MDE_UnifiedRbacRoles_CL" and ChangeType == "Added" | join kind=inner (MDE_UnifiedRbacRoles_CL | summarize arg_max(TimeGenerated, *) by EntityId) on EntityId
+  MDE_Drift_Configuration(30d, 1d) | where StreamName == "MDE_UnifiedRbacRoles_CL" and ChangeType == "Added" | join kind=inner (MDE_UnifiedRbacRoles_CL | summarize arg_max(TimeGenerated, *) by EntityId) on EntityId

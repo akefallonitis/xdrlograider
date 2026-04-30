@@ -50,7 +50,6 @@ BeforeDiscovery {
 
 BeforeAll {
     $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    Import-Module "$repoRoot/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"         -Force
     Import-Module "$repoRoot/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1" -Force
     Import-Module "$repoRoot/src/Modules/Xdr.Defender.Client/Xdr.Defender.Client.psd1" -Force
 
@@ -73,7 +72,6 @@ BeforeAll {
 AfterAll {
     Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
-    Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
 }
 
 Describe 'Pre-deploy: Auth chain' -Tag 'predeploy', 'live' {

@@ -1,0 +1,12 @@
+{
+  "description": "Every 6 hours @ :35 — Configuration / detection-rule tier. Polls 14 streams: alert-pipeline rules (MDE_AlertServiceConfig_CL, MDE_AlertTuning_CL, MDE_SuppressionRules_CL, MDE_CustomDetections_CL), tenant policy (MDE_TenantAllowBlock_CL, MDE_PreviewFeatures_CL), integration state (MDE_ConnectedApps_CL, MDE_IntuneConnection_CL, MDE_PurviewSharing_CL), RBAC (MDE_RbacDeviceGroups_CL, MDE_UnifiedRbacRoles_CL), threat intel (MDE_ThreatAnalytics_CL), operator preferences (MDE_UserPreferences_CL), and CASB integration (MDE_CloudAppsConfig_CL). 6h matches Defender admin's typical weekday-work-cycle change cadence — 4 polls/day is enough for governance reporting without burning 429 budget on stable surfaces.",
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 35 */6 * * *",
+      "runOnStartup": false
+    }
+  ]
+}

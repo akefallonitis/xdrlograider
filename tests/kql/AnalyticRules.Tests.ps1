@@ -30,7 +30,7 @@ BeforeAll {
 
     # Manifest: all streams (active + deferred); anything referenced must be in here.
     $manifest = Import-PowerShellDataFile -Path (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1')
-    $script:KnownStreams = @($manifest.Endpoints | ForEach-Object { $_.Stream }) + @('MDE_Heartbeat_CL', 'MDE_AuthTestResult_CL')
+    $script:KnownStreams = @($manifest.Endpoints | ForEach-Object { $_.Stream }) + @('MDE_Heartbeat_CL')
 
     # Parser names (from sentinel/parsers/MDE_Drift_*.kql).
     $script:KnownParsers = @((Get-ChildItem (Join-Path $repoRoot 'sentinel' 'parsers') -Filter 'MDE_Drift_*.kql') | ForEach-Object { $_.BaseName })
@@ -86,7 +86,7 @@ Describe 'Analytic rule <Name> — static audit' -ForEach $script:RuleCases {
             'MDE_NetworkProtectionConfig_CL', 'MDE_ApprovalAssignments_CL'
         )
         $manifest = Import-PowerShellDataFile -Path (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1')
-        $script:KnownStreams = @($manifest.Endpoints | ForEach-Object { $_.Stream }) + @('MDE_Heartbeat_CL', 'MDE_AuthTestResult_CL')
+        $script:KnownStreams = @($manifest.Endpoints | ForEach-Object { $_.Stream }) + @('MDE_Heartbeat_CL')
         $script:KnownParsers = @((Get-ChildItem (Join-Path $repoRoot 'sentinel' 'parsers') -Filter 'MDE_Drift_*.kql') | ForEach-Object { $_.BaseName })
 
         # Copy of the minimal YAML reader (needed inside -ForEach scope).

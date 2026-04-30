@@ -1,13 +1,13 @@
 function Invoke-MDETierPoll {
     <#
     .SYNOPSIS
-        Polls every endpoint in a given tier (P0-P3, P5-P7), batches rows to Log
-        Analytics via DCE, persists per-stream checkpoints, and returns aggregate
-        counters.
+        Polls every endpoint in a given cadence tier (fast | exposure | config |
+        inventory | maintenance), batches rows to Log Analytics via DCE, persists
+        per-stream checkpoints, and returns aggregate counters.
 
     .DESCRIPTION
         Called once per timer-function invocation. Encapsulates the repetitive
-        loop pattern that previously lived in every `poll-p<tier>/run.ps1` file:
+        loop pattern that previously lived in every `poll-<tier>/run.ps1` file:
 
           1. Read endpoints.manifest.psd1 filtered by -Tier.
           2. For each stream in the tier:
@@ -26,10 +26,11 @@ function Invoke-MDETierPoll {
         surface the result).
 
     .PARAMETER Session
-        PortalSession from Connect-MDEPortal.
+        PortalSession from Connect-DefenderPortal.
 
     .PARAMETER Tier
-        Tier to poll. Must match a 'Tier' value in endpoints.manifest.psd1.
+        One of fast | exposure | config | inventory | maintenance. Must match
+        a 'Tier' value in endpoints.manifest.psd1.
 
     .PARAMETER Config
         Hashtable/pscustomobject with the connector's runtime config. Required keys:
@@ -51,8 +52,8 @@ function Invoke-MDETierPoll {
 
     .EXAMPLE
         # Typical timer body
-        $result = Invoke-MDETierPoll -Session $session -Tier 'P0' -Config $config
-        Write-Heartbeat -FunctionName $fnName -Tier 'P0' `
+        $result = Invoke-MDETierPoll -Session $session -Tier 'fast' -Config $config
+        Write-Heartbeat -FunctionName $fnName -Tier 'fast' `
             -StreamsAttempted $result.StreamsAttempted `
             -StreamsSucceeded $result.StreamsSucceeded `
             -RowsIngested     $result.RowsIngested
@@ -62,7 +63,7 @@ function Invoke-MDETierPoll {
     param(
         [Parameter(Mandatory)] [pscustomobject] $Session,
         [Parameter(Mandatory)]
-        [ValidateSet('P0', 'P1', 'P2', 'P3', 'P5', 'P6', 'P7')]
+        [ValidateSet('fast', 'exposure', 'config', 'inventory', 'maintenance')]
         [string] $Tier,
         [Parameter(Mandatory)] $Config,
         [switch] $IncludeDeferred
@@ -96,7 +97,7 @@ function Invoke-MDETierPoll {
     # Reset the portal-module cumulative 429 counter so the Rate429Count we
     # surface to the Heartbeat reflects THIS tier's pressure only. Skip if the
     # reset function isn't available (unit-test contexts that don't import
-    # Xdr.Portal.Auth) — functional test suites always import both modules.
+    # Xdr.Defender.Auth) — functional test suites always import both modules.
     if (Get-Command -Name Reset-XdrPortalRate429Count -ErrorAction SilentlyContinue) {
         Reset-XdrPortalRate429Count
     }
@@ -193,7 +194,7 @@ function Invoke-MDETierPoll {
         }
     }
 
-    # Read the cumulative 429 count from Xdr.Portal.Auth for this tier.
+    # Read the cumulative 429 count from Xdr.Defender.Auth for this tier.
     $rate429 = 0
     if (Get-Command -Name Get-XdrPortalRate429Count -ErrorAction SilentlyContinue) {
         $rate429 = [int](Get-XdrPortalRate429Count)

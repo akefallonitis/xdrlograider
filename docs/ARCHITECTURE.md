@@ -27,45 +27,52 @@ XdrLogRaider is a three-layer Sentinel Solution:
 │  │ Function App (PowerShell 7.4 + System-Assigned MI)         │       │
 │  │                                                            │       │
 │  │  profile.ps1 (cold-start)                                  │       │
-│  │    └─ Import Xdr.Portal.Auth, Client, Ingest              │       │
+│  │    └─ Import 5 modules in dependency order                 │       │
 │  │    └─ Connect-AzAccount -Identity                          │       │
 │  │                                                            │       │
-│  │  Modules/Xdr.Portal.Auth                                  │       │
+│  │  Modules/Xdr.Common.Auth          (L1 portal-generic)      │       │
 │  │    ├─ Get-TotpCode (RFC 6238)                              │       │
 │  │    ├─ Invoke-PasskeyChallenge (ECDSA-P256)                 │       │
-│  │    ├─ Get-EstsCookie → sccauth exchange                    │       │
-│  │    └─ Connect-MDEPortal / Invoke-MDEPortalRequest          │       │
+│  │    ├─ Get-EntraEstsAuth → ESTS sign-in                     │       │
+│  │    └─ Get-XdrAuthFromKeyVault                              │       │
 │  │                                                            │       │
-│  │  Modules/XdrLogRaider.Client                           │       │
-│  │    └─ Endpoints/Get-<55-endpoint-wrappers>                 │       │
-│  │                                                            │       │
-│  │  Modules/XdrLogRaider.Ingest                           │       │
-│  │    ├─ Send-ToLogAnalytics (DCE batch writer)               │       │
+│  │  Modules/Xdr.Sentinel.Ingest       (L1 portal-generic)     │       │
+│  │    ├─ Send-ToLogAnalytics (DCE batch writer + gzip + 413)  │       │
 │  │    ├─ Write-Heartbeat                                      │       │
-│  │    └─ Get-CheckpointTimestamp                              │       │
+│  │    ├─ Send-XdrAppInsights* (AuthChain.* events)            │       │
+│  │    └─ Get-/Set-CheckpointTimestamp                         │       │
 │  │                                                            │       │
-│  │  Timer functions (9 total, all timer-triggered):           │       │
+│  │  Modules/Xdr.Defender.Auth         (L2 cookie exchange)    │       │
+│  │    ├─ Get-DefenderSccauth → sccauth exchange               │       │
+│  │    └─ Connect-DefenderPortal / Invoke-DefenderPortalRequest│       │
+│  │                                                            │       │
+│  │  Modules/Xdr.Defender.Client       (L3 manifest dispatcher)│       │
+│  │    ├─ endpoints.manifest.psd1 (46 stream entries)          │       │
+│  │    └─ Invoke-MDEEndpoint / Invoke-MDETierPoll              │       │
+│  │                                                            │       │
+│  │  Modules/Xdr.Connector.Orchestrator (L4 portal routing)    │       │
+│  │    └─ Connect-XdrPortal / Invoke-XdrTierPoll               │       │
+│  │       (forward-scalable to multi-portal in v0.2.0+)        │       │
+│  │                                                            │       │
+│  │  Timer functions (6 total, all timer-triggered):           │       │
 │  │    heartbeat-5m                                            │       │
-│  │    validate-auth-selftest (T+5m/T+1h/T+6h then off)        │       │
-│  │    poll-p0-compliance-1h (19 streams)                      │       │
-│  │    poll-p1-pipeline-30m (7 streams)                        │       │
-│  │    poll-p2-governance-1d (7 streams)                       │       │
-│  │    poll-p3-exposure-1h (8 streams)                         │       │
-│  │    poll-p5-identity-1d (5 streams)                         │       │
-│  │    poll-p6-audit-10m (2 streams)                           │       │
-│  │    poll-p7-metadata-1d (4 streams)                         │       │
+│  │    poll-fast-10m         (ActionCenter + MachineActions)   │       │
+│  │    poll-exposure-1h      (XSPM graph + Exposure snapshots) │       │
+│  │    poll-config-6h        (rules / RBAC / integrations)     │       │
+│  │    poll-inventory-1d     (settings / identity / metadata)  │       │
+│  │    poll-maintenance-1w   (DataExportSettings — rare-change)│       │
 │  └────────────────────────────────────────────────────────────┘       │
 │                                                                        │
 │  ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────────┐ │
 │  │ Key Vault        │  │ Storage Account  │  │ App Insights        │ │
 │  │ - mde-portal-*   │  │ - Checkpoints    │  │ - FA telemetry      │ │
-│  │ (passkey / creds)│  │ - Heartbeats     │  │ - App Insights logs │ │
+│  │ (passkey / creds)│  │ - Heartbeats     │  │ - AuthChain.* events│ │
 │  └──────────────────┘  └──────────────────┘  └─────────────────────┘ │
 │                                                                        │
 │  ┌────────────────────────────────────────────────────────────┐       │
 │  │ DCE + DCR  (location = WORKSPACE region)                   │       │
 │  │   47 streams declared → routed to LA custom tables         │       │
-│  │   (45 telemetry + MDE_Heartbeat + MDE_AuthTestResult)      │       │
+│  │   (46 data + MDE_Heartbeat operational)                    │       │
 │  └────────────────────────────────────────────────────────────┘       │
 └────────────────────────────────────────────────────────────────────────┘
                                    │
@@ -80,15 +87,16 @@ XdrLogRaider is a three-layer Sentinel Solution:
 │  │ Existing Log Analytics workspace (Sentinel-enabled)        │       │
 │  │                                                            │       │
 │  │   47 custom tables written by cross-RG nested deployment:  │       │
-│  │     MDE_*_CL  (45 telemetry tables)                        │       │
+│  │     MDE_*_CL  (46 data tables)                             │       │
 │  │     MDE_Heartbeat_CL                                       │       │
-│  │     MDE_AuthTestResult_CL                                  │       │
 │  │                                                            │       │
 │  │   Sentinel content written by cross-RG nested deployment:  │       │
-│  │     6 Parsers (savedSearches / KQL functions)              │       │
-│  │     6 Workbooks                                            │       │
-│  │     15 Analytic rules (scheduled, ship disabled)           │       │
-│  │     10 Hunting queries                                     │       │
+│  │     4 Parsers (one per cadence tier with snapshot          │       │
+│  │       semantics — Exposure, Configuration, Inventory,      │       │
+│  │       Maintenance; the fast tier has events not snapshots) │       │
+│  │     7 Workbooks                                            │       │
+│  │     14 Analytic rules (scheduled, ship disabled)           │       │
+│  │     9 Hunting queries                                      │       │
 │  │     1 Data Connector UI card (XdrLogRaider)                │       │
 │  └────────────────────────────────────────────────────────────┘       │
 └────────────────────────────────────────────────────────────────────────┘
@@ -98,7 +106,7 @@ XdrLogRaider is a three-layer Sentinel Solution:
 
 1. Timer function fires
 2. Function reads auth secrets from Key Vault via Managed Identity
-3. Xdr.Portal.Auth runs cookie chain (if cache miss) → sccauth + XSRF
+3. Xdr.Common.Auth + Xdr.Defender.Auth run the cookie chain (if cache miss) → sccauth + XSRF
 4. For each stream in the tier: call the endpoint, parse response, append a row
 5. All rows for the tier are batched into one DCE POST
 6. DCR transforms the stream name → Log Analytics custom table
@@ -154,7 +162,7 @@ any entry that doesn't override. Entries can opt in to a different portal:
 
 ```powershell
 # Current entry (v0.1.0-beta — security portal implicitly)
-@{ Stream = 'MDE_AdvancedFeatures_CL'; Path = '/apiproxy/mtp/settings/...'; Tier = 'P0'; Availability = 'live' }
+@{ Stream = 'MDE_AdvancedFeatures_CL'; Path = '/apiproxy/mtp/settings/...'; Tier = 'inventory'; Availability = 'live' }
 
 # Future v0.2.0 entry — explicit non-default portal
 @{ Stream = 'AAD_CAPolicies_CL'; Path = '/apiproxy/...'; Tier = 'A0'; Portal = 'entra.microsoft.com'; Availability = 'live' }
@@ -162,10 +170,12 @@ any entry that doesn't override. Entries can opt in to a different portal:
 
 ### 2. Portal-agnostic auth module
 
-`Xdr.Portal.Auth` takes `-PortalHost` on every public function. The full auth
-chain (ests-cookie → TOTP/Passkey → sccauth) works identically against any
-Microsoft portal that uses the same SSO stack (which all of them do). Zero
-new code needed for v0.2.0 portals — just new manifest entries.
+`Xdr.Common.Auth` is fully portal-generic — `Get-EntraEstsAuth` takes
+`-ClientId` and `-PortalHost` as parameters; no Defender-specific symbols.
+The cookie-exchange step lives in `Xdr.Defender.Auth`. v0.2.0 multi-portal
+expansion is a 1-day file-add operation: copy `Xdr.Defender.Auth`, change
+the public-client ID + portal host + cookie names, register in `profile.ps1`.
+L1 unchanged.
 
 ### 3. Shared timer helper
 
@@ -173,9 +183,9 @@ new code needed for v0.2.0 portals — just new manifest entries.
 `-Portal` parameter defaulting to `security.microsoft.com`. v0.2.0 adds:
 
 ```
-src/functions/poll-admin-a0-1h/run.ps1  (2-line wrapper):
+src/functions/poll-admin-fast-10m/run.ps1  (2-line wrapper):
     param($Timer)
-    Invoke-TierPollWithHeartbeat -Tier 'A0' -FunctionName 'poll-admin-a0-1h' -Portal 'admin.microsoft.com'
+    Invoke-TierPollWithHeartbeat -Tier 'fast' -FunctionName 'poll-admin-fast-10m' -Portal 'admin.microsoft.com'
 ```
 
 No change to helper internals; `Invoke-MDETierPoll` already filters manifest
@@ -185,14 +195,17 @@ entries by `Portal` AND `Tier`.
 
 ```
 Timer wrappers
-    └→ XdrLogRaider.Client         (per-portal manifest + dispatcher)
-           ├→ Xdr.Portal.Auth        (portal-agnostic auth primitives)
-           └→ XdrLogRaider.Ingest    (portal-agnostic DCE + checkpoint + heartbeat)
+    └→ Xdr.Connector.Orchestrator     (L4 portal-routing dispatcher)
+        ├→ Xdr.Defender.Client         (L3 manifest dispatcher)
+        │      └→ Xdr.Defender.Auth    (L2 cookie exchange)
+        │             └→ Xdr.Common.Auth  (L1 portal-generic Entra)
+        └→ Xdr.Sentinel.Ingest         (L1 portal-generic ingest, standalone)
 ```
 
-Adding a sibling `XdrLogRaider.AdminPortal.Client` module for a second
-portal doesn't touch Auth or Ingest. `tests/unit/ForwardScalability.Tests.ps1`
-enforces this graph in CI.
+Adding a sibling `Xdr.AdminPortal.Auth` + `Xdr.AdminPortal.Client` pair for
+a second portal doesn't touch the existing modules. Tests in
+`tests/unit/ForwardScalability.Tests.ps1` and
+`tests/unit/ModuleSplit.LayerBoundaries.Tests.ps1` enforce this graph in CI.
 
 ## Schema lives in parsers, not DCR (Design A rationale)
 
@@ -238,7 +251,7 @@ query instead of greping raw stack traces:
 | Layer | Error type | Surfaces as | Operator KQL hook |
 |-------|-----------|-------------|-------------------|
 | Portal 429 | Rate-limited | `$script:Rate429Count` incremented; exhausted → `[MDERateLimited]` message prefix thrown | `MDE_Heartbeat_CL \| extend n = parse_json(Notes) \| summarize sum(toint(n.rate429Count))` |
-| Portal 401/440 | Session expired | Reactive reauth via cached credentials; transparent to caller | `MDE_AuthTestResult_CL \| where Success == false \| project Stage, FailureReason` |
+| Portal 401/440 | Session expired | Reactive reauth via cached credentials; transparent to caller | App Insights: `customEvents \| where name == 'AuthChain.AADSTSError' \| project timestamp, customDimensions` |
 | Portal 403 | Auth OK but not permitted | Surfaced to caller; no reauth spin | Heartbeat `fatalError` note if persistent |
 | Portal 4xx other | Request malformed | Stream-level error captured in tier-poll `Errors` hashtable; heartbeat `Notes.errors` | `MDE_Heartbeat_CL \| extend err = parse_json(tostring(parse_json(Notes).errors)) \| where isnotempty(err)` |
 | Portal 5xx | Portal-side failure | Exponential backoff retry (5 attempts); final throw surfaces to caller | Same as above |

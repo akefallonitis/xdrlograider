@@ -21,9 +21,9 @@ relevantTechniques:
   - T1562
 query: |
   let drift = union
-    (MDE_Drift_P0Compliance(7d, 1h)),
-    (MDE_Drift_P1Pipeline(7d, 30m)),
-    (MDE_Drift_P2Governance(7d, 1d));
+    (MDE_Drift_Inventory(7d, 1d)),
+    (MDE_Drift_Configuration(7d, 6h)),
+    (MDE_Drift_Exposure(7d, 1h));
   let audits = AuditLogs
     | where TimeGenerated > ago(7d)
     | where Category in (

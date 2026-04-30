@@ -124,15 +124,15 @@ foreach ($file in Get-ChildItem -Path $parsersDir -Filter '*.kql') {
     $name = $file.BaseName
     $content = Get-Content $file.FullName -Raw
 
-    # Default parameter signatures per parser
+    # Default parameter signatures per parser. Lookback/window pairs reflect
+    # the per-tier poll cadence so workbooks pick up sensible defaults when
+    # callers invoke the parser without arguments.
     $params = switch ($name) {
-        'MDE_Drift_P0Compliance' { 'lookback:timespan = 24h, window:timespan = 1h' }
-        'MDE_Drift_P1Pipeline'   { 'lookback:timespan = 24h, window:timespan = 30m' }
-        'MDE_Drift_P2Governance' { 'lookback:timespan = 7d, window:timespan = 1d' }
-        'MDE_Drift_P3Exposure'   { 'lookback:timespan = 7d, window:timespan = 1h' }
-        'MDE_Drift_P5Identity'   { 'lookback:timespan = 7d, window:timespan = 1d' }
-        'MDE_Drift_P7Metadata'   { 'lookback:timespan = 30d, window:timespan = 1d' }
-        default                  { '' }
+        'MDE_Drift_Exposure'      { 'lookback:timespan = 7d,  window:timespan = 1h' }
+        'MDE_Drift_Configuration' { 'lookback:timespan = 7d,  window:timespan = 6h' }
+        'MDE_Drift_Inventory'     { 'lookback:timespan = 30d, window:timespan = 1d' }
+        'MDE_Drift_Maintenance'   { 'lookback:timespan = 30d, window:timespan = 7d' }
+        default                   { '' }
     }
 
     $parsers += @{

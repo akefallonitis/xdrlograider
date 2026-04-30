@@ -263,20 +263,10 @@
             "constraints": {
               "required": true,
               "allowedValues": [
-                { "label": "Consumption (Y1)", "value": "Y1" },
-                { "label": "Premium EP1",      "value": "EP1" },
-                { "label": "Premium EP2",      "value": "EP2" }
+                { "label": "Consumption (Y1) — lab / dev / cost-constrained",                          "value": "consumption-y1" },
+                { "label": "Flex (FC1) — production-hardened, full Managed Identity",                  "value": "flex-fc1" },
+                { "label": "Premium (EP1) — regulated / compliance, always-warm + private endpoints",  "value": "premium-ep1" }
               ]
-            }
-          },
-          {
-            "name": "functionAppZipVersion",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Function App version",
-            "toolTip": "Pinned release tag (e.g. '0.1.0-beta'). Do NOT use 'latest' — GitHub /releases/latest excludes pre-releases.",
-            "defaultValue": "0.1.0-beta",
-            "constraints": {
-              "required": true
             }
           },
           {
@@ -320,7 +310,6 @@
       "totpSeed":              "[if(and(equals(steps('authSettings').authMethod, 'credentials_totp'), equals(steps('authSettings').uploadSecretsNow, 'wizard')), steps('authSettings').totpSeed, '')]",
       "passkeyJson":           "[if(and(equals(steps('authSettings').authMethod, 'passkey'), equals(steps('authSettings').uploadSecretsNow, 'wizard')), steps('authSettings').passkeyJson, '')]",
       "functionPlanSku":       "[steps('advanced').functionPlanSku]",
-      "functionAppZipVersion": "[steps('advanced').functionAppZipVersion]",
       "githubRepo":            "[steps('advanced').githubRepo]",
       "deploySentinelContent": "[steps('advanced').deploySentinelContent]"
     }

@@ -10,20 +10,20 @@
 
       profile.ps1 → Get-XdrLogRaiderConfig → \$env-direct config build
         → Get-XdrAuthSelfTestFlag (auth-gate green check)
-        → Get-MDEAuthFromKeyVault (cred fetch from KV)
-        → Connect-MDEPortal (sccauth cookie acquisition)
+        → Get-XdrAuthFromKeyVault (cred fetch from KV)
+        → Connect-DefenderPortal (sccauth cookie acquisition)
         → Invoke-MDETierPoll
             ├─ for each manifest entry in tier:
             │    ├─ Get-CheckpointTimestamp
             │    ├─ Invoke-MDEEndpoint
-            │    │    ├─ Invoke-MDEPortalRequest
+            │    │    ├─ Invoke-DefenderPortalRequest
             │    │    └─ Expand-MDEResponse → ConvertTo-MDEIngestRow
             │    ├─ Send-ToLogAnalytics → DCE
             │    └─ Set-CheckpointTimestamp
             └─ return aggregate counters
         → Write-Heartbeat (success row)
 
-    The ONLY thing mocked is the HTTP transport (Invoke-MDEPortalRequest +
+    The ONLY thing mocked is the HTTP transport (Invoke-DefenderPortalRequest +
     Invoke-WebRequest for DCE). Every other function executes its real
     production code, so a regression anywhere in the integration chain
     surfaces immediately as a test failure.
@@ -34,7 +34,6 @@
 
 BeforeAll {
     $script:RepoRoot         = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:AuthModulePath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'   'Xdr.Portal.Auth.psd1'
     $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
     $script:ClientModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
 
@@ -50,8 +49,11 @@ BeforeAll {
     }
     function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
 
-    Import-Module $script:AuthModulePath   -Force -ErrorAction Stop
     Import-Module $script:IngestModulePath -Force -ErrorAction Stop
+    $script:CommonAuthPath_  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
+    $script:DefenderAuthPath_ = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
+    Import-Module $script:CommonAuthPath_ -Force -ErrorAction Stop
+    Import-Module $script:DefenderAuthPath_ -Force -ErrorAction Stop
     Import-Module $script:ClientModulePath -Force -ErrorAction Stop
 
     Set-StrictMode -Version Latest
@@ -75,12 +77,12 @@ AfterAll {
     }
 }
 
-Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
+Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (inventory tier)' {
 
     It 'completes successfully when every dependency works (happy path)' {
         $outcome = InModuleScope Xdr.Defender.Client {
-            # Mock the HTTP transport at the module that owns it (Xdr.Portal.Auth).
-            Mock Invoke-MDEPortalRequest -ModuleName Xdr.Defender.Client {
+            # Mock the HTTP transport at the module that owns it (Xdr.Defender.Auth).
+            Mock Invoke-DefenderPortalRequest -ModuleName Xdr.Defender.Client {
                 # Return a simple object response that Expand-MDEResponse handles.
                 [pscustomobject]@{
                     id   = 'test-entity-1'
@@ -88,8 +90,8 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
                     config = @{ enabled = $true; threshold = 100 }
                 }
             }
-            # Mock Connect-MDEPortal so we don't need a real auth flow.
-            Mock Connect-MDEPortal -ModuleName Xdr.Defender.Client {
+            # Mock Connect-DefenderPortal so we don't need a real auth flow.
+            Mock Connect-DefenderPortal -ModuleName Xdr.Defender.Client {
                 [pscustomobject]@{
                     PortalHost = 'security.microsoft.com'
                     TenantId   = '11111111-1111-1111-1111-111111111111'
@@ -98,7 +100,7 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
                 }
             }
             # Mock KV credential fetch so we don't need real KV.
-            Mock Get-MDEAuthFromKeyVault -ModuleName Xdr.Defender.Client {
+            Mock Get-XdrAuthFromKeyVault -ModuleName Xdr.Defender.Client {
                 @{
                     Method   = 'CredentialsTotp'
                     Upn      = 'svc-test@example.com'
@@ -121,7 +123,7 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
             $threw = $false
             $errMsg = $null
             try {
-                Invoke-TierPollWithHeartbeat -Tier 'P0' -FunctionName 'poll-p0-test-1h' -Portal 'security.microsoft.com'
+                Invoke-TierPollWithHeartbeat -Tier 'inventory' -FunctionName 'poll-inventory-test-1d' -Portal 'security.microsoft.com'
             } catch {
                 $threw = $true
                 $errMsg = $_.Exception.Message
@@ -131,10 +133,10 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
         $outcome.Threw | Should -BeFalse -Because "happy-path timer fire must complete without exception. Got: $($outcome.ErrMsg)"
     }
 
-    It 'survives a per-stream Invoke-MDEPortalRequest failure (per-stream isolation works end-to-end)' {
+    It 'survives a per-stream Invoke-DefenderPortalRequest failure (per-stream isolation works end-to-end)' {
         $outcome = InModuleScope Xdr.Defender.Client {
             $script:RequestCallCount = 0
-            Mock Invoke-MDEPortalRequest -ModuleName Xdr.Defender.Client {
+            Mock Invoke-DefenderPortalRequest -ModuleName Xdr.Defender.Client {
                 $script:RequestCallCount++
                 # Fail every other call
                 if ($script:RequestCallCount % 2 -eq 0) {
@@ -142,10 +144,10 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
                 }
                 [pscustomobject]@{ id = "ok-$script:RequestCallCount"; name = 'OkEntity' }
             }
-            Mock Connect-MDEPortal -ModuleName Xdr.Defender.Client {
+            Mock Connect-DefenderPortal -ModuleName Xdr.Defender.Client {
                 [pscustomobject]@{ PortalHost = 'security.microsoft.com'; TenantId = 't'; Cookies = @{ sccauth = 'c' }; AcquiredUtc = [datetime]::UtcNow }
             }
-            Mock Get-MDEAuthFromKeyVault -ModuleName Xdr.Defender.Client {
+            Mock Get-XdrAuthFromKeyVault -ModuleName Xdr.Defender.Client {
                 @{ Method = 'CredentialsTotp'; Upn = 'u'; Password = (ConvertTo-SecureString 'p' -AsPlainText -Force); TotpSeed = 'JBSWY3DPEHPK3PXP' }
             }
             Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest {
@@ -159,7 +161,7 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
 
             $threw = $false; $errMsg = $null
             try {
-                Invoke-TierPollWithHeartbeat -Tier 'P0' -FunctionName 'poll-p0-test-1h'
+                Invoke-TierPollWithHeartbeat -Tier 'inventory' -FunctionName 'poll-inventory-test-1d'
             } catch {
                 $threw = $true; $errMsg = $_.Exception.Message
             }
@@ -172,8 +174,8 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
         $outcome = InModuleScope Xdr.Defender.Client {
             # Override auth-gate flag to RED
             Mock Get-XdrAuthSelfTestFlag -ModuleName Xdr.Defender.Client { $false }
-            Mock Connect-MDEPortal -ModuleName Xdr.Defender.Client {
-                throw "Should NOT reach Connect-MDEPortal when auth-gate is red"
+            Mock Connect-DefenderPortal -ModuleName Xdr.Defender.Client {
+                throw "Should NOT reach Connect-DefenderPortal when auth-gate is red"
             }
             Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest {
                 [pscustomobject]@{ StatusCode = 204; Headers = @{} }
@@ -183,7 +185,7 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
 
             $threw = $false; $errMsg = $null
             try {
-                Invoke-TierPollWithHeartbeat -Tier 'P0' -FunctionName 'poll-p0-test-1h'
+                Invoke-TierPollWithHeartbeat -Tier 'inventory' -FunctionName 'poll-inventory-test-1d'
             } catch {
                 $threw = $true; $errMsg = $_.Exception.Message
             }
@@ -192,12 +194,12 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
         $outcome.Threw | Should -BeFalse -Because "auth-gate-red must skip cleanly with skipped-heartbeat row, NOT throw. Got: $($outcome.ErrMsg)"
     }
 
-    It 'fatal error during Connect-MDEPortal emits fatal-error heartbeat then re-throws' {
+    It 'fatal error during Connect-DefenderPortal emits fatal-error heartbeat then re-throws' {
         $outcome = InModuleScope Xdr.Defender.Client {
-            Mock Connect-MDEPortal -ModuleName Xdr.Defender.Client {
+            Mock Connect-DefenderPortal -ModuleName Xdr.Defender.Client {
                 throw "FATAL: Key Vault unreachable"
             }
-            Mock Get-MDEAuthFromKeyVault -ModuleName Xdr.Defender.Client {
+            Mock Get-XdrAuthFromKeyVault -ModuleName Xdr.Defender.Client {
                 @{ Method = 'CredentialsTotp'; Upn = 'u'; Password = (ConvertTo-SecureString 'p' -AsPlainText -Force); TotpSeed = 'JBSWY3DPEHPK3PXP' }
             }
             $heartbeatRows = @()
@@ -216,7 +218,7 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (P0 tier)' {
 
             $threw = $false; $errMsg = $null
             try {
-                Invoke-TierPollWithHeartbeat -Tier 'P0' -FunctionName 'poll-p0-test-1h'
+                Invoke-TierPollWithHeartbeat -Tier 'inventory' -FunctionName 'poll-inventory-test-1d'
             } catch {
                 $threw = $true; $errMsg = $_.Exception.Message
             }

@@ -141,8 +141,8 @@ Describe 'Write-Heartbeat — schema' {
             Write-Heartbeat `
                 -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
                 -DcrImmutableId 'dcr-x' `
-                -FunctionName 'poll-p0-compliance-1h' `
-                -Tier 'P0' `
+                -FunctionName 'poll-fast-10m' `
+                -Tier 'fast' `
                 -StreamsAttempted 19 `
                 -StreamsSucceeded 13 `
                 -RowsIngested 412 `
@@ -150,8 +150,8 @@ Describe 'Write-Heartbeat — schema' {
 
             $script:sent                   | Should -Not -BeNullOrEmpty
             $script:sent.TimeGenerated     | Should -Not -BeNullOrEmpty
-            $script:sent.FunctionName      | Should -Be 'poll-p0-compliance-1h'
-            $script:sent.Tier              | Should -Be 'P0'
+            $script:sent.FunctionName      | Should -Be 'poll-fast-10m'
+            $script:sent.Tier              | Should -Be 'fast'
             $script:sent.StreamsAttempted  | Should -Be 19
             $script:sent.StreamsSucceeded  | Should -Be 13
             $script:sent.RowsIngested      | Should -Be 412
@@ -183,7 +183,7 @@ Describe 'Write-Heartbeat — schema' {
                 -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
                 -DcrImmutableId 'dcr-x' `
                 -FunctionName 'poll-test' `
-                -Tier 'P0' `
+                -Tier 'fast' `
                 -StreamsAttempted 1 `
                 -StreamsSucceeded 0 `
                 -RowsIngested 0 `
@@ -195,44 +195,141 @@ Describe 'Write-Heartbeat — schema' {
     }
 }
 
-Describe 'Write-AuthTestResult — schema' {
+Describe 'Send-ToLogAnalytics — gzip compression (v0.1.0-beta)' {
 
-    It 'invokes Send-ToLogAnalytics with the correct stream name + Success field' {
+    It 'compresses body with Content-Encoding: gzip by default and returns GzipBytes' {
         InModuleScope Xdr.Sentinel.Ingest {
-            $script:sentStream = $null
-            $script:sentSuccess = $null
-            Mock Send-ToLogAnalytics {
-                param($DceEndpoint, $DcrImmutableId, $StreamName, $Rows)
-                $script:sentStream = $StreamName
-                $script:sentSuccess = $Rows[0].Success
-                @{ RowsSent = 1 }
+            Mock Get-MonitorIngestionToken { 'tok' }
+            Mock Start-Sleep {}
+            $script:captured = $null
+            Mock Invoke-WebRequest {
+                $script:captured = [pscustomobject]@{
+                    Body = $Body
+                    Headers = $Headers
+                    IsBytes = ($Body -is [byte[]])
+                    HasGzipHeader = $Headers.ContainsKey('Content-Encoding') -and $Headers['Content-Encoding'] -eq 'gzip'
+                }
+                @{ StatusCode = 204 }
             }
 
-            $authRes = [pscustomobject]@{
-                Success       = $true
-                Stage         = 'complete'
-                Method        = 'CredentialsTotp'
-                PortalHost    = 'security.microsoft.com'
-                Upn           = 'svc@test.com'
-                FailureReason = $null
-                StageTimings  = @{ estsMs = 100; sccauthMs = 50 }
-                SampleCallHttpCode = 200
-                SampleCallLatencyMs = 120
-                SccauthAcquiredUtc = [datetime]::UtcNow
-            }
-
-            Write-AuthTestResult `
+            $rows = 1..50 | ForEach-Object { [pscustomobject]@{ EntityId = "e$_"; Name = "name$_"; Value = "v$_ " * 20 } }
+            $result = Send-ToLogAnalytics `
                 -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
                 -DcrImmutableId 'dcr-x' `
-                -TestResult $authRes | Out-Null
+                -StreamName 'Custom-MDE_Test_CL' `
+                -Rows $rows
 
-            $script:sentStream  | Should -Be 'Custom-MDE_AuthTestResult_CL'
-            $script:sentSuccess | Should -BeTrue
+            $script:captured.IsBytes | Should -BeTrue -Because 'gzip-compressed body is byte[]'
+            $script:captured.HasGzipHeader | Should -BeTrue -Because 'Content-Encoding: gzip must be set'
+            $result.GzipBytes | Should -BeGreaterThan 0 -Because 'GzipBytes must be surfaced to caller for heartbeat'
+            $result.GzipBytes | Should -BeLessThan ($rows.Count * 200) -Because 'gzip should compress the synthetic repetitive payload substantially'
+        }
+    }
+
+    It 'sends raw JSON body (not byte[]) when -DisableGzip is passed' {
+        InModuleScope Xdr.Sentinel.Ingest {
+            Mock Get-MonitorIngestionToken { 'tok' }
+            Mock Start-Sleep {}
+            $script:captured = $null
+            Mock Invoke-WebRequest {
+                $script:captured = [pscustomobject]@{
+                    IsBytes = ($Body -is [byte[]])
+                    IsString = ($Body -is [string])
+                    HasGzipHeader = $Headers.ContainsKey('Content-Encoding')
+                }
+                @{ StatusCode = 204 }
+            }
+
+            $rows = @([pscustomobject]@{ EntityId = 'e1'; Value = 'x' })
+            Send-ToLogAnalytics `
+                -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
+                -DcrImmutableId 'dcr-x' `
+                -StreamName 'Custom-MDE_Test_CL' `
+                -Rows $rows -DisableGzip | Out-Null
+
+            $script:captured.IsBytes | Should -BeFalse
+            $script:captured.IsString | Should -BeTrue
+            $script:captured.HasGzipHeader | Should -BeFalse
         }
     }
 }
 
-Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (iter-13.15: via Invoke-XdrStorageTableEntity)' {
+Describe 'Send-ToLogAnalytics — 413 split-and-retry (v0.1.0-beta)' {
+
+    It 'halves the batch and recurses when DCE returns 413 Payload Too Large' {
+        InModuleScope Xdr.Sentinel.Ingest {
+            Mock Get-MonitorIngestionToken { 'tok' }
+            Mock Start-Sleep {}
+            $script:postCount = 0
+            $script:batchSizes = @()
+            # First call returns 413, subsequent calls return 204 (simulating
+            # the halved retries succeed).
+            Mock Invoke-WebRequest {
+                $script:postCount++
+                # Estimate batch size from body length. Always collect a sample.
+                $script:batchSizes += if ($Body -is [byte[]]) { $Body.Length } else { $Body.Length }
+                if ($script:postCount -eq 1) {
+                    # Throw 413 exactly like Invoke-WebRequest would on a real 413
+                    $resp = [System.Net.HttpWebResponse]::new()
+                    $mockResp = [pscustomobject]@{ StatusCode = 413 }
+                    $exc = [System.Net.WebException]::new('payload too large')
+                    $exc | Add-Member -NotePropertyName Response -NotePropertyValue $mockResp -Force
+                    throw $exc
+                }
+                @{ StatusCode = 204 }
+            }
+
+            $rows = 1..10 | ForEach-Object { [pscustomobject]@{ EntityId = "e$_"; Value = 'x' } }
+            $result = Send-ToLogAnalytics `
+                -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
+                -DcrImmutableId 'dcr-x' `
+                -StreamName 'Custom-MDE_Test_CL' `
+                -Rows $rows -MaxRetries 0 -WarningAction SilentlyContinue
+
+            # Must have called Invoke-WebRequest more than once (split path hit)
+            $script:postCount | Should -BeGreaterThan 1 -Because '413 must trigger split-and-retry'
+            # All 10 rows should eventually ingest (via the split-recurse)
+            $result.RowsSent | Should -Be 10
+        }
+    }
+}
+
+Describe 'Get-XdrAuthSelfTestFlag — 4-path coverage (delegates to Invoke-XdrStorageTableEntity)' {
+    # Get-XdrAuthSelfTestFlag delegates to Invoke-XdrStorageTableEntity (the
+    # unified Storage Table HttpClient helper). Mocks target the helper directly
+    # so we exercise the function's mapping logic (helper return → bool flag)
+    # without depending on REST/HTTP semantics.
+
+    It 'returns $true when checkpoint row exists with Success=true' {
+        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith {
+            [pscustomobject]@{ Success = $true; LastRunUtc = [datetime]::UtcNow.ToString('o') }
+        }
+        $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
+        $result | Should -BeTrue
+    }
+
+    It 'returns $false when checkpoint row exists with Success=false' {
+        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith {
+            [pscustomobject]@{ Success = $false; LastRunUtc = [datetime]::UtcNow.ToString('o') }
+        }
+        $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
+        $result | Should -BeFalse
+    }
+
+    It 'returns $false when no checkpoint row exists yet (helper returns $null on 404)' {
+        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith { $null }
+        $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
+        $result | Should -BeFalse
+    }
+
+    It 'returns $false (fails closed) when the helper throws' {
+        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith { throw 'token acquisition failed' }
+        $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
+        $result | Should -BeFalse
+    }
+}
+
+Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (via Invoke-XdrStorageTableEntity)' {
     # Iter 13.15: tests refactored to mock the unified helper instead of the
     # legacy AzTable / Az.Storage cmdlet chain. Public function contracts
     # (MinValue on missing/error, parses LastPolledUtc, no throw on first call)

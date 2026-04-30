@@ -17,7 +17,7 @@ tactics:
 relevantTechniques:
   - T1562.006
 query: |
-  MDE_Drift_P0Compliance(2h, 15m) | where StreamName == "MDE_SuppressionRules_CL" | where ChangeType == "Modified" | where FieldName in ("scope","conditions","machineGroup")
+  MDE_Drift_Configuration(2h, 15m) | where StreamName == "MDE_SuppressionRules_CL" | where ChangeType == "Modified" | where FieldName in ("scope","conditions","machineGroup")
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

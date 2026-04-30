@@ -61,8 +61,8 @@ Describe 'Sentinel parsers — no unconditional union of deprecated streams (ite
         )
     }
 
-    It 'baseline parser count is at least 6 (drift detector)' {
+    It 'baseline parser count is exactly 4 — one per cadence tier with snapshot semantics (Exposure / Configuration / Inventory / Maintenance). The fast tier carries events, not snapshots, so has no parser.' {
         $parsers = @(Get-ChildItem -Path $script:ParsersDir -Filter '*.kql' -File)
-        $parsers.Count | Should -BeGreaterOrEqual 6 -Because 'baseline parser count must not regress'
+        $parsers.Count | Should -Be 4 -Because 'v0.1.0-beta first publish: 4 cadence-tier parsers, no more, no fewer'
     }
 }

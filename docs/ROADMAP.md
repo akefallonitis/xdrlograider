@@ -11,27 +11,31 @@ change documented in CHANGELOG.md + UPGRADE.md.
 
 Complete-beta release. Production-hardened on all dimensions the plan scoped:
 
-- **45 portal-only streams** (36 live-verified against full-access admin account
-  on 2026-04-27 after the path-research audit corrected
-  `MDE_CustomCollection_CL` /model→/rules per XDRInternals canonical source),
-  8 tenant-feature-gated (MDI / MCAS / TVM / Intune AV / MDO / Custom Collection),
-  1 deprecated (`MDE_StreamingApiConfig_CL` collides with `MDE_DataExportSettings_CL`).
+- **46 portal-only streams** (45 active + 1 deprecated `MDE_StreamingApiConfig_CL`
+  collides with `MDE_DataExportSettings_CL`) grouped into the 5-tier cadence
+  model: `fast` (10 min — 2 streams), `exposure` (1h — 7 streams), `config`
+  (6h — 14 streams), `inventory` (daily — 21 streams), `maintenance` (weekly —
+  1 stream). 8 tenant-feature-gated (MDI / MCAS / TVM / Intune AV / MDO /
+  Custom Collection).
 - **Auth**: CredentialsTotp + Passkey auto-refresh for unattended production;
   DirectCookies retained as laptop-only test path (KV writer refuses cookies
   as a production secret). 429 Retry-After honoured, session TTL 3h30m.
 - **DCE efficiency**: gzip compression (5-10× bandwidth), 413 split-and-retry,
   Rate429Count + GzipBytes surfaced in `MDE_Heartbeat_CL.Notes`.
-- **Function App**: 9 timers consolidated via `Invoke-TierPollWithHeartbeat`
-  (-315 LoC dup), App Insights sampling tuned, Az.Monitor bloat removed.
+- **Function App**: 5 cadence-tier timers (`poll-fast-10m`, `poll-exposure-1h`,
+  `poll-config-6h`, `poll-inventory-1d`, `poll-maintenance-1w`) + heartbeat,
+  consolidated via `Invoke-TierPollWithHeartbeat`. Auth chain diagnostics
+  flow to App Insights `customEvents` (`AuthChain.*` event names) — no
+  separate selftest table required.
 - **Content Hub compliant**: Data Connector lists all 47 tables, 14 analytic
   rules ship `enabled: false`, 9 hunting queries carry `author`/`version`/`tags`
   metadata, custom tables explicit `plan: 'Analytics'`, BUG #4 `ConfigChangesByUpn`
   join rewritten.
 - **Forward-scalable**: manifest `Defaults.Portal` + timer-helper `-Portal`
   parameter so v0.2.0+ can add `admin.microsoft.com`/`entra.microsoft.com`
-  portals without touching `Xdr.Portal.Auth` or `XdrLogRaider.Ingest`.
-- **Test coverage**: 1063 offline pass / 0 fail / 33 skip; preflight gate
-  (8 sections) returns PRE-DEPLOY READY: YES; live capture 33 `live`-tagged
+  portals without touching `Xdr.Defender.Auth` or `Xdr.Sentinel.Ingest`.
+- **Test coverage**: 1340 offline pass / 0 fail / 16 skip; preflight gate
+  (8 sections) returns PRE-DEPLOY READY: YES; live capture `live`-tagged
   streams return 200 against admin account.
 
 **Graduation criterion → v0.1.0 GA**: 30-day tenant soak with:
@@ -39,7 +43,7 @@ Complete-beta release. Production-hardened on all dimensions the plan scoped:
 - `MDE_Heartbeat_CL.Notes.rate429Count = 0` in steady state
 - `GzipBytes / RowsIngested < 0.2` (80% compression)
 - 0 fatal heartbeats
-- Auth self-test green for 30 consecutive days
+- Heartbeat `StreamsSucceeded > 0` across all 5 cadence tiers in steady state for 30 consecutive days; zero `AuthChain.AADSTSError` events in App Insights for 7 consecutive days
 - 3/3 auth methods (CredsTotp + Passkey + DirectCookies-test) live-verified once
 
 ## v0.1.0 GA (after soak)
@@ -65,7 +69,7 @@ forward-scalable `Portal=` infrastructure laid down in v0.1.0-beta.
   - `MDE_TvmRemediationTasks_CL` (proactive remediation tracking)
   - `MDE_NdrSensorConfig_CL` (Network Detection)
 - **First non-security portal** (optional, depends on community interest):
-  `admin.microsoft.com` for M365 tenant context — uses same `Xdr.Portal.Auth`
+  `admin.microsoft.com` for M365 tenant context — uses same `Xdr.Defender.Auth`
   chain (cookie-based), proves the `Portal=` abstraction.
 - Optional Durable Functions orchestrator if 30-day GA soak surfaces cold-start
   cost as an actual problem. Default: keep 9 independent timers.
@@ -96,18 +100,16 @@ PR review mandates.
   - `intune.microsoft.com` — Intune device/policy config (complements
     Defender-side Intune integration)
   - `admin.microsoft.com` — M365 tenant-wide config + licence posture
-- **MS Graph Security API complement** — for the endpoints that DO have
-  official Graph coverage, offer a Graph-backed alternative that operators
-  can opt into. Not a replacement — complementary; Graph + portal give
-  broader coverage together than either alone.
-- **Microsoft 365 Defender Hunting API** — subscription-scoped advanced
-  hunting via Graph. Orthogonal; Sentinel has a built-in connector for this
-  already, but shipping our own KQL parsers aligned with the same
-  `RawJson`-centric schema lets operators mix `advanced hunting` data with
-  `portal-only` data in a single drift workbook.
+  *(MS Graph Security API complement and Microsoft 365 Defender Hunting API
+  integrations are explicitly out of scope — the connector's value
+  proposition is portal-only telemetry NOT exposed by Microsoft Graph. For
+  Graph-covered streams, operators should use the official Microsoft
+  Sentinel data connectors.)*
 - **Durable Functions orchestrator** — re-evaluate after production soak
-  evidence. If cold-start tax is material, collapse 9 timers to 1 orchestrator
-  + 7 activities. Trade-off: loses per-tier App Insights operation isolation.
+  evidence. If cold-start tax is material, or if v0.2.0+ multi-portal expansion
+  pushes total stream count past ~100, collapse the 5 cadence-tier timers to
+  1 orchestrator + N activities. Trade-off: loses per-tier App Insights
+  operation isolation.
 - **Private endpoints** for Key Vault + Storage + DCE as a wizard toggle —
   required for regulated tenants. Optional post-GA enhancement.
 - **Customer-pinned Function App package** — `WEBSITE_RUN_FROM_PACKAGE`

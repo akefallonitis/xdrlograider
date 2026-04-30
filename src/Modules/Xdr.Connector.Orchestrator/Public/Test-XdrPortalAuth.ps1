@@ -6,7 +6,7 @@ function Test-XdrPortalAuth {
 
     .DESCRIPTION
         Today routes 'Defender' to Test-DefenderPortalAuth (Xdr.Defender.Auth).
-        Used by the validate-auth-selftest timer function to verify the
+        Used by the auth-selftest flag setter (first successful poll-* sign-in) to verify the
         service-account credentials are accepted by the target portal before
         any tier-poll runs.
 

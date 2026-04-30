@@ -1,0 +1,12 @@
+{
+  "description": "Weekly Sunday @ 03:00 UTC — Maintenance tier. Polls 1 active stream (MDE_DataExportSettings_CL — streaming-API export configuration; rare-change). The deprecated MDE_StreamingApiConfig_CL is also nominally part of this tier but is excluded from the actual poll (returns 404 on modern tenants — superseded by DataExportSettings). Weekly cadence is sufficient because data-export configuration only changes during architectural reviews; faster polling consumes 429 budget without operator value.",
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 0 3 * * 0",
+      "runOnStartup": false
+    }
+  ]
+}

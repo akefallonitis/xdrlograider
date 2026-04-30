@@ -5,7 +5,7 @@
     "_generator": {
       "name": "Hand-authored ARM template matching deploy/main.bicep. Regenerate via `az bicep build` and diff before committing."
     },
-    "comments": "XdrLogRaider v0.1.0-beta — connector + Sentinel Solution. Requires an existing Sentinel-enabled Log Analytics workspace (any RG, any subscription in the same tenant). Adds 47 custom tables (45 data + Heartbeat + AuthTestResult) + a Sentinel Solution package (XdrLogRaider) + a GenericUI Data Connector card visible in Sentinel → Data Connectors blade, all via cross-RG nested deployments."
+    "comments": "XdrLogRaider v0.1.0-beta — connector + Sentinel Solution. Requires an existing Sentinel-enabled Log Analytics workspace (any RG, any subscription in the same tenant). Adds 47 custom tables (46 data + Heartbeat) + a Sentinel Solution package (XdrLogRaider) + a GenericUI Data Connector card visible in Sentinel → Data Connectors blade, all via cross-RG nested deployments."
   },
   "parameters": {
     "projectPrefix": {
@@ -57,11 +57,6 @@
       "allowedValues": [ "Y1", "EP1", "EP2" ],
       "metadata": { "description": "Function App plan SKU. Y1 = Consumption." }
     },
-    "functionAppZipVersion": {
-      "type": "string",
-      "defaultValue": "0.1.0-beta",
-      "metadata": { "description": "Pinned release tag, e.g. '0.1.0-beta'. URL becomes releases/download/v<value>/function-app.zip. DO NOT use 'latest' for pre-release tags — GitHub's /releases/latest endpoint excludes pre-releases and returns 302→nothing, leaving the Function App with no code." }
-    },
     "githubRepo": {
       "type": "string",
       "defaultValue": "akefallonitis/xdrlograider",
@@ -100,7 +95,7 @@
     "dceName": "[concat(parameters('projectPrefix'), '-', variables('envSegment'), 'dce')]",
     "dcrName": "[concat(parameters('projectPrefix'), '-', variables('envSegment'), 'dcr')]",
     "aiName": "[concat(parameters('projectPrefix'), '-', variables('envSegment'), 'ai')]",
-    "packageUrl": "[if(equals(parameters('functionAppZipVersion'), 'latest'), concat('https://github.com/', parameters('githubRepo'), '/releases/latest/download/function-app.zip'), concat('https://github.com/', parameters('githubRepo'), '/releases/download/v', parameters('functionAppZipVersion'), '/function-app.zip'))]",
+    "packageUrl": "[concat('https://github.com/', parameters('githubRepo'), '/releases/latest/download/function-app.zip')]",
     "workspaceSubscriptionId": "[split(parameters('existingWorkspaceId'), '/')[2]]",
     "workspaceResourceGroup": "[split(parameters('existingWorkspaceId'), '/')[4]]",
     "workspaceName": "[last(split(parameters('existingWorkspaceId'), '/'))]",
@@ -259,22 +254,6 @@
               { "name": "HostName",         "type": "string" },
               { "name": "Notes",            "type": "dynamic" }
             ]
-          },
-          "Custom-MDE_AuthTestResult_CL": {
-            "columns": [
-              { "name": "TimeGenerated",       "type": "datetime" },
-              { "name": "Method",              "type": "string" },
-              { "name": "PortalHost",          "type": "string" },
-              { "name": "Upn",                 "type": "string" },
-              { "name": "Success",             "type": "boolean" },
-              { "name": "Stage",               "type": "string" },
-              { "name": "FailureReason",       "type": "string" },
-              { "name": "EstsMs",              "type": "int" },
-              { "name": "SccauthMs",           "type": "int" },
-              { "name": "SampleCallHttpCode",  "type": "int" },
-              { "name": "SampleCallLatencyMs", "type": "int" },
-              { "name": "SccauthAcquiredUtc",  "type": "string" }
-            ]
           }
         },
         "destinations": {
@@ -344,8 +323,7 @@
               "Custom-MDE_UserPreferences_CL",
               "Custom-MDE_MtoTenants_CL",
               "Custom-MDE_CloudAppsConfig_CL",
-              "Custom-MDE_Heartbeat_CL",
-              "Custom-MDE_AuthTestResult_CL"
+              "Custom-MDE_Heartbeat_CL"
             ],
             "destinations": [ "la-destination" ]
           }
@@ -1669,33 +1647,6 @@
                   ]
                 }
               }
-            },
-            {
-              "type": "Microsoft.OperationalInsights/workspaces/tables",
-              "apiVersion": "2023-09-01",
-              "name": "[concat(parameters('workspaceName'), '/MDE_AuthTestResult_CL')]",
-              "properties": {
-                "plan": "Analytics",
-                "retentionInDays": "[parameters('retentionInDays')]",
-                "totalRetentionInDays": "[parameters('retentionInDays')]",
-                "schema": {
-                  "name":    "MDE_AuthTestResult_CL",
-                  "columns": [
-                    { "name": "TimeGenerated",       "type": "datetime" },
-                    { "name": "Method",              "type": "string" },
-                    { "name": "PortalHost",          "type": "string" },
-                    { "name": "Upn",                 "type": "string" },
-                    { "name": "Success",             "type": "boolean" },
-                    { "name": "Stage",               "type": "string" },
-                    { "name": "FailureReason",       "type": "string" },
-                    { "name": "EstsMs",              "type": "int" },
-                    { "name": "SccauthMs",           "type": "int" },
-                    { "name": "SampleCallHttpCode",  "type": "int" },
-                    { "name": "SampleCallLatencyMs", "type": "int" },
-                    { "name": "SccauthAcquiredUtc",  "type": "string" }
-                  ]
-                }
-              }
             }
           ]
         }
@@ -1776,18 +1727,18 @@
                   "id":                  "[variables('dataConnectorId')]",
                   "title":               "XdrLogRaider — Defender XDR portal telemetry",
                   "publisher":           "[variables('solutionPublisher')]",
-                  "descriptionMarkdown": "Ingests Defender XDR portal-only telemetry — 45 streams of configuration, compliance, drift, exposure, governance, identity (MDI), audit, metadata that is **not** exposed by public Microsoft Graph Security or Microsoft 365 Defender / MDE APIs.\n\n- 47 custom tables (45 data + Heartbeat + AuthTestResult)\n- Per-stream typed columns at ingest via projection map; `RawJson` preserved alongside\n- 6 KQL parsers (drift detection via typed-column bag)\n- 14 analytic rules (ship disabled per Microsoft Sentinel best practice)\n- 9 hunting queries\n- 7 workbooks (incl. Action Center for Device Timeline + Machine Actions)\n\nPowered by an unattended PowerShell Azure Function App authenticating to `security.microsoft.com` via Credentials+TOTP or Software Passkey. Multi-portal forward-compat foundation (Defender ships today; Entra, Purview, Intune planned).",
+                  "descriptionMarkdown": "Ingests Defender XDR portal-only telemetry — 46 streams of configuration, compliance, drift, exposure, governance, identity (MDI), audit, metadata that is **not** exposed by public Microsoft Graph Security or Microsoft 365 Defender / MDE APIs.\n\n- 47 custom tables (46 data + Heartbeat)\n- Per-stream typed columns at ingest via projection map; `RawJson` preserved alongside\n- 6 KQL parsers (drift detection via typed-column bag)\n- 14 analytic rules (ship disabled per Microsoft Sentinel best practice)\n- 9 hunting queries\n- 7 workbooks (incl. Action Center for Device Timeline + Machine Actions)\n- Auth chain diagnostics in App Insights `customEvents` (AuthChain.* event names)\n\nPowered by an unattended PowerShell Azure Function App authenticating to `security.microsoft.com` via Credentials+TOTP or Software Passkey. Multi-portal forward-compat foundation (Defender ships today; Entra, Purview, Intune planned).",
                   "graphQueriesTableName": "MDE_Heartbeat_CL",
                   "graphQueries": [
                     { "metricName": "Heartbeat (last 24h)", "legend": "XdrLogRaider heartbeats", "baseQuery": "MDE_Heartbeat_CL | where TimeGenerated > ago(24h) | summarize count() by bin(TimeGenerated, 1h)" }
                   ],
                   "sampleQueries": [
-                    { "description": "Recent auth self-test results",                "query": "MDE_AuthTestResult_CL | order by TimeGenerated desc | take 10" },
-                    { "description": "Suppression rules modified in the last 24h",  "query": "MDE_SuppressionRules_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, RawJson" }
+                    { "description": "Recent auth chain events (App Insights)",      "query": "customEvents | where name in ('AuthChain.AADSTSError', 'AuthChain.Completed') | order by timestamp desc | take 10" },
+                    { "description": "Connector health (Heartbeat last 1h)",         "query": "MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | order by TimeGenerated desc" },
+                    { "description": "Suppression rules modified in the last 24h",   "query": "MDE_SuppressionRules_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, RawJson" }
                   ],
                   "dataTypes": [
                     { "name": "MDE_Heartbeat_CL",                "lastDataReceivedQuery": "MDE_Heartbeat_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-                    { "name": "MDE_AuthTestResult_CL",           "lastDataReceivedQuery": "MDE_AuthTestResult_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_AdvancedFeatures_CL",         "lastDataReceivedQuery": "MDE_AdvancedFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_PreviewFeatures_CL",          "lastDataReceivedQuery": "MDE_PreviewFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
                     { "name": "MDE_AlertServiceConfig_CL",       "lastDataReceivedQuery": "MDE_AlertServiceConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
@@ -1835,7 +1786,7 @@
                     { "name": "MDE_MachineActions_CL",           "lastDataReceivedQuery": "MDE_MachineActions_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
                   ],
                   "connectivityCriterias": [
-                    { "type": "IsConnectedQuery", "value": [ "MDE_Heartbeat_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(1h)" ] }
+                    { "type": "IsConnectedQuery", "value": [ "MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | project IsConnected = isnotempty(TimeGenerated)" ] }
                   ],
                   "availability": { "status": 1, "isPreview": true },
                   "permissions": {
@@ -1855,10 +1806,10 @@
                       ]
                     },
                     {
-                      "title": "Wait for self-test",
-                      "description": "Within 5 minutes the Function App validates auth and writes to MDE_AuthTestResult_CL:",
+                      "title": "Confirm connector liveness",
+                      "description": "Within 5-10 minutes the Function App's heartbeat timer + first poll fire. The connector card reads MDE_Heartbeat_CL for the IsConnected indicator. For auth chain diagnostics, query App Insights customEvents:",
                       "instructions": [
-                        { "type": "CopyableLabel", "parameters": { "label": "MDE_AuthTestResult_CL | order by TimeGenerated desc | take 1 | project TimeGenerated, Success, Stage, FailureReason" } }
+                        { "type": "CopyableLabel", "parameters": { "label": "customEvents | where name in ('AuthChain.AADSTSError', 'AuthChain.Completed') | order by timestamp desc | take 10" } }
                       ]
                     }
                   ]
@@ -1989,6 +1940,6 @@
     "workspaceId":        { "type": "string", "value": "[parameters('existingWorkspaceId')]" },
     "workspaceRg":        { "type": "string", "value": "[variables('workspaceResourceGroup')]" },
     "workspaceLocation":  { "type": "string", "value": "[parameters('workspaceLocation')]" },
-    "postDeployCommand":  { "type": "string", "value": "[if(or(and(equals(parameters('authMethod'), 'credentials_totp'), and(greater(length(parameters('servicePassword')), 0), greater(length(parameters('totpSeed')), 0))), and(equals(parameters('authMethod'), 'passkey'), greater(length(parameters('passkeyJson')), 0))), concat('Auth secrets uploaded by deploy. Self-test result expected within 5 minutes in workspace: MDE_AuthTestResult_CL | top 1 by TimeGenerated. KV: ', variables('kvName')), concat('git clone https://github.com/', parameters('githubRepo'), ' && cd xdrlograider && ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName ', variables('kvName')))]" }
+    "postDeployCommand":  { "type": "string", "value": "[if(or(and(equals(parameters('authMethod'), 'credentials_totp'), and(greater(length(parameters('servicePassword')), 0), greater(length(parameters('totpSeed')), 0))), and(equals(parameters('authMethod'), 'passkey'), greater(length(parameters('passkeyJson')), 0))), concat('Auth secrets uploaded by deploy. Heartbeat expected within 5-10 minutes in workspace: MDE_Heartbeat_CL | top 1 by TimeGenerated. Auth chain diagnostics: App Insights customEvents | where name startswith \"AuthChain.\". KV: ', variables('kvName')), concat('git clone https://github.com/', parameters('githubRepo'), ' && cd xdrlograider && ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName ', variables('kvName')))]" }
   }
 }

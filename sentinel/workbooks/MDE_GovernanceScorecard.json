@@ -61,7 +61,7 @@
         "queryType": 0,
         "title": "Governance drift",
         "size": 0,
-        "query": "MDE_Drift_P2Governance({TimeRange:value}, 1d)\n| summarize Changes = count() by StreamName\n| render piechart",
+        "query": "MDE_Drift_Configuration({TimeRange:value}, 1d)\n| summarize Changes = count() by StreamName\n| render piechart",
         "version": "KqlItem/1.0"
       },
       "type": 3

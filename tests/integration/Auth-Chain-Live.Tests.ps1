@@ -6,7 +6,7 @@
 .DESCRIPTION
     Gated by XDRLR_ONLINE=true. Reads test credentials from env vars
     (or tests/.env.local via Run-Tests.ps1). Exercises the full
-    Xdr.Portal.Auth chain + one sample dispatcher call.
+    Xdr.Common.Auth + Xdr.Defender.Auth chain + one sample dispatcher call.
 
     Run locally:
       pwsh ./tests/Run-Tests.ps1 -Category local-online
@@ -37,14 +37,16 @@ BeforeDiscovery {
 }
 
 BeforeAll {
-    # Modules needed for live auth + dispatcher calls
-    $authPsd1   = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Portal.Auth'     'Xdr.Portal.Auth.psd1'
-    $ingestPsd1 = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
-    $clientPsd1 = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
+    # Modules needed for live auth + dispatcher calls (5-module set)
+    $commonPsd1   = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Common.Auth'    'Xdr.Common.Auth.psd1'
+    $defAuthPsd1  = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Auth'  'Xdr.Defender.Auth.psd1'
+    $ingestPsd1   = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
+    $clientPsd1   = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
 
-    Import-Module $authPsd1   -Force -ErrorAction Stop
-    Import-Module $ingestPsd1 -Force -ErrorAction Stop
-    Import-Module $clientPsd1 -Force -ErrorAction Stop
+    Import-Module $commonPsd1  -Force -ErrorAction Stop
+    Import-Module $defAuthPsd1 -Force -ErrorAction Stop
+    Import-Module $ingestPsd1  -Force -ErrorAction Stop
+    Import-Module $clientPsd1  -Force -ErrorAction Stop
 
     # Mirror discovery-phase gating flag so it's valid during run too.
     $script:RunLive = ($env:XDRLR_ONLINE -eq 'true') -and $env:XDRLR_TEST_UPN
@@ -88,20 +90,19 @@ BeforeAll {
     function script:New-LiveSession {
         param($AuthMethod, $Credential, $PortalHost, [switch]$Force)
         if ($AuthMethod -eq 'DirectCookies') {
-            return Connect-MDEPortalWithCookies `
+            return Connect-DefenderPortalWithCookies `
                 -Sccauth   $Credential.sccauth `
                 -XsrfToken $Credential.xsrfToken `
                 -Upn       $Credential.upn `
                 -PortalHost $PortalHost
         }
-        return Connect-MDEPortal -Method $AuthMethod -Credential $Credential -PortalHost $PortalHost -Force:$Force.IsPresent
+        return Connect-DefenderPortal -Method $AuthMethod -Credential $Credential -PortalHost $PortalHost -Force:$Force.IsPresent
     }
 }
 
 AfterAll {
     Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
-    Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
 }
 
 Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
@@ -126,14 +127,14 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
         $xsrf.Value | Should -Not -BeNullOrEmpty
     }
 
-    It 'Invoke-MDEPortalRequest returns TenantContext (proven-working portal API)' -Skip:(-not $script:RunLive) {
+    It 'Invoke-DefenderPortalRequest returns TenantContext (proven-working portal API)' -Skip:(-not $script:RunLive) {
         # TenantContext is the most stable portal API — used by the sign-in flow itself.
         # If this returns 200 + AuthInfo, the session is fully authenticated. The
         # 52-stream endpoint catalogue in endpoints.manifest.psd1 is a separate
         # validation (different tracking issue — some paths may have drifted since
         # the nodoc/XDRInternals research dates).
         $session = script:New-LiveSession -AuthMethod $script:AuthMethod -Credential $script:Credential -PortalHost $script:PortalHost
-        $ctx = Invoke-MDEPortalRequest -Session $session -Path '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true' -Method GET
+        $ctx = Invoke-DefenderPortalRequest -Session $session -Path '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true' -Method GET
         $ctx               | Should -Not -BeNullOrEmpty
         $ctx.AuthInfo      | Should -Not -BeNullOrEmpty
         $ctx.AuthInfo.TenantId | Should -Not -BeNullOrEmpty
@@ -147,7 +148,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
         $rows = Invoke-MDEEndpoint -Session $session -Stream 'MDE_AdvancedFeatures_CL' -ErrorAction SilentlyContinue 3>$null
         # Dispatcher returns $null or empty on endpoint 404/500 — ACCEPTABLE as long as
         # the session itself is still healthy. We re-query TenantContext to confirm.
-        $stillAuthed = Invoke-MDEPortalRequest -Session $session -Path '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true' -Method GET
+        $stillAuthed = Invoke-DefenderPortalRequest -Session $session -Path '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true' -Method GET
         $stillAuthed.AuthInfo.TenantId | Should -Not -BeNullOrEmpty
     }
 
@@ -168,7 +169,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
         $waitTo = [math]::Floor($now / 30) * 30 + 32
         Start-Sleep -Seconds ([math]::Max(1, $waitTo - $now))
 
-        # Force re-auth — simulating a 401 recovery in Invoke-MDEPortalRequest
+        # Force re-auth — simulating a 401 recovery in Invoke-DefenderPortalRequest
         $s2 = script:New-LiveSession -AuthMethod $script:AuthMethod -Credential $script:Credential -PortalHost $script:PortalHost -Force
         $cookies2 = $s2.Session.Cookies.GetCookies("https://$script:PortalHost")
         $sccauth2 = ($cookies2 | Where-Object Name -eq 'sccauth' | Select-Object -First 1).Value
@@ -182,7 +183,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
     It 'Passkey auth also returns sccauth (skipped if no passkey configured)' -Skip:(-not $env:XDRLR_TEST_PASSKEY_PATH -or -not (Test-Path $env:XDRLR_TEST_PASSKEY_PATH)) {
         $passkey = Get-Content $env:XDRLR_TEST_PASSKEY_PATH -Raw | ConvertFrom-Json
         $cred = @{ upn = $env:XDRLR_TEST_UPN; passkey = $passkey }
-        $session = Connect-MDEPortal -Method Passkey -Credential $cred -PortalHost $script:PortalHost -Force
+        $session = Connect-DefenderPortal -Method Passkey -Credential $cred -PortalHost $script:PortalHost -Force
         $sccauth = $session.Session.Cookies.GetCookies("https://$script:PortalHost") | Where-Object Name -eq 'sccauth' | Select-Object -First 1
         $sccauth       | Should -Not -BeNullOrEmpty
         $sccauth.Value | Should -Not -BeNullOrEmpty
@@ -190,8 +191,8 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
 
     It 'Live 401-recovery: poisoning sccauth triggers silent reauth + API call succeeds' -Skip:$script:SkipCacheTest {
         # Prove the end-to-end reauth path: inject an obviously-invalid sccauth into the
-        # live session so the NEXT /apiproxy call returns 401 → Invoke-MDEPortalRequest
-        # detects the 401 → Connect-MDEPortal -Force mints a fresh session → retry succeeds.
+        # live session so the NEXT /apiproxy call returns 401 → Invoke-DefenderPortalRequest
+        # detects the 401 → Connect-DefenderPortal -Force mints a fresh session → retry succeeds.
         # This is the exact path the Function App walks in production when sccauth expires.
 
         $session = script:New-LiveSession -AuthMethod $script:AuthMethod -Credential $script:Credential -PortalHost $script:PortalHost -Force
@@ -210,7 +211,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
         $priorAcquired = $session.AcquiredUtc
 
         # Trigger the 401→reauth path. TenantContext is our proven-working endpoint.
-        $ctx = Invoke-MDEPortalRequest -Session $session -Path '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true' -Method GET
+        $ctx = Invoke-DefenderPortalRequest -Session $session -Path '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true' -Method GET
         $ctx               | Should -Not -BeNullOrEmpty -Because 'Auto-reauth must recover the call'
         $ctx.AuthInfo      | Should -Not -BeNullOrEmpty
         $ctx.AuthInfo.TenantId | Should -Not -BeNullOrEmpty
@@ -247,7 +248,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
             }
 
             # Run 1: no checkpoint yet → endpoint called without -FromUtc via default 1h.
-            $r1 = Invoke-MDETierPoll -Session $Session -Tier 'P6' -Config $config
+            $r1 = Invoke-MDETierPoll -Session $Session -Tier 'fast' -Config $config
             $r1.StreamsAttempted | Should -Be 2
 
             # Both filterable streams should now have a checkpoint.
@@ -267,7 +268,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
                 ,@()
             }
 
-            $r2 = Invoke-MDETierPoll -Session $Session -Tier 'P6' -Config $config
+            $r2 = Invoke-MDETierPoll -Session $Session -Tier 'fast' -Config $config
             $r2.StreamsAttempted | Should -Be 2
         }
     }

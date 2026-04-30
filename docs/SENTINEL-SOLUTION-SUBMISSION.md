@@ -54,7 +54,7 @@ Solutions/XdrLogRaider/
 │   ├── ConfigChangesByUpn.yaml
 │   └── ...                               # 10 queries, YAML format
 ├── Parsers/
-│   └── MDE_Drift_P0Compliance.yaml       # One parser YAML per category
+│   └── MDE_Drift_Inventory.yaml       # One parser YAML per category
 ├── Workbooks/
 │   ├── MDEComplianceDashboard.json
 │   ├── MDEComplianceDashboard.yaml       # metadata sidecar

@@ -23,7 +23,7 @@ tactics:
 relevantTechniques:
   - T1078
 query: |
-  MDE_Drift_P2Governance(7d, 1d)
+  MDE_Drift_Configuration(7d, 1d)
   | where StreamName == "MDE_UnifiedRbacRoles_CL"
   | where ChangeType == "Added"
   | where FieldName == "principalId" or FieldName == "principalName"

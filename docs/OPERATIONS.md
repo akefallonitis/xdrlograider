@@ -18,9 +18,9 @@ MDE_Heartbeat_CL
     GzipBytesTotal = sum(tolong(n.gzipBytes))
     by FunctionName
 | join kind=leftouter (
-    MDE_AuthTestResult_CL
+    App Insights customEvents
     | summarize arg_max(TimeGenerated, Success, Stage) by PortalHost
-  ) on $left.FunctionName == 'validate-auth-selftest'
+  ) on $left.FunctionName == '(auth chain — see App Insights customEvents)'
 | order by FunctionName asc
 ```
 
@@ -28,7 +28,7 @@ Traffic-light reading:
 - `LastFire` within the last 2x its schedule window → **green**
 - `StreamsSucc == StreamsAttempted` → **green**
 - `Rate429Count == 0` → **green**; if non-zero persistently, portal is throttling us (see below)
-- `MDE_AuthTestResult_CL.Success == true` → **green**; if false for > 30 min, auth chain broke (see RUNBOOK)
+- `App Insights customEvents.Success == true` → **green**; if false for > 30 min, auth chain broke (see RUNBOOK)
 
 ## App Insights KQL cookbook (8 canned triage queries)
 
@@ -89,7 +89,7 @@ traces
 ### 6. Auth self-test failures (RUNBOOK entry-point)
 
 ```kql
-MDE_AuthTestResult_CL
+App Insights customEvents
 | where TimeGenerated > ago(24h)
 | where Success == false
 | project TimeGenerated, Stage, FailureReason, SampleCallHttpCode
@@ -121,7 +121,7 @@ Minimum viable set; create in Azure Portal → Sentinel workspace → Alerts.
 | Signal | Condition | Severity | Action |
 |--------|-----------|----------|--------|
 | Fatal heartbeat | `MDE_Heartbeat_CL | where parse_json(Notes).fatalError != ''` count > 0 in last 30 min | High | Page on-call |
-| Auth self-test fail | `MDE_AuthTestResult_CL | where Success == false` count > 2 consecutive | High | Page + run RUNBOOK auth-chain |
+| Auth self-test fail | `App Insights customEvents | where Success == false` count > 2 consecutive | High | Page + run RUNBOOK auth-chain |
 | Rate429 steady-state | `MDE_Heartbeat_CL | extend r429=toint(parse_json(Notes).rate429Count) | where r429 > 5` over 1h | Medium | Investigate tenant-side portal quota, consider reducing poll frequency |
 | Ingestion silence | `MDE_Heartbeat_CL | summarize max(TimeGenerated)` older than `2 × max-cron-interval` | High | FA stopped; check App Insights Exception telemetry |
 

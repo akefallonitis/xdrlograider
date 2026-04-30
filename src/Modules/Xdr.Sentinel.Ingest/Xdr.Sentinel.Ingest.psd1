@@ -15,7 +15,6 @@
     FunctionsToExport     = @(
         'Send-ToLogAnalytics',
         'Write-Heartbeat',
-        'Write-AuthTestResult',
         'Get-CheckpointTimestamp',
         'Set-CheckpointTimestamp',
         'Get-XdrAuthSelfTestFlag',

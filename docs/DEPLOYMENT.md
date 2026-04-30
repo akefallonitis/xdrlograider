@@ -52,7 +52,7 @@ The deploy creates resources in **two distinct scopes**:
                            ▼
 ┌── Workspace RG (where your existing Sentinel workspace lives)─┐
 │     - 47 custom tables in the workspace (45 telemetry +       │
-│       MDE_Heartbeat_CL + MDE_AuthTestResult_CL)               │
+│       MDE_Heartbeat_CL + App Insights customEvents)               │
 │     - Sentinel Data Connector UI card                         │
 │     - 6 KQL parsers + 6 workbooks + 14 analytic rules +       │
 │       9 hunting queries (via sentinelContent.json)           │
@@ -126,10 +126,10 @@ The script:
 
 ## Step 6 — Wait for auth self-test (~5 min)
 
-The `validate-auth-selftest` timer fires within ~5 min. Check in your workspace:
+The `(auth chain — see App Insights customEvents)` timer fires within ~5 min. Check in your workspace:
 
 ```kql
-MDE_AuthTestResult_CL
+App Insights customEvents
 | order by TimeGenerated desc
 | take 1
 | project TimeGenerated, Success, Stage, FailureReason, SampleCallHttpCode

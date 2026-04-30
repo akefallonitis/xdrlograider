@@ -1,29 +1,26 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Architectural gate for the L1-L4 module-split work. Asserts the dependency
-    graph stays acyclic and that the L4 portal-routing orchestrator has access
-    to L1-L3 (so it can dispatch through them) while L3 does not depend on L4
+    Architectural gate for the 5-module split. Asserts the dependency graph
+    stays acyclic and that the L4 portal-routing orchestrator has access to
+    L1-L3 (so it can dispatch through them) while L3 does not depend on L4
     (would create a cycle).
 
 .DESCRIPTION
-    Layer map:
+    Layer map (v0.1.0-beta first publish — 5 real modules, no shims):
       L1 Xdr.Common.Auth          portal-generic Entra (TOTP, passkey, ESTS)
       L1 Xdr.Sentinel.Ingest      portal-generic ingest (DCE/DCR + Storage Table)
       L2 Xdr.Defender.Auth        Defender-specific cookie exchange (sccauth + XSRF)
       L3 Xdr.Defender.Client      Defender-portal manifest dispatcher (46 streams)
       L4 Xdr.Connector.Orchestrator  portal-routing dispatcher (Connect-XdrPortal etc.)
-      Shim Xdr.Portal.Auth         legacy MDE-prefixed auth wrappers
-      Shim XdrLogRaider.Client     legacy MDE-prefixed client wrappers
-      Shim XdrLogRaider.Ingest     legacy ingest wrappers
 
     Invariants enforced here:
       1. L3 Xdr.Defender.Client RequiredModules: only L2 Xdr.Defender.Auth
          (no L4, no L1 ingest — would be a cycle / cross-leg).
       2. L4 Xdr.Connector.Orchestrator RequiredModules cover L1+L2+L3
          (so the dispatcher can call into them).
-      3. Backward-compat shims XdrLogRaider.Client + XdrLogRaider.Ingest
-         re-export the same public surface as the renamed modules.
+      3. Five modules total, no MDE-prefixed legacy shim modules left in
+         src/Modules/.
       4. Orchestrator routing: Connect-XdrPortal -Portal 'Defender' resolves
          through to Connect-DefenderPortal; unknown -Portal throws.
 #>
@@ -37,8 +34,27 @@ BeforeAll {
     $script:SentinelPsd1    = Join-Path $script:ModulesRoot 'Xdr.Sentinel.Ingest'      'Xdr.Sentinel.Ingest.psd1'
     $script:CommonAuthPsd1  = Join-Path $script:ModulesRoot 'Xdr.Common.Auth'           'Xdr.Common.Auth.psd1'
     $script:DefAuthPsd1     = Join-Path $script:ModulesRoot 'Xdr.Defender.Auth'         'Xdr.Defender.Auth.psd1'
-    $script:LegacyClientPsd1 = Join-Path $script:ModulesRoot 'XdrLogRaider.Client'      'XdrLogRaider.Client.psd1'
-    $script:LegacyIngestPsd1 = Join-Path $script:ModulesRoot 'XdrLogRaider.Ingest'      'XdrLogRaider.Ingest.psd1'
+}
+
+Describe 'Five-module architecture — no shim modules remain' {
+
+    It 'src/Modules contains exactly the 5 real modules (no legacy shim dirs)' {
+        $dirs = @(Get-ChildItem -LiteralPath $script:ModulesRoot -Directory | Sort-Object Name | ForEach-Object Name)
+        $expected = @(
+            'Xdr.Common.Auth',
+            'Xdr.Connector.Orchestrator',
+            'Xdr.Defender.Auth',
+            'Xdr.Defender.Client',
+            'Xdr.Sentinel.Ingest'
+        )
+        $dirs | Should -Be $expected -Because 'v0.1.0-beta first-publish drops the 3 backward-compat shims'
+    }
+
+    It 'src/Modules/Xdr.Portal.Auth, XdrLogRaider.Client, XdrLogRaider.Ingest are deleted' {
+        Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'Xdr.Portal.Auth')      | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'XdrLogRaider.Client')  | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'XdrLogRaider.Ingest')  | Should -BeFalse
+    }
 }
 
 Describe 'L1-L4 layering — manifest RequiredModules graph' {
@@ -80,42 +96,12 @@ Describe 'L1-L4 layering — manifest RequiredModules graph' {
     }
 }
 
-Describe 'Backward-compat shims — XdrLogRaider.Client + XdrLogRaider.Ingest' {
-
-    It 'XdrLogRaider.Client shim FunctionsToExport matches Xdr.Defender.Client surface' {
-        $shim    = Import-PowerShellDataFile -Path $script:LegacyClientPsd1
-        $renamed = Import-PowerShellDataFile -Path $script:DefClientPsd1
-        $shimExports    = @($shim.FunctionsToExport)    | Sort-Object
-        $renamedExports = @($renamed.FunctionsToExport) | Sort-Object
-        $shimExports    | Should -Be $renamedExports -Because 'shim must re-export the same surface as the renamed module'
-    }
-
-    It 'XdrLogRaider.Ingest shim FunctionsToExport matches Xdr.Sentinel.Ingest surface' {
-        $shim    = Import-PowerShellDataFile -Path $script:LegacyIngestPsd1
-        $renamed = Import-PowerShellDataFile -Path $script:SentinelPsd1
-        $shimExports    = @($shim.FunctionsToExport)    | Sort-Object
-        $renamedExports = @($renamed.FunctionsToExport) | Sort-Object
-        $shimExports    | Should -Be $renamedExports -Because 'shim must re-export the same surface as the renamed module'
-    }
-
-    It 'XdrLogRaider.Client shim psm1 imports Xdr.Defender.Client (no Public/ duplication)' {
-        $shimPsm1 = Get-Content -LiteralPath (Join-Path $script:ModulesRoot 'XdrLogRaider.Client' 'XdrLogRaider.Client.psm1') -Raw
-        $shimPsm1 | Should -Match 'Xdr\.Defender\.Client' -Because 'shim must reference the renamed module by name'
-    }
-
-    It 'XdrLogRaider.Ingest shim psm1 imports Xdr.Sentinel.Ingest (no Public/ duplication)' {
-        $shimPsm1 = Get-Content -LiteralPath (Join-Path $script:ModulesRoot 'XdrLogRaider.Ingest' 'XdrLogRaider.Ingest.psm1') -Raw
-        $shimPsm1 | Should -Match 'Xdr\.Sentinel\.Ingest' -Because 'shim must reference the renamed module by name'
-    }
-}
-
 Describe 'Orchestrator portal-routing dispatch (offline)' {
 
     BeforeAll {
         # Load the layered modules in dependency order. Tests run InModuleScope
         # against the orchestrator and stub the per-portal connect/test functions.
         Get-Module Xdr.* | Remove-Module -Force -ErrorAction SilentlyContinue
-        Get-Module XdrLogRaider.* | Remove-Module -Force -ErrorAction SilentlyContinue
 
         Import-Module $script:CommonAuthPsd1   -Force -ErrorAction Stop
         Import-Module $script:SentinelPsd1     -Force -ErrorAction Stop
@@ -182,15 +168,15 @@ Describe 'Orchestrator portal-routing dispatch (offline)' {
         }
         $session = [pscustomobject]@{ Upn = 'svc'; PortalHost = 'security.microsoft.com' }
         $config  = [pscustomobject]@{ DceEndpoint = 'x'; DcrImmutableId = 'y'; StorageAccountName = 'z'; CheckpointTable = 'c' }
-        $r = Invoke-XdrTierPoll -Session $session -Tier 'P0' -Config $config -Portal 'Defender'
+        $r = Invoke-XdrTierPoll -Session $session -Tier 'fast' -Config $config -Portal 'Defender'
         $r.RowsIngested | Should -Be 42
-        $r.Tier | Should -Be 'P0'
+        $r.Tier | Should -Be 'fast'
     }
 
     It "Invoke-XdrTierPoll -Portal 'Unknown' throws" {
         $session = [pscustomobject]@{ Upn = 'svc' }
         $config  = [pscustomobject]@{ DceEndpoint = 'x'; DcrImmutableId = 'y'; StorageAccountName = 'z'; CheckpointTable = 'c' }
-        { Invoke-XdrTierPoll -Session $session -Tier 'P0' -Config $config -Portal 'Unknown' } |
+        { Invoke-XdrTierPoll -Session $session -Tier 'fast' -Config $config -Portal 'Unknown' } |
             Should -Throw -ExpectedMessage "*Unknown -Portal 'Unknown'*"
     }
 
@@ -215,40 +201,54 @@ Describe 'Orchestrator portal-routing dispatch (offline)' {
     }
 }
 
-Describe 'profile.ps1 imports the new module set in the right order' {
+Describe 'profile.ps1 imports the 5-module set in dependency order' {
 
     BeforeAll {
         $script:ProfilePath = Join-Path $script:RepoRoot 'src' 'profile.ps1'
         $script:ProfileContent = Get-Content -LiteralPath $script:ProfilePath -Raw
     }
 
-    It 'profile.ps1 loads the new orchestrator module' {
-        $script:ProfileContent | Should -Match "'Xdr\.Connector\.Orchestrator'" -Because 'profile.ps1 must import the L4 orchestrator'
+    It 'profile.ps1 loads Xdr.Common.Auth (L1 Entra)' {
+        $script:ProfileContent | Should -Match "'Xdr\.Common\.Auth'"
     }
 
-    It 'profile.ps1 loads Xdr.Sentinel.Ingest (renamed from XdrLogRaider.Ingest)' {
-        $script:ProfileContent | Should -Match "'Xdr\.Sentinel\.Ingest'" -Because 'profile.ps1 must reference the renamed L1 ingest module'
+    It 'profile.ps1 loads Xdr.Sentinel.Ingest (L1 ingest)' {
+        $script:ProfileContent | Should -Match "'Xdr\.Sentinel\.Ingest'"
     }
 
-    It 'profile.ps1 loads Xdr.Defender.Client (renamed from XdrLogRaider.Client)' {
-        $script:ProfileContent | Should -Match "'Xdr\.Defender\.Client'" -Because 'profile.ps1 must reference the renamed L3 client module'
+    It 'profile.ps1 loads Xdr.Defender.Auth (L2 cookie exchange)' {
+        $script:ProfileContent | Should -Match "'Xdr\.Defender\.Auth'"
     }
 
-    It 'profile.ps1 loads the legacy XdrLogRaider.Client + XdrLogRaider.Ingest shims for backward-compat' {
-        $script:ProfileContent | Should -Match "'XdrLogRaider\.Client'"
-        $script:ProfileContent | Should -Match "'XdrLogRaider\.Ingest'"
+    It 'profile.ps1 loads Xdr.Defender.Client (L3 manifest dispatcher)' {
+        $script:ProfileContent | Should -Match "'Xdr\.Defender\.Client'"
     }
 
-    It 'profile.ps1 imports renamed modules BEFORE the legacy shims (shim depends on renamed)' {
+    It 'profile.ps1 loads Xdr.Connector.Orchestrator (L4 portal routing)' {
+        $script:ProfileContent | Should -Match "'Xdr\.Connector\.Orchestrator'"
+    }
+
+    It 'profile.ps1 does NOT reference legacy shim modules' {
+        $script:ProfileContent | Should -Not -Match "'Xdr\.Portal\.Auth'"
+        $script:ProfileContent | Should -Not -Match "'XdrLogRaider\.Client'"
+        $script:ProfileContent | Should -Not -Match "'XdrLogRaider\.Ingest'"
+    }
+
+    It 'profile.ps1 imports modules in dependency order (Common.Auth + Sentinel.Ingest before Defender.Auth before Defender.Client before Orchestrator)' {
         $lines = Get-Content -LiteralPath $script:ProfilePath
         $rangeStart = ($lines | Select-String -Pattern '\$coreModules\s*=\s*@\(').LineNumber
         $rangeEnd   = ($lines | Select-String -Pattern '^\)' | Where-Object { $_.LineNumber -gt $rangeStart } | Select-Object -First 1).LineNumber
         $section = $lines[$rangeStart..$rangeEnd]
-        $renamedClientLine = ($section | Select-String -Pattern "'Xdr\.Defender\.Client'").LineNumber
-        $shimClientLine    = ($section | Select-String -Pattern "'XdrLogRaider\.Client'").LineNumber
-        $renamedIngestLine = ($section | Select-String -Pattern "'Xdr\.Sentinel\.Ingest'").LineNumber
-        $shimIngestLine    = ($section | Select-String -Pattern "'XdrLogRaider\.Ingest'").LineNumber
-        $renamedClientLine | Should -BeLessThan $shimClientLine -Because 'shim psm1 imports the renamed module; renamed must load first'
-        $renamedIngestLine | Should -BeLessThan $shimIngestLine -Because 'shim psm1 imports the renamed module; renamed must load first'
+
+        $commonLine     = ($section | Select-String -Pattern "'Xdr\.Common\.Auth'").LineNumber
+        $sentinelLine   = ($section | Select-String -Pattern "'Xdr\.Sentinel\.Ingest'").LineNumber
+        $defAuthLine    = ($section | Select-String -Pattern "'Xdr\.Defender\.Auth'").LineNumber
+        $defClientLine  = ($section | Select-String -Pattern "'Xdr\.Defender\.Client'").LineNumber
+        $orchLine       = ($section | Select-String -Pattern "'Xdr\.Connector\.Orchestrator'").LineNumber
+
+        $commonLine    | Should -BeLessThan $defAuthLine
+        $sentinelLine  | Should -BeLessThan $defClientLine
+        $defAuthLine   | Should -BeLessThan $defClientLine
+        $defClientLine | Should -BeLessThan $orchLine
     }
 }

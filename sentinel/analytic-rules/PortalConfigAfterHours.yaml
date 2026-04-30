@@ -17,7 +17,7 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
-  union (MDE_Drift_P0Compliance(2h, 15m)), (MDE_Drift_P1Pipeline(1h, 10m)), (MDE_Drift_P2Governance(7d, 1d)) | extend HourOfDay = datetime_part("Hour", TimeGenerated) | where HourOfDay < 9 or HourOfDay >= 17
+  union (MDE_Drift_Configuration(2h, 15m)), (MDE_Drift_Inventory(2h, 15m)) | extend HourOfDay = datetime_part("Hour", TimeGenerated) | where HourOfDay < 9 or HourOfDay >= 17
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

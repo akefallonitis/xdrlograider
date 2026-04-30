@@ -17,7 +17,7 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
-  MDE_Drift_P5Identity(2d, 1h) | where StreamName == "MDE_DCCoverage_CL" | where FieldName == "hasSensor" and OldValue == "true" and NewValue == "false"
+  MDE_Drift_Inventory(2d, 1h) | where StreamName == "MDE_DCCoverage_CL" | where FieldName == "hasSensor" and OldValue == "true" and NewValue == "false"
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

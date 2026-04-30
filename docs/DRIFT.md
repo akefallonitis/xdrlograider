@@ -11,12 +11,12 @@ XdrLogRaider computes drift in **pure KQL at query time**, not in the connector 
 
 Each parser is a callable KQL function (savedSearch with Category `Functions`):
 
-- `MDE_Drift_P0Compliance(lookback, window)` — 19 P0 tenant-config streams, field-level diff
-- `MDE_Drift_P1Pipeline(lookback, window)` — 7 P1 integration streams, field-level diff
-- `MDE_Drift_P2Governance(lookback, window)` — 7 P2 RBAC/asset streams, field-level diff
-- `MDE_Drift_P3Exposure(lookback, window)` — 8 P3 XSPM streams, **set-diff** (added/removed entities)
-- `MDE_Drift_P5Identity(lookback, window)` — 5 P5 MDI streams, field-level diff
-- `MDE_Drift_P7Metadata(lookback, window)` — 4 P7 metadata streams, field-level diff
+- `MDE_Drift_Inventory(lookback, window)` — 19 P0 tenant-config streams, field-level diff
+- `MDE_Drift_Configuration(lookback, window)` — 7 P1 integration streams, field-level diff
+- `MDE_Drift_Configuration(lookback, window)` — 7 P2 RBAC/asset streams, field-level diff
+- `MDE_Drift_Exposure(lookback, window)` — 8 P3 XSPM streams, **set-diff** (added/removed entities)
+- `MDE_Drift_Inventory(lookback, window)` — 5 P5 MDI streams, field-level diff
+- `MDE_Drift_Configuration(lookback, window)` — 4 P7 metadata streams, field-level diff
 
 **No P6 parser** — P6 (action center, threat analytics) is audit log, not drift.
 
@@ -36,7 +36,7 @@ All field-level parsers return rows with:
 | `SnapshotCurrent` | Same as TimeGenerated |
 | `ChangeType` | `Added` / `Removed` / `Modified` |
 
-`MDE_Drift_P3Exposure` (set-diff) omits `FieldName`, `OldValue`, `NewValue` at field level — `OldValue`/`NewValue` hold the full RawJson at entity level.
+`MDE_Drift_Exposure` (set-diff) omits `FieldName`, `OldValue`, `NewValue` at field level — `OldValue`/`NewValue` hold the full RawJson at entity level.
 
 ## How parsers work
 
@@ -55,14 +55,14 @@ Each parser:
 
 ### In a workbook
 ```kql
-MDE_Drift_P0Compliance(24h, 1h)
+MDE_Drift_Inventory(24h, 1h)
 | summarize Changes = count() by StreamName, bin(TimeGenerated, 1h)
 | render timechart
 ```
 
 ### In an analytic rule (ASR downgrade)
 ```kql
-MDE_Drift_P0Compliance(2h, 15m)
+MDE_Drift_Inventory(2h, 15m)
 | where StreamName == "MDE_AsrRulesConfig_CL"
 | where FieldName == "mode"
 | where OldValue == "Block" and NewValue in ("Audit", "Off")
@@ -71,9 +71,9 @@ MDE_Drift_P0Compliance(2h, 15m)
 ### Cross-category drift with audit-log attribution
 ```kql
 union
-  (MDE_Drift_P0Compliance(7d, 1h)  | extend Category = "P0"),
-  (MDE_Drift_P1Pipeline(7d, 30m)   | extend Category = "P1"),
-  (MDE_Drift_P2Governance(7d, 1d)  | extend Category = "P2")
+  (MDE_Drift_Inventory(7d, 1h)  | extend Category = "P0"),
+  (MDE_Drift_Configuration(7d, 30m)   | extend Category = "P1"),
+  (MDE_Drift_Configuration(7d, 1d)  | extend Category = "P2")
 | join kind=leftouter (
     AuditLogs
     | where Category in ("PolicyManagement", "DefenderXdrSettings")

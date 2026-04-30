@@ -1,32 +1,33 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Asserts the iter-14.0 J2 forward-scalable architecture — adding a new
+    Asserts the v0.1.0-beta forward-scalable architecture — adding a new
     Microsoft portal (e.g. compliance.microsoft.com, intune.microsoft.com,
     entra.microsoft.com) in v0.2.0+ must be additive-only: no changes required
-    to L1 Xdr.Common.Auth, XdrLogRaider.Ingest, or the timer helper internals.
+    to L1 Xdr.Common.Auth, Xdr.Sentinel.Ingest, or the timer helper internals.
 
 .DESCRIPTION
-    iter-14.0 split the legacy Xdr.Portal.Auth module into three:
-      - L1 Xdr.Common.Auth   (portal-generic Entra layer; TOTP, passkey, ESTS)
-      - L2 Xdr.Defender.Auth (Defender-specific cookie exchange)
-      - Xdr.Portal.Auth      (backward-compat shim for the legacy MDE-prefixed names)
+    Five-module architecture:
+      - L1 Xdr.Common.Auth      (portal-generic Entra layer; TOTP, passkey, ESTS)
+      - L1 Xdr.Sentinel.Ingest  (portal-generic DCE/DCR ingest + Storage Table)
+      - L2 Xdr.Defender.Auth    (Defender-specific cookie exchange)
+      - L3 Xdr.Defender.Client  (Defender-portal manifest dispatcher)
+      - L4 Xdr.Connector.Orchestrator (portal-routing dispatcher)
 
-    v0.2.0 multi-portal expansion is then a 1-day file-add operation: copy
+    v0.2.0 multi-portal expansion is a 1-day file-add operation: copy
     Xdr.Defender.Auth, change the public-client ID + portal host + cookie
     names, register in profile.ps1. L1 unchanged.
 
     Verified invariants:
       1. Manifest Defaults.Portal = 'security.microsoft.com' applied at load.
-         Every entry loaded via Get-MDEEndpointManifest has a Portal field
-         regardless of whether the entry declared one.
+         Every entry loaded via Get-MDEEndpointManifest has a Portal field.
 
       2. Invoke-TierPollWithHeartbeat accepts optional -Portal param (defaults
          security.microsoft.com).
 
       3. Module dependency graph is strictly acyclic:
-             XdrLogRaider.Client -> Xdr.Portal.Auth (shim) -> Xdr.Defender.Auth -> Xdr.Common.Auth
-             XdrLogRaider.Ingest: no auth-module deps (standalone)
+             Xdr.Defender.Client -> Xdr.Defender.Auth -> Xdr.Common.Auth
+             Xdr.Sentinel.Ingest: no auth-module deps (standalone)
          No cyclic references; safe to add a sibling Xdr.<Portal>.Auth + a
          sibling Xdr.<Portal>.Client without touching the other layers.
 
@@ -48,7 +49,6 @@ BeforeAll {
     $script:ClientPsd1     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
     $script:CommonAuthPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth'      'Xdr.Common.Auth.psd1'
     $script:DefAuthPsd1    = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth'    'Xdr.Defender.Auth.psd1'
-    $script:PortalShimPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'      'Xdr.Portal.Auth.psd1'
     $script:IngestPsd1     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
     $script:HelperPath     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Public' 'Invoke-TierPollWithHeartbeat.ps1'
     $script:ManifestPath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
@@ -57,13 +57,11 @@ BeforeAll {
 
     Import-Module $script:CommonAuthPsd1 -Force -ErrorAction Stop
     Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
-    Import-Module $script:PortalShimPsd1 -Force -ErrorAction Stop
     Import-Module $script:ClientPsd1     -Force -ErrorAction Stop
 }
 
 AfterAll {
     Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
-    Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Defender.Auth   -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Common.Auth     -Force -ErrorAction SilentlyContinue
 }
@@ -136,24 +134,19 @@ Describe 'J2 invariant 2 — Invoke-TierPollWithHeartbeat helper accepts optiona
     }
 }
 
-Describe 'J2 invariant 3 — strictly acyclic L1 -> L2 -> shim -> client dependency graph' {
+Describe 'invariant 3 — strictly acyclic L1 -> L2 -> L3 dependency graph (no shim modules)' {
 
-    It 'XdrLogRaider.Client declares RequiredModules referencing the auth surface (Xdr.Portal.Auth shim is acceptable)' {
+    It 'Xdr.Defender.Client declares Xdr.Defender.Auth as a RequiredModule' {
         $manifest = Import-PowerShellDataFile -Path $script:ClientPsd1
         $req = @($manifest.RequiredModules)
-        # Either the legacy shim name OR the new direct L2 name is acceptable.
-        # iter-14.0 keeps the shim reference for backward-compat; Phase 8 will
-        # rename XdrLogRaider.Client → Xdr.Defender.Client and update this to Xdr.Defender.Auth.
-        $hasAuthDep = ($req -contains 'Xdr.Portal.Auth') -or ($req -contains 'Xdr.Defender.Auth')
-        $hasAuthDep | Should -BeTrue -Because 'client depends on the auth surface (via shim today; via direct L2 in Phase 8)'
+        $req | Should -Contain 'Xdr.Defender.Auth' -Because 'L3 client depends on the L2 cookie-exchange surface'
     }
 
-    It 'XdrLogRaider.Ingest has no auth-module RequiredModules (standalone leaf)' {
+    It 'Xdr.Sentinel.Ingest has no auth-module RequiredModules (standalone L1)' {
         $manifest = Import-PowerShellDataFile -Path $script:IngestPsd1
         if ($manifest.ContainsKey('RequiredModules')) {
             $req = @($manifest.RequiredModules)
-            $req | Should -Not -Contain 'XdrLogRaider.Client'
-            $req | Should -Not -Contain 'Xdr.Portal.Auth'
+            $req | Should -Not -Contain 'Xdr.Defender.Client'
             $req | Should -Not -Contain 'Xdr.Defender.Auth'
             $req | Should -Not -Contain 'Xdr.Common.Auth'
         }
@@ -163,20 +156,18 @@ Describe 'J2 invariant 3 — strictly acyclic L1 -> L2 -> shim -> client depende
         $manifest = Import-PowerShellDataFile -Path $script:CommonAuthPsd1
         if ($manifest.ContainsKey('RequiredModules')) {
             $req = @($manifest.RequiredModules)
-            $req | Should -Not -Contain 'XdrLogRaider.Client'
-            $req | Should -Not -Contain 'XdrLogRaider.Ingest'
+            $req | Should -Not -Contain 'Xdr.Defender.Client'
+            $req | Should -Not -Contain 'Xdr.Sentinel.Ingest'
             $req | Should -Not -Contain 'Xdr.Defender.Auth' -Because 'L1 must not depend on L2 (would be a cycle)'
-            $req | Should -Not -Contain 'Xdr.Portal.Auth'   -Because 'L1 must not depend on the shim'
         }
     }
 
-    It 'L2 Xdr.Defender.Auth does not depend on the shim or on the client (only on L1, optionally)' {
+    It 'L2 Xdr.Defender.Auth does not depend on the L3 client or on Sentinel.Ingest' {
         $manifest = Import-PowerShellDataFile -Path $script:DefAuthPsd1
         if ($manifest.ContainsKey('RequiredModules')) {
             $req = @($manifest.RequiredModules)
-            $req | Should -Not -Contain 'XdrLogRaider.Client'
-            $req | Should -Not -Contain 'XdrLogRaider.Ingest'
-            $req | Should -Not -Contain 'Xdr.Portal.Auth' -Because 'L2 must not depend on the shim (would be a cycle: shim imports L2)'
+            $req | Should -Not -Contain 'Xdr.Defender.Client'
+            $req | Should -Not -Contain 'Xdr.Sentinel.Ingest'
         }
     }
 }

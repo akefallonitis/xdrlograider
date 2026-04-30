@@ -21,7 +21,7 @@ function Invoke-MDEEndpoint {
         (Invoke-MDETierPoll does), session reuse (caller owns the session).
 
     .PARAMETER Session
-        PortalSession from Connect-MDEPortal.
+        PortalSession from Connect-DefenderPortal.
 
     .PARAMETER Stream
         Custom Log Analytics table name (e.g. 'MDE_PUAConfig_CL'). Must exist in

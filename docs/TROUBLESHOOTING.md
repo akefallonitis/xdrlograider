@@ -40,7 +40,7 @@ supported in Linux Consumption on Legion. Please remove all module references
 from requirements.psd1 and include the function app dependencies with the
 function app content.'
 ```
-**Symptoms downstream of this bug**: heartbeat sporadic (3 of 24 5-min bins), MDE_AuthTestResult_CL has 0 rows, 44 of 47 tables empty, App Insights `AppExceptions` shows 200+ exceptions/h with this exact message.
+**Symptoms downstream of this bug**: heartbeat sporadic (3 of 24 5-min bins), no AuthChain.Completed events in App Insights customEvents, 44 of 47 tables empty, App Insights `AppExceptions` shows 200+ exceptions/h with this exact message.
 **Fix**: redeploy from `v0.1.0-beta` tag (post iter 13). Iter 13 ships:
 - `requirements.psd1` empty (module references removed)
 - `host.json` `managedDependency.Enabled = false`
@@ -57,7 +57,7 @@ function app content.'
 
 See also: [RUNBOOK.md § Auth self-test failure](RUNBOOK.md#auth-self-test-failure) for the full per-stage diagnostic table.
 
-### MDE_AuthTestResult_CL shows Stage=ests-cookie, Success=false
+### AuthChain.AADSTSError event in App Insights customEvents (Entra-side failure)
 **Cause**: login.microsoftonline.com failed.
 **Possible fixes**:
 - Password expired → reset + re-upload
@@ -65,14 +65,14 @@ See also: [RUNBOOK.md § Auth self-test failure](RUNBOOK.md#auth-self-test-failu
 - Conditional Access blocked sign-in → check Entra sign-in logs, add named-location exception
 - Account locked → unlock in Entra
 
-### MDE_AuthTestResult_CL shows Stage=sccauth-exchange, Success=false
+### AuthChain.Completed event missing; sccauth not issued (portal-side failure)
 **Cause**: Entra sign-in succeeded but portal exchange failed.
 **Possible fixes**:
 - Service account missing Security Reader role → grant role
 - Tenant doesn't have Defender XDR licensed → licensing issue
 - Portal endpoint being hardened by Microsoft → file `portal_endpoint_broken` issue
 
-### MDE_AuthTestResult_CL shows Stage=sample-call, SampleCallHttpCode=403
+### Sample-call returned 403 in customEvents AuthChain.* (service-account roles missing)
 **Cause**: auth worked but probe endpoint returned 403.
 **Possible fixes**:
 - Service account needs additional role (Defender Analyst)
@@ -103,7 +103,7 @@ See also: [RUNBOOK.md § Auth self-test failure](RUNBOOK.md#auth-self-test-failu
 **Cause**: custom table not yet created in Log Analytics (created by ARM deployment).
 **Fix**: re-run ARM deployment to create tables. Wait up to 15 min for Log Analytics to propagate.
 
-### Workbook parser function error: "The function 'MDE_Drift_P0Compliance' was not found"
+### Workbook parser function error: "The function 'MDE_Drift_Inventory' was not found"
 **Cause**: Sentinel savedSearches not yet created (Parsers/ not deployed).
 **Fix**: Deploy parsers manually via `az monitor log-analytics saved-search create` or re-run the solution deployment.
 
@@ -214,7 +214,7 @@ customEvents
 **Fix**: redeploy from a current build — `APPLICATIONINSIGHTS_TELEMETRY_SAMPLING_EXCLUDED_TYPES = AuthChain.AADSTSError;AuthChain.RateLimited;AuthChain.BoundaryMarker` is in the FA appSettings. Verify via Portal → Function App → Configuration.
 
 ### "Send-XdrAppInsights* not exporting / unit tests fail"
-**Cause**: `XdrLogRaider.Ingest.psd1` `FunctionsToExport` must list all 4 entry points; `XdrLogRaider.Ingest.psm1` exports them via the manifest's list (the bundle file `Send-XdrAppInsightsEvent.ps1` contains all 4).
+**Cause**: `Xdr.Sentinel.Ingest.psd1` `FunctionsToExport` must list all 4 entry points; `Xdr.Sentinel.Ingest.psm1` exports them via the manifest's list (the bundle file `Send-XdrAppInsightsEvent.ps1` contains all 4).
 **Fix**: re-run `./tests/Run-Tests.ps1 -Category all-offline` and check the `Logging.iter14.Tests.ps1` suite output.
 
 ### "Secret leaked into App Insights customDimensions"

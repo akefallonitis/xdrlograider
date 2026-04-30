@@ -1,48 +1,60 @@
 // SYNOPSIS:
-//   Computes drift across P0 tenant-configuration streams.
-//
-//   One row per (StreamName, EntityId, FieldName) that changed between the
-//   previous and current observation windows. Used by workbooks and analytic
-//   rules to surface configuration changes.
+//   Computes drift across the Inventory tier — endpoint config + MDI
+//   identity + tenant context + metadata long-tail. Field-level diff (one
+//   row per StreamName, EntityId, FieldName that changed between observation
+//   windows). Sources: AdvancedFeatures, DeviceControlPolicy,
+//   WebContentFiltering, SmartScreenConfig, LiveResponseConfig,
+//   AuthenticatedTelemetry, PUAConfig, AntivirusPolicy, CustomCollection,
+//   TenantContext, TenantWorkloadStatus, SAClassification, IdentityOnboarding,
+//   IdentityServiceAccounts, DCCoverage, IdentityAlertThresholds,
+//   RemediationAccounts, SecurityBaselines, MtoTenants, LicenseReport,
+//   DeviceTimeline.
 //
 // PARAMETERS:
-//   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
-//   window   - ISO 8601 duration, default 1h. How recent counts as "current".
+//   lookback - ISO 8601 duration, default 30d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 1d. Matches the inventory-tier daily poll cadence.
 //
 // INVOCATION:
-//   MDE_Drift_P0Compliance(7d, 1h) | where StreamName == "MDE_AdvancedFeatures_CL"
-//   MDE_Drift_P0Compliance()       // applies defaults
+//   MDE_Drift_Inventory(30d, 1d) | where StreamName == "MDE_DCCoverage_CL"
+//   MDE_Drift_Inventory()        // applies defaults
 //
 // NOTES:
 //   - Parameterized as a KQL function so workbooks/rules can plumb
 //     {TimeRange:value} from the time-picker without forking the parser body.
-//   - Returns an empty result if no drift.
 //   - Drift is computed over the per-stream typed columns (DCR-projected at
 //     ingest); RawJson is preserved on each table as a fallback for fields
 //     not in the manifest's ProjectionMap, but the parser never re-parses it.
-//   - Removed-stream history lives in docs/STREAMS-REMOVED.md + CHANGELOG.md.
+//   - MDE_DeviceTimeline_CL is tenant-gated. The table is created at deploy
+//     time; unioning it when the tenant has not provisioned the timeline
+//     surface yields zero rows but keeps the parser's source list stable.
 
-let MDE_Drift_P0Compliance = (lookback:timespan = 7d, window:timespan = 1h) {
+let MDE_Drift_Inventory = (lookback:timespan = 30d, window:timespan = 1d) {
     // Metadata + envelope columns to exclude from field-level diff (these are
     // bookkeeping; only typed data columns from the manifest ProjectionMap
     // count as "fields" for drift detection).
     let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);
     let sources = union withsource=_Table
         MDE_AdvancedFeatures_CL,
-        MDE_PUAConfig_CL,
-        MDE_AntivirusPolicy_CL,
         MDE_DeviceControlPolicy_CL,
         MDE_WebContentFiltering_CL,
         MDE_SmartScreenConfig_CL,
-        MDE_TenantAllowBlock_CL,
-        MDE_CustomCollection_CL,
         MDE_LiveResponseConfig_CL,
-        MDE_AlertServiceConfig_CL,
-        MDE_AlertTuning_CL,
-        MDE_SuppressionRules_CL,
-        MDE_CustomDetections_CL,
         MDE_AuthenticatedTelemetry_CL,
-        MDE_PreviewFeatures_CL
+        MDE_PUAConfig_CL,
+        MDE_AntivirusPolicy_CL,
+        MDE_CustomCollection_CL,
+        MDE_TenantContext_CL,
+        MDE_TenantWorkloadStatus_CL,
+        MDE_SAClassification_CL,
+        MDE_IdentityOnboarding_CL,
+        MDE_IdentityServiceAccounts_CL,
+        MDE_DCCoverage_CL,
+        MDE_IdentityAlertThresholds_CL,
+        MDE_RemediationAccounts_CL,
+        MDE_SecurityBaselines_CL,
+        MDE_MtoTenants_CL,
+        MDE_LicenseReport_CL,
+        MDE_DeviceTimeline_CL
         | where TimeGenerated > ago(lookback);
     let current = sources
         | where TimeGenerated > ago(window)
@@ -74,4 +86,4 @@ let MDE_Drift_P0Compliance = (lookback:timespan = 7d, window:timespan = 1h) {
         SnapshotPrevious = TimeGenerated1,
         ChangeType       = iff(isnull(TypedBag1), "Added", iff(isnull(TypedBag[tostring(field)]), "Removed", "Modified"))
 };
-MDE_Drift_P0Compliance
+MDE_Drift_Inventory

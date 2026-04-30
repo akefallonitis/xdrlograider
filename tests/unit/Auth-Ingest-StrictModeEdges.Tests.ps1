@@ -24,13 +24,11 @@
 
 BeforeAll {
     $script:RepoRoot         = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:AuthModulePath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'   'Xdr.Portal.Auth.psd1'
     $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
 
     # Stub Az.* deps before module import (Ingest module resolves at runtime).
     function global:Get-AzAccessToken { param([string]$ResourceUrl) [pscustomobject]@{ Token = 'stub'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
 
-    Import-Module $script:AuthModulePath   -Force -ErrorAction Stop
     Import-Module $script:IngestModulePath -Force -ErrorAction Stop
 
     Set-StrictMode -Version Latest

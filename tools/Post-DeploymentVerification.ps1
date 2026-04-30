@@ -15,13 +15,13 @@
       P2.   Workspace tables present (47 MDE_*_CL with plan: Analytics)
       P3.   Solution package + 35 metadata back-links + Data Connector card (kind=GenericUI)
       P3.5. Key Vault structure (RBAC mode + expected secrets + SAMI Secrets User)
-      P4.   Auth chain green (MDE_AuthTestResult_CL last 15 min)
+      P4.   Heartbeat liveness (MDE_Heartbeat_CL last 15 min, StreamsSucceeded > 0)
       P5.  Heartbeat continuous (no gaps in last 2h)
       P6.  Rate limits = 0 (steady state)
       P7.  Compression efficiency (GzipBytes/RowsIngested < 0.2)
       P8.  Per-stream liveness (every 'live' manifest entry has rows in 24h)
-      P9.  App Insights health (exception/error counts within bounds)
-      P10. Parser round-trip (each of 6 parsers emits expected schema)
+      P9.  App Insights health (exception/error counts within bounds; AuthChain.* events)
+      P10. Parser round-trip (each of 4 parsers emits expected schema)
       P11. Drift consistency (manifest <-> DCR <-> tables <-> FA app settings)
       P12. SAMI verification (3 narrow-scoped roles assigned correctly)
       P13. Markdown report
@@ -263,18 +263,20 @@ function Invoke-WorkspaceKql {
     return $r.Results
 }
 
-# P4. Auth chain green
+# P4. Heartbeat liveness — proves the FA loaded, signed in, ran a poll, and ingested.
+# (Auth chain diagnostics are emitted to App Insights customEvents as AuthChain.*
+# events — see P9. Workspace-side, the strongest single liveness signal is a
+# Heartbeat row with StreamsSucceeded > 0 in the last 15 min.)
 try {
-    $rows = Invoke-WorkspaceKql -Query 'MDE_AuthTestResult_CL | top 1 by TimeGenerated desc | project TimeGenerated, Success, Stage'
+    $rows = Invoke-WorkspaceKql -Query 'MDE_Heartbeat_CL | where TimeGenerated > ago(15m) | where StreamsSucceeded > 0 | top 1 by TimeGenerated desc | project TimeGenerated, Tier, FunctionName, StreamsSucceeded, StreamsAttempted'
     if (@($rows).Count -eq 0) {
-        Record-Phase 'P4' 'Auth chain' $false 'No MDE_AuthTestResult_CL rows yet — wait 5+ min after deploy' ''
+        Record-Phase 'P4' 'Heartbeat liveness' $false 'No MDE_Heartbeat_CL rows with StreamsSucceeded > 0 in last 15 min — wait 5-10+ min after deploy or check AuthChain.* events in App Insights' ''
     } else {
         $r = $rows[0]
         $age = ([datetime]::UtcNow - [datetime]$r.TimeGenerated).TotalMinutes
-        $pass = ($r.Success -eq $true -or $r.Success -eq 'true') -and $age -lt 30
-        Record-Phase 'P4' 'Auth chain' $pass "Last: Success=$($r.Success) Stage=$($r.Stage) Age=$([int]$age)min" ''
+        Record-Phase 'P4' 'Heartbeat liveness' $true "Last: Tier=$($r.Tier) Fn=$($r.FunctionName) StreamsSucceeded=$($r.StreamsSucceeded)/$($r.StreamsAttempted) Age=$([int]$age)min" ''
     }
-} catch { Record-Phase 'P4' 'Auth chain' $false "KQL failed: $_" '' }
+} catch { Record-Phase 'P4' 'Heartbeat liveness' $false "KQL failed: $_" '' }
 
 # P5. Heartbeat continuous
 try {

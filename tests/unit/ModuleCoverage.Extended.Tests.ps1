@@ -26,20 +26,16 @@
 
 BeforeAll {
     $script:Root = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
-    # iter-14.0: import L1 + L2 directly so tests can target Xdr.Defender.Auth
-    # InModuleScope. The Xdr.Portal.Auth shim imports both modules implicitly
-    # but we need explicit references for Mock -ModuleName.
+    # Five-module imports — explicit references for Mock -ModuleName.
     Import-Module "$script:Root/src/Modules/Xdr.Common.Auth/Xdr.Common.Auth.psd1"           -Force
-    Import-Module "$script:Root/src/Modules/Xdr.Defender.Auth/Xdr.Defender.Auth.psd1"       -Force
-    Import-Module "$script:Root/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"           -Force
     Import-Module "$script:Root/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1"   -Force
+    Import-Module "$script:Root/src/Modules/Xdr.Defender.Auth/Xdr.Defender.Auth.psd1"       -Force
     Import-Module "$script:Root/src/Modules/Xdr.Defender.Client/Xdr.Defender.Client.psd1"   -Force
 }
 
 AfterAll {
     Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
-    Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Defender.Auth   -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Common.Auth     -Force -ErrorAction SilentlyContinue
 }
@@ -204,15 +200,14 @@ Describe 'Expand-MDEResponse on varied input shapes' {
     }
 }
 
-Describe 'Test-DefenderPortalAuth stage reporting (iter-14.0 home)' {
-    # iter-14.0: Test-MDEPortalAuth is now a backward-compat shim wrapper around
-    # Test-DefenderPortalAuth. Stage names changed slightly: the rewrite-era
-    # 'ests-cookie' stage is now subsumed under 'auth-chain' (since the L2
-    # module's Connect-DefenderPortal wraps both Get-EntraEstsAuth + Get-DefenderSccauth
-    # into one stage). Tests target the L2 function directly so we exercise
-    # the actual stage names in production.
+Describe 'Test-DefenderPortalAuth stage reporting' {
+    # Stage names: the rewrite-era 'ests-cookie' stage is subsumed under
+    # 'auth-chain' (since the L2 module's Connect-DefenderPortal wraps both
+    # Get-EntraEstsAuth + Get-DefenderSccauth into one stage). Tests target
+    # the L2 function directly so we exercise the actual stage names in
+    # production.
 
-    It 'reports auth-chain stage on initial auth failure (iter-14.0: Connect-DefenderPortal throws)' {
+    It 'reports auth-chain stage on initial auth failure (Connect-DefenderPortal throws)' {
         InModuleScope Xdr.Defender.Auth {
             Mock Connect-DefenderPortal { throw 'ESTS sign-in blocked by CA' }
             $r = Test-DefenderPortalAuth -Method CredentialsTotp -Credential @{

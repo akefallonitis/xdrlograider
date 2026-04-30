@@ -19,7 +19,7 @@ tactics:
 relevantTechniques:
   - T1537
 query: |
-  MDE_Drift_P1Pipeline(1h, 10m) | where StreamName == "MDE_StreamingApiConfig_CL" | where ChangeType == "Added"
+  MDE_Drift_Maintenance(1h, 10m) | where StreamName == "MDE_StreamingApiConfig_CL" | where ChangeType == "Added"
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

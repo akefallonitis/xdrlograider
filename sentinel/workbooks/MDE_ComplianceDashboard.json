@@ -50,7 +50,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_Drift_P0Compliance({TimeRange:value}, 1h)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1h)\n| render timechart",
+        "query": "MDE_Drift_Inventory({TimeRange:value}, 1h)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1h)\n| render timechart",
         "size": 0,
         "title": "P0 drift events",
         "queryType": 0
@@ -73,7 +73,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "let drift = MDE_Drift_P0Compliance({TimeRange:value}, 1h)\n    | extend DriftTime = TimeGenerated, DriftBin = bin(TimeGenerated, 5min);\nlet audits = AuditLogs\n    | where TimeGenerated > ago({TimeRange:value})\n    | project AuditTime = TimeGenerated, OperationName, InitiatedByUpn = tostring(InitiatedBy.user.userPrincipalName), AuditBin = bin(TimeGenerated, 5min);\ndrift\n| join kind=leftouter audits on $left.DriftBin == $right.AuditBin\n| where isnull(AuditTime) or (AuditTime between ((DriftTime - 5min) .. (DriftTime + 5min)))\n| extend DeltaSec = iff(isnull(AuditTime), int(null), abs(datetime_diff('second', AuditTime, DriftTime)))\n| summarize arg_min(DeltaSec, OperationName, InitiatedByUpn, AuditTime) by DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType\n| project TimeGenerated = DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType, OperationName, InitiatedByUpn\n| order by TimeGenerated desc",
+        "query": "let drift = MDE_Drift_Inventory({TimeRange:value}, 1h)\n    | extend DriftTime = TimeGenerated, DriftBin = bin(TimeGenerated, 5min);\nlet audits = AuditLogs\n    | where TimeGenerated > ago({TimeRange:value})\n    | project AuditTime = TimeGenerated, OperationName, InitiatedByUpn = tostring(InitiatedBy.user.userPrincipalName), AuditBin = bin(TimeGenerated, 5min);\ndrift\n| join kind=leftouter audits on $left.DriftBin == $right.AuditBin\n| where isnull(AuditTime) or (AuditTime between ((DriftTime - 5min) .. (DriftTime + 5min)))\n| extend DeltaSec = iff(isnull(AuditTime), int(null), abs(datetime_diff('second', AuditTime, DriftTime)))\n| summarize arg_min(DeltaSec, OperationName, InitiatedByUpn, AuditTime) by DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType\n| project TimeGenerated = DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType, OperationName, InitiatedByUpn\n| order by TimeGenerated desc",
         "size": 0,
         "title": "Recent changes with attribution",
         "queryType": 0,

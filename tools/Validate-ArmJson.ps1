@@ -487,25 +487,24 @@ if (Test-Path $mainPath) {
             # gate locks the embedded copy in sync.
             $dt = $haveDataConnector[0].properties.connectorUiConfig.dataTypes
             $dtCount = if ($dt) { @($dt).Count } else { 0 }
-            if ($dtCount -ne 47) {
-                Write-Host ("FAIL : dataConnector.connectorUiConfig.dataTypes.Count = $dtCount; expected 47 (45 streams + Heartbeat + AuthTestResult)") -ForegroundColor Red
+            if ($dtCount -ne 46) {
+                Write-Host ("FAIL : dataConnector.connectorUiConfig.dataTypes.Count = $dtCount; expected 46 (45 active streams + 1 deprecated + Heartbeat = 46 surfaced)") -ForegroundColor Red
                 $anyFail = $true
             } else {
-                Write-Host ("OK   : dataConnector.dataTypes lists 47 tables") -ForegroundColor Green
+                Write-Host ("OK   : dataConnector.dataTypes lists 46 tables") -ForegroundColor Green
             }
 
-            # ITER 13: connectivityCriterias query strength gate — must use
-            # `summarize ... | project IsConnected = ...` modern pattern, not
-            # legacy `| count | where Count > 0`. Sentinel UI status indicator
-            # is more reliable with the modern pattern (Trend Micro Vision One
-            # / AbnormalSecurity references).
+            # connectivityCriterias query — must reference Heartbeat + StreamsSucceeded
+            # filter (proves a poll succeeded, not just that the heartbeat timer
+            # fired). Auth chain diagnostics live in App Insights customEvents,
+            # not in a workspace table.
             $conQuery = $haveDataConnector[0].properties.connectorUiConfig.connectivityCriterias[0].value[0]
-            if ($conQuery -notmatch 'IsConnected\s*=\s*LastLogReceived') {
-                Write-Host ("FAIL : connectivityCriterias query uses legacy pattern. Got: $conQuery") -ForegroundColor Red
-                Write-Host ("       Expected: 'MDE_Heartbeat_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(1h)'") -ForegroundColor Yellow
+            if ($conQuery -notmatch 'MDE_Heartbeat_CL' -or $conQuery -notmatch 'StreamsSucceeded' -or $conQuery -notmatch 'IsConnected\s*=\s*isnotempty') {
+                Write-Host ("FAIL : connectivityCriterias query does not match the v0.1.0-beta shape. Got: $conQuery") -ForegroundColor Red
+                Write-Host ("       Expected: 'MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | project IsConnected = isnotempty(TimeGenerated)'") -ForegroundColor Yellow
                 $anyFail = $true
             } else {
-                Write-Host ("OK   : connectivityCriterias query uses modern summarize+project IsConnected pattern") -ForegroundColor Green
+                Write-Host ("OK   : connectivityCriterias query uses Heartbeat + StreamsSucceeded gate (proves poll-success, not just timer-firing)") -ForegroundColor Green
             }
 
             # CANONICAL DATA-CONNECTOR SHAPE LOCK
@@ -610,65 +609,47 @@ if (Test-Path $hostJsonPath) {
 }
 
 # ============================================================================
-# FUNCTION-APP DEPLOYMENT URL — package version pinning gate.
-# GitHub /releases/latest/download/... endpoint excludes pre-release tags by
-# design (returns 302 → 404). Default 'latest' silently leaves the FA with no
-# code → "Runtime: Error", 0 functions loaded, 0 heartbeats, hidden connector
-# card. v0.1.0-beta first deploy attempt hit exactly this. Lock the default to
-# an explicit pinned tag.
+# FUNCTION-APP DEPLOYMENT URL — release tracking shape.
+# v0.1.0-beta uses the GitHub Releases /latest/download/function-app.zip
+# pattern (Marketplace best practice for community connectors). GitHub's
+# /latest endpoint resolves to the most-recent non-prerelease tag — operators
+# don't have to edit the wizard for routine upgrades. Pinning a specific tag
+# is documented as an advanced override in docs/DEPLOY-METHODS.md.
+# Gate: every code path that builds packageUrl must point at /releases/latest.
 # ============================================================================
 
 Write-Host ""
 Write-Host "=== Function App package URL ===" -ForegroundColor Cyan
 
 $mainTplPath = 'deploy/compiled/mainTemplate.json'
-$createUiPath = 'deploy/compiled/createUiDefinition.json'
-$bicepPath    = 'deploy/main.bicep'
+$bicepPath   = 'deploy/main.bicep'
 
-# 1) mainTemplate.json default
 if (Test-Path $mainTplPath) {
     $main = Get-Content $mainTplPath -Raw | ConvertFrom-Json
     if ($main.parameters.PSObject.Properties.Name -contains 'functionAppZipVersion') {
-        $faDef = $main.parameters.functionAppZipVersion.defaultValue
-        if ($faDef -eq 'latest') {
-            Write-Host ("FAIL : mainTemplate.json functionAppZipVersion default = 'latest'. GitHub /releases/latest excludes pre-releases — FA gets no code, 'Runtime: Error'. Pin to an explicit tag like '0.1.0-beta'.") -ForegroundColor Red
-            $anyFail = $true
-        } elseif ($faDef -notmatch '^\d+\.\d+\.\d+(-[a-z0-9.]+)?$') {
-            Write-Host ("WARN : mainTemplate.json functionAppZipVersion default '$faDef' is not a semver string. Confirm the corresponding GitHub Release tag exists at /releases/download/v$faDef/function-app.zip.") -ForegroundColor Yellow
-        } else {
-            Write-Host ("OK   : mainTemplate.json functionAppZipVersion default = '$faDef' (pinned, not 'latest')") -ForegroundColor Green
-        }
+        Write-Host ("FAIL : mainTemplate.json still defines a 'functionAppZipVersion' parameter — v0.1.0-beta tracks /releases/latest unconditionally; remove the parameter and inline the URL in variables.packageUrl.") -ForegroundColor Red
+        $anyFail = $true
+    }
+    $pkgUrl = $main.variables.packageUrl
+    if ($pkgUrl -notmatch '/releases/latest/download/function-app\.zip') {
+        Write-Host ("FAIL : mainTemplate.json variables.packageUrl does not target /releases/latest/download/function-app.zip. Got: $pkgUrl") -ForegroundColor Red
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : mainTemplate.json variables.packageUrl tracks /releases/latest/download/function-app.zip") -ForegroundColor Green
     }
 }
 
-# 2) createUiDefinition.json default
-if (Test-Path $createUiPath) {
-    $ui = Get-Content $createUiPath -Raw | ConvertFrom-Json
-    $faTextBox = $null
-    # The wizard textbox lives somewhere in the steps tree. Recursive search.
-    $stepsBlob = ($ui | ConvertTo-Json -Depth 50)
-    if ($stepsBlob -match '"name"\s*:\s*"functionAppZipVersion"[^}]*"defaultValue"\s*:\s*"([^"]+)"') {
-        $uiDef = $Matches[1]
-        if ($uiDef -eq 'latest') {
-            Write-Host ("FAIL : createUiDefinition.json functionAppZipVersion default = 'latest' (same /releases/latest 404 trap as mainTemplate). Pin to an explicit tag.") -ForegroundColor Red
-            $anyFail = $true
-        } else {
-            Write-Host ("OK   : createUiDefinition.json functionAppZipVersion default = '$uiDef' (pinned)") -ForegroundColor Green
-        }
-    }
-}
-
-# 3) Bicep parameter default
 if (Test-Path $bicepPath) {
     $bicep = Get-Content $bicepPath -Raw
-    if ($bicep -match "param\s+functionAppZipVersion\s+string\s*=\s*'([^']+)'") {
-        $bicepDef = $Matches[1]
-        if ($bicepDef -eq 'latest') {
-            Write-Host ("FAIL : main.bicep functionAppZipVersion default = 'latest' (same trap). Pin to an explicit tag.") -ForegroundColor Red
-            $anyFail = $true
-        } else {
-            Write-Host ("OK   : main.bicep functionAppZipVersion default = '$bicepDef' (pinned)") -ForegroundColor Green
-        }
+    if ($bicep -match "param\s+functionAppZipVersion\s+string") {
+        Write-Host ("FAIL : main.bicep still declares 'param functionAppZipVersion' — v0.1.0-beta drops the param. Inline /releases/latest into the packageUrl variable.") -ForegroundColor Red
+        $anyFail = $true
+    }
+    if ($bicep -notmatch "/releases/latest/download/function-app\.zip") {
+        Write-Host ("FAIL : main.bicep packageUrl does not reference /releases/latest/download/function-app.zip.") -ForegroundColor Red
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : main.bicep packageUrl tracks /releases/latest/download/function-app.zip") -ForegroundColor Green
     }
 }
 

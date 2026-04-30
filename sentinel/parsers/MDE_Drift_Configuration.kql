@@ -1,18 +1,20 @@
 // SYNOPSIS:
-//   Computes drift across P7 metadata streams (license report, user
-//   preferences, multi-tenant org, cloud apps config).
-//
-//   One row per (StreamName, EntityId, FieldName) that changed between the
-//   previous and current observation windows. Used by workbooks and analytic
-//   rules to surface configuration changes.
+//   Computes drift across the Configuration tier — alert/detection rules,
+//   tenant policy, integration state, RBAC, threat intel, operator
+//   preferences, CASB integration. Field-level diff (one row per
+//   StreamName, EntityId, FieldName that changed between observation
+//   windows). Sources: PreviewFeatures, AlertServiceConfig, AlertTuning,
+//   SuppressionRules, CustomDetections, TenantAllowBlock, ConnectedApps,
+//   IntuneConnection, PurviewSharing, RbacDeviceGroups, UnifiedRbacRoles,
+//   ThreatAnalytics, UserPreferences, CloudAppsConfig.
 //
 // PARAMETERS:
 //   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
-//   window   - ISO 8601 duration, default 1h. How recent counts as "current".
+//   window   - ISO 8601 duration, default 6h. Matches the config-tier poll cadence.
 //
 // INVOCATION:
-//   MDE_Drift_P7Metadata(7d, 1h) | where StreamName == "MDE_LicenseReport_CL"
-//   MDE_Drift_P7Metadata()       // applies defaults
+//   MDE_Drift_Configuration(7d, 6h) | where StreamName == "MDE_SuppressionRules_CL"
+//   MDE_Drift_Configuration()       // applies defaults
 //
 // NOTES:
 //   - Parameterized as a KQL function so workbooks/rules can plumb
@@ -21,15 +23,25 @@
 //     ingest); RawJson is preserved on each table as a fallback for fields
 //     not in the manifest's ProjectionMap, but the parser never re-parses it.
 
-let MDE_Drift_P7Metadata = (lookback:timespan = 7d, window:timespan = 1h) {
+let MDE_Drift_Configuration = (lookback:timespan = 7d, window:timespan = 6h) {
     // Metadata + envelope columns to exclude from field-level diff (these are
     // bookkeeping; only typed data columns from the manifest ProjectionMap
     // count as "fields" for drift detection).
     let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);
     let sources = union withsource=_Table
-        MDE_LicenseReport_CL,
+        MDE_PreviewFeatures_CL,
+        MDE_AlertServiceConfig_CL,
+        MDE_AlertTuning_CL,
+        MDE_SuppressionRules_CL,
+        MDE_CustomDetections_CL,
+        MDE_TenantAllowBlock_CL,
+        MDE_ConnectedApps_CL,
+        MDE_IntuneConnection_CL,
+        MDE_PurviewSharing_CL,
+        MDE_RbacDeviceGroups_CL,
+        MDE_UnifiedRbacRoles_CL,
+        MDE_ThreatAnalytics_CL,
         MDE_UserPreferences_CL,
-        MDE_MtoTenants_CL,
         MDE_CloudAppsConfig_CL
         | where TimeGenerated > ago(lookback);
     let current = sources
@@ -62,4 +74,4 @@ let MDE_Drift_P7Metadata = (lookback:timespan = 7d, window:timespan = 1h) {
         SnapshotPrevious = TimeGenerated1,
         ChangeType       = iff(isnull(TypedBag1), "Added", iff(isnull(TypedBag[tostring(field)]), "Removed", "Modified"))
 };
-MDE_Drift_P7Metadata
+MDE_Drift_Configuration

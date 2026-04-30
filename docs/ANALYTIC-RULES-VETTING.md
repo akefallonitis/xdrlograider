@@ -113,7 +113,7 @@ Each section below covers one rule. The rule files live at [`sentinel/analytic-r
 - **Display name**: `MDE portal config change outside business hours`
 - **Severity**: Low
 - **MITRE**: T1562 (Impair Defenses)
-- **Required streams**: `MDE_Drift_P0Compliance`, `MDE_Drift_P1Pipeline`, `MDE_Drift_P2Governance` (any change in any P0/P1/P2 stream)
+- **Required streams**: `MDE_Drift_Inventory`, `MDE_Drift_Configuration`, `MDE_Drift_Configuration` (any change in any P0/P1/P2 stream)
 - **What it detects**: a configuration change occurred outside 09:00-17:00 local time (workspace `TimeGenerated` is UTC, so adjust the `HourOfDay` window for your operating hours).
 - **False-positive likelihood**: High. Cross-region operators, on-call rotations, automation, and after-hours incident response all trigger this. Useful as a hunting baseline; not as a high-signal rule.
 - **Tuning recommendation**: configure the `HourOfDay` filter for your tenant's operating hours and time zone before enabling. Pair with a join against expected-after-hours-account list to suppress on-call automation.

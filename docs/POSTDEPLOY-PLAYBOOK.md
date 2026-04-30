@@ -58,7 +58,7 @@ pwsh ./tools/Initialize-XdrLogRaiderAuth.ps1 `
 
 ## Step 2 — Wait for first timer cycle (~15 minutes)
 
-The `validate-auth-selftest` timer fires at :05/:20/:35/:50 past the hour. Once it produces a green flag in the checkpoint table, the other timers un-gate.
+On first deploy the auth-selftest flag is set the first time any poll-* timer signs in successfully. Once that green flag lands in the Storage Table checkpoint row, the other timers un-gate.
 
 **Success check** (run after 20 min):
 ```powershell
@@ -78,7 +78,7 @@ az storage entity show `
 ```
 
 **If no flag after 30 min**:
-- Check Function App logs in Azure Portal → Functions → `validate-auth-selftest` → Monitor → invocations.
+- Check Function App logs in Azure Portal → Functions → `(auth chain — see App Insights customEvents)` → Monitor → invocations.
 - Common failure: AADSTS error in the stack trace → credentials wrong, TOTP seed wrong, or MFA not registered on the service account.
 - Run locally for fast feedback:
   ```powershell
@@ -91,7 +91,7 @@ az storage entity show `
 
 ## Step 3 — Verify ingestion started (≈ 15 more minutes)
 
-After Step 2 + one more hour (for the `poll-p0-compliance-1h` timer to fire), run:
+After Step 2 + one more hour (for the `poll-inventory-1d` timer to fire), run:
 
 ```powershell
 $env:XDRLR_ONLINE = 'true'
@@ -103,7 +103,7 @@ pwsh ./tests/Run-Tests.ps1 -Category e2e
 **Success**: every assertion green:
 - `resource group contains Function App / Key Vault / DCE / DCR / Storage` ✓
 - `MDE_Heartbeat_CL has rows in the last hour` ✓
-- `MDE_AuthTestResult_CL shows latest Success=true` ✓
+- `App Insights customEvents (AuthChain.* events) shows latest Success=true` ✓
 - `MDE_AdvancedFeatures_CL has at least one row` ✓
 - `at least 3 P0 streams have ingested rows` ✓
 - per-tier coverage asserted ✓
@@ -128,11 +128,11 @@ MDE_Heartbeat_CL
 | summarize PerTier = makeset(Tier), Runs = count() by FunctionName, bin(TimeGenerated, 1h)
 | order by TimeGenerated desc
 ```
-**Expect**: 9 function names present (heartbeat-5m, validate-auth-selftest, 7× poll-p*). Each poll-p* should appear at its scheduled cadence.
+**Expect**: 6 function names present (heartbeat-5m + 5 poll-* cadence-tier timers). Each poll-p* should appear at its scheduled cadence.
 
 ### 4b. Auth health
 ```kql
-MDE_AuthTestResult_CL
+App Insights customEvents (AuthChain.* events)
 | where TimeGenerated > ago(24h)
 | summarize Successes = countif(Success == true), Failures = countif(Success == false) by bin(TimeGenerated, 1h)
 | order by TimeGenerated desc
@@ -186,7 +186,7 @@ After 48 hours of green heartbeats + stable ingestion:
 The manifest ships with 25 verified streams + 27 marked for follow-up. To enable one:
 
 1. Identify which path / body shape is needed — use `tests/integration/Audit-Endpoints-Live.ps1` to probe manually, or capture a browser HAR and inspect.
-2. Edit `src/Modules/XdrLogRaider.Client/endpoints.manifest.psd1` — remove `Deferred = $true` (and adjust `Path`/`Method`/`Body` if needed).
+2. Edit `src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1` — remove `Deferred = $true` (and adjust `Path`/`Method`/`Body` if needed).
 3. Run `pwsh ./tools/Build-SentinelContent.ps1` to refresh compiled ARM.
 4. Run `pwsh ./tests/Run-Tests.ps1 -Category all-offline` — tests catch drift automatically.
 5. Push + rebuild artefacts:
@@ -206,11 +206,11 @@ The manifest ships with 25 verified streams + 27 marked for follow-up. To enable
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `MDE_Heartbeat_CL` empty after 30 min | FA not running / MI not granted | Check FA `state` + 3 role assignments on MI |
-| `MDE_AuthTestResult_CL.Success = false` | Credentials mismatch / TOTP seed wrong | Re-run `Initialize-XdrLogRaiderAuth.ps1` with corrected values |
+| `App Insights customEvents (AuthChain.* events).Success = false` | Credentials mismatch / TOTP seed wrong | Re-run `Initialize-XdrLogRaiderAuth.ps1` with corrected values |
 | Only 1-2 streams populated | Auth working but endpoints 4xx/5xx | Expected — 25/52 is today's baseline; iterate on deferred set |
 | `AADSTS9000410` in logs | ProcessAuth ContentType regression | Should not happen in v1.0+ — file bug |
 | `AADSTS50058` in logs | Tenant rejects the ESTS cookie (rare) | Add service account to a CA policy exemption for named location |
-| HTTP 440 storms in logs | Auto-reauth loop broken | Should not happen in v1.0+ — verify `Invoke-MDEPortalRequest` patch applied |
+| HTTP 440 storms in logs | Auto-reauth loop broken | Should not happen in v1.0+ — verify `Invoke-DefenderPortalRequest` patch applied |
 | `Row exceeds 900 KB` warning | Single row hit DCE size limit | Benign; row skipped, logged. Investigate if it's a specific stream always hitting this |
 
 ---

@@ -61,7 +61,7 @@
         "queryType": 0,
         "title": "Identity drift over time",
         "size": 0,
-        "query": "MDE_Drift_P5Identity({TimeRange:value}, 1d)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1d)\n| render timechart",
+        "query": "MDE_Drift_Inventory({TimeRange:value}, 1d)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1d)\n| render timechart",
         "version": "KqlItem/1.0"
       },
       "type": 3

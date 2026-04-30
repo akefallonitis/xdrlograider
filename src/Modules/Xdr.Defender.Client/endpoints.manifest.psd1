@@ -1,6 +1,6 @@
 @{
     # ============================================================================
-    # XdrLogRaider — Endpoint Catalogue (iter-14.0 schema)
+    # XdrLogRaider — Endpoint Catalogue
     # ============================================================================
     # Single source of truth for every Defender XDR portal-only stream this
     # connector collects. Dispatched at runtime by Invoke-MDEEndpoint and
@@ -14,11 +14,15 @@
     #   - DefenderHarvester (github.com/olafhartong/DefenderHarvester) — 12
     #     classic MDE endpoints with full worked examples.
     #
-    # iter-14.0 schema (this file's structure):
-    #   Per-entry MANDATORY:
+    # Per-entry MANDATORY:
     #     Stream         custom LA table name (e.g. 'MDE_PUAConfig_CL')
     #     Path           portal API path relative to https://<Portal>
-    #     Tier           'P0'|'P1'|'P2'|'P3'|'P5'|'P6'|'P7' (drives polling cadence)
+    #     Tier           cadence-purpose label that drives polling frequency:
+    #                      'fast'        — every 10 min (Action Center events)
+    #                      'exposure'    — hourly (XSPM + ExposureSnapshots)
+    #                      'config'      — every 6 hours (rules / policies / RBAC)
+    #                      'inventory'   — daily (settings / identity / metadata)
+    #                      'maintenance' — weekly (rare-change long-tail)
     #     Category       nathanmcnulty 10-category functional taxonomy:
     #                      'Endpoint Device Management'
     #                      'Endpoint Configuration'
@@ -72,43 +76,20 @@
     #                       Defaults to empty in Phase 2; populated per-stream in
     #                       Phase 4 with sensible per-Category column conventions.
     #
-    # iter-14.0 portal-only-vs-public-API audit (2026-04-29):
+    # Portal-only-vs-public-API audit notes:
     #   DROPPED 1 stream: MDE_SecureScoreBreakdown_CL (Graph /security/secureScores
     #     covers the same data with the same shape).
     #   HYBRID flag (3 streams): MDE_RbacDeviceGroups_CL, MDE_LicenseReport_CL,
     #     MDE_DataExportSettings_CL. Each entry's per-entry comment documents
     #     the public-API delta + why we keep the portal version.
-    #   New endpoints in Phase 6: MDE_DeviceTimeline_CL (portal-only) +
-    #     MDE_MachineActions_CL (HYBRID). Not in this Phase-2 file yet.
-    #
-    # iter-13.x cumulative changes (preserved here for forensic — see CHANGELOG
-    # for full provenance):
-    #   - 2 write endpoints removed (would corrupt tenant data on read):
-    #     MDE_CriticalAssets_CL, MDE_DeviceCriticality_CL.
-    #   - 4 streams ACTIVATED via XDRInternals-documented bodies:
-    #     MDE_IdentityServiceAccounts_CL, MDE_XspmAttackPaths_CL,
-    #     MDE_XspmChokePoints_CL, MDE_XspmTopTargets_CL.
-    #   - 2 streams METHOD-CORRECTED (POST→GET): MDE_AntivirusPolicy_CL,
-    #     MDE_TenantAllowBlock_CL.
-    #   - MDE_CustomCollection_CL path '/model' → '/rules'.
-    #   - MDE_StreamingApiConfig_CL marked deprecated; canonical is
-    #     MDE_DataExportSettings_CL. Removed in v0.2.0.
-    #
-    # iter-14.0 Phase 3 EntityId wrapper-key fix (impacts THIS manifest):
-    #   MDE_ActionCenter_CL gets UnwrapProperty='Results' + IdProperty=@('ActionId')
-    #   so its `{Count:N, Results:[…]}` response yields per-action rows instead
-    #   of 2 wrapper rows (EntityId='Results', EntityId='Count'). Same fix is
-    #   audited per-stream during Phase 3 + verified by per-stream live fixtures.
     #
     # Per-tier breakdown (verified by tests/unit/Manifest.* gates):
-    #   P0 = 15 streams (12 live + 3 tenant-gated)
-    #   P1 = 7  streams (6 live + 1 deprecated)
-    #   P2 = 4  streams (4 live) — 2 WRITE endpoints REMOVED
-    #   P3 = 7  streams (6 live + 1 tenant-gated) — was 8, dropped SecureScoreBreakdown
-    #   P5 = 5  streams (2 live + 3 tenant-gated)
-    #   P6 = 2  streams (2 live)
-    #   P7 = 4  streams (3 live + 1 tenant-gated)
-    #   TOTAL: 44 data streams (35 live + 8 tenant-gated + 1 deprecated)
+    #   fast        =  2 streams (Action Center events, every 10 min)
+    #   exposure    =  7 streams (XSPM graph + Exposure snapshots, hourly)
+    #   config      = 14 streams (alert/detect rules + RBAC + integrations, every 6h)
+    #   inventory   = 21 streams (device + identity + metadata long-tail, daily)
+    #   maintenance =  2 streams (DataExport active + StreamingApi deprecated, weekly)
+    #   TOTAL       = 46 entries (45 active + 1 deprecated)
     # ============================================================================
 
     Defaults = @{
@@ -120,11 +101,11 @@
     }
 
     Endpoints = @(
-        # ---- P0 Compliance (15 streams, hourly) ------------------------------------
+        # ---- Endpoint catalogue — Tier values are: fast | exposure | config | inventory | maintenance.
         @{
             Stream = 'MDE_AdvancedFeatures_CL'
             Path = '/apiproxy/mtp/settings/GetAdvancedFeaturesSetting'
-            Tier = 'P0'
+            Tier = 'inventory'
             Category = 'Endpoint Configuration'
             Purpose = 'Tenant-wide MDE feature toggles (Tamper Protection, EDR-block, Web Content Filtering, etc.)'
             Availability = 'live'
@@ -144,7 +125,7 @@
         @{
             Stream = 'MDE_PreviewFeatures_CL'
             Path = '/apiproxy/mtp/settings/GetPreviewExperienceSetting?context=MdatpContext'
-            Tier = 'P0'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'Preview-ring enrolment for tenant-wide MDE features (gradual rollout state)'
             Availability = 'live'
@@ -159,7 +140,7 @@
         @{
             Stream = 'MDE_AlertServiceConfig_CL'
             Path = '/apiproxy/mtp/alertsApiService/workloads/disabled?includeDetails=true'
-            Tier = 'P0'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'Per-workload alert-source enable/disable matrix (which detection sources fire alerts)'
             Availability = 'live'
@@ -176,7 +157,7 @@
         @{
             Stream = 'MDE_AlertTuning_CL'
             Path = '/apiproxy/mtp/alertsEmailNotifications/email_notifications'
-            Tier = 'P0'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'Email-notification rules for alerts (recipients, severity filters, delivery cadence)'
             Availability = 'live'
@@ -193,7 +174,7 @@
         @{
             Stream = 'MDE_SuppressionRules_CL'
             Path = '/apiproxy/mtp/suppressionRulesService/suppressionRules'
-            Tier = 'P0'
+            Tier = 'config'
             Filter = 'fromDate'
             Category = 'Configuration and Settings'
             Purpose = 'Operator-defined alert suppression rules (which alerts are deliberately silenced + scope)'
@@ -219,7 +200,7 @@
         @{
             Stream = 'MDE_CustomDetections_CL'
             Path = '/apiproxy/mtp/huntingService/rules/unified?pageIndex=1&pageSize=10000&sortOrder=Ascending&isUnifiedRulesListEnabled=true'
-            Tier = 'P0'
+            Tier = 'config'
             Filter = 'fromDate'
             UnwrapProperty = 'Rules'
             Category = 'Configuration and Settings'
@@ -240,7 +221,7 @@
         @{
             Stream = 'MDE_DeviceControlPolicy_CL'
             Path = '/apiproxy/mtp/siamApi/Onboarding'
-            Tier = 'P0'
+            Tier = 'inventory'
             Category = 'Endpoint Configuration'
             Purpose = 'Device-control + onboarding-package configuration (USB/printer/disk policies)'
             Availability = 'live'
@@ -255,7 +236,7 @@
         @{
             Stream = 'MDE_WebContentFiltering_CL'
             Path = '/apiproxy/mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories'
-            Tier = 'P0'
+            Tier = 'inventory'
             Category = 'Endpoint Configuration'
             Purpose = 'Web Content Filtering policy state + top blocked-category report'
             Availability = 'live'
@@ -272,7 +253,7 @@
         @{
             Stream = 'MDE_SmartScreenConfig_CL'
             Path = '/apiproxy/mtp/webThreatProtection/webThreats/reports/webThreatSummary'
-            Tier = 'P0'
+            Tier = 'inventory'
             Category = 'Endpoint Configuration'
             Purpose = 'Microsoft Defender SmartScreen aggregated web-threat report (impressions + block actions)'
             Availability = 'live'
@@ -291,7 +272,7 @@
         @{
             Stream = 'MDE_LiveResponseConfig_CL'
             Path = '/apiproxy/mtp/liveResponseApi/get_properties?useV2Api=true&useV3Api=true'
-            Tier = 'P0'
+            Tier = 'inventory'
             Category = 'Endpoint Configuration'
             Purpose = 'Live Response service properties + script-library config + tab-completion enablement'
             Availability = 'live'
@@ -308,7 +289,7 @@
         @{
             Stream = 'MDE_AuthenticatedTelemetry_CL'
             Path = '/apiproxy/mtp/responseApiPortal/senseauth/allownonauthsense'
-            Tier = 'P0'
+            Tier = 'inventory'
             Category = 'Endpoint Configuration'
             Purpose = 'Sense-auth posture (whether unauthenticated telemetry from Sense agent is accepted)'
             Availability = 'live'
@@ -322,7 +303,7 @@
         @{
             Stream = 'MDE_PUAConfig_CL'
             Path = '/apiproxy/mtp/autoIr/ui/properties/'
-            Tier = 'P0'
+            Tier = 'inventory'
             Category = 'Endpoint Configuration'
             Purpose = 'Potentially-Unwanted-Application enforcement scope (block / audit / off + per-platform)'
             Availability = 'live'
@@ -337,7 +318,7 @@
         @{
             Stream = 'MDE_AntivirusPolicy_CL'
             Path = '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters'
-            Tier = 'P0'
+            Tier = 'inventory'
             Category = 'Endpoint Configuration'
             Purpose = 'MEM-bridged antivirus policy filter facets (Intune + Configuration Manager scope)'
             Availability = 'tenant-gated'
@@ -353,7 +334,7 @@
         @{
             Stream = 'MDE_TenantAllowBlock_CL'
             Path = '/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues'
-            Tier = 'P0'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'Tenant Allow-Block-List (TABL) filter facet — IP/URL/file-hash indicator inventory'
             Availability = 'tenant-gated'
@@ -372,7 +353,7 @@
         @{
             Stream = 'MDE_CustomCollection_CL'
             Path = '/apiproxy/mtp/mdeCustomCollection/rules'
-            Tier = 'P0'
+            Tier = 'inventory'
             Category = 'Endpoint Configuration'
             Purpose = 'Custom event-collection rules (what extra MDE telemetry the tenant is gathering)'
             Availability = 'tenant-gated'
@@ -387,14 +368,14 @@
             }
         }
 
-        # ---- P1 Pipeline (7 streams, 30-min) ---------------------------------------
+        # (grouping below is by source-of-truth ordering, not poll cadence)
         # MDE_DataExportSettings_CL — HYBRID. Public ARM resource type
         # microsoft.insights/dataCollectionRules covers the SET surface; the
         # READ-side queryable Streaming API config is portal-only.
         @{
             Stream = 'MDE_DataExportSettings_CL'
             Path = '/apiproxy/mtp/wdatpApi/dataexportsettings'
-            Tier = 'P1'
+            Tier = 'maintenance'
             Category = 'Streaming API'
             Purpose = 'Streaming API configuration: which workspaces / event-hubs / storage receive exported MDE telemetry'
             AuditScope = 'hybrid'
@@ -413,7 +394,7 @@
         @{
             Stream = 'MDE_ConnectedApps_CL'
             Path = '/apiproxy/mtp/responseApiPortal/apps/all'
-            Tier = 'P1'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'OAuth + service-app inventory connected to the tenant Defender API surface'
             Availability = 'live'
@@ -429,7 +410,7 @@
         @{
             Stream = 'MDE_TenantContext_CL'
             Path = '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true'
-            Tier = 'P1'
+            Tier = 'inventory'
             Category = 'Multi-Tenant Operations'
             Purpose = 'Authenticated-tenant context: tenant ID, region, M365 sku, cross-tenant flags'
             Availability = 'live'
@@ -451,7 +432,7 @@
         @{
             Stream = 'MDE_TenantWorkloadStatus_CL'
             Path = '/apiproxy/mtoapi/tenantGroups'
-            Tier = 'P1'
+            Tier = 'inventory'
             Headers = @{ 'mtoproxyurl' = 'MTO' }
             Category = 'Multi-Tenant Operations'
             Purpose = 'MTO tenant-group definitions + per-group workload (alerts/incidents/dashboards) state'
@@ -472,7 +453,7 @@
         @{
             Stream = 'MDE_StreamingApiConfig_CL'
             Path = '/apiproxy/mtp/streamingapi/streamingApiConfiguration'
-            Tier = 'P1'
+            Tier = 'maintenance'
             Category = 'Streaming API'
             Purpose = 'DEPRECATED — superseded by MDE_DataExportSettings_CL. Returns 404 on modern tenants.'
             Availability = 'deprecated'
@@ -482,7 +463,7 @@
         @{
             Stream = 'MDE_IntuneConnection_CL'
             Path = '/apiproxy/mtp/responseApiPortal/onboarding/intune/status'
-            Tier = 'P1'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'Defender ↔ Intune connector status (link-state, last-handshake, scope enrolment)'
             Availability = 'live'
@@ -496,7 +477,7 @@
         @{
             Stream = 'MDE_PurviewSharing_CL'
             Path = '/apiproxy/mtp/wdatpInternalApi/compliance/alertSharing/status'
-            Tier = 'P1'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'Defender ↔ Purview alert-sharing toggle + per-domain scope'
             Availability = 'live'
@@ -508,14 +489,14 @@
             }
         }
 
-        # ---- P2 Governance (4 streams, daily) --------------------------------------
+        # ----------------------------------------------------------------------
         # MDE_RbacDeviceGroups_CL — HYBRID. MDE Public /api/machinegroups exposes
         # id+name only; portal exposes AAD-group bindings + machine-count + role
         # assignments. Operator-valuable for drift detection.
         @{
             Stream = 'MDE_RbacDeviceGroups_CL'
             Path = '/apiproxy/mtp/rbacManagementApi/rbac/machine_groups?addAadGroupNames=true&addMachineGroupCount=false'
-            Tier = 'P2'
+            Tier = 'config'
             UnwrapProperty = 'items'
             Category = 'Configuration and Settings'
             Purpose = 'RBAC device groups + AAD-group bindings + per-group machine count + role assignments'
@@ -538,7 +519,7 @@
         @{
             Stream = 'MDE_UnifiedRbacRoles_CL'
             Path = '/apiproxy/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions'
-            Tier = 'P2'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'Unified-RBAC role definitions: per-role permission bitmaps + assigned principals'
             Availability = 'live'
@@ -555,7 +536,7 @@
         @{
             Stream = 'MDE_AssetRules_CL'
             Path = '/apiproxy/mtp/xspmatlas/assetrules'
-            Tier = 'P2'
+            Tier = 'exposure'
             Category = 'Exposure Management (XSPM)'
             Purpose = 'Critical-asset classification rules (which devices/identities feed XSPM as crown jewels)'
             Availability = 'live'
@@ -576,7 +557,7 @@
         @{
             Stream = 'MDE_SAClassification_CL'
             Path = '/apiproxy/radius/api/radius/serviceaccounts/classificationrule/getall'
-            Tier = 'P2'
+            Tier = 'inventory'
             Category = 'Identity Protection (MDI)'
             Purpose = 'MDI service-account classification rules (which AD accounts MDI flags as service accounts)'
             Availability = 'live'
@@ -591,11 +572,11 @@
             }
         }
 
-        # ---- P3 Exposure (7 streams, hourly) — was 8, dropped SecureScoreBreakdown_CL ----
+        # ----------------------------------------------------------------------
         @{
             Stream = 'MDE_XspmInitiatives_CL'
             Path = '/apiproxy/mtp/posture/oversight/initiatives'
-            Tier = 'P3'
+            Tier = 'exposure'
             Filter = 'fromDate'
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM exposure initiatives + per-initiative completion progress + recommended actions'
@@ -614,7 +595,7 @@
         @{
             Stream = 'MDE_ExposureSnapshots_CL'
             Path = '/apiproxy/mtp/posture/oversight/updates'
-            Tier = 'P3'
+            Tier = 'exposure'
             Filter = 'fromDate'
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM posture-snapshot deltas (what changed in exposure score / metrics over time)'
@@ -636,7 +617,7 @@
         @{
             Stream = 'MDE_ExposureRecommendations_CL'
             Path = '/apiproxy/mtp/posture/oversight/recommendations'
-            Tier = 'P3'
+            Tier = 'exposure'
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM remediation recommendations (per-initiative actionable steps + criticality + effort)'
             Availability = 'live'
@@ -672,7 +653,7 @@
                 'x-tid'              = '{TenantId}'
                 'x-ms-scenario-name' = 'AttackPathOverview_get_has_attack_paths'
             }
-            Tier = 'P3'
+            Tier = 'exposure'
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM attack-path graph (multi-hop privesc/lateral chains from low-privilege entry to crown jewels)'
             IdProperty = @('attackPathId', 'id')
@@ -708,7 +689,7 @@ AttackPathDiscovery
                 'x-tid'              = '{TenantId}'
                 'x-ms-scenario-name' = 'ChokePoints_get_choke_point_types_filter'
             }
-            Tier = 'P3'
+            Tier = 'exposure'
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM chokepoints — single nodes that appear on many attack paths (highest-leverage remediation targets)'
             Availability = 'live'
@@ -740,7 +721,7 @@ AttackPathsV2
                 'x-tid'              = '{TenantId}'
                 'x-ms-scenario-name' = 'AttackPathOverview_get_attack_paths_top_targets'
             }
-            Tier = 'P3'
+            Tier = 'exposure'
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM top-targeted assets — critical assets reachable by the most active attack paths'
             Availability = 'live'
@@ -758,7 +739,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_SecurityBaselines_CL'
             Path = '/apiproxy/mtp/tvm/analytics/baseline/profiles?pageIndex=0&pageSize=25'
-            Tier = 'P3'
+            Tier = 'inventory'
             Headers = @{ 'api-version' = '1.0' }
             Category = 'Vulnerability Management (TVM)'
             Purpose = 'TVM security-baseline profile compliance (CIS / Microsoft baselines applied to device fleet)'
@@ -775,11 +756,11 @@ AttackPathsV2
             }
         }
 
-        # ---- P5 Identity (5 streams, daily) ----------------------------------------
+        # ----------------------------------------------------------------------
         @{
             Stream = 'MDE_IdentityOnboarding_CL'
             Path = '/apiproxy/mtp/siamApi/domaincontrollers/list'
-            Tier = 'P5'
+            Tier = 'inventory'
             UnwrapProperty = 'DomainControllers'
             Category = 'Identity Protection (MDI)'
             Purpose = 'MDI domain-controller onboarding state (per-DC sensor health + last-seen + IP)'
@@ -807,7 +788,7 @@ AttackPathsV2
                 IncludeAccountActivity = $true
             }
             UnwrapProperty = 'ServiceAccounts'
-            Tier = 'P5'
+            Tier = 'inventory'
             Category = 'Identity Protection (MDI)'
             Purpose = 'MDI service-account inventory (auto-classified service accounts + activity heuristics)'
             Availability = 'live'
@@ -827,7 +808,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_DCCoverage_CL'
             Path = '/apiproxy/aatp/api/sensors/domainControllerCoverage'
-            Tier = 'P5'
+            Tier = 'inventory'
             Category = 'Identity Protection (MDI)'
             Purpose = 'MDI sensor coverage per domain controller (which DCs have working sensors / sync state)'
             Availability = 'tenant-gated'
@@ -843,7 +824,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_IdentityAlertThresholds_CL'
             Path = '/apiproxy/aatp/api/alertthresholds/withExpiry'
-            Tier = 'P5'
+            Tier = 'inventory'
             Category = 'Identity Protection (MDI)'
             Purpose = 'MDI alert-threshold tuning per detection (when each MDI rule fires + temporary overrides)'
             Availability = 'tenant-gated'
@@ -860,7 +841,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_RemediationAccounts_CL'
             Path = '/apiproxy/aatp/api/remediationActions/configuration'
-            Tier = 'P5'
+            Tier = 'inventory'
             Category = 'Identity Protection (MDI)'
             Purpose = 'MDI gMSA remediation-action configuration (which managed-service-accounts MDI uses for password resets)'
             Availability = 'tenant-gated'
@@ -874,7 +855,7 @@ AttackPathsV2
             }
         }
 
-        # ---- P6 Audit/AIR (2 streams, 10-min) --------------------------------------
+        # ----------------------------------------------------------------------
         # iter-14.0 Phase 3: UnwrapProperty='Results' + IdProperty=@('ActionId') fixes
         # the wrapper-key bug. Response shape is {Count:N, Results:[…]}; without
         # UnwrapProperty operators saw 2 rows (EntityId='Results', EntityId='Count')
@@ -882,7 +863,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_ActionCenter_CL'
             Path = '/apiproxy/mtp/actionCenter/actioncenterui/history-actions'
-            Tier = 'P6'
+            Tier = 'fast'
             Filter = 'fromDate'
             UnwrapProperty = 'Results'
             IdProperty = @('ActionId', 'Id', 'id')
@@ -912,7 +893,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_ThreatAnalytics_CL'
             Path = '/apiproxy/mtp/threatAnalytics/outbreaks'
-            Tier = 'P6'
+            Tier = 'config'
             Filter = 'fromDate'
             Category = 'Threat Analytics'
             Purpose = 'Threat Analytics active outbreaks + per-tenant exposure score + tracked-actor links'
@@ -933,11 +914,11 @@ AttackPathsV2
             }
         }
 
-        # ---- P7 Metadata (4 streams, daily) ----------------------------------------
+        # ----------------------------------------------------------------------
         @{
             Stream = 'MDE_UserPreferences_CL'
             Path = '/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference'
-            Tier = 'P7'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'Per-analyst portal preferences (homepage layout, default filters) — drift detector for shared accounts'
             Availability = 'live'
@@ -956,7 +937,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_MtoTenants_CL'
             Path   = '/apiproxy/mtoapi/tenants/TenantPicker'
-            Tier   = 'P7'
+            Tier   = 'inventory'
             Headers = @{ 'mtoproxyurl' = 'MTO' }
             UnwrapProperty = 'tenantInfoList'
             Category = 'Multi-Tenant Operations'
@@ -977,7 +958,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_LicenseReport_CL'
             Path = '/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machines/skuReport'
-            Tier = 'P7'
+            Tier = 'inventory'
             UnwrapProperty = 'sums'
             Category = 'Endpoint Device Management'
             Purpose = 'Per-SKU device license rollup (how many devices on each MDE plan / per-OS / per-region)'
@@ -994,7 +975,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_CloudAppsConfig_CL'
             Path = '/apiproxy/mcas/cas/api/v1/settings/'
-            Tier = 'P7'
+            Tier = 'config'
             Category = 'Configuration and Settings'
             Purpose = 'MCAS / Defender for Cloud Apps general settings (regions, integrations, notification policy)'
             Availability = 'tenant-gated'
@@ -1037,7 +1018,7 @@ AttackPathsV2
                 fromDate = ''
                 toDate = ''
             }
-            Tier = 'P3'
+            Tier = 'inventory'
             Filter = 'fromDate'
             Category = 'Endpoint Device Management'
             Purpose = 'Per-device unified timeline (process/file/network/registry events with portal-side correlation + grouping)'
@@ -1064,7 +1045,7 @@ AttackPathsV2
         @{
             Stream = 'MDE_MachineActions_CL'
             Path = '/apiproxy/mtp/responseApiPortal/machineactions'
-            Tier = 'P6'
+            Tier = 'fast'
             Filter = 'fromDate'
             Category = 'Action Center'
             Purpose = 'Per-device action results (Live Response per-step script output + AIR linkage; richer than public MDE /api/machineactions)'

@@ -76,32 +76,24 @@ See docs/TROUBLESHOOTING.md → 'Function App env vars missing'.
 # ----------------------------------------------------------------------------
 $modulesPath = Join-Path $PSScriptRoot 'Modules'
 
-# iter-14.0 Phase 1: auth module split into L1 + L2 + backward-compat shim.
-# Import order matters — Xdr.Common.Auth must load before Xdr.Defender.Auth
-# (the shim relies on both being already loaded when its psm1 runs).
+# Five-module architecture (v0.1.0-beta first publish).
+# Import order matters — each downstream layer references the previous one.
 #
-#   L1 Xdr.Common.Auth   — portal-generic Entra layer (TOTP, passkey, ESTS auth)
-#   L2 Xdr.Defender.Auth — Defender-specific cookie exchange (sccauth + XSRF-TOKEN)
-#   Shim Xdr.Portal.Auth — backward-compat wrappers (Connect-MDEPortal etc.)
+#   L1 Xdr.Common.Auth         — portal-generic Entra layer (TOTP, passkey, ESTS auth)
+#   L1 Xdr.Sentinel.Ingest     — portal-generic DCE ingest + checkpoint + heartbeat + App Insights
+#   L2 Xdr.Defender.Auth       — Defender-specific cookie exchange (sccauth + XSRF-TOKEN)
+#   L3 Xdr.Defender.Client     — Defender-portal manifest dispatcher (endpoints + tier polls)
+#   L4 Xdr.Connector.Orchestrator — top-level routing surface used by timer functions
 #
 # v0.2.0 will add sibling L2 modules (Xdr.Purview.Auth, Xdr.Intune.Auth,
-# Xdr.Entra.Auth) by appending to this list.
+# Xdr.Entra.Auth) and corresponding L3 clients by extending this list.
 
 $coreModules = @(
-    # L1 portal-generic modules.
     'Xdr.Common.Auth',
     'Xdr.Sentinel.Ingest',
-    # L2 Defender-specific cookie-exchange auth.
     'Xdr.Defender.Auth',
-    # L3 Defender-portal manifest dispatcher.
     'Xdr.Defender.Client',
-    # L4 portal-routing orchestrator.
-    'Xdr.Connector.Orchestrator',
-    # Backward-compat shims (re-export legacy names; load LAST so the
-    # renamed modules are already present when the shim psm1 imports them).
-    'Xdr.Portal.Auth',
-    'XdrLogRaider.Client',
-    'XdrLogRaider.Ingest'
+    'Xdr.Connector.Orchestrator'
 )
 
 foreach ($m in $coreModules) {

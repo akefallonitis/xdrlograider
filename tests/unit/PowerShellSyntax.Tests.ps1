@@ -118,8 +118,10 @@ Describe 'Module export contract — psd1 FunctionsToExport must match psm1 Expo
         })
     }
 
-    It 'enumerates expected module manifests (3 custom modules)' {
-        @($script:ModuleManifests).Count | Should -BeGreaterOrEqual 3 -Because "Xdr.Portal.Auth + XdrLogRaider.Client + XdrLogRaider.Ingest"
+    It 'enumerates expected module manifests (5 custom modules in v0.1.0-beta first publish)' {
+        # Five-module architecture: Xdr.Common.Auth, Xdr.Sentinel.Ingest,
+        # Xdr.Defender.Auth, Xdr.Defender.Client, Xdr.Connector.Orchestrator.
+        @($script:ModuleManifests).Count | Should -Be 5 -Because "v0.1.0-beta first publish has exactly 5 modules and no shims"
     }
 
     It 'every psd1 FunctionsToExport entry is also in the corresponding psm1 Export-ModuleMember' {

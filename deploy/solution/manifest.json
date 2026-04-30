@@ -54,12 +54,10 @@
     "Hunting Queries/XspmChokepointDeltas.yaml"
   ],
   "Parsers": [
-    "Parsers/MDE_Drift_P0Compliance.kql",
-    "Parsers/MDE_Drift_P1Pipeline.kql",
-    "Parsers/MDE_Drift_P2Governance.kql",
-    "Parsers/MDE_Drift_P3Exposure.kql",
-    "Parsers/MDE_Drift_P5Identity.kql",
-    "Parsers/MDE_Drift_P7Metadata.kql"
+    "Parsers/MDE_Drift_Exposure.kql",
+    "Parsers/MDE_Drift_Configuration.kql",
+    "Parsers/MDE_Drift_Inventory.kql",
+    "Parsers/MDE_Drift_Maintenance.kql"
   ],
   "DataConnectors": [
     "Data Connectors/XdrLogRaider_DataConnector.json"

@@ -29,7 +29,7 @@ resource dce 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' = {
   }
 }
 
-// --- Stream declarations — 46 data streams + 2 operational = 48 total ---
+// --- Stream declarations — 46 data streams + 1 operational = 47 total ---
 //
 // Schema strategy: every non-deprecated stream carries a typed-column schema
 // derived from its manifest ProjectionMap (4 base columns +
@@ -43,9 +43,11 @@ resource dce 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' = {
 // (ConvertTo-MDEIngestRow honors the same ProjectionMap), so the DCR just needs
 // to declare the matching columns or DCE silently drops them.
 //
-// The two system streams (MDE_Heartbeat_CL + MDE_AuthTestResult_CL) carry their
-// own write-shape schemas (no SourceStream/EntityId/RawJson — they're not data
-// rows but operational telemetry).
+// The single operational stream (MDE_Heartbeat_CL) carries its own write-shape
+// schema (no SourceStream/EntityId/RawJson — it's not a data row but
+// connector-liveness telemetry). Auth chain diagnostics live in App Insights
+// `customEvents` (AuthChain.* event names) instead of a dedicated workspace
+// table.
 //
 // Full removed-stream history (write endpoints, NO_PUBLIC_API, publicly-API-covered)
 // lives in docs/STREAMS-REMOVED.md. Do NOT inline removed stream names in this
@@ -733,27 +735,7 @@ var heartbeatDecl = {
   }
 }
 
-// AuthTestResult stream — operational telemetry from Write-AuthTestResult.
-var authTestResultDecl = {
-  'Custom-MDE_AuthTestResult_CL': {
-    columns: [
-      { name: 'TimeGenerated',       type: 'datetime' }
-      { name: 'Method',              type: 'string' }
-      { name: 'PortalHost',          type: 'string' }
-      { name: 'Upn',                 type: 'string' }
-      { name: 'Success',             type: 'boolean' }
-      { name: 'Stage',               type: 'string' }
-      { name: 'FailureReason',       type: 'string' }
-      { name: 'EstsMs',              type: 'int' }
-      { name: 'SccauthMs',           type: 'int' }
-      { name: 'SampleCallHttpCode',  type: 'int' }
-      { name: 'SampleCallLatencyMs', type: 'int' }
-      { name: 'SccauthAcquiredUtc',  type: 'string' }
-    ]
-  }
-}
-
-var streamDeclarations = union(streamSchemas, heartbeatDecl, authTestResultDecl)
+var streamDeclarations = union(streamSchemas, heartbeatDecl)
 
 // Azure DCR has TWO interlocking quotas Microsoft enforces at preflight:
 //   - max 10 dataFlows per rule
@@ -761,7 +743,7 @@ var streamDeclarations = union(streamSchemas, heartbeatDecl, authTestResultDecl)
 //
 // v0.1.0-beta first compile: 47 dataFlows × 1 stream → tripped quota #1.
 // v0.1.0-beta first fix:      1 dataFlow × 47 streams → tripped quota #2.
-// (Current shape: 48 streams = 46 data + 2 system; same 3-flow grouping.)
+// (Current shape: 47 streams = 46 data + 1 system; same 3-flow grouping.)
 // Final shape: 3 dataFlows grouped by functional tier — each ≤ 20 streams,
 // total ≤ 10 dataFlows. Still well under both quotas with headroom for
 // future stream additions, and the grouping carries semantic meaning so an
@@ -834,7 +816,6 @@ var p5p6p7OpsStreams = [
   'Custom-MDE_CloudAppsConfig_CL'
   // Operational
   'Custom-MDE_Heartbeat_CL'
-  'Custom-MDE_AuthTestResult_CL'
 ]
 
 // transformKql is intentionally OMITTED on every dataFlow:

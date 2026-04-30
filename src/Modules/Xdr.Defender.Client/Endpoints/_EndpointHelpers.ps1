@@ -1,6 +1,6 @@
 # Shared helpers for endpoint wrappers.
 # Each MDE_*_CL wrapper follows the same pattern:
-#   1. Call the portal endpoint via Invoke-MDEPortalRequest
+#   1. Call the portal endpoint via Invoke-DefenderPortalRequest
 #   2. Enumerate the response into one row per entity
 #   3. Each row has TimeGenerated, SourceStream, EntityId, RawJson (+ optional projected columns)
 
@@ -91,7 +91,7 @@ function ConvertTo-MDEIngestRow {
 function Invoke-MDEPortalEndpoint {
     <#
     .SYNOPSIS
-        Wraps Invoke-MDEPortalRequest with try/catch that converts failures into structured results.
+        Wraps Invoke-DefenderPortalRequest with try/catch that converts failures into structured results.
 
     .DESCRIPTION
         Returns @{ Success=$true; Data=<response> } on success or @{ Success=$false; Error=$msg } on failure.
@@ -113,7 +113,7 @@ function Invoke-MDEPortalEndpoint {
     )
 
     try {
-        $data = Invoke-MDEPortalRequest -Session $Session -Path $Path -Method $Method `
+        $data = Invoke-DefenderPortalRequest -Session $Session -Path $Path -Method $Method `
             -Body $Body -TimeoutSec $TimeoutSec -AdditionalHeaders $AdditionalHeaders
         return @{ Success = $true; Data = $data; Path = $Path }
     } catch {

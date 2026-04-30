@@ -33,11 +33,9 @@ BeforeAll {
     $script:ClientPsd1    = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
     $script:CommonAuthPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
     $script:DefAuthPsd1    = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
-    $script:PortalShimPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth' 'Xdr.Portal.Auth.psd1'
 
     Import-Module $script:CommonAuthPsd1 -Force -ErrorAction Stop
     Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
-    Import-Module $script:PortalShimPsd1 -Force -ErrorAction Stop
     Import-Module $script:ClientPsd1     -Force -ErrorAction Stop
 
     $script:ArmJson = Get-Content -LiteralPath $script:CompiledArm -Raw | ConvertFrom-Json -Depth 30
@@ -78,7 +76,6 @@ BeforeAll {
 
 AfterAll {
     Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
-    Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Defender.Auth   -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Common.Auth     -Force -ErrorAction SilentlyContinue
 }
@@ -226,19 +223,30 @@ Describe 'Migration.NoResourceTypeChanges' {
     }
 }
 
-Describe 'Migration.AuthBackwardCompat (iter-14.0 Phase 1 shim)' {
+Describe 'Migration.AuthCanonicalNames (v0.1.0-beta first publish)' {
 
-    It 'Xdr.Portal.Auth shim still exports the iter-13.15 MDE-prefixed function names' {
-        $shimExports = (Get-Module Xdr.Portal.Auth).ExportedFunctions.Keys
-        @('Connect-MDEPortal', 'Invoke-MDEPortalRequest', 'Test-MDEPortalAuth', 'Get-MDEAuthFromKeyVault', 'Connect-MDEPortalWithCookies', 'Get-XdrPortalRate429Count', 'Reset-XdrPortalRate429Count') | ForEach-Object {
-            $shimExports | Should -Contain $_ -Because "$_ was exported by iter-13.15 Xdr.Portal.Auth; iter-14.0 shim must preserve it"
+    # The 3 backward-compat shim modules (Xdr.Portal.Auth, XdrLogRaider.Client,
+    # XdrLogRaider.Ingest) were deleted in v0.1.0-beta first publish. Operator
+    # scripts that referenced the legacy MDE-prefixed names must migrate to
+    # the canonical L1/L2 names below. See docs/UPGRADE.md for the cutover
+    # checklist.
+    It 'L1 Xdr.Common.Auth exports the canonical Entra-layer surface' {
+        $l1Exports = (Get-Module Xdr.Common.Auth).ExportedFunctions.Keys
+        @('Get-EntraEstsAuth', 'Get-XdrAuthFromKeyVault', 'Resolve-EntraInterruptPage') | ForEach-Object {
+            $l1Exports | Should -Contain $_
         }
     }
 
     It 'L2 Xdr.Defender.Auth exports the new canonical names' {
         $l2Exports = (Get-Module Xdr.Defender.Auth).ExportedFunctions.Keys
-        @('Connect-DefenderPortal', 'Invoke-DefenderPortalRequest', 'Test-DefenderPortalAuth', 'Get-DefenderSccauth') | ForEach-Object {
+        @('Connect-DefenderPortal', 'Connect-DefenderPortalWithCookies', 'Invoke-DefenderPortalRequest', 'Test-DefenderPortalAuth', 'Get-DefenderSccauth', 'Get-XdrPortalRate429Count', 'Reset-XdrPortalRate429Count') | ForEach-Object {
             $l2Exports | Should -Contain $_
         }
+    }
+
+    It 'no shim modules are loaded (Xdr.Portal.Auth, XdrLogRaider.Client, XdrLogRaider.Ingest were deleted)' {
+        Get-Module Xdr.Portal.Auth      -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        Get-Module XdrLogRaider.Client  -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        Get-Module XdrLogRaider.Ingest  -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
 }

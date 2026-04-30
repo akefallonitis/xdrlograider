@@ -111,7 +111,7 @@ After configuring:
 
 ```kql
 // Wait 5 min, then check:
-MDE_AuthTestResult_CL
+App Insights customEvents
 | order by TimeGenerated desc
 | take 1
 | project TimeGenerated, Success, Stage, FailureReason

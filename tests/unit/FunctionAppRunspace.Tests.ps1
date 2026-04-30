@@ -98,20 +98,12 @@ Describe '$env-direct config pattern — each timer function reads from process-
         $content | Should -Match '\$env:KEY_VAULT_URI|\$env:DCE_ENDPOINT' -Because 'must use env-direct pattern'
     }
 
-    It 'validate-auth-selftest run.ps1 reads config from $env (no $global dependency)' {
-        $authPath = Join-Path $script:FunctionsDir 'validate-auth-selftest' 'run.ps1'
-        $content = Get-Content $authPath -Raw
-        $codeOnly = ($content -split "`n" | Where-Object { $_ -notmatch '^\s*#' }) -join "`n"
-        $codeOnly | Should -Not -Match '\$global:XdrLogRaiderConfig' -Because 'iter 13.3: auth-selftest reads env vars directly'
-        $content | Should -Match '\$env:KEY_VAULT_URI|\$env:DCE_ENDPOINT'
-    }
-
     It 'Invoke-TierPollWithHeartbeat (orchestrator) reads config from env vars (no global dependency)' {
         $content = Get-Content $script:OrchestratorPath -Raw
         # Strip both block comments (<# #>) and line comments (#)
         $stripped = [regex]::Replace($content, '<#[\s\S]*?#>', '')
         $codeOnly = ($stripped -split "`n" | Where-Object { $_ -notmatch '^\s*#' }) -join "`n"
-        $codeOnly | Should -Not -Match '\$global:XdrLogRaiderConfig' -Because 'iter 13.3: orchestrator reads env vars directly so all 7 poll-* timers benefit'
+        $codeOnly | Should -Not -Match '\$global:XdrLogRaiderConfig' -Because 'orchestrator reads env vars directly so all 5 poll-* timers benefit'
         $content | Should -Match '\$env:KEY_VAULT_URI|\$env:DCE_ENDPOINT'
     }
 

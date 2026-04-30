@@ -21,8 +21,8 @@
     published as a release asset).
 
     Verifies:
-      - All 9 timer function directories at the ROOT of the staged tree
-        (heartbeat-5m, poll-p0-compliance-1h, poll-p1-pipeline-30m, ...)
+      - All 6 timer function directories at the ROOT of the staged tree
+        (heartbeat-5m + 5 cadence-tier polls)
       - No `functions/` wrapper directory
       - No `local.settings.json*` development artefact
       - Required root files: host.json, profile.ps1, requirements.psd1
@@ -34,18 +34,18 @@ BeforeAll {
     $script:SrcDir     = Join-Path $script:RepoRoot 'src'
     $script:ReleaseYml = Join-Path $script:RepoRoot '.github' 'workflows' 'release.yml'
 
-    # The 9 timer functions that ship with v0.1.0-beta — must all appear at
+    # The 6 timer functions that ship with v0.1.0-beta — must all appear at
     # the zip root (NOT under `functions/`) per Azure Functions runtime spec.
+    # Heartbeat is the operational tier; the 5 polls are the cadence tiers
+    # declared in endpoints.manifest.psd1 (fast/exposure/config/inventory/
+    # maintenance).
     $script:ExpectedFunctions = @(
         'heartbeat-5m'
-        'poll-p0-compliance-1h'
-        'poll-p1-pipeline-30m'
-        'poll-p2-governance-1d'
-        'poll-p3-exposure-1h'
-        'poll-p5-identity-1d'
-        'poll-p6-audit-10m'
-        'poll-p7-metadata-1d'
-        'validate-auth-selftest'
+        'poll-fast-10m'
+        'poll-exposure-1h'
+        'poll-config-6h'
+        'poll-inventory-1d'
+        'poll-maintenance-1w'
     )
 
     # Simulate the release.yml staging step — flatten src/functions/* to root.
@@ -102,7 +102,7 @@ Describe 'Function App zip — canonical flat structure (Azure runtime requireme
         $funcSrcDir = Join-Path $script:SrcDir 'functions'
         $actualDirs = @(Get-ChildItem -Path $funcSrcDir -Directory | Select-Object -ExpandProperty Name)
         foreach ($expected in $script:ExpectedFunctions) {
-            $actualDirs | Should -Contain $expected -Because "v0.1.0-beta ships 9 timer functions; '$expected' is missing"
+            $actualDirs | Should -Contain $expected -Because "v0.1.0-beta ships 6 timer functions; '$expected' is missing"
         }
     }
 

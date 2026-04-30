@@ -5,7 +5,7 @@ function Test-DefenderPortalAuth {
         structured diagnostic.
 
     .DESCRIPTION
-        Used by the Function App's validate-auth-selftest timer and by operator
+        Used by the Function App's (first successful poll-* sign-in) timer and by operator
         diagnostics. Returns a structured object covering each stage of the auth
         chain (Get-EntraEstsAuth + Get-DefenderSccauth + benign portal API probe)
         with timing and success/failure per stage.

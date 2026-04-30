@@ -7,14 +7,17 @@
 .DESCRIPTION
     Upload-only. Prompts for the auth method and the required secrets, validates format,
     and writes them to Key Vault. Does NOT call security.microsoft.com or any Graph API —
-    the Function App's validate-auth-selftest timer is the source of truth for "does auth work".
+    the Function App's first poll-* timer (after KV secrets land) is the source of truth
+    for "does auth work" via App Insights AuthChain.* customEvents.
 
     Supported methods:
       - credentials_totp: prompts for UPN, password, TOTP Base32 secret
       - passkey:          prompts for passkey JSON path
 
-    After this script completes, wait ~5 minutes then query:
-        MDE_AuthTestResult_CL | order by TimeGenerated desc | take 1
+    After this script completes, wait ~5-10 minutes then query App Insights:
+        customEvents | where name in ('AuthChain.AADSTSError', 'AuthChain.Completed') | order by timestamp desc | take 5
+    or check workspace heartbeat:
+        MDE_Heartbeat_CL | where StreamsSucceeded > 0 | order by TimeGenerated desc | take 1
 
 .PARAMETER KeyVaultName
     Name of the Key Vault. Output of the deploy wizard includes this.
@@ -278,10 +281,14 @@ if ($DryRun) {
 Write-Host ""
 Write-Host "  ✓ Done." -ForegroundColor Green
 Write-Host ""
-Write-Host "  The Function App self-test will run within 5 minutes." -ForegroundColor Gray
-Write-Host "  Check result in Log Analytics:" -ForegroundColor Gray
+Write-Host "  Within 5-10 minutes the Function App's heartbeat timer + first poll fire." -ForegroundColor Gray
+Write-Host "  Check connector liveness in Log Analytics:" -ForegroundColor Gray
 Write-Host ""
-Write-Host "    MDE_AuthTestResult_CL | order by TimeGenerated desc | take 1" -ForegroundColor White
+Write-Host "    MDE_Heartbeat_CL | where StreamsSucceeded > 0 | order by TimeGenerated desc | take 1" -ForegroundColor White
+Write-Host ""
+Write-Host "  Auth chain diagnostics in App Insights customEvents:" -ForegroundColor Gray
+Write-Host ""
+Write-Host "    customEvents | where name in ('AuthChain.AADSTSError', 'AuthChain.Completed') | order by timestamp desc | take 10" -ForegroundColor White
 Write-Host ""
 Write-Host "  Runbook: docs/RUNBOOK.md · Troubleshooting: docs/TROUBLESHOOTING.md" -ForegroundColor Gray
 Write-Host ""

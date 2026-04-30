@@ -21,8 +21,10 @@
 # uses the same ProjectionMap, so the row column set matches exactly.
 #
 # System-stream invariant:
-#   MDE_Heartbeat_CL     — must include the 9 fields Write-Heartbeat emits
-#   MDE_AuthTestResult_CL — must include the 12 fields Write-AuthTestResult emits
+#   MDE_Heartbeat_CL — must include the 9 fields Write-Heartbeat emits
+#
+# (MDE_AuthTestResult_CL retired in v0.1.0-beta first publish — auth chain
+# diagnostics moved to App Insights customEvents.)
 
 BeforeDiscovery {
     $repoRoot     = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
@@ -44,15 +46,10 @@ BeforeAll {
     $script:ArmPath      = Join-Path $repoRoot 'deploy' 'compiled' 'mainTemplate.json'
     $script:BaselineCols = @('TimeGenerated', 'SourceStream', 'EntityId', 'RawJson')
 
-    # Heartbeat columns per Write-Heartbeat.ps1 lines 55-65.
+    # Heartbeat columns per Write-Heartbeat.ps1.
     $script:HeartbeatCols = @(
         'TimeGenerated', 'FunctionName', 'Tier', 'StreamsAttempted', 'StreamsSucceeded',
         'RowsIngested', 'LatencyMs', 'HostName', 'Notes'
-    )
-    # AuthTestResult columns per Write-AuthTestResult.ps1 lines 31-44.
-    $script:AuthTestCols = @(
-        'TimeGenerated', 'Method', 'PortalHost', 'Upn', 'Success', 'Stage', 'FailureReason',
-        'EstsMs', 'SccauthMs', 'SampleCallHttpCode', 'SampleCallLatencyMs', 'SccauthAcquiredUtc'
     )
 
     # Pull every streamDeclaration out of the compiled ARM so we don't have to
@@ -92,18 +89,13 @@ Describe 'DCR stream declarations — invariants' {
         $extras.Count | Should -Be 0 -Because "DCR Heartbeat schema has extra columns that Write-Heartbeat never populates: $($extras -join ', ')"
     }
 
-    It 'DCR declares MDE_AuthTestResult_CL with the 12 Write-AuthTestResult columns' {
-        $cols = $script:DcrStreamDecls['MDE_AuthTestResult_CL']
-        $cols | Should -Not -BeNullOrEmpty
-        foreach ($c in $script:AuthTestCols) {
-            $cols | Should -Contain $c -Because "AuthTestResult column '$c' must be declared in the DCR"
-        }
-        $extras = @($cols | Where-Object { $_ -notin $script:AuthTestCols })
-        $extras.Count | Should -Be 0 -Because "DCR AuthTestResult schema has extra columns: $($extras -join ', ')"
+    It 'DCR does NOT declare MDE_AuthTestResult_CL (retired in v0.1.0-beta first publish)' {
+        $script:DcrStreamDecls.ContainsKey('MDE_AuthTestResult_CL') | Should -BeFalse `
+            -Because 'auth chain diagnostics moved from MDE_AuthTestResult_CL to App Insights customEvents (AuthChain.* event names)'
     }
 
-    It 'DCR declares exactly 48 streams (46 data + 2 system)' {
-        $script:DcrStreamDecls.Count | Should -Be 48
+    It 'DCR declares exactly 47 streams (46 data + 1 system Heartbeat)' {
+        $script:DcrStreamDecls.Count | Should -Be 47
     }
 }
 
@@ -147,7 +139,6 @@ Describe 'Per-data-stream: ingest row matches DCR schema' -ForEach $script:Activ
             function global:Get-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey) $null }
             function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
         }
-        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Portal.Auth'     'Xdr.Portal.Auth.psd1')     -Force -ErrorAction Stop
         Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -ErrorAction Stop
         Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -ErrorAction Stop
 

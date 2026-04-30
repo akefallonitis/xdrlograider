@@ -20,7 +20,6 @@ Get-Content "$repoRoot/tests/.env.local" | ForEach-Object {
     }
 }
 
-Import-Module "$repoRoot/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"         -Force
 Import-Module "$repoRoot/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1" -Force
 Import-Module "$repoRoot/src/Modules/Xdr.Defender.Client/Xdr.Defender.Client.psd1" -Force
 
@@ -40,7 +39,7 @@ Write-Host "UPN       : $($credential.upn)"
 Write-Host ""
 
 Write-Host "Authenticating..."
-$session = Connect-MDEPortal -Method $authMethod -Credential $credential -PortalHost $portalHost -Force
+$session = Connect-DefenderPortal -Method $authMethod -Credential $credential -PortalHost $portalHost -Force
 Write-Host "  sccauth acquired (TenantId $($session.TenantId))"
 Write-Host ""
 
@@ -105,7 +104,7 @@ foreach ($entry in $entries) {
         if ($extraHeaders.Count -gt 0) {
             $invokeArgs['AdditionalHeaders'] = $extraHeaders
         }
-        $resp = Invoke-MDEPortalRequest @invokeArgs -ErrorAction Stop
+        $resp = Invoke-DefenderPortalRequest @invokeArgs -ErrorAction Stop
         $sw.Stop()
         $status = '200'
         if ($null -eq $resp) {

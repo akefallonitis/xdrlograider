@@ -1,18 +1,17 @@
 // SYNOPSIS:
-//   Computes drift across P1 pipeline streams (data export, Intune, Purview,
-//   connected apps, tenant context).
-//
-//   One row per (StreamName, EntityId, FieldName) that changed between the
-//   previous and current observation windows. Used by workbooks and analytic
-//   rules to surface configuration changes.
+//   Computes drift across the Maintenance tier — rare-change long-tail
+//   surfaces. Field-level diff. Sources: DataExportSettings (the canonical
+//   streaming-API config). The deprecated MDE_StreamingApiConfig_CL stream
+//   is intentionally NOT unioned here — it returns 404 on modern tenants and
+//   is excluded from the actual poll.
 //
 // PARAMETERS:
-//   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
-//   window   - ISO 8601 duration, default 1h. How recent counts as "current".
+//   lookback - ISO 8601 duration, default 30d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 7d. Matches the maintenance-tier weekly poll cadence.
 //
 // INVOCATION:
-//   MDE_Drift_P1Pipeline(7d, 1h) | where StreamName == "MDE_DataExportSettings_CL"
-//   MDE_Drift_P1Pipeline()       // applies defaults
+//   MDE_Drift_Maintenance(30d, 7d) | where StreamName == "MDE_DataExportSettings_CL"
+//   MDE_Drift_Maintenance()       // applies defaults
 //
 // NOTES:
 //   - Parameterized as a KQL function so workbooks/rules can plumb
@@ -20,19 +19,17 @@
 //   - Drift is computed over the per-stream typed columns (DCR-projected at
 //     ingest); RawJson is preserved on each table as a fallback for fields
 //     not in the manifest's ProjectionMap, but the parser never re-parses it.
+//   - Single-source tier: the union still uses `withsource=_Table` so the
+//     output schema is identical to the other tier parsers — operators can
+//     write tier-agnostic queries that filter on StreamName.
 
-let MDE_Drift_P1Pipeline = (lookback:timespan = 7d, window:timespan = 1h) {
+let MDE_Drift_Maintenance = (lookback:timespan = 30d, window:timespan = 7d) {
     // Metadata + envelope columns to exclude from field-level diff (these are
     // bookkeeping; only typed data columns from the manifest ProjectionMap
     // count as "fields" for drift detection).
     let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);
     let sources = union withsource=_Table
-        MDE_DataExportSettings_CL,
-        MDE_IntuneConnection_CL,
-        MDE_PurviewSharing_CL,
-        MDE_ConnectedApps_CL,
-        MDE_TenantContext_CL,
-        MDE_TenantWorkloadStatus_CL
+        MDE_DataExportSettings_CL
         | where TimeGenerated > ago(lookback);
     let current = sources
         | where TimeGenerated > ago(window)
@@ -64,4 +61,4 @@ let MDE_Drift_P1Pipeline = (lookback:timespan = 7d, window:timespan = 1h) {
         SnapshotPrevious = TimeGenerated1,
         ChangeType       = iff(isnull(TypedBag1), "Added", iff(isnull(TypedBag[tostring(field)]), "Removed", "Modified"))
 };
-MDE_Drift_P1Pipeline
+MDE_Drift_Maintenance

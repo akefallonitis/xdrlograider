@@ -19,4 +19,4 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
-  let drift = MDE_Drift_P0Compliance(7d, 1h); let suppressions = drift | where StreamName == "MDE_SuppressionRules_CL" and ChangeType == "Added"; let puaOff = drift | where StreamName == "MDE_PUAConfig_CL" and FieldName == "enabled" and NewValue == "false"; union suppressions, puaOff | summarize Events = count() by bin(TimeGenerated, 1d) | where Events >= 2
+  let drift = MDE_Drift_Configuration(7d, 1h); let suppressions = drift | where StreamName == "MDE_SuppressionRules_CL" and ChangeType == "Added"; let puaOff = drift | where StreamName == "MDE_PUAConfig_CL" and FieldName == "enabled" and NewValue == "false"; union suppressions, puaOff | summarize Events = count() by bin(TimeGenerated, 1d) | where Events >= 2

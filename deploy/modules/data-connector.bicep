@@ -137,7 +137,7 @@ resource dataConnector 'Microsoft.OperationalInsights/workspaces/providers/dataC
       id:                  dataConnectorContentId
       title:               dataConnectorTitle
       publisher:           solutionPublisher
-      descriptionMarkdown: 'Ingests Defender XDR portal-only telemetry — 45 streams of configuration, compliance, drift, exposure, governance, identity (MDI), audit, metadata that is **not** exposed by public Microsoft Graph Security / Defender XDR / MDE APIs.\n\n- 47 custom tables (45 data + Heartbeat + AuthTestResult)\n- Per-stream typed columns at ingest via projection map; `RawJson` preserved alongside\n- 6 KQL parsers (drift detection via typed-column bag)\n- 14 analytic rules (ship disabled per Microsoft Sentinel best practice)\n- 9 hunting queries\n- 7 workbooks (incl. Action Center for Device Timeline + Machine Actions)\n\nPowered by an unattended PowerShell Azure Function App authenticating to `security.microsoft.com` via Credentials+TOTP or Software Passkey. Multi-portal forward-compat foundation (Defender ships today; Entra, Purview, Intune planned).'
+      descriptionMarkdown: 'Ingests Defender XDR portal-only telemetry — 46 streams of configuration, compliance, drift, exposure, governance, identity (MDI), audit, metadata that is **not** exposed by public Microsoft Graph Security / Defender XDR / MDE APIs.\n\n- 47 custom tables (46 data + Heartbeat)\n- Per-stream typed columns at ingest via projection map; `RawJson` preserved alongside\n- 4 KQL parsers (drift detection via typed-column bag)\n- 14 analytic rules (ship disabled per Microsoft Sentinel best practice)\n- 9 hunting queries\n- 7 workbooks (incl. Action Center for Device Timeline + Machine Actions)\n- Auth chain diagnostics in App Insights `customEvents` (AuthChain.* event names)\n\nPowered by an unattended PowerShell Azure Function App authenticating to `security.microsoft.com` via Credentials+TOTP or Software Passkey. Multi-portal forward-compat foundation (Defender ships today; Entra, Purview, Intune planned).'
       graphQueriesTableName: 'MDE_Heartbeat_CL'
       graphQueries: [
         {
@@ -147,15 +147,14 @@ resource dataConnector 'Microsoft.OperationalInsights/workspaces/providers/dataC
         }
       ]
       sampleQueries: [
-        { description: 'Recent auth self-test results',                query: 'MDE_AuthTestResult_CL | order by TimeGenerated desc | take 10' }
+        { description: 'Recent auth chain events (App Insights customEvents)', query: 'customEvents | where name in (\'AuthChain.AADSTSError\', \'AuthChain.Completed\') | order by timestamp desc | take 10' }
         { description: 'Suppression rules modified in the last 24h',  query: 'MDE_SuppressionRules_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, RawJson' }
       ]
-      // 47-table dataTypes list (45 data + Heartbeat + AuthTestResult). Sourced
+      // 47-table dataTypes list (46 data + Heartbeat). Sourced
       // from deploy/solution/Data Connectors/XdrLogRaider_DataConnector.json
       // (single source of truth — keep both in sync).
       dataTypes: [
         { name: 'MDE_Heartbeat_CL',                lastDataReceivedQuery: 'MDE_Heartbeat_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
-        { name: 'MDE_AuthTestResult_CL',           lastDataReceivedQuery: 'MDE_AuthTestResult_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_AdvancedFeatures_CL',         lastDataReceivedQuery: 'MDE_AdvancedFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_PreviewFeatures_CL',          lastDataReceivedQuery: 'MDE_PreviewFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
         { name: 'MDE_AlertServiceConfig_CL',       lastDataReceivedQuery: 'MDE_AlertServiceConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)' }
@@ -209,7 +208,7 @@ resource dataConnector 'Microsoft.OperationalInsights/workspaces/providers/dataC
       connectivityCriterias: [
         {
           type:  'IsConnectedQuery'
-          value: [ 'MDE_Heartbeat_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(1h)' ]
+          value: [ 'MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | project IsConnected = isnotempty(TimeGenerated)' ]
         }
       ]
       availability: { status: 1, isPreview: true }
@@ -239,10 +238,10 @@ resource dataConnector 'Microsoft.OperationalInsights/workspaces/providers/dataC
           ]
         }
         {
-          title: 'Wait for self-test'
-          description: 'Within 5 minutes the Function App validates auth and writes to MDE_AuthTestResult_CL:'
+          title: 'Confirm connector liveness'
+          description: 'Within 5-10 minutes the Function App\'s heartbeat timer + first poll fire. The connector card reads MDE_Heartbeat_CL for the IsConnected indicator. For auth chain diagnostics, query App Insights customEvents:'
           instructions: [
-            { type: 'CopyableLabel', parameters: { label: 'MDE_AuthTestResult_CL | order by TimeGenerated desc | take 1 | project TimeGenerated, Success, Stage, FailureReason' } }
+            { type: 'CopyableLabel', parameters: { label: 'customEvents | where name in (\'AuthChain.AADSTSError\', \'AuthChain.Completed\') | order by timestamp desc | take 10' } }
           ]
         }
       ]

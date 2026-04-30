@@ -16,10 +16,13 @@ function Write-Heartbeat {
         DCR immutable ID (usually $env:DCR_IMMUTABLE_ID).
 
     .PARAMETER FunctionName
-        Timer function name (e.g., 'poll-p0-compliance-1h').
+        Timer function name (e.g., 'poll-fast-10m').
 
     .PARAMETER Tier
-        Tier label ('P0'..'P7', 'overhead').
+        Cadence tier label. One of: fast | exposure | config | inventory |
+        maintenance | overhead. The first five match the per-Category cadence
+        model declared in endpoints.manifest.psd1; 'overhead' is reserved for
+        the heartbeat-5m timer's own bookkeeping rows.
 
     .PARAMETER StreamsAttempted
         Number of streams this invocation tried.
@@ -44,7 +47,9 @@ function Write-Heartbeat {
         [Parameter(Mandatory)] [string] $DceEndpoint,
         [Parameter(Mandatory)] [string] $DcrImmutableId,
         [Parameter(Mandatory)] [string] $FunctionName,
-        [Parameter(Mandatory)] [string] $Tier,
+        [Parameter(Mandatory)]
+        [ValidateSet('fast', 'exposure', 'config', 'inventory', 'maintenance', 'overhead')]
+        [string] $Tier,
         [int] $StreamsAttempted = 0,
         [int] $StreamsSucceeded = 0,
         [int] $RowsIngested = 0,

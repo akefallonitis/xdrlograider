@@ -2,7 +2,7 @@
   "id": "XdrLogRaiderInternal",
   "title": "XdrLogRaider — Defender XDR Internal Telemetry",
   "publisher": "Community",
-  "descriptionMarkdown": "Ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance, identity, action center, threat analytics) that is not exposed by public Microsoft Graph Security or Microsoft 365 Defender / MDE public APIs.\n\n- **45 data streams** across 7 compliance tiers (P0 Compliance, P1 Pipeline, P2 Governance, P3 Exposure, P5 Identity, P6 Audit/AIR, P7 Metadata) + 2 operational streams (Heartbeat, AuthTestResult) = **47 custom tables**\n- Per-stream typed columns at ingest via projection map; `RawJson` preserved alongside for forensic queries\n- Drift detection via 6 tier parsers operating on typed-column bag (`pack_all() - metaCols`)\n- 7 workbooks (incl. Action Center for Device Timeline + Machine Actions), 14 analytic rules (ship disabled per Microsoft Sentinel best practice), 9 hunting queries\n- Unified Entra-layer auth (TOTP or Software Passkey) — single primitive for unattended production across all Microsoft 365 portals\n- Multi-portal forward-compat foundation (Defender ships today; Entra, Purview, Intune planned)\n\nSee [repo README](https://github.com/akefallonitis/xdrlograider) for setup, deployment, permissions, and operator runbook.",
+  "descriptionMarkdown": "Ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance, identity, action center, threat analytics) that is not exposed by public Microsoft Graph Security or Microsoft 365 Defender / MDE public APIs.\n\n- **46 data streams** grouped into 5 cadence tiers (fast 10m, exposure 1h, config 6h, inventory 1d, maintenance 1w) + 1 operational stream (Heartbeat) = **47 custom tables**\n- Per-stream typed columns at ingest via projection map; `RawJson` preserved alongside for forensic queries\n- Drift detection via 4 tier parsers operating on typed-column bag (`pack_all() - metaCols`)\n- 7 workbooks (incl. Action Center for Device Timeline + Machine Actions), 14 analytic rules (ship disabled per Microsoft Sentinel best practice), 9 hunting queries\n- Auth chain diagnostics in App Insights `customEvents` (AuthChain.* event names)\n- Unified Entra-layer auth (TOTP or Software Passkey) — single primitive for unattended production across all Microsoft 365 portals\n- Multi-portal forward-compat foundation (Defender ships today; Entra, Purview, Intune planned)\n\nSee [repo README](https://github.com/akefallonitis/xdrlograider) for setup, deployment, permissions, and operator runbook.",
   "graphQueriesTableName": "MDE_Heartbeat_CL",
   "graphQueries": [
     {
@@ -13,8 +13,8 @@
   ],
   "sampleQueries": [
     {
-      "description": "Recent auth self-test results",
-      "query": "MDE_AuthTestResult_CL | order by TimeGenerated desc | take 10"
+      "description": "Recent auth chain events (App Insights customEvents)",
+      "query": "customEvents | where name in ('AuthChain.AADSTSError', 'AuthChain.Completed') | order by timestamp desc | take 10"
     },
     {
       "description": "Heartbeat by tier, last 24h (including Rate429Count + GzipBytes from Notes)",
@@ -27,7 +27,6 @@
   ],
   "dataTypes": [
     { "name": "MDE_Heartbeat_CL",                "lastDataReceivedQuery": "MDE_Heartbeat_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_AuthTestResult_CL",           "lastDataReceivedQuery": "MDE_AuthTestResult_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_AdvancedFeatures_CL",         "lastDataReceivedQuery": "MDE_AdvancedFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_PreviewFeatures_CL",          "lastDataReceivedQuery": "MDE_PreviewFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
     { "name": "MDE_AlertServiceConfig_CL",       "lastDataReceivedQuery": "MDE_AlertServiceConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
@@ -77,7 +76,7 @@
   "connectivityCriteria": [
     {
       "type": "IsConnectedQuery",
-      "value": [ "MDE_Heartbeat_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(1h)" ]
+      "value": [ "MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | project IsConnected = isnotempty(TimeGenerated)" ]
     }
   ],
   "availability": {
@@ -119,13 +118,13 @@
       ]
     },
     {
-      "title": "Wait for self-test",
-      "description": "Within 5 minutes the Function App validates auth and writes a row to MDE_AuthTestResult_CL:",
+      "title": "Confirm connector liveness",
+      "description": "Within 5-10 minutes the Function App's heartbeat timer + first poll fire. The connector card reads MDE_Heartbeat_CL for the IsConnected indicator. For auth chain diagnostics, query App Insights customEvents:",
       "instructions": [
         {
           "type": "CopyableLabel",
           "parameters": {
-            "label": "MDE_AuthTestResult_CL | order by TimeGenerated desc | take 1 | project TimeGenerated, Success, Stage, FailureReason"
+            "label": "customEvents | where name in ('AuthChain.AADSTSError', 'AuthChain.Completed') | order by timestamp desc | take 10"
           }
         }
       ]

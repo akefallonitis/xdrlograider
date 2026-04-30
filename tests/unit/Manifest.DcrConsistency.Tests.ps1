@@ -4,8 +4,8 @@
 # that must agree:
 #
 #   1. src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1  (46 entries)
-#   2. DCR streamDeclarations                                   (46 data + 2 system = 48)
-#   3. Custom-tables list in the workspace deployment           (46 data + 2 system = 48)
+#   2. DCR streamDeclarations                                   (46 data + 1 system = 47)
+#   3. Custom-tables list in the workspace deployment           (46 data + 1 system = 47)
 #
 # Preferred source of declarations 2 and 3 is the compiled ARM
 # (deploy/compiled/mainTemplate.json) — it's what actually gets deployed. Bicep
@@ -20,7 +20,7 @@ BeforeDiscovery {
     $script:DceDcrBicep       = Join-Path $repoRoot 'deploy' 'modules' 'dce-dcr.bicep'
 
     # System tables declared ONLY in DCR + custom-tables; NOT in endpoints manifest.
-    $script:SystemStreams = @('MDE_Heartbeat_CL', 'MDE_AuthTestResult_CL')
+    $script:SystemStreams = @('MDE_Heartbeat_CL')
 }
 
 BeforeAll {
@@ -32,7 +32,7 @@ BeforeAll {
 
     # Pester 5 — BeforeDiscovery script vars do NOT carry into the Run phase;
     # re-declare the system stream list here.
-    $script:SystemStreams = @('MDE_Heartbeat_CL', 'MDE_AuthTestResult_CL')
+    $script:SystemStreams = @('MDE_Heartbeat_CL')
 
     # -------- Manifest -------------------------------------------------------
     $manifest = Import-PowerShellDataFile -Path $script:ManifestPath
@@ -144,22 +144,24 @@ Describe 'Manifest / DCR / custom-tables consistency' {
         $script:ManifestStreams.Count | Should -Be 46
     }
 
-    It 'DCR declares exactly 48 streams (46 data + 2 system)' {
-        $script:DcrStreams.Count | Should -Be 48
+    It 'DCR declares exactly 47 streams (46 data + 1 system Heartbeat)' {
+        $script:DcrStreams.Count | Should -Be 47
     }
 
-    It 'custom-tables declares exactly 48 tables (46 data + 2 system)' {
-        $script:CustomTables.Count | Should -Be 48
+    It 'custom-tables declares exactly 47 tables (46 data + 1 system Heartbeat)' {
+        $script:CustomTables.Count | Should -Be 47
     }
 
-    It 'DCR contains both system streams (Heartbeat + AuthTestResult)' {
+    It 'DCR contains the Heartbeat system stream' {
         $script:DcrStreams | Should -Contain 'MDE_Heartbeat_CL'
-        $script:DcrStreams | Should -Contain 'MDE_AuthTestResult_CL'
+        # AuthTestResult was retired in v0.1.0-beta first publish — auth chain
+        # diagnostics moved to App Insights customEvents (AuthChain.* names).
+        $script:DcrStreams | Should -Not -Contain 'MDE_AuthTestResult_CL'
     }
 
-    It 'custom-tables contains both system tables (Heartbeat + AuthTestResult)' {
+    It 'custom-tables contains the Heartbeat table' {
         $script:CustomTables | Should -Contain 'MDE_Heartbeat_CL'
-        $script:CustomTables | Should -Contain 'MDE_AuthTestResult_CL'
+        $script:CustomTables | Should -Not -Contain 'MDE_AuthTestResult_CL'
     }
 
     It 'zero drift between the three layers' {

@@ -1,0 +1,12 @@
+{
+  "description": "Daily @ 02:00 UTC — Inventory tier (settings + identity + metadata long-tail). Polls 21 streams covering: tenant-wide endpoint config (MDE_AdvancedFeatures_CL, MDE_DeviceControlPolicy_CL, MDE_WebContentFiltering_CL, MDE_SmartScreenConfig_CL, MDE_LiveResponseConfig_CL, MDE_AuthenticatedTelemetry_CL, MDE_PUAConfig_CL, MDE_AntivirusPolicy_CL, MDE_CustomCollection_CL), tenant context (MDE_TenantContext_CL, MDE_TenantWorkloadStatus_CL, MDE_SAClassification_CL), MDI identity (MDE_IdentityOnboarding_CL, MDE_IdentityServiceAccounts_CL, MDE_DCCoverage_CL, MDE_IdentityAlertThresholds_CL, MDE_RemediationAccounts_CL), CIS baselines (MDE_SecurityBaselines_CL), MTO + license + device timeline (MDE_MtoTenants_CL, MDE_LicenseReport_CL, MDE_DeviceTimeline_CL). Daily matches the typical change-rate of these surfaces; faster polling costs 429 budget without operator value.",
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 0 2 * * *",
+      "runOnStartup": false
+    }
+  ]
+}

@@ -44,15 +44,15 @@ Describe 'mainTemplate.json — schema + structure' {
         $p.maxLength | Should -Be 12
     }
 
-    It 'functionAppZipVersion parameter default is a pinned tag, NOT "latest"' {
-        # GitHub /releases/latest/download/... endpoint excludes pre-release
-        # tags by design (returns 302 → 404). v0.1.0-beta first deploy attempt
-        # hit exactly this — FA got no code, "Runtime: Error", 0 functions
-        # loaded, hidden connector card. Default must be an explicit tag.
-        $p = $script:MainTemplate.parameters.functionAppZipVersion
-        $p                | Should -Not -BeNullOrEmpty
-        $p.defaultValue   | Should -Not -Be 'latest' -Because 'GitHub /releases/latest excludes pre-releases — FA gets no code'
-        $p.defaultValue   | Should -Match '^\d+\.\d+\.\d+(-[a-z0-9.]+)?$' -Because 'must be a semver release tag like 0.1.0-beta'
+    It 'mainTemplate variables.packageUrl resolves /releases/latest/download/function-app.zip (no functionAppZipVersion parameter)' {
+        # v0.1.0-beta first publish: drops the functionAppZipVersion wizard
+        # field. The Function App ZIP URL tracks GitHub Releases /latest
+        # unconditionally (Marketplace best practice for community connectors).
+        # /latest resolves to the most-recent non-prerelease tag — operators
+        # don't have to edit the wizard for routine upgrades.
+        $script:MainTemplate.parameters.PSObject.Properties.Name | Should -Not -Contain 'functionAppZipVersion' -Because 'parameter retired in v0.1.0-beta first publish'
+        $packageUrl = $script:MainTemplate.variables.packageUrl
+        $packageUrl | Should -Match '/releases/latest/download/function-app\.zip' -Because 'packageUrl must point at /releases/latest/download/function-app.zip'
     }
 
     It 'declares authMethod parameter with validation' {
@@ -486,20 +486,19 @@ Describe 'DCR — Azure service-quota gates' {
         }
     }
 
-    It 'main DCR splits 46 streams across 3 tier-grouped dataFlows (post-quota-fix shape)' {
-        # Final quota-compliant shape after the v0.1.0-beta deploy fixes:
+    It 'main DCR splits 47 streams across 3 grouped dataFlows (post-quota-fix shape)' {
+        # Final quota-compliant shape:
         #   - dataFlows.Count = 3 (Azure limit 10)
-        #   - max streams in any single dataFlow = 19 (Azure limit 20)
-        #   - sum of streams across all dataFlows >= 46 (every declared stream routed)
-        # iter-14.0 dropped MDE_SecureScoreBreakdown_CL → 46 = 44 data + 2 system.
-        # Locks the canonical shape so future edits don't accidentally
-        # re-explode (>10 flows) or re-collapse (>20 streams in any flow).
+        #   - max streams in any single dataFlow ≤ 19 (Azure limit 20)
+        #   - sum of streams across all dataFlows >= 47 (every declared stream routed)
+        # 47 = 46 data + 1 operational (Heartbeat). AuthTestResult retired in
+        # v0.1.0-beta first publish (auth chain → App Insights customEvents).
         $mainDcr = $script:Dcrs | Where-Object { @($_.properties.streamDeclarations.PSObject.Properties.Name).Count -ge 46 } | Select-Object -First 1
         $mainDcr | Should -Not -BeNullOrEmpty
-        @($mainDcr.properties.dataFlows).Count | Should -Be 3 -Because 'tier-grouped split: P0 / P1+P2+P3 / P5+P6+P7+ops'
+        @($mainDcr.properties.dataFlows).Count | Should -Be 3 -Because 'grouped split into 3 dataFlows for stream-quota headroom'
         $totalStreams = 0
         foreach ($df in $mainDcr.properties.dataFlows) { $totalStreams += @($df.streams).Count }
-        $totalStreams | Should -BeGreaterOrEqual 46 -Because 'every declared stream must appear in some dataFlow'
+        $totalStreams | Should -BeGreaterOrEqual 47 -Because 'every declared stream must appear in some dataFlow'
     }
 
     It 'no dataFlow combines multiple streams with a transformKql (Microsoft DCR rule)' {
@@ -536,7 +535,7 @@ Describe 'DCR — Azure service-quota gates' {
         # When outputStream is omitted, each Custom-X stream routes by name to
         # workspace table X. Setting outputStream on a multi-stream dataFlow
         # would collapse all streams into ONE table — that would be a bug.
-        # iter-14.0: stream count 47 → 46 (dropped MDE_SecureScoreBreakdown_CL).
+        # 47 = 46 data + 1 operational Heartbeat (no AuthTestResult).
         $mainDcr = $script:Dcrs | Where-Object { @($_.properties.streamDeclarations.PSObject.Properties.Name).Count -ge 46 } | Select-Object -First 1
         foreach ($df in $mainDcr.properties.dataFlows) {
             if (@($df.streams).Count -gt 1) {
@@ -547,24 +546,15 @@ Describe 'DCR — Azure service-quota gates' {
 }
 
 Describe 'DCR streams — completeness' {
-    It 'DCR includes 46 MDE_*_CL data stream declarations + 2 operational tables' {
-        # 46 = 15 P0 + 7 P1 + 4 P2 + 8 P3 + 5 P5 + 3 P6 + 4 P7
-        # Recent additions (portal-only surfaces not in public Microsoft APIs):
-        #   MDE_DeviceTimeline_CL (P3, tenant-gated), MDE_MachineActions_CL (P6, tenant-gated/hybrid).
-        # Recent removal (publicly-API-covered, Graph /security/secureScores covers):
-        #   MDE_SecureScoreBreakdown_CL.
-        # v0.1.0-beta.1 removals (2 WRITE endpoints per XDRInternals):
-        #   MDE_CriticalAssets_CL, MDE_DeviceCriticality_CL.
-        # Earlier v1.0.2 removals (NO_PUBLIC_API):
-        #   MDE_AsrRulesConfig_CL, MDE_AntiRansomwareConfig_CL,
-        #   MDE_ControlledFolderAccess_CL, MDE_NetworkProtectionConfig_CL,
-        #   MDE_ApprovalAssignments_CL.
+    It 'DCR includes 46 MDE_*_CL data stream declarations + 1 operational table' {
+        # 46 active+deprecated data streams + 1 operational (Heartbeat). The
+        # legacy MDE_AuthTestResult_CL stream was retired in v0.1.0-beta first
+        # publish — auth chain diagnostics moved to App Insights customEvents
+        # (AuthChain.* event names) instead of a dedicated workspace table.
         $dceDcrBicep = Get-Content (Join-Path $script:DeployDir 'modules' 'dce-dcr.bicep') -Raw
-        # Match both 'Custom-MDE_..._CL' (DCR streamSchemas keys) and bare 'MDE_..._CL'
-        # (dataFlow streams arrays use 'Custom-' prefix; dropped-stream guards below
-        # do not). Strip the optional 'Custom-' prefix to dedupe the two reference forms.
+        # Match both 'Custom-MDE_..._CL' (DCR streamSchemas keys) and bare 'MDE_..._CL'.
         $streams = [regex]::Matches($dceDcrBicep, "'(?:Custom-)?(MDE_\w+_CL)'") | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
-        @($streams).Count | Should -BeGreaterOrEqual 48  # 46 data streams + Heartbeat + AuthTestResult
+        @($streams).Count | Should -BeGreaterOrEqual 47  # 46 data streams + Heartbeat
     }
 
     It 'DCR has NO dropped streams (v1.0.0 P4 + v1.0.2 + v0.1.0-beta.1 removals)' {

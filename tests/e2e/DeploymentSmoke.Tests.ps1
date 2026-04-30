@@ -102,11 +102,11 @@ Describe 'E2E — ingestion signal' -Tag 'e2e', 'ingestion' {
         $count | Should -BeGreaterThan 0 -Because 'connector should be emitting heartbeats'
     }
 
-    It 'MDE_AuthTestResult_CL shows latest Success=true' -Skip:(-not $script:RunE2E) {
-        $query = "MDE_AuthTestResult_CL | order by TimeGenerated desc | take 1 | project Success"
+    It 'Latest MDE_Heartbeat_CL row has StreamsSucceeded > 0 (auth chain produced ingestable rows)' -Skip:(-not $script:RunE2E) {
+        $query = "MDE_Heartbeat_CL | order by TimeGenerated desc | take 1 | project StreamsSucceeded"
         $result = Invoke-AzOperationalInsightsQuery -WorkspaceId $script:Ws.CustomerId -Query $query -ErrorAction Stop
         $result.Results | Should -Not -BeNullOrEmpty
-        [string]$result.Results[0].Success | Should -Match '^(true|True|1)$' -Because 'FA self-test must be green'
+        [int]$result.Results[0].StreamsSucceeded | Should -BeGreaterThan 0 -Because 'auth + first-poll must produce at least one ingested stream; AuthChain.* events live in App Insights customEvents now'
     }
 
     It 'MDE_AdvancedFeatures_CL has at least one row' -Skip:(-not $script:RunE2E) {
@@ -116,10 +116,11 @@ Describe 'E2E — ingestion signal' -Tag 'e2e', 'ingestion' {
         $count | Should -BeGreaterThan 0 -Because 'first P0 stream must have ingested'
     }
 
-    It 'at least 3 P0 streams have ingested rows' -Skip:(-not $script:RunE2E) {
+    It 'at least 3 inventory-tier streams have ingested rows' -Skip:(-not $script:RunE2E) {
         $streams = @(
-            'MDE_AdvancedFeatures_CL', 'MDE_PreviewFeatures_CL', 'MDE_PUAConfig_CL',
-            'MDE_AsrRulesConfig_CL', 'MDE_LiveResponseConfig_CL'
+            'MDE_AdvancedFeatures_CL', 'MDE_PUAConfig_CL',
+            'MDE_LiveResponseConfig_CL', 'MDE_AntivirusPolicy_CL',
+            'MDE_TenantContext_CL'
         )
         $ingested = 0
         foreach ($s in $streams) {
@@ -129,7 +130,7 @@ Describe 'E2E — ingestion signal' -Tag 'e2e', 'ingestion' {
                 if ([int]$result.Results[0].Count -gt 0) { $ingested++ }
             } catch { }
         }
-        $ingested | Should -BeGreaterOrEqual 3 -Because "At least 3 of 5 sampled P0 streams should have data"
+        $ingested | Should -BeGreaterOrEqual 3 -Because "At least 3 of 5 sampled inventory-tier streams should have data"
     }
 }
 
@@ -141,14 +142,13 @@ Describe 'E2E — per-tier ingestion coverage' -Tag 'e2e', 'tier-coverage' {
     }
 
     # Helper: count populated streams for a tier, asserted against the expected count.
+    # Probes use the cadence-tier model (fast/exposure/config/inventory/maintenance).
     $tierProbes = @(
-        @{ Tier = 'P0'; Streams = @('MDE_AdvancedFeatures_CL','MDE_PreviewFeatures_CL','MDE_AlertServiceConfig_CL','MDE_SuppressionRules_CL') ; MinPopulated = 2 }
-        @{ Tier = 'P1'; Streams = @('MDE_ConnectedApps_CL','MDE_DataExportSettings_CL','MDE_TenantContext_CL')                                ; MinPopulated = 2 }
-        @{ Tier = 'P2'; Streams = @('MDE_RbacDeviceGroups_CL','MDE_UnifiedRbacRoles_CL','MDE_AssetRules_CL','MDE_SAClassification_CL')        ; MinPopulated = 2 }
-        @{ Tier = 'P3'; Streams = @('MDE_ExposureSnapshots_CL','MDE_XspmInitiatives_CL','MDE_ExposureRecommendations_CL')                    ; MinPopulated = 1 }
-        @{ Tier = 'P5'; Streams = @('MDE_IdentityOnboarding_CL')                                                                              ; MinPopulated = 1 }
-        @{ Tier = 'P6'; Streams = @('MDE_ThreatAnalytics_CL','MDE_ActionCenter_CL')                                                           ; MinPopulated = 1 }
-        @{ Tier = 'P7'; Streams = @('MDE_UserPreferences_CL','MDE_MtoTenants_CL')                                                             ; MinPopulated = 1 }
+        @{ Tier = 'fast';        Streams = @('MDE_ActionCenter_CL','MDE_MachineActions_CL')                                                       ; MinPopulated = 1 }
+        @{ Tier = 'exposure';    Streams = @('MDE_ExposureSnapshots_CL','MDE_XspmInitiatives_CL','MDE_ExposureRecommendations_CL')                ; MinPopulated = 1 }
+        @{ Tier = 'config';      Streams = @('MDE_AlertServiceConfig_CL','MDE_SuppressionRules_CL','MDE_RbacDeviceGroups_CL','MDE_UnifiedRbacRoles_CL') ; MinPopulated = 2 }
+        @{ Tier = 'inventory';   Streams = @('MDE_AdvancedFeatures_CL','MDE_PUAConfig_CL','MDE_TenantContext_CL','MDE_IdentityOnboarding_CL')     ; MinPopulated = 2 }
+        @{ Tier = 'maintenance'; Streams = @('MDE_DataExportSettings_CL')                                                                          ; MinPopulated = 1 }
     )
 
     It "Tier <Tier>: at least <MinPopulated> of its verified streams has ingested rows" -ForEach $tierProbes -Skip:(-not $script:RunE2E) {
@@ -163,7 +163,7 @@ Describe 'E2E — per-tier ingestion coverage' -Tag 'e2e', 'tier-coverage' {
         $populated | Should -BeGreaterOrEqual $MinPopulated -Because "Tier $Tier must have at least $MinPopulated populated streams post-first-poll"
     }
 
-    It 'MDE_Heartbeat_CL shows all 9 timer functions fired in last 2h' -Skip:(-not $script:RunE2E) {
+    It 'MDE_Heartbeat_CL shows the 6 timer functions fired in last 2h' -Skip:(-not $script:RunE2E) {
         $query = @'
 MDE_Heartbeat_CL
 | where TimeGenerated > ago(2h)
@@ -171,8 +171,8 @@ MDE_Heartbeat_CL
 | count
 '@
         $r = Invoke-AzOperationalInsightsQuery -WorkspaceId $script:Ws.CustomerId -Query $query -ErrorAction Stop
-        # 9 timer functions: heartbeat-5m + validate-auth-selftest + 7 poll-p*
-        [int]$r.Results[0].Count | Should -BeGreaterOrEqual 7 -Because 'Most timers should have fired in a 2-hour window'
+        # 6 timer functions: heartbeat-5m + 5 poll-* cadence tiers (fast/exposure/config/inventory/maintenance)
+        [int]$r.Results[0].Count | Should -BeGreaterOrEqual 4 -Because 'Most timers should have fired in a 2-hour window (maintenance is weekly so may not fire in 2h)'
     }
 
     It 'No repeated auth failures in Application Insights traces (last 1h)' -Skip:(-not $script:RunE2E) {
@@ -283,17 +283,24 @@ MDE_Heartbeat_CL
         }
     }
 
-    It 'MDE_AuthTestResult_CL latest row has Success=true and Stage=complete' -Skip:(-not $script:RunE2E) {
+    It 'App Insights customEvents shows recent AuthChain.Completed event' -Skip:(-not $script:RunE2E) {
+        # Auth chain diagnostics moved from MDE_AuthTestResult_CL to App
+        # Insights customEvents (AuthChain.* event names) in v0.1.0-beta first
+        # publish. The ARM workspace receives App Insights logs through the
+        # connected diagnostic-settings link, so the same query workspace can
+        # reach customEvents via App Insights.
         $kql = @'
-MDE_AuthTestResult_CL
-| top 1 by TimeGenerated desc
-| project Success_value = tostring(Success)
+customEvents
+| where timestamp > ago(15m)
+| where name == 'AuthChain.Completed'
+| top 1 by timestamp desc
+| project ev = name
 '@
-        $success = script:Invoke-E2EKqlScalar -Query $kql
-        if ($success) {
-            $success | Should -BeIn @('true', 'True') -Because 'latest auth self-test must be green for operator to trust the connector'
+        $found = script:Invoke-E2EKqlScalar -Query $kql
+        if ($found) {
+            $found | Should -Be 'AuthChain.Completed' -Because 'auth chain must complete green for operator to trust the connector'
         } else {
-            Set-ItResult -Skipped -Because 'no MDE_AuthTestResult_CL rows yet (connector may be <5 min old)'
+            Set-ItResult -Skipped -Because 'no AuthChain.* events yet (connector may be <5 min old, or App Insights not yet linked)'
         }
     }
 

@@ -13,16 +13,14 @@
     unattendant". CredentialsTotp is exercised by Audit-Endpoints-Live + the
     integration test; Passkey is the second-priority unattended path.
 
-    iter-14.0 update: Connect-MDEPortal is now a backward-compat shim wrapper
-    in Xdr.Portal.Auth that delegates to Connect-DefenderPortal in
-    Xdr.Defender.Auth. The auth-chain code (passkey branch) now lives in
-    Xdr.Common.Auth/Private/Complete-PasskeyFlow.ps1 +
-    Xdr.Common.Auth/Private/Invoke-PasskeyChallenge.ps1. Get-MDEAuthFromKeyVault
-    is now a shim wrapper around Get-XdrAuthFromKeyVault in Xdr.Common.Auth.
+    Connect-DefenderPortal in Xdr.Defender.Auth is the canonical entry point
+    for authenticated portal sessions. The auth-chain code (passkey branch)
+    lives in Xdr.Common.Auth/Private/Complete-PasskeyFlow.ps1 +
+    Xdr.Common.Auth/Private/Invoke-PasskeyChallenge.ps1. Get-XdrAuthFromKeyVault
+    in Xdr.Common.Auth supplies the credential material.
 
     This gate locks the passkey contract permanently:
       - Connect-DefenderPortal accepts -Method Passkey
-      - Connect-MDEPortal (shim) still exposes -Method Passkey for backward-compat
       - Get-XdrAuthFromKeyVault returns the passkey shape from KV
       - Auth chain has a passkey-specific code branch
       - Documentation (AUTH.md + BRING-YOUR-OWN-PASSKEY.md) describes the
@@ -33,16 +31,13 @@ BeforeAll {
     $script:RepoRoot          = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
     $script:CommonModulePath  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth'   'Xdr.Common.Auth.psd1'
     $script:DefenderModulePath= Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
-    $script:ShimModulePath    = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'   'Xdr.Portal.Auth.psd1'
 
     Import-Module $script:CommonModulePath   -Force -ErrorAction Stop
     Import-Module $script:DefenderModulePath -Force -ErrorAction Stop
-    Import-Module $script:ShimModulePath     -Force -ErrorAction Stop
     Set-StrictMode -Version Latest
 }
 
 AfterAll {
-    Remove-Module Xdr.Portal.Auth   -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Defender.Auth -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Common.Auth   -Force -ErrorAction SilentlyContinue
 }
@@ -60,15 +55,6 @@ Describe 'Passkey unattended auth method — contract lock (iter 13.9 P1; iter-1
         $validateSet.ValidValues | Should -Contain 'Passkey' -Because 'Passkey is a documented unattended auth method'
     }
 
-    It 'Connect-MDEPortal shim wrapper still accepts -Method Passkey (backward-compat)' {
-        $cmd = Get-Command -Module Xdr.Portal.Auth -Name Connect-MDEPortal -ErrorAction Stop
-        $methodParam = $cmd.Parameters['Method']
-        $methodParam | Should -Not -BeNullOrEmpty
-        $validateSet = $methodParam.Attributes |
-            Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
-        $validateSet.ValidValues | Should -Contain 'Passkey'
-    }
-
     It 'Get-XdrAuthFromKeyVault supports the passkey method enum' {
         $cmd = Get-Command -Module Xdr.Common.Auth -Name Get-XdrAuthFromKeyVault -ErrorAction Stop
         $methodParam = $cmd.Parameters['AuthMethod']
@@ -77,15 +63,6 @@ Describe 'Passkey unattended auth method — contract lock (iter 13.9 P1; iter-1
         $validateSet = $methodParam.Attributes |
             Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
         $validateSet.ValidValues | Should -Contain 'Passkey' -Because 'KV-backed passkey credential retrieval must be supported'
-    }
-
-    It 'Get-MDEAuthFromKeyVault shim wrapper still accepts -AuthMethod Passkey (backward-compat)' {
-        $cmd = Get-Command -Module Xdr.Portal.Auth -Name Get-MDEAuthFromKeyVault -ErrorAction Stop
-        $methodParam = $cmd.Parameters['AuthMethod']
-        $methodParam | Should -Not -BeNullOrEmpty
-        $validateSet = $methodParam.Attributes |
-            Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
-        $validateSet.ValidValues | Should -Contain 'Passkey'
     }
 
     It 'auth chain has a passkey code branch in Xdr.Common.Auth (Complete-PasskeyFlow + Invoke-PasskeyChallenge)' {

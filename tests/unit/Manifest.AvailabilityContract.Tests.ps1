@@ -35,7 +35,6 @@ BeforeAll {
     $script:ManifestPath     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $script:Manifest         = Import-PowerShellDataFile -Path $script:ManifestPath
     $script:Entries          = @($script:Manifest.Endpoints)
-    $script:AuthModulePath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'   'Xdr.Portal.Auth.psd1'
     $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
     $script:ClientModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
     $script:FixtureDir       = Join-Path $script:RepoRoot 'tests' 'fixtures' 'live-responses'
@@ -47,8 +46,11 @@ BeforeAll {
     function global:Get-AzStorageTable   { param([string]$Name, $Context) [pscustomobject]@{ Name = $Name; CloudTable = [pscustomobject]@{ Name = $Name } } }
     function global:New-AzStorageTable   { param([string]$Name, $Context) [pscustomobject]@{ Name = $Name; CloudTable = [pscustomobject]@{ Name = $Name } } }
 
-    Import-Module $script:AuthModulePath   -Force -ErrorAction Stop
     Import-Module $script:IngestModulePath -Force -ErrorAction Stop
+    $script:CommonAuthPath_  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
+    $script:DefenderAuthPath_ = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
+    Import-Module $script:CommonAuthPath_ -Force -ErrorAction Stop
+    Import-Module $script:DefenderAuthPath_ -Force -ErrorAction Stop
     Import-Module $script:ClientModulePath -Force -ErrorAction Stop
 
     Set-StrictMode -Version Latest
@@ -110,7 +112,7 @@ Describe 'Invoke-MDETierPoll — per-stream failure isolation (behavioral gate)'
     It 'one stream throwing does NOT abort the rest of the tier' {
         $outcome = InModuleScope Xdr.Defender.Client {
             $manifest = Get-MDEEndpointManifest
-            $p0Streams = @($manifest.Values | Where-Object { $_.Tier -eq 'P0' })
+            $p0Streams = @($manifest.Values | Where-Object { $_.Tier -eq 'inventory' })
 
             $script:CallNumber = 0
             Mock Invoke-MDEEndpoint -ModuleName Xdr.Defender.Client {
@@ -133,7 +135,7 @@ Describe 'Invoke-MDETierPoll — per-stream failure isolation (behavioral gate)'
             }
 
             $threw = $false; $errMsg = $null; $result = $null
-            try { $result = Invoke-MDETierPoll -Session $session -Tier 'P0' -Config $config }
+            try { $result = Invoke-MDETierPoll -Session $session -Tier 'inventory' -Config $config }
             catch { $threw = $true; $errMsg = $_.Exception.Message }
 
             return [pscustomobject]@{
@@ -161,7 +163,7 @@ Describe 'Invoke-MDETierPoll — per-stream failure isolation (behavioral gate)'
             }
 
             $threw = $false; $errMsg = $null; $result = $null
-            try { $result = Invoke-MDETierPoll -Session $session -Tier 'P7' -Config $config }
+            try { $result = Invoke-MDETierPoll -Session $session -Tier 'maintenance' -Config $config }
             catch { $threw = $true; $errMsg = $_.Exception.Message }
             return [pscustomobject]@{ Threw = $threw; ErrMsg = $errMsg; Result = $result }
         }

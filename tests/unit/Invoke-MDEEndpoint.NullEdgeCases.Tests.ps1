@@ -27,14 +27,16 @@
 BeforeAll {
     $script:RepoRoot         = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
     $script:ClientModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
-    $script:AuthModulePath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth'   'Xdr.Portal.Auth.psd1'
     $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
 
     # Stub Az.* deps the Ingest module resolves at runtime
     function global:Get-AzAccessToken { param([string]$ResourceUrl) [pscustomobject]@{ Token = 'stub'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
 
-    Import-Module $script:AuthModulePath   -Force -ErrorAction Stop
     Import-Module $script:IngestModulePath -Force -ErrorAction Stop
+    $script:CommonAuthPath_  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
+    $script:DefenderAuthPath_ = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
+    Import-Module $script:CommonAuthPath_ -Force -ErrorAction Stop
+    Import-Module $script:DefenderAuthPath_ -Force -ErrorAction Stop
     Import-Module $script:ClientModulePath -Force -ErrorAction Stop
 
     # Strict mode like production
@@ -48,10 +50,10 @@ BeforeAll {
 
 Describe 'Invoke-MDEEndpoint — null/edge-case response handling (iter 13.4 regression gate)' {
 
-    Context 'When Invoke-MDEPortalRequest returns various edge-case shapes' {
+    Context 'When Invoke-DefenderPortalRequest returns various edge-case shapes' {
 
         # Each test case represents a real or theoretical weird shape. The test
-        # mocks Invoke-MDEPortalRequest to return that shape and asserts that
+        # mocks Invoke-DefenderPortalRequest to return that shape and asserts that
         # Invoke-MDEEndpoint completes without throwing.
         It 'survives <Description>' -ForEach @(
             @{ Description = 'literal $null response (empty 200 body)';                MockReturn = $null }
@@ -70,12 +72,12 @@ Describe 'Invoke-MDEEndpoint — null/edge-case response handling (iter 13.4 reg
         ) {
             param($Description, $MockReturn)
 
-            # Mock Invoke-MDEPortalRequest at the module scope so Invoke-MDEEndpoint
+            # Mock Invoke-DefenderPortalRequest at the module scope so Invoke-MDEEndpoint
             # picks up the stub instead of making a real HTTP call.
             InModuleScope Xdr.Defender.Client -Parameters @{ MockReturn = $MockReturn; Session = $script:Session } {
                 param($MockReturn, $Session)
 
-                Mock Invoke-MDEPortalRequest -ModuleName Xdr.Defender.Client { $MockReturn } -ParameterFilter { $true }
+                Mock Invoke-DefenderPortalRequest -ModuleName Xdr.Defender.Client { $MockReturn } -ParameterFilter { $true }
 
                 # Behavioral assertion: function MUST NOT throw "Cannot bind
                 # argument to parameter 'Raw'" no matter what shape the upstream

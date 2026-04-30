@@ -7,8 +7,8 @@
 .DESCRIPTION
     Three rings of error handling, tested in isolation here:
 
-      1. Invoke-MDEPortalRequest (Xdr.Portal.Auth)
-         - 401 -> Connect-MDEPortal -Force -> retry once
+      1. Invoke-DefenderPortalRequest (Xdr.Defender.Auth)
+         - 401 -> Connect-DefenderPortal -Force -> retry once
          - Non-401 errors (403/404/429/5xx/network) -> surface to caller
          - Missing cached credentials -> throw with clear message
 
@@ -35,11 +35,10 @@ BeforeAll {
     # iter-14.0: target the L2 module directly so InModuleScope can mock
     # Update-XsrfToken + Connect-DefenderPortal (the real implementations).
     # Xdr.Portal.Auth is still imported so the surface tests at module level
-    # continue to find Connect-MDEPortal etc., but the request-level error
+    # continue to find Connect-DefenderPortal etc., but the request-level error
     # tests work against the L2 module where the actual logic lives.
     Import-Module "$script:Root/src/Modules/Xdr.Common.Auth/Xdr.Common.Auth.psd1"         -Force
     Import-Module "$script:Root/src/Modules/Xdr.Defender.Auth/Xdr.Defender.Auth.psd1"     -Force
-    Import-Module "$script:Root/src/Modules/Xdr.Portal.Auth/Xdr.Portal.Auth.psd1"         -Force
     Import-Module "$script:Root/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1" -Force
     Import-Module "$script:Root/src/Modules/Xdr.Defender.Client/Xdr.Defender.Client.psd1" -Force
 }
@@ -47,7 +46,6 @@ BeforeAll {
 AfterAll {
     Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
-    Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Defender.Auth   -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Common.Auth     -Force -ErrorAction SilentlyContinue
 }
@@ -119,7 +117,7 @@ Describe 'API error handling — Invoke-MDEPortalEndpoint (structured failures)'
 
     It 'returns Success true with Data on happy path' {
         InModuleScope Xdr.Defender.Client {
-            Mock Invoke-MDEPortalRequest { @{ hello = 'world' } }
+            Mock Invoke-DefenderPortalRequest { @{ hello = 'world' } }
             $r = Invoke-MDEPortalEndpoint -Session ([pscustomobject]@{}) -Path '/api/x'
             $r.Success | Should -BeTrue
             $r.Data.hello | Should -Be 'world'
@@ -129,7 +127,7 @@ Describe 'API error handling — Invoke-MDEPortalEndpoint (structured failures)'
 
     It 'returns Success false with Error on any exception' {
         InModuleScope Xdr.Defender.Client {
-            Mock Invoke-MDEPortalRequest { throw 'simulated portal blowup' }
+            Mock Invoke-DefenderPortalRequest { throw 'simulated portal blowup' }
             $r = Invoke-MDEPortalEndpoint -Session ([pscustomobject]@{}) -Path '/api/x'
             $r.Success | Should -BeFalse
             $r.Error   | Should -Match 'simulated portal blowup'
@@ -139,7 +137,7 @@ Describe 'API error handling — Invoke-MDEPortalEndpoint (structured failures)'
 
     It 'does not throw — caller must check .Success' {
         InModuleScope Xdr.Defender.Client {
-            Mock Invoke-MDEPortalRequest { throw 'boom' }
+            Mock Invoke-DefenderPortalRequest { throw 'boom' }
             { Invoke-MDEPortalEndpoint -Session ([pscustomobject]@{}) -Path '/api/x' } | Should -Not -Throw
         }
     }
@@ -169,18 +167,20 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             Mock Invoke-MDEEndpoint {
                 param($Session, $Stream, $FromUtc, $PathParams)
                 $script:invoked += $Stream
-                if ($Stream -eq 'MDE_ThreatAnalytics_CL') { throw 'boom' }
+                # Pick a fast-tier stream to be the failing one
+                if ($Stream -eq 'MDE_ActionCenter_CL') { throw 'boom' }
                 ,@()
             }
             Mock Send-ToLogAnalytics { @{ RowsSent = 0 } }
             Mock Set-CheckpointTimestamp { }
             Mock Get-CheckpointTimestamp { $null }
 
-            $result = Invoke-MDETierPoll -Session $Sess -Tier 'P6' -Config $Cfg
-            $result.StreamsAttempted | Should -Be 3
-            $result.StreamsSucceeded | Should -Be 2
-            $result.Errors['MDE_ThreatAnalytics_CL'] | Should -Be 'boom'
-            $script:invoked.Count | Should -Be 3 -Because 'All streams in tier P6 should have been tried'
+            $result = Invoke-MDETierPoll -Session $Sess -Tier 'fast' -Config $Cfg
+            # fast tier has 2 streams: MDE_ActionCenter_CL + MDE_MachineActions_CL
+            $result.StreamsAttempted | Should -Be 2
+            $result.StreamsSucceeded | Should -Be 1
+            $result.Errors['MDE_ActionCenter_CL'] | Should -Be 'boom'
+            $script:invoked.Count | Should -Be 2 -Because 'All streams in fast tier should have been tried even after one fails'
         }
     }
 
@@ -192,7 +192,7 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             Mock Get-CheckpointTimestamp { $null }
             Mock Set-CheckpointTimestamp {}
 
-            $null = Invoke-MDETierPoll -Session $Sess -Tier 'P6' -Config $Cfg
+            $null = Invoke-MDETierPoll -Session $Sess -Tier 'fast' -Config $Cfg
 
             Should -Invoke Set-CheckpointTimestamp -Times 0 -Exactly -Because 'failed stream must not checkpoint'
         }
@@ -204,7 +204,7 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             # P4 was intentionally dropped — no streams carry Tier='P4' in the manifest.
             # But ValidateSet rejects P4 directly. Simulate empty tier by mocking manifest.
             Mock Get-MDEEndpointManifest { @{} }
-            { Invoke-MDETierPoll -Session $Sess -Tier 'P0' -Config $Cfg } | Should -Not -Throw
+            { Invoke-MDETierPoll -Session $Sess -Tier 'inventory' -Config $Cfg } | Should -Not -Throw
         }
     }
 }

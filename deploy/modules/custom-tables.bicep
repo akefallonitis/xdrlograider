@@ -8,7 +8,7 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existin
   name: workspaceName
 }
 
-// 46 data tables + 2 operational tables = 48 total.
+// 46 data tables + 1 operational table = 47 total.
 // (Was 45 data + 2 operational = 47 in v0.1.0-beta.1; subsequently dropped
 // MDE_SecureScoreBreakdown_CL — Graph /security/secureScores covers — and
 // added MDE_DeviceTimeline_CL + MDE_MachineActions_CL as portal-only surfaces
@@ -18,9 +18,9 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existin
 // derived from its manifest ProjectionMap (4 base columns +
 // per-stream typed columns). The 1 deprecated stream
 // (MDE_StreamingApiConfig_CL) keeps the 4-column baseline because it has no
-// ProjectionMap entries to derive typed columns from. Heartbeat and
-// AuthTestResult carry their own write-shape schemas — they're operational
-// telemetry, not data rows.
+// ProjectionMap entries to derive typed columns from. The Heartbeat operational
+// table carries its own write-shape schema (connector-liveness telemetry, not
+// a data row). Auth chain diagnostics now live in App Insights `customEvents`.
 //
 // Each table's column list MUST match its DCR streamDeclaration in dce-dcr.bicep
 // or the DCE silently drops typed columns at ingest. The DCR.TypedColumnCoverage
@@ -659,36 +659,5 @@ resource heartbeatTable 'Microsoft.OperationalInsights/workspaces/tables@2023-09
   }
 }
 
-// AuthTestResult table — extended schema matching Write-AuthTestResult output.
-// Fields per src/Modules/XdrLogRaider.Ingest/Public/Write-AuthTestResult.ps1:
-//   TimeGenerated, Method, PortalHost, Upn, Success, Stage, FailureReason,
-//   EstsMs, SccauthMs, SampleCallHttpCode, SampleCallLatencyMs, SccauthAcquiredUtc.
-resource authTestResultTable 'Microsoft.OperationalInsights/workspaces/tables@2023-09-01' = {
-  name: 'MDE_AuthTestResult_CL'
-  parent: workspace
-  properties: {
-    schema: {
-      name: 'MDE_AuthTestResult_CL'
-      columns: [
-        { name: 'TimeGenerated',       type: 'datetime' }
-        { name: 'Method',              type: 'string' }
-        { name: 'PortalHost',          type: 'string' }
-        { name: 'Upn',                 type: 'string' }
-        { name: 'Success',             type: 'boolean' }
-        { name: 'Stage',               type: 'string' }
-        { name: 'FailureReason',       type: 'string' }
-        { name: 'EstsMs',              type: 'int' }
-        { name: 'SccauthMs',           type: 'int' }
-        { name: 'SampleCallHttpCode',  type: 'int' }
-        { name: 'SampleCallLatencyMs', type: 'int' }
-        { name: 'SccauthAcquiredUtc',  type: 'string' }
-      ]
-    }
-    retentionInDays: retentionInDays
-    totalRetentionInDays: retentionInDays
-    plan: 'Analytics'
-  }
-}
-
 output dataStreamTableCount int = length(items(tableSchemas))
-output totalTableCount int = length(items(tableSchemas)) + 2
+output totalTableCount int = length(items(tableSchemas)) + 1

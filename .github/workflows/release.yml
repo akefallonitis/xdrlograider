@@ -82,14 +82,15 @@ jobs:
           }
           Write-Host "✓ Release-gate grep clean — 0 removed-stream refs in deploy/compiled + sentinel" -ForegroundColor Green
 
-      - name: Release-gate — DCR stream count = 47 + all rules enabled:false + Data Connector 47 tables
+      - name: Release-gate — DCR stream count = 47 + all rules enabled:false + Data Connector 46 tables
         shell: pwsh
         run: |
           # v0.1.0-beta gate triad (belt + suspenders on top of preflight):
           #   (1) mainTemplate.json DCR.streamDeclarations.Count == 47
+          #       (46 data streams + 1 operational Heartbeat; AuthTestResult retired)
           #   (2) every Microsoft.OperationalInsights/workspaces/savedSearches-Scheduled
           #       rule in sentinelContent.json has properties.enabled: false
-          #   (3) Data Connector card dataTypes.Count == 47
+          #   (3) Data Connector card dataTypes.Count == 46
           # These catch regressions that preflight covers but release workflow
           # would otherwise skip on tagged builds.
 
@@ -102,8 +103,8 @@ jobs:
                   $streamCount += ($dcr.properties.streamDeclarations.PSObject.Properties.Name).Count
               }
           }
-          if ($streamCount -ne 48) {
-              throw "Gate 1 FAIL: DCR streamDeclarations count = $streamCount (expected 48 = 46 data + Heartbeat + AuthTestResult)"
+          if ($streamCount -ne 47) {
+              throw "Gate 1 FAIL: DCR streamDeclarations count = $streamCount (expected 47 = 46 data + Heartbeat operational)"
           }
           Write-Host "Gate 1 OK: DCR streamDeclarations.Count = $streamCount" -ForegroundColor Green
 
@@ -123,8 +124,8 @@ jobs:
           # ---- Gate 3: Data Connector dataTypes count ----
           $dc = Get-Content './deploy/solution/Data Connectors/XdrLogRaider_DataConnector.json' -Raw | ConvertFrom-Json
           $dtCount = @($dc.dataTypes).Count
-          if ($dtCount -ne 47) {
-              throw "Gate 3 FAIL: Data Connector lists $dtCount dataTypes (expected 47). Regenerate via tools/Build-SentinelSolution.ps1."
+          if ($dtCount -ne 46) {
+              throw "Gate 3 FAIL: Data Connector lists $dtCount dataTypes (expected 46 = 45 active streams + Heartbeat; deprecated stream excluded; AuthTestResult retired). Regenerate via tools/Build-SentinelSolution.ps1."
           }
           Write-Host "Gate 3 OK: Data Connector dataTypes.Count = $dtCount" -ForegroundColor Green
 
@@ -310,11 +311,13 @@ jobs:
           if ($entries | Where-Object { $_ -like 'functions/*' }) {
               throw "function-app.zip has a 'functions/' wrapper. Function directories MUST be at root for Azure Functions runtime to load them."
           }
-          # 4. All 9 expected function dirs at root with function.json
+          # 4. All 6 expected function dirs at root with function.json.
+          # 5 cadence-tier polls (fast/exposure/config/inventory/maintenance) +
+          # the heartbeat-5m operational timer.
           $expectedFuncs = @(
-              'heartbeat-5m','poll-p0-compliance-1h','poll-p1-pipeline-30m',
-              'poll-p2-governance-1d','poll-p3-exposure-1h','poll-p5-identity-1d',
-              'poll-p6-audit-10m','poll-p7-metadata-1d','validate-auth-selftest'
+              'heartbeat-5m',
+              'poll-fast-10m','poll-exposure-1h','poll-config-6h',
+              'poll-inventory-1d','poll-maintenance-1w'
           )
           foreach ($func in $expectedFuncs) {
               if ($entries -notcontains "$func/function.json") {

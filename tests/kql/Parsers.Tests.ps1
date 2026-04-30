@@ -16,19 +16,17 @@ BeforeAll {
 }
 
 Describe 'KQL parsers — file presence' {
-    It 'ships exactly 6 parser .kql files' {
+    It 'ships exactly 4 parser .kql files (one per cadence tier with snapshot semantics; fast tier has no parser)' {
         $files = Get-ChildItem -Path $script:ParsersDir -Filter '*.kql'
-        $files.Count | Should -Be 6
+        $files.Count | Should -Be 4
     }
 
-    It 'includes all category parsers' {
+    It 'includes all cadence-tier parsers' {
         $expected = @(
-            'MDE_Drift_P0Compliance.kql',
-            'MDE_Drift_P1Pipeline.kql',
-            'MDE_Drift_P2Governance.kql',
-            'MDE_Drift_P3Exposure.kql',
-            'MDE_Drift_P5Identity.kql',
-            'MDE_Drift_P7Metadata.kql'
+            'MDE_Drift_Exposure.kql',
+            'MDE_Drift_Configuration.kql',
+            'MDE_Drift_Inventory.kql',
+            'MDE_Drift_Maintenance.kql'
         )
         foreach ($name in $expected) {
             Test-Path (Join-Path $script:ParsersDir $name) | Should -BeTrue
@@ -72,13 +70,13 @@ Describe 'KQL parsers — content validation' {
         }
     }
 
-    It 'P3Exposure parser uses set-diff pattern (leftanti)' {
-        $p3 = Get-Content (Join-Path $script:ParsersDir 'MDE_Drift_P3Exposure.kql') -Raw
-        $p3 | Should -Match 'leftanti'
+    It 'Exposure parser uses set-diff pattern (leftanti) because XSPM streams are graph-structured' {
+        $exposure = Get-Content (Join-Path $script:ParsersDir 'MDE_Drift_Exposure.kql') -Raw
+        $exposure | Should -Match 'leftanti'
     }
 
-    It 'non-P3 parsers use field-level diff (mv-apply)' {
-        foreach ($name in @('MDE_Drift_P0Compliance', 'MDE_Drift_P1Pipeline', 'MDE_Drift_P2Governance', 'MDE_Drift_P5Identity', 'MDE_Drift_P7Metadata')) {
+    It 'Configuration / Inventory / Maintenance parsers use field-level diff (mv-apply)' {
+        foreach ($name in @('MDE_Drift_Configuration', 'MDE_Drift_Inventory', 'MDE_Drift_Maintenance')) {
             $content = Get-Content (Join-Path $script:ParsersDir "$name.kql") -Raw
             $content | Should -Match 'mv-apply'
         }

@@ -1,20 +1,21 @@
 // SYNOPSIS:
-//   Computes drift across P3 Exposure / XSPM streams (attack paths,
-//   chokepoints, top targets, initiatives, exposure snapshots, baselines,
-//   recommendations, device timeline) — set-diff flavor.
+//   Computes drift across the Exposure Management (XSPM) tier — set-diff flavor.
+//   Sources: AssetRules, XspmInitiatives, ExposureSnapshots, ExposureRecommendations,
+//   XspmAttackPaths, XspmChokePoints, XspmTopTargets.
 //
-//   Unlike P0/P1/P2/P5/P7 which do field-level diff, XSPM streams are
-//   graph-structured (attack paths, chokepoints, entry points). Drift here
-//   means "which entities were added/removed between snapshots", not "which
-//   fields changed within an entity".
+//   XSPM streams are graph-structured (attack paths, chokepoints, entry
+//   points). Drift here means "which entities were added/removed between
+//   snapshots", not "which fields changed within an entity" — same set-diff
+//   shape used by the previous P3 Exposure parser, now scoped to the
+//   per-Category exposure cadence.
 //
 // PARAMETERS:
 //   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
 //   window   - ISO 8601 duration, default 1h. How recent counts as "current".
 //
 // INVOCATION:
-//   MDE_Drift_P3Exposure(7d, 1h) | where ChangeType == "Added"
-//   MDE_Drift_P3Exposure()       // applies defaults
+//   MDE_Drift_Exposure(7d, 1h) | where ChangeType == "Added"
+//   MDE_Drift_Exposure()       // applies defaults
 //
 // NOTES:
 //   - Parameterized as a KQL function so workbooks/rules can plumb
@@ -25,25 +26,21 @@
 //   - MDE_SecureScoreBreakdown_CL is intentionally omitted: it is publicly
 //     covered by Microsoft Graph /security/secureScores. Use the Graph Security
 //     data connector for that data.
-//   - MDE_DeviceTimeline_CL is tenant-gated. The table is created at deploy
-//     time; unioning it when the tenant has not provisioned the timeline
-//     surface yields zero rows but keeps the parser's source list stable.
 //   - Removed-stream history lives in docs/STREAMS-REMOVED.md + CHANGELOG.md.
 
-let MDE_Drift_P3Exposure = (lookback:timespan = 7d, window:timespan = 1h) {
+let MDE_Drift_Exposure = (lookback:timespan = 7d, window:timespan = 1h) {
     // Metadata + envelope columns to exclude from the snapshot identity (these
     // are bookkeeping; only typed data columns from the manifest ProjectionMap
     // count as the entity's state for drift detection).
     let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);
     let sources = union withsource=_Table
-        MDE_XspmAttackPaths_CL,
-        MDE_XspmChokePoints_CL,
-        MDE_XspmTopTargets_CL,
+        MDE_AssetRules_CL,
         MDE_XspmInitiatives_CL,
         MDE_ExposureSnapshots_CL,
-        MDE_SecurityBaselines_CL,
         MDE_ExposureRecommendations_CL,
-        MDE_DeviceTimeline_CL
+        MDE_XspmAttackPaths_CL,
+        MDE_XspmChokePoints_CL,
+        MDE_XspmTopTargets_CL
         | where TimeGenerated > ago(lookback);
     let currentSet = sources
         | where TimeGenerated > ago(window)
@@ -56,7 +53,7 @@ let MDE_Drift_P3Exposure = (lookback:timespan = 7d, window:timespan = 1h) {
         | extend PreviousTypedBag = bag_remove_keys(pack_all(), metaCols)
         | project _Table, EntityId, PreviousTypedBag, PreviousTime = TimeGenerated;
     // SnapshotCurrent + SnapshotPrevious columns keep the 9-column drift schema
-    // consistent across all 6 tier parsers. Downstream analytic rules and
+    // consistent across all 4 tier parsers. Downstream analytic rules and
     // workbooks can filter on "seen in snapshot X but not Y" regardless of tier.
     let added = currentSet
         | join kind=leftanti previousSet on _Table, EntityId
@@ -83,4 +80,4 @@ let MDE_Drift_P3Exposure = (lookback:timespan = 7d, window:timespan = 1h) {
         SnapshotPrevious = PreviousSnapshot,
         ChangeType
 };
-MDE_Drift_P3Exposure
+MDE_Drift_Exposure

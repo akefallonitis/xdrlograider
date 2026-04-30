@@ -8,24 +8,25 @@ function Invoke-TierPollWithHeartbeat {
 
     .DESCRIPTION
         Replaces ~45 lines of duplicated boilerplate previously copy-pasted
-        across the 7 poll-p*/run.ps1 files. Each timer body now becomes:
+        across the per-cadence poll-*/run.ps1 files. Each timer body now becomes:
 
             param($Timer)
-            Invoke-TierPollWithHeartbeat -Tier 'P0' -FunctionName 'poll-p0-compliance-1h'
+            Invoke-TierPollWithHeartbeat -Tier 'fast' -FunctionName 'poll-fast-10m'
 
         The helper enforces the canonical execution shape end-to-end:
 
           1. Strict mode + $ErrorActionPreference = 'Stop'.
           2. Config built directly from $env:* (process-scoped, always
-             present per profile.ps1 required-env-vars validation). Iter 13.3
-             eliminated runspace-local global state dependency to fix the
-             multi-runspace propagation bug.
+             present per profile.ps1 required-env-vars validation). Eliminates
+             runspace-local global state dependency to fix the multi-runspace
+             propagation bug.
           3. Auth-self-test gate: skip with an informational heartbeat row if
-             validate-auth-selftest hasn't turned green yet. Never silently
-             no-ops — operators see a gated row, not zero rows.
+             no successful sign-in has happened yet (the auth-selftest flag
+             is set the first time any poll-* sign-in succeeds). Never
+             silently no-ops — operators see a gated row, not zero rows.
           4. Main polling lifecycle, wrapped in top-level try/catch:
-                Get-MDEAuthFromKeyVault
-                Connect-MDEPortal
+                Get-XdrAuthFromKeyVault
+                Connect-DefenderPortal
                 Invoke-MDETierPoll
                 Write-Heartbeat (success row with Rate429Count + GzipBytes)
           5. Fatal-error catch:
@@ -41,11 +42,11 @@ function Invoke-TierPollWithHeartbeat {
         a non-default Portal value + extra poll-<portal>-<tier> timer files.
 
     .PARAMETER Tier
-        One of P0..P7 (excluding P4 which was retired pre-v0.1.0-beta.1).
+        One of fast | exposure | config | inventory | maintenance.
         Must match a Tier value declared in endpoints.manifest.psd1.
 
     .PARAMETER FunctionName
-        The timer-function folder name (e.g. 'poll-p0-compliance-1h'). Used as
+        The timer-function folder name (e.g. 'poll-fast-10m'). Used as
         the FunctionName label in MDE_Heartbeat_CL so operators can correlate
         heartbeat rows to App Insights invocations.
 
@@ -62,13 +63,13 @@ function Invoke-TierPollWithHeartbeat {
     .EXAMPLE
         # Canonical timer body (collapses a ~45-line boilerplate to 2 lines)
         param($Timer)
-        Invoke-TierPollWithHeartbeat -Tier 'P0' -FunctionName 'poll-p0-compliance-1h'
+        Invoke-TierPollWithHeartbeat -Tier 'fast' -FunctionName 'poll-fast-10m'
     #>
     [CmdletBinding()]
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet('P0', 'P1', 'P2', 'P3', 'P5', 'P6', 'P7')]
+        [ValidateSet('fast', 'exposure', 'config', 'inventory', 'maintenance')]
         [string] $Tier,
 
         [Parameter(Mandatory)]
@@ -114,7 +115,7 @@ function Invoke-TierPollWithHeartbeat {
         }
     }
 
-    # Auth-self-test gate: refuse to poll until validate-auth-selftest has
+    # Auth-self-test gate: refuse to poll until a previous successful sign-in
     # signed in at least once. Emits an informational heartbeat row so
     # operators can see "gated, not broken" in MDE_Heartbeat_CL.
     if (-not (Get-XdrAuthSelfTestFlag -StorageAccountName $config.StorageAccountName -CheckpointTable $config.CheckpointTable)) {
@@ -131,8 +132,8 @@ function Invoke-TierPollWithHeartbeat {
     # emit a heartbeat row with Notes.fatalError so operators see the failure
     # in MDE_Heartbeat_CL rather than silence, then re-throw for App Insights.
     try {
-        $credential = Get-MDEAuthFromKeyVault -VaultUri $config.KeyVaultUri -SecretName $config.AuthSecretName -AuthMethod $config.AuthMethod
-        $session    = Connect-MDEPortal -Method $config.AuthMethod -Credential $credential -PortalHost $Portal
+        $credential = Get-XdrAuthFromKeyVault -VaultUri $config.KeyVaultUri -SecretPrefix $config.AuthSecretName -AuthMethod $config.AuthMethod
+        $session    = Connect-DefenderPortal -Method $config.AuthMethod -Credential $credential -PortalHost $Portal
 
         $result = Invoke-MDETierPoll -Session $session -Tier $Tier -Config $config
 

@@ -52,12 +52,10 @@ BeforeAll {
     $script:ClientPsd1     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
     $script:CommonAuthPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
     $script:DefAuthPsd1    = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
-    $script:PortalShimPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Portal.Auth' 'Xdr.Portal.Auth.psd1'
     $script:ActionCenterFixture = Join-Path $script:RepoRoot 'tests' 'fixtures' 'live-responses' 'MDE_ActionCenter_CL-raw.json'
 
     Import-Module $script:CommonAuthPsd1 -Force -ErrorAction Stop
     Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
-    Import-Module $script:PortalShimPsd1 -Force -ErrorAction Stop
     Import-Module $script:ClientPsd1     -Force -ErrorAction Stop
 
     # The wrapper-key shapes that WERE breaking before iter-14.0 Phase 3.
@@ -70,7 +68,6 @@ BeforeAll {
 
 AfterAll {
     Remove-Module Xdr.Defender.Client -Force -ErrorAction SilentlyContinue
-    Remove-Module Xdr.Portal.Auth     -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Defender.Auth   -Force -ErrorAction SilentlyContinue
     Remove-Module Xdr.Common.Auth     -Force -ErrorAction SilentlyContinue
 }

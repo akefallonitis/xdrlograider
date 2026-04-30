@@ -1,0 +1,12 @@
+{
+  "description": "Hourly @ :25 — Exposure Management (XSPM) tier. Polls 7 streams: MDE_AssetRules_CL, MDE_XspmInitiatives_CL, MDE_ExposureSnapshots_CL, MDE_ExposureRecommendations_CL, MDE_XspmAttackPaths_CL, MDE_XspmChokePoints_CL, MDE_XspmTopTargets_CL. Cadence-paired with the Sentinel exposure workbook (hourly refresh). XSPM graph data churn-rate is well under 1h so a faster poll wastes XSPM-API quota.",
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 25 * * * *",
+      "runOnStartup": false
+    }
+  ]
+}

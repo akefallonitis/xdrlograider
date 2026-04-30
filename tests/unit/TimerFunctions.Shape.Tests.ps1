@@ -1,37 +1,34 @@
 #Requires -Modules Pester
 
-# AST-based shape tests for the 7 poll-*/run.ps1 timer bodies + the shared
+# AST-based shape tests for the 5 poll-*/run.ps1 timer bodies + the shared
 # Invoke-TierPollWithHeartbeat helper.
 #
-# v0.1.0-beta: each timer body was consolidated from ~45 lines of duplicated
-# boilerplate to a 2-line thin wrapper that calls the shared helper. These
-# tests split into two layers:
+# Each timer body is a 2-line thin wrapper that calls the shared helper.
+# Tests split into two layers:
 #
-#   LAYER 1 — thin-wrapper shape (per timer):
+#   LAYER 1 - thin-wrapper shape (per timer):
 #     run.ps1 exists, parses, has param($Timer), calls
 #     Invoke-TierPollWithHeartbeat with the correct -Tier + -FunctionName that
 #     matches the folder name, and references no removed/legacy helpers.
 #     function.json has a timerTrigger with a valid 6-field NCRONTAB schedule.
 #
-#   LAYER 2 — helper shape (once):
+#   LAYER 2 - helper shape (once):
 #     Invoke-TierPollWithHeartbeat.ps1 has the canonical execution shape:
 #     strict mode + ErrorAction=Stop, Get-XdrAuthSelfTestFlag gate,
-#     Get-MDEAuthFromKeyVault + Connect-MDEPortal + Invoke-MDETierPoll,
+#     Get-XdrAuthFromKeyVault + Connect-DefenderPortal + Invoke-MDETierPoll,
 #     Write-Heartbeat on both gated + success + fatal paths, top-level
 #     try/catch with fatalError Note, bare re-throw, nested try around
 #     Write-Heartbeat in the catch, no references to legacy functions.
 #
-# Parse-only — no function bodies are executed.
+# Parse-only - no function bodies are executed.
 
 BeforeDiscovery {
     $TimerCases = @(
-        @{ Folder = 'poll-p0-compliance-1h'; Tier = 'P0' }
-        @{ Folder = 'poll-p1-pipeline-30m';  Tier = 'P1' }
-        @{ Folder = 'poll-p2-governance-1d'; Tier = 'P2' }
-        @{ Folder = 'poll-p3-exposure-1h';   Tier = 'P3' }
-        @{ Folder = 'poll-p5-identity-1d';   Tier = 'P5' }
-        @{ Folder = 'poll-p6-audit-10m';     Tier = 'P6' }
-        @{ Folder = 'poll-p7-metadata-1d';   Tier = 'P7' }
+        @{ Folder = 'poll-fast-10m';        Tier = 'fast' }
+        @{ Folder = 'poll-exposure-1h';     Tier = 'exposure' }
+        @{ Folder = 'poll-config-6h';       Tier = 'config' }
+        @{ Folder = 'poll-inventory-1d';    Tier = 'inventory' }
+        @{ Folder = 'poll-maintenance-1w';  Tier = 'maintenance' }
     )
 }
 
@@ -43,7 +40,14 @@ BeforeAll {
         'Exchange-SccauthCookie',
         'Get-LaraAuthSelfTestFlag',
         'Invoke-LaraTierPoll',
-        'Connect-LaraPortal'
+        'Connect-LaraPortal',
+        # Shim wrappers removed in v0.1.0-beta first publish — code must call
+        # the real-module names directly (Connect-DefenderPortal etc.).
+        'Connect-MDEPortal',
+        'Connect-MDEPortalWithCookies',
+        'Invoke-MDEPortalRequest',
+        'Test-MDEPortalAuth',
+        'Get-MDEAuthFromKeyVault'
     )
 
     function script:Get-ScriptAst {
@@ -185,7 +189,7 @@ Describe 'Timer thin-wrapper shape: <Folder>' -ForEach $TimerCases {
     }
 }
 
-Describe 'Invoke-TierPollWithHeartbeat helper shape (single source of truth for all 7 poll-* timers)' {
+Describe 'Invoke-TierPollWithHeartbeat helper shape (single source of truth for all 5 poll-* timers)' {
 
     BeforeAll {
         $script:Parsed = script:Get-ScriptAst -Path $script:HelperPath
@@ -218,12 +222,12 @@ Describe 'Invoke-TierPollWithHeartbeat helper shape (single source of truth for 
         script:Test-AstCallsCommand -Commands $script:Parsed.Commands -Name 'Get-XdrAuthSelfTestFlag' | Should -BeTrue
     }
 
-    It 'calls Get-MDEAuthFromKeyVault' {
-        script:Test-AstCallsCommand -Commands $script:Parsed.Commands -Name 'Get-MDEAuthFromKeyVault' | Should -BeTrue
+    It 'calls Get-XdrAuthFromKeyVault (real Xdr.Common.Auth name, not Get-MDEAuthFromKeyVault shim)' {
+        script:Test-AstCallsCommand -Commands $script:Parsed.Commands -Name 'Get-XdrAuthFromKeyVault' | Should -BeTrue
     }
 
-    It 'calls Connect-MDEPortal' {
-        script:Test-AstCallsCommand -Commands $script:Parsed.Commands -Name 'Connect-MDEPortal' | Should -BeTrue
+    It 'calls Connect-DefenderPortal (real Xdr.Defender.Auth name, not Connect-MDEPortal shim)' {
+        script:Test-AstCallsCommand -Commands $script:Parsed.Commands -Name 'Connect-DefenderPortal' | Should -BeTrue
     }
 
     It 'calls Invoke-MDETierPoll' {

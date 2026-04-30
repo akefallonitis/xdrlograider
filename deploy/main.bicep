@@ -4,7 +4,7 @@
 // Analytics workspace. This template does NOT create or modify the workspace
 // itself. It deploys:
 //   - Connector resources in the target RG (Function App + plan + KV + Storage + App Insights + DCE + DCR)
-//   - 47 custom tables (45 data + Heartbeat + AuthTestResult) inside the customer's workspace (cross-RG if needed)
+//   - 47 custom tables (46 data + Heartbeat) inside the customer's workspace (cross-RG if needed)
 //   - A Sentinel Solution package (XdrLogRaider) + GenericUI Data Connector card so the connector
 //     appears in Sentinel → Data Connectors alongside Microsoft Defender XDR / MDE / etc.
 //     (kind=GenericUI + apiVersion=2021-03-01-preview is the canonical pair for FA-based
@@ -67,9 +67,6 @@ param enableKeyVaultDiagnostics bool = true
 @description('DEPRECATED: use `hostingPlan` instead. Retained for backward-compatibility with existing deployments; if `hostingPlan` is unset, this maps consumption-y1=Y1 / flex-fc1=FC1 / premium-ep1=EP1.')
 @allowed([ 'Y1', 'FC1', 'EP1', 'EP2' ])
 param functionPlanSku string = 'Y1'
-
-@description('Pinned release tag (e.g. "0.1.0-beta"). DO NOT use "latest" — GitHub /releases/latest excludes pre-releases and returns 302→nothing, leaving the FA with no code.')
-param functionAppZipVersion string = '0.1.0-beta'
 
 @description('GitHub repo owner/name for the Function App code ZIP. Override only if you forked.')
 param githubRepo string = 'akefallonitis/xdrlograider'
@@ -135,9 +132,12 @@ var workspaceSubscriptionId = split(existingWorkspaceId, '/')[2]
 var workspaceResourceGroup  = split(existingWorkspaceId, '/')[4]
 var workspaceName           = last(split(existingWorkspaceId, '/'))
 
-var packageUrl = functionAppZipVersion == 'latest'
-  ? 'https://github.com/${githubRepo}/releases/latest/download/function-app.zip'
-  : 'https://github.com/${githubRepo}/releases/download/v${functionAppZipVersion}/function-app.zip'
+// WEBSITE_RUN_FROM_PACKAGE points at GitHub Releases /latest/download — Marketplace
+// best practice for community connectors. Each release ships a `function-app.zip`
+// asset; GitHub's /latest endpoint resolves to the most-recent non-prerelease tag.
+// To pin a specific tag (e.g. for staged rollouts) override packageUrl directly.
+// See docs/DEPLOY-METHODS.md → "Advanced: pinning a specific release".
+var packageUrl = 'https://github.com/${githubRepo}/releases/latest/download/function-app.zip'
 
 // hostingPlan tier derivations.
 // `useFullManagedIdentity` is true when the operator picked a tier where Azure
@@ -324,9 +324,9 @@ output workspaceLocation   string = workspaceLocation
 
 // Conditional next-step text. When the wizard supplied all required auth
 // secrets via the secure parameters, the connector is fully bootstrapped and
-// the operator only needs to wait for the self-test. Otherwise, surface the
-// exact command to upload the secrets via the helper script.
+// the operator only needs to wait for the first heartbeat / poll. Otherwise,
+// surface the exact command to upload the secrets via the helper script.
 var wizardSecretsProvided = (authMethod == 'credentials_totp' && length(servicePassword) > 0 && length(totpSeed) > 0) || (authMethod == 'passkey' && length(passkeyJson) > 0)
 output postDeployCommand string = wizardSecretsProvided
-  ? 'Auth secrets uploaded by deploy. Self-test result expected within 5 minutes in workspace: MDE_AuthTestResult_CL | top 1 by TimeGenerated. KV: ${kvName}'
+  ? 'Auth secrets uploaded by deploy. Heartbeat expected within 5-10 minutes in workspace: MDE_Heartbeat_CL | top 1 by TimeGenerated. Auth chain diagnostics: App Insights customEvents | where name startswith "AuthChain.". KV: ${kvName}'
   : 'git clone https://github.com/${githubRepo} && cd xdrlograider && ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName ${kvName}'

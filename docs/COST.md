@@ -21,14 +21,14 @@ Estimated monthly Azure costs for a typical XdrLogRaider deployment.
 | Tier | Streams | Cadence | Executions/day | Est. GB/day |
 |---|---|---|---|---|
 | heartbeat-5m | 1 | 5 min | 288 | ~0.5 MB |
-| validate-auth-selftest | 1 | 10 min initially, hourly after | ~100 | ~0.1 MB |
-| poll-p0-compliance-1h | 19 | 1h | 24 | ~20 MB |
-| poll-p1-pipeline-30m | 7 | 30 min | 48 | ~5 MB |
-| poll-p2-governance-1d | 7 | 1d | 1 | ~5 MB (once per day) |
-| poll-p3-exposure-1h | 8 | 1h | 24 | ~30 MB |
-| poll-p5-identity-1d | 5 | 1d | 1 | ~3 MB |
-| poll-p6-audit-10m | 2 | 10 min | 144 | ~10 MB |
-| poll-p7-metadata-1d | 4 | 1d | 1 | ~2 MB |
+| (auth chain — see App Insights customEvents) | 1 | 10 min initially, hourly after | ~100 | ~0.1 MB |
+| poll-inventory-1d | 19 | 1h | 24 | ~20 MB |
+| poll-config-6h | 7 | 30 min | 48 | ~5 MB |
+| poll-config-6h | 7 | 1d | 1 | ~5 MB (once per day) |
+| poll-exposure-1h | 8 | 1h | 24 | ~30 MB |
+| poll-inventory-1d | 5 | 1d | 1 | ~3 MB |
+| poll-fast-10m | 2 | 10 min | 144 | ~10 MB |
+| poll-config-6h | 4 | 1d | 1 | ~2 MB |
 | **Total** | 52 | | ~600 | ~75 MB/day = ~2.25 GB/month |
 
 ## Cost levers (default-on in v1.0)

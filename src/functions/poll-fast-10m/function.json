@@ -1,0 +1,12 @@
+{
+  "description": "Every 10 minutes — Action Center events. Polls 2 streams: MDE_ActionCenter_CL (per-investigation actions + AIR linkage), MDE_MachineActions_CL (Live Response per-step output). Both are event-shaped (one row per occurrence, not snapshots), so this tier has the highest cadence to keep operator latency tight on hostile-action visibility.",
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 */10 * * * *",
+      "runOnStartup": false
+    }
+  ]
+}
