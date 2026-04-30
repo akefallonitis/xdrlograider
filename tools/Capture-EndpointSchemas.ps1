@@ -78,10 +78,12 @@ Get-Content $envFile | ForEach-Object {
     }
 }
 
-# -------- Import modules -------------------------------------------------
-Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Portal.Auth'         'Xdr.Portal.Auth.psd1')         -Force
-Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Ingest'     'XdrLogRaider.Ingest.psd1')     -Force
-Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client'     'XdrLogRaider.Client.psd1')     -Force
+# -------- Import modules — 5 real modules in dep order (no shim layer) ------
+Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Auth'           'Xdr.Common.Auth.psd1')                 -Force
+Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest'       'Xdr.Sentinel.Ingest.psd1')             -Force
+Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Auth'         'Xdr.Defender.Auth.psd1')               -Force
+Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client'       'Xdr.Defender.Client.psd1')             -Force
+Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Connector.Orchestrator' 'Xdr.Connector.Orchestrator.psd1')     -Force
 
 # -------- Build session --------------------------------------------------
 $portalHost = if ($env:XDRLR_TEST_PORTAL_HOST) { $env:XDRLR_TEST_PORTAL_HOST } else { 'security.microsoft.com' }

@@ -195,10 +195,10 @@ try {
     $dcPath = Join-Path $repoRoot 'deploy' 'solution' 'Data Connectors' 'XdrLogRaider_DataConnector.json'
     $dc = Get-Content $dcPath -Raw | ConvertFrom-Json
     $tableCount = @($dc.dataTypes).Count
-    if ($tableCount -eq 47) {
-        Add-Check -Section '5-Hub' -Name 'Data Connector lists all 47 tables' -Status Pass -Detail "dataTypes.Count = $tableCount"
+    if ($tableCount -eq 46) {
+        Add-Check -Section '5-Hub' -Name 'Data Connector lists all 46 tables' -Status Pass -Detail "dataTypes.Count = $tableCount (45 active data streams + 1 Heartbeat operational; deprecated stream excluded)"
     } else {
-        Add-Check -Section '5-Hub' -Name 'Data Connector lists all 47 tables' -Status Fail -Detail "dataTypes.Count = $tableCount (expected 47)"
+        Add-Check -Section '5-Hub' -Name 'Data Connector lists all 46 tables' -Status Fail -Detail "dataTypes.Count = $tableCount (expected 46 = 45 active data + 1 Heartbeat; deprecated stream excluded)"
     }
 
     # 5b — All 14 analytic rules have enabled: false
@@ -252,9 +252,12 @@ try {
 # -----------------------------------------------------------------
 Write-Host "--- 6/8  Schema consistency ---" -ForegroundColor Cyan
 try {
-    # Manifest count
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Portal.Auth' 'Xdr.Portal.Auth.psd1')     -Force -ErrorAction Stop
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'XdrLogRaider.Client' 'XdrLogRaider.Client.psd1') -Force -ErrorAction Stop
+    # Manifest count — load 5 real modules in dep order (no shim layer in v0.1.0-beta first publish)
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1')                 -Force -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1')         -Force -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1')             -Force -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1')         -Force -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Connector.Orchestrator' 'Xdr.Connector.Orchestrator.psd1') -Force -ErrorAction Stop
     $manifest = Get-MDEEndpointManifest -Force
     if ($manifest.Count -eq 46) {
         Add-Check -Section '6-Schema' -Name 'Manifest = 46 streams' -Status Pass -Detail "$($manifest.Count) streams"
