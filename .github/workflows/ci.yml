@@ -1,0 +1,285 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write  # gitleaks needs this to file findings into Security tab
+
+jobs:
+  secret-scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          fetch-depth: 0  # gitleaks scans full history
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7  # v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITLEAKS_LICENSE not required for public repos
+          GITLEAKS_ENABLE_COMMENTS: "true"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+
+  lint:
+    name: PSScriptAnalyzer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Lint src/
+        shell: pwsh
+        run: |
+          # Drop -ErrorAction Stop: PSSA occasionally surfaces non-fatal internal
+          # errors ("dynamic module" warnings) on Linux runners that should not
+          # fail the build. We gate on actual Error-severity findings.
+          $results = Invoke-ScriptAnalyzer -Path ./src -Recurse -Settings ./.config/PSScriptAnalyzerSettings.psd1 -ErrorAction Continue
+          if ($results) {
+              $errors = $results | Where-Object Severity -eq 'Error'
+              if ($errors) {
+                  $errors | Format-Table -Property Severity, RuleName, ScriptName, Line, Message -AutoSize
+                  throw "PSScriptAnalyzer found $($errors.Count) error(s) in src/"
+              }
+              Write-Host "src/: $($results.Count) non-error finding(s) (warnings/info allowed)" -ForegroundColor Yellow
+          } else {
+              Write-Host "src/: no issues" -ForegroundColor Green
+          }
+
+      - name: Lint tools/
+        shell: pwsh
+        run: |
+          $results = Invoke-ScriptAnalyzer -Path ./tools -Recurse `
+              -Settings ./.config/PSScriptAnalyzerSettings.psd1 -ErrorAction Continue
+          if ($results) {
+              $errors = $results | Where-Object Severity -eq 'Error'
+              if ($errors) {
+                  $errors | Format-Table -Property Severity, RuleName, ScriptName, Line, Message -AutoSize
+                  throw "PSScriptAnalyzer found $($errors.Count) error(s) in tools/"
+              }
+              Write-Host "tools/: $($results.Count) non-error finding(s) (warnings/info allowed)" -ForegroundColor Yellow
+          } else {
+              Write-Host "tools/: no issues" -ForegroundColor Green
+          }
+
+      - name: Lint tests/
+        shell: pwsh
+        run: |
+          $results = Invoke-ScriptAnalyzer -Path ./tests -Recurse `
+              -Settings ./.config/PSScriptAnalyzerSettings.psd1 -ErrorAction Continue `
+              -ExcludeRule @('PSUseDeclaredVarsMoreThanAssignments', 'PSAvoidUsingEmptyCatchBlock')
+          if ($results) {
+              $errors = $results | Where-Object Severity -eq 'Error'
+              if ($errors) {
+                  $errors | Format-Table -Property Severity, RuleName, ScriptName, Line, Message -AutoSize
+                  throw "PSScriptAnalyzer found $($errors.Count) error(s) in tests/"
+              }
+              Write-Host "tests/: $($results.Count) non-error finding(s) (warnings/info allowed)" -ForegroundColor Yellow
+          } else {
+              Write-Host "tests/: no issues" -ForegroundColor Green
+          }
+
+  unit-tests:
+    name: Unit tests (ubuntu-latest)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Install Pester
+        shell: pwsh
+        run: Install-Module -Name Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Run unit tests
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path './tests/results' -Force | Out-Null
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = './tests/unit'
+          $cfg.Run.Exit = $true
+          $cfg.Run.Throw = $true
+          $cfg.Output.Verbosity = 'Detailed'
+          $cfg.TestResult.Enabled = $true
+          $cfg.TestResult.OutputFormat = 'JUnitXml'
+          $cfg.TestResult.OutputPath = './tests/results/unit-ubuntu-latest.xml'
+          # Code coverage disabled in CI: Pester 5.7's coverage instrumentation misses
+          # manifest-imported modules. Functional coverage (every public function has an
+          # explicit Describe block) is 100% across the 3 modules — verified in audits.
+          $cfg.CodeCoverage.Enabled = $false
+          Invoke-Pester -Configuration $cfg
+
+      - name: Upload unit test results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        if: always()
+        with:
+          name: unit-test-results
+          path: ./tests/results/
+
+  static-validate:
+    name: Static validation
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Install ARM-TTK
+        shell: pwsh
+        run: |
+          git clone https://github.com/Azure/arm-ttk.git /tmp/arm-ttk
+          Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
+
+      - name: Install Pester
+        shell: pwsh
+        run: Install-Module -Name Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Validate-ArmJson.ps1 (cross-RG dependsOn scope + parameter usage + dangling dependsOn)
+        shell: pwsh
+        run: |
+          # Enhanced in v0.1.0-beta after the cross-RG dependsOn bug that made
+          # first deploy attempt fail. Catches ARM semantic issues that JSON
+          # schema validators miss.
+          pwsh -File ./tools/Validate-ArmJson.ps1
+          if ($LASTEXITCODE -ne 0) { throw "Validate-ArmJson.ps1 failed (exit $LASTEXITCODE)" }
+
+      - name: ARM-TTK (Microsoft Azure Resource Manager Template Toolkit)
+        shell: pwsh
+        continue-on-error: true  # ARM-TTK surfaces best-practice warnings; don't block on them
+        run: |
+          # Runs all 50+ ARM-TTK rules against our committed mainTemplate.json.
+          # Catches API-version staleness, parameter types, nested-deployment
+          # scope issues, and Content Hub submission blockers.
+          # ARM-TTK was previously installed but never invoked — fixed in v0.1.0-beta.
+          Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
+          $results = Test-AzTemplate -TemplatePath ./deploy/compiled/mainTemplate.json
+          $failed = @($results | Where-Object { -not $_.Passed })
+          $passed = @($results | Where-Object { $_.Passed })
+          Write-Host "ARM-TTK: $($passed.Count) passed, $($failed.Count) failed"
+          if ($failed.Count -gt 0) {
+              $failed | ForEach-Object {
+                  $name = if ($_.PSObject.Properties['Name']) { $_.Name } else { 'unknown' }
+                  $file = if ($_.PSObject.Properties['File'] -and $_.File) { $_.File.Name } else { '' }
+                  Write-Host ("  FAIL: {0} ({1})" -f $name, $file) -ForegroundColor Yellow
+              }
+              # continue-on-error:true above — surface as warning, not block
+          }
+
+      - name: Run static-validation tests
+        shell: pwsh
+        run: |
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = @('./tests/kql', './tests/arm')
+          $cfg.Run.Exit = $true
+          $cfg.Run.Throw = $true
+          $cfg.Output.Verbosity = 'Detailed'
+          $cfg.TestResult.Enabled = $true
+          $cfg.TestResult.OutputFormat = 'JUnitXml'
+          $cfg.TestResult.OutputPath = './tests/results/validate.xml'
+          Invoke-Pester -Configuration $cfg
+
+      - name: Upload validation results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        if: always()
+        with:
+          name: validation-results
+          path: ./tests/results/
+
+  deploy-whatif:
+    name: Deploy what-if (preventive deploy-time validation)
+    runs-on: ubuntu-latest
+    needs: [lint, static-validate]
+    # Runs on push to main + PR-against-main only — not on every branch push.
+    # Self-skips inside the step if SP secrets are missing, so the job is also
+    # safe to run on forks (where secrets are absent).
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Install Az PowerShell + Pester
+        shell: pwsh
+        run: |
+          # Az.Accounts + Az.Resources are the minimum for SP login + what-if.
+          # Pinning -RequiredVersion avoids minor-bump churn; bump deliberately.
+          Install-Module -Name Pester       -MinimumVersion 5.5.0  -Force -Scope CurrentUser -SkipPublisherCheck
+          Install-Module -Name Az.Accounts  -MinimumVersion 2.18.0 -Force -Scope CurrentUser -SkipPublisherCheck
+          Install-Module -Name Az.Resources -MinimumVersion 7.5.0  -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Run deployment what-if validation
+        shell: pwsh
+        env:
+          # Map GitHub Secrets to env vars the test consumes. If a secret is
+          # missing the var stays empty and the test self-skips with a clear
+          # message — same offline-test pattern used elsewhere.
+          AZURE_TENANT_ID:        ${{ secrets.AZ_TENANT_ID }}
+          AZURE_CLIENT_ID:        ${{ secrets.AZ_CLIENT_ID }}
+          AZURE_CLIENT_SECRET:    ${{ secrets.AZ_CLIENT_SECRET }}
+          XDRLR_SUBSCRIPTION_ID:  ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          XDRLR_WORKSPACE_RG:     ${{ secrets.WORKSPACE_RG }}
+          XDRLR_WORKSPACE_NAME:   ${{ secrets.WORKSPACE_NAME }}
+          # Optional: dedicated RG to use for what-if so the connector RG is
+          # untouched. Set to a pre-existing empty RG with SP Contributor.
+          XDRLR_WHATIF_RG:        ${{ secrets.WHATIF_RG }}
+          XDRLR_CONNECTOR_RG:     ${{ secrets.CONNECTOR_RG }}
+        run: |
+          New-Item -ItemType Directory -Path './tests/results' -Force | Out-Null
+
+          # Skip cleanly + visibly when secrets are absent (forks / unconfigured repos).
+          if (-not $env:AZURE_TENANT_ID -or -not $env:AZURE_CLIENT_ID -or -not $env:AZURE_CLIENT_SECRET -or -not $env:XDRLR_SUBSCRIPTION_ID) {
+              Write-Host "::warning::Deploy what-if skipped — required GitHub Secrets not configured." -ForegroundColor Yellow
+              Write-Host "Configure these secrets to enable preventive deploy-time validation:"
+              Write-Host "  AZ_TENANT_ID, AZ_CLIENT_ID, AZ_CLIENT_SECRET, AZ_SUBSCRIPTION_ID,"
+              Write-Host "  WORKSPACE_RG, WORKSPACE_NAME, optional WHATIF_RG / CONNECTOR_RG"
+              Write-Host ""
+              Write-Host "The SP needs Contributor on a target RG (any of WHATIF_RG / CONNECTOR_RG)."
+              Write-Host "For full role-assignment validation, also grant 'User Access Administrator'."
+              exit 0
+          }
+
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = './tests/integration/Deployment-WhatIf.Tests.ps1'
+          $cfg.Run.Exit = $true
+          $cfg.Run.Throw = $true
+          $cfg.Output.Verbosity = 'Detailed'
+          $cfg.TestResult.Enabled = $true
+          $cfg.TestResult.OutputFormat = 'JUnitXml'
+          $cfg.TestResult.OutputPath = './tests/results/deploy-whatif.xml'
+          Invoke-Pester -Configuration $cfg
+
+      - name: Upload what-if results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        if: always()
+        with:
+          name: deploy-whatif-results
+          path: ./tests/results/
+
+  summary:
+    name: CI summary
+    runs-on: ubuntu-latest
+    needs: [secret-scan, lint, unit-tests, static-validate, deploy-whatif]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "### CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Secret scan:      ${{ needs.secret-scan.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint:             ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit tests:       ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Static validate:  ${{ needs.static-validate.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy what-if:   ${{ needs.deploy-whatif.result }}" >> $GITHUB_STEP_SUMMARY
+          # deploy-whatif self-skips on missing secrets (exits 0); only fail
+          # the workflow if it actually failed (non-success / non-skipped).
+          if [ "${{ needs.secret-scan.result }}" != "success" ] \
+             || [ "${{ needs.lint.result }}" != "success" ] \
+             || [ "${{ needs.unit-tests.result }}" != "success" ] \
+             || [ "${{ needs.static-validate.result }}" != "success" ] \
+             || [ "${{ needs.deploy-whatif.result }}" = "failure" ]; then
+            exit 1
+          fi

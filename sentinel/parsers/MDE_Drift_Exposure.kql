@@ -1,0 +1,83 @@
+// SYNOPSIS:
+//   Computes drift across the Exposure Management (XSPM) tier — set-diff flavor.
+//   Sources: AssetRules, XspmInitiatives, ExposureSnapshots, ExposureRecommendations,
+//   XspmAttackPaths, XspmChokePoints, XspmTopTargets.
+//
+//   XSPM streams are graph-structured (attack paths, chokepoints, entry
+//   points). Drift here means "which entities were added/removed between
+//   snapshots", not "which fields changed within an entity" — same set-diff
+//   shape used by the previous P3 Exposure parser, now scoped to the
+//   per-Category exposure cadence.
+//
+// PARAMETERS:
+//   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 1h. How recent counts as "current".
+//
+// INVOCATION:
+//   MDE_Drift_Exposure(7d, 1h) | where ChangeType == "Added"
+//   MDE_Drift_Exposure()       // applies defaults
+//
+// NOTES:
+//   - Parameterized as a KQL function so workbooks/rules can plumb
+//     {TimeRange:value} from the time-picker without forking the parser body.
+//   - Snapshot identity is the per-stream typed-column bag (DCR-projected at
+//     ingest); RawJson is preserved on each table as a fallback for fields
+//     not in the manifest's ProjectionMap, but the parser never re-parses it.
+//   - MDE_SecureScoreBreakdown_CL is intentionally omitted: it is publicly
+//     covered by Microsoft Graph /security/secureScores. Use the Graph Security
+//     data connector for that data.
+//   - Removed-stream history lives in docs/STREAMS-REMOVED.md + CHANGELOG.md.
+
+let MDE_Drift_Exposure = (lookback:timespan = 7d, window:timespan = 1h) {
+    // Metadata + envelope columns to exclude from the snapshot identity (these
+    // are bookkeeping; only typed data columns from the manifest ProjectionMap
+    // count as the entity's state for drift detection).
+    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);
+    let sources = union withsource=_Table
+        MDE_AssetRules_CL,
+        MDE_XspmInitiatives_CL,
+        MDE_ExposureSnapshots_CL,
+        MDE_ExposureRecommendations_CL,
+        MDE_XspmAttackPaths_CL,
+        MDE_XspmChokePoints_CL,
+        MDE_XspmTopTargets_CL
+        | where TimeGenerated > ago(lookback);
+    let currentSet = sources
+        | where TimeGenerated > ago(window)
+        | summarize arg_max(TimeGenerated, *) by _Table, EntityId
+        | extend CurrentTypedBag = bag_remove_keys(pack_all(), metaCols)
+        | project _Table, EntityId, CurrentTypedBag, CurrentTime = TimeGenerated;
+    let previousSet = sources
+        | where TimeGenerated between (ago(lookback) .. ago(window))
+        | summarize arg_max(TimeGenerated, *) by _Table, EntityId
+        | extend PreviousTypedBag = bag_remove_keys(pack_all(), metaCols)
+        | project _Table, EntityId, PreviousTypedBag, PreviousTime = TimeGenerated;
+    // SnapshotCurrent + SnapshotPrevious columns keep the 9-column drift schema
+    // consistent across all 4 tier parsers. Downstream analytic rules and
+    // workbooks can filter on "seen in snapshot X but not Y" regardless of tier.
+    let added = currentSet
+        | join kind=leftanti previousSet on _Table, EntityId
+        | extend ChangeType = "Added", OldValue = "", NewValue = tostring(CurrentTypedBag),
+                 CurrentSnapshot = CurrentTime, PreviousSnapshot = datetime(null);
+    let removed = previousSet
+        | join kind=leftanti currentSet on _Table, EntityId
+        | extend ChangeType = "Removed", OldValue = tostring(PreviousTypedBag), NewValue = "",
+                 CurrentSnapshot = datetime(null), PreviousSnapshot = PreviousTime;
+    let modified = currentSet
+        | join kind=inner previousSet on _Table, EntityId
+        | where hash(tostring(CurrentTypedBag)) != hash(tostring(PreviousTypedBag))
+        | extend ChangeType = "Modified", OldValue = tostring(PreviousTypedBag), NewValue = tostring(CurrentTypedBag),
+                 CurrentSnapshot = CurrentTime, PreviousSnapshot = PreviousTime;
+    union added, removed, modified
+    | project
+        TimeGenerated    = coalesce(CurrentSnapshot, PreviousSnapshot),
+        StreamName       = _Table,
+        EntityId,
+        FieldName        = "",
+        OldValue,
+        NewValue,
+        SnapshotCurrent  = CurrentSnapshot,
+        SnapshotPrevious = PreviousSnapshot,
+        ChangeType
+};
+MDE_Drift_Exposure

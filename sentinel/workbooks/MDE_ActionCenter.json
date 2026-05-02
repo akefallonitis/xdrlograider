@@ -1,0 +1,85 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDE_ActionCenter",
+  "items": [
+    {
+      "name": "header",
+      "content": {
+        "json": "# MDE Action Center\n\nPer-device unified timeline events plus per-action machine-action results (Live Response per-step output and AIR linkage)."
+      },
+      "type": 1
+    },
+    {
+      "name": "parameters",
+      "content": {
+        "parameters": [
+          {
+            "value": { "durationMs": 604800000 },
+            "id": "tr",
+            "name": "TimeRange",
+            "version": "KqlParameterItem/1.0",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          }
+        ],
+        "queryType": 0,
+        "style": "pills",
+        "version": "KqlParameterItem/1.0"
+      },
+      "type": 9
+    },
+    {
+      "name": "summary-panel",
+      "content": {
+        "queryType": 0,
+        "title": "Action Center summary by status",
+        "size": 0,
+        "query": "MDE_MachineActions_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by ActionId\n| summarize Count = count() by ActionStatus, ActionType\n| order by Count desc",
+        "version": "KqlItem/1.0",
+        "visualization": "barchart"
+      },
+      "type": 3
+    },
+    {
+      "name": "device-timeline-panel",
+      "content": {
+        "queryType": 0,
+        "title": "Device timeline events (per-device)",
+        "size": 0,
+        "query": "MDE_DeviceTimeline_CL\n| where TimeGenerated > ago({TimeRange:value})\n| project EventTime, MachineId, EventType, EventId, ProcessName, FileName, Severity, TimeGenerated\n| order by EventTime desc\n| take 200",
+        "version": "KqlItem/1.0",
+        "visualization": "table"
+      },
+      "type": 3
+    },
+    {
+      "name": "machine-actions-detail-panel",
+      "content": {
+        "queryType": 0,
+        "title": "Machine actions detail (Live Response output and AIR linkage)",
+        "size": 0,
+        "query": "MDE_MachineActions_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by ActionId\n| extend DurationMinutes = iff(isnotnull(CompletedTime) and isnotnull(CreatedTime), datetime_diff('minute', CompletedTime, CreatedTime), int(null))\n| project CreatedTime, CompletedTime, DurationMinutes, ActionId, ActionType, ActionStatus, MachineId, Operator, InvestigationId, ScriptOutput, TimeGenerated\n| order by CreatedTime desc",
+        "version": "KqlItem/1.0",
+        "visualization": "table"
+      },
+      "type": 3
+    }
+  ],
+  "version": "Notebook/1.0"
+}

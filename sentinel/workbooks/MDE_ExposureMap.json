@@ -1,0 +1,71 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDE_ExposureMap",
+  "items": [
+    {
+      "name": "header",
+      "content": {
+        "json": "# MDE Exposure Map\n\nXSPM attack paths, chokepoints, and exposure score trends."
+      },
+      "type": 1
+    },
+    {
+      "name": "parameters",
+      "content": {
+        "parameters": [
+          {
+            "value": { "durationMs": 604800000 },
+            "id": "tr",
+            "name": "TimeRange",
+            "version": "KqlParameterItem/1.0",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          }
+        ],
+        "queryType": 0,
+        "style": "pills",
+        "version": "KqlParameterItem/1.0"
+      },
+      "type": 9
+    },
+    {
+      "name": "panel-1",
+      "content": {
+        "queryType": 0,
+        "title": "Active attack paths",
+        "size": 0,
+        "query": "MDE_XspmAttackPaths_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by EntityId\n| project PathId, Source, Target, HopCount, Severity, Status, CreatedTime, TimeGenerated\n| order by Severity asc, HopCount asc",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    },
+    {
+      "name": "panel-2",
+      "content": {
+        "queryType": 0,
+        "title": "Exposure score trend",
+        "size": 0,
+        "query": "MDE_ExposureSnapshots_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize AvgScore = avg(Score) by bin(TimeGenerated, 1d)\n| render timechart",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    }
+  ],
+  "version": "Notebook/1.0"
+}

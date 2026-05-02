@@ -1,0 +1,35 @@
+id: 3b1e26f7-8a0f-4b2d-c5e7-1f0a3d8b6c15
+name: MDE exclusion additions (past quarter)
+description: |
+  File/path/process exclusions ADDED to AV/EDR policy in the last 90 days. Attackers abuse exclusions for persistence — adding a path that hosts their malware effectively whitelists it from Defender scanning.
+author: Alex Kefallonitis
+version: 1.1.0
+tags:
+  - Compliance
+  - Drift
+  - DefenderXDR
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562.001
+query: |
+  // Implementation: uses the drift parser MDE_Drift_Inventory with the
+  // ChangeType="Added" filter so it returns only NEW exclusions in the lookback
+  // window (rather than the full current exclusion list).
+  //
+  // Operator response (suggested):
+  //   1. For each row: review the added exclusion path/hash + the Operator
+  //      (admin who made the change) + the time
+  //   2. Verify against your change-management ticket system
+  //   3. If unauthorized: investigate the admin's session for compromise +
+  //      remove the exclusion
+  MDE_Drift_Inventory(90d, 1h)
+  | where StreamName == "MDE_AntivirusPolicy_CL"
+  | where ChangeType == "Added"
+  | where FieldName has "exclusion" or FieldName has "Exclusion"
+  | project TimeGenerated, EntityId, FieldName, NewValue, ChangeType
+  | order by TimeGenerated desc

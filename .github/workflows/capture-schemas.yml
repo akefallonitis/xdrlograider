@@ -1,0 +1,103 @@
+name: Capture Live Endpoint Schemas
+
+# Manual-dispatch ONLY. Regenerates tests/fixtures/live-responses/*.json by
+# hitting the live Defender XDR portal with auth material from repository
+# secrets. Useful when:
+#   - tenant adds/removes features and endpoint responses change shape
+#   - a new stream is promoted from deferred -> active
+#   - operators want to verify schemas offline pre-deployment
+#
+# Does NOT run on push/PR — `workflow_dispatch` is itself the opt-in gate.
+# Operators must explicitly click "Run workflow" in the Actions UI. No
+# accidental capture is possible from a misconfigured branch.
+
+on:
+  workflow_dispatch:
+    inputs:
+      stream_filter:
+        description: 'Wildcard for which streams to capture (default: *)'
+        required: false
+        default: '*'
+      include_deferred:
+        description: 'Attempt deferred streams too (expected 4xx/5xx)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Write .env.local from secrets
+        shell: pwsh
+        env:
+          CAPTURE_UPN:          ${{ secrets.CAPTURE_UPN }}
+          CAPTURE_AUTH_METHOD:  ${{ secrets.CAPTURE_AUTH_METHOD }}
+          CAPTURE_PASSWORD:     ${{ secrets.CAPTURE_PASSWORD }}
+          CAPTURE_TOTP_SECRET:  ${{ secrets.CAPTURE_TOTP_SECRET }}
+          CAPTURE_SCCAUTH:      ${{ secrets.CAPTURE_SCCAUTH }}
+          CAPTURE_XSRF_TOKEN:   ${{ secrets.CAPTURE_XSRF_TOKEN }}
+        run: |
+          if (-not $env:CAPTURE_UPN) {
+              throw "Required secret CAPTURE_UPN is not configured on this repository."
+          }
+          $envFile = "tests/.env.local"
+          @"
+          XDRLR_TEST_UPN=$env:CAPTURE_UPN
+          XDRLR_TEST_AUTH_METHOD=$env:CAPTURE_AUTH_METHOD
+          XDRLR_TEST_PASSWORD=$env:CAPTURE_PASSWORD
+          XDRLR_TEST_TOTP_SECRET=$env:CAPTURE_TOTP_SECRET
+          XDRLR_TEST_SCCAUTH=$env:CAPTURE_SCCAUTH
+          XDRLR_TEST_XSRF_TOKEN=$env:CAPTURE_XSRF_TOKEN
+          "@ | Out-File -FilePath $envFile -Encoding utf8
+
+      - name: Run capture
+        shell: pwsh
+        run: |
+          $extra = @()
+          if ('${{ inputs.include_deferred }}' -eq 'true') { $extra += '-IncludeDeferred' }
+          pwsh -NoProfile -File ./tools/Capture-EndpointSchemas.ps1 -StreamFilter '${{ inputs.stream_filter }}' @extra
+          if ($LASTEXITCODE -ne 0) { throw "Capture failed (exit $LASTEXITCODE)" }
+
+      - name: Verify no PII leaks
+        shell: pwsh
+        run: |
+          $leaks = Get-ChildItem tests/fixtures/live-responses/*.json -File | ForEach-Object {
+              $c = Get-Content $_.FullName -Raw
+              $m = [regex]::Match($c, '\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b')
+              if ($m.Success -and $m.Value -ne '00000000-0000-0000-0000-000000000000') {
+                  [pscustomobject]@{ File = $_.Name; Leak = $m.Value }
+              }
+          }
+          if ($leaks) {
+              $leaks | Format-Table -AutoSize
+              throw "PII leak detected — aborting."
+          }
+          Write-Host "PII audit clean."
+
+      - name: Open PR with refreshed fixtures
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          $branch = "capture-schemas-$(Get-Date -Format yyyyMMdd-HHmmss)"
+          git checkout -b $branch
+          git add tests/fixtures/live-responses
+          if (-not (git diff --cached --quiet)) {
+              git commit -m "chore(fixtures): refresh live schema fixtures"
+              git push --set-upstream origin $branch
+              gh pr create --title "Refresh live schema fixtures" --body "Automated capture. Review for PII before merge." --base main
+          } else {
+              Write-Host "No changes to commit."
+          }

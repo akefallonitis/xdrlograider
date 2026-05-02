@@ -1,0 +1,219 @@
+{
+  "@odata.context": "https://security.microsoft.com/api/$metadata#DataExportSettings",
+  "value": [
+    {
+      "id": "SentinelExportSettings-sentinel-workspace",
+      "designatedTenantId": null,
+      "eventHubProperties": null,
+      "storageAccountProperties": null,
+      "workspaceProperties": {
+        "workspaceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sentinel-workspace/providers/Microsoft.OperationalInsights/workspaces/sentinel-workspace",
+        "subscriptionId": "00000000-0000-0000-0000-000000000000",
+        "resourceGroup": "sentinel-workspace",
+        "name": "sentinel-workspace"
+      },
+      "logs": [
+        {
+          "category": "AdvancedHunting-AlertInfo",
+          "enabled": true
+        },
+        {
+          "category": "AdvancedHunting-AlertEvidence",
+          "enabled": true
+        },
+        {
+          "category": "Alert",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-CloudAppEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceNetworkInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceProcessEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceNetworkEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceFileEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceRegistryEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceLogonEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceImageLoadEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceAlertEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DynamicEventCollection",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceFileCertificateInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-EmailAttachmentInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-EmailEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-EmailPostDeliveryEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-EmailUrlInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-IdentityDirectoryEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-IdentityLogonEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-IdentityQueryEvents",
+          "enabled": false
+        },
+        {
+          "category": "CloudAppEvents",
+          "enabled": false
+        },
+        {
+          "category": "IdentityDirectoryEvents",
+          "enabled": false
+        },
+        {
+          "category": "IdentityLogonEvents",
+          "enabled": false
+        },
+        {
+          "category": "IdentityQueryEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-UrlClickEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-IdentityInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-BehaviorInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-BehaviorEntities",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DeviceScriptEvents",
+          "enabled": false
+        },
+        {
+          "category": "CustomCollection-DeviceFileEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-CloudAuditEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-CloudProcessEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-CloudStorageAggregatedEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-OAuthAppInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DataSecurityEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-DataSecurityBehaviors",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-IdentityEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-IdentityAuditEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-GraphAPIAuditEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-AIAgentsInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-MessageEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-MessagePostDeliveryEvents",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-MessageUrlInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-BehaviorAnalytics",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-Anomalies",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-SentinelBehaviorInfo",
+          "enabled": false
+        },
+        {
+          "category": "AdvancedHunting-SentinelBehaviorEntities",
+          "enabled": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+Name: MDE Drift Report
+Author: Alex Kefallonitis
+Description: |
+  All configuration drift across P0/P1/P2/P5/P7 categories, unioned with AuditLogs for who-changed-what attribution.
+Id: 35146a98-471d-407d-a7e3-d0afc7c66357
+Logo: '<img src="https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/deploy/solution/Images/Logo.svg" width="75px" height="75px">'
+Data:
+  - DataConnector: XdrLogRaiderInternal
+    DataTypes:
+      - MDE_Heartbeat_CL
+      - MDE_AuthTestResult_CL
+WorkbookKey: MDE_DriftReport
+SourceCenter: sentinel
+FileName: MDE_DriftReport.json
+Version: '1.0.0'
+PreviewImages: []

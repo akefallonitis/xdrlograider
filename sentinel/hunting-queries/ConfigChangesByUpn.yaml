@@ -1,0 +1,49 @@
+id: 8c69e1f2-3b5a-4c7e-d0f2-6a5b8e3c1d10
+name: MDE config changes by UPN
+description: |
+  Correlate Defender XDR configuration drift with AuditLogs actor UPNs to surface "who changed what". Useful for post-incident retrospective and change-control reviews.
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - Compliance
+  - Drift
+  - Audit
+  - DefenderXDR
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  // Note: drift EntityIds and AuditLogs target identifiers are not reliable to
+  // join at the record level. This query approximates by actor UPN within a
+  // time window of the drift event, filtered to Defender-related audit
+  // categories.
+  let drift = union
+    (MDE_Drift_Inventory(7d, 1d)),
+    (MDE_Drift_Configuration(7d, 6h)),
+    (MDE_Drift_Exposure(7d, 1h));
+  let audits = AuditLogs
+    | where TimeGenerated > ago(7d)
+    | where Category in (
+        'PolicyManagement',
+        'DefenderXdrSettings',
+        'Microsoft Defender for Cloud Apps',
+        'Microsoft Defender for Identity',
+        'Unified audit',
+        'Azure Active Directory'
+      )
+    | extend ActorUpn = tostring(InitiatedBy.user.userPrincipalName)
+    | where isnotempty(ActorUpn)
+    | project AuditTime = TimeGenerated, ActorUpn, Operation = OperationName, Category, AuditResult = Result;
+  drift
+  | join kind=leftouter (audits) on $left.TimeGenerated == $right.AuditTime
+  | extend ActorUpn = coalesce(ActorUpn, 'unknown (no correlating audit)')
+  | summarize DriftEvents = count(),
+              Streams = make_set(StreamName),
+              Operations = make_set(Operation)
+          by ActorUpn
+  | order by DriftEvents desc

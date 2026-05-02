@@ -1,0 +1,703 @@
+#Requires -Version 7.0
+<#
+.SYNOPSIS
+    Validates the compiled ARM/Sentinel JSON assets parse and are well-formed.
+
+.DESCRIPTION
+    CI-friendly JSON sanity check (no network, no az CLI dependency).
+    - JSON parse via ConvertFrom-Json
+    - $schema present
+    - mainTemplate + sentinelContent have resources array
+    - createUiDefinition has $schema + parameters
+
+.EXAMPLE
+    pwsh ./tools/Validate-ArmJson.ps1
+#>
+
+[CmdletBinding()]
+param(
+    # When true, treat ARM semantic warnings (API-version staleness, missing
+    # api-version, etc.) as hard failures. Default false so dev iteration
+    # isn't blocked on cosmetic issues; CI release-gate flips this to true.
+    [switch] $Strict
+)
+
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
+
+$repoRoot = Split-Path -Parent $PSScriptRoot
+Set-Location $repoRoot
+
+$files = @(
+    [pscustomobject]@{ Path='deploy/compiled/mainTemplate.json';       Kind='armTemplate' }
+    [pscustomobject]@{ Path='deploy/compiled/createUiDefinition.json'; Kind='createUi'    }
+    [pscustomobject]@{ Path='deploy/compiled/sentinelContent.json';    Kind='armTemplate' }
+)
+
+$anyFail = $false
+foreach ($entry in $files) {
+    $p = $entry.Path
+    $kind = $entry.Kind
+    if (-not (Test-Path $p)) {
+        Write-Host ("MISSING: {0}" -f $p) -ForegroundColor Red
+        $anyFail = $true
+        continue
+    }
+
+    $raw = Get-Content $p -Raw
+    # 1) JSON parse
+    try {
+        $obj = $raw | ConvertFrom-Json -ErrorAction Stop
+        Write-Host ("OK   : {0} parses as JSON" -f $p) -ForegroundColor Green
+    } catch {
+        Write-Host ("FAIL : {0} JSON parse - {1}" -f $p, $_.Exception.Message) -ForegroundColor Red
+        $anyFail = $true
+        continue
+    }
+
+    # 2) schema present
+    $names = $obj.PSObject.Properties.Name
+    if ($names -notcontains '$schema') {
+        Write-Host ("WARN : {0} missing `$schema" -f $p) -ForegroundColor Yellow
+    } else {
+        Write-Host ("OK   : {0} `$schema = {1}" -f $p, $obj.'$schema') -ForegroundColor Green
+    }
+
+    # 3) kind-specific sanity
+    switch ($kind) {
+        'armTemplate' {
+            if ($names -notcontains 'contentVersion') {
+                Write-Host ("FAIL : {0} missing contentVersion" -f $p) -ForegroundColor Red
+                $anyFail = $true
+            }
+            if ($names -notcontains 'resources') {
+                Write-Host ("FAIL : {0} missing resources array" -f $p) -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                $resCount = @($obj.resources).Count
+                Write-Host ("OK   : {0} has {1} resources" -f $p, $resCount) -ForegroundColor Green
+            }
+        }
+        'createUi' {
+            if ($names -notcontains 'handler') {
+                Write-Host ("FAIL : {0} missing handler" -f $p) -ForegroundColor Red
+                $anyFail = $true
+            }
+            if ($names -notcontains 'version') {
+                Write-Host ("FAIL : {0} missing version" -f $p) -ForegroundColor Red
+                $anyFail = $true
+            }
+        }
+    }
+}
+
+# ============================================================================
+# ARM SEMANTIC CHECKS — targeted at bug classes we've hit in production.
+# These go beyond "does it parse" to "will ARM actually deploy it?".
+# ============================================================================
+
+Write-Host ""
+Write-Host "=== ARM semantic checks ===" -ForegroundColor Cyan
+
+$mainTemplatePath = 'deploy/compiled/mainTemplate.json'
+if (-not (Test-Path $mainTemplatePath)) {
+    Write-Host "SKIP : semantic checks (mainTemplate.json missing)" -ForegroundColor Yellow
+} else {
+    $template = Get-Content $mainTemplatePath -Raw | ConvertFrom-Json
+
+    # CHECK 1: Cross-RG / cross-subscription dependsOn scope bug
+    # ----------------------------------------------------------------
+    # If a resource is a Microsoft.Resources/deployments with a non-null
+    # subscriptionId OR resourceGroup (cross-scope nested deploy), then
+    # OTHER resources' dependsOn arrays MUST reference it by plain name —
+    # NOT by resourceId('Microsoft.Resources/deployments', ...). ARM
+    # validators resolve resourceId() in the parent template's scope, which
+    # doesn't match the child deployment's cross-scope target. This is
+    # exactly the bug that caused "The resource ... is not defined in the
+    # template" on v0.1.0-beta first deploy attempt.
+    $crossScopeDeployments = @($template.resources | Where-Object {
+        $_.type -eq 'Microsoft.Resources/deployments' -and
+        (($_.PSObject.Properties.Name -contains 'subscriptionId' -and $_.subscriptionId) -or
+         ($_.PSObject.Properties.Name -contains 'resourceGroup'   -and $_.resourceGroup))
+    })
+    $scopeBugs = @()
+    foreach ($cs in $crossScopeDeployments) {
+        # Extract the literal deployment name (may be an ARM expression like
+        # "[concat('customTables-', variables('suffix'))]" — we want the
+        # stable identifier, which is the text inside concat or the bare string).
+        $csName = $cs.name
+        foreach ($r in $template.resources) {
+            if ($r.PSObject.Properties.Name -notcontains 'dependsOn' -or -not $r.dependsOn) { continue }
+            foreach ($d in $r.dependsOn) {
+                # Bug pattern: [resourceId('Microsoft.Resources/deployments', <matches cross-scope name>)]
+                # We match against the *literal substring* of the cross-scope
+                # deployment's name expression inside a resourceId() call.
+                # Example bad: [resourceId('Microsoft.Resources/deployments', concat('customTables-', variables('suffix')))]
+                # Example good: [concat('customTables-', variables('suffix'))]
+                if ($d -match 'resourceId\(\s*[''"]Microsoft\.Resources/deployments[''"]') {
+                    # Does this resourceId reference match a cross-scope deployment?
+                    $insideConcat = $csName -replace '[\[\]]', ''
+                    if ($d -match [regex]::Escape($insideConcat.Substring(1, [math]::Min(30, $insideConcat.Length - 1)))) {
+                        $scopeBugs += [pscustomobject]@{
+                            ReferencingResource = $r.name
+                            CrossScopeTarget    = $csName
+                            BadDependsOnEntry   = $d
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if ($scopeBugs.Count -gt 0) {
+        Write-Host ("FAIL : {0} cross-RG dependsOn scope bug(s) detected" -f $scopeBugs.Count) -ForegroundColor Red
+        foreach ($b in $scopeBugs) {
+            Write-Host ("       - resource '$($b.ReferencingResource)' dependsOn uses resourceId() for cross-scope deployment '$($b.CrossScopeTarget)'") -ForegroundColor Red
+            Write-Host ("         Bad:  $($b.BadDependsOnEntry)") -ForegroundColor DarkGray
+        }
+        Write-Host "       Fix: use the plain concat()/name expression without wrapping resourceId() — ARM resolves cross-scope dependencies by name, not resource ID." -ForegroundColor Yellow
+        $anyFail = $true
+    } else {
+        $csCount = $crossScopeDeployments.Count
+        Write-Host ("OK   : no cross-RG dependsOn scope bugs ($csCount cross-scope deployment(s) checked)") -ForegroundColor Green
+    }
+
+    # CHECK 2: All declared parameters are used somewhere
+    # ----------------------------------------------------------------
+    if ($template.PSObject.Properties.Name -contains 'parameters' -and $template.parameters) {
+        $declared = @($template.parameters.PSObject.Properties.Name)
+        $bodyText = ($template | ConvertTo-Json -Depth 50 -Compress)
+        $unused = @($declared | Where-Object { $bodyText -notmatch "parameters\('$_'\)" })
+        if ($unused.Count -gt 0) {
+            if ($Strict) {
+                Write-Host ("FAIL : $($unused.Count) declared parameter(s) are never referenced: $($unused -join ', ')") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("WARN : $($unused.Count) declared parameter(s) never referenced: $($unused -join ', ')") -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host ("OK   : all $($declared.Count) declared parameters are referenced") -ForegroundColor Green
+        }
+    }
+
+    # CHECK 3: DCR service-quota gates (dataFlows <= 10, destinations <= 10,
+    # every streamDeclaration referenced)
+    # ----------------------------------------------------------------
+    # Microsoft.Insights/dataCollectionRules has hard service quotas that ARM-TTK
+    # does not catch. Hitting these only manifests at preflight (PreflightValidation
+    # CheckFailed). v0.1.0-beta originally generated 47 dataFlows (one per stream)
+    # and tripped 'DataFlows item count should be 10 or less'. Catch here.
+    $dcrs = @($template.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' })
+    foreach ($dcr in $dcrs) {
+        $dcrName = $dcr.name
+        $props = $dcr.properties
+        if ($props.PSObject.Properties.Name -contains 'dataFlows' -and $props.dataFlows) {
+            $flowCount = @($props.dataFlows).Count
+            if ($flowCount -gt 10) {
+                Write-Host ("FAIL : DCR '$dcrName' has $flowCount dataFlows (Azure limit: 10). Consolidate by listing multiple streams in one dataFlow's 'streams' array.") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : DCR '$dcrName' dataFlows = $flowCount (within Azure limit of 10)") -ForegroundColor Green
+            }
+            # Streams-per-dataFlow quota: Azure rejects any dataFlow whose
+            # 'streams' array has more than 20 entries. Caught us on the first
+            # consolidation attempt (1 flow × 47 streams). Split by category.
+            $maxStreamsPerFlow = 0
+            $offendingFlowIdx = -1
+            for ($i = 0; $i -lt @($props.dataFlows).Count; $i++) {
+                $flow = $props.dataFlows[$i]
+                $sCount = @($flow.streams).Count
+                if ($sCount -gt $maxStreamsPerFlow) { $maxStreamsPerFlow = $sCount }
+                if ($sCount -gt 20) {
+                    $offendingFlowIdx = $i
+                    Write-Host ("FAIL : DCR '$dcrName' dataFlow[$i] has $sCount streams (Azure limit: 20 per dataFlow). Split into multiple dataFlows grouped by category/tier.") -ForegroundColor Red
+                    $anyFail = $true
+                }
+            }
+            if ($offendingFlowIdx -lt 0) {
+                Write-Host ("OK   : DCR '$dcrName' max streams in any dataFlow = $maxStreamsPerFlow (within Azure limit of 20)") -ForegroundColor Green
+            }
+            # Cross-check: every streamDeclaration must appear in some dataFlow.streams
+            if ($props.PSObject.Properties.Name -contains 'streamDeclarations' -and $props.streamDeclarations) {
+                $declaredStreams = @($props.streamDeclarations.PSObject.Properties.Name)
+                $referencedStreams = @()
+                foreach ($df in $props.dataFlows) {
+                    if ($df.PSObject.Properties.Name -contains 'streams') {
+                        $referencedStreams += @($df.streams)
+                    }
+                }
+                $orphanStreams = @($declaredStreams | Where-Object { $_ -notin $referencedStreams })
+                if ($orphanStreams.Count -gt 0) {
+                    Write-Host ("FAIL : DCR '$dcrName' has $($orphanStreams.Count) declared stream(s) not referenced in any dataFlow: $($orphanStreams -join ', ')") -ForegroundColor Red
+                    $anyFail = $true
+                } else {
+                    Write-Host ("OK   : DCR '$dcrName' all $($declaredStreams.Count) streamDeclarations are referenced in dataFlows") -ForegroundColor Green
+                }
+            }
+        }
+        # If any dataFlow has multiple streams, transformKql must NOT be set
+        # (Microsoft DCR rule: "If you use a transformation, the data flow
+        # should only use a single stream."). Tripped us with InvalidPayload
+        # at DCR creation when we shipped the consolidated 3-flow shape with
+        # the redundant TimeGenerated cast.
+        if ($props.PSObject.Properties.Name -contains 'dataFlows' -and $props.dataFlows) {
+            for ($i = 0; $i -lt @($props.dataFlows).Count; $i++) {
+                $df = $props.dataFlows[$i]
+                $hasTransform = ($df.PSObject.Properties.Name -contains 'transformKql' -and $df.transformKql)
+                $multiStream  = (@($df.streams).Count -gt 1)
+                if ($hasTransform -and $multiStream) {
+                    Write-Host ("FAIL : DCR '$dcrName' dataFlow[$i] has $(@($df.streams).Count) streams AND a transformKql — Azure rejects multi-stream + transform combinations.") -ForegroundColor Red
+                    $anyFail = $true
+                }
+            }
+            if (-not $anyFail) {
+                Write-Host ("OK   : DCR '$dcrName' no multi-stream + transformKql combinations") -ForegroundColor Green
+            }
+        }
+
+        # Sentinel Solution shape: any nested deploy whose name starts with
+        # 'solution-' must use resourceId() (not extensionResourceId) for
+        # hierarchical Microsoft.OperationalInsights/workspaces/providers/*
+        # types. Bicep's `.id` accessor on a `workspaces/providers/...`
+        # resource compiles to a 4-arg extensionResourceId() that ARM rejects
+        # with: "the type ... requires '3' resource name argument(s)" at
+        # template validation. Tripped us in iteration 6.
+        $solutionNested = @($template.resources | Where-Object {
+            $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'solution-'
+        })
+        foreach ($snd in $solutionNested) {
+            $bodyText = ($snd | ConvertTo-Json -Depth 50 -Compress)
+            $badMatches = [regex]::Matches($bodyText, "extensionResourceId\([^)]*workspaces/providers/")
+            if ($badMatches.Count -gt 0) {
+                Write-Host ("FAIL : '$($snd.name)' uses extensionResourceId() with hierarchical workspaces/providers/ type ($($badMatches.Count) occurrence(s)). ARM rejects this with 'requires N resource name argument(s)'. Use resourceId('Microsoft.OperationalInsights/workspaces/providers/<resource>', workspaceName, 'Microsoft.SecurityInsights', <name>) instead.") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : '$($snd.name)' Solution refs use plain resourceId() (no broken extensionResourceId on hierarchical types)") -ForegroundColor Green
+            }
+
+            $innerRes = @($snd.properties.template.resources)
+
+            # `location` field check on every Solution resource — Microsoft Sentinel
+            # content resources (contentPackages, metadata, dataConnectors)
+            # require an Azure region. Missing `location` won't always fail
+            # at deploy but Marketplace + Content Hub indexing relies on it.
+            $solRes = $innerRes | Where-Object { $_.type -in 'Microsoft.OperationalInsights/workspaces/providers/contentPackages','Microsoft.OperationalInsights/workspaces/providers/metadata','Microsoft.OperationalInsights/workspaces/providers/dataConnectors' }
+            $missingLoc = @($solRes | Where-Object { -not $_.PSObject.Properties['location'] -or -not $_.location })
+            if ($missingLoc.Count -gt 0) {
+                Write-Host ("FAIL : $($missingLoc.Count) Solution resources missing 'location' field: $(@($missingLoc | ForEach-Object { $_.name }) -join ', ')") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : all $(@($solRes).Count) Solution resources carry 'location'") -ForegroundColor Green
+            }
+
+            # contentPackages required-property check (Sentinel content schema 3.0.0).
+            # Microsoft.SecurityInsights API rejects PUT with `properties.contentSchemaVersion is required` if the field is missing.
+            # Pinned required set per reference solutions: contentSchemaVersion, kind, version, displayName, contentKind, contentId.
+            $cp = $innerRes | Where-Object { $_.type -eq 'Microsoft.OperationalInsights/workspaces/providers/contentPackages' } | Select-Object -First 1
+            if ($cp) {
+                # Note: do NOT require `parentId` or `id` on contentPackages.
+                # Iteration 9 deploy attempt rejected with `Invalid data model - solutions
+                # expect properties.contentId to match properties.parentId` even when
+                # both fields were set to the same variable. The Sentinel API does
+                # not require these for Solution-kind packages in schema 3.0.0; their
+                # presence triggers an over-zealous equality check that fails on
+                # ARM expressions that resolve identically. Omit both.
+                $required = @('contentSchemaVersion', 'kind', 'version', 'displayName', 'contentKind', 'contentId')
+                $missing  = @($required | Where-Object { -not $cp.properties.PSObject.Properties[$_] })
+                if ($missing.Count -gt 0) {
+                    Write-Host ("FAIL : contentPackages missing required properties: $($missing -join ', '). Sentinel API rejects with `properties.<field> is required` BadRequestException.") -ForegroundColor Red
+                    $anyFail = $true
+                } else {
+                    Write-Host ("OK   : contentPackages has all 6 required properties (contentSchemaVersion, kind, version, displayName, contentKind, contentId)") -ForegroundColor Green
+                }
+                if ($cp.properties.PSObject.Properties['contentSchemaVersion'] -and $cp.properties.contentSchemaVersion -notmatch '^\d+\.\d+\.\d+$') {
+                    Write-Host ("WARN : contentPackages.contentSchemaVersion = '$($cp.properties.contentSchemaVersion)' should be a semver string like '3.0.0'") -ForegroundColor Yellow
+                }
+
+                # ITER 13: prevent "DEPRECATED" + "no info" Content Hub UI display.
+                # Per Microsoft official ARM schema (verified 2026-04-27 against
+                # https://learn.microsoft.com/en-us/azure/templates/microsoft.securityinsights/2023-04-01-preview/contentpackages):
+                # plain `description` (NOT just descriptionHtml) is the field
+                # Sentinel UI's detail panel reads. Without it, the info panel
+                # shows empty. Plus categories.verticals (empty array OK) is in
+                # the canonical schema.
+                if (-not $cp.properties.PSObject.Properties['description'] -or [string]::IsNullOrWhiteSpace($cp.properties.description)) {
+                    Write-Host ("FAIL : contentPackages.properties.description (plain text) is missing or empty. Sentinel UI detail panel reads this field, NOT descriptionHtml. Without it: empty info panel + may trigger DEPRECATED auto-tag.") -ForegroundColor Red
+                    $anyFail = $true
+                } else {
+                    Write-Host ("OK   : contentPackages.description is plain-text populated ($($cp.properties.description.Length) chars)") -ForegroundColor Green
+                }
+                if (-not $cp.properties.categories.PSObject.Properties['verticals']) {
+                    Write-Host ("FAIL : contentPackages.properties.categories.verticals is missing. Canonical schema requires the array (empty OK).") -ForegroundColor Red
+                    $anyFail = $true
+                } else {
+                    Write-Host ("OK   : contentPackages.categories has both domains + verticals") -ForegroundColor Green
+                }
+                if (-not $cp.properties.PSObject.Properties['isPreview']) {
+                    Write-Host ("WARN : contentPackages.properties.isPreview not set. v0.1.0-beta should declare 'true' explicitly per Microsoft schema (string flag).") -ForegroundColor Yellow
+                }
+            }
+        }
+
+        # If the DCR's outputStream targets are custom tables (Custom-* prefix
+        # or omitted-with-by-name routing), the DCR resource MUST dependsOn the
+        # cross-RG nested deployment that creates those tables — otherwise DCR
+        # creation race-conditions on a synchronous "do these tables exist?"
+        # check at PUT time and fails with InvalidOutputTable. This bug shipped
+        # in v0.1.0-beta first deploy attempts; locked here to prevent recur.
+        $dcrDeps = @()
+        if ($dcr.PSObject.Properties.Name -contains 'dependsOn' -and $dcr.dependsOn) {
+            $dcrDeps = @($dcr.dependsOn)
+        }
+        $tablesNestedDeploys = @($template.resources | Where-Object {
+            $_.type -eq 'Microsoft.Resources/deployments' -and ($_.name -match 'customTables|tables-')
+        })
+        if ($tablesNestedDeploys.Count -gt 0) {
+            $tableDeployRef = $tablesNestedDeploys[0].name
+            $stripped = ($tableDeployRef -replace '\[|\]', '').Trim()
+            $stripped = if ($stripped -match "concat\(([^)]+)\)") { $Matches[1] } else { $stripped }
+            $matched = $false
+            foreach ($d in $dcrDeps) {
+                if ($d.Contains('customTables') -or $d.Contains('tables-')) {
+                    $matched = $true
+                    break
+                }
+            }
+            if (-not $matched) {
+                Write-Host ("FAIL : DCR '$dcrName' is missing dependsOn entry for the cross-RG customTables nested deploy ('$tableDeployRef'). DCR creation will race the table creation and fail with InvalidOutputTable.") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : DCR '$dcrName' dependsOn includes the customTables nested deploy") -ForegroundColor Green
+            }
+        }
+
+        if ($props.PSObject.Properties.Name -contains 'destinations' -and $props.destinations) {
+            $destCount = 0
+            foreach ($destProp in $props.destinations.PSObject.Properties) {
+                if ($destProp.Value -is [array]) {
+                    $destCount += @($destProp.Value).Count
+                } elseif ($destProp.Value) {
+                    $destCount += 1
+                }
+            }
+            if ($destCount -gt 10) {
+                Write-Host ("FAIL : DCR '$dcrName' has $destCount destinations (Azure limit: 10)") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : DCR '$dcrName' destinations = $destCount (within limit)") -ForegroundColor Green
+            }
+        }
+    }
+
+    # CHECK 4: All dependsOn targets resolve to an actual resource or known pattern
+    # ----------------------------------------------------------------
+    $allResourceNames = @($template.resources | ForEach-Object { $_.name })
+    $allResourceTypes = @($template.resources | ForEach-Object { $_.type })
+    $danglingDeps = @()
+    foreach ($r in $template.resources) {
+        if ($r.PSObject.Properties.Name -notcontains 'dependsOn' -or -not $r.dependsOn) { continue }
+        foreach ($d in $r.dependsOn) {
+            # Accept: any reference to a resource name in the template
+            #         any resourceId(...) call matching a declared type
+            #         any raw name matching a resource name
+            $resolved = $false
+            foreach ($rname in $allResourceNames) {
+                if ($d.Contains($rname)) { $resolved = $true; break }
+            }
+            if (-not $resolved) {
+                foreach ($rtype in $allResourceTypes) {
+                    if ($d.Contains($rtype)) { $resolved = $true; break }
+                }
+            }
+            if (-not $resolved) {
+                $danglingDeps += [pscustomobject]@{ From = $r.name; Target = $d }
+            }
+        }
+    }
+    if ($danglingDeps.Count -gt 0 -and $Strict) {
+        Write-Host ("WARN : $($danglingDeps.Count) dependsOn entries may not match any resource in the template (could be intentional cross-template refs):") -ForegroundColor Yellow
+        foreach ($d in $danglingDeps | Select-Object -First 5) {
+            Write-Host ("       - $($d.From) -> $($d.Target)") -ForegroundColor DarkGray
+        }
+    } else {
+        Write-Host ("OK   : dependsOn entries resolve to template resources ($($allResourceNames.Count) resources)") -ForegroundColor Green
+    }
+}
+
+# ============================================================================
+# SENTINEL SOLUTION SHAPE — does the deployment actually surface as a Sentinel
+# solution + connector card the way Microsoft first-party connectors do?
+# ============================================================================
+
+Write-Host ""
+Write-Host "=== Sentinel Solution shape ===" -ForegroundColor Cyan
+
+$mainPath = 'deploy/compiled/mainTemplate.json'
+if (Test-Path $mainPath) {
+    $main = Get-Content $mainPath -Raw | ConvertFrom-Json
+    $solutionDeploy = $null
+    foreach ($r in $main.resources) {
+        if ($r.type -eq 'Microsoft.Resources/deployments' -and $r.name -match 'solution-') {
+            $solutionDeploy = $r
+            break
+        }
+    }
+    if (-not $solutionDeploy) {
+        Write-Host ("FAIL : no 'solution-*' nested deployment in mainTemplate.json — connector won't appear in Sentinel Data Connectors blade") -ForegroundColor Red
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : 'solution-*' nested deploy present (cross-RG into workspace RG)") -ForegroundColor Green
+        # Inner template must contain: contentPackages (the Solution wrapper)
+        # + dataConnectors (GenericUI connector card per Trend Micro reference)
+        # + DataConnector metadata back-link. NO metadata kind=Solution:
+        # AbnormalSecurity reference
+        # solution (2026-02-17, contentSchemaVersion 3.0.0) confirms newer
+        # solutions use only contentPackages — adding a separate metadata-Solution
+        # triggers Sentinel's `Invalid data model - solutions expect contentId
+        # to match parentId` rejection (the metadata's parentId is a full
+        # resourceId path while contentId is the slug; they can never match by
+        # string). The contentPackages IS the Solution.
+        $innerResources = @($solutionDeploy.properties.template.resources)
+        $haveContentPackage    = $innerResources | Where-Object { $_.type -match 'contentPackages$' }
+        $haveDataConnector     = $innerResources | Where-Object { $_.type -match 'dataConnectors$' }
+        $haveSolutionMeta      = $innerResources | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'Solution' }
+        $haveDataConnectorMeta = $innerResources | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'DataConnector' }
+        if ($haveSolutionMeta) {
+            Write-Host ("FAIL : solution-* inner template has REDUNDANT metadata kind=Solution (Sentinel rejects it). Keep only contentPackages as the wrapper.") -ForegroundColor Red
+            $anyFail = $true
+        } else {
+            Write-Host ("OK   : solution-* inner template correctly omits metadata kind=Solution (canonical AbnormalSecurity 2026-02-17 shape)") -ForegroundColor Green
+        }
+        foreach ($pair in @(
+            @{ Name='contentPackages';        Have=$haveContentPackage    }
+            @{ Name='dataConnector';          Have=$haveDataConnector     }
+            @{ Name='DataConnector metadata'; Have=$haveDataConnectorMeta }
+        )) {
+            if (-not $pair.Have) {
+                Write-Host ("FAIL : solution-* inner template missing '{0}' resource" -f $pair.Name) -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : solution-* inner template has '{0}'" -f $pair.Name) -ForegroundColor Green
+            }
+        }
+        if ($haveDataConnector) {
+            # ITER 13: dataTypes count gate — embedded mainTemplate.json copy
+            # must list ALL 47 tables (45 data + Heartbeat + AuthTestResult),
+            # not the 3-table stub we shipped pre-iter-13. Standalone
+            # XdrLogRaider_DataConnector.json was already complete; this
+            # gate locks the embedded copy in sync.
+            $dt = $haveDataConnector[0].properties.connectorUiConfig.dataTypes
+            $dtCount = if ($dt) { @($dt).Count } else { 0 }
+            if ($dtCount -ne 46) {
+                Write-Host ("FAIL : dataConnector.connectorUiConfig.dataTypes.Count = $dtCount; expected 46 (45 active streams + 1 deprecated + Heartbeat = 46 surfaced)") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : dataConnector.dataTypes lists 46 tables") -ForegroundColor Green
+            }
+
+            # connectivityCriterias query — must reference Heartbeat + StreamsSucceeded
+            # filter (proves a poll succeeded, not just that the heartbeat timer
+            # fired). Auth chain diagnostics live in App Insights customEvents,
+            # not in a workspace table.
+            $conQuery = $haveDataConnector[0].properties.connectorUiConfig.connectivityCriterias[0].value[0]
+            if ($conQuery -notmatch 'MDE_Heartbeat_CL' -or $conQuery -notmatch 'StreamsSucceeded' -or $conQuery -notmatch 'IsConnected\s*=\s*isnotempty') {
+                Write-Host ("FAIL : connectivityCriterias query does not match the v0.1.0-beta shape. Got: $conQuery") -ForegroundColor Red
+                Write-Host ("       Expected: 'MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | project IsConnected = isnotempty(TimeGenerated)'") -ForegroundColor Yellow
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : connectivityCriterias query uses Heartbeat + StreamsSucceeded gate (proves poll-success, not just timer-firing)") -ForegroundColor Green
+            }
+
+            # CANONICAL DATA-CONNECTOR SHAPE LOCK
+            # ----------------------------------------------------------------
+            # Per Trend Micro Vision One reference solution (the production
+            # working example of a Function-App-based community connector that
+            # surfaces in Sentinel → Data Connectors blade after direct ARM
+            # deploy), the canonical pair is:
+            #   kind:        GenericUI
+            #   apiVersion:  2021-03-01-preview
+            # StaticUI is documented for first-party Microsoft solutions
+            # (Defender XDR, MDE, Office 365). The Sentinel UI blade indexer
+            # treats StaticUI from non-Microsoft publishers differently than
+            # from MSFT, causing the connector card to stay hidden after
+            # direct ARM deploy. apiVersion 2023-04-01-preview newer but the
+            # Trend Micro reference uses 2021-03-01-preview — keeping that
+            # match avoids any indexer-pickup quirks.
+            $dcKind       = $haveDataConnector[0].kind
+            $dcApiVersion = $haveDataConnector[0].apiVersion
+            $dcType       = $haveDataConnector[0].type
+            if ($dcKind -ne 'GenericUI') {
+                Write-Host ("FAIL : dataConnectors kind = '$dcKind'; expected 'GenericUI' (canonical for FA-based community connectors per Trend Micro Vision One reference)") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : dataConnectors kind = GenericUI (canonical for community FA-based connectors)") -ForegroundColor Green
+            }
+            if ($dcApiVersion -ne '2021-03-01-preview') {
+                Write-Host ("FAIL : dataConnectors apiVersion = '$dcApiVersion'; expected '2021-03-01-preview' (matches Trend Micro reference)") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : dataConnectors apiVersion = 2021-03-01-preview") -ForegroundColor Green
+            }
+            if ($dcType -ne 'Microsoft.OperationalInsights/workspaces/providers/dataConnectors') {
+                Write-Host ("FAIL : dataConnectors type = '$dcType'; expected 'Microsoft.OperationalInsights/workspaces/providers/dataConnectors'") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : dataConnectors type = Microsoft.OperationalInsights/workspaces/providers/dataConnectors") -ForegroundColor Green
+            }
+        }
+
+        if ($haveDataConnectorMeta) {
+            # The metadata kind=DataConnector parentId must use the
+            # extensionResourceId() form per Trend Micro reference:
+            #   [extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', <ws>),
+            #                        'Microsoft.SecurityInsights/dataConnectors', <id>)]
+            # The hierarchical resourceId() form (workspaces/providers/dataConnectors)
+            # produces a DIFFERENT canonical resource ID that the Sentinel UI
+            # blade indexer doesn't always chain back to the connector card.
+            $parentId = $haveDataConnectorMeta[0].properties.parentId
+            if ($parentId -notmatch 'extensionResourceId\(') {
+                Write-Host ("FAIL : DataConnector metadata.parentId does not use extensionResourceId() form. Got: $parentId") -ForegroundColor Red
+                $anyFail = $true
+            } elseif ($parentId -notmatch 'Microsoft\.SecurityInsights/dataConnectors') {
+                Write-Host ("FAIL : DataConnector metadata.parentId extensionResourceId() does not target 'Microsoft.SecurityInsights/dataConnectors'. Got: $parentId") -ForegroundColor Red
+                $anyFail = $true
+            } else {
+                Write-Host ("OK   : DataConnector metadata.parentId uses extensionResourceId(workspace, 'Microsoft.SecurityInsights/dataConnectors', ...) form") -ForegroundColor Green
+            }
+        }
+    }
+}
+
+# ============================================================================
+# FUNCTION-APP RUNTIME — Linux Consumption Legion managed-dependencies gate.
+# Iter 13 root cause: src/requirements.psd1 listed Az modules → Linux
+# Consumption "Legion" runtime fails to install via Managed Dependencies →
+# every function load throws "Failed to install function app dependencies".
+# Microsoft's official fix (https://aka.ms/functions-powershell-include-modules):
+# bundle modules into Modules/ inside the zip + set host.json
+# managedDependency.Enabled=false. This gate catches regressions to either.
+# ============================================================================
+
+Write-Host ""
+Write-Host "=== Function App runtime — Linux Consumption Legion compatibility ===" -ForegroundColor Cyan
+
+$reqPsd1Path  = 'src/requirements.psd1'
+$hostJsonPath = 'src/host.json'
+
+# 1) requirements.psd1 must be empty (no Az.* references)
+if (Test-Path $reqPsd1Path) {
+    $reqContent = Get-Content $reqPsd1Path -Raw
+    # Strip comment lines for analysis
+    $codeOnly = ($reqContent -split "`n") | Where-Object { $_ -notmatch '^\s*#' } | Out-String
+    if ($codeOnly -match "(?m)^\s*'?Az\.") {
+        Write-Host ("FAIL : src/requirements.psd1 has Az.* module references. Linux Consumption Legion runtime does NOT support Managed Dependencies — every function load will fail with 'Failed to install function app dependencies'. Empty the file and bundle modules into Modules/ via Save-Module in release.yml.") -ForegroundColor Red
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : src/requirements.psd1 is module-free (Legion-compatible)") -ForegroundColor Green
+    }
+}
+
+# 2) host.json managedDependency.Enabled must be false
+if (Test-Path $hostJsonPath) {
+    $hostJson = Get-Content $hostJsonPath -Raw | ConvertFrom-Json
+    $managedDepEnabled = $hostJson.managedDependency.Enabled
+    if ($managedDepEnabled) {
+        Write-Host ("FAIL : host.json managedDependency.Enabled = true. Must be false on Linux Consumption Legion (and Flex Consumption v0.2.0+) — bundled modules under Modules/ are the supported pattern.") -ForegroundColor Red
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : host.json managedDependency.Enabled = false (bundled-modules mode)") -ForegroundColor Green
+    }
+}
+
+# ============================================================================
+# FUNCTION-APP DEPLOYMENT URL — release tracking shape.
+# v0.1.0-beta uses the GitHub Releases /latest/download/function-app.zip
+# pattern (Marketplace best practice for community connectors). GitHub's
+# /latest endpoint resolves to the most-recent non-prerelease tag — operators
+# don't have to edit the wizard for routine upgrades. Pinning a specific tag
+# is documented as an advanced override in docs/DEPLOY-METHODS.md.
+# Gate: every code path that builds packageUrl must point at /releases/latest.
+# ============================================================================
+
+Write-Host ""
+Write-Host "=== Function App package URL ===" -ForegroundColor Cyan
+
+$mainTplPath = 'deploy/compiled/mainTemplate.json'
+$bicepPath   = 'deploy/main.bicep'
+
+if (Test-Path $mainTplPath) {
+    $main = Get-Content $mainTplPath -Raw | ConvertFrom-Json
+    if ($main.parameters.PSObject.Properties.Name -contains 'functionAppZipVersion') {
+        Write-Host ("FAIL : mainTemplate.json still defines a 'functionAppZipVersion' parameter — v0.1.0-beta tracks /releases/latest unconditionally; remove the parameter and inline the URL in variables.packageUrl.") -ForegroundColor Red
+        $anyFail = $true
+    }
+    $pkgUrl = $main.variables.packageUrl
+    if ($pkgUrl -notmatch '/releases/latest/download/function-app\.zip') {
+        Write-Host ("FAIL : mainTemplate.json variables.packageUrl does not target /releases/latest/download/function-app.zip. Got: $pkgUrl") -ForegroundColor Red
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : mainTemplate.json variables.packageUrl tracks /releases/latest/download/function-app.zip") -ForegroundColor Green
+    }
+}
+
+if (Test-Path $bicepPath) {
+    $bicep = Get-Content $bicepPath -Raw
+    if ($bicep -match "param\s+functionAppZipVersion\s+string") {
+        Write-Host ("FAIL : main.bicep still declares 'param functionAppZipVersion' — v0.1.0-beta drops the param. Inline /releases/latest into the packageUrl variable.") -ForegroundColor Red
+        $anyFail = $true
+    }
+    if ($bicep -notmatch "/releases/latest/download/function-app\.zip") {
+        Write-Host ("FAIL : main.bicep packageUrl does not reference /releases/latest/download/function-app.zip.") -ForegroundColor Red
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : main.bicep packageUrl tracks /releases/latest/download/function-app.zip") -ForegroundColor Green
+    }
+}
+
+# ============================================================================
+# SENTINEL CONTENT — analytic rules technique format.
+# Sentinel API regex for techniques is ^T\d+$ (parent only). Sub-techniques
+# (T1562.001) are rejected. Caught us in iteration 5.
+# ============================================================================
+
+Write-Host ""
+Write-Host "=== Sentinel content ===" -ForegroundColor Cyan
+
+$sentinelPath = 'deploy/compiled/sentinelContent.json'
+if (Test-Path $sentinelPath) {
+    $sentinel = Get-Content $sentinelPath -Raw | ConvertFrom-Json
+    $alertRules = @($sentinel.resources | Where-Object { $_.type -match 'alertRules' })
+    $badRules = @()
+    foreach ($r in $alertRules) {
+        $tactics    = $r.properties.tactics
+        $techniques = $r.properties.techniques
+        if ($tactics -isnot [System.Array])    { $badRules += "$($r.name) tactics not array" }
+        if ($techniques -isnot [System.Array]) { $badRules += "$($r.name) techniques not array" }
+        foreach ($t in @($techniques)) {
+            if ($t -notmatch '^T\d+$') {
+                $badRules += "$($r.name) technique '$t' violates ^T\d+$ (sub-techniques rejected by Sentinel API)"
+            }
+        }
+        # Sentinel API also requires technique→tactic mapping match
+        if ($techniques -contains 'T1595' -and -not ($tactics -contains 'Reconnaissance')) {
+            $badRules += "$($r.name) declares T1595 but tactics doesn't include 'Reconnaissance'"
+        }
+    }
+    if ($badRules.Count -gt 0) {
+        Write-Host ("FAIL : $($badRules.Count) analytic rule shape violations:") -ForegroundColor Red
+        foreach ($b in $badRules | Select-Object -First 5) { Write-Host "       - $b" -ForegroundColor DarkGray }
+        $anyFail = $true
+    } else {
+        Write-Host ("OK   : all $($alertRules.Count) analytic rules have valid tactics + techniques shape (^T\d+$, arrays, MITRE-consistent)") -ForegroundColor Green
+    }
+}
+
+# ============================================================================
+if ($anyFail) {
+    Write-Host ""
+    Write-Host "ARM validation: FAIL" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host ""
+Write-Host "ARM validation: PASS" -ForegroundColor Green
+exit 0

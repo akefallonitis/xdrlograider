@@ -1,0 +1,20 @@
+id: 7f526adb-2e43-4f6b-a9cb-5d4e7b2f0a19
+name: MDE custom detection content audit
+description: |
+  Full current text of all tenant custom detections — governance review artifact.
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - Compliance
+  - Drift
+  - DefenderXDR
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - Discovery
+relevantTechniques:
+  - T1082
+query: |
+  MDE_CustomDetections_CL | summarize arg_max(TimeGenerated, *) by EntityId | extend Name = tostring(parse_json(RawJson).displayName), Enabled = tostring(parse_json(RawJson).isEnabled), Query = tostring(parse_json(RawJson).queryText), Schedule = tostring(parse_json(RawJson).schedule) | project EntityId, Name, Enabled, Schedule, Query, TimeGenerated

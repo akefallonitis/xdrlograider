@@ -1,0 +1,12 @@
+{
+  "description": "Writes a heartbeat row to MDE_Heartbeat_CL every 5 minutes. Drives the Sentinel connector's Connected/Disconnected status indicator (connectivityCriterias query). Also exposes per-tier metrics (Rate429Count, GzipBytes, RowsIngested) via the Notes JSON field for operator dashboards.",
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 */5 * * * *",
+      "runOnStartup": false
+    }
+  ]
+}

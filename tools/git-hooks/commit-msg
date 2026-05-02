@@ -1,0 +1,57 @@
+#!/bin/sh
+# XdrLogRaider commit-msg hook — block AI-attribution leaks.
+#
+# Source of truth lives at tools/git-hooks/commit-msg (versioned).
+# The local .git/hooks/commit-msg is a copy installed via tools/Install-GitHooks.ps1.
+# Re-run that helper after pulling repo changes that update this file.
+#
+# Rationale (iter-14.0 Phase 0.5 + Phase 12.1):
+#   The repo's contributor graph is operator-facing. AI-attribution trailers
+#   (Co-Authored-By: Claude, noreply@anthropic.com, etc.) make automated
+#   tools appear as public contributors. We block them at the commit-msg
+#   stage so the leak never reaches git history.
+#
+#   Past commits are left untouched (rewriting public history is more
+#   disruptive than the cosmetic gain). Future commits are clean.
+
+COMMIT_MSG_FILE="$1"
+
+if [ -z "$COMMIT_MSG_FILE" ] || [ ! -f "$COMMIT_MSG_FILE" ]; then
+    echo "commit-msg hook: no commit message file passed; skipping" >&2
+    exit 0
+fi
+
+# Strip git's auto-comment lines (those starting with #) before scanning.
+SCRUBBED=$(grep -v '^#' "$COMMIT_MSG_FILE" 2>/dev/null || cat "$COMMIT_MSG_FILE")
+
+# Block 1 — Co-Authored-By: Claude (any case, any Claude variant)
+if echo "$SCRUBBED" | grep -iqE '^[[:space:]]*co-authored-by:[[:space:]]*claude'; then
+    echo "" >&2
+    echo "ERROR: commit message contains a 'Co-Authored-By: Claude' trailer." >&2
+    echo "       Remove the trailer line before committing." >&2
+    echo "       (See iter-14.0 Phase 0.5 / Phase 12.1 for context.)" >&2
+    echo "" >&2
+    exit 1
+fi
+
+# Block 2 — Anthropic noreply email (catches Co-Authored-By trailers that
+# spell the name differently but still leak an Anthropic email signature).
+if echo "$SCRUBBED" | grep -iqE 'noreply@anthropic\.com'; then
+    echo "" >&2
+    echo "ERROR: commit message contains 'noreply@anthropic.com' email." >&2
+    echo "       Remove the trailer line before committing." >&2
+    echo "" >&2
+    exit 1
+fi
+
+# Block 3 — bare 'Generated with Claude Code' / 'Generated with Claude' marker
+# (some tooling emits this without a Co-Authored-By trailer).
+if echo "$SCRUBBED" | grep -iqE 'generated[[:space:]]+with[[:space:]]+claude'; then
+    echo "" >&2
+    echo "ERROR: commit message contains a 'Generated with Claude' marker." >&2
+    echo "       Remove the marker line before committing." >&2
+    echo "" >&2
+    exit 1
+fi
+
+exit 0

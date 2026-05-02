@@ -1,0 +1,187 @@
+#Requires -Modules Pester
+<#
+.SYNOPSIS
+    Iter 13.6 manifest schema gate: every endpoint must declare an Availability
+    flag with a known value, and the connector must handle every Availability
+    class without fatal errors.
+
+.DESCRIPTION
+    Live audit (2026-04-27) shows 36/45 endpoints return 200 in a default
+    tenant. The 9 non-200s are documented role/tenant gates. This test
+    enforces the contract:
+
+      1. Every manifest entry has an Availability field.
+      2. Availability is one of: live | tenant-gated | role-gated | deprecated.
+      3. For each non-live class, a captured fixture exists in
+         tests/fixtures/live-responses/ documenting the actual response shape.
+      4. Invoke-MDETierPoll, when faced with a stream returning 4xx/5xx,
+         logs a warning + continues to the next stream (per-stream isolation).
+         A failure in one stream must NEVER abort the rest of the tier.
+
+    These are behavioral assertions: they execute the production code with
+    mocked transport that simulates real failure modes, then assert the
+    correct emergent behavior.
+#>
+
+BeforeDiscovery {
+    $script:RepoRoot     = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    $script:ManifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
+    $script:Manifest     = Import-PowerShellDataFile -Path $script:ManifestPath
+    $script:Entries      = @($script:Manifest.Endpoints)
+}
+
+BeforeAll {
+    $script:RepoRoot         = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    $script:ManifestPath     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
+    $script:Manifest         = Import-PowerShellDataFile -Path $script:ManifestPath
+    $script:Entries          = @($script:Manifest.Endpoints)
+    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
+    $script:ClientModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
+    $script:FixtureDir       = Join-Path $script:RepoRoot 'tests' 'fixtures' 'live-responses'
+
+    function global:Get-AzAccessToken { param([string]$ResourceUrl) [pscustomobject]@{ Token = 'stub'; ExpiresOn = [datetimeoffset]::UtcNow.AddHours(1) } }
+    function global:Get-AzTableRow    { param($Table, [string]$PartitionKey, [string]$RowKey) $null }
+    function global:Add-AzTableRow    { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
+    function global:New-AzStorageContext { param([string]$StorageAccountName, [switch]$UseConnectedAccount) [pscustomobject]@{ StorageAccountName = $StorageAccountName } }
+    function global:Get-AzStorageTable   { param([string]$Name, $Context) [pscustomobject]@{ Name = $Name; CloudTable = [pscustomobject]@{ Name = $Name } } }
+    function global:New-AzStorageTable   { param([string]$Name, $Context) [pscustomobject]@{ Name = $Name; CloudTable = [pscustomobject]@{ Name = $Name } } }
+
+    Import-Module $script:IngestModulePath -Force -ErrorAction Stop
+    $script:CommonAuthPath_  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
+    $script:DefenderAuthPath_ = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
+    Import-Module $script:CommonAuthPath_ -Force -ErrorAction Stop
+    Import-Module $script:DefenderAuthPath_ -Force -ErrorAction Stop
+    Import-Module $script:ClientModulePath -Force -ErrorAction Stop
+
+    # Stub DCR_IMMUTABLE_IDS_JSON env var so Get-DcrImmutableIdForStream
+    # (called by Invoke-MDETierPoll for every stream) resolves. All keys point
+    # at a single stub `dcr-stub` since Send-ToLogAnalytics is mocked.
+    $stubMap = @{}
+    foreach ($e in $script:Entries) { $stubMap[$e.Stream] = 'dcr-stub' }
+    $stubMap['MDE_Heartbeat_CL'] = 'dcr-stub'
+    $env:DCR_IMMUTABLE_IDS_JSON = ($stubMap | ConvertTo-Json -Compress)
+    # Reset module-scope cache so the env var is observed.
+    $module = Get-Module Xdr.Sentinel.Ingest
+    if ($module) { & $module { $script:DcrIdMap = $null } }
+
+    Set-StrictMode -Version Latest
+}
+
+Describe 'Manifest Availability schema (declarative contract)' {
+
+    It 'every endpoint declares an Availability field' {
+        $missing = @()
+        foreach ($e in $script:Entries) {
+            if (-not $e.ContainsKey('Availability') -or [string]::IsNullOrWhiteSpace([string]$e.Availability)) {
+                $missing += $e.Stream
+            }
+        }
+        $missing | Should -BeNullOrEmpty -Because ('every manifest entry must declare Availability so the connector can decide how to handle the response. Missing: ' + ($missing -join ', '))
+    }
+
+    It 'Availability values are restricted to the known enum' {
+        $allowed = @('live', 'tenant-gated', 'role-gated', 'deprecated')
+        $offenders = @()
+        foreach ($e in $script:Entries) {
+            if ($e.ContainsKey('Availability')) {
+                if ($allowed -notcontains $e.Availability) {
+                    $offenders += "$($e.Stream) -> Availability='$($e.Availability)'"
+                }
+            }
+        }
+        $offenders | Should -BeNullOrEmpty -Because ('Availability must be one of {live, tenant-gated, role-gated, deprecated}. Offenders: ' + ($offenders -join '; '))
+    }
+
+    It 'every non-live endpoint has a captured live-response fixture' {
+        $missingFixtures = @()
+        foreach ($e in $script:Entries) {
+            if ($e.Availability -ne 'live') {
+                $fix = Join-Path $script:FixtureDir "$($e.Stream)-raw.json"
+                if (-not (Test-Path $fix)) {
+                    $missingFixtures += "$($e.Stream) (Availability=$($e.Availability))"
+                }
+            }
+        }
+        $missingFixtures | Should -BeNullOrEmpty -Because ('every gated endpoint must have a captured fixture documenting the actual failure shape so the parsing pipeline can be tested against it. Missing: ' + ($missingFixtures -join '; '))
+    }
+
+    It 'manifest contains the expected baseline of <ExpectedCount> endpoints (drift detector)' -ForEach @(
+        @{ Description = 'total endpoints (2 added: DeviceTimeline + MachineActions; 1 dropped: SecureScoreBreakdown — Graph /security/secureScores covers)'; ExpectedCount = 46; Filter = { $true } }
+        @{ Description = 'live endpoints (~80% target)';                   ExpectedCount = 35; Filter = { $args[0].Availability -eq 'live' } }
+        @{ Description = 'role-gated endpoints (retired category)'; ExpectedCount = 0; Filter = { $args[0].Availability -eq 'role-gated' } }
+        @{ Description = 'tenant-gated endpoints';                         ExpectedCount = 10; Filter = { $args[0].Availability -eq 'tenant-gated' } }
+        @{ Description = 'deprecated endpoints (StreamingApiConfig path collision)'; ExpectedCount = 1; Filter = { $args[0].Availability -eq 'deprecated' } }
+    ) {
+        param($Description, $ExpectedCount, $Filter)
+        $matching = @($script:Entries | Where-Object { & $Filter $_ })
+        $matching.Count | Should -Be $ExpectedCount -Because ($Description + ' — drift detector. If a new endpoint is added or an existing one re-categorized, update both manifest AND this baseline.')
+    }
+}
+
+Describe 'Invoke-MDETierPoll — per-stream failure isolation (behavioral gate)' {
+
+    It 'one stream throwing does NOT abort the rest of the tier' {
+        $outcome = InModuleScope Xdr.Defender.Client {
+            $manifest = Get-MDEEndpointManifest
+            $p0Streams = @($manifest.Values | Where-Object { $_.Tier -eq 'inventory' })
+
+            $script:CallNumber = 0
+            Mock Invoke-MDEEndpoint -ModuleName Xdr.Defender.Client {
+                $script:CallNumber++
+                if ($script:CallNumber -eq 1) {
+                    throw "simulated 4xx for first stream (role-gated)"
+                }
+                ,@([pscustomobject]@{ TimeGenerated = (Get-Date).ToString('o'); EntityId = 'x'; SourceStream = 'MDE_Test_CL'; RawJson = '{}' })
+            }
+            Mock Send-ToLogAnalytics -ModuleName Xdr.Defender.Client {
+                [pscustomobject]@{ RowsSent = 1; BatchesSent = 1; LatencyMs = 10; GzipBytes = 100 }
+            }
+            Mock Set-CheckpointTimestamp -ModuleName Xdr.Defender.Client {}
+            Mock Get-CheckpointTimestamp -ModuleName Xdr.Defender.Client { $null }
+
+            $session = [pscustomobject]@{ PortalHost = 'security.microsoft.com'; TenantId = 't'; Cookies = @{} }
+            $config  = [pscustomobject]@{
+                StorageAccountName = 'stub'; CheckpointTable = 'stub'
+                DceEndpoint = 'https://dce.test/'; DcrImmutableId = 'dcr-stub'
+            }
+
+            $threw = $false; $errMsg = $null; $result = $null
+            try { $result = Invoke-MDETierPoll -Session $session -Tier 'inventory' -Config $config }
+            catch { $threw = $true; $errMsg = $_.Exception.Message }
+
+            return [pscustomobject]@{
+                Threw = $threw; ErrMsg = $errMsg; Result = $result; ExpectedStreams = $p0Streams.Count
+            }
+        }
+        $outcome.Threw | Should -BeFalse -Because "iter 13.6: per-stream failure must NEVER abort the tier. Got error: $($outcome.ErrMsg)"
+        $outcome.Result | Should -Not -BeNullOrEmpty
+        $outcome.Result.StreamsAttempted | Should -Be $outcome.ExpectedStreams
+        $outcome.Result.StreamsSucceeded | Should -Be ($outcome.ExpectedStreams - 1) -Because 'all but the first stream succeed'
+        $outcome.Result.Errors.Count | Should -Be 1 -Because 'exactly one stream errored'
+        $outcome.Result.RowsIngested | Should -BeGreaterThan 0 -Because 'rest of tier produced rows'
+    }
+
+    It 'all streams in a tier returning 4xx still produces a structured result (no fatal)' {
+        $outcome = InModuleScope Xdr.Defender.Client {
+            Mock Invoke-MDEEndpoint -ModuleName Xdr.Defender.Client { throw "simulated 403 Forbidden -- role-gated" }
+            Mock Get-CheckpointTimestamp -ModuleName Xdr.Defender.Client { $null }
+            Mock Set-CheckpointTimestamp -ModuleName Xdr.Defender.Client {}
+
+            $session = [pscustomobject]@{ PortalHost = 'security.microsoft.com'; TenantId = 't'; Cookies = @{} }
+            $config  = [pscustomobject]@{
+                StorageAccountName = 'stub'; CheckpointTable = 'stub'
+                DceEndpoint = 'https://dce.test/'; DcrImmutableId = 'dcr'
+            }
+
+            $threw = $false; $errMsg = $null; $result = $null
+            try { $result = Invoke-MDETierPoll -Session $session -Tier 'maintenance' -Config $config }
+            catch { $threw = $true; $errMsg = $_.Exception.Message }
+            return [pscustomobject]@{ Threw = $threw; ErrMsg = $errMsg; Result = $result }
+        }
+        $outcome.Threw | Should -BeFalse -Because "tier-poll must surface a structured result even when ALL streams fail. Got: $($outcome.ErrMsg)"
+        $outcome.Result | Should -Not -BeNullOrEmpty
+        $outcome.Result.StreamsSucceeded | Should -Be 0
+        $outcome.Result.RowsIngested | Should -Be 0
+        $outcome.Result.Errors.Count | Should -BeGreaterThan 0
+    }
+}

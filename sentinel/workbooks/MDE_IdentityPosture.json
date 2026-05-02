@@ -1,0 +1,71 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDE_IdentityPosture",
+  "items": [
+    {
+      "name": "header",
+      "content": {
+        "json": "# MDE Identity Posture\n\nMDI service account coverage, DC onboarding, alert threshold drift."
+      },
+      "type": 1
+    },
+    {
+      "name": "parameters",
+      "content": {
+        "parameters": [
+          {
+            "value": { "durationMs": 604800000 },
+            "id": "tr",
+            "name": "TimeRange",
+            "version": "KqlParameterItem/1.0",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          }
+        ],
+        "queryType": 0,
+        "style": "pills",
+        "version": "KqlParameterItem/1.0"
+      },
+      "type": 9
+    },
+    {
+      "name": "panel-1",
+      "content": {
+        "queryType": 0,
+        "title": "Domain controller sensor coverage",
+        "size": 0,
+        "query": "MDE_DCCoverage_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by EntityId\n| summarize Coverage = countif(IsActive == true), Total = count()\n| extend CoveragePct = todouble(Coverage) / todouble(Total) * 100",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    },
+    {
+      "name": "panel-2",
+      "content": {
+        "queryType": 0,
+        "title": "Identity drift over time",
+        "size": 0,
+        "query": "MDE_Drift_Inventory({TimeRange:value}, 1d)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1d)\n| render timechart",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    }
+  ],
+  "version": "Notebook/1.0"
+}

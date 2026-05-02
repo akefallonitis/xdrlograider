@@ -1,0 +1,1443 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": "tools/Build-SentinelContent.ps1",
+    "description": "XdrLogRaider — Sentinel content (parsers, workbooks, analytic rules, hunting queries)."
+  },
+  "parameters": {
+    "workspaceName": {
+      "metadata": {
+        "description": "Log Analytics workspace name."
+      },
+      "type": "string"
+    },
+    "location": {
+      "defaultValue": "[resourceGroup().location]",
+      "type": "string"
+    }
+  },
+  "variables": {
+    "solutionId": "community.xdrlograider",
+    "solutionName": "XdrLogRaider",
+    "solutionVersion": "0.1.0-beta",
+    "solutionSource": {
+      "kind": "Solution",
+      "name": "XdrLogRaider",
+      "sourceId": "community.xdrlograider"
+    },
+    "solutionAuthor": {
+      "name": "Alex Kefallonitis",
+      "email": "al.kefallonitis@gmail.com"
+    },
+    "solutionSupport": {
+      "name": "XdrLogRaider",
+      "email": "al.kefallonitis@gmail.com",
+      "tier": "Community",
+      "link": "https://github.com/akefallonitis/xdrlograider"
+    }
+  },
+  "resources": [
+    {
+      "properties": {
+        "category": "Functions",
+        "functionParameters": "lookback:timespan = 7d,  window:timespan = 6h",
+        "displayName": "MDE_Drift_Configuration",
+        "version": 2,
+        "functionAlias": "MDE_Drift_Configuration",
+        "query": "// SYNOPSIS:\r\n//   Computes drift across the Configuration tier — alert/detection rules,\r\n//   tenant policy, integration state, RBAC, threat intel, operator\r\n//   preferences, CASB integration. Field-level diff (one row per\r\n//   StreamName, EntityId, FieldName that changed between observation\r\n//   windows). Sources: PreviewFeatures, AlertServiceConfig, AlertTuning,\r\n//   SuppressionRules, CustomDetections, TenantAllowBlock, ConnectedApps,\r\n//   IntuneConnection, PurviewSharing, RbacDeviceGroups, UnifiedRbacRoles,\r\n//   ThreatAnalytics, UserPreferences, CloudAppsConfig.\r\n//\r\n// PARAMETERS:\r\n//   lookback - ISO 8601 duration, default 7d. How far back to look for the \"previous\" snapshot.\r\n//   window   - ISO 8601 duration, default 6h. Matches the config-tier poll cadence.\r\n//\r\n// INVOCATION:\r\n//   MDE_Drift_Configuration(7d, 6h) | where StreamName == \"MDE_SuppressionRules_CL\"\r\n//   MDE_Drift_Configuration()       // applies defaults\r\n//\r\n// NOTES:\r\n//   - Parameterized as a KQL function so workbooks/rules can plumb\r\n//     {TimeRange:value} from the time-picker without forking the parser body.\r\n//   - Drift is computed over the per-stream typed columns (DCR-projected at\r\n//     ingest); RawJson is preserved on each table as a fallback for fields\r\n//     not in the manifest's ProjectionMap, but the parser never re-parses it.\r\n\r\nlet MDE_Drift_Configuration = (lookback:timespan = 7d, window:timespan = 6h) {\r\n    // Metadata + envelope columns to exclude from field-level diff (these are\r\n    // bookkeeping; only typed data columns from the manifest ProjectionMap\r\n    // count as \"fields\" for drift detection).\r\n    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);\r\n    let sources = union withsource=_Table\r\n        MDE_PreviewFeatures_CL,\r\n        MDE_AlertServiceConfig_CL,\r\n        MDE_AlertTuning_CL,\r\n        MDE_SuppressionRules_CL,\r\n        MDE_CustomDetections_CL,\r\n        MDE_TenantAllowBlock_CL,\r\n        MDE_ConnectedApps_CL,\r\n        MDE_IntuneConnection_CL,\r\n        MDE_PurviewSharing_CL,\r\n        MDE_RbacDeviceGroups_CL,\r\n        MDE_UnifiedRbacRoles_CL,\r\n        MDE_ThreatAnalytics_CL,\r\n        MDE_UserPreferences_CL,\r\n        MDE_CloudAppsConfig_CL\r\n        | where TimeGenerated > ago(lookback);\r\n    let current = sources\r\n        | where TimeGenerated > ago(window)\r\n        | summarize arg_max(TimeGenerated, *) by _Table, EntityId\r\n        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);\r\n    let previous = sources\r\n        | where TimeGenerated between (ago(lookback) .. ago(window))\r\n        | summarize arg_max(TimeGenerated, *) by _Table, EntityId\r\n        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);\r\n    current\r\n    | join kind=leftouter previous on _Table, EntityId\r\n    | where hash(tostring(TypedBag)) != hash(tostring(TypedBag1)) or isnull(TypedBag1)\r\n    | extend CurrentFields  = bag_keys(TypedBag)\r\n    | extend PreviousFields = iff(isnull(TypedBag1), dynamic([]), bag_keys(TypedBag1))\r\n    | mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (\r\n        extend\r\n            NewValue = tostring(TypedBag[tostring(field)]),\r\n            OldValue = tostring(iff(isnull(TypedBag1), '', TypedBag1[tostring(field)]))\r\n        | where NewValue != OldValue\r\n      )\r\n    | project\r\n        TimeGenerated,\r\n        StreamName       = _Table,\r\n        EntityId,\r\n        FieldName        = tostring(field),\r\n        OldValue,\r\n        NewValue,\r\n        SnapshotCurrent  = TimeGenerated,\r\n        SnapshotPrevious = TimeGenerated1,\r\n        ChangeType       = iff(isnull(TypedBag1), \"Added\", iff(isnull(TypedBag[tostring(field)]), \"Removed\", \"Modified\"))\r\n};\r\nMDE_Drift_Configuration\r\n"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'MDE_Drift_Configuration')]"
+    },
+    {
+      "properties": {
+        "category": "Functions",
+        "functionParameters": "lookback:timespan = 7d,  window:timespan = 1h",
+        "displayName": "MDE_Drift_Exposure",
+        "version": 2,
+        "functionAlias": "MDE_Drift_Exposure",
+        "query": "// SYNOPSIS:\r\n//   Computes drift across the Exposure Management (XSPM) tier — set-diff flavor.\r\n//   Sources: AssetRules, XspmInitiatives, ExposureSnapshots, ExposureRecommendations,\r\n//   XspmAttackPaths, XspmChokePoints, XspmTopTargets.\r\n//\r\n//   XSPM streams are graph-structured (attack paths, chokepoints, entry\r\n//   points). Drift here means \"which entities were added/removed between\r\n//   snapshots\", not \"which fields changed within an entity\" — same set-diff\r\n//   shape used by the previous P3 Exposure parser, now scoped to the\r\n//   per-Category exposure cadence.\r\n//\r\n// PARAMETERS:\r\n//   lookback - ISO 8601 duration, default 7d. How far back to look for the \"previous\" snapshot.\r\n//   window   - ISO 8601 duration, default 1h. How recent counts as \"current\".\r\n//\r\n// INVOCATION:\r\n//   MDE_Drift_Exposure(7d, 1h) | where ChangeType == \"Added\"\r\n//   MDE_Drift_Exposure()       // applies defaults\r\n//\r\n// NOTES:\r\n//   - Parameterized as a KQL function so workbooks/rules can plumb\r\n//     {TimeRange:value} from the time-picker without forking the parser body.\r\n//   - Snapshot identity is the per-stream typed-column bag (DCR-projected at\r\n//     ingest); RawJson is preserved on each table as a fallback for fields\r\n//     not in the manifest's ProjectionMap, but the parser never re-parses it.\r\n//   - MDE_SecureScoreBreakdown_CL is intentionally omitted: it is publicly\r\n//     covered by Microsoft Graph /security/secureScores. Use the Graph Security\r\n//     data connector for that data.\r\n//   - Removed-stream history lives in docs/STREAMS-REMOVED.md + CHANGELOG.md.\r\n\r\nlet MDE_Drift_Exposure = (lookback:timespan = 7d, window:timespan = 1h) {\r\n    // Metadata + envelope columns to exclude from the snapshot identity (these\r\n    // are bookkeeping; only typed data columns from the manifest ProjectionMap\r\n    // count as the entity's state for drift detection).\r\n    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);\r\n    let sources = union withsource=_Table\r\n        MDE_AssetRules_CL,\r\n        MDE_XspmInitiatives_CL,\r\n        MDE_ExposureSnapshots_CL,\r\n        MDE_ExposureRecommendations_CL,\r\n        MDE_XspmAttackPaths_CL,\r\n        MDE_XspmChokePoints_CL,\r\n        MDE_XspmTopTargets_CL\r\n        | where TimeGenerated > ago(lookback);\r\n    let currentSet = sources\r\n        | where TimeGenerated > ago(window)\r\n        | summarize arg_max(TimeGenerated, *) by _Table, EntityId\r\n        | extend CurrentTypedBag = bag_remove_keys(pack_all(), metaCols)\r\n        | project _Table, EntityId, CurrentTypedBag, CurrentTime = TimeGenerated;\r\n    let previousSet = sources\r\n        | where TimeGenerated between (ago(lookback) .. ago(window))\r\n        | summarize arg_max(TimeGenerated, *) by _Table, EntityId\r\n        | extend PreviousTypedBag = bag_remove_keys(pack_all(), metaCols)\r\n        | project _Table, EntityId, PreviousTypedBag, PreviousTime = TimeGenerated;\r\n    // SnapshotCurrent + SnapshotPrevious columns keep the 9-column drift schema\r\n    // consistent across all 4 tier parsers. Downstream analytic rules and\r\n    // workbooks can filter on \"seen in snapshot X but not Y\" regardless of tier.\r\n    let added = currentSet\r\n        | join kind=leftanti previousSet on _Table, EntityId\r\n        | extend ChangeType = \"Added\", OldValue = \"\", NewValue = tostring(CurrentTypedBag),\r\n                 CurrentSnapshot = CurrentTime, PreviousSnapshot = datetime(null);\r\n    let removed = previousSet\r\n        | join kind=leftanti currentSet on _Table, EntityId\r\n        | extend ChangeType = \"Removed\", OldValue = tostring(PreviousTypedBag), NewValue = \"\",\r\n                 CurrentSnapshot = datetime(null), PreviousSnapshot = PreviousTime;\r\n    let modified = currentSet\r\n        | join kind=inner previousSet on _Table, EntityId\r\n        | where hash(tostring(CurrentTypedBag)) != hash(tostring(PreviousTypedBag))\r\n        | extend ChangeType = \"Modified\", OldValue = tostring(PreviousTypedBag), NewValue = tostring(CurrentTypedBag),\r\n                 CurrentSnapshot = CurrentTime, PreviousSnapshot = PreviousTime;\r\n    union added, removed, modified\r\n    | project\r\n        TimeGenerated    = coalesce(CurrentSnapshot, PreviousSnapshot),\r\n        StreamName       = _Table,\r\n        EntityId,\r\n        FieldName        = \"\",\r\n        OldValue,\r\n        NewValue,\r\n        SnapshotCurrent  = CurrentSnapshot,\r\n        SnapshotPrevious = PreviousSnapshot,\r\n        ChangeType\r\n};\r\nMDE_Drift_Exposure\r\n"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'MDE_Drift_Exposure')]"
+    },
+    {
+      "properties": {
+        "category": "Functions",
+        "functionParameters": "lookback:timespan = 30d, window:timespan = 1d",
+        "displayName": "MDE_Drift_Inventory",
+        "version": 2,
+        "functionAlias": "MDE_Drift_Inventory",
+        "query": "// SYNOPSIS:\r\n//   Computes drift across the Inventory tier — endpoint config + MDI\r\n//   identity + tenant context + metadata long-tail. Field-level diff (one\r\n//   row per StreamName, EntityId, FieldName that changed between observation\r\n//   windows). Sources: AdvancedFeatures, DeviceControlPolicy,\r\n//   WebContentFiltering, SmartScreenConfig, LiveResponseConfig,\r\n//   AuthenticatedTelemetry, PUAConfig, AntivirusPolicy, CustomCollection,\r\n//   TenantContext, TenantWorkloadStatus, SAClassification, IdentityOnboarding,\r\n//   IdentityServiceAccounts, DCCoverage, IdentityAlertThresholds,\r\n//   RemediationAccounts, SecurityBaselines, MtoTenants, LicenseReport,\r\n//   DeviceTimeline.\r\n//\r\n// PARAMETERS:\r\n//   lookback - ISO 8601 duration, default 30d. How far back to look for the \"previous\" snapshot.\r\n//   window   - ISO 8601 duration, default 1d. Matches the inventory-tier daily poll cadence.\r\n//\r\n// INVOCATION:\r\n//   MDE_Drift_Inventory(30d, 1d) | where StreamName == \"MDE_DCCoverage_CL\"\r\n//   MDE_Drift_Inventory()        // applies defaults\r\n//\r\n// NOTES:\r\n//   - Parameterized as a KQL function so workbooks/rules can plumb\r\n//     {TimeRange:value} from the time-picker without forking the parser body.\r\n//   - Drift is computed over the per-stream typed columns (DCR-projected at\r\n//     ingest); RawJson is preserved on each table as a fallback for fields\r\n//     not in the manifest's ProjectionMap, but the parser never re-parses it.\r\n//   - MDE_DeviceTimeline_CL is tenant-gated. The table is created at deploy\r\n//     time; unioning it when the tenant has not provisioned the timeline\r\n//     surface yields zero rows but keeps the parser's source list stable.\r\n\r\nlet MDE_Drift_Inventory = (lookback:timespan = 30d, window:timespan = 1d) {\r\n    // Metadata + envelope columns to exclude from field-level diff (these are\r\n    // bookkeeping; only typed data columns from the manifest ProjectionMap\r\n    // count as \"fields\" for drift detection).\r\n    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);\r\n    let sources = union withsource=_Table\r\n        MDE_AdvancedFeatures_CL,\r\n        MDE_DeviceControlPolicy_CL,\r\n        MDE_WebContentFiltering_CL,\r\n        MDE_SmartScreenConfig_CL,\r\n        MDE_LiveResponseConfig_CL,\r\n        MDE_AuthenticatedTelemetry_CL,\r\n        MDE_PUAConfig_CL,\r\n        MDE_AntivirusPolicy_CL,\r\n        MDE_CustomCollection_CL,\r\n        MDE_TenantContext_CL,\r\n        MDE_TenantWorkloadStatus_CL,\r\n        MDE_SAClassification_CL,\r\n        MDE_IdentityOnboarding_CL,\r\n        MDE_IdentityServiceAccounts_CL,\r\n        MDE_DCCoverage_CL,\r\n        MDE_IdentityAlertThresholds_CL,\r\n        MDE_RemediationAccounts_CL,\r\n        MDE_SecurityBaselines_CL,\r\n        MDE_MtoTenants_CL,\r\n        MDE_LicenseReport_CL,\r\n        MDE_DeviceTimeline_CL\r\n        | where TimeGenerated > ago(lookback);\r\n    let current = sources\r\n        | where TimeGenerated > ago(window)\r\n        | summarize arg_max(TimeGenerated, *) by _Table, EntityId\r\n        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);\r\n    let previous = sources\r\n        | where TimeGenerated between (ago(lookback) .. ago(window))\r\n        | summarize arg_max(TimeGenerated, *) by _Table, EntityId\r\n        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);\r\n    current\r\n    | join kind=leftouter previous on _Table, EntityId\r\n    | where hash(tostring(TypedBag)) != hash(tostring(TypedBag1)) or isnull(TypedBag1)\r\n    | extend CurrentFields  = bag_keys(TypedBag)\r\n    | extend PreviousFields = iff(isnull(TypedBag1), dynamic([]), bag_keys(TypedBag1))\r\n    | mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (\r\n        extend\r\n            NewValue = tostring(TypedBag[tostring(field)]),\r\n            OldValue = tostring(iff(isnull(TypedBag1), '', TypedBag1[tostring(field)]))\r\n        | where NewValue != OldValue\r\n      )\r\n    | project\r\n        TimeGenerated,\r\n        StreamName       = _Table,\r\n        EntityId,\r\n        FieldName        = tostring(field),\r\n        OldValue,\r\n        NewValue,\r\n        SnapshotCurrent  = TimeGenerated,\r\n        SnapshotPrevious = TimeGenerated1,\r\n        ChangeType       = iff(isnull(TypedBag1), \"Added\", iff(isnull(TypedBag[tostring(field)]), \"Removed\", \"Modified\"))\r\n};\r\nMDE_Drift_Inventory\r\n"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'MDE_Drift_Inventory')]"
+    },
+    {
+      "properties": {
+        "category": "Functions",
+        "functionParameters": "lookback:timespan = 30d, window:timespan = 7d",
+        "displayName": "MDE_Drift_Maintenance",
+        "version": 2,
+        "functionAlias": "MDE_Drift_Maintenance",
+        "query": "// SYNOPSIS:\r\n//   Computes drift across the Maintenance tier — rare-change long-tail\r\n//   surfaces. Field-level diff. Sources: DataExportSettings (the canonical\r\n//   streaming-API config). The deprecated MDE_StreamingApiConfig_CL stream\r\n//   is intentionally NOT unioned here — it returns 404 on modern tenants and\r\n//   is excluded from the actual poll.\r\n//\r\n// PARAMETERS:\r\n//   lookback - ISO 8601 duration, default 30d. How far back to look for the \"previous\" snapshot.\r\n//   window   - ISO 8601 duration, default 7d. Matches the maintenance-tier weekly poll cadence.\r\n//\r\n// INVOCATION:\r\n//   MDE_Drift_Maintenance(30d, 7d) | where StreamName == \"MDE_DataExportSettings_CL\"\r\n//   MDE_Drift_Maintenance()       // applies defaults\r\n//\r\n// NOTES:\r\n//   - Parameterized as a KQL function so workbooks/rules can plumb\r\n//     {TimeRange:value} from the time-picker without forking the parser body.\r\n//   - Drift is computed over the per-stream typed columns (DCR-projected at\r\n//     ingest); RawJson is preserved on each table as a fallback for fields\r\n//     not in the manifest's ProjectionMap, but the parser never re-parses it.\r\n//   - Single-source tier: the union still uses `withsource=_Table` so the\r\n//     output schema is identical to the other tier parsers — operators can\r\n//     write tier-agnostic queries that filter on StreamName.\r\n\r\nlet MDE_Drift_Maintenance = (lookback:timespan = 30d, window:timespan = 7d) {\r\n    // Metadata + envelope columns to exclude from field-level diff (these are\r\n    // bookkeeping; only typed data columns from the manifest ProjectionMap\r\n    // count as \"fields\" for drift detection).\r\n    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);\r\n    let sources = union withsource=_Table\r\n        MDE_DataExportSettings_CL\r\n        | where TimeGenerated > ago(lookback);\r\n    let current = sources\r\n        | where TimeGenerated > ago(window)\r\n        | summarize arg_max(TimeGenerated, *) by _Table, EntityId\r\n        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);\r\n    let previous = sources\r\n        | where TimeGenerated between (ago(lookback) .. ago(window))\r\n        | summarize arg_max(TimeGenerated, *) by _Table, EntityId\r\n        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);\r\n    current\r\n    | join kind=leftouter previous on _Table, EntityId\r\n    | where hash(tostring(TypedBag)) != hash(tostring(TypedBag1)) or isnull(TypedBag1)\r\n    | extend CurrentFields  = bag_keys(TypedBag)\r\n    | extend PreviousFields = iff(isnull(TypedBag1), dynamic([]), bag_keys(TypedBag1))\r\n    | mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (\r\n        extend\r\n            NewValue = tostring(TypedBag[tostring(field)]),\r\n            OldValue = tostring(iff(isnull(TypedBag1), '', TypedBag1[tostring(field)]))\r\n        | where NewValue != OldValue\r\n      )\r\n    | project\r\n        TimeGenerated,\r\n        StreamName       = _Table,\r\n        EntityId,\r\n        FieldName        = tostring(field),\r\n        OldValue,\r\n        NewValue,\r\n        SnapshotCurrent  = TimeGenerated,\r\n        SnapshotPrevious = TimeGenerated1,\r\n        ChangeType       = iff(isnull(TypedBag1), \"Added\", iff(isnull(TypedBag[tostring(field)]), \"Removed\", \"Modified\"))\r\n};\r\nMDE_Drift_Maintenance\r\n"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'MDE_Drift_Maintenance')]"
+    },
+    {
+      "properties": {
+        "tags": [
+          {
+            "name": "description",
+            "value": "Compliance + pipeline drift events that occurred outside business hours (0900-1700 UTC) or on weekends. Attackers prefer making config changes off-hours to avoid review-window oversight."
+          },
+          {
+            "name": "tactics",
+            "value": "DefenseEvasion"
+          },
+          {
+            "name": "techniques",
+            "value": "T1562"
+          }
+        ],
+        "version": 2,
+        "displayName": "MDE after-hours drift events",
+        "query": "// Note: workbook time-pickers can override the lookback/window via\n// {TimeRange:value} — the underlying parsers are parameterized.\n//\n// Tenant-time-zone caveat: this query uses UTC. If your tenant operates in\n// a non-UTC time zone, adjust 9/17 to your local business hours OR convert\n// TimeGenerated to local TZ before the comparison.\nunion (MDE_Drift_Inventory(7d, 1d)), (MDE_Drift_Configuration(7d, 6h)), (MDE_Drift_Maintenance(30d, 7d))\n| extend HourOfDay = datetime_part(\"Hour\", TimeGenerated)\n| extend DayOfWeek = dayofweek(TimeGenerated)\n| where HourOfDay < 9 or HourOfDay >= 17 or DayOfWeek == time(0d) or DayOfWeek == time(6d)",
+        "category": "Hunting Queries"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'AfterHoursDrift')]"
+    },
+    {
+      "properties": {
+        "tags": [
+          {
+            "name": "description",
+            "value": "Correlate Defender XDR configuration drift with AuditLogs actor UPNs to surface \"who changed what\". Useful for post-incident retrospective and change-control reviews."
+          },
+          {
+            "name": "tactics",
+            "value": "DefenseEvasion"
+          },
+          {
+            "name": "techniques",
+            "value": "T1562"
+          }
+        ],
+        "version": 2,
+        "displayName": "MDE config changes by UPN",
+        "query": "// Note: drift EntityIds and AuditLogs target identifiers are not reliable to\n// join at the record level. This query approximates by actor UPN within a\n// time window of the drift event, filtered to Defender-related audit\n// categories.\nlet drift = union\n(MDE_Drift_Inventory(7d, 1d)),\n(MDE_Drift_Configuration(7d, 6h)),\n(MDE_Drift_Exposure(7d, 1h));\nlet audits = AuditLogs\n| where TimeGenerated > ago(7d)\n| where Category in (\n'PolicyManagement',\n'DefenderXdrSettings',\n'Microsoft Defender for Cloud Apps',\n'Microsoft Defender for Identity',\n'Unified audit',\n'Azure Active Directory'\n)\n| extend ActorUpn = tostring(InitiatedBy.user.userPrincipalName)\n| where isnotempty(ActorUpn)\n| project AuditTime = TimeGenerated, ActorUpn, Operation = OperationName, Category, AuditResult = Result;\ndrift\n| join kind=leftouter (audits) on $left.TimeGenerated == $right.AuditTime\n| extend ActorUpn = coalesce(ActorUpn, 'unknown (no correlating audit)')\n| summarize DriftEvents = count(),\nStreams = make_set(StreamName),\nOperations = make_set(Operation)\nby ActorUpn\n| order by DriftEvents desc",
+        "category": "Hunting Queries"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'ConfigChangesByUpn')]"
+    },
+    {
+      "properties": {
+        "tags": [
+          {
+            "name": "description",
+            "value": "Full current text of all tenant custom detections — governance review artifact."
+          },
+          {
+            "name": "tactics",
+            "value": "Discovery"
+          },
+          {
+            "name": "techniques",
+            "value": "T1082"
+          }
+        ],
+        "version": 2,
+        "displayName": "MDE custom detection content audit",
+        "query": "MDE_CustomDetections_CL | summarize arg_max(TimeGenerated, *) by EntityId | extend Name = tostring(parse_json(RawJson).displayName), Enabled = tostring(parse_json(RawJson).isEnabled), Query = tostring(parse_json(RawJson).queryText), Schedule = tostring(parse_json(RawJson).schedule) | project EntityId, Name, Enabled, Schedule, Query, TimeGenerated",
+        "category": "Hunting Queries"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'CustomDetectionContentAudit')]"
+    },
+    {
+      "properties": {
+        "tags": [
+          {
+            "name": "description",
+            "value": "File/path/process exclusions ADDED to AV/EDR policy in the last 90 days. Attackers abuse exclusions for persistence — adding a path that hosts their malware effectively whitelists it from Defender scanning."
+          },
+          {
+            "name": "tactics",
+            "value": "DefenseEvasion"
+          },
+          {
+            "name": "techniques",
+            "value": "T1562.001"
+          }
+        ],
+        "version": 2,
+        "displayName": "MDE exclusion additions (past quarter)",
+        "query": "// Implementation: uses the drift parser MDE_Drift_Inventory with the\n// ChangeType=\"Added\" filter so it returns only NEW exclusions in the lookback\n// window (rather than the full current exclusion list).\n//\n// Operator response (suggested):\n//   1. For each row: review the added exclusion path/hash + the Operator\n//      (admin who made the change) + the time\n//   2. Verify against your change-management ticket system\n//   3. If unauthorized: investigate the admin's session for compromise +\n//      remove the exclusion\nMDE_Drift_Inventory(90d, 1h)\n| where StreamName == \"MDE_AntivirusPolicy_CL\"\n| where ChangeType == \"Added\"\n| where FieldName has \"exclusion\" or FieldName has \"Exclusion\"\n| project TimeGenerated, EntityId, FieldName, NewValue, ChangeType\n| order by TimeGenerated desc",
+        "category": "Hunting Queries"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'ExclusionAdditionsPastQuarter')]"
+    },
+    {
+      "properties": {
+        "tags": [
+          {
+            "name": "description",
+            "value": "Live Response sessions initiated without a paired incident or investigation."
+          },
+          {
+            "name": "tactics",
+            "value": "Discovery,Collection"
+          },
+          {
+            "name": "techniques",
+            "value": "T1059"
+          }
+        ],
+        "version": 2,
+        "displayName": "MDE Live Response sessions without justification",
+        "query": "MDE_ActionCenter_CL | where TimeGenerated > ago(7d) | extend Type = tostring(parse_json(RawJson).actionType), InvestigationId = tostring(parse_json(RawJson).investigationId) | where Type has \"LiveResponse\" and isempty(InvestigationId)",
+        "category": "Hunting Queries"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'LrSessionsWithoutJustification')]"
+    },
+    {
+      "properties": {
+        "tags": [
+          {
+            "name": "description",
+            "value": "Changes to MDI directory service account classifications."
+          },
+          {
+            "name": "tactics",
+            "value": "Persistence,PrivilegeEscalation"
+          },
+          {
+            "name": "techniques",
+            "value": "T1078.002"
+          }
+        ],
+        "version": 2,
+        "displayName": "MDE MDI service account drift",
+        "query": "MDE_Drift_Inventory(30d, 1d) | where StreamName == \"MDE_IdentityServiceAccounts_CL\"",
+        "category": "Hunting Queries"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'MdiServiceAccountDrift')]"
+    },
+    {
+      "properties": {
+        "tags": [
+          {
+            "name": "description",
+            "value": "Role assignments to accounts that previously had none."
+          },
+          {
+            "name": "tactics",
+            "value": "PrivilegeEscalation"
+          },
+          {
+            "name": "techniques",
+            "value": "T1078"
+          }
+        ],
+        "version": 2,
+        "displayName": "MDE RBAC escalation events",
+        "query": "MDE_Drift_Configuration(30d, 1d) | where StreamName == \"MDE_UnifiedRbacRoles_CL\" and ChangeType == \"Added\" | join kind=inner (MDE_UnifiedRbacRoles_CL | summarize arg_max(TimeGenerated, *) by EntityId) on EntityId",
+        "category": "Hunting Queries"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'RbacEscalationEvents')]"
+    },
+    {
+      "properties": {
+        "tags": [
+          {
+            "name": "description",
+            "value": "Composite signal combining suppression-rule additions + PUA protection disables\nin the same day. Both are legitimate admin actions on their own; together they\nsuggest an attacker quieting alerts before running unwanted code."
+          },
+          {
+            "name": "tactics",
+            "value": "DefenseEvasion"
+          },
+          {
+            "name": "techniques",
+            "value": "T1562"
+          }
+        ],
+        "version": 2,
+        "displayName": "MDE silent bypass indicators",
+        "query": "let drift = MDE_Drift_Configuration(7d, 1h); let suppressions = drift | where StreamName == \"MDE_SuppressionRules_CL\" and ChangeType == \"Added\"; let puaOff = drift | where StreamName == \"MDE_PUAConfig_CL\" and FieldName == \"enabled\" and NewValue == \"false\"; union suppressions, puaOff | summarize Events = count() by bin(TimeGenerated, 1d) | where Events >= 2",
+        "category": "Hunting Queries"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'SilentBypassIndicators')]"
+    },
+    {
+      "properties": {
+        "tags": [
+          {
+            "name": "description",
+            "value": "Nodes newly identified as chokepoints — they sit on many attack paths."
+          },
+          {
+            "name": "tactics",
+            "value": "Reconnaissance"
+          },
+          {
+            "name": "techniques",
+            "value": "T1595"
+          }
+        ],
+        "version": 2,
+        "displayName": "MDE XSPM chokepoint deltas",
+        "query": "MDE_Drift_Exposure(30d, 1h) | where StreamName == \"MDE_XspmChokePoints_CL\" and ChangeType == \"Added\"",
+        "category": "Hunting Queries"
+      },
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspaceName'), '/', 'XspmChokepointDeltas')]"
+    },
+    {
+      "location": "[parameters('location')]",
+      "properties": {
+        "version": "1.0",
+        "displayName": "MDE Action Center",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "category": "sentinel",
+        "serializedData": "{\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\",\"fallbackResourceIds\":[],\"fromTemplateId\":\"sentinel-MDE_ActionCenter\",\"items\":[{\"name\":\"header\",\"content\":{\"json\":\"# MDE Action Center\\n\\nPer-device unified timeline events plus per-action machine-action results (Live Response per-step output and AIR linkage).\"},\"type\":1},{\"name\":\"parameters\",\"content\":{\"parameters\":[{\"value\":{\"durationMs\":604800000},\"id\":\"tr\",\"name\":\"TimeRange\",\"version\":\"KqlParameterItem/1.0\",\"type\":4,\"typeSettings\":{\"selectableValues\":[{\"durationMs\":3600000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000}]}}],\"queryType\":0,\"style\":\"pills\",\"version\":\"KqlParameterItem/1.0\"},\"type\":9},{\"name\":\"summary-panel\",\"content\":{\"queryType\":0,\"title\":\"Action Center summary by status\",\"size\":0,\"query\":\"MDE_MachineActions_CL\\n| where TimeGenerated > ago({TimeRange:value})\\n| summarize arg_max(TimeGenerated, *) by ActionId\\n| summarize Count = count() by ActionStatus, ActionType\\n| order by Count desc\",\"version\":\"KqlItem/1.0\",\"visualization\":\"barchart\"},\"type\":3},{\"name\":\"device-timeline-panel\",\"content\":{\"queryType\":0,\"title\":\"Device timeline events (per-device)\",\"size\":0,\"query\":\"MDE_DeviceTimeline_CL\\n| where TimeGenerated > ago({TimeRange:value})\\n| project EventTime, MachineId, EventType, EventId, ProcessName, FileName, Severity, TimeGenerated\\n| order by EventTime desc\\n| take 200\",\"version\":\"KqlItem/1.0\",\"visualization\":\"table\"},\"type\":3},{\"name\":\"machine-actions-detail-panel\",\"content\":{\"queryType\":0,\"title\":\"Machine actions detail (Live Response output and AIR linkage)\",\"size\":0,\"query\":\"MDE_MachineActions_CL\\n| where TimeGenerated > ago({TimeRange:value})\\n| summarize arg_max(TimeGenerated, *) by ActionId\\n| extend DurationMinutes = iff(isnotnull(CompletedTime) and isnotnull(CreatedTime), datetime_diff('minute', CompletedTime, CreatedTime), int(null))\\n| project CreatedTime, CompletedTime, DurationMinutes, ActionId, ActionType, ActionStatus, MachineId, Operator, InvestigationId, ScriptOutput, TimeGenerated\\n| order by CreatedTime desc\",\"version\":\"KqlItem/1.0\",\"visualization\":\"table\"},\"type\":3}],\"version\":\"Notebook/1.0\"}"
+      },
+      "name": "[guid(resourceGroup().id, 'MDE_ActionCenter')]",
+      "type": "Microsoft.Insights/workbooks",
+      "kind": "shared",
+      "apiVersion": "2022-04-01"
+    },
+    {
+      "location": "[parameters('location')]",
+      "properties": {
+        "version": "1.0",
+        "displayName": "MDE Compliance Dashboard",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "category": "sentinel",
+        "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":1,\"content\":{\"json\":\"# MDE Compliance Dashboard\\n\\nCurrent state of Defender XDR tenant security configuration, with recent drift highlighted.\\n\\n**Data source**: P0 tenant-configuration streams polled hourly by the XdrLogRaider Function App.\"},\"name\":\"header\"},{\"type\":9,\"content\":{\"version\":\"KqlParameterItem/1.0\",\"parameters\":[{\"id\":\"timerange-param\",\"version\":\"KqlParameterItem/1.0\",\"name\":\"TimeRange\",\"type\":4,\"value\":{\"durationMs\":604800000},\"typeSettings\":{\"selectableValues\":[{\"durationMs\":3600000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000}]}}],\"style\":\"pills\",\"queryType\":0},\"name\":\"parameters\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"MDE_Heartbeat_CL\\n| where TimeGenerated > ago(1h)\\n| where Tier == 'P0'\\n| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by FunctionName\\n| extend Status = iff(LastSeen > ago(30m), 'Healthy', 'Stale')\",\"size\":0,\"title\":\"Connector health (last hour)\",\"queryType\":0,\"visualization\":\"table\"},\"name\":\"health-panel\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"MDE_Drift_Inventory({TimeRange:value}, 1h)\\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1h)\\n| render timechart\",\"size\":0,\"title\":\"P0 drift events\",\"queryType\":0},\"name\":\"drift-timechart\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"MDE_LiveResponseConfig_CL\\n| summarize arg_max(TimeGenerated, *) by EntityId\\n| project EntityId, FeatureName, AutomatedIrLiveResponse, AutomatedIrUnsignedScripts, LiveResponseForServers, TimeGenerated\",\"size\":0,\"title\":\"Live Response config\",\"queryType\":0,\"visualization\":\"table\"},\"name\":\"lr-table\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"let drift = MDE_Drift_Inventory({TimeRange:value}, 1h)\\n    | extend DriftTime = TimeGenerated, DriftBin = bin(TimeGenerated, 5min);\\nlet audits = AuditLogs\\n    | where TimeGenerated > ago({TimeRange:value})\\n    | project AuditTime = TimeGenerated, OperationName, InitiatedByUpn = tostring(InitiatedBy.user.userPrincipalName), AuditBin = bin(TimeGenerated, 5min);\\ndrift\\n| join kind=leftouter audits on $left.DriftBin == $right.AuditBin\\n| where isnull(AuditTime) or (AuditTime between ((DriftTime - 5min) .. (DriftTime + 5min)))\\n| extend DeltaSec = iff(isnull(AuditTime), int(null), abs(datetime_diff('second', AuditTime, DriftTime)))\\n| summarize arg_min(DeltaSec, OperationName, InitiatedByUpn, AuditTime) by DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType\\n| project TimeGenerated = DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType, OperationName, InitiatedByUpn\\n| order by TimeGenerated desc\",\"size\":0,\"title\":\"Recent changes with attribution\",\"queryType\":0,\"visualization\":\"table\"},\"name\":\"recent-changes-table\"}],\"fallbackResourceIds\":[],\"fromTemplateId\":\"sentinel-MDEComplianceDashboard\",\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\"}"
+      },
+      "name": "[guid(resourceGroup().id, 'MDE_ComplianceDashboard')]",
+      "type": "Microsoft.Insights/workbooks",
+      "kind": "shared",
+      "apiVersion": "2022-04-01"
+    },
+    {
+      "location": "[parameters('location')]",
+      "properties": {
+        "version": "1.0",
+        "displayName": "MDE Drift Report",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "category": "sentinel",
+        "serializedData": "{\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\",\"fallbackResourceIds\":[],\"fromTemplateId\":\"sentinel-MDE_DriftReport\",\"items\":[{\"name\":\"header\",\"content\":{\"json\":\"# MDE Drift Report\\n\\nAll configuration drift across P0/P1/P2/P5/P7 categories, unioned and enriched with AuditLogs attribution.\"},\"type\":1},{\"name\":\"parameters\",\"content\":{\"parameters\":[{\"value\":{\"durationMs\":604800000},\"id\":\"tr\",\"name\":\"TimeRange\",\"version\":\"KqlParameterItem/1.0\",\"type\":4,\"typeSettings\":{\"selectableValues\":[{\"durationMs\":3600000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000}]}}],\"queryType\":0,\"style\":\"pills\",\"version\":\"KqlParameterItem/1.0\"},\"type\":9},{\"name\":\"panel-1\",\"content\":{\"queryType\":0,\"title\":\"Drift events over time, by category\",\"size\":0,\"query\":\"union\\n  (MDE_Drift_Inventory({TimeRange:value}, 1h) | extend Category = \\\"P0 Config\\\"),\\n  (MDE_Drift_Configuration({TimeRange:value}, 30m) | extend Category = \\\"P1 Pipeline\\\"),\\n  (MDE_Drift_Configuration({TimeRange:value}, 1d) | extend Category = \\\"P2 Governance\\\"),\\n  (MDE_Drift_Inventory({TimeRange:value}, 1d) | extend Category = \\\"P5 Identity\\\"),\\n  (MDE_Drift_Configuration({TimeRange:value}, 1d) | extend Category = \\\"P7 Metadata\\\")\\n| summarize Changes = count() by Category, bin(TimeGenerated, 1h)\\n| render timechart\",\"version\":\"KqlItem/1.0\"},\"type\":3},{\"name\":\"panel-2\",\"content\":{\"queryType\":0,\"title\":\"Recent drift events (all categories)\",\"size\":0,\"query\":\"union\\n  (MDE_Drift_Inventory({TimeRange:value}, 1h)),\\n  (MDE_Drift_Configuration({TimeRange:value}, 30m)),\\n  (MDE_Drift_Configuration({TimeRange:value}, 1d)),\\n  (MDE_Drift_Inventory({TimeRange:value}, 1d)),\\n  (MDE_Drift_Configuration({TimeRange:value}, 1d))\\n| project TimeGenerated, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType\\n| order by TimeGenerated desc\\n| take 100\",\"version\":\"KqlItem/1.0\"},\"type\":3}],\"version\":\"Notebook/1.0\"}"
+      },
+      "name": "[guid(resourceGroup().id, 'MDE_DriftReport')]",
+      "type": "Microsoft.Insights/workbooks",
+      "kind": "shared",
+      "apiVersion": "2022-04-01"
+    },
+    {
+      "location": "[parameters('location')]",
+      "properties": {
+        "version": "1.0",
+        "displayName": "MDE Exposure Map",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "category": "sentinel",
+        "serializedData": "{\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\",\"fallbackResourceIds\":[],\"fromTemplateId\":\"sentinel-MDE_ExposureMap\",\"items\":[{\"name\":\"header\",\"content\":{\"json\":\"# MDE Exposure Map\\n\\nXSPM attack paths, chokepoints, and exposure score trends.\"},\"type\":1},{\"name\":\"parameters\",\"content\":{\"parameters\":[{\"value\":{\"durationMs\":604800000},\"id\":\"tr\",\"name\":\"TimeRange\",\"version\":\"KqlParameterItem/1.0\",\"type\":4,\"typeSettings\":{\"selectableValues\":[{\"durationMs\":3600000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000}]}}],\"queryType\":0,\"style\":\"pills\",\"version\":\"KqlParameterItem/1.0\"},\"type\":9},{\"name\":\"panel-1\",\"content\":{\"queryType\":0,\"title\":\"Active attack paths\",\"size\":0,\"query\":\"MDE_XspmAttackPaths_CL\\n| where TimeGenerated > ago({TimeRange:value})\\n| summarize arg_max(TimeGenerated, *) by EntityId\\n| project PathId, Source, Target, HopCount, Severity, Status, CreatedTime, TimeGenerated\\n| order by Severity asc, HopCount asc\",\"version\":\"KqlItem/1.0\"},\"type\":3},{\"name\":\"panel-2\",\"content\":{\"queryType\":0,\"title\":\"Exposure score trend\",\"size\":0,\"query\":\"MDE_ExposureSnapshots_CL\\n| where TimeGenerated > ago({TimeRange:value})\\n| summarize AvgScore = avg(Score) by bin(TimeGenerated, 1d)\\n| render timechart\",\"version\":\"KqlItem/1.0\"},\"type\":3}],\"version\":\"Notebook/1.0\"}"
+      },
+      "name": "[guid(resourceGroup().id, 'MDE_ExposureMap')]",
+      "type": "Microsoft.Insights/workbooks",
+      "kind": "shared",
+      "apiVersion": "2022-04-01"
+    },
+    {
+      "location": "[parameters('location')]",
+      "properties": {
+        "version": "1.0",
+        "displayName": "MDE Governance Scorecard",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "category": "sentinel",
+        "serializedData": "{\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\",\"fallbackResourceIds\":[],\"fromTemplateId\":\"sentinel-MDE_GovernanceScorecard\",\"items\":[{\"name\":\"header\",\"content\":{\"json\":\"# MDE Governance Scorecard\\n\\nRBAC, asset classification, and approval governance posture.\"},\"type\":1},{\"name\":\"parameters\",\"content\":{\"parameters\":[{\"value\":{\"durationMs\":604800000},\"id\":\"tr\",\"name\":\"TimeRange\",\"version\":\"KqlParameterItem/1.0\",\"type\":4,\"typeSettings\":{\"selectableValues\":[{\"durationMs\":3600000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000}]}}],\"queryType\":0,\"style\":\"pills\",\"version\":\"KqlParameterItem/1.0\"},\"type\":9},{\"name\":\"panel-1\",\"content\":{\"queryType\":0,\"title\":\"RBAC device groups (current state)\",\"size\":0,\"query\":\"MDE_RbacDeviceGroups_CL\\n| summarize arg_max(TimeGenerated, *) by EntityId\\n| project Name, GroupId, Description, Priority, AutoRemediationLevel, MachineCount, RuleCount, IsUnassigned, LastUpdated, TimeGenerated\",\"version\":\"KqlItem/1.0\"},\"type\":3},{\"name\":\"panel-2\",\"content\":{\"queryType\":0,\"title\":\"Governance drift\",\"size\":0,\"query\":\"MDE_Drift_Configuration({TimeRange:value}, 1d)\\n| summarize Changes = count() by StreamName\\n| render piechart\",\"version\":\"KqlItem/1.0\"},\"type\":3}],\"version\":\"Notebook/1.0\"}"
+      },
+      "name": "[guid(resourceGroup().id, 'MDE_GovernanceScorecard')]",
+      "type": "Microsoft.Insights/workbooks",
+      "kind": "shared",
+      "apiVersion": "2022-04-01"
+    },
+    {
+      "location": "[parameters('location')]",
+      "properties": {
+        "version": "1.0",
+        "displayName": "MDE Identity Posture",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "category": "sentinel",
+        "serializedData": "{\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\",\"fallbackResourceIds\":[],\"fromTemplateId\":\"sentinel-MDE_IdentityPosture\",\"items\":[{\"name\":\"header\",\"content\":{\"json\":\"# MDE Identity Posture\\n\\nMDI service account coverage, DC onboarding, alert threshold drift.\"},\"type\":1},{\"name\":\"parameters\",\"content\":{\"parameters\":[{\"value\":{\"durationMs\":604800000},\"id\":\"tr\",\"name\":\"TimeRange\",\"version\":\"KqlParameterItem/1.0\",\"type\":4,\"typeSettings\":{\"selectableValues\":[{\"durationMs\":3600000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000}]}}],\"queryType\":0,\"style\":\"pills\",\"version\":\"KqlParameterItem/1.0\"},\"type\":9},{\"name\":\"panel-1\",\"content\":{\"queryType\":0,\"title\":\"Domain controller sensor coverage\",\"size\":0,\"query\":\"MDE_DCCoverage_CL\\n| where TimeGenerated > ago({TimeRange:value})\\n| summarize arg_max(TimeGenerated, *) by EntityId\\n| summarize Coverage = countif(IsActive == true), Total = count()\\n| extend CoveragePct = todouble(Coverage) / todouble(Total) * 100\",\"version\":\"KqlItem/1.0\"},\"type\":3},{\"name\":\"panel-2\",\"content\":{\"queryType\":0,\"title\":\"Identity drift over time\",\"size\":0,\"query\":\"MDE_Drift_Inventory({TimeRange:value}, 1d)\\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1d)\\n| render timechart\",\"version\":\"KqlItem/1.0\"},\"type\":3}],\"version\":\"Notebook/1.0\"}"
+      },
+      "name": "[guid(resourceGroup().id, 'MDE_IdentityPosture')]",
+      "type": "Microsoft.Insights/workbooks",
+      "kind": "shared",
+      "apiVersion": "2022-04-01"
+    },
+    {
+      "location": "[parameters('location')]",
+      "properties": {
+        "version": "1.0",
+        "displayName": "MDE Response Audit",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "category": "sentinel",
+        "serializedData": "{\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\",\"fallbackResourceIds\":[],\"fromTemplateId\":\"sentinel-MDE_ResponseAudit\",\"items\":[{\"name\":\"header\",\"content\":{\"json\":\"# MDE Response Audit\\n\\nAction Center history with operators, comments, and time-to-action metrics.\"},\"type\":1},{\"name\":\"parameters\",\"content\":{\"parameters\":[{\"value\":{\"durationMs\":604800000},\"id\":\"tr\",\"name\":\"TimeRange\",\"version\":\"KqlParameterItem/1.0\",\"type\":4,\"typeSettings\":{\"selectableValues\":[{\"durationMs\":3600000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000}]}}],\"queryType\":0,\"style\":\"pills\",\"version\":\"KqlParameterItem/1.0\"},\"type\":9},{\"name\":\"panel-1\",\"content\":{\"queryType\":0,\"title\":\"Action Center summary by type and status\",\"size\":0,\"query\":\"MDE_ActionCenter_CL\\n| where TimeGenerated > ago({TimeRange:value})\\n| summarize Count = count() by ActionType, ActionStatus\\n| render barchart\",\"version\":\"KqlItem/1.0\"},\"type\":3},{\"name\":\"panel-2\",\"content\":{\"queryType\":0,\"title\":\"Time-to-action by action type\",\"size\":0,\"query\":\"MDE_ActionCenter_CL\\n| where TimeGenerated > ago({TimeRange:value})\\n| where isnotnull(StartTime) and isnotnull(EndTime)\\n| extend TimeToActionMinutes = datetime_diff('minute', EndTime, StartTime)\\n| project TimeGenerated, ActionId, ActionType, ActionStatus, ActionDecision, Operator, MachineId, ComputerName, TimeToActionMinutes\\n| order by TimeGenerated desc\",\"version\":\"KqlItem/1.0\"},\"type\":3}],\"version\":\"Notebook/1.0\"}"
+      },
+      "name": "[guid(resourceGroup().id, 'MDE_ResponseAudit')]",
+      "type": "Microsoft.Insights/workbooks",
+      "kind": "shared",
+      "apiVersion": "2022-04-01"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Configuration(2h, 15m) | where StreamName == \"MDE_AlertTuning_CL\" | where ChangeType == \"Modified\" | where FieldName in (\"conditions\",\"scope\")",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "displayName": "MDE alert tuning broadened",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "Medium",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1562"
+        ],
+        "description": "An alert tuning rule was widened — may hide genuine alerts from analysts.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '4e25a7b8-9d1c-4e3a-f6b8-2c1d4a9e7f0c')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Configuration(6h, 10m) | where StreamName == \"MDE_ConnectedApps_CL\" | where ChangeType == \"Added\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Persistence"
+        ],
+        "displayName": "MDE connected app new registration",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "Low",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1098"
+        ],
+        "description": "A new third-party app was connected to Defender with API access.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '6a47c9d0-1f3e-4a5c-b8d0-4e3f6c1a9b0e')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Maintenance(1h, 10m) | where StreamName == \"MDE_DataExportSettings_CL\" | where ChangeType == \"Added\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Exfiltration"
+        ],
+        "displayName": "MDE new data export destination",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "Medium",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1537"
+        ],
+        "description": "A new streaming/export destination was added to Defender data export settings. Potential data-exfiltration channel.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'b5f6d8e9-0a23-4b4d-c7e9-3f2a5d0b8c03')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Inventory(2h, 15m) | where StreamName == \"MDE_LiveResponseConfig_CL\" | where FieldName == \"allowUnsignedScripts\" and NewValue == \"true\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "DefenseEvasion",
+          "Execution"
+        ],
+        "displayName": "MDE Live Response unsigned scripts enabled",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "High",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1562"
+        ],
+        "description": "The Defender Live Response unsigned-scripts policy was enabled tenant-wide. This allows arbitrary scripts to run on managed endpoints without code signing.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'a4e5c7f8-9b12-4a3c-b6d8-2e1f4c9a7b02')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Inventory(2d, 1h) | where StreamName == \"MDE_DCCoverage_CL\" | where FieldName == \"hasSensor\" and OldValue == \"true\" and NewValue == \"false\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "displayName": "MDE MDI DC sensor down",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "High",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1562"
+        ],
+        "description": "A Defender for Identity domain controller sensor stopped reporting. Identity threat detection gap.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '3d14f6a7-8c0b-4d2f-e5a7-1b0c3f8d6e0b')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "union (MDE_Drift_Configuration(2h, 15m)), (MDE_Drift_Inventory(2h, 15m)) | extend HourOfDay = datetime_part(\"Hour\", TimeGenerated) | where HourOfDay < 9 or HourOfDay >= 17",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "displayName": "MDE portal config change outside business hours",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "Low",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1562"
+        ],
+        "description": "A tenant-configuration change was made outside 0900-1700 local time.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '7b58d0e1-2a4f-4b6d-c9e1-5f4a7d2b0c0f')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Inventory(2h, 15m) | where StreamName == \"MDE_PUAConfig_CL\" | where FieldName == \"enabled\" and NewValue == \"false\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "displayName": "MDE PUA protection disabled",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "High",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1562"
+        ],
+        "description": "Defender Potentially Unwanted Application protection was disabled tenant-wide.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'c6a7e9f0-1b34-4c5e-d8f0-4a3b6e1c9d04')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Configuration(7d, 1d)\n| where StreamName == \"MDE_UnifiedRbacRoles_CL\"\n| where ChangeType == \"Added\"\n| where FieldName == \"principalId\" or FieldName == \"principalName\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "PrivilegeEscalation",
+          "Persistence"
+        ],
+        "displayName": "MDE RBAC role to unusual account",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "High",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1078"
+        ],
+        "description": "A Defender unified-RBAC role was assigned to a new principal. Alerts on \"who got a new role\" — not on every role-definition tweak.\n\nSuggested operator response:\n1. Confirm the principalId resolves to a known and sanctioned admin account.\n2. If unknown: cross-reference SigninLogs and recent privilege grants for related activity.\n3. If sanctioned: suppress this principal for 30 days via the rule's suppression settings.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Maintenance(1h, 10m) | where StreamName == \"MDE_StreamingApiConfig_CL\" | where ChangeType == \"Added\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Exfiltration"
+        ],
+        "displayName": "MDE streaming API new target",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "Medium",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1537"
+        ],
+        "description": "A new Event Hub or Storage target was configured for Defender telemetry streaming. Possible exfiltration channel.\n\nNote: Microsoft has signaled the upstream streaming-API endpoint may be retired in favor of newer Defender XDR streaming feeds. Heartbeat diagnostics surface 403/404 if the endpoint becomes unreachable. See docs/STREAMS.md for current endpoint-availability tracking.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '5f36b8c9-0e2d-4f4b-a7c9-3d2e5b0f8a0d')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Configuration(2h, 15m) | where StreamName == \"MDE_SuppressionRules_CL\" | where ChangeType == \"Modified\" | where FieldName in (\"scope\",\"conditions\",\"machineGroup\")",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "displayName": "MDE suppression rule broadened",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "Medium",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1562"
+        ],
+        "description": "An existing alert suppression rule had its scope widened — may silence legitimate alerts.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'f9d0b2c3-4e67-4f8b-a1c3-7d6e9b4f2a07')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Inventory(2h, 15m) | where StreamName == \"MDE_AdvancedFeatures_CL\" | where EntityId has \"Tamper\" | where FieldName == \"Enabled\" and NewValue == \"false\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "displayName": "MDE Tamper Protection disabled",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "High",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1562"
+        ],
+        "description": "Defender Tamper Protection was disabled. This allows malicious tools to modify Defender settings directly.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'd7b8f0a1-2c45-4d6f-e9a1-5b4c7f2d0e05')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Configuration(2h, 15m) | where StreamName == \"MDE_TenantAllowBlock_CL\" | where ChangeType == \"Added\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "displayName": "MDE tenant allow-list new entry",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "Medium",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1562"
+        ],
+        "description": "A new URL, IP, file hash, or sender was added to the Defender tenant allow-list, bypassing blocks.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'e8c9a1b2-3d56-4e7a-f0b2-6c5d8a3e1f06')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_Drift_Exposure(7d, 1h) | where StreamName == \"MDE_XspmAttackPaths_CL\" | where ChangeType == \"Added\"",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Reconnaissance"
+        ],
+        "displayName": "MDE XSPM new attack path discovered",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "Medium",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1595"
+        ],
+        "description": "A new attack path was identified in Defender Exposure Management (XSPM) — a route from an entry point to a critical asset.\nNote: the MDE_XspmAttackPaths_CL stream is opt-in. The rule is deployed but stays dormant until the stream is enabled in the connector configuration.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09')]"
+    },
+    {
+      "properties": {
+        "triggerThreshold": 0,
+        "query": "MDE_XspmAttackPaths_CL | summarize arg_max(TimeGenerated, *) by EntityId | extend TargetCriticality = tostring(parse_json(RawJson).targetCriticality) | where TargetCriticality == \"Critical\" | where TimeGenerated > ago(1h)",
+        "suppressionDuration": "PT5H",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Reconnaissance",
+          "LateralMovement"
+        ],
+        "displayName": "MDE XSPM path to critical asset",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryPeriod": "PT2H",
+        "suppressionEnabled": false,
+        "severity": "High",
+        "queryFrequency": "PT15M",
+        "techniques": [
+          "T1595",
+          "T1570"
+        ],
+        "description": "An attack path terminates at a device tagged Critical. Immediate remediation candidate.\nNote: the MDE_XspmAttackPaths_CL stream is opt-in. The rule is deployed but stays dormant until the stream is enabled in the connector configuration.",
+        "enabled": false
+      },
+      "kind": "Scheduled",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '2c03e5f6-7b9a-4c1e-d4f6-0a9b2e7c5d0a')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Parser-MDE_Drift_Configuration')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MDE_Drift_Configuration')]",
+        "contentId": "MDE_Drift_Configuration",
+        "kind": "Parser",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MDE_Drift_Configuration')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Parser-MDE_Drift_Exposure')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MDE_Drift_Exposure')]",
+        "contentId": "MDE_Drift_Exposure",
+        "kind": "Parser",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MDE_Drift_Exposure')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Parser-MDE_Drift_Inventory')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MDE_Drift_Inventory')]",
+        "contentId": "MDE_Drift_Inventory",
+        "kind": "Parser",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MDE_Drift_Inventory')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Parser-MDE_Drift_Maintenance')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MDE_Drift_Maintenance')]",
+        "contentId": "MDE_Drift_Maintenance",
+        "kind": "Parser",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MDE_Drift_Maintenance')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-AfterHoursDrift')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'AfterHoursDrift')]",
+        "contentId": "AfterHoursDrift",
+        "kind": "HuntingQuery",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'AfterHoursDrift')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-ConfigChangesByUpn')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'ConfigChangesByUpn')]",
+        "contentId": "ConfigChangesByUpn",
+        "kind": "HuntingQuery",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'ConfigChangesByUpn')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-CustomDetectionContentAudit')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'CustomDetectionContentAudit')]",
+        "contentId": "CustomDetectionContentAudit",
+        "kind": "HuntingQuery",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'CustomDetectionContentAudit')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-ExclusionAdditionsPastQuarter')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'ExclusionAdditionsPastQuarter')]",
+        "contentId": "ExclusionAdditionsPastQuarter",
+        "kind": "HuntingQuery",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'ExclusionAdditionsPastQuarter')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-LrSessionsWithoutJustification')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'LrSessionsWithoutJustification')]",
+        "contentId": "LrSessionsWithoutJustification",
+        "kind": "HuntingQuery",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'LrSessionsWithoutJustification')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-MdiServiceAccountDrift')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MdiServiceAccountDrift')]",
+        "contentId": "MdiServiceAccountDrift",
+        "kind": "HuntingQuery",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'MdiServiceAccountDrift')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-RbacEscalationEvents')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'RbacEscalationEvents')]",
+        "contentId": "RbacEscalationEvents",
+        "kind": "HuntingQuery",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'RbacEscalationEvents')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-SilentBypassIndicators')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'SilentBypassIndicators')]",
+        "contentId": "SilentBypassIndicators",
+        "kind": "HuntingQuery",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'SilentBypassIndicators')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/HuntingQuery-XspmChokepointDeltas')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'XspmChokepointDeltas')]",
+        "contentId": "XspmChokepointDeltas",
+        "kind": "HuntingQuery",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspaceName'), 'XspmChokepointDeltas')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Workbook-MDE_ActionCenter')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_ActionCenter'))]",
+        "contentId": "MDE_ActionCenter",
+        "kind": "Workbook",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_ActionCenter'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Workbook-MDE_ComplianceDashboard')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_ComplianceDashboard'))]",
+        "contentId": "MDE_ComplianceDashboard",
+        "kind": "Workbook",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_ComplianceDashboard'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Workbook-MDE_DriftReport')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_DriftReport'))]",
+        "contentId": "MDE_DriftReport",
+        "kind": "Workbook",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_DriftReport'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Workbook-MDE_ExposureMap')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_ExposureMap'))]",
+        "contentId": "MDE_ExposureMap",
+        "kind": "Workbook",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_ExposureMap'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Workbook-MDE_GovernanceScorecard')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_GovernanceScorecard'))]",
+        "contentId": "MDE_GovernanceScorecard",
+        "kind": "Workbook",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_GovernanceScorecard'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Workbook-MDE_IdentityPosture')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_IdentityPosture'))]",
+        "contentId": "MDE_IdentityPosture",
+        "kind": "Workbook",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_IdentityPosture'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Workbook-MDE_ResponseAudit')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_ResponseAudit'))]",
+        "contentId": "MDE_ResponseAudit",
+        "kind": "Workbook",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/workbooks', guid(resourceGroup().id, 'MDE_ResponseAudit'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-4e25a7b8-9d1c-4e3a-f6b8-2c1d4a9e7f0c')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '4e25a7b8-9d1c-4e3a-f6b8-2c1d4a9e7f0c')]",
+        "contentId": "4e25a7b8-9d1c-4e3a-f6b8-2c1d4a9e7f0c",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '4e25a7b8-9d1c-4e3a-f6b8-2c1d4a9e7f0c')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-6a47c9d0-1f3e-4a5c-b8d0-4e3f6c1a9b0e')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '6a47c9d0-1f3e-4a5c-b8d0-4e3f6c1a9b0e')]",
+        "contentId": "6a47c9d0-1f3e-4a5c-b8d0-4e3f6c1a9b0e",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '6a47c9d0-1f3e-4a5c-b8d0-4e3f6c1a9b0e')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-b5f6d8e9-0a23-4b4d-c7e9-3f2a5d0b8c03')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'b5f6d8e9-0a23-4b4d-c7e9-3f2a5d0b8c03')]",
+        "contentId": "b5f6d8e9-0a23-4b4d-c7e9-3f2a5d0b8c03",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'b5f6d8e9-0a23-4b4d-c7e9-3f2a5d0b8c03')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-a4e5c7f8-9b12-4a3c-b6d8-2e1f4c9a7b02')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'a4e5c7f8-9b12-4a3c-b6d8-2e1f4c9a7b02')]",
+        "contentId": "a4e5c7f8-9b12-4a3c-b6d8-2e1f4c9a7b02",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'a4e5c7f8-9b12-4a3c-b6d8-2e1f4c9a7b02')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-3d14f6a7-8c0b-4d2f-e5a7-1b0c3f8d6e0b')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '3d14f6a7-8c0b-4d2f-e5a7-1b0c3f8d6e0b')]",
+        "contentId": "3d14f6a7-8c0b-4d2f-e5a7-1b0c3f8d6e0b",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '3d14f6a7-8c0b-4d2f-e5a7-1b0c3f8d6e0b')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-7b58d0e1-2a4f-4b6d-c9e1-5f4a7d2b0c0f')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '7b58d0e1-2a4f-4b6d-c9e1-5f4a7d2b0c0f')]",
+        "contentId": "7b58d0e1-2a4f-4b6d-c9e1-5f4a7d2b0c0f",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '7b58d0e1-2a4f-4b6d-c9e1-5f4a7d2b0c0f')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-c6a7e9f0-1b34-4c5e-d8f0-4a3b6e1c9d04')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'c6a7e9f0-1b34-4c5e-d8f0-4a3b6e1c9d04')]",
+        "contentId": "c6a7e9f0-1b34-4c5e-d8f0-4a3b6e1c9d04",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'c6a7e9f0-1b34-4c5e-d8f0-4a3b6e1c9d04')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08')]",
+        "contentId": "0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-5f36b8c9-0e2d-4f4b-a7c9-3d2e5b0f8a0d')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '5f36b8c9-0e2d-4f4b-a7c9-3d2e5b0f8a0d')]",
+        "contentId": "5f36b8c9-0e2d-4f4b-a7c9-3d2e5b0f8a0d",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '5f36b8c9-0e2d-4f4b-a7c9-3d2e5b0f8a0d')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-f9d0b2c3-4e67-4f8b-a1c3-7d6e9b4f2a07')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'f9d0b2c3-4e67-4f8b-a1c3-7d6e9b4f2a07')]",
+        "contentId": "f9d0b2c3-4e67-4f8b-a1c3-7d6e9b4f2a07",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'f9d0b2c3-4e67-4f8b-a1c3-7d6e9b4f2a07')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-d7b8f0a1-2c45-4d6f-e9a1-5b4c7f2d0e05')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'd7b8f0a1-2c45-4d6f-e9a1-5b4c7f2d0e05')]",
+        "contentId": "d7b8f0a1-2c45-4d6f-e9a1-5b4c7f2d0e05",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'd7b8f0a1-2c45-4d6f-e9a1-5b4c7f2d0e05')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-e8c9a1b2-3d56-4e7a-f0b2-6c5d8a3e1f06')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'e8c9a1b2-3d56-4e7a-f0b2-6c5d8a3e1f06')]",
+        "contentId": "e8c9a1b2-3d56-4e7a-f0b2-6c5d8a3e1f06",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', 'e8c9a1b2-3d56-4e7a-f0b2-6c5d8a3e1f06')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09')]",
+        "contentId": "1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-2c03e5f6-7b9a-4c1e-d4f6-0a9b2e7c5d0a')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '2c03e5f6-7b9a-4c1e-d4f6-0a9b2e7c5d0a')]",
+        "contentId": "2c03e5f6-7b9a-4c1e-d4f6-0a9b2e7c5d0a",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '2c03e5f6-7b9a-4c1e-d4f6-0a9b2e7c5d0a')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "huntingQueriesCount": {
+      "value": 9,
+      "type": "int"
+    },
+    "rulesCount": {
+      "value": 14,
+      "type": "int"
+    },
+    "workbooksCount": {
+      "value": 7,
+      "type": "int"
+    },
+    "parsersCount": {
+      "value": 4,
+      "type": "int"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+id: 2a0d15e6-7f9e-4a1c-b4d6-0e9f2c7a5b14
+name: MDE Live Response sessions without justification
+description: |
+  Live Response sessions initiated without a paired incident or investigation.
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - Compliance
+  - Drift
+  - DefenderXDR
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - Discovery
+  - Collection
+relevantTechniques:
+  - T1059
+query: |
+  MDE_ActionCenter_CL | where TimeGenerated > ago(7d) | extend Type = tostring(parse_json(RawJson).actionType), InvestigationId = tostring(parse_json(RawJson).investigationId) | where Type has "LiveResponse" and isempty(InvestigationId)

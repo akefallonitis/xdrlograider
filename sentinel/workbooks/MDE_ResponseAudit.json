@@ -1,0 +1,71 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDE_ResponseAudit",
+  "items": [
+    {
+      "name": "header",
+      "content": {
+        "json": "# MDE Response Audit\n\nAction Center history with operators, comments, and time-to-action metrics."
+      },
+      "type": 1
+    },
+    {
+      "name": "parameters",
+      "content": {
+        "parameters": [
+          {
+            "value": { "durationMs": 604800000 },
+            "id": "tr",
+            "name": "TimeRange",
+            "version": "KqlParameterItem/1.0",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          }
+        ],
+        "queryType": 0,
+        "style": "pills",
+        "version": "KqlParameterItem/1.0"
+      },
+      "type": 9
+    },
+    {
+      "name": "panel-1",
+      "content": {
+        "queryType": 0,
+        "title": "Action Center summary by type and status",
+        "size": 0,
+        "query": "MDE_ActionCenter_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize Count = count() by ActionType, ActionStatus\n| render barchart",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    },
+    {
+      "name": "panel-2",
+      "content": {
+        "queryType": 0,
+        "title": "Time-to-action by action type",
+        "size": 0,
+        "query": "MDE_ActionCenter_CL\n| where TimeGenerated > ago({TimeRange:value})\n| where isnotnull(StartTime) and isnotnull(EndTime)\n| extend TimeToActionMinutes = datetime_diff('minute', EndTime, StartTime)\n| project TimeGenerated, ActionId, ActionType, ActionStatus, ActionDecision, Operator, MachineId, ComputerName, TimeToActionMinutes\n| order by TimeGenerated desc",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    }
+  ],
+  "version": "Notebook/1.0"
+}

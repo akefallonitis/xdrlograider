@@ -1,0 +1,17 @@
+Name: MDE Response Audit
+Author: Alex Kefallonitis
+Description: |
+  Action Center history with operators, decisions, and time-to-action metrics.
+Id: f4b6e6fe-24e2-4780-9c45-298f48e50146
+Logo: '<img src="https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/deploy/solution/Images/Logo.svg" width="75px" height="75px">'
+Data:
+  - DataConnector: XdrLogRaiderInternal
+    DataTypes:
+      - MDE_Heartbeat_CL
+      - MDE_ActionCenter_CL
+      - MDE_MachineActions_CL
+WorkbookKey: MDE_ResponseAudit
+SourceCenter: sentinel
+FileName: MDE_ResponseAudit.json
+Version: '1.0.0'
+PreviewImages: []

@@ -1,0 +1,20 @@
+id: 5d3048b9-0c21-4d4f-e7a9-3b2c5f0d8e17
+name: MDE XSPM chokepoint deltas
+description: |
+  Nodes newly identified as chokepoints — they sit on many attack paths.
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - Compliance
+  - Drift
+  - DefenderXDR
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+tactics:
+  - Reconnaissance
+relevantTechniques:
+  - T1595
+query: |
+  MDE_Drift_Exposure(30d, 1h) | where StreamName == "MDE_XspmChokePoints_CL" and ChangeType == "Added"
