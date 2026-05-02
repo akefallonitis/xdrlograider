@@ -125,75 +125,24 @@ function Invoke-TierPollWithHeartbeat {
     # emit a heartbeat row with Notes.fatalError so operators see the failure
     # in MDE_Heartbeat_CL rather than silence, then re-throw for App Insights.
     #
-    # The auth-selftest cooldown gate is INSIDE this try (not a separate
-    # top-level try) so the catch path covers selftest-read failures + writes
-    # the failure flag uniformly. This keeps the helper's structural contract
-    # to one top-level try (gated by TimerFunctions.Execution.Tests.ps1).
+    # Architectural note: there is NO auth-selftest gate. Earlier iterations had
+    # a Storage-Table-backed Get/Set flag pair to "skip polling until auth
+    # validated" — the rationale was preventing 401-storms from a retired
+    # `validate-auth-selftest` timer that fired every minute. With that timer
+    # retired and poll-* timers running on 10-min minimum cadences, a worst-
+    # case 6 sign-in failures/hour is NOT a "storm" — it is the correct
+    # signal-to-noise ratio for an operator to see "card disconnected" + dig
+    # into AuthChain.* customEvents for the specific stage that failed.
+    # Removing the gate eliminated ~150 LOC + a deadlock class (writer-missing
+    # → infinite skip) + Storage Table state coupling. Defence-in-depth comes
+    # from Entra account-lockout (real protection against credential brute-
+    # force), Azure Functions [FixedDelayRetry] on the timer trigger (per-
+    # cycle transient retry), and the heartbeat fatalError Note (per-cycle
+    # operator visibility).
     try {
-        # ---- Auth-self-test gate (v0.1.0-beta post-deploy hardening) ----
-        # State machine:
-        #   ABSENT                       → proceed (first-deploy bootstrap)
-        #   {Success=true}               → proceed (steady state)
-        #   {Success=false, age<TTL}     → SKIP   (cooldown — don't spam portal)
-        #   {Success=false, age>=TTL}    → proceed (cooldown elapsed; auto-retry)
-        # Cooldown TTL = AUTH_SELFTEST_COOLDOWN_MINUTES env var (default 30).
-        # Provides automatic retry after operator rotates creds via
-        # Initialize-XdrLogRaiderAuth.ps1, without requiring manual flag-clear.
-        # The implicit selftest below WRITES the flag on every
-        # Connect-DefenderPortal outcome (success → true; throw → false). The
-        # CHANGELOG line "auth-selftest flag is set by the first successful
-        # poll-* sign-in" describes this; the Set-XdrAuthSelfTestFlag writer
-        # was absent in the v0.1.0-beta initial publish — every poll-*
-        # deadlocked with reason='auth not validated'. Fixed here.
-        $selfTestRow = Get-XdrAuthSelfTestFlag `
-            -StorageAccountName $config.StorageAccountName `
-            -CheckpointTable $config.CheckpointTable -ReturnRow
-
-        if ($null -ne $selfTestRow -and
-            $selfTestRow.PSObject.Properties['Success'] -and
-            $selfTestRow.Success -eq $false) {
-
-            $cooldownMinutes = 30
-            if (-not [string]::IsNullOrWhiteSpace($env:AUTH_SELFTEST_COOLDOWN_MINUTES)) {
-                $envVal = 0
-                if ([int]::TryParse($env:AUTH_SELFTEST_COOLDOWN_MINUTES, [ref]$envVal) -and $envVal -gt 0) {
-                    $cooldownMinutes = $envVal
-                }
-            }
-            $flagAge = $null
-            if ($selfTestRow.PSObject.Properties['TimeUtc']) {
-                $flagTime = [datetime]::MinValue
-                if ([datetime]::TryParse([string]$selfTestRow.TimeUtc, [ref]$flagTime)) {
-                    $flagAge = [datetime]::UtcNow - $flagTime.ToUniversalTime()
-                }
-            }
-            $inCooldown = ($null -ne $flagAge -and $flagAge.TotalMinutes -lt $cooldownMinutes)
-
-            if ($inCooldown) {
-                $reason = if ($selfTestRow.PSObject.Properties['Reason']) { [string]$selfTestRow.Reason } else { 'auth-selftest=failed' }
-                $remainingMin = [int]($cooldownMinutes - $flagAge.TotalMinutes)
-                Write-Warning "$FunctionName skipped — auth-selftest is FAILED ($reason); cooldown ${remainingMin}m remaining. Auto-retry after expiry; operator can clear the cooldown by uploading fresh credentials via Initialize-XdrLogRaiderAuth.ps1."
-                Write-Heartbeat -DceEndpoint $config.DceEndpoint -DcrImmutableId $heartbeatDcrId `
-                    -FunctionName $FunctionName -Tier $Tier `
-                    -StreamsAttempted 0 -StreamsSucceeded 0 -RowsIngested 0 `
-                    -LatencyMs ([int]$sw.ElapsedMilliseconds) `
-                    -Notes ([pscustomobject]@{ skipped = $true; reason = "auth-selftest=failed (cooldown ${remainingMin}m remaining): $reason" }) | Out-Null
-                return
-            }
-            # else cooldown elapsed → fall through to retry attempt below
-        }
-
         # ---- Main poll lifecycle ----
         $credential = Get-XdrAuthFromKeyVault -VaultUri $config.KeyVaultUri -SecretPrefix $config.AuthSecretName -AuthMethod $config.AuthMethod
         $session    = Connect-DefenderPortal -Method $config.AuthMethod -Credential $credential -PortalHost $Portal
-
-        # Implicit auth-selftest: connection succeeded → write/refresh the
-        # gate flag so subsequent poll-* runs short-circuit the read above.
-        # Idempotent (Upsert); cheap (~1 storage-table call per cycle).
-        Set-XdrAuthSelfTestFlag `
-            -StorageAccountName $config.StorageAccountName `
-            -CheckpointTable $config.CheckpointTable `
-            -Success $true -Stage 'complete'
 
         $result = Invoke-MDETierPoll -Session $session -Tier $Tier -Config $config
 

@@ -276,63 +276,6 @@ if ($DryRun) {
     }
 }
 
-# --- Clear the auth-selftest cooldown flag (best-effort) ---
-#
-# If the FA was previously deadlocked by failed credentials and wrote a
-# Success=false flag, that flag stays for AUTH_SELFTEST_COOLDOWN_MINUTES
-# (default 30 min) before poll-* auto-retries. Operators uploading fresh
-# credentials WANT the next poll to retry immediately — clear the flag here.
-#
-# Implementation: call the Storage Table REST DELETE directly. Avoids the
-# AzTable PowerShell module dependency (operators may not have it). Uses
-# Az.Accounts (already required by Set-AzKeyVaultSecret above) for the
-# bearer token, scoped to https://storage.azure.com.
-#
-# Best-effort: failure here is non-fatal. The cooldown expires naturally
-# within 30 min anyway; we just print a one-line note and move on.
-try {
-    $faSites = @(Get-AzResource -ResourceType 'Microsoft.Web/sites' -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -match '^xdrlr.*-fn-' } |
-        Select-Object -First 1)
-    if ($faSites.Count -gt 0) {
-        $faRg = $faSites[0].ResourceGroupName
-        $stAccount = @(Get-AzResource -ResourceGroupName $faRg -ResourceType 'Microsoft.Storage/storageAccounts' -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name -match '^xdrlr' } |
-            Select-Object -First 1)
-        if ($stAccount.Count -gt 0) {
-            $stName = $stAccount[0].Name
-            # Storage REST API requires a bearer token scoped to storage.azure.com
-            $tokenObj = Get-AzAccessToken -ResourceUrl 'https://storage.azure.com' -AsSecureString -ErrorAction Stop
-            $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($tokenObj.Token)
-            try {
-                $bearerToken = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
-            } finally {
-                [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
-            }
-            $tableUrl = "https://$stName.table.core.windows.net/connectorCheckpoints(PartitionKey='auth-selftest',RowKey='latest')"
-            $headers = @{
-                'Authorization'   = "Bearer $bearerToken"
-                'x-ms-version'    = '2020-12-06'
-                'x-ms-date'       = ([datetime]::UtcNow.ToString('R'))
-                'If-Match'        = '*'
-                'Accept'          = 'application/json;odata=nometadata'
-            }
-            try {
-                Invoke-RestMethod -Uri $tableUrl -Method Delete -Headers $headers -ErrorAction Stop | Out-Null
-                Write-Host "        Cleared:      auth-selftest cooldown flag (next poll-* will retry immediately)" -ForegroundColor Green
-            } catch {
-                # 404 = row didn't exist (clean state) — perfectly fine, suppress.
-                if ($_.Exception.Response.StatusCode.value__ -ne 404) {
-                    throw
-                }
-                Write-Host "        Note:         no auth-selftest cooldown flag to clear (clean state)" -ForegroundColor Gray
-            }
-        }
-    }
-} catch {
-    Write-Host "        Note:         couldn't clear auth-selftest cooldown flag ($($_.Exception.Message)). Cooldown will expire naturally within 30 min." -ForegroundColor Yellow
-}
-
 # --- Success ---
 
 Write-Host ""

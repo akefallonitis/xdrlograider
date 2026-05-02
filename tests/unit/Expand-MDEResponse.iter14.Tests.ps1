@@ -58,6 +58,19 @@ BeforeAll {
     Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
     Import-Module $script:ClientPsd1     -Force -ErrorAction Stop
 
+    # v0.1.0-beta post-deploy contract: Expand-MDEResponse uses Get-Command
+    # to defensively check Send-XdrAppInsightsCustomEvent existence (Xdr.
+    # Sentinel.Ingest may not be imported in unit tests). Inject a stub in
+    # the Xdr.Defender.Client module scope so the AppInsights-event tests
+    # below can intercept the call via Mock — without dragging in the full
+    # Ingest module.
+    InModuleScope Xdr.Defender.Client {
+        function global:Send-XdrAppInsightsCustomEvent {
+            param([string]$EventName, [hashtable]$Properties, [string]$OperationId)
+            # default no-op; tests Mock this to capture
+        }
+    }
+
     # The wrapper-key shapes that WERE breaking before iter-14.0 Phase 3.
     # Locked: NO row in production should ever carry EntityId in this set.
     $script:ForbiddenWrapperKeys = @(
@@ -182,50 +195,72 @@ Describe 'Expand-MDEResponse — ScalarWrap (iter-14.0 Phase 3.4)' {
     }
 }
 
-Describe 'Expand-MDEResponse — NullBoundaryMarker (iter-14.0 Phase 3.5)' {
+Describe 'Expand-MDEResponse — NullResponse (post-deploy contract: zero rows + AppInsights event)' {
+    # v0.1.0-beta post-deploy hardening: boundary markers no longer emitted as
+    # rows in MDE_*_CL — they polluted customer data tables and broke every
+    # Sentinel parser/workbook/rule that referenced typed columns. New
+    # contract: empty/null/missing-results responses return @() + emit an
+    # AppInsights customEvent (Ingest.BoundaryMarker) for operator visibility.
 
-    It 'null response emits ONE boundary-marker row' {
-        $rows = Expand-MDEResponse -Response $null
-        $rows.Count | Should -Be 1
-        $rows[0].Entity.__boundary_marker | Should -Be $true
-        $rows[0].Entity.__reason | Should -Be 'api-returned-null'
+    It 'null response returns ZERO rows (no boundary marker pollution)' {
+        $rows = @(Expand-MDEResponse -Response $null)
+        $rows.Count | Should -Be 0 -Because 'boundary markers no longer pollute MDE_*_CL — operator visibility via AppInsights customEvent only'
     }
 
-    It 'boundary-marker carries -Stream context when supplied' {
-        $rows = Expand-MDEResponse -Response $null -Stream 'MDE_TestStream_CL'
-        $rows[0].Entity.__stream | Should -Be 'MDE_TestStream_CL'
-    }
-
-    It 'boundary-marker EntityId is unique per call (cross-stream collisions impossible)' {
-        $rows1 = Expand-MDEResponse -Response $null
-        $rows2 = Expand-MDEResponse -Response $null
-        $rows1[0].Id | Should -Not -Be $rows2[0].Id -Because 'boundary marker IDs use Get-Random for uniqueness'
+    It 'null response emits Ingest.BoundaryMarker AppInsights customEvent' {
+        InModuleScope Xdr.Defender.Client {
+            $script:emittedEvents = @()
+            Mock Send-XdrAppInsightsCustomEvent {
+                $script:emittedEvents += [pscustomobject]@{ Name = $EventName; Properties = $Properties }
+            }
+            Expand-MDEResponse -Response $null -Stream 'MDE_TestStream_CL' | Out-Null
+            $bm = $script:emittedEvents | Where-Object { $_.Name -eq 'Ingest.BoundaryMarker' } | Select-Object -First 1
+            $bm | Should -Not -BeNullOrEmpty
+            $bm.Properties.Stream | Should -Be 'MDE_TestStream_CL'
+            $bm.Properties.Reason | Should -Be 'api-returned-null'
+        }
     }
 }
 
-Describe 'Expand-MDEResponse — Empty-shape boundary markers' {
+Describe 'Expand-MDEResponse — Empty-shape responses (post-deploy contract: zero rows + AppInsights event)' {
 
-    It 'empty array @() emits ONE boundary-marker row with reason=empty-array' {
-        $rows = Expand-MDEResponse -Response @()
-        $rows.Count | Should -Be 1
-        $rows[0].Entity.__boundary_marker | Should -Be $true
-        $rows[0].Entity.__reason | Should -Be 'empty-array'
+    It 'empty array @() returns ZERO rows + emits empty-array event' {
+        InModuleScope Xdr.Defender.Client {
+            $script:emittedEvents = @()
+            Mock Send-XdrAppInsightsCustomEvent {
+                $script:emittedEvents += [pscustomobject]@{ Name = $EventName; Properties = $Properties }
+            }
+            $rows = @(Expand-MDEResponse -Response @() -Stream 'MDE_S')
+            $rows.Count | Should -Be 0
+            ($script:emittedEvents | Where-Object { $_.Name -eq 'Ingest.BoundaryMarker' -and $_.Properties.Reason -eq 'empty-array' }) | Should -Not -BeNullOrEmpty
+        }
     }
 
-    It 'empty object {} emits ONE boundary-marker row with reason=empty-object' {
-        $rows = Expand-MDEResponse -Response ([pscustomobject]@{})
-        $rows.Count | Should -Be 1
-        $rows[0].Entity.__boundary_marker | Should -Be $true
-        $rows[0].Entity.__reason | Should -Be 'empty-object'
+    It 'empty object {} returns ZERO rows + emits empty-object event' {
+        InModuleScope Xdr.Defender.Client {
+            $script:emittedEvents = @()
+            Mock Send-XdrAppInsightsCustomEvent {
+                $script:emittedEvents += [pscustomobject]@{ Name = $EventName; Properties = $Properties }
+            }
+            $rows = @(Expand-MDEResponse -Response ([pscustomobject]@{}) -Stream 'MDE_S')
+            $rows.Count | Should -Be 0
+            ($script:emittedEvents | Where-Object { $_.Name -eq 'Ingest.BoundaryMarker' -and $_.Properties.Reason -eq 'empty-object' }) | Should -Not -BeNullOrEmpty
+        }
     }
 
-    It 'wrapper present but UnwrapProperty value null emits ONE boundary-marker row with reason=unwrap-target-null' {
-        $response = [pscustomobject]@{ Count = 0; Results = $null }
-        $rows = Expand-MDEResponse -Response $response -UnwrapProperty 'Results'
-        $rows.Count | Should -Be 1
-        $rows[0].Entity.__boundary_marker | Should -Be $true
-        $rows[0].Entity.__reason | Should -Be 'unwrap-target-null'
-        $rows[0].Entity.__unwrapProperty | Should -Be 'Results'
+    It 'wrapper present but UnwrapProperty value null returns ZERO rows + emits unwrap-target-null event' {
+        InModuleScope Xdr.Defender.Client {
+            $script:emittedEvents = @()
+            Mock Send-XdrAppInsightsCustomEvent {
+                $script:emittedEvents += [pscustomobject]@{ Name = $EventName; Properties = $Properties }
+            }
+            $response = [pscustomobject]@{ Count = 0; Results = $null }
+            $rows = @(Expand-MDEResponse -Response $response -UnwrapProperty 'Results' -Stream 'MDE_S')
+            $rows.Count | Should -Be 0
+            $bm = $script:emittedEvents | Where-Object { $_.Name -eq 'Ingest.BoundaryMarker' -and $_.Properties.Reason -eq 'unwrap-target-null' } | Select-Object -First 1
+            $bm | Should -Not -BeNullOrEmpty
+            $bm.Properties.UnwrapProperty | Should -Be 'Results'
+        }
     }
 }
 

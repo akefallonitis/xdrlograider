@@ -65,53 +65,13 @@ Describe 'Update-XsrfToken (Xdr.Defender.Auth — iter-14.0 home)' {
     }
 }
 
-Describe 'Get-XdrAuthSelfTestFlag — all return paths (iter-13.15: via Invoke-XdrStorageTableEntity)' {
-    # Iter 13.15: Get-XdrAuthSelfTestFlag now delegates to the unified
-    # Invoke-XdrStorageTableEntity helper. Tests target that single seam so
-    # we exercise the function's null/throw/Success-false → $false mapping
-    # without re-asserting REST/HTTP semantics (those are covered by
-    # tests/unit/Invoke-XdrStorageTableEntity.Tests.ps1).
-
-    It 'returns false when the helper throws (transient/permission error → fail closed)' {
-        InModuleScope Xdr.Sentinel.Ingest {
-            Mock Invoke-XdrStorageTableEntity { throw 'storage table not reachable' }
-            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'missing' -CheckpointTable 'cp' -WarningAction SilentlyContinue
-            $r | Should -BeFalse
-        }
-    }
-
-    It 'returns false when the helper returns null (404 → row not present yet)' {
-        InModuleScope Xdr.Sentinel.Ingest {
-            Mock Invoke-XdrStorageTableEntity { $null }
-            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
-            $r | Should -BeFalse
-        }
-    }
-
-    It 'returns true when flag row has Success=true' {
-        InModuleScope Xdr.Sentinel.Ingest {
-            Mock Invoke-XdrStorageTableEntity { [pscustomobject]@{ Success = $true } }
-            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
-            $r | Should -BeTrue
-        }
-    }
-
-    It 'returns false when flag row has Success=false' {
-        InModuleScope Xdr.Sentinel.Ingest {
-            Mock Invoke-XdrStorageTableEntity { [pscustomobject]@{ Success = $false } }
-            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp'
-            $r | Should -BeFalse
-        }
-    }
-
-    It 'returns false when flag row has Success missing entirely (defensive)' {
-        InModuleScope Xdr.Sentinel.Ingest {
-            Mock Invoke-XdrStorageTableEntity { [pscustomobject]@{ LastRunUtc = '2026-04-28T00:00:00Z' } }
-            $r = Get-XdrAuthSelfTestFlag -StorageAccountName 'sa' -CheckpointTable 'cp' -WarningAction SilentlyContinue
-            $r | Should -BeFalse
-        }
-    }
-}
+# NOTE: Get-XdrAuthSelfTestFlag tests removed in v0.1.0-beta post-deploy
+# hardening — the gate (Get + Set + cooldown) was deleted as a workaround
+# that masked the AUTH_SECRET_NAME='mde-portal-auth' bug. Defence-in-depth
+# now: Entra account-lockout + Azure Functions [FixedDelayRetry] on timer
+# triggers + heartbeat fatalError Notes. See ARCHITECTURE.md auth-chain
+# section + tests/arm/AuthSecretNameInvariants.Tests.ps1 for the
+# regression gate that locks the CORRECT secret-prefix value.
 
 Describe 'ConvertTo-MDEIngestRow schema' {
 
@@ -143,15 +103,15 @@ Describe 'ConvertTo-MDEIngestRow schema' {
 
 Describe 'Expand-MDEResponse on varied input shapes' {
 
-    It 'returns boundary-marker row on null response (iter-14.0 Phase 3.5)' {
-        # iter-14.0 Phase 3.5: null/empty responses emit a single marker row
-        # carrying __boundary_marker=$true + __reason='api-returned-null' so
-        # heartbeat can tell "API returned no data" apart from "API failed".
+    It 'returns ZERO rows on null response (post-deploy contract)' {
+        # v0.1.0-beta post-deploy hardening: boundary markers no longer
+        # pollute MDE_*_CL tables. Empty/null responses return @() and emit
+        # an Ingest.BoundaryMarker AppInsights customEvent for operator
+        # visibility. See tests/unit/Expand-MDEResponse.iter14.Tests.ps1
+        # for the AppInsights-event assertions.
         InModuleScope Xdr.Defender.Client {
-            $r = Expand-MDEResponse -Response $null
-            @($r).Count | Should -Be 1
-            $r[0].Entity.__boundary_marker | Should -Be $true
-            $r[0].Entity.__reason | Should -Be 'api-returned-null'
+            $r = @(Expand-MDEResponse -Response $null)
+            $r.Count | Should -Be 0 -Because 'null response = zero rows; AppInsights event carries the operator signal'
         }
     }
 

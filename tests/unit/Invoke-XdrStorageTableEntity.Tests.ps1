@@ -121,7 +121,7 @@ Describe 'Invoke-XdrStorageTableEntity — source-level contract assertions' {
 
     It 'Get returns null on HTTP 404 (not throw)' {
         # Single-quoted regex so PS does not expand $null.
-        $script:HelperSource | Should -Match '(?s)Operation\s*-eq\s*''Get''.*NotFound.*return\s+\$null' -Because 'callers expect null on 404 to mean "row does not exist yet" (e.g. first-run Get-XdrAuthSelfTestFlag)'
+        $script:HelperSource | Should -Match '(?s)Operation\s*-eq\s*''Get''.*NotFound.*return\s+\$null' -Because 'callers expect null on 404 to mean "row does not exist yet" (e.g. first-run Get-CheckpointTimestamp)'
     }
 
     It 'PartitionKey + RowKey are injected into Entity body if absent' {

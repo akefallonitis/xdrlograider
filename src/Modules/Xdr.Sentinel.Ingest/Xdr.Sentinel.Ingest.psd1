@@ -17,11 +17,15 @@
         'Write-Heartbeat',
         'Get-CheckpointTimestamp',
         'Set-CheckpointTimestamp',
-        'Get-XdrAuthSelfTestFlag',
-        # v0.1.0-beta post-deploy bug fix: counterpart writer for the
-        # auth-selftest gate. Without it, the gate is read-only (never
-        # set), and every poll-* skips with "auth not validated" forever.
-        'Set-XdrAuthSelfTestFlag',
+        # auth-selftest gate (Get/Set pair) was removed in v0.1.0-beta post-
+        # deploy hardening. The gate's "skip until previous sign-in succeeded"
+        # made sense when the legacy `validate-auth-selftest` timer fired every
+        # minute (60+ exceptions/15 min was a real storm); with that timer
+        # retired and poll-* on 10-min minimum cadences, 6 failures/hr is the
+        # correct signal-to-noise ratio for an operator. Defence-in-depth
+        # now comes from Entra account-lockout + Azure Functions
+        # [FixedDelayRetry] on the timer trigger + heartbeat fatalError Notes
+        # (per-cycle operator visibility) — no application state to manage.
         'Invoke-XdrStorageTableEntity',
         'Get-DcrImmutableIdForStream',
         # iter-14.0 Phase 14B: structured logging to App Insights.

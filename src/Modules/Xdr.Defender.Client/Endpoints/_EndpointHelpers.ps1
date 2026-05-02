@@ -186,24 +186,50 @@ function Expand-MDEResponse {
         [string] $Stream
     )
 
-    # --- Shape 5: NULL → boundary-marker row (iter-14.0 Phase 3.5) -----------
-    # Null responses (204 no-content, empty body, etc.) emit ONE marker row so
-    # downstream heartbeat queries can distinguish "API succeeded with no data"
-    # from "API failed entirely" (failed paths produce zero rows + an error log).
-    if ($null -eq $Response) {
-        $markerEntity = [ordered]@{
-            __boundary_marker = $true
-            __reason          = 'api-returned-null'
-            __observedUtc     = [datetime]::UtcNow.ToString('o')
+    # v0.1.0-beta post-deploy hardening: DEBUG-CAPTURE mode.
+    # When XDR_DEBUG_RESPONSE_CAPTURE=true, log first 800 chars of the raw
+    # response shape per stream to AppInsights customEvent so an audit can
+    # see what the portal ACTUALLY returns (vs what the manifest assumes).
+    # Default OFF — only enable for one cycle when investigating projection
+    # mismatches. Capture ONCE per stream per worker process to keep volume
+    # bounded.
+    if ($Stream -and $env:XDR_DEBUG_RESPONSE_CAPTURE -eq 'true') {
+        if ($null -eq $script:DebugResponseSeen) { $script:DebugResponseSeen = @{} }
+        if (-not $script:DebugResponseSeen.ContainsKey($Stream)) {
+            $script:DebugResponseSeen[$Stream] = $true
+            $rawShape = if ($null -eq $Response) {
+                'NULL'
+            } else {
+                try { ($Response | ConvertTo-Json -Depth 4 -Compress) } catch { "<unserializable: $($_.Exception.Message)>" }
+            }
+            if ($rawShape.Length -gt 800) { $rawShape = $rawShape.Substring(0, 800) + '...[truncated]' }
+            if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
+                Send-XdrAppInsightsCustomEvent -EventName 'Ingest.RawResponseShape' -Properties @{
+                    Stream      = [string]$Stream
+                    UnwrapHint  = [string]$UnwrapProperty
+                    RawSnippet  = $rawShape
+                    ResponseType = if ($null -eq $Response) { 'null' } else { $Response.GetType().FullName }
+                }
+            }
         }
-        if ($Stream) { $markerEntity['__stream'] = $Stream }
+    }
+
+    # --- Shape 5: NULL response — emit AppInsights event, return ZERO rows ---
+    # Pre-v0.1.0-beta this returned a "boundary marker" row inserted into the
+    # MDE_*_CL table. That polluted the customer's data tables with non-entity
+    # rows that broke parser/workbook/rule queries (which assumed every row
+    # represented a real entity). The correct contract:
+    #   - Null/empty responses produce ZERO rows in MDE_*_CL
+    #   - Operator visibility comes from the Ingest.BoundaryMarker
+    #     AppInsights customEvent + the heartbeat's emptyStreams Notes counter
+    if ($null -eq $Response) {
         if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
             Send-XdrAppInsightsCustomEvent -EventName 'Ingest.BoundaryMarker' -Properties @{
                 Stream = [string]$Stream
                 Reason = 'api-returned-null'
             }
         }
-        return ,@(@{ Id = "boundary-no-data-$(Get-Random -Minimum 1000 -Maximum 9999)"; Entity = [pscustomobject]$markerEntity })
+        return @()
     }
 
     # --- Shape 2: unwrap wrapper before generic flattening (CQ1 fix) ---------
@@ -217,14 +243,9 @@ function Expand-MDEResponse {
         if ($hasProp) {
             $inner = if ($Response -is [hashtable]) { $Response[$UnwrapProperty] } else { $Response.$UnwrapProperty }
             if ($null -eq $inner) {
-                # Unwrap-target was present but null — same as shape 5 with extra context.
-                $markerEntity = [ordered]@{
-                    __boundary_marker = $true
-                    __reason          = 'unwrap-target-null'
-                    __unwrapProperty  = $UnwrapProperty
-                    __observedUtc     = [datetime]::UtcNow.ToString('o')
-                }
-                if ($Stream) { $markerEntity['__stream'] = $Stream }
+                # Unwrap-target was present but null — emit AppInsights event
+                # for operator visibility, return ZERO rows. (No more boundary-
+                # marker rows polluting the MDE_*_CL tables.)
                 if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
                     Send-XdrAppInsightsCustomEvent -EventName 'Ingest.BoundaryMarker' -Properties @{
                         Stream         = [string]$Stream
@@ -232,7 +253,7 @@ function Expand-MDEResponse {
                         UnwrapProperty = $UnwrapProperty
                     }
                 }
-                return ,@(@{ Id = "boundary-empty-$(Get-Random -Minimum 1000 -Maximum 9999)"; Entity = [pscustomobject]$markerEntity })
+                return @()
             }
             # PowerShell quirk defense: when a hashtable is constructed in PowerShell
             # source code with a single-item array value (e.g. @{Results=@(item)}),
@@ -254,19 +275,15 @@ function Expand-MDEResponse {
     # --- Shape 1: array of objects -------------------------------------------
     if ($Response -is [array]) {
         if ($Response.Count -eq 0) {
-            $markerEntity = [ordered]@{
-                __boundary_marker = $true
-                __reason          = 'empty-array'
-                __observedUtc     = [datetime]::UtcNow.ToString('o')
-            }
-            if ($Stream) { $markerEntity['__stream'] = $Stream }
+            # Empty array — operator visibility via AppInsights only; return
+            # ZERO rows (no MDE_*_CL pollution).
             if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
                 Send-XdrAppInsightsCustomEvent -EventName 'Ingest.BoundaryMarker' -Properties @{
                     Stream = [string]$Stream
                     Reason = 'empty-array'
                 }
             }
-            return ,@(@{ Id = "boundary-empty-$(Get-Random -Minimum 1000 -Maximum 9999)"; Entity = [pscustomobject]$markerEntity })
+            return @()
         }
         $i = 0
         foreach ($item in $Response) {
@@ -317,19 +334,14 @@ function Expand-MDEResponse {
             $pairs += @{ Id = $prop.Name; Entity = $prop.Value }
         }
         if ($pairs.Count -eq 0) {
-            $markerEntity = [ordered]@{
-                __boundary_marker = $true
-                __reason          = 'empty-object'
-                __observedUtc     = [datetime]::UtcNow.ToString('o')
-            }
-            if ($Stream) { $markerEntity['__stream'] = $Stream }
+            # Empty object — AppInsights event for visibility, return ZERO rows.
             if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
                 Send-XdrAppInsightsCustomEvent -EventName 'Ingest.BoundaryMarker' -Properties @{
                     Stream = [string]$Stream
                     Reason = 'empty-object'
                 }
             }
-            return ,@(@{ Id = "boundary-empty-$(Get-Random -Minimum 1000 -Maximum 9999)"; Entity = [pscustomobject]$markerEntity })
+            return @()
         }
     }
 

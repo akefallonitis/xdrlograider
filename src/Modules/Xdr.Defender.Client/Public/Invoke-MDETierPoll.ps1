@@ -20,10 +20,12 @@ function Invoke-MDETierPoll {
                 in the tier still get their chance).
           3. Return a counter object consumable by Write-Heartbeat.
 
-        This function does NOT handle auth-selftest gating (caller must check via
-        Get-XdrAuthSelfTestFlag before invoking), connection setup (caller
-        manages Session lifecycle), or heartbeat emission (caller decides how to
-        surface the result).
+        This function does NOT handle connection setup (caller manages Session
+        lifecycle) or heartbeat emission (caller decides how to surface the
+        result). Per v0.1.0-beta post-deploy hardening, there is no
+        auth-selftest gate either — credential failure surfaces in the caller's
+        catch-block heartbeat (Notes.fatalError) and natural Azure Functions
+        retry policy on the timer trigger.
 
     .PARAMETER Session
         PortalSession from Connect-DefenderPortal.

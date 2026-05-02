@@ -218,9 +218,12 @@ Describe 'Invoke-TierPollWithHeartbeat helper shape (single source of truth for 
         script:Test-AstCallsCommand -Commands $script:Parsed.Commands -Name 'Set-StrictMode' | Should -BeTrue
     }
 
-    It 'calls Get-XdrAuthSelfTestFlag (auth gate)' {
-        script:Test-AstCallsCommand -Commands $script:Parsed.Commands -Name 'Get-XdrAuthSelfTestFlag' | Should -BeTrue
-    }
+    # NOTE: 'calls Get-XdrAuthSelfTestFlag' assertion removed in v0.1.0-beta
+    # post-deploy hardening — the auth-selftest gate (Get/Set pair) was
+    # deleted because it was masking the AUTH_SECRET_NAME='mde-portal-auth'
+    # config bug. Defence-in-depth comes from Entra account-lockout +
+    # Azure Functions [FixedDelayRetry] on the timer trigger + heartbeat
+    # fatalError Notes (per-cycle operator visibility).
 
     It 'calls Get-XdrAuthFromKeyVault (real Xdr.Common.Auth name, not Get-MDEAuthFromKeyVault shim)' {
         script:Test-AstCallsCommand -Commands $script:Parsed.Commands -Name 'Get-XdrAuthFromKeyVault' | Should -BeTrue
@@ -234,12 +237,15 @@ Describe 'Invoke-TierPollWithHeartbeat helper shape (single source of truth for 
         script:Test-AstCallsCommand -Commands $script:Parsed.Commands -Name 'Invoke-MDETierPoll' | Should -BeTrue
     }
 
-    It 'calls Write-Heartbeat on gated + success + fatal paths (>= 3 calls)' {
+    It 'calls Write-Heartbeat on success + fatal-catch paths (>= 2 calls)' {
+        # Post-gate-removal: helper has only 2 heartbeat-emit paths (success
+        # + fatal-catch). Pre-removal there were 3 (gated-skip too) — the
+        # gated-skip path is gone now that the auth-selftest gate is gone.
         $calls = @($script:Parsed.Commands | Where-Object {
             $_.CommandElements[0] -is [System.Management.Automation.Language.StringConstantExpressionAst] -and
             $_.CommandElements[0].Value -ieq 'Write-Heartbeat'
         })
-        $calls.Count | Should -BeGreaterOrEqual 3 -Because 'helper must emit heartbeat in gated-skip, success, and fatal-catch paths'
+        $calls.Count | Should -BeGreaterOrEqual 2 -Because 'helper must emit heartbeat in success + fatal-catch paths'
     }
 
     It 'has a top-level TryStatementAst (fatal-error handling)' {

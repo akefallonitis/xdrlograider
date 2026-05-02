@@ -191,79 +191,13 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (inventory tier
         $outcome.Threw | Should -BeFalse -Because "per-stream isolation must hold END-TO-END through every layer. Got: $($outcome.ErrMsg)"
     }
 
-    It 'auth-gate FAILED + in cooldown emits a "skipped" heartbeat row but does not throw' {
-        # v0.1.0-beta post-deploy hardening: gate semantics changed from
-        # bool-returning Get-XdrAuthSelfTestFlag (legacy "any false = skip")
-        # to row-returning -ReturnRow with cooldown TTL ("only Success=false
-        # + TimeUtc within last 30 min = skip"). This test models the new
-        # semantics — FAILED row WITHIN cooldown window must skip cleanly
-        # without calling Connect-DefenderPortal.
-        $outcome = InModuleScope Xdr.Defender.Client {
-            # Mock returns a FAILED row with TimeUtc=now (well within 30-min cooldown).
-            Mock Get-XdrAuthSelfTestFlag -ModuleName Xdr.Defender.Client {
-                if ($ReturnRow) {
-                    return [pscustomobject]@{
-                        PartitionKey = 'auth-selftest'
-                        RowKey       = 'latest'
-                        Success      = $false
-                        Stage        = 'fatal'
-                        TimeUtc      = [datetime]::UtcNow.ToString('o')
-                        Reason       = 'simulated AADSTS50126'
-                    }
-                }
-                return $false
-            }
-            Mock Connect-DefenderPortal -ModuleName Xdr.Defender.Client {
-                throw "Should NOT reach Connect-DefenderPortal when auth-gate FAILED + in cooldown"
-            }
-            Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest {
-                [pscustomobject]@{ StatusCode = 204; Headers = @{} }
-            }
-            $module = Get-Module Xdr.Sentinel.Ingest
-            & $module { $script:MonitorTokenCache = $null; $script:MonitorTokenExpiry = [datetime]::MinValue }
-
-            $threw = $false; $errMsg = $null
-            try {
-                Invoke-TierPollWithHeartbeat -Tier 'inventory' -FunctionName 'poll-inventory-test-1d'
-            } catch {
-                $threw = $true; $errMsg = $_.Exception.Message
-            }
-            return [pscustomobject]@{ Threw = $threw; ErrMsg = $errMsg }
-        }
-        $outcome.Threw | Should -BeFalse -Because "auth-gate FAILED + in cooldown must skip cleanly, NOT throw. Got: $($outcome.ErrMsg)"
-    }
-
-    It 'auth-gate ABSENT (first-deploy bootstrap) PROCEEDS to attempt auth (does not skip)' {
-        # v0.1.0-beta post-deploy hardening: ABSENT row = first-deploy
-        # bootstrap → must proceed to attempt the implicit selftest (the
-        # Set-XdrAuthSelfTestFlag writer fires inside the success path).
-        # The legacy "skip on $false" semantics caused the v0.1.0-beta
-        # initial-publish deadlock; this test locks the new behaviour.
-        $outcome = InModuleScope Xdr.Defender.Client {
-            Mock Get-XdrAuthSelfTestFlag -ModuleName Xdr.Defender.Client {
-                if ($ReturnRow) { return $null }   # row absent
-                return $false
-            }
-            $reachedConnect = $false
-            Mock Connect-DefenderPortal -ModuleName Xdr.Defender.Client {
-                $script:reachedConnect = $true
-                throw "stop here — proves we got past the gate"
-            }
-            Mock Get-XdrAuthFromKeyVault -ModuleName Xdr.Defender.Client {
-                @{ Method = 'CredentialsTotp'; Upn = 'u'; Password = (ConvertTo-SecureString 'p' -AsPlainText -Force); TotpSeed = 'JBSWY3DPEHPK3PXP' }
-            }
-            Mock Set-XdrAuthSelfTestFlag -ModuleName Xdr.Defender.Client {}
-            Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest {
-                [pscustomobject]@{ StatusCode = 204; Headers = @{} }
-            }
-
-            try {
-                Invoke-TierPollWithHeartbeat -Tier 'inventory' -FunctionName 'poll-inventory-test-1d'
-            } catch {}
-            return [pscustomobject]@{ ReachedConnect = $script:reachedConnect }
-        }
-        $outcome.ReachedConnect | Should -BeTrue -Because 'first-deploy bootstrap (no auth-selftest row yet) MUST proceed to attempt the implicit selftest, otherwise the connector deadlocks forever (the v0.1.0-beta initial-publish bug)'
-    }
+    # NOTE: auth-gate "FAILED + cooldown" + "ABSENT bootstrap" tests removed.
+    # The auth-selftest gate (Get-/Set-XdrAuthSelfTestFlag pair) was deleted
+    # in v0.1.0-beta post-deploy hardening because it was MASKING the
+    # AUTH_SECRET_NAME='mde-portal-auth' configuration bug. Defence-in-depth
+    # now: Entra account-lockout + Azure Functions [FixedDelayRetry] on the
+    # timer trigger + heartbeat fatalError Notes (visible per-cycle). See
+    # tests/arm/AuthSecretNameInvariants.Tests.ps1 for the regression gate.
 
     It 'fatal error during Connect-DefenderPortal emits fatal-error heartbeat then re-throws' {
         $outcome = InModuleScope Xdr.Defender.Client {
@@ -281,7 +215,6 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (inventory tier
                 }
                 [pscustomobject]@{ StatusCode = 204; Headers = @{} }
             } -ParameterFilter { $true }
-            Mock Get-XdrAuthSelfTestFlag -ModuleName Xdr.Defender.Client { $true }
 
             $module = Get-Module Xdr.Sentinel.Ingest
             & $module { $script:MonitorTokenCache = $null; $script:MonitorTokenExpiry = [datetime]::MinValue }

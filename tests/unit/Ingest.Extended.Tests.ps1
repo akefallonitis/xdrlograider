@@ -294,40 +294,8 @@ Describe 'Send-ToLogAnalytics — 413 split-and-retry (v0.1.0-beta)' {
     }
 }
 
-Describe 'Get-XdrAuthSelfTestFlag — 4-path coverage (delegates to Invoke-XdrStorageTableEntity)' {
-    # Get-XdrAuthSelfTestFlag delegates to Invoke-XdrStorageTableEntity (the
-    # unified Storage Table HttpClient helper). Mocks target the helper directly
-    # so we exercise the function's mapping logic (helper return → bool flag)
-    # without depending on REST/HTTP semantics.
-
-    It 'returns $true when checkpoint row exists with Success=true' {
-        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith {
-            [pscustomobject]@{ Success = $true; LastRunUtc = [datetime]::UtcNow.ToString('o') }
-        }
-        $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
-        $result | Should -BeTrue
-    }
-
-    It 'returns $false when checkpoint row exists with Success=false' {
-        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith {
-            [pscustomobject]@{ Success = $false; LastRunUtc = [datetime]::UtcNow.ToString('o') }
-        }
-        $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck'
-        $result | Should -BeFalse
-    }
-
-    It 'returns $false when no checkpoint row exists yet (helper returns $null on 404)' {
-        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith { $null }
-        $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
-        $result | Should -BeFalse
-    }
-
-    It 'returns $false (fails closed) when the helper throws' {
-        Mock -ModuleName Xdr.Sentinel.Ingest Invoke-XdrStorageTableEntity -MockWith { throw 'token acquisition failed' }
-        $result = Get-XdrAuthSelfTestFlag -StorageAccountName 'st' -CheckpointTable 'ck' -WarningAction SilentlyContinue
-        $result | Should -BeFalse
-    }
-}
+# NOTE: Get-XdrAuthSelfTestFlag tests removed in v0.1.0-beta post-deploy
+# hardening — see tests/unit/ModuleCoverage.Extended.Tests.ps1 for rationale.
 
 Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (via Invoke-XdrStorageTableEntity)' {
     # Iter 13.15: tests refactored to mock the unified helper instead of the
