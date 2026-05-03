@@ -70,11 +70,55 @@ function ConvertTo-MDEIngestRow {
     }
 
     if (-not $isBoundary -and $ProjectionMap -and $ProjectionMap.Count -gt 0) {
+        # iter-14.0 — for property-bag streams (Shape 3 in Expand-MDEResponse),
+        # the entity is the property VALUE (often a scalar like $true/$false).
+        # The manifest convention `FeatureName = '$tostring:EntityId'` lets the
+        # operator project the property NAME as a typed col. Synthesise a
+        # projection-context object that wraps the entity + exposes EntityId
+        # so JSONPath hints like `$tostring:EntityId` resolve. The original
+        # $Raw is still used for RawJson serialization above.
+        # iter-13.4 defense: edge-case entities (empty pscustomobject, hashtable
+        # with one null-valued property, etc) must NOT crash the cloner under
+        # Set-StrictMode -Version Latest. Wrap each access in try/catch +
+        # explicit null guards.
+        $projContext = $null
+        try {
+            if ($Raw -is [hashtable]) {
+                $hasEntityIdKey = $Raw.ContainsKey('EntityId')
+                if ($hasEntityIdKey) {
+                    $projContext = $Raw
+                } else {
+                    $clone = [ordered]@{ EntityId = $EntityId }
+                    foreach ($k in @($Raw.Keys)) { $clone[$k] = $Raw[$k] }
+                    $projContext = [pscustomobject]$clone
+                }
+            } elseif ($Raw -is [pscustomobject]) {
+                # PSObject access requires defensive null check on Properties.
+                $propsObj = $Raw.PSObject.Properties
+                $names = if ($null -ne $propsObj) { @($propsObj | ForEach-Object { $_.Name }) } else { @() }
+                if ('EntityId' -in $names) {
+                    $projContext = $Raw
+                } else {
+                    $clone = [ordered]@{ EntityId = $EntityId }
+                    if ($null -ne $propsObj) {
+                        foreach ($p in $propsObj) { $clone[$p.Name] = $p.Value }
+                    }
+                    $projContext = [pscustomobject]$clone
+                }
+            } else {
+                # Scalar entity (Shape 4 in Expand-MDEResponse). Wrap so EntityId
+                # + value are both accessible via JSONPath.
+                $projContext = [pscustomobject]@{ EntityId = $EntityId; value = $Raw }
+            }
+        } catch {
+            Write-Verbose "ConvertTo-MDEIngestRow: projection-context build failed for $Stream — falling back to bare entity: $($_.Exception.Message)"
+            $projContext = $Raw
+        }
         foreach ($targetCol in $ProjectionMap.Keys) {
             $hint = $ProjectionMap[$targetCol]
             if ([string]::IsNullOrWhiteSpace($hint)) { continue }
             try {
-                $base[$targetCol] = Project-EntityField -Hint $hint -Entity $Raw
+                $base[$targetCol] = Project-EntityField -Hint $hint -Entity $projContext
             } catch {
                 Write-Verbose "ConvertTo-MDEIngestRow: projection failed for $Stream column '$targetCol' (hint='$hint'): $($_.Exception.Message)"
                 $base[$targetCol] = $null

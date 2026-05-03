@@ -195,7 +195,17 @@ function Invoke-MDEEndpoint {
             } else {
                 [string]$rawId
             }
-            ConvertTo-MDEIngestRow -Stream $Stream -EntityId $entityId -Raw $entity -Extras $extras
+            # iter-14.0 BUGFIX (CRITICAL — was silent in v0.1.0-beta): pass the
+            # manifest's ProjectionMap so ConvertTo-MDEIngestRow extracts typed
+            # columns. Without -ProjectionMap, the dispatcher silently emits
+            # rows with only the 4 base columns + RawJson — every typed column
+            # in every MDE_*_CL table came out NULL. Live verification on
+            # MDE_AdvancedFeatures_CL / MDE_TenantContext_CL / MDE_PUAConfig_CL
+            # confirmed NULL across the board pre-fix. ProjectionMap is always
+            # at least @{} (Get-MDEEndpointManifest's Defaults block guarantees
+            # the field exists), so a $null guard is unnecessary but harmless.
+            $projMap = if ($entry.ContainsKey('ProjectionMap') -and $entry.ProjectionMap) { $entry.ProjectionMap } else { $null }
+            ConvertTo-MDEIngestRow -Stream $Stream -EntityId $entityId -Raw $entity -Extras $extras -ProjectionMap $projMap
         }
     )
     Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' -> $($rows.Count) rows"
