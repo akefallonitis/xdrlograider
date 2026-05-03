@@ -1,0 +1,134 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# XdrLogRaider — Connector Health\n\nOperator-facing dashboard for the XdrLogRaider Defender XDR portal-only telemetry connector.\n\nPanels:\n1. Per-tier last-fresh poll markers (5 capability tiers + heartbeat)\n2. Auth chain failures last 24h (AppExceptions filtered to AuthChain.*)\n3. DLQ depth and oldest-entry age\n4. Freshness SLI per consolidated category\n5. Per-row partial-success rate per stream\n6. Service account sign-in anomaly summary (uses $(SERVICE_ACCOUNT_UPN) deployment parameter)\n\nFor triage workflows see [docs/RUNBOOK.md](https://github.com/akefallonitis/xdrlograider/blob/main/docs/RUNBOOK.md)."
+      },
+      "name": "title"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "0aa11111-1111-1111-1111-111111111111",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Time range",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 86400000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 3600000 },
+                { "durationMs": 14400000 },
+                { "durationMs": 86400000 },
+                { "durationMs": 604800000 }
+              ]
+            }
+          }
+        ],
+        "style": "above",
+        "queryType": 0
+      },
+      "name": "params"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MDE_Heartbeat_CL\n| where TimeGenerated {TimeRange}\n| summarize LastSeenUtc = max(TimeGenerated), HeartbeatCount = count(), TotalRowsIngested = sum(RowsIngested) by FunctionName\n| extend StaleMinutes = datetime_diff('minute', now(), LastSeenUtc)\n| extend Status = case(\n    FunctionName == 'Connector-Heartbeat'           and StaleMinutes <= 10,    'Healthy',\n    FunctionName == 'Defender-ActionCenter-Refresh' and StaleMinutes <= 20,    'Healthy',\n    FunctionName == 'Defender-XspmGraph-Refresh'    and StaleMinutes <= 120,   'Healthy',\n    FunctionName == 'Defender-Configuration-Refresh' and StaleMinutes <= 720,  'Healthy',\n    FunctionName == 'Defender-Inventory-Refresh'    and StaleMinutes <= 2880,  'Healthy',\n    FunctionName == 'Defender-Maintenance-Refresh'  and StaleMinutes <= 20160, 'Healthy',\n    'Stale'\n)\n| project FunctionName, Status, StaleMinutes, LastSeenUtc, HeartbeatCount, TotalRowsIngested\n| sort by FunctionName asc",
+        "size": 0,
+        "title": "Per-capability poll freshness (last vs cadence threshold)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "Status",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "colors",
+                "thresholdsGrid": [
+                  { "operator": "==", "thresholdValue": "Healthy", "representation": "green", "text": "{0}{1}" },
+                  { "operator": "Default", "representation": "redBright", "text": "{0}{1}" }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "name": "panel-1-poll-freshness"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppExceptions\n| where TimeGenerated {TimeRange}\n| extend ErrorClass = tostring(Properties.ErrorClass)\n| where ErrorClass startswith 'AuthChain.'\n| summarize FailureCount = count() by ErrorClass, bin(TimeGenerated, 1h)\n| render timechart",
+        "size": 0,
+        "title": "Auth chain failures over time (AppExceptions where ErrorClass startswith AuthChain.)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "panel-2-auth-chain"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where TimeGenerated {TimeRange}\n| where Name in ('xdr.ingest.dlq_depth', 'xdr.ingest.dlq_oldest_age_seconds')\n| summarize MaxValue = max(Value) by Name, bin(TimeGenerated, 30m)\n| render timechart",
+        "size": 0,
+        "title": "DLQ depth and oldest-entry age over time",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "panel-3-dlq"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where TimeGenerated {TimeRange}\n| where Name == 'xdr.ingest.row_age_seconds'\n| extend Stream = tostring(Properties.Stream)\n| summarize p95FreshnessSeconds = percentile(Value, 95) by Stream\n| sort by p95FreshnessSeconds desc",
+        "size": 0,
+        "title": "Freshness SLI per stream (p95 row age in seconds)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "panel-4-freshness-sli"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where TimeGenerated {TimeRange}\n| where Name == 'xdr.ingest.row_success_rate'\n| extend Stream = tostring(Properties.Stream)\n| summarize MinSuccessRate = min(Value), AvgSuccessRate = avg(Value) by Stream\n| extend Health = case(MinSuccessRate >= 0.99, 'Healthy', MinSuccessRate >= 0.90, 'Degraded', 'Failed')\n| sort by MinSuccessRate asc",
+        "size": 0,
+        "title": "Per-stream partial-success rate (min/avg in window)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "panel-5-partial-success"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "// Operator MUST replace $(SERVICE_ACCOUNT_UPN) with their service account UPN\n// from the ARM deployment parameter — this workbook is a TEMPLATE; the\n// XdrOps-ServiceAccountAnomalousSignIn analytic rule uses the same parameter.\nlet serviceAccountUpn = '$(SERVICE_ACCOUNT_UPN)';\nSigninLogs\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName =~ serviceAccountUpn\n| extend Country = tostring(LocationDetails.countryOrRegion)\n| summarize SignInCount = count(),\n            UniqueIPs = dcount(IPAddress),\n            UniqueCountries = dcount(Country),\n            FailedSignIns = countif(ResultType != 0)\n            by bin(TimeGenerated, 1h)\n| render timechart",
+        "size": 0,
+        "title": "Service account sign-in activity (uses $(SERVICE_ACCOUNT_UPN) deployment parameter — see XdrOps-ServiceAccountAnomalousSignIn rule)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "panel-6-service-account-anomaly"
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/<sub>/resourceGroups/<rg>/providers/microsoft.operationalinsights/workspaces/<workspace>"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

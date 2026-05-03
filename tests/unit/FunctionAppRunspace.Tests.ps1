@@ -124,8 +124,8 @@ Describe '$env-direct config pattern — each timer function reads from process-
         $offenders | Should -BeNullOrEmpty -Because ('poll-* run.ps1 must NOT access $global state directly:' + [Environment]::NewLine + (($offenders | ForEach-Object { '    ' + $_ }) -join [Environment]::NewLine))
     }
 
-    It 'heartbeat-5m run.ps1 reads config from $env (no $global dependency)' {
-        $heartbeatPath = Join-Path $script:FunctionsDir 'heartbeat-5m' 'run.ps1'
+    It 'Connector-Heartbeat run.ps1 reads config from $env (no $global dependency)' {
+        $heartbeatPath = Join-Path $script:FunctionsDir 'Connector-Heartbeat' 'run.ps1'
         $content = Get-Content $heartbeatPath -Raw
         $codeOnly = ($content -split "`n" | Where-Object { $_ -notmatch '^\s*#' }) -join "`n"
         # Must NOT have $global:XdrLogRaiderConfig outside comments

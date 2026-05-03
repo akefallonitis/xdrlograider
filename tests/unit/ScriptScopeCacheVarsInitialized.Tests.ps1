@@ -4,9 +4,9 @@
     Lock the module-load-time initialization of every $script: cache variable
     referenced by public functions. Under
     `Set-StrictMode -Version Latest` (enabled by every poll-* function and
-    heartbeat-5m), reading an unset script-scope variable THROWS — not returns
+    Connector-Heartbeat), reading an unset script-scope variable THROWS — not returns
     $null. The bug class hit live in v0.1.0-beta first deploy:
-    `heartbeat-5m failed: The variable '$script:DcrIdMap' cannot be retrieved
+    `Connector-Heartbeat failed: The variable '$script:DcrIdMap' cannot be retrieved
     because it has not been set.`
 
     The fix pattern (used by every cache var in this codebase):
@@ -79,10 +79,10 @@ Describe 'ScriptScopeCacheVars.InitializedAtModuleLoad' {
             }
         }
         $reasonLines = @(
-            'Under Set-StrictMode -Version Latest (enabled by every poll-* + heartbeat-5m),',
+            'Under Set-StrictMode -Version Latest (enabled by every poll-* + Connector-Heartbeat),',
             'reading an unset script-scope variable THROWS. Public-function code that uses',
             '`if ($null -eq $script:VarName)` REQUIRES the psm1 to do `$script:VarName = $null`',
-            'at module load. Live bug class: heartbeat-5m failed:',
+            'at module load. Live bug class: Connector-Heartbeat failed:',
             '  The variable ''$script:DcrIdMap'' cannot be retrieved because it has not been set.',
             'Missing initializations:'
         )

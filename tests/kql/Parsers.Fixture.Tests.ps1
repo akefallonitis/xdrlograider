@@ -30,7 +30,7 @@
         MDE_Drift_Configuration  → config
         MDE_Drift_Inventory      → inventory
         MDE_Drift_Maintenance    → maintenance (active streams only)
-    The 'fast' tier (Action Center events) has NO parser — those streams carry
+    The 'ActionCenter' tier (Action Center events) has NO parser — those streams carry
     occurrences, not snapshots, so field-level drift is undefined.
 #>
 
@@ -53,12 +53,12 @@ BeforeDiscovery {
         $script:StreamsByTier[$e.Tier] += $e.Stream
     }
 
-    # Parser-name → tier map. The 'fast' tier has no parser.
+    # Parser-name → tier map. The 'ActionCenter' tier has no parser.
     $parserTierMap = @{
-        'MDE_Drift_Exposure'      = 'exposure'
-        'MDE_Drift_Configuration' = 'config'
-        'MDE_Drift_Inventory'     = 'inventory'
-        'MDE_Drift_Maintenance'   = 'maintenance'
+        'MDE_Drift_Exposure'      = 'XspmGraph'
+        'MDE_Drift_Configuration' = 'Configuration'
+        'MDE_Drift_Inventory'     = 'Inventory'
+        'MDE_Drift_Maintenance'   = 'Maintenance'
     }
 
     $parsersDir = Join-Path $repoRoot 'sentinel' 'parsers'

@@ -146,6 +146,13 @@ function Invoke-MDEEndpoint {
     if ($entry.ContainsKey('UnwrapProperty') -and $entry.UnwrapProperty) {
         $expandArgs['UnwrapProperty'] = [string]$entry.UnwrapProperty
     }
+    # iter-14.0 Phase 1: SingleObjectAsRow forces single-object responses to
+    # emit ONE per-entity row (Shape 1) instead of N per-property rows (Shape 3).
+    # Used for endpoints returning a single configuration object that's
+    # operator-friendly as one row (TenantContext, ConnectedApps, UserPreferences).
+    if ($entry.ContainsKey('SingleObjectAsRow') -and $entry.SingleObjectAsRow) {
+        $expandArgs['SingleObjectAsRow'] = $true
+    }
 
     # Per-call Extras: carry any PathParams so ingested rows are self-describing
     # (useful for per-machineId / per-investigationId correlation).

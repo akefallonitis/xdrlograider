@@ -61,7 +61,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_LiveResponseConfig_CL\n| summarize arg_max(TimeGenerated, *) by EntityId\n| project EntityId, FeatureName, AutomatedIrLiveResponse, AutomatedIrUnsignedScripts, LiveResponseForServers, TimeGenerated",
+        "query": "MDE_LiveResponseConfig_CL\n| summarize arg_max(TimeGenerated, *) by FeatureName\n| project FeatureName, IsEnabled, TimeGenerated\n| order by FeatureName asc",
         "size": 0,
         "title": "Live Response config",
         "queryType": 0,

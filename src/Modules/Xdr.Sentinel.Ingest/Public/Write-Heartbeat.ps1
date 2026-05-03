@@ -19,10 +19,11 @@ function Write-Heartbeat {
         Timer function name (e.g., 'poll-fast-10m').
 
     .PARAMETER Tier
-        Cadence tier label. One of: fast | exposure | config | inventory |
-        maintenance | overhead. The first five match the per-Category cadence
-        model declared in endpoints.manifest.psd1; 'overhead' is reserved for
-        the heartbeat-5m timer's own bookkeeping rows.
+        Capability tier label. One of: ActionCenter | XspmGraph | Configuration |
+        Inventory | Maintenance | overhead. The first five match the per-capability
+        model declared in endpoints.manifest.psd1 (per directive 12 + Phase B.3);
+        'overhead' is reserved for the Connector-Heartbeat timer's own
+        bookkeeping rows.
 
     .PARAMETER StreamsAttempted
         Number of streams this invocation tried.
@@ -48,7 +49,10 @@ function Write-Heartbeat {
         [Parameter(Mandatory)] [string] $DcrImmutableId,
         [Parameter(Mandatory)] [string] $FunctionName,
         [Parameter(Mandatory)]
-        [ValidateSet('fast', 'exposure', 'config', 'inventory', 'maintenance', 'overhead')]
+        # Phase B.3 capability-themed Tier values per directive 12.
+        # 'overhead' kept for Connector-Heartbeat's own bookkeeping (it is not
+        # a Defender capability — it's connector-layer overhead).
+        [ValidateSet('ActionCenter', 'XspmGraph', 'Configuration', 'Inventory', 'Maintenance', 'overhead')]
         [string] $Tier,
         [int] $StreamsAttempted = 0,
         [int] $StreamsSucceeded = 0,

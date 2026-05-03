@@ -24,11 +24,11 @@
 
 BeforeDiscovery {
     $TimerCases = @(
-        @{ Folder = 'poll-fast-10m';        Tier = 'fast' }
-        @{ Folder = 'poll-exposure-1h';     Tier = 'exposure' }
-        @{ Folder = 'poll-config-6h';       Tier = 'config' }
-        @{ Folder = 'poll-inventory-1d';    Tier = 'inventory' }
-        @{ Folder = 'poll-maintenance-1w';  Tier = 'maintenance' }
+        @{ Folder = 'Defender-ActionCenter-Refresh';        Tier = 'ActionCenter' }
+        @{ Folder = 'Defender-XspmGraph-Refresh';     Tier = 'XspmGraph' }
+        @{ Folder = 'Defender-Configuration-Refresh';       Tier = 'Configuration' }
+        @{ Folder = 'Defender-Inventory-Refresh';    Tier = 'Inventory' }
+        @{ Folder = 'Defender-Maintenance-Refresh';  Tier = 'Maintenance' }
     )
 }
 

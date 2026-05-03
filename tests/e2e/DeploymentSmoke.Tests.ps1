@@ -144,11 +144,11 @@ Describe 'E2E — per-tier ingestion coverage' -Tag 'e2e', 'tier-coverage' {
     # Helper: count populated streams for a tier, asserted against the expected count.
     # Probes use the cadence-tier model (fast/exposure/config/inventory/maintenance).
     $tierProbes = @(
-        @{ Tier = 'fast';        Streams = @('MDE_ActionCenter_CL','MDE_MachineActions_CL')                                                       ; MinPopulated = 1 }
-        @{ Tier = 'exposure';    Streams = @('MDE_ExposureSnapshots_CL','MDE_XspmInitiatives_CL','MDE_ExposureRecommendations_CL')                ; MinPopulated = 1 }
-        @{ Tier = 'config';      Streams = @('MDE_AlertServiceConfig_CL','MDE_SuppressionRules_CL','MDE_RbacDeviceGroups_CL','MDE_UnifiedRbacRoles_CL') ; MinPopulated = 2 }
-        @{ Tier = 'inventory';   Streams = @('MDE_AdvancedFeatures_CL','MDE_PUAConfig_CL','MDE_TenantContext_CL','MDE_IdentityOnboarding_CL')     ; MinPopulated = 2 }
-        @{ Tier = 'maintenance'; Streams = @('MDE_DataExportSettings_CL')                                                                          ; MinPopulated = 1 }
+        @{ Tier = 'ActionCenter';        Streams = @('MDE_ActionCenter_CL','MDE_MachineActions_CL')                                                       ; MinPopulated = 1 }
+        @{ Tier = 'XspmGraph';    Streams = @('MDE_ExposureSnapshots_CL','MDE_XspmInitiatives_CL','MDE_ExposureRecommendations_CL')                ; MinPopulated = 1 }
+        @{ Tier = 'Configuration';      Streams = @('MDE_AlertServiceConfig_CL','MDE_SuppressionRules_CL','MDE_RbacDeviceGroups_CL','MDE_UnifiedRbacRoles_CL') ; MinPopulated = 2 }
+        @{ Tier = 'Inventory';   Streams = @('MDE_AdvancedFeatures_CL','MDE_PUAConfig_CL','MDE_TenantContext_CL','MDE_IdentityOnboarding_CL')     ; MinPopulated = 2 }
+        @{ Tier = 'Maintenance'; Streams = @('MDE_DataExportSettings_CL')                                                                          ; MinPopulated = 1 }
     )
 
     It "Tier <Tier>: at least <MinPopulated> of its verified streams has ingested rows" -ForEach $tierProbes -Skip:(-not $script:RunE2E) {
@@ -171,7 +171,7 @@ MDE_Heartbeat_CL
 | count
 '@
         $r = Invoke-AzOperationalInsightsQuery -WorkspaceId $script:Ws.CustomerId -Query $query -ErrorAction Stop
-        # 6 timer functions: heartbeat-5m + 5 poll-* cadence tiers (fast/exposure/config/inventory/maintenance)
+        # 6 timer functions: Connector-Heartbeat + 5 poll-* cadence tiers (fast/exposure/config/inventory/maintenance)
         [int]$r.Results[0].Count | Should -BeGreaterOrEqual 4 -Because 'Most timers should have fired in a 2-hour window (maintenance is weekly so may not fire in 2h)'
     }
 

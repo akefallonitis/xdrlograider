@@ -8,10 +8,11 @@ function Invoke-TierPollWithHeartbeat {
 
     .DESCRIPTION
         Replaces ~45 lines of duplicated boilerplate previously copy-pasted
-        across the per-cadence poll-*/run.ps1 files. Each timer body now becomes:
+        across the per-capability Defender-{Capability}-Refresh/run.ps1 files.
+        Each timer body now becomes:
 
             param($Timer)
-            Invoke-TierPollWithHeartbeat -Tier 'fast' -FunctionName 'poll-fast-10m'
+            Invoke-TierPollWithHeartbeat -Tier 'ActionCenter' -FunctionName 'Defender-ActionCenter-Refresh'
 
         The helper enforces the canonical execution shape end-to-end:
 
@@ -63,13 +64,16 @@ function Invoke-TierPollWithHeartbeat {
     .EXAMPLE
         # Canonical timer body (collapses a ~45-line boilerplate to 2 lines)
         param($Timer)
-        Invoke-TierPollWithHeartbeat -Tier 'fast' -FunctionName 'poll-fast-10m'
+        Invoke-TierPollWithHeartbeat -Tier 'ActionCenter' -FunctionName 'Defender-ActionCenter-Refresh'
     #>
     [CmdletBinding()]
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet('fast', 'exposure', 'config', 'inventory', 'maintenance')]
+        # Phase B.3 capability-themed Tier values per directive 12 in
+        # .claude/plans/immutable-splashing-waffle.md. v0.1.0 GA = first publish;
+        # no back-compat for legacy fast/exposure/config names per directive 43.
+        [ValidateSet('ActionCenter', 'XspmGraph', 'Configuration', 'Inventory', 'Maintenance')]
         [string] $Tier,
 
         [Parameter(Mandatory)]

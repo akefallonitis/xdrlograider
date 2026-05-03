@@ -235,9 +235,13 @@ Describe 'Logging.AuthChainEventsStructured' {
         $src | Should -Match "Send-XdrAppInsightsCustomEvent\s+-EventName\s+'AuthChain\.ProactiveRefresh'"
     }
 
-    It 'Invoke-MDETierPoll emits Stream.Polled' {
+    # iter-14.0 Phase 2 (v0.1.0 GA): Stream.Polled migrated from customEvent to
+    # customMetrics (xdr.stream.poll_duration_ms + xdr.stream.rows_emitted) per
+    # Section 2.3 native-routing rubric. AppInsights.MetricsDensity test gate
+    # enforces the new metric names.
+    It 'Invoke-MDETierPoll emits xdr.stream.poll_duration_ms metric (was Stream.Polled customEvent pre-Phase-2)' {
         $src = Get-Content -LiteralPath (Join-Path $script:ClientDir 'Public' 'Invoke-MDETierPoll.ps1') -Raw
-        $src | Should -Match "Send-XdrAppInsightsCustomEvent\s+-EventName\s+'Stream\.Polled'"
+        $src | Should -Match "Send-XdrAppInsightsCustomMetric\s+-MetricName\s+'xdr\.stream\.poll_duration_ms'"
     }
 
     It '_EndpointHelpers emits Ingest.BoundaryMarker on every boundary path' {
@@ -247,11 +251,15 @@ Describe 'Logging.AuthChainEventsStructured' {
             Should -BeGreaterOrEqual 4
     }
 
-    It 'Connect-DefenderPortal emits AuthChain.AADSTSError before rethrow' {
+    # iter-14.0 Phase 2 (v0.1.0 GA): AuthChain.AADSTSError migrated from customEvent
+    # to AppExceptions per Section 2.3 (errors operators alert on belong in
+    # exceptions). Identifier preserved via ErrorClass='AuthChain.AADSTSError' property.
+    It 'Connect-DefenderPortal emits Send-XdrAppInsightsException (ErrorClass=AuthChain.AADSTSError) before rethrow' {
         $src = Get-Content -LiteralPath (Join-Path $script:DefenderAuthDir 'Connect-DefenderPortal.ps1') -Raw
-        $src | Should -Match "Send-XdrAppInsightsCustomEvent\s+-EventName\s+'AuthChain\.AADSTSError'"
+        $src | Should -Match "Send-XdrAppInsightsException"
+        $src | Should -Match "ErrorClass\s*=\s*'AuthChain\.AADSTSError'"
         # Confirm the throw still happens after the AI emission.
-        $src | Should -Match 'AuthChain\.AADSTSError'
+        $src | Should -Match '\bthrow\b'
     }
 }
 
@@ -259,13 +267,17 @@ Describe 'Logging.AuthChainEventsStructured' {
 #  Logging.NoPlainAADSTSMessages
 # ============================================================================
 Describe 'Logging.NoPlainAADSTSMessages' {
-    It 'every AADSTS-bearing message in Connect-DefenderPortal pairs with AuthChain.AADSTSError emission' {
+    # iter-14.0 Phase 2 (v0.1.0 GA): AADSTS errors now flow to AppExceptions
+    # (was customEvent). The string `AuthChain.AADSTSError` is preserved as the
+    # ErrorClass property value so operator KQL still pivots by it.
+    It 'every AADSTS-bearing message in Connect-DefenderPortal pairs with AuthChain.AADSTSError exception emission' {
         $src = Get-Content -LiteralPath (Join-Path $script:DefenderAuthDir 'Connect-DefenderPortal.ps1') -Raw
-        # The function must reference both the AADSTS regex extraction AND the
-        # AADSTSError event emission with AADSTSCode property.
+        # The function must reference the AADSTS regex extraction AND the
+        # exception emission tagged ErrorClass=AuthChain.AADSTSError with AADSTSCode property.
         $src | Should -Match 'AADSTS\(\\d\+\)'
         $src | Should -Match "AuthChain\.AADSTSError"
         $src | Should -Match "AADSTSCode"
+        $src | Should -Match "Send-XdrAppInsightsException"
     }
 }
 

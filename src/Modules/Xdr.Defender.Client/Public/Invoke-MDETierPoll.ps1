@@ -57,8 +57,8 @@ function Invoke-MDETierPoll {
 
     .EXAMPLE
         # Typical timer body
-        $result = Invoke-MDETierPoll -Session $session -Tier 'fast' -Config $config
-        Write-Heartbeat -FunctionName $fnName -Tier 'fast' `
+        $result = Invoke-MDETierPoll -Session $session -Tier 'ActionCenter' -Config $config
+        Write-Heartbeat -FunctionName $fnName -Tier 'ActionCenter' `
             -StreamsAttempted $result.StreamsAttempted `
             -StreamsSucceeded $result.StreamsSucceeded `
             -RowsIngested     $result.RowsIngested
@@ -68,7 +68,10 @@ function Invoke-MDETierPoll {
     param(
         [Parameter(Mandatory)] [pscustomobject] $Session,
         [Parameter(Mandatory)]
-        [ValidateSet('fast', 'exposure', 'config', 'inventory', 'maintenance')]
+        # Phase B.3 capability-themed Tier values per directive 12 in
+        # .claude/plans/immutable-splashing-waffle.md. v0.1.0 GA = first publish;
+        # no back-compat for legacy fast/exposure/config names per directive 43.
+        [ValidateSet('ActionCenter', 'XspmGraph', 'Configuration', 'Inventory', 'Maintenance')]
         [string] $Tier,
         [Parameter(Mandatory)] $Config,
         [switch] $IncludeDeferred
@@ -191,8 +194,14 @@ function Invoke-MDETierPoll {
                         $isStuck = $newAttempt -gt 10
                         if ($isStuck) {
                             $totalDlqStuck++
-                            if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
-                                Send-XdrAppInsightsCustomEvent -EventName 'Ingest.DlqStuck' -OperationId $tierCorrelationId -Properties @{
+                            # iter-14.0 Phase 2 (v0.1.0 GA): DLQ retry exhaustion → native
+                            # `exceptions` table per Section 2.3. Stuck DLQ is a true
+                            # error operators alert on — belongs in AppExceptions.
+                            # Operators query: AppExceptions | where ProblemId contains 'DlqStuck' | summarize by Stream.
+                            if (Get-Command -Name Send-XdrAppInsightsException -ErrorAction SilentlyContinue) {
+                                $stuckExc = [System.Exception]::new("Ingest DLQ stuck for stream '$($dlqEntry.PartitionKey)' after $newAttempt attempts: $($_.Exception.Message)")
+                                Send-XdrAppInsightsException -Exception $stuckExc -OperationId $tierCorrelationId -Properties @{
+                                    ErrorClass     = 'Ingest.DlqStuck'
                                     Stream         = $dlqEntry.PartitionKey
                                     AttemptCount   = $newAttempt
                                     FirstFailedUtc = $dlqEntry.FirstFailedUtc
@@ -332,26 +341,20 @@ function Invoke-MDETierPoll {
                     }
             }
         }
-        # iter-14.0 Phase 14B: per-stream completion event (success OR failure).
-        # Pairs with the AuthChain.* events on the same OperationId so operators
-        # can read end-to-end timing in App Insights' transaction view.
+        # iter-14.0 Phase 2 (v0.1.0 GA): native AI-table routing per Section 2.3
+        # of the senior-architect plan. Per-stream completion is NUMERIC telemetry
+        # (RowsEmitted + LatencyMs) — belongs in customMetrics, not customEvents.
+        # Operators query: customMetrics | where name in ('xdr.stream.poll_duration_ms','xdr.stream.rows_emitted') | summarize by Stream/Tier.
+        # Old Stream.Polled customEvent retired (was overuse — numeric payload).
         $streamLatencyMs = [int]([datetime]::UtcNow - $streamStartedUtc).TotalMilliseconds
-        if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
-            Send-XdrAppInsightsCustomEvent -EventName 'Stream.Polled' -OperationId $tierCorrelationId -Properties @{
-                Stream       = $stream
-                Tier         = $Tier
-                RowsEmitted  = $streamRowsEmitted
-                LatencyMs    = $streamLatencyMs
-                Success      = [string]$streamSuccess
-            }
-        }
-        # v0.1.0-beta production-readiness polish: per-stream poll-duration
-        # metric. Surfaces in AI's customMetrics with Stream + Tier dimensions
-        # so operators can chart polling latency per stream + per tier.
         if (Get-Command -Name Send-XdrAppInsightsCustomMetric -ErrorAction SilentlyContinue) {
-            Send-XdrAppInsightsCustomMetric -MetricName 'xdr.poll.duration_ms' `
+            Send-XdrAppInsightsCustomMetric -MetricName 'xdr.stream.poll_duration_ms' `
                 -Value ([double]$streamLatencyMs) `
-                -Properties @{ Stream = $stream; Tier = $Tier } `
+                -Properties @{ Stream = $stream; Tier = $Tier; Success = [string]$streamSuccess } `
+                -OperationId $tierCorrelationId
+            Send-XdrAppInsightsCustomMetric -MetricName 'xdr.stream.rows_emitted' `
+                -Value ([double]$streamRowsEmitted) `
+                -Properties @{ Stream = $stream; Tier = $Tier; Success = [string]$streamSuccess } `
                 -OperationId $tierCorrelationId
         }
     }

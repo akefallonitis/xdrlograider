@@ -11,11 +11,137 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 > (v0.1.0-beta → v0.2.0 multi-portal expansion → v1.0 Microsoft Sentinel
 > Solution Gallery listing).
 
-## [Unreleased]
+## [Unreleased] — v0.1.0 GA (first publish)
 
 ### Status
 
-v0.1.0-beta first-publish refactor. Pure data-pipeline connector. Operators bring their own KQL.
+v0.1.0 GA. Production-ready. Pure data-pipeline Sentinel custom data connector for Defender XDR portal-only telemetry. Operators bring their own KQL. Methodology adopted: fixture-first development, drift gates at PR time, native AppInsights table routing, single-source-of-truth manifest, Microsoft Sentinel Solution Gallery alignment.
+
+### v0.1.0 GA Architecture (45 directives — see `.claude/plans/immutable-splashing-waffle.md`)
+
+**BREAKING CHANGES (first publish — no prior versions to migrate from per directive 43)**:
+
+- **Capability function rename** (Phase B per directive 12 — operator-meaningful naming):
+  - `poll-fast-10m` → `Defender-ActionCenter-Refresh`
+  - `poll-exposure-1h` → `Defender-XspmGraph-Refresh`
+  - `poll-config-6h` → `Defender-Configuration-Refresh`
+  - `poll-inventory-1d` → `Defender-Inventory-Refresh`
+  - `poll-maintenance-1w` → `Defender-Maintenance-Refresh`
+  - `heartbeat-5m` → `Connector-Heartbeat`
+- **Tier value rename in manifest**: `fast`→`ActionCenter`, `exposure`→`XspmGraph`, `config`→`Configuration`, `inventory`→`Inventory`, `maintenance`→`Maintenance`
+- 12 test files updated for new names (65 replacements via `.internal/tools/_phase-b-test-rename.ps1`)
+- `release.yml` updated to expect new function names
+
+**ADDED (Phase A multi-portal scaffolding per directives 11+17)**:
+
+- 6 multi-portal forward-compat scaffolding stub modules: `Xdr.Entra.Auth`, `Xdr.Entra.Client`, `Xdr.Purview.Auth`, `Xdr.Purview.Client`, `Xdr.Intune.Auth`, `Xdr.Intune.Client` — placeholder functions throw informative "v0.2.0 roadmap" errors; v0.2.0 fills in bodies
+- `Xdr.Connector.Orchestrator` extended `$script:PortalRoutes` with Entra/Purview/Intune entries (Status='scaffolding-stub') + new helpers `Get-XdrConnectorHealth` + `Test-XdrConnectorConfig`
+- `tests/unit/MultiPortalScaffolding.Tests.ps1` — 9 tests verifying stubs throw correctly + Orchestrator wiring
+
+**ADDED (Phase A internal/external separation per directive 27)**:
+
+- `.gitattributes` with `.internal/`, `.claude/`, secret-pattern `export-ignore` (defense-in-depth on top of `.gitignore`)
+- `tools/README.md` — operator-facing tools clarification + internal-tools cross-reference
+- `tests/integration/NoInternalLeakInArchive.Tests.ps1` — 16 tests verifying `git archive HEAD` excludes `.internal/`, `.claude/`, secrets, local working state
+
+**ADDED (Phase D LITE per directives 34+41+42 — nodoc 10-category authoritative taxonomy)**:
+
+- `NodocCategoryId` field (1-10) added to all 46 manifest entries mapping to nodoc.nathanmcnulty.com authoritative Defender XDR API categories. Ten in-scope categories per user screenshot (yellow-highlighted only): Endpoint Device Management (1), Endpoint Configuration (2), Vulnerability Management TVM (3), Identity Protection MDI (4), Configuration and Settings (5), Exposure Management XSPM (6), Threat Analytics (7), Action Center (8), Multi-Tenant Operations (9), Streaming API (10).
+- DROPPED categories per directive 42 (redundant with official Microsoft APIs): Alerts and Incidents, Advanced Hunting, Live Response, Data Lake and Analytics.
+- Per-category table consolidation (47 → ~9 `Defender_<Category>_CL` tables) DEFERRED to v0.1.1 (would require KQL migration; per-stream tables work today).
+
+**ADDED (Phase E per directive 15 — schema source discipline)**:
+
+- `SchemaSource = 'live-capture'` added to manifest Defaults; v0.1.1 adds per-stream overrides for `XDRInternals-cmdlet` / `nodoc-spec` / `inferred` classifications
+
+**ADDED (Phase F.1 — operator visibility per directives 13+38, blockers B6+B5+B7+B8+B4-new)**:
+
+- **`sentinel/workbooks/XdrLogRaider_ConnectorHealth.json`** + `.yaml` — single-pane operator dashboard with 6 panels: per-capability poll freshness, auth chain failures, DLQ depth+age, freshness SLI, partial-success rate, service account sign-in activity (uses `$(SERVICE_ACCOUNT_UPN)` deployment parameter)
+- **`sentinel/analytic-rules/XdrOps-ConnectorStaleStream.yaml`** (B7) — alerts when a stream stops ingesting beyond 2× expected cadence
+- **`sentinel/analytic-rules/XdrOps-AuthChainFailure.yaml`** (B8) — alerts on >3 AuthChain.* exceptions in 1h window
+- **`sentinel/analytic-rules/XdrOps-DlqDepthAlert.yaml`** (B5) — alerts when DLQ depth >100 entries OR oldest entry >2h
+- **`sentinel/analytic-rules/XdrOps-ServiceAccountAnomalousSignIn.yaml`** (B4-new per directive 38 — service account is the security boundary) — uses `$(SERVICE_ACCOUNT_UPN)` ARM deployment parameter; detects sign-in from new country/IP, outside poll cadence, credential stuffing, MFA bypass attempts. Operator MUST enable post-deploy.
+- All 4 new rules ship `enabled: false` per Microsoft Sentinel Solution Gallery best practice; operator enables after threshold tuning
+
+**ADDED (Phase F.2 — Solution Gallery readiness, blockers B1+B2)**:
+
+- **`deploy/solution/SolutionMetadata.json`** (B1) — Solution Gallery metadata with publisherId/offerId/categories/support
+- `deploy/solution/manifest.json` updated to reference new ConnectorHealth workbook + 4 new ops analytic rules (now 8 workbooks + 18 rules total)
+
+**ADDED (Phase F.3 — supply chain hardening, blocker B9)**:
+
+- **Sigstore-cosign keyless signing** in `.github/workflows/release.yml` — uses GitHub Actions OIDC token to obtain Fulcio cert; signatures published to Sigstore Rekor transparency log
+- `id-token: write` permission added to release workflow
+- Signed artefacts: `function-app.zip`, `mainTemplate.json`, `sentinelContent.json`, `createUiDefinition.json`, `xdrlograider-solution-*.zip`, `xdrlograider-sbom.spdx.json` — each gets `.sig` + `.bundle` companion files
+- SBOM SPDX (anchore/sbom-action@v0.24.0 SHA-pinned) — graceful fallback stub if generation fails
+- Operator verification: `cosign verify-blob --certificate-identity-regexp '...' --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' --signature <artefact>.sig --bundle <artefact>.bundle <artefact>`
+
+**ADDED (Phase F.4 — operational hardening, blocker B5)**:
+
+- **DLQ TTL fields** — `Push-XdrIngestDlq` now stamps `ExpiresUtc` + `TtlDays` fields per directive 38 (default 7 days; override via `XDR_INGEST_DLQ_TTL_DAYS` env var). The fields are present on every DLQ row written from v0.1.0 GA forward, providing the data layer for v0.1.1 cleanup logic.
+- **DEFERRED to v0.1.1**: `Pop-XdrIngestDlq` skip + delete logic for expired entries — current implementation reads ALL DLQ rows; TTL consumer (skip+delete with `Ingest.DlqExpired` exception emission) requires a small refactor of the OData filter + per-row evaluation in the Pop loop. Operator impact in v0.1.0: DLQ depth grows unbounded ONLY in the pathological case of permanent portal API breakage; sustained backpressure auto-drains as transient failures resolve. Recommended manual mitigation: operator deletes expired rows via Azure Storage Explorer if depth exceeds operational threshold.
+- DEFERRED to v0.1.1: per-row partial-success metric (R3), freshness SLI metric (R4), 4th createUiDefinition wizard step (R2)
+
+**ADDED (Phase F.5 — post-deploy automation, recommended R1)**:
+
+- **`.github/workflows/post-deploy-verify.yml`** — manual-dispatch workflow that runs P1-P14 verification probes against verification subscription using INTERNAL SP credentials (per directive 35: NO OIDC AAD app; internal tooling uses internal auth methods only)
+
+**DEFERRED to v0.1.1 (with explicit rationale per directives 26+45 — don't overengineer)**:
+
+- **Phase C — Durable Functions consolidation**: current `Invoke-TierPollWithHeartbeat` pattern works (per-tier heartbeat observability sufficient for v0.1.0); Durable adds replay-safety + scale-out session sharing complexity without proportional v0.1.0 operator value. Defer until measured per-stream backpressure need.
+- **Phase D FULL — table consolidation**: 47 per-stream tables → 9 per-category `Defender_<Category>_CL` tables. NodocCategoryId metadata shipped (Phase D LITE) so operators can `union` in KQL today; physical table consolidation deferred to v0.1.1 with KQL migration plan.
+- **Module proper extraction** to `Xdr.Common.{Manifest,Telemetry,Ingest,Health}`: current 5+6 module structure deemed sufficient per audit; folded into Phase D when manifest schema rewrite makes extraction atomic.
+
+**DROPPED from scope (per directives 35+36+37+39 — never planning)**:
+
+- ❌ OIDC AAD app for online preflight (directive 35 — internal auth only)
+- ❌ FC1 / Container Apps / EP1 hosting plan matrix (directive 36 — Y1 Linux Consumption only; simpler)
+- ❌ KV diagnostic logging applied by us (directive 37 — user enables manually if wanted)
+- ❌ KV cred-expiry warning analytic rule (directive 39 — KV won't expire; SA password admin-managed; replaced by ServiceAccountAnomalousSignIn)
+- ❌ HTTP admin functions (operator uses Az CLI / portal blade)
+- ❌ MIGRATION-FROM-PRE-V010.md (directive 43 — first publish; nothing to migrate from)
+
+**TEST PYRAMID at v0.1.0 GA**: 1,519 offline tests pass / 0 fail / 48 skipped (intentional Phase D/F TODO marker on SentinelContent.ManifestAlignment + `_e2e/online` categories that need live tenant).
+
+---
+
+### Senior-architect methodology adopted (iter-14.0 v0.1.0 GA)
+
+Per `.claude/plans/immutable-splashing-waffle.md` — the production-readiness ship plan replaces trial-and-error iteration with a 9-step gated workflow (capture → design → derive → content → unit test → online preflight → what-if → deploy → post-deploy verify). Test pyramid + CI/CD pipeline + per-stream operational matrix all consolidated under `docs/STREAMS-MATRIX.md` + `docs/TELEMETRY.md`.
+
+### Added — v0.1.0 GA
+
+- **`SingleObjectAsRow` manifest option** — for endpoints whose response is a single object that should emit ONE per-entity row instead of being flattened to N per-property rows. Used by `MDE_TenantContext_CL`, `MDE_ConnectedApps_CL`, `MDE_UserPreferences_CL`, `MDE_TenantWorkloadStatus_CL`. Wired through `Expand-MDEResponse` + `Invoke-MDEEndpoint` + `Capture-EndpointSchemas.ps1`.
+- **`Manifest.ProjectionResolution.Tests.ps1`** — drift gate that catches projection mismatches at PR time. Two assertions per stream: hint syntax validation (`$tox:` prefix grammar) + dry-run extraction against fixture (asserts at least one typed col extracts non-null where fixture has data). Caught 4 real ProjectionMap bugs in v0.1.0 GA shakedown (MDE_AlertTuning_CL, MDE_DataExportSettings_CL, MDE_TenantWorkloadStatus_CL, MDE_UnifiedRbacRoles_CL).
+- **`tests/online/CapturePreflight.Tests.ps1`** + **`.github/workflows/online-preflight.yml`** — online preflight category (run-tag `online-preflight`) that captures fresh fixtures + diffs against committed. Catches portal-API drift before deploy. CI workflow stubbed with OIDC federation; operator one-time AAD config required (documented in workflow file).
+- **`tests/arm/SentinelContent.ManifestAlignment.Tests.ps1`** — drift gate that asserts every typed-col reference in Sentinel content (parsers/rules/workbooks/hunting) matches manifest ProjectionMap.
+- **`docs/TELEMETRY.md`** — operator-facing classification rubric for which native Application Insights table to query for which signal (customEvents / customMetrics / exceptions / dependencies / traces). KQL examples per signal type.
+- **`docs/STREAMS-MATRIX.md`** — per-stream consolidated operational SSoT: cadence, availability, response shape, manifest contract, DCR cohesion, live-verified state. The reference table for every operator question about a stream.
+- **Property-bag projection-context wrap** — `ConvertTo-MDEIngestRow` synthesizes `EntityId` (and `value` for Shape 4 scalars) into the projection context, enabling the universal `FeatureName='$tostring:EntityId'` + `IsEnabled='$tobool:value'` convention for property-bag streams.
+
+### Changed — v0.1.0 GA
+
+- **Property-bag manifest convention rewrite (12 streams)**. Streams whose response is `{Feature1: bool, Feature2: bool, ...}` (Shape 3 flatten) now use the universal `FeatureName + IsEnabled/Value` convention. Per-property declarations (e.g. `EnableMcasIntegration='$tobool:EnableMcasIntegration'`) cannot resolve under Shape 3 because the per-row entity is the property VALUE — a scalar bool — not an object. Affected: `MDE_AdvancedFeatures_CL`, `MDE_DeviceControlPolicy_CL`, `MDE_PUAConfig_CL`, `MDE_SmartScreenConfig_CL`, `MDE_LiveResponseConfig_CL`, `MDE_AuthenticatedTelemetry_CL`, `MDE_PurviewSharing_CL`, `MDE_IntuneConnection_CL`, `MDE_UserPreferences_CL`, `MDE_PreviewFeatures_CL`. Single-object streams `MDE_TenantContext_CL`, `MDE_ConnectedApps_CL`, `MDE_TenantWorkloadStatus_CL` use new `SingleObjectAsRow=$true`. `MDE_WebContentFiltering_CL` rewritten as Shape 2 unwrap on `TopParentCategories`. Legacy per-property + redundant alias columns preserved as back-compat (declared in DCR + ProjectionMap; project to non-existent fields → null going forward; ARM additive-only schema mandate).
+- **Native AppInsights table routing per Section 2.3 of the senior-architect plan.** Four migrations:
+  - `Stream.Polled` customEvent → `customMetrics` (`xdr.stream.poll_duration_ms` + `xdr.stream.rows_emitted` with Stream/Tier/Success dimensions). Numeric payload belongs in metrics for chart/alert efficiency.
+  - `AuthChain.AADSTSError` customEvent → `exceptions` via `Send-XdrAppInsightsException` with `ErrorClass='AuthChain.AADSTSError'`. Errors operators alert on belong in exceptions.
+  - `Ingest.DlqStuck` customEvent → `exceptions` (`ErrorClass='Ingest.DlqStuck'`). Retry exhaustion is a true error.
+  - `Ingest.DlqDropped` customEvent → `exceptions` (`ErrorClass='Ingest.DlqDropped'`). Row drop is a true error.
+- **Capture-EndpointSchemas.ps1 mirrors Function App pipeline.** Pre-iter-14.0 the capture script lacked `-ProjectionMap` + `UnwrapProperty` + `SingleObjectAsRow` arguments → fixtures didn't reflect production. Fixed: capture now passes all three so committed fixtures match what the Function App actually produces.
+- **`FA.ParsingPipeline.Tests.ps1`** — hard-fails on missing fixture for live streams (was silent skip). Methodology gate: every live stream MUST have a captured fixture; missing fixture means someone added a stream without running `tools/Capture-EndpointSchemas.ps1`.
+- **`MDE_AlertTuning_CL`** — added `UnwrapProperty='items'`. Fixture is `{items: []}`; without unwrap the empty inner array silently flattened to a wrapper-key row.
+- **`MDE_DataExportSettings_CL`** — added `UnwrapProperty='value'`. Fixture is `{@odata.context, value: [...]}`.
+- **`MDE_UnifiedRbacRoles_CL`** — added `UnwrapProperty='value'`. Fixture is `{value: [], isPartial: false}`.
+- **5 dead one-shot internal diagnostic scripts deleted** (`.internal/tools/_capture-response-shapes.ps1`, `_kudu-zipdeploy.ps1`, `_build-and-push-fa.ps1`, `_fix-e2e-script.ps1`, `_phase-h-l5.ps1`) — iter-14.0 development hacks with no ongoing operator value. 28 → 21 internal scripts retained for ongoing diagnostics.
+
+### Fixed — v0.1.0 GA (continued from earlier iter-14.0 work)
+
+- **Critical -ProjectionMap forwarding bug** (`690b625`) — `Invoke-MDEEndpoint` never passed `-ProjectionMap` to `ConvertTo-MDEIngestRow` since v0.1.0-beta first-publish. Every typed column in every operator-facing query came back null across all 47 streams. Bug stayed silent because `DCR.SchemaConsistency.Tests.ps1` exercised the projector directly with `-ProjectionMap`, validating the projector but not its caller. Added `Invoke-MDEEndpoint.ProjectionForwarding.Tests.ps1` regression gate (would have caught this in v0.1.0-beta).
+- **Test infra: `DCR.SchemaConsistency.Tests.ps1` BeforeAll missing module imports** — `Xdr.Defender.Client` `RequiredModules` chain wasn't fully imported (missing `Xdr.Common.Auth` + `Xdr.Defender.Auth`). Test silently failed setup for 35 per-stream cases. Fixed.
+- **Capture script stale shim function names** — `tools/Capture-EndpointSchemas.ps1` referenced removed shim functions (`Connect-MDEPortal`, `Invoke-MDEPortalRequest`, `Connect-MDEPortalWithCookies`) from the deleted `XdrLogRaider.Ingest` shim module. Updated to canonical names (`Connect-DefenderPortal`, `Invoke-DefenderPortalRequest`, `Connect-DefenderPortalWithCookies`).
+- **`MDE_LiveResponseConfig_CL` workbook query** (`MDE_ComplianceDashboard.json` + compiled `sentinelContent.json`) — referenced Phase-1-renamed cols (`AutomatedIrLiveResponse`, `AutomatedIrUnsignedScripts`, `LiveResponseForServers`). Updated to new `FeatureName + IsEnabled` convention.
+
+### Earlier in [Unreleased] — v0.1.0-beta first-publish refactor (preserved)
 
 ### Changed — pure data-pipeline scope
 

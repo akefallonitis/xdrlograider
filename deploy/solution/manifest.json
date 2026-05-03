@@ -15,7 +15,8 @@
     "MDE Exposure Map",
     "MDE Governance Scorecard",
     "MDE Identity Posture",
-    "MDE Response Audit"
+    "MDE Response Audit",
+    "XdrLogRaider Connector Health"
   ],
   "Workbooks": [
     "Workbooks/MDE_ActionCenter.json",
@@ -24,7 +25,8 @@
     "Workbooks/MDE_ExposureMap.json",
     "Workbooks/MDE_GovernanceScorecard.json",
     "Workbooks/MDE_IdentityPosture.json",
-    "Workbooks/MDE_ResponseAudit.json"
+    "Workbooks/MDE_ResponseAudit.json",
+    "Workbooks/XdrLogRaider_ConnectorHealth.json"
   ],
   "AnalyticalRules": [
     "Analytic Rules/AlertTuningBroadened.yaml",
@@ -40,7 +42,11 @@
     "Analytic Rules/TamperProtectionOff.yaml",
     "Analytic Rules/TenantAllowListNewEntry.yaml",
     "Analytic Rules/XspmNewAttackPath.yaml",
-    "Analytic Rules/XspmPathToCriticalAsset.yaml"
+    "Analytic Rules/XspmPathToCriticalAsset.yaml",
+    "Analytic Rules/XdrOps-ConnectorStaleStream.yaml",
+    "Analytic Rules/XdrOps-AuthChainFailure.yaml",
+    "Analytic Rules/XdrOps-DlqDepthAlert.yaml",
+    "Analytic Rules/XdrOps-ServiceAccountAnomalousSignIn.yaml"
   ],
   "HuntingQueries": [
     "Hunting Queries/AfterHoursDrift.yaml",

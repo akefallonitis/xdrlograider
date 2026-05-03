@@ -1,6 +1,8 @@
-# heartbeat-5m — regular heartbeat, independent of any auth state.
+# Connector-Heartbeat — regular heartbeat, independent of any auth state.
 # Writes a row to MDE_Heartbeat_CL every 5 minutes confirming the Function App
-# itself is alive. Used by the Sentinel data-connector UI to show connection status.
+# itself is alive. Used by the Sentinel data-connector UI to show connection
+# status. Per directive 12: capability-named (Connector + Heartbeat) not
+# cron-named (heartbeat-5m).
 
 param($Timer)
 
@@ -33,13 +35,13 @@ try {
     Write-Heartbeat `
         -DceEndpoint $config.DceEndpoint `
         -DcrImmutableId $heartbeatDcrId `
-        -FunctionName 'heartbeat-5m' `
+        -FunctionName 'Connector-Heartbeat' `
         -Tier 'overhead' `
         -StreamsAttempted 0 `
         -StreamsSucceeded 0 `
         -RowsIngested 0 `
         -LatencyMs ([int]$sw.ElapsedMilliseconds) | Out-Null
-    Write-Information "heartbeat-5m complete"
+    Write-Information "Connector-Heartbeat complete"
 } catch {
-    Write-Error "heartbeat-5m failed: $_"
+    Write-Error "Connector-Heartbeat failed: $_"
 }

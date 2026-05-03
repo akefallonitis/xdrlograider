@@ -43,18 +43,27 @@ BeforeAll {
     $script:PortalRequestPath   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Public' 'Invoke-DefenderPortalRequest.ps1'
 }
 
-Describe 'Metrics.TierPoll.PollDuration — xdr.poll.duration_ms emitted per stream with Tier dimension' {
+Describe 'Metrics.TierPoll.PollDuration — xdr.stream.poll_duration_ms emitted per stream with Tier dimension' {
 
-    It 'Invoke-MDETierPoll calls Send-XdrAppInsightsCustomMetric with -MetricName xdr.poll.duration_ms' {
+    # iter-14.0 Phase 2 (v0.1.0 GA): renamed from xdr.poll.duration_ms to
+    # xdr.stream.poll_duration_ms to align with Section 2.3 native-routing rubric
+    # (consistent xdr.stream.* prefix with xdr.stream.rows_emitted). Old metric
+    # name retired — operators with existing KQL must update to the new name.
+    It 'Invoke-MDETierPoll calls Send-XdrAppInsightsCustomMetric with -MetricName xdr.stream.poll_duration_ms' {
         $src = Get-Content -LiteralPath $script:TierPollPath -Raw
-        $src | Should -Match "Send-XdrAppInsightsCustomMetric\s+-MetricName\s+'xdr\.poll\.duration_ms'"
+        $src | Should -Match "Send-XdrAppInsightsCustomMetric\s+-MetricName\s+'xdr\.stream\.poll_duration_ms'"
     }
 
-    It 'the call site stamps both Stream and Tier dimensions' {
+    It 'Invoke-MDETierPoll also emits xdr.stream.rows_emitted (Phase 2 addition replacing Stream.Polled customEvent)' {
         $src = Get-Content -LiteralPath $script:TierPollPath -Raw
-        # Properties hashtable must include both Stream and Tier so AI dashboards
-        # can pivot per-tier vs per-stream.
-        ($src -match 'xdr\.poll\.duration_ms[\s\S]{0,400}Stream\s*=\s*\$stream[\s\S]{0,200}Tier\s*=\s*\$Tier') | Should -BeTrue
+        $src | Should -Match "Send-XdrAppInsightsCustomMetric\s+-MetricName\s+'xdr\.stream\.rows_emitted'"
+    }
+
+    It 'the call site stamps Stream + Tier + Success dimensions' {
+        $src = Get-Content -LiteralPath $script:TierPollPath -Raw
+        # Properties hashtable must include Stream + Tier (for pivot) + Success
+        # (post-Phase-2: Success replaced the old Stream.Polled customEvent's success boolean).
+        ($src -match 'xdr\.stream\.poll_duration_ms[\s\S]{0,400}Stream\s*=\s*\$stream[\s\S]{0,200}Tier\s*=\s*\$Tier[\s\S]{0,200}Success\s*=') | Should -BeTrue
     }
 }
 

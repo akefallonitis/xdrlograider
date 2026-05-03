@@ -141,8 +141,8 @@ Describe 'Write-Heartbeat — schema' {
             Write-Heartbeat `
                 -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
                 -DcrImmutableId 'dcr-x' `
-                -FunctionName 'poll-fast-10m' `
-                -Tier 'fast' `
+                -FunctionName 'Defender-ActionCenter-Refresh' `
+                -Tier 'ActionCenter' `
                 -StreamsAttempted 19 `
                 -StreamsSucceeded 13 `
                 -RowsIngested 412 `
@@ -150,8 +150,8 @@ Describe 'Write-Heartbeat — schema' {
 
             $script:sent                   | Should -Not -BeNullOrEmpty
             $script:sent.TimeGenerated     | Should -Not -BeNullOrEmpty
-            $script:sent.FunctionName      | Should -Be 'poll-fast-10m'
-            $script:sent.Tier              | Should -Be 'fast'
+            $script:sent.FunctionName      | Should -Be 'Defender-ActionCenter-Refresh'
+            $script:sent.Tier              | Should -Be 'ActionCenter'
             $script:sent.StreamsAttempted  | Should -Be 19
             $script:sent.StreamsSucceeded  | Should -Be 13
             $script:sent.RowsIngested      | Should -Be 412
@@ -183,7 +183,7 @@ Describe 'Write-Heartbeat — schema' {
                 -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
                 -DcrImmutableId 'dcr-x' `
                 -FunctionName 'poll-test' `
-                -Tier 'fast' `
+                -Tier 'ActionCenter' `
                 -StreamsAttempted 1 `
                 -StreamsSucceeded 0 `
                 -RowsIngested 0 `

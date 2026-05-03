@@ -211,6 +211,18 @@ function Expand-MDEResponse {
         boundary-marker row's Entity for forensic + included in EntityId so
         operators can filter heartbeat boundary rows by stream.
 
+    .PARAMETER SingleObjectAsRow
+        Optional. When $true and the response is a single object (not array,
+        not wrapper, not scalar), force it into a 1-element array so Shape 1
+        emits ONE per-entity row instead of Shape 3 flattening it to N
+        per-property rows. Use for streams whose endpoint returns a single
+        configuration object that should be one operator-friendly row (e.g.
+        MDE_TenantContext_CL, MDE_ConnectedApps_CL when single app, MDE_UserPreferences_CL).
+        Without this, single-object responses fall into Shape 3 (property-bag
+        flatten) and operator queries against typed cols return null because
+        the cols are designed for the whole-object shape, not per-property
+        rows. iter-14.0 Phase 1 addition.
+
     .OUTPUTS
         [hashtable[]] — array of @{ Id; Entity } pairs.
     #>
@@ -227,7 +239,8 @@ function Expand-MDEResponse {
             'AlertId', 'IncidentId', 'MachineId', 'DeviceId'
         ),
         [string] $UnwrapProperty,
-        [string] $Stream
+        [string] $Stream,
+        [switch] $SingleObjectAsRow
     )
 
     # v0.1.0-beta post-deploy hardening: DEBUG-CAPTURE mode.
@@ -312,6 +325,17 @@ function Expand-MDEResponse {
                 $Response = $inner
             }
         }
+    }
+
+    # --- iter-14.0 Phase 1: SingleObjectAsRow override ----------------------
+    # When the manifest declares SingleObjectAsRow=$true and the response is
+    # a single object (not array, not wrapper, not scalar), wrap into a
+    # 1-element array so Shape 1 emits ONE per-entity row instead of Shape 3
+    # flattening it to N per-property rows. Used for endpoints whose response
+    # is a single configuration object (TenantContext, ConnectedApps single-
+    # app, UserPreferences) where operator typed-col queries expect one row.
+    if ($SingleObjectAsRow -and ($Response -is [pscustomobject] -or $Response -is [hashtable]) -and -not ($Response -is [array])) {
+        $Response = [Object[]]@($Response)
     }
 
     $pairs = @()

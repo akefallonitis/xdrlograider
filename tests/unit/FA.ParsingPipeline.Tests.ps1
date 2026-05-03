@@ -99,15 +99,16 @@ Describe 'Pipeline: raw -> Expand-MDEResponse -> ConvertTo-MDEIngestRow' -ForEac
         $script:IngestPath = Join-Path $script:FixturesDir "$($_.Stream)-ingest.json"
     }
 
-    It 'raw fixture exists for <Stream> (<Tier>)' {
-        # v0.1.0-beta.1: a newly-activated live stream may not have a fixture yet
-        # (Phase 2c captures are operator-driven). Skip with a clear message so
-        # downstream assertions cascade-skip rather than fail noisily.
-        if (-not (Test-Path $script:RawPath)) {
-            Set-ItResult -Skipped -Because "No fixture for $($_.Stream) — run tools/Capture-EndpointSchemas.ps1 to capture."
-            return
-        }
-        $true | Should -BeTrue
+    It 'raw fixture exists for <Stream> (<Tier>) — HARD FAIL for live streams' {
+        # iter-14.0 Phase 4 (v0.1.0 GA): hard-fail per Section 2.2 + Section 5
+        # of the senior-architect plan. Live streams MUST have committed
+        # fixtures; missing fixtures are a methodology violation (someone
+        # added a stream without running tools/Capture-EndpointSchemas.ps1).
+        # Tenant-gated streams are exempted — Phase-4 design correctly classifies
+        # them via Availability='tenant-gated' and excludes from `live` filter
+        # at BeforeDiscovery (line 33). If a stream reaches this gate without
+        # a fixture, it's misclassified.
+        Test-Path $script:RawPath | Should -BeTrue -Because "live stream '$($_.Stream)' MUST have a captured fixture at $script:RawPath. Run: pwsh tools/Capture-EndpointSchemas.ps1 -EnvFile tests/.env.local. Tenant-gated streams should be marked Availability='tenant-gated' in the manifest (excluded from this gate)."
     }
 
     It 'raw fixture parses as valid JSON for <Stream>' {

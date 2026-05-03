@@ -1,0 +1,50 @@
+id: 6d1b7a3e-9f2c-4e8d-a7b1-3c4d5e6f7a8b
+name: "[XdrOps] Connector DLQ depth or age exceeds operator threshold"
+description: |
+  XdrLogRaider's ingest dead-letter queue (Storage Table xdrIngestDlq) has
+  rows that have been waiting too long OR queue depth exceeded operational
+  threshold, indicating sustained DCE 5xx/429 backpressure.
+
+  Per directive 38 + B5 in .claude/plans/immutable-splashing-waffle.md.
+  Operator-enabled (ships disabled per Sentinel Solution best practice).
+
+  Thresholds (operator-tuneable in query):
+    - Depth >100 entries OR
+    - Oldest entry >2h (> 1 poll cycle for fast tier)
+
+  Triage in docs/RUNBOOK.md "DLQ backlog" section.
+  Auto-drain: Pop-XdrIngestDlq runs at start of every Defender-*-Refresh poll
+  to retry stuck batches (with TTL eviction per Phase F.4).
+severity: Medium
+enabled: false
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - AppMetrics
+queryFrequency: 1h
+queryPeriod: 4h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  // DLQ depth metric is emitted by Pop-XdrIngestDlq on each poll cycle.
+  // Per-stream cardinality bounded by manifest stream count (47).
+  AppMetrics
+  | where TimeGenerated > ago(4h)
+  | where Name in ("xdr.ingest.dlq_depth", "xdr.ingest.dlq_oldest_age_seconds")
+  | summarize MaxValue = max(Value) by Name, bin(TimeGenerated, 1h)
+  | extend AlertReason = case(
+      Name == "xdr.ingest.dlq_depth"               and MaxValue > 100,    "DLQ depth >100 entries",
+      Name == "xdr.ingest.dlq_oldest_age_seconds"  and MaxValue > 7200,   "DLQ oldest entry >2h",
+      ""
+  )
+  | where AlertReason != ""
+  | project TimeGenerated, Name, MaxValue, AlertReason
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: AlertPerResult
+suppressionEnabled: true
+suppressionDuration: PT2H

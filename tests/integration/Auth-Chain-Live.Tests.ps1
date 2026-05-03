@@ -248,7 +248,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
             }
 
             # Run 1: no checkpoint yet → endpoint called without -FromUtc via default 1h.
-            $r1 = Invoke-MDETierPoll -Session $Session -Tier 'fast' -Config $config
+            $r1 = Invoke-MDETierPoll -Session $Session -Tier 'ActionCenter' -Config $config
             $r1.StreamsAttempted | Should -Be 2
 
             # Both filterable streams should now have a checkpoint.
@@ -268,7 +268,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
                 ,@()
             }
 
-            $r2 = Invoke-MDETierPoll -Session $Session -Tier 'fast' -Config $config
+            $r2 = Invoke-MDETierPoll -Session $Session -Tier 'ActionCenter' -Config $config
             $r2.StreamsAttempted | Should -Be 2
         }
     }

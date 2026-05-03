@@ -118,10 +118,13 @@ Describe 'Module export contract — psd1 FunctionsToExport must match psm1 Expo
         })
     }
 
-    It 'enumerates expected module manifests (5 custom modules in v0.1.0-beta first publish)' {
-        # Five-module architecture: Xdr.Common.Auth, Xdr.Sentinel.Ingest,
-        # Xdr.Defender.Auth, Xdr.Defender.Client, Xdr.Connector.Orchestrator.
-        @($script:ModuleManifests).Count | Should -Be 5 -Because "v0.1.0-beta first publish has exactly 5 modules and no shims"
+    It 'enumerates expected module manifests (11 modules in v0.1.0 GA - 5 live + 6 multi-portal scaffolding stubs)' {
+        # v0.1.0 GA architecture per Phase A.3 in .claude/plans/immutable-splashing-waffle.md:
+        #   5 live: Xdr.Common.Auth, Xdr.Sentinel.Ingest, Xdr.Defender.Auth,
+        #           Xdr.Defender.Client, Xdr.Connector.Orchestrator
+        #   6 stubs: Xdr.{Entra,Purview,Intune}.{Auth,Client} - throw "NOT IMPLEMENTED"
+        #            errors when called; v0.2.0 fills in bodies
+        @($script:ModuleManifests).Count | Should -Be 11 -Because "v0.1.0 GA = 5 live + 6 scaffolding stubs"
     }
 
     It 'every psd1 FunctionsToExport entry is also in the corresponding psm1 Export-ModuleMember' {

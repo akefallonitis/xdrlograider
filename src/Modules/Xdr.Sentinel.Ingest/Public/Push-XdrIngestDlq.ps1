@@ -123,7 +123,18 @@ function Push-XdrIngestDlq {
 
         [string] $Reason = 'unknown-terminal',
 
-        [string] $OperationId
+        [string] $OperationId,
+
+        # Phase F.4 (B5) — DLQ TTL per directive 38 + .claude/plans/immutable-splashing-waffle.md.
+        # Default 7 days. Pop-XdrIngestDlq SKIPS + DELETES expired entries
+        # so the DLQ doesn't grow unbounded for genuinely-unrecoverable batches
+        # (e.g., portal API permanent shape change). Operator can override
+        # via XDR_INGEST_DLQ_TTL_DAYS env var.
+        [int] $TtlDays = $(
+            if ([Environment]::GetEnvironmentVariable('XDR_INGEST_DLQ_TTL_DAYS')) {
+                [int]::Parse([Environment]::GetEnvironmentVariable('XDR_INGEST_DLQ_TTL_DAYS'))
+            } else { 7 }
+        )
     )
 
     if (-not $Rows -or $Rows.Count -eq 0) {
@@ -163,8 +174,14 @@ function Push-XdrIngestDlq {
     if ($rowsJsonB64.Length -gt $maxRowsJsonChars) {
         $msg = "Push-XdrIngestDlq: gzipped+base64 batch is $($rowsJsonB64.Length) chars (cap $maxRowsJsonChars). Stream='$StreamName' Rows=$($Rows.Count) UncompressedBytes=$batchSizeBytes — DROPPING. Operator must reduce row size or split upstream."
         Write-Warning $msg
-        if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
-            Send-XdrAppInsightsCustomEvent -EventName 'Ingest.DlqDropped' -OperationId $OperationId -Properties @{
+        # iter-14.0 Phase 2 (v0.1.0 GA): row-drop threshold exceeded → native
+        # `exceptions` table per Section 2.3. DLQ drops are true errors operators
+        # must alert on — belongs in AppExceptions, not customEvents.
+        # Operators query: AppExceptions | where ProblemId contains 'DlqDropped' | summarize by Stream.
+        if (Get-Command -Name Send-XdrAppInsightsException -ErrorAction SilentlyContinue) {
+            $dropExc = [System.Exception]::new($msg)
+            Send-XdrAppInsightsException -Exception $dropExc -OperationId $OperationId -Properties @{
+                ErrorClass         = 'Ingest.DlqDropped'
                 Stream             = $StreamName
                 RowCount           = $Rows.Count
                 UncompressedBytes  = $batchSizeBytes
@@ -185,6 +202,12 @@ function Push-XdrIngestDlq {
     # so the table is naturally ordered oldest-first when scanned ascending.
     $rowKey = ('{0}_{1}' -f ([datetime]::UtcNow.ToString('o')), [Guid]::NewGuid().ToString('N'))
 
+    # Phase F.4 (B5) — TTL: compute expiry from FirstFailedUtc + TtlDays.
+    # Pop-XdrIngestDlq treats entries past ExpiresUtc as unrecoverable and
+    # DELETES them (with Ingest.DlqExpired exception emission) so the queue
+    # bounded — DCE permanent shape change won't accumulate forever.
+    $expiresUtc = $FirstFailedUtc.AddDays($TtlDays)
+
     $entity = @{
         PartitionKey       = $StreamName
         RowKey             = $rowKey
@@ -193,6 +216,8 @@ function Push-XdrIngestDlq {
         LastHttpStatus     = if ($null -eq $LastHttpStatus) { -1 } else { [int]$LastHttpStatus }
         AttemptCount       = [int]$AttemptCount
         FirstFailedUtc     = $FirstFailedUtc.ToString('o')
+        ExpiresUtc         = $expiresUtc.ToString('o')   # Phase F.4 (B5) — DLQ TTL
+        TtlDays            = [int]$TtlDays                # Phase F.4 (B5) — visible to operators in storage table
         Reason             = $Reason
         BatchSizeBytes     = [int]$batchSizeBytes
         RowCount           = [int]$Rows.Count

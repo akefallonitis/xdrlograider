@@ -175,15 +175,21 @@ Describe 'Dlq.Push.RoundTrip — Push-XdrIngestDlq writes the expected entity sh
     }
 }
 
-Describe 'Dlq.Push.OversizeDropped — >100 KB compressed batches are dropped + emit Ingest.DlqDropped' {
+Describe 'Dlq.Push.OversizeDropped — >100 KB compressed batches are dropped + emit DlqDropped exception' {
 
-    It 'drops oversize batch + emits Ingest.DlqDropped, returns Enqueued=$false' {
+    # iter-14.0 Phase 2 (v0.1.0 GA): Ingest.DlqDropped migrated from customEvent
+    # to AppExceptions per Section 2.3 native-routing rubric (errors operators
+    # alert on belong in exceptions). Properties identify the error class via
+    # `ErrorClass='Ingest.DlqDropped'` so KQL queries pivot the same.
+    It 'drops oversize batch + emits Send-XdrAppInsightsException with ErrorClass=Ingest.DlqDropped, returns Enqueued=$false' {
         InModuleScope Xdr.Sentinel.Ingest {
             $script:upserted   = $false
-            $script:droppedEv  = $null
+            $script:droppedExc = $null
             Mock Invoke-XdrStorageTableEntity { $script:upserted = $true }
-            Mock Send-XdrAppInsightsCustomEvent {
-                if ($EventName -eq 'Ingest.DlqDropped') { $script:droppedEv = $Properties }
+            Mock Send-XdrAppInsightsException {
+                if ($Properties -and $Properties.ErrorClass -eq 'Ingest.DlqDropped') {
+                    $script:droppedExc = $Properties
+                }
             }
 
             # Build a batch of incompressible random data > 100 KB compressed.
@@ -199,8 +205,8 @@ Describe 'Dlq.Push.OversizeDropped — >100 KB compressed batches are dropped + 
 
             $result.Enqueued | Should -BeFalse -Because 'oversize batch must be dropped (Storage Tables 100 KB cap)'
             $script:upserted | Should -BeFalse -Because 'no Upsert may happen for a dropped row'
-            $script:droppedEv | Should -Not -BeNullOrEmpty -Because 'Ingest.DlqDropped custom event must fire so operators see the loss'
-            $script:droppedEv.Stream | Should -Be 'Custom-X'
+            $script:droppedExc | Should -Not -BeNullOrEmpty -Because 'Send-XdrAppInsightsException with ErrorClass=Ingest.DlqDropped must fire so operators see the loss'
+            $script:droppedExc.Stream | Should -Be 'Custom-X'
         }
     }
 }

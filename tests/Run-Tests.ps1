@@ -61,7 +61,7 @@ param(
     #   unit / validate / all-offline  — CI-friendly, no external deps
     #   local-online                   — pre-deploy: real portal sign-in from laptop
     #   e2e                            — post-deploy: KQL verification of deployed workspace
-    [ValidateSet('unit', 'validate', 'e2e', 'local-online', 'predeploy', 'all-offline', 'whatif')]
+    [ValidateSet('unit', 'validate', 'e2e', 'local-online', 'predeploy', 'all-offline', 'whatif', 'online-preflight')]
     [string] $Category = 'unit',
 
     [switch] $FailFast,
@@ -94,6 +94,10 @@ $paths = switch ($Category) {
     'predeploy'    { @('./tests/integration/Auth-Chain-Live.Tests.ps1', './tests/integration/Predeploy-Validation.Tests.ps1', './tests/integration/Deployment-WhatIf.Tests.ps1') }
     'whatif'       { @('./tests/integration/Deployment-WhatIf.Tests.ps1') }
     'all-offline'  { @('./tests/unit', './tests/kql', './tests/arm') }
+    # iter-14.0 Phase 4 (v0.1.0 GA): online-preflight runs after fixture refresh
+    # to assert committed fixtures still match live portal shape (catches portal
+    # drift before deploy). See Section 3 step 6 + Section 5 of senior-architect plan.
+    'online-preflight' { @('./tests/online') }
 }
 
 # --- Online gating ------------------------------------------------------------
@@ -110,7 +114,7 @@ if ($Category -eq 'e2e') {
 
 # Local-online tests use real tenant credentials loaded from env vars or .env file.
 # No Key Vault required — user provides TOTP/passkey directly.
-if ($Category -in @('local-online', 'predeploy')) {
+if ($Category -in @('local-online', 'predeploy', 'online-preflight')) {
     $envFile = Join-Path $repoRoot 'tests' '.env.local'
     if (Test-Path $envFile) {
         Write-Host "Loading local env from tests/.env.local" -ForegroundColor Yellow

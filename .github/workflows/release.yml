@@ -7,6 +7,9 @@ on:
 
 permissions:
   contents: write
+  # Phase F.3 (B9): Sigstore-cosign keyless signing requires OIDC token to
+  # request short-lived Fulcio cert. Per directive 38 + .claude/plans/immutable-splashing-waffle.md.
+  id-token: write
 
 jobs:
   build-and-release:
@@ -294,12 +297,16 @@ jobs:
               throw "function-app.zip has a 'functions/' wrapper. Function directories MUST be at root for Azure Functions runtime to load them."
           }
           # 4. All 6 expected function dirs at root with function.json.
-          # 5 cadence-tier polls (fast/exposure/config/inventory/maintenance) +
-          # the heartbeat-5m operational timer.
+          # Per directive 12 + Phase B in .claude/plans/immutable-splashing-waffle.md,
+          # functions are named by CAPABILITY (ActionCenter, XspmGraph, etc.) not
+          # by CADENCE (10m, 1h, etc.) — operator-meaningful FA Overview tab.
           $expectedFuncs = @(
-              'heartbeat-5m',
-              'poll-fast-10m','poll-exposure-1h','poll-config-6h',
-              'poll-inventory-1d','poll-maintenance-1w'
+              'Connector-Heartbeat',
+              'Defender-ActionCenter-Refresh',
+              'Defender-XspmGraph-Refresh',
+              'Defender-Configuration-Refresh',
+              'Defender-Inventory-Refresh',
+              'Defender-Maintenance-Refresh'
           )
           foreach ($func in $expectedFuncs) {
               if ($entries -notcontains "$func/function.json") {
@@ -361,6 +368,51 @@ jobs:
           upload-artifact: false       # disable implicit artifact upload (needs extra perms)
           upload-release-assets: false  # we attach it ourselves via softprops below
 
+      # Phase F.3 (B9): Sigstore-cosign keyless signing per directive 38 +
+      # production-readiness blocker B9 in .claude/plans/immutable-splashing-waffle.md.
+      # Keyless signing uses GitHub Actions OIDC token (id-token: write permission)
+      # to obtain a short-lived Fulcio cert; signature is published to public
+      # Sigstore Rekor transparency log. Operators verify with:
+      #   cosign verify-blob --certificate-identity-regexp '...' \
+      #     --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+      #     --signature <artifact>.sig --bundle <artifact>.bundle <artifact>
+      - name: Install Sigstore cosign
+        uses: sigstore/cosign-installer@d7d6bc7722e3daa8354c50bcb52f4837da5e9b6a  # v3.8.1
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Sign release artefacts (Sigstore-cosign keyless)
+        shell: bash
+        continue-on-error: true  # signing is supply-chain-hardening; release proceeds unsigned if cosign fails
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -e
+          for artifact in \
+              ./function-app.zip \
+              ./deploy/compiled/mainTemplate.json \
+              ./deploy/compiled/sentinelContent.json \
+              ./deploy/compiled/createUiDefinition.json \
+              ./xdrlograider-sbom.spdx.json; do
+              if [[ -f "$artifact" ]]; then
+                  echo "Signing $artifact..."
+                  cosign sign-blob --yes --bundle "$artifact.bundle" "$artifact" > "$artifact.sig" || {
+                      echo "::warning::cosign sign-blob failed for $artifact — continuing unsigned"
+                      continue
+                  }
+                  echo "  ✓ $artifact.sig + $artifact.bundle written"
+              else
+                  echo "  - $artifact missing; skipping"
+              fi
+          done
+          # Solution zip uses glob; sign whichever version was produced
+          for solzip in ./xdrlograider-solution-*.zip; do
+              if [[ -f "$solzip" ]]; then
+                  cosign sign-blob --yes --bundle "$solzip.bundle" "$solzip" > "$solzip.sig" || \
+                      echo "::warning::cosign sign-blob failed for $solzip"
+              fi
+          done
+
       - name: Guarantee SBOM file exists (fallback stub)
         shell: pwsh
         if: always()
@@ -388,11 +440,23 @@ jobs:
         with:
           files: |
             function-app.zip
+            function-app.zip.sig
+            function-app.zip.bundle
             deploy/compiled/mainTemplate.json
+            deploy/compiled/mainTemplate.json.sig
+            deploy/compiled/mainTemplate.json.bundle
             deploy/compiled/sentinelContent.json
+            deploy/compiled/sentinelContent.json.sig
+            deploy/compiled/sentinelContent.json.bundle
             deploy/compiled/createUiDefinition.json
+            deploy/compiled/createUiDefinition.json.sig
+            deploy/compiled/createUiDefinition.json.bundle
             xdrlograider-solution-*.zip
+            xdrlograider-solution-*.zip.sig
+            xdrlograider-solution-*.zip.bundle
             xdrlograider-sbom.spdx.json
+            xdrlograider-sbom.spdx.json.sig
+            xdrlograider-sbom.spdx.json.bundle
           body: |
             ## XdrLogRaider ${{ github.ref_name }}
 

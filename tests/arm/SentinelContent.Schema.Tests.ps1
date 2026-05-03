@@ -147,12 +147,14 @@ Describe 'Analytic rules YAML schema compliance' {
         $metadata = @($compiled.resources | Where-Object {
             $_.type -eq 'Microsoft.OperationalInsights/workspaces/providers/metadata'
         })
-        @($metadata).Count | Should -Be 34 -Because 'expect 14 AnalyticsRule + 9 HuntingQuery + 7 Workbook + 4 Parser metadata back-links'
+        # v0.1.0 GA Phase F.1 added 4 ops analytic rules (XdrOps-*) + 1 ConnectorHealth workbook
+        # so total metadata back-links: 18 AnalyticsRule + 9 HuntingQuery + 8 Workbook + 4 Parser = 39
+        @($metadata).Count | Should -Be 39 -Because 'v0.1.0 GA: 18 AnalyticsRule (14 detection + 4 XdrOps-*) + 9 HuntingQuery + 8 Workbook (7 + ConnectorHealth) + 4 Parser metadata back-links'
 
         $byKind = $metadata | Group-Object { $_.properties.kind }
-        ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 14
+        ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 18  # 14 detection + 4 XdrOps-* (Phase F.1)
         ($byKind | Where-Object Name -eq 'HuntingQuery').Count  | Should -Be 9
-        ($byKind | Where-Object Name -eq 'Workbook').Count      | Should -Be 7
+        ($byKind | Where-Object Name -eq 'Workbook').Count      | Should -Be 8   # 7 + ConnectorHealth (Phase F.1)
         ($byKind | Where-Object Name -eq 'Parser').Count        | Should -Be 4
 
         # Every metadata back-link must reference the canonical Solution

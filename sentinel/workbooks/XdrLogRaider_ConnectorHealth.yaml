@@ -1,0 +1,38 @@
+# XdrLogRaider — Connector Health workbook (Phase F.1 / B6).
+#
+# Operator-facing single-pane dashboard for connector health. 6 panels:
+#   1. Per-capability poll freshness (last vs cadence threshold)
+#   2. Auth chain failures over time
+#   3. DLQ depth + oldest-entry age
+#   4. Freshness SLI per stream (p95 row age)
+#   5. Per-stream partial-success rate
+#   6. Service account sign-in activity (uses $(SERVICE_ACCOUNT_UPN) parameter)
+#
+# Per directives 13 + 38 + B6 in .claude/plans/immutable-splashing-waffle.md.
+# Pairs with 4 ops analytic rules:
+#   - XdrOps-ConnectorStaleStream     (B7)
+#   - XdrOps-AuthChainFailure         (B8)
+#   - XdrOps-DlqDepthAlert            (B5)
+#   - XdrOps-ServiceAccountAnomalousSignIn (B4-new)
+
+name: XdrLogRaider — Connector Health
+description: |
+  Single-pane operational dashboard for the XdrLogRaider connector. Surfaces
+  poll freshness, auth chain health, DLQ backpressure, freshness SLI,
+  partial-success rates, and service account sign-in anomaly summary.
+
+  Companion workbooks (existing): MDE_ActionCenter, MDE_ComplianceDashboard,
+  MDE_DriftReport, MDE_ExposureMap, MDE_GovernanceScorecard, MDE_IdentityPosture,
+  MDE_ResponseAudit (per-functional-area dashboards).
+templateRelativePath: XdrLogRaider_ConnectorHealth.json
+subtitle: Operator dashboard
+provider: Community
+support: Community
+author: Alex Kefallonitis
+version: 1.0.0
+lastUpdated: 2026-05-03
+sources:
+  - MDE_Heartbeat_CL
+  - AppExceptions
+  - AppMetrics
+  - SigninLogs

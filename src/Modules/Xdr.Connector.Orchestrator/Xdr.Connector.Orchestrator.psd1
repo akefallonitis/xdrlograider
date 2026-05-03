@@ -7,18 +7,28 @@
     Author                = 'Alex Kefallonitis'
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
-    Description           = 'L4 portal-routing dispatcher. Provides a single -Portal-keyed entry point (Connect-XdrPortal, Invoke-XdrTierPoll, Test-XdrPortalAuth, Get-XdrPortalManifest) that routes to the right L2 auth + L3 client modules based on an internal portal-routing table. Today routes Defender to Xdr.Defender.Auth + Xdr.Defender.Client; v0.2.0 adds Purview/Intune/Entra entries.'
+    Description           = 'L4 portal-routing dispatcher. Provides a single -Portal-keyed entry point (Connect-XdrPortal, Invoke-XdrTierPoll, Test-XdrPortalAuth, Get-XdrPortalManifest) plus v0.1.0 GA helpers Get-XdrConnectorHealth + Test-XdrConnectorConfig. Routes to the right L2 auth + L3 client modules based on an internal portal-routing table. v0.1.0 GA: Defender = live; Entra/Purview/Intune = scaffolding-stub (v0.2.0 roadmap).'
     RequiredModules       = @(
         'Xdr.Common.Auth',
         'Xdr.Defender.Auth',
         'Xdr.Defender.Client',
-        'Xdr.Sentinel.Ingest'
+        'Xdr.Sentinel.Ingest',
+        # v0.1.0 GA Phase A.3 multi-portal scaffolding stubs (forward-compat):
+        'Xdr.Entra.Auth',
+        'Xdr.Entra.Client',
+        'Xdr.Purview.Auth',
+        'Xdr.Purview.Client',
+        'Xdr.Intune.Auth',
+        'Xdr.Intune.Client'
     )
     FunctionsToExport     = @(
         'Connect-XdrPortal',
         'Invoke-XdrTierPoll',
         'Test-XdrPortalAuth',
-        'Get-XdrPortalManifest'
+        'Get-XdrPortalManifest',
+        # v0.1.0 GA Phase A.3.6 helpers:
+        'Get-XdrConnectorHealth',
+        'Test-XdrConnectorConfig'
     )
     CmdletsToExport       = @()
     VariablesToExport     = @()

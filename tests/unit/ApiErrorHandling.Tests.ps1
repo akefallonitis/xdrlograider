@@ -188,7 +188,7 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             Mock Set-CheckpointTimestamp { }
             Mock Get-CheckpointTimestamp { $null }
 
-            $result = Invoke-MDETierPoll -Session $Sess -Tier 'fast' -Config $Cfg
+            $result = Invoke-MDETierPoll -Session $Sess -Tier 'ActionCenter' -Config $Cfg
             # fast tier has 2 streams: MDE_ActionCenter_CL + MDE_MachineActions_CL
             $result.StreamsAttempted | Should -Be 2
             $result.StreamsSucceeded | Should -Be 1
@@ -205,7 +205,7 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             Mock Get-CheckpointTimestamp { $null }
             Mock Set-CheckpointTimestamp {}
 
-            $null = Invoke-MDETierPoll -Session $Sess -Tier 'fast' -Config $Cfg
+            $null = Invoke-MDETierPoll -Session $Sess -Tier 'ActionCenter' -Config $Cfg
 
             Should -Invoke Set-CheckpointTimestamp -Times 0 -Exactly -Because 'failed stream must not checkpoint'
         }
@@ -217,7 +217,7 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             # P4 was intentionally dropped — no streams carry Tier='P4' in the manifest.
             # But ValidateSet rejects P4 directly. Simulate empty tier by mocking manifest.
             Mock Get-MDEEndpointManifest { @{} }
-            { Invoke-MDETierPoll -Session $Sess -Tier 'inventory' -Config $Cfg } | Should -Not -Throw
+            { Invoke-MDETierPoll -Session $Sess -Tier 'Inventory' -Config $Cfg } | Should -Not -Throw
         }
     }
 }

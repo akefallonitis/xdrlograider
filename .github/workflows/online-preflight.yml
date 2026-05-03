@@ -1,0 +1,139 @@
+# XdrLogRaider — Online preflight (v0.1.0 GA, iter-14.0 Phase 4)
+#
+# Per Section 3 step 6 + Section 5 of the senior-architect plan
+# (.claude/plans/immutable-splashing-waffle.md). Catches portal-API drift before
+# release: refreshes fixtures from live tenant + diffs against committed.
+#
+# OIDC FEDERATION SETUP (one-time, per repo):
+#   1. Create Azure AD app registration; note tenantId + clientId
+#   2. Add federated credential:
+#      Issuer:   https://token.actions.githubusercontent.com
+#      Subject:  repo:akefallonitis/xdrlograider:ref:refs/heads/main
+#                  (or repo:owner/repo:pull_request for PRs)
+#      Audience: api://AzureADTokenExchange
+#   3. Grant the AAD app the SP-equivalent scopes (KV Reader, etc).
+#   4. Set GitHub secrets:
+#      AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_SUBSCRIPTION_ID,
+#      XDRLR_TEST_UPN, XDRLR_TEST_PASSWORD (KV-backed),
+#      XDRLR_TEST_TOTP_SECRET (KV-backed)
+#   5. (Recommended) Use `secrets.AZURE_KEY_VAULT_NAME` + Azure/login@ to fetch
+#      XDRLR_TEST_PASSWORD + XDRLR_TEST_TOTP_SECRET from KV at runtime —
+#      avoids storing TOTP seed as a static GitHub secret.
+#
+# RECOMMENDED OPERATIONAL CADENCE:
+#   - Nightly schedule: 04:00 UTC sweep + Issue creation if drift detected
+#   - On manifest change in PR: re-capture + diff, fail PR if drift
+#
+# v0.1.0 GA SCOPE:
+#   - Workflow file shipped + documented
+#   - OIDC AAD app config is operator's one-time setup task
+#   - Workflow does NOT auto-trigger until secrets are configured
+#     (see `if:` guard below — skips when XDR_PREFLIGHT_ENABLED is unset)
+
+name: Online Preflight (portal-shape drift gate)
+
+on:
+  schedule:
+    # 04:00 UTC nightly — catches overnight portal-side schema drift
+    - cron: '0 4 * * *'
+  pull_request:
+    paths:
+      - 'src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1'
+      - 'tools/Capture-EndpointSchemas.ps1'
+      - '.github/workflows/online-preflight.yml'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Why running on-demand'
+        required: false
+        default: 'manual'
+
+permissions:
+  id-token: write   # OIDC federation
+  contents: read    # checkout
+  issues: write     # auto-create issue on drift detection
+
+concurrency:
+  group: online-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    name: Capture + diff
+    runs-on: ubuntu-latest
+    # Guard: only run if operator has enabled it (set repo variable XDR_PREFLIGHT_ENABLED=true)
+    if: ${{ vars.XDR_PREFLIGHT_ENABLED == 'true' }}
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Install PowerShell 7
+        shell: bash
+        run: |
+          # Ubuntu runner pre-installs pwsh; no-op
+          pwsh --version
+
+      - name: Install Pester 5.5+
+        shell: pwsh
+        run: |
+          if (-not (Get-Module -ListAvailable Pester | Where-Object { $_.Version -ge '5.5.0' })) {
+            Install-Module Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+          }
+
+      - name: Az PowerShell login (OIDC federation)
+        uses: azure/login@a65d910e8af852a8061c627c456678983e180302  # v2.4.1
+        with:
+          client-id:       ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id:       ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+
+      - name: Materialize tests/.env.local from secrets
+        shell: pwsh
+        env:
+          XDRLR_TEST_UPN:           ${{ secrets.XDRLR_TEST_UPN }}
+          XDRLR_TEST_AUTH_METHOD:   ${{ secrets.XDRLR_TEST_AUTH_METHOD }}
+          XDRLR_TEST_PASSWORD:      ${{ secrets.XDRLR_TEST_PASSWORD }}
+          XDRLR_TEST_TOTP_SECRET:   ${{ secrets.XDRLR_TEST_TOTP_SECRET }}
+        run: |
+          @"
+          XDRLR_TEST_UPN=$env:XDRLR_TEST_UPN
+          XDRLR_TEST_AUTH_METHOD=$env:XDRLR_TEST_AUTH_METHOD
+          XDRLR_TEST_PASSWORD=$env:XDRLR_TEST_PASSWORD
+          XDRLR_TEST_TOTP_SECRET=$env:XDRLR_TEST_TOTP_SECRET
+          "@ | Set-Content -Path tests/.env.local -NoNewline -Encoding utf8
+
+      - name: Refresh fixtures from live portal
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File tools/Capture-EndpointSchemas.ps1
+
+      - name: Run online-preflight tests
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File tests/Run-Tests.ps1 -Category online-preflight
+
+      - name: Diff captured vs committed (fail if drift)
+        shell: bash
+        run: |
+          if ! git diff --exit-code -- tests/fixtures/live-responses/; then
+            echo "::error::Portal shape drift detected. Manifest may need UnwrapProperty / SingleObjectAsRow / ProjectionMap update."
+            exit 1
+          fi
+
+      - name: On drift — open issue
+        if: failure()
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        with:
+          script: |
+            const title = `[online-preflight] Portal shape drift detected — ${new Date().toISOString().split('T')[0]}`;
+            const body = `Online preflight workflow failed on ${context.runId}.\n\nLikely causes:\n- Portal API changed response shape\n- Fixture stale (re-capture and verify)\n- Manifest needs UnwrapProperty / SingleObjectAsRow / ProjectionMap update\n\nNext steps:\n1. Review workflow logs: ${context.payload.repository.html_url}/actions/runs/${context.runId}\n2. Pull latest fixtures locally: pwsh tools/Capture-EndpointSchemas.ps1\n3. Update manifest if needed; re-run unit tests; PR.\n\n/cc @${context.payload.sender.login}`;
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['drift', 'online-preflight', 'priority:high']
+            });

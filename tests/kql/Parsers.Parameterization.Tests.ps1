@@ -30,7 +30,7 @@
         MDE_Drift_Configuration  → config
         MDE_Drift_Inventory      → inventory
         MDE_Drift_Maintenance    → maintenance
-    The 'fast' tier has no parser (events vs snapshots).
+    The 'ActionCenter' tier has no parser (events vs snapshots).
 
 .NOTES
     Pair test with Parsers.Tests.ps1 (which locks the looser shape — declares

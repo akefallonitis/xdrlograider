@@ -146,12 +146,14 @@ function Connect-DefenderPortal {
         # --- L2: verify Defender portal cookies + auto-resolve TenantId ---
         $sccauth = Get-DefenderSccauth -Session $entraAuth.Session -PortalHost $PortalHost -TenantId $TenantId
     } catch {
-        # AADSTS error trapping: if the L1/L2 chain raised an AADSTS<code>
-        # message, emit a high-fidelity AuthChain.AADSTSError event before the
-        # rethrow so operators get a structured customDimension feed AND the
-        # original throw still propagates to callers.
+        # iter-14.0 Phase 2 (v0.1.0 GA): AADSTS error → native `exceptions` table
+        # per Section 2.3 of senior-architect plan. AADSTS failures ARE genuine
+        # errors that operators should alert on — belongs in AppExceptions, not
+        # customEvents. Send-XdrAppInsightsException auto-captures stack trace +
+        # structured Properties (customDimensions). Original throw still propagates.
+        # Operators query: AppExceptions | where ProblemId contains 'AADSTS' | summarize by AADSTSCode/Stage.
         $msg = if ($null -ne $_.Exception) { $_.Exception.Message } else { [string]$_ }
-        if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
+        if (Get-Command -Name Send-XdrAppInsightsException -ErrorAction SilentlyContinue) {
             $aadstsCode = $null
             $stage      = 'unknown'
             if ($msg -match 'AADSTS(\d+)') {
@@ -161,15 +163,16 @@ function Connect-DefenderPortal {
                          elseif ($msg -match 'Authorize endpoint') { 'authorize' }
                          else { 'unknown' }
             }
-            $eventProps = @{
+            $excProps = @{
                 Upn        = $upn
                 PortalHost = $PortalHost
                 Method     = $Method
                 Stage      = $stage
-                Message    = $msg
+                ErrorClass = 'AuthChain.AADSTSError'
             }
-            if ($aadstsCode) { $eventProps['AADSTSCode'] = $aadstsCode }
-            Send-XdrAppInsightsCustomEvent -EventName 'AuthChain.AADSTSError' -OperationId $correlationId -Properties $eventProps
+            if ($aadstsCode) { $excProps['AADSTSCode'] = $aadstsCode }
+            $exceptionToTrack = if ($null -ne $_.Exception) { $_.Exception } else { [System.Exception]::new($msg) }
+            Send-XdrAppInsightsException -Exception $exceptionToTrack -OperationId $correlationId -Properties $excProps
         }
         throw
     }

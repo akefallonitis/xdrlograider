@@ -7,22 +7,31 @@
     (would create a cycle).
 
 .DESCRIPTION
-    Layer map (v0.1.0-beta first publish — 5 real modules, no shims):
+    Layer map (v0.1.0 GA — 5 live + 6 multi-portal scaffolding stubs per Phase A.3):
       L1 Xdr.Common.Auth          portal-generic Entra (TOTP, passkey, ESTS)
       L1 Xdr.Sentinel.Ingest      portal-generic ingest (DCE/DCR + Storage Table)
       L2 Xdr.Defender.Auth        Defender-specific cookie exchange (sccauth + XSRF)
       L3 Xdr.Defender.Client      Defender-portal manifest dispatcher (46 streams)
-      L4 Xdr.Connector.Orchestrator  portal-routing dispatcher (Connect-XdrPortal etc.)
+      L2 Xdr.Entra.Auth           Entra portal scaffolding stub (v0.2.0 roadmap)
+      L3 Xdr.Entra.Client         Entra portal scaffolding stub (v0.2.0 roadmap)
+      L2 Xdr.Purview.Auth         Purview portal scaffolding stub (v0.2.0 roadmap)
+      L3 Xdr.Purview.Client       Purview portal scaffolding stub (v0.2.0 roadmap)
+      L2 Xdr.Intune.Auth          Intune portal scaffolding stub (v0.2.0 roadmap)
+      L3 Xdr.Intune.Client        Intune portal scaffolding stub (v0.2.0 roadmap)
+      L4 Xdr.Connector.Orchestrator  portal-routing dispatcher (Connect-XdrPortal etc.
+                                      + Get-XdrConnectorHealth + Test-XdrConnectorConfig)
 
     Invariants enforced here:
       1. L3 Xdr.Defender.Client RequiredModules: only L2 Xdr.Defender.Auth
          (no L4, no L1 ingest — would be a cycle / cross-leg).
-      2. L4 Xdr.Connector.Orchestrator RequiredModules cover L1+L2+L3
+      2. L4 Xdr.Connector.Orchestrator RequiredModules cover L1+L2+L3 + all 6 stubs
          (so the dispatcher can call into them).
-      3. Five modules total, no MDE-prefixed legacy shim modules left in
-         src/Modules/.
+      3. 11 modules total: 5 live + 6 multi-portal scaffolding stubs.
+         No MDE-prefixed legacy shim modules left.
       4. Orchestrator routing: Connect-XdrPortal -Portal 'Defender' resolves
          through to Connect-DefenderPortal; unknown -Portal throws.
+      5. Stub modules throw informative "v0.2.0 roadmap" errors when called
+         (covered by MultiPortalScaffolding.Tests.ps1 Phase A.4.4).
 #>
 
 BeforeAll {
@@ -38,16 +47,22 @@ BeforeAll {
 
 Describe 'Five-module architecture — no shim modules remain' {
 
-    It 'src/Modules contains exactly the 5 real modules (no legacy shim dirs)' {
+    It 'src/Modules contains exactly the 11 v0.1.0-GA modules (5 live + 6 scaffolding stubs)' {
         $dirs = @(Get-ChildItem -LiteralPath $script:ModulesRoot -Directory | Sort-Object Name | ForEach-Object Name)
         $expected = @(
-            'Xdr.Common.Auth',
-            'Xdr.Connector.Orchestrator',
-            'Xdr.Defender.Auth',
-            'Xdr.Defender.Client',
-            'Xdr.Sentinel.Ingest'
+            'Xdr.Common.Auth',           # L1 live
+            'Xdr.Connector.Orchestrator', # L4 live
+            'Xdr.Defender.Auth',          # L2 live
+            'Xdr.Defender.Client',        # L3 live
+            'Xdr.Entra.Auth',             # L2 stub (v0.2.0)
+            'Xdr.Entra.Client',           # L3 stub (v0.2.0)
+            'Xdr.Intune.Auth',            # L2 stub (v0.2.0)
+            'Xdr.Intune.Client',          # L3 stub (v0.2.0)
+            'Xdr.Purview.Auth',           # L2 stub (v0.2.0)
+            'Xdr.Purview.Client',         # L3 stub (v0.2.0)
+            'Xdr.Sentinel.Ingest'         # L1 live
         )
-        $dirs | Should -Be $expected -Because 'v0.1.0-beta first-publish drops the 3 backward-compat shims'
+        $dirs | Should -Be $expected -Because 'v0.1.0 GA: 5 live modules + 6 multi-portal scaffolding stubs (Entra/Purview/Intune × Auth/Client). Stubs ship empty placeholders; v0.2.0 fills bodies.'
     }
 
     It 'src/Modules/Xdr.Portal.Auth, XdrLogRaider.Client, XdrLogRaider.Ingest are deleted' {
@@ -66,22 +81,34 @@ Describe 'L1-L4 layering — manifest RequiredModules graph' {
         $req | Should -Not -Contain 'Xdr.Connector.Orchestrator' -Because 'L3 cannot depend on L4 (cycle)'
     }
 
-    It 'L4 Xdr.Connector.Orchestrator RequiredModules contains L1+L2+L3 layer modules' {
+    It 'L4 Xdr.Connector.Orchestrator RequiredModules contains L1+L2+L3 + 6 multi-portal stubs' {
         $manifest = Import-PowerShellDataFile -Path $script:OrchestratorPsd1
         $req = @($manifest.RequiredModules)
+        # Live module dependencies
         $req | Should -Contain 'Xdr.Common.Auth'      -Because 'L4 routes into L1 Entra'
         $req | Should -Contain 'Xdr.Sentinel.Ingest'  -Because 'L4 routes into L1 ingest'
         $req | Should -Contain 'Xdr.Defender.Auth'    -Because 'L4 routes into L2 cookie exchange'
         $req | Should -Contain 'Xdr.Defender.Client'  -Because 'L4 routes into L3 client dispatcher'
+        # v0.1.0 GA Phase A.3: multi-portal scaffolding stubs
+        $req | Should -Contain 'Xdr.Entra.Auth'       -Because 'L4 PortalRoutes references Entra stub'
+        $req | Should -Contain 'Xdr.Entra.Client'     -Because 'L4 PortalRoutes references Entra stub'
+        $req | Should -Contain 'Xdr.Purview.Auth'     -Because 'L4 PortalRoutes references Purview stub'
+        $req | Should -Contain 'Xdr.Purview.Client'   -Because 'L4 PortalRoutes references Purview stub'
+        $req | Should -Contain 'Xdr.Intune.Auth'      -Because 'L4 PortalRoutes references Intune stub'
+        $req | Should -Contain 'Xdr.Intune.Client'    -Because 'L4 PortalRoutes references Intune stub'
     }
 
-    It 'L4 Xdr.Connector.Orchestrator FunctionsToExport is the portal-routing surface' {
+    It 'L4 Xdr.Connector.Orchestrator FunctionsToExport is the portal-routing surface + v0.1.0 GA helpers' {
         $manifest = Import-PowerShellDataFile -Path $script:OrchestratorPsd1
         $exports = @($manifest.FunctionsToExport)
+        # Original L4 surface
         $exports | Should -Contain 'Connect-XdrPortal'
         $exports | Should -Contain 'Invoke-XdrTierPoll'
         $exports | Should -Contain 'Test-XdrPortalAuth'
         $exports | Should -Contain 'Get-XdrPortalManifest'
+        # v0.1.0 GA Phase A.3.6 helpers
+        $exports | Should -Contain 'Get-XdrConnectorHealth'   -Because 'Phase A.3.6: connector health aggregator'
+        $exports | Should -Contain 'Test-XdrConnectorConfig'  -Because 'Phase A.3.6: env+KV+DCE config validator'
     }
 
     It 'L1 Xdr.Sentinel.Ingest does not depend on any auth or client module' {
@@ -101,12 +128,21 @@ Describe 'Orchestrator portal-routing dispatch (offline)' {
     BeforeAll {
         # Load the layered modules in dependency order. Tests run InModuleScope
         # against the orchestrator and stub the per-portal connect/test functions.
+        # v0.1.0 GA Phase A.3: also load 6 multi-portal scaffolding stubs
+        # (referenced by orchestrator psd1 RequiredModules).
         Get-Module Xdr.* | Remove-Module -Force -ErrorAction SilentlyContinue
 
         Import-Module $script:CommonAuthPsd1   -Force -ErrorAction Stop
         Import-Module $script:SentinelPsd1     -Force -ErrorAction Stop
         Import-Module $script:DefAuthPsd1      -Force -ErrorAction Stop
         Import-Module $script:DefClientPsd1    -Force -ErrorAction Stop
+        # 6 scaffolding stubs (Phase A.3)
+        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Entra.Auth' 'Xdr.Entra.Auth.psd1')       -Force -ErrorAction Stop
+        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Entra.Client' 'Xdr.Entra.Client.psd1')   -Force -ErrorAction Stop
+        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Purview.Auth' 'Xdr.Purview.Auth.psd1')   -Force -ErrorAction Stop
+        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Purview.Client' 'Xdr.Purview.Client.psd1') -Force -ErrorAction Stop
+        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Intune.Auth' 'Xdr.Intune.Auth.psd1')     -Force -ErrorAction Stop
+        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Intune.Client' 'Xdr.Intune.Client.psd1') -Force -ErrorAction Stop
         Import-Module $script:OrchestratorPsd1 -Force -ErrorAction Stop
     }
 
@@ -168,15 +204,15 @@ Describe 'Orchestrator portal-routing dispatch (offline)' {
         }
         $session = [pscustomobject]@{ Upn = 'svc'; PortalHost = 'security.microsoft.com' }
         $config  = [pscustomobject]@{ DceEndpoint = 'x'; DcrImmutableId = 'y'; StorageAccountName = 'z'; CheckpointTable = 'c' }
-        $r = Invoke-XdrTierPoll -Session $session -Tier 'fast' -Config $config -Portal 'Defender'
+        $r = Invoke-XdrTierPoll -Session $session -Tier 'ActionCenter' -Config $config -Portal 'Defender'
         $r.RowsIngested | Should -Be 42
-        $r.Tier | Should -Be 'fast'
+        $r.Tier | Should -Be 'ActionCenter'
     }
 
     It "Invoke-XdrTierPoll -Portal 'Unknown' throws" {
         $session = [pscustomobject]@{ Upn = 'svc' }
         $config  = [pscustomobject]@{ DceEndpoint = 'x'; DcrImmutableId = 'y'; StorageAccountName = 'z'; CheckpointTable = 'c' }
-        { Invoke-XdrTierPoll -Session $session -Tier 'fast' -Config $config -Portal 'Unknown' } |
+        { Invoke-XdrTierPoll -Session $session -Tier 'ActionCenter' -Config $config -Portal 'Unknown' } |
             Should -Throw -ExpectedMessage "*Unknown -Portal 'Unknown'*"
     }
 

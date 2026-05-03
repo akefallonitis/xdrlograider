@@ -1,6 +1,29 @@
 {
-  "Count": 1868,
+  "Count": 1869,
   "Results": [
+    {
+      "InvestigationId": null,
+      "ActionId": "00000000-0000-0000-0000-000000000000",
+      "StartTime": "2026-04-25T20:42:21.7842936",
+      "EndTime": "2026-04-25T21:13:34.0467247",
+      "ActionType": "CollectInvestigationPackageResponse",
+      "ActionDecision": null,
+      "DecidedBy": "MDE-Alex-App",
+      "Comment": "reboot",
+      "RelatedEntities": [
+        {
+          "EntityType": "Unknown"
+        }
+      ],
+      "AdditionalFields": {},
+      "EntityType": "Unknown",
+      "EventTime": "2026-04-25T21:13:34.0467247",
+      "ActionStatus": "Completed",
+      "ActionSource": "PublicApi",
+      "Product": "MDE",
+      "MachineId": "REDACTED-HASH",
+      "ComputerName": "larabond"
+    },
     {
       "InvestigationId": null,
       "ActionId": "00000000-0000-0000-0000-000000000000",
@@ -667,33 +690,6 @@
       "Product": "MDE",
       "MachineId": "REDACTED-HASH",
       "ComputerName": "larabond"
-    },
-    {
-      "InvestigationId": "CLR4b6d28c8-0915-40ca-a4c8-be03fa7ea486",
-      "ActionId": "00000000-0000-0000-0000-000000000000",
-      "StartTime": "2026-04-05T14:16:16.3066656",
-      "EndTime": "2026-04-05T14:16:19.0096964",
-      "ActionType": "LiveResponseCommand",
-      "ActionDecision": null,
-      "DecidedBy": "user@example.com",
-      "UserPrincipalName": "user@example.com",
-      "ActionAutomationType": "Manual Investigation",
-      "RelatedEntities": [
-        {
-          "EntityType": "Unknown"
-        }
-      ],
-      "AdditionalFields": {
-        "is_cloud_liveresponse": true,
-        "raw_command": "ls"
-      },
-      "EntityType": "Unknown",
-      "EventTime": "2026-04-05T14:16:19.0177288",
-      "ActionStatus": "Completed",
-      "ActionSource": "AutomatedIRActionState",
-      "Product": "MDE",
-      "MachineId": "REDACTED-HASH",
-      "ComputerName": "larabond2"
     }
   ]
 }

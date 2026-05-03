@@ -10,7 +10,7 @@
     For each entry in endpoints.manifest.psd1 where Deferred is not $true and
     the Path has no unresolved {placeholder}, this script:
 
-      1. Calls Invoke-MDEPortalRequest to fetch the raw response.
+      1. Calls Invoke-DefenderPortalRequest to fetch the raw response.
       2. Writes the raw response to tests/fixtures/live-responses/<Stream>-raw.json
          (after PII redaction — GUIDs, UPNs, IPv4, bearer tokens).
       3. Feeds the response through Expand-MDEResponse + ConvertTo-MDEIngestRow
@@ -104,7 +104,7 @@ $session = switch ($authMethod) {
         if (-not $env:XDRLR_TEST_SCCAUTH -or -not $env:XDRLR_TEST_XSRF_TOKEN) {
             throw "DirectCookies method requires XDRLR_TEST_SCCAUTH + XDRLR_TEST_XSRF_TOKEN in .env.local"
         }
-        Connect-MDEPortalWithCookies `
+        Connect-DefenderPortalWithCookies `
             -Sccauth   $env:XDRLR_TEST_SCCAUTH `
             -XsrfToken $env:XDRLR_TEST_XSRF_TOKEN `
             -Upn       $upn `
@@ -116,12 +116,12 @@ $session = switch ($authMethod) {
             password    = $env:XDRLR_TEST_PASSWORD
             totpBase32  = $env:XDRLR_TEST_TOTP_SECRET
         }
-        Connect-MDEPortal -Method CredentialsTotp -Credential $cred -PortalHost $portalHost -Force
+        Connect-DefenderPortal -Method CredentialsTotp -Credential $cred -PortalHost $portalHost -Force
     }
     'Passkey' {
         $pk = Get-Content $env:XDRLR_TEST_PASSKEY_PATH -Raw | ConvertFrom-Json
         $cred = @{ upn = $upn; passkey = $pk }
-        Connect-MDEPortal -Method Passkey -Credential $cred -PortalHost $portalHost -Force
+        Connect-DefenderPortal -Method Passkey -Credential $cred -PortalHost $portalHost -Force
     }
     default { throw "Unsupported auth method: $authMethod" }
 }
@@ -246,7 +246,7 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
 
     # -------- Fetch live --------
     try {
-        $resp = Invoke-MDEPortalRequest -Session $session -Path $path -Method $method -Body $body -AdditionalHeaders $headers -ErrorAction Stop
+        $resp = Invoke-DefenderPortalRequest -Session $session -Path $path -Method $method -Body $body -AdditionalHeaders $headers -ErrorAction Stop
         $row.Status = '200'
     } catch {
         $code = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 'ERR' }
@@ -331,12 +331,25 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
     # -------- Ingest-row fixture --------
     # Same pipeline as the Function App: Expand-MDEResponse -> ConvertTo-MDEIngestRow.
     # Always emits an ingest file (even '[]') so downstream tests can rely on presence.
+    # iter-14.0: pass UnwrapProperty + ProjectionMap so wrapper-key responses
+    # iterate per-entity AND typed cols populate. (The capture script had the same
+    # silent bugs Invoke-MDEEndpoint had until iter-14.0; commits 77f5e8d+690b625
+    # fixed them in the FA pipeline; we mirror here so fixtures reflect production.)
     $ingestPath = Join-Path $OutDir ("{0}-ingest.json" -f $stream)
     try {
         $expandArgs = @{ Response = $resp }
         if ($entry.ContainsKey('IdProperty') -and $entry.IdProperty) {
             $expandArgs['IdProperty'] = [string[]]$entry.IdProperty
         }
+        if ($entry.ContainsKey('UnwrapProperty') -and $entry.UnwrapProperty) {
+            $expandArgs['UnwrapProperty'] = [string]$entry.UnwrapProperty
+        }
+        if ($entry.ContainsKey('SingleObjectAsRow') -and $entry.SingleObjectAsRow) {
+            $expandArgs['SingleObjectAsRow'] = $true
+        }
+        # NOT passing -Stream: that triggers AppInsights BoundaryMarker emission
+        # which we don't want during fixture capture (runs offline).
+        $projMap = if ($entry.ContainsKey('ProjectionMap') -and $entry.ProjectionMap) { $entry.ProjectionMap } else { $null }
         $rows = @(
             foreach ($pair in (Expand-MDEResponse @expandArgs)) {
                 # $pair.Entity can be $null or @() for responses shaped like
@@ -346,7 +359,7 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
                 if ($null -eq $entityRaw -or ($entityRaw -is [array] -and @($entityRaw).Count -eq 0)) {
                     $entityRaw = [pscustomobject]@{}
                 }
-                ConvertTo-MDEIngestRow -Stream $stream -EntityId $pair.Id -Raw $entityRaw
+                ConvertTo-MDEIngestRow -Stream $stream -EntityId $pair.Id -Raw $entityRaw -ProjectionMap $projMap
             }
         )
         $row.IngestRowCount = $rows.Count

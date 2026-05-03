@@ -22,7 +22,7 @@
 
     Verifies:
       - All 6 timer function directories at the ROOT of the staged tree
-        (heartbeat-5m + 5 cadence-tier polls)
+        (Connector-Heartbeat + 5 cadence-tier polls)
       - No `functions/` wrapper directory
       - No `local.settings.json*` development artefact
       - Required root files: host.json, profile.ps1, requirements.psd1
@@ -40,12 +40,12 @@ BeforeAll {
     # declared in endpoints.manifest.psd1 (fast/exposure/config/inventory/
     # maintenance).
     $script:ExpectedFunctions = @(
-        'heartbeat-5m'
-        'poll-fast-10m'
-        'poll-exposure-1h'
-        'poll-config-6h'
-        'poll-inventory-1d'
-        'poll-maintenance-1w'
+        'Connector-Heartbeat'
+        'Defender-ActionCenter-Refresh'
+        'Defender-XspmGraph-Refresh'
+        'Defender-Configuration-Refresh'
+        'Defender-Inventory-Refresh'
+        'Defender-Maintenance-Refresh'
     )
 
     # Simulate the release.yml staging step — flatten src/functions/* to root.

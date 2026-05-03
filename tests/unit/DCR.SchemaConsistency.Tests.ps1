@@ -142,7 +142,13 @@ Describe 'Per-data-stream: ingest row matches DCR schema' -ForEach $script:Activ
             function global:Get-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey) $null }
             function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
         }
+        # Import deps in order — Xdr.Defender.Client RequiredModules=@('Xdr.Defender.Auth')
+        # which RequiredModules=@('Xdr.Common.Auth') so all 3 must be explicitly loaded
+        # before the dependent. Without this, BeforeAll fails with
+        # "MissingMemberException: required module 'Xdr.Defender.Auth' not loaded".
+        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Auth'    'Xdr.Common.Auth.psd1')    -Force -ErrorAction Stop
         Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -ErrorAction Stop
+        Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Auth'  'Xdr.Defender.Auth.psd1')  -Force -ErrorAction Stop
         Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -ErrorAction Stop
 
         # Re-parse DCR — Pester 5 runs -ForEach Describes in their own scope.

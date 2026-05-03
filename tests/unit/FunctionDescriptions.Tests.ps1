@@ -11,11 +11,11 @@
     compares against the manifest's per-tier breakdown.
 
     Tier mapping (poll-* function → manifest Tier value):
-      poll-fast-10m         → fast        (2 active streams)
-      poll-exposure-1h      → exposure    (7 active streams)
-      poll-config-6h        → config      (14 active streams)
-      poll-inventory-1d     → inventory   (21 active streams)
-      poll-maintenance-1w   → maintenance (1 active + 1 deprecated; description states "1 active stream")
+      Defender-ActionCenter-Refresh         → fast        (2 active streams)
+      Defender-XspmGraph-Refresh      → exposure    (7 active streams)
+      Defender-Configuration-Refresh        → config      (14 active streams)
+      Defender-Inventory-Refresh     → inventory   (21 active streams)
+      Defender-Maintenance-Refresh   → maintenance (1 active + 1 deprecated; description states "1 active stream")
 #>
 
 BeforeAll {
@@ -38,11 +38,11 @@ BeforeAll {
 
     # Map each poll-* function dir to its cadence tier.
     $script:PollFunctions = @{
-        'poll-fast-10m'        = 'fast'
-        'poll-exposure-1h'     = 'exposure'
-        'poll-config-6h'       = 'config'
-        'poll-inventory-1d'    = 'inventory'
-        'poll-maintenance-1w'  = 'maintenance'
+        'Defender-ActionCenter-Refresh'        = 'ActionCenter'
+        'Defender-XspmGraph-Refresh'     = 'XspmGraph'
+        'Defender-Configuration-Refresh'       = 'Configuration'
+        'Defender-Inventory-Refresh'    = 'Inventory'
+        'Defender-Maintenance-Refresh'  = 'Maintenance'
     }
 }
 
@@ -88,7 +88,7 @@ Describe 'function.json descriptions match manifest source-of-truth' {
         # is allowed in the maintenance description because it's explicitly
         # called out as excluded-from-poll.
         $allActiveStreams = $script:TierStreams.Values | ForEach-Object { $_ } | Sort-Object -Unique
-        $allowDeprecatedMention = @{ 'maintenance' = @('MDE_StreamingApiConfig_CL') }
+        $allowDeprecatedMention = @{ 'Maintenance' = @('MDE_StreamingApiConfig_CL') }
 
         $offenders = @()
         foreach ($funcName in $script:PollFunctions.Keys) {

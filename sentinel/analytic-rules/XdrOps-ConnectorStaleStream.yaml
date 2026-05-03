@@ -1,0 +1,53 @@
+id: 8a3f9c1d-4b2e-4f7a-9c1e-2d6f8a3b9c5e
+name: "[XdrOps] Connector stream stale - no ingest beyond expected cadence"
+description: |
+  An XdrLogRaider stream has not ingested any rows for >2x its expected cadence,
+  indicating a poll failure, schema drift, portal API change, or auth chain issue.
+
+  Per directive 38 + B7 in .claude/plans/immutable-splashing-waffle.md.
+  Operator-enabled (ships disabled per Sentinel Solution best practice).
+
+  Thresholds (2x cadence margin):
+    Defender-ActionCenter-Refresh    (10m cadence) -> alert if >20m stale
+    Defender-XspmGraph-Refresh       (1h  cadence) -> alert if >2h  stale
+    Defender-Configuration-Refresh   (6h  cadence) -> alert if >12h stale
+    Defender-Inventory-Refresh       (1d  cadence) -> alert if >2d  stale
+    Defender-Maintenance-Refresh     (1w  cadence) -> alert if >2w  stale
+
+  Triage in docs/RUNBOOK.md "Stream stale" section.
+severity: Medium
+enabled: false
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - MDE_Heartbeat_CL
+queryFrequency: 1h
+queryPeriod: 14d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  let cadenceLimits = datatable(FunctionName: string, MaxStaleMin: long)
+  [
+      "Defender-ActionCenter-Refresh",   20,
+      "Defender-XspmGraph-Refresh",      120,
+      "Defender-Configuration-Refresh",  720,
+      "Defender-Inventory-Refresh",      2880,
+      "Defender-Maintenance-Refresh",    20160,
+      "Connector-Heartbeat",             10
+  ];
+  MDE_Heartbeat_CL
+  | where TimeGenerated > ago(14d)
+  | summarize LastSeenUtc = max(TimeGenerated) by FunctionName
+  | join kind=inner cadenceLimits on FunctionName
+  | extend StaleMin = datetime_diff('minute', now(), LastSeenUtc)
+  | where StaleMin > MaxStaleMin
+  | project FunctionName, LastSeenUtc, StaleMin, MaxStaleMin
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: AlertPerResult
+suppressionEnabled: true
+suppressionDuration: PT4H

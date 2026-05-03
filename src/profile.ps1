@@ -76,23 +76,50 @@ See docs/TROUBLESHOOTING.md → 'Function App env vars missing'.
 # ----------------------------------------------------------------------------
 $modulesPath = Join-Path $PSScriptRoot 'Modules'
 
-# Five-module architecture (v0.1.0-beta first publish).
+# Eleven-module architecture (v0.1.0 GA — 5 live + 6 scaffolding stubs).
 # Import order matters — each downstream layer references the previous one.
 #
 #   L1 Xdr.Common.Auth         — portal-generic Entra layer (TOTP, passkey, ESTS auth)
 #   L1 Xdr.Sentinel.Ingest     — portal-generic DCE ingest + checkpoint + heartbeat + App Insights
+#                                 (v0.1.0 GA Phase A.2: forward-compat Xdr* aliases for
+#                                  Send-XdrToLogAnalytics / Get-XdrCheckpointTimestamp /
+#                                  Set-XdrCheckpointTimestamp / Get-XdrDcrImmutableIdForStream)
 #   L2 Xdr.Defender.Auth       — Defender-specific cookie exchange (sccauth + XSRF-TOKEN)
 #   L3 Xdr.Defender.Client     — Defender-portal manifest dispatcher (endpoints + tier polls)
-#   L4 Xdr.Connector.Orchestrator — top-level routing surface used by timer functions
+#                                 (v0.1.0 GA Phase A.2: forward-compat Xdr* aliases for
+#                                  Get-XdrEndpointManifest / Expand-XdrResponse /
+#                                  ConvertTo-XdrIngestRow / Invoke-XdrEndpoint /
+#                                  Invoke-DefenderTierPoll)
+#   L2 Xdr.Entra.Auth          — Entra portal scaffolding stub (v0.2.0 roadmap)
+#   L3 Xdr.Entra.Client        — Entra portal scaffolding stub (v0.2.0 roadmap)
+#   L2 Xdr.Purview.Auth        — Purview portal scaffolding stub (v0.2.0 roadmap)
+#   L3 Xdr.Purview.Client      — Purview portal scaffolding stub (v0.2.0 roadmap)
+#   L2 Xdr.Intune.Auth         — Intune portal scaffolding stub (v0.2.0 roadmap)
+#   L3 Xdr.Intune.Client       — Intune portal scaffolding stub (v0.2.0 roadmap)
+#   L4 Xdr.Connector.Orchestrator — top-level routing surface (Connect-XdrPortal +
+#                                    Invoke-XdrTierPoll + Test-XdrPortalAuth +
+#                                    Get-XdrPortalManifest + Get-XdrConnectorHealth +
+#                                    Test-XdrConnectorConfig). Portal routes table
+#                                    references all L2/L3 modules; v0.2.0 extends bodies.
 #
-# v0.2.0 will add sibling L2 modules (Xdr.Purview.Auth, Xdr.Intune.Auth,
-# Xdr.Entra.Auth) and corresponding L3 clients by extending this list.
+# v0.2.0 will fill in Entra/Purview/Intune Connect/Test/Poll/Manifest function
+# bodies; the architectural seam is final in v0.1.0 GA — no architectural
+# change required for v0.2.0, only content addition.
+# See .claude/plans/immutable-splashing-waffle.md Section 2.1 for details.
 
 $coreModules = @(
     'Xdr.Common.Auth',
     'Xdr.Sentinel.Ingest',
     'Xdr.Defender.Auth',
     'Xdr.Defender.Client',
+    # v0.1.0 GA Phase A.3 multi-portal scaffolding stubs:
+    'Xdr.Entra.Auth',
+    'Xdr.Entra.Client',
+    'Xdr.Purview.Auth',
+    'Xdr.Purview.Client',
+    'Xdr.Intune.Auth',
+    'Xdr.Intune.Client',
+    # L4 must be last — its psd1 RequiredModules references all the above
     'Xdr.Connector.Orchestrator'
 )
 
