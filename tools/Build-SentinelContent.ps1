@@ -28,6 +28,49 @@ if (-not $OutputPath) {
     $OutputPath = Join-Path $RepoRoot 'deploy' 'compiled' 'sentinelContent.json'
 }
 
+function ConvertTo-IsoDuration {
+    <#
+    .SYNOPSIS
+        Convert short duration form (15m, 1h, 14d) to ISO 8601 (PT15M, PT1H, P14D).
+    .DESCRIPTION
+        Sentinel API requires ISO 8601 PT/P durations for QueryFrequency + QueryPeriod.
+        v0.1.0 GA Phase F.1 reaudit fix per "PT1M not in [PT5M, P14D]" deploy error.
+        Maps:
+          Ns -> PTNS  (seconds)
+          Nm -> PTNM  (minutes)
+          Nh -> PTNH  (hours)
+          Nd -> PNDay (days, no T prefix per ISO 8601)
+        Already-ISO inputs (PT15M, P14D) pass through unchanged.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)] [string] $Value,
+        [string] $Default = 'PT15M'
+    )
+    if ([string]::IsNullOrWhiteSpace($Value)) { return $Default }
+    $v = $Value.Trim()
+    # Already ISO 8601 (PT15M, PT1H, P14D, P1Y) - pass through
+    if ($v -match '^(P|PT)\d+[YMWDHMS]') { return $v }
+    # Short form: <digits><unit>
+    if ($v -match '^(\d+)\s*([smhdwSMHDW])$') {
+        $n = [int]$Matches[1]
+        $u = $Matches[2].ToUpperInvariant()
+        switch ($u) {
+            'S' { return "PT${n}S" }
+            'M' { return "PT${n}M" }
+            'H' { return "PT${n}H" }
+            'D' { return "P${n}D" }
+            'W' { return "P${n}W" }
+        }
+    }
+    # Numeric only: assume minutes (legacy convention)
+    if ($v -match '^\d+$') { return "PT${v}M" }
+    # Unparseable: return default
+    Write-Warning "ConvertTo-IsoDuration: cannot parse '$Value', returning default '$Default'"
+    return $Default
+}
+
 $sentinelDir = Join-Path $RepoRoot 'sentinel'
 $parsersDir   = Join-Path $sentinelDir 'parsers'
 $workbooksDir = Join-Path $sentinelDir 'workbooks'
@@ -188,8 +231,12 @@ foreach ($file in Get-ChildItem -Path $rulesDir -Filter '*.yaml') {
         Description   = $parsed.description
         Severity      = if ($parsed.severity) { $parsed.severity } else { 'Medium' }
         Query         = $parsed.query
-        QueryFrequency= if ($parsed.queryFrequency) { "PT$((($parsed.queryFrequency -replace '[^\d]', '') + 'M'))" } else { 'PT15M' }
-        QueryPeriod   = if ($parsed.queryPeriod)    { "PT$((($parsed.queryPeriod    -replace '[^\d]', '') + 'H'))" } else { 'PT2H' }
+        # v0.1.0 GA fix (Phase F.1 reaudit): proper ISO 8601 conversion.
+        # Previous version stripped unit and force-appended M/H — broke for
+        # `1h` (became PT1M instead of PT1H) and `14d` (became PT14H instead of P14D).
+        # Sentinel API rejects QueryFrequency outside [PT5M, P14D].
+        QueryFrequency= if ($parsed.queryFrequency) { ConvertTo-IsoDuration $parsed.queryFrequency 'PT15M' } else { 'PT15M' }
+        QueryPeriod   = if ($parsed.queryPeriod)    { ConvertTo-IsoDuration $parsed.queryPeriod    'PT2H'  } else { 'PT2H' }
         Tactics       = if ($parsed.tactics)  { $parsed.tactics } else { @() }
         Techniques    = if ($parsed.relevantTechniques) { $parsed.relevantTechniques } else { @() }
     }
