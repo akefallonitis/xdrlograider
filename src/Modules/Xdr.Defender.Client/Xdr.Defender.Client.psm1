@@ -23,6 +23,15 @@ Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'Endpoints' '_ProjectionHelpers.ps1')
 . (Join-Path $PSScriptRoot 'Endpoints' '_EndpointHelpers.ps1')
 
+# v0.1.0-beta post-deploy: strict-mode-safe init for the debug-capture
+# tracking var used by Expand-MDEResponse when XDR_DEBUG_RESPONSE_CAPTURE=true.
+# Without this init, every poll-* invocation crashed with
+#   "The variable '$script:DebugResponseSeen' cannot be retrieved because
+#    it has not been set"
+# under Set-StrictMode -Version Latest. Same pattern as $script:DcrIdMap
+# init in Xdr.Sentinel.Ingest.psm1.
+$script:DebugResponseSeen = @{}
+
 # 2) Public entry points (dispatcher + tier poller).
 $publicFiles = @(Get-ChildItem -Path (Join-Path $PSScriptRoot 'Public') -Filter *.ps1 -ErrorAction SilentlyContinue)
 foreach ($file in $publicFiles) {
