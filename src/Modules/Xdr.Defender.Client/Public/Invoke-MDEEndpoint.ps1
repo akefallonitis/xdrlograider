@@ -135,7 +135,10 @@ function Invoke-MDEEndpoint {
     }
 
     # --- Expand + normalise ---
-    $expandArgs = @{ Response = $r.Data }
+    # Pass -Stream so Expand-MDEResponse can:
+    #  (a) attach -Stream context to Ingest.BoundaryMarker AppInsights events
+    #  (b) fire the XDR_DEBUG_RESPONSE_CAPTURE one-shot per stream when env=true
+    $expandArgs = @{ Response = $r.Data; Stream = $Stream }
     if ($entry.ContainsKey('IdProperty') -and $entry.IdProperty) {
         $expandArgs['IdProperty'] = [string[]]$entry.IdProperty
     }
