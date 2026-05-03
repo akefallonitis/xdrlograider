@@ -243,7 +243,7 @@
           "Custom-MDE_AuthenticatedTelemetry_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"AllowNonAuthSense","type":"boolean"},{"name":"FeatureName","type":"string"},{"name":"IsEnabled","type":"boolean"}]},
           "Custom-MDE_CloudAppsConfig_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"CreatedTime","type":"datetime"},{"name":"IsEnabled","type":"boolean"},{"name":"ModifiedBy","type":"string"},{"name":"Region","type":"string"},{"name":"SettingId","type":"string"}]},
           "Custom-MDE_ConnectedApps_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"AppId","type":"string"},{"name":"IsEnabled","type":"boolean"},{"name":"LatestConnectivity","type":"datetime"},{"name":"Name","type":"string"},{"name":"SettingsLink","type":"string"}]},
-          "Custom-MDE_CustomCollection_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"CreatedBy","type":"string"},{"name":"CreatedTime","type":"datetime"},{"name":"IsEnabled","type":"boolean"},{"name":"Name","type":"string"},{"name":"RuleId","type":"string"},{"name":"Scope","type":"string"}]}
+          "Custom-MDE_CustomCollection_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"ActionType","type":"string"},{"name":"CreatedBy","type":"string"},{"name":"CreatedTime","type":"datetime"},{"name":"Description","type":"string"},{"name":"IsEnabled","type":"boolean"},{"name":"LastModifiedBy","type":"string"},{"name":"LastModifiedTime","type":"datetime"},{"name":"Name","type":"string"},{"name":"Platform","type":"string"},{"name":"RuleId","type":"string"},{"name":"Scope","type":"string"},{"name":"Table","type":"string"}]}
         },
         "destinations": {
           "logAnalytics": [
@@ -338,7 +338,7 @@
           "Custom-MDE_ExposureRecommendations_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"Category","type":"string"},{"name":"ImplementationCost","type":"string"},{"name":"IsDisabled","type":"boolean"},{"name":"LastSyncedUtc","type":"datetime"},{"name":"MaxScore","type":"real"},{"name":"Product","type":"string"},{"name":"RecommendationId","type":"string"},{"name":"Score","type":"real"},{"name":"Severity","type":"string"},{"name":"Source","type":"string"},{"name":"Status","type":"string"},{"name":"Title","type":"string"},{"name":"UserImpact","type":"string"}]},
           "Custom-MDE_ExposureSnapshots_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"CreatedTime","type":"datetime"},{"name":"InitiativeId","type":"string"},{"name":"MetricId","type":"string"},{"name":"Score","type":"real"},{"name":"ScoreChange","type":"real"},{"name":"SnapshotId","type":"string"}]},
           "Custom-MDE_Heartbeat_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"FunctionName","type":"string"},{"name":"Tier","type":"string"},{"name":"StreamsAttempted","type":"int"},{"name":"StreamsSucceeded","type":"int"},{"name":"RowsIngested","type":"int"},{"name":"LatencyMs","type":"int"},{"name":"HostName","type":"string"},{"name":"Notes","type":"dynamic"}]},
-          "Custom-MDE_IdentityAlertThresholds_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"AlertType","type":"string"},{"name":"ExpiresUtc","type":"datetime"},{"name":"IsEnabled","type":"boolean"},{"name":"ModifiedBy","type":"string"},{"name":"Threshold","type":"real"},{"name":"ThresholdId","type":"string"}]},
+          "Custom-MDE_IdentityAlertThresholds_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"AlertName","type":"string"},{"name":"AlertTitle","type":"string"},{"name":"AlertType","type":"string"},{"name":"AvailableThresholds","type":"string"},{"name":"ExpiresUtc","type":"datetime"},{"name":"IsEnabled","type":"boolean"},{"name":"ModifiedBy","type":"string"},{"name":"Threshold","type":"real"},{"name":"ThresholdLevel","type":"string"},{"name":"ThresholdId","type":"string"}]},
           "Custom-MDE_IdentityOnboarding_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"DCName","type":"string"},{"name":"Domain","type":"string"},{"name":"IpAddress","type":"string"},{"name":"IsActive","type":"boolean"},{"name":"LastSeenUtc","type":"datetime"},{"name":"SensorHealth","type":"string"}]}
         },
         "destinations": {
@@ -524,7 +524,7 @@
         "streamDeclarations": {
           "Custom-MDE_RemediationAccounts_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"AccountType","type":"string"},{"name":"AccountUpn","type":"string"},{"name":"Domain","type":"string"},{"name":"IsActive","type":"boolean"},{"name":"LastSeenUtc","type":"datetime"}]},
           "Custom-MDE_SAClassification_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"AccountType","type":"string"},{"name":"Domain","type":"string"},{"name":"IsActive","type":"boolean"},{"name":"LastSeenUtc","type":"datetime"},{"name":"Name","type":"string"},{"name":"RuleId","type":"string"}]},
-          "Custom-MDE_SecurityBaselines_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"BenchmarkName","type":"string"},{"name":"Compliance","type":"boolean"},{"name":"DeviceCount","type":"int"},{"name":"LastScanUtc","type":"datetime"},{"name":"Name","type":"string"},{"name":"ProfileId","type":"string"},{"name":"Score","type":"real"}]},
+          "Custom-MDE_SecurityBaselines_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"BenchmarkName","type":"string"},{"name":"Compliance","type":"boolean"},{"name":"CompliancePct","type":"real"},{"name":"CompliantDevices","type":"int"},{"name":"DeviceCount","type":"int"},{"name":"LastModifiedUtc","type":"datetime"},{"name":"LastScanUtc","type":"datetime"},{"name":"Name","type":"string"},{"name":"NonCompliantDevices","type":"int"},{"name":"ProfileId","type":"string"},{"name":"Score","type":"real"}]},
           "Custom-MDE_SmartScreenConfig_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"CustomIndicator","type":"int"},{"name":"Exploit","type":"int"},{"name":"FeatureName","type":"string"},{"name":"LastModifiedUtc","type":"datetime"},{"name":"Malicious","type":"int"},{"name":"Phishing","type":"int"},{"name":"TotalThreats","type":"int"}]},
           "Custom-MDE_StreamingApiConfig_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"}]},
           "Custom-MDE_SuppressionRules_CL": {"columns":[{"name":"TimeGenerated","type":"datetime"},{"name":"SourceStream","type":"string"},{"name":"EntityId","type":"string"},{"name":"RawJson","type":"dynamic"},{"name":"Action","type":"int"},{"name":"AlertTitle","type":"string"},{"name":"CreatedBy","type":"string"},{"name":"CreatedTime","type":"datetime"},{"name":"IsEnabled","type":"boolean"},{"name":"IsReadOnly","type":"boolean"},{"name":"MatchingAlertsCount","type":"int"},{"name":"Name","type":"string"},{"name":"RuleId","type":"string"},{"name":"Scope","type":"int"},{"name":"UpdateTime","type":"datetime"}]},
@@ -1098,12 +1098,18 @@
                     { "name": "SourceStream", "type": "string" },
                     { "name": "EntityId", "type": "string" },
                     { "name": "RawJson", "type": "dynamic" },
+                    { "name": "ActionType", "type": "string" },
                     { "name": "CreatedBy", "type": "string" },
                     { "name": "CreatedTime", "type": "datetime" },
+                    { "name": "Description", "type": "string" },
                     { "name": "IsEnabled", "type": "boolean" },
+                    { "name": "LastModifiedBy", "type": "string" },
+                    { "name": "LastModifiedTime", "type": "datetime" },
                     { "name": "Name", "type": "string" },
+                    { "name": "Platform", "type": "string" },
                     { "name": "RuleId", "type": "string" },
-                    { "name": "Scope", "type": "string" }
+                    { "name": "Scope", "type": "string" },
+                    { "name": "Table", "type": "string" }
                   ]
                 }
               }
@@ -1306,11 +1312,15 @@
                     { "name": "SourceStream", "type": "string" },
                     { "name": "EntityId", "type": "string" },
                     { "name": "RawJson", "type": "dynamic" },
+                    { "name": "AlertName", "type": "string" },
+                    { "name": "AlertTitle", "type": "string" },
                     { "name": "AlertType", "type": "string" },
+                    { "name": "AvailableThresholds", "type": "string" },
                     { "name": "ExpiresUtc", "type": "datetime" },
                     { "name": "IsEnabled", "type": "boolean" },
                     { "name": "ModifiedBy", "type": "string" },
                     { "name": "Threshold", "type": "real" },
+                    { "name": "ThresholdLevel", "type": "string" },
                     { "name": "ThresholdId", "type": "string" }
                   ]
                 }
@@ -1647,9 +1657,13 @@
                     { "name": "RawJson", "type": "dynamic" },
                     { "name": "BenchmarkName", "type": "string" },
                     { "name": "Compliance", "type": "boolean" },
+                    { "name": "CompliancePct", "type": "real" },
+                    { "name": "CompliantDevices", "type": "int" },
                     { "name": "DeviceCount", "type": "int" },
+                    { "name": "LastModifiedUtc", "type": "datetime" },
                     { "name": "LastScanUtc", "type": "datetime" },
                     { "name": "Name", "type": "string" },
+                    { "name": "NonCompliantDevices", "type": "int" },
                     { "name": "ProfileId", "type": "string" },
                     { "name": "Score", "type": "real" }
                   ]

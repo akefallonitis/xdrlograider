@@ -357,14 +357,26 @@
             Category = 'Endpoint Configuration'
             Purpose = 'Custom event-collection rules (what extra MDE telemetry the tenant is gathering)'
             Availability = 'tenant-gated'
-            # Fixture: tenant-gated (no live data). Convention: collection-rule shape.
+            IdProperty = @('ruleId', 'RuleId', 'id', 'Id')
+            # Tenant-gated (no live data). Schema cross-referenced against
+            # XDRInternals Get-XdrEndpointConfigurationCustomCollectionRule.ps1
+            # — bare array of rule objects (no wrapper). Per-row schema:
+            #   { ruleId, ruleName, ruleDescription, table, actionType, isEnabled,
+            #     platform, scope, createdBy, lastModifiedBy, creationDateTimeUtc,
+            #     lastModificationDateTimeUtc, version, updateKey, filters }.
             ProjectionMap = @{
-                RuleId       = '$tostring:Id'
-                Name         = '$tostring:Name'
-                IsEnabled    = '$tobool:IsEnabled'
-                CreatedTime  = '$todatetime:CreatedTime'
-                CreatedBy    = '$tostring:CreatedBy'
-                Scope        = '$tostring:Scope'
+                RuleId             = '$tostring:ruleId'
+                Name               = '$tostring:ruleName'
+                Description        = '$tostring:ruleDescription'
+                Table              = '$tostring:table'
+                ActionType         = '$tostring:actionType'
+                IsEnabled          = '$tobool:isEnabled'
+                Platform           = '$tostring:platform'
+                Scope              = '$tostring:scope'
+                CreatedBy          = '$tostring:createdBy'
+                LastModifiedBy     = '$tostring:lastModifiedBy'
+                CreatedTime        = '$todatetime:creationDateTimeUtc'
+                LastModifiedTime   = '$todatetime:lastModificationDateTimeUtc'
             }
         }
 
@@ -544,7 +556,11 @@
             Category = 'Exposure Management (XSPM)'
             Purpose = 'Critical-asset classification rules (which devices/identities feed XSPM as crown jewels)'
             Availability = 'live'
-            # Fixture: { rules: [{ ruleId, ruleName, ruleDescription, createdBy, isDisabled, ruleType, criticalityLevel, isDeleted, assetType, classificationValue, affectedAssetsCount }] } — but no UnwrapProperty, so each row is one (key, value) where value is the full rules array.
+            # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
+            # { rules: [{ orgId, tenantId, ruleId, ruleName, ruleDescription, createdBy,
+            #   createdByName, lastUpdatedBy, lastUpdatedByName, lastUpdateTime,
+            #   ruleDefinition, kqlQuery, ... }] }
+            UnwrapProperty = 'rules'
             ProjectionMap = @{
                 RuleId               = '$tostring:ruleId'
                 Name                 = '$tostring:ruleName'
@@ -585,7 +601,10 @@
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM exposure initiatives + per-initiative completion progress + recommended actions'
             Availability = 'live'
-            # Fixture: { results: [{ id, name, description, targetValue, metricIds, activeMetricIds, recommendationIds, programs, isFavorite, dataHistory }] }.
+            # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
+            # { results: [{ id, name, description, targetValue, metricIds[], activeMetricIds[],
+            #   recommendationIds[], programs[], isFavorite, dataHistory }] }
+            UnwrapProperty = 'results'
             ProjectionMap = @{
                 InitiativeId      = '$tostring:id'
                 Name              = '$tostring:name'
@@ -604,7 +623,9 @@
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM posture-snapshot deltas (what changed in exposure score / metrics over time)'
             Availability = 'live'
-            # Fixture: { results: [], recordsCount: 0 } — empty in test tenant. Convention: posture-snapshot delta shape.
+            # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
+            # { results: [], recordsCount: 0 } — empty when no recent posture updates.
+            UnwrapProperty = 'results'
             ProjectionMap = @{
                 SnapshotId    = '$tostring:id'
                 MetricId      = '$tostring:metricId'
@@ -625,6 +646,10 @@
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM remediation recommendations (per-initiative actionable steps + criticality + effort)'
             Availability = 'live'
+            # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
+            # { results: [{ id, title, lastStateChange, lastStateUpdate, category, source,
+            #   product, description, implementationStatus, severity, remediation, ... }] }
+            UnwrapProperty = 'results'
             # Fixture: { results: [{ id, title, lastStateChange, lastStateUpdate, category, source, product, severity, implementationCost, userImpact, userAffected, currentState, mssControlState, isDisabled, score, maxScore, lastSynced }] }.
             ProjectionMap = @{
                 RecommendationId  = '$tostring:id'
@@ -662,7 +687,11 @@
             Purpose = 'XSPM attack-path graph (multi-hop privesc/lateral chains from low-privilege entry to crown jewels)'
             IdProperty = @('attackPathId', 'id')
             Availability = 'live'
-            # Fixture: { totalRecords: 0, count: 0, data: [] } — empty in test tenant. Convention: attack-path graph row shape.
+            # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
+            # { totalRecords: 0, count: 0, skipToken: null, data: [] } — empty in test
+            # tenant; non-empty rows carry { attackPathId, MaxRiskLevel, Status,
+            # Source: { Name, Id }, Target: { Name, Id }, HopsCount, CreationTime, ... }.
+            UnwrapProperty = 'data'
             ProjectionMap = @{
                 PathId      = '$tostring:attackPathId'
                 Severity    = '$tostring:MaxRiskLevel'
@@ -697,7 +726,11 @@ AttackPathDiscovery
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM chokepoints — single nodes that appear on many attack paths (highest-leverage remediation targets)'
             Availability = 'live'
-            # Fixture: { totalRecords: 0, count: 0, data: [] } — empty in test tenant. Convention: chokepoint row shape (attack-path-discovery aggregation).
+            # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
+            # { totalRecords: 0, count: 0, skipToken: null, data: [] } — empty in test
+            # tenant; non-empty rows carry { NodeId, NodeName, NodeType, MaxRiskLevel,
+            # AttackPathsCount, EntityType } from the AttackPathDiscovery aggregation.
+            UnwrapProperty = 'data'
             ProjectionMap = @{
                 NodeId           = '$tostring:NodeId'
                 NodeName         = '$tostring:NodeName'
@@ -729,7 +762,11 @@ AttackPathsV2
             Category = 'Exposure Management (XSPM)'
             Purpose = 'XSPM top-targeted assets — critical assets reachable by the most active attack paths'
             Availability = 'live'
-            # Fixture: { totalRecords: 0, count: 0, data: [] } — empty in test tenant. Convention: top-target row from summarized attack-paths.
+            # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
+            # { totalRecords: 0, count: 0, skipToken: null, data: [] } — empty in test
+            # tenant; non-empty rows carry { TargetId, TargetName, AttackPathsCount }
+            # from the AttackPathsV2 summarize-by-target aggregation.
+            UnwrapProperty = 'data'
             ProjectionMap = @{
                 TargetId         = '$tostring:TargetId'
                 TargetName       = '$tostring:TargetName'
@@ -748,15 +785,36 @@ AttackPathsV2
             Category = 'Vulnerability Management (TVM)'
             Purpose = 'TVM security-baseline profile compliance (CIS / Microsoft baselines applied to device fleet)'
             Availability = 'tenant-gated'
-            # Fixture: tenant-gated (no live data). Convention: TVM baseline-profile shape.
+            # Tenant-gated (no live data — TVM addon not licensed in test tenant).
+            # Schema cross-referenced against XDRInternals
+            # Get-XdrVulnerabilityManagementBaseline.ps1 — root response is
+            # { results: [...], numOfResults: <int> }; cmdlet appends $response.results.
+            # Per-row schema:
+            #   { id (GUID), name, compliancePct, compliantDevices,
+            #     nonCompliantDevices, lastModifiedDateTime, benchmarkName }.
+            # `api-version: 1.0` header is mandatory (TVM API gate).
+            UnwrapProperty = 'results'
+            # NOTE: legacy `Compliance` column was typed `boolean` in v0.1.0-beta
+            # initial DCR but the upstream API returns a percentage (real).
+            # `CompliancePct` is the additive replacement; queries should migrate
+            # to `CompliancePct` going forward (Compliance preserved for back-compat).
+            # Legacy cols (Compliance/DeviceCount/LastScanUtc/Score) are declared
+            # in the ProjectionMap so the DCR-mirror gate sees them as part of the
+            # contract. They project from convention names that don't appear in
+            # the corrected upstream shape — values stay null.
             ProjectionMap = @{
-                ProfileId       = '$tostring:id'
-                Name            = '$tostring:name'
-                Compliance      = '$tobool:isCompliant'
-                DeviceCount     = '$toint:assetsCount'
-                LastScanUtc     = '$todatetime:lastUpdate'
-                BenchmarkName   = '$tostring:benchmarkName'
-                Score           = '$todouble:complianceScore'
+                ProfileId           = '$tostring:id'
+                Name                = '$tostring:name'
+                BenchmarkName       = '$tostring:benchmarkName'
+                CompliancePct       = '$todouble:compliancePct'
+                CompliantDevices    = '$toint:compliantDevices'
+                NonCompliantDevices = '$toint:nonCompliantDevices'
+                LastModifiedUtc     = '$todatetime:lastModifiedDateTime'
+                # Legacy back-compat (always null with the corrected upstream shape):
+                Compliance          = '$tobool:isCompliant'
+                DeviceCount         = '$toint:assetsCount'
+                LastScanUtc         = '$todatetime:lastUpdate'
+                Score               = '$todouble:complianceScore'
             }
         }
 
@@ -832,14 +890,36 @@ AttackPathsV2
             Category = 'Identity Protection (MDI)'
             Purpose = 'MDI alert-threshold tuning per detection (when each MDI rule fires + temporary overrides)'
             Availability = 'tenant-gated'
-            # Fixture: tenant-gated (no MDI). Convention: alert-threshold-with-expiry shape.
+            IdProperty = @('AlertName', 'AlertType', 'Id')
+            # Tenant-gated (no MDI). Schema cross-referenced against
+            # XDRInternals Get-XdrIdentityAlertThreshold.ps1 — root response is
+            # { IsRecommendedTestModeEnabled: bool, AlertThresholds: [...] };
+            # cmdlet returns $result.AlertThresholds. Per-row schema:
+            #   { AlertName, Threshold (High/Medium/Low), AvailableThresholds[],
+            #     Expiry, AlertTitle (cmdlet-enriched friendly name) }.
+            UnwrapProperty = 'AlertThresholds'
+            # NOTE: legacy `Threshold` column was typed `real` in the v0.1.0-beta
+            # initial DCR — preserved for backward compatibility (queries still
+            # parse). Actual MDI threshold values are categorical strings
+            # (High/Medium/Low) that ride on the new `ThresholdLevel` column;
+            # operators should query `ThresholdLevel` going forward.
+            # Legacy cols (ThresholdId/AlertType/IsEnabled/ModifiedBy/Threshold)
+            # are declared in the ProjectionMap so the DCR-mirror gate
+            # (DCR.TypedColumnCoverage.Tests.ps1) sees them as part of the
+            # contract. They project from fields the upstream cmdlet doesn't
+            # surface — values stay null until/unless MDI exposes them.
             ProjectionMap = @{
-                ThresholdId  = '$tostring:Id'
-                AlertType    = '$tostring:AlertType'
-                Threshold    = '$todouble:Value'
-                ExpiresUtc   = '$todatetime:ExpiryTime'
-                IsEnabled    = '$tobool:IsEnabled'
-                ModifiedBy   = '$tostring:ModifiedBy'
+                AlertName           = '$tostring:AlertName'
+                AlertTitle          = '$tostring:AlertTitle'
+                ThresholdLevel      = '$tostring:Threshold'
+                AvailableThresholds = '$tostring:AvailableThresholds[*]'
+                ExpiresUtc          = '$todatetime:Expiry'
+                # Legacy back-compat (always null with the corrected upstream shape):
+                ThresholdId         = '$tostring:Id'
+                AlertType           = '$tostring:AlertType'
+                IsEnabled           = '$tobool:IsEnabled'
+                ModifiedBy          = '$tostring:ModifiedBy'
+                Threshold           = '$todouble:Value'
             }
         }
         @{
