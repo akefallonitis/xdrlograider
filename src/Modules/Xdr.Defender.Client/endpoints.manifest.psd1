@@ -104,12 +104,20 @@
     # ============================================================================
 
     Defaults = @{
-        Portal              = 'security.microsoft.com'
-        SchemaSource        = 'live-capture'   # Default per directive 15 (Phase E); per-stream override in v0.1.1 for nodoc-spec / XDRInternals-cmdlet / inferred classifications
-        MFAMethodsSupported = @('CredentialsTotp', 'Passkey')
-        AuditScope          = 'portal-only'
-        IdProperty          = $null  # falls back to Expand-MDEResponse default heuristic list
-        ProjectionMap       = @{}    # populated per-stream in Phase 4
+        Portal                  = 'security.microsoft.com'
+        SchemaSource            = 'live-capture'   # Phase E per directive 15
+        MFAMethodsSupported     = @('CredentialsTotp', 'Passkey')
+        AuditScope              = 'portal-only'
+        IdProperty              = $null  # falls back to Expand-MDEResponse default heuristic list
+        ProjectionMap           = @{}    # populated per-stream in Phase 4
+        # Phase I per directives 32 + 34 + plan Section 2.A:
+        StreamSubtype           = 'portal-api'  # v0.2.0 adds 'xdrinternals' + 'hybrid'
+        SnapshotDedupRationale  = 'snapshot-replace'  # default for snapshot-style ingest; per-stream override for event-stream tiers
+        # NodocCategorySlug derived at manifest-load from NodocCategoryId via lookup table:
+        #   1=endpoint-device-management, 2=endpoint-configuration, 3=vulnerability-management,
+        #   4=identity-protection, 5=configuration-and-settings, 6=exposure-management-xspm,
+        #   7=threat-analytics, 8=action-center, 9=multi-tenant-operations, 10=streaming-api
+        # SourceName derived at manifest-load: <Stream>_PortalApi (per-stream override allowed)
     }
 
     Endpoints = @(

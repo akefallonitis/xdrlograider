@@ -212,6 +212,10 @@ function Invoke-MDEEndpoint {
             # at least @{} (Get-MDEEndpointManifest's Defaults block guarantees
             # the field exists), so a $null guard is unnecessary but harmless.
             $projMap = if ($entry.ContainsKey('ProjectionMap') -and $entry.ProjectionMap) { $entry.ProjectionMap } else { $null }
+            # Phase I REVERTED per user feedback (2026-05-04): nodoc taxonomy
+            # remains MANIFEST-INTERNAL reference only. Per-row stamping was
+            # over-engineering; operators query typed cols + RawJson, not nodoc
+            # metadata. Reverted to original ConvertTo-MDEIngestRow signature.
             ConvertTo-MDEIngestRow -Stream $Stream -EntityId $entityId -Raw $entity -Extras $extras -ProjectionMap $projMap
         }
     )

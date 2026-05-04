@@ -53,6 +53,11 @@ function ConvertTo-MDEIngestRow {
         [hashtable] $ProjectionMap = $null
     )
 
+    # Phase I REVERTED per user feedback (2026-05-04): NodocCategoryId/Slug/SourceName/
+    # StreamSubtype/SchemaSource are MANIFEST-INTERNAL REFERENCES ONLY, not per-row
+    # operator-visible columns. Operators query typed cols + RawJson; nodoc taxonomy
+    # is for code/test/doc reference (groupby in manifest scripts), not for row data.
+    # Original 4-col envelope preserved.
     $base = [ordered]@{
         TimeGenerated = [datetime]::UtcNow.ToString('o')
         SourceStream  = $Stream
@@ -471,11 +476,15 @@ function Get-MDEEndpointManifest {
     # so consumers (Invoke-MDEEndpoint, ConvertTo-MDEIngestRow, parsers, etc.)
     # always see a populated field.
     $defaults = @{
-        Portal              = 'security.microsoft.com'
-        MFAMethodsSupported = @('CredentialsTotp', 'Passkey')
-        AuditScope          = 'portal-only'
-        IdProperty          = $null
-        ProjectionMap       = @{}
+        Portal                  = 'security.microsoft.com'
+        MFAMethodsSupported     = @('CredentialsTotp', 'Passkey')
+        AuditScope              = 'portal-only'
+        IdProperty              = $null
+        ProjectionMap           = @{}
+        # Phase E + Phase I per directives 15 + 32 + 34 + plan Section 2.A:
+        SchemaSource            = 'live-capture'
+        StreamSubtype           = 'portal-api'
+        SnapshotDedupRationale  = 'snapshot-replace'
     }
     if ($raw.PSObject.Properties['Defaults'] -and $raw.Defaults) {
         foreach ($key in $defaults.Keys.Clone()) {
@@ -483,6 +492,21 @@ function Get-MDEEndpointManifest {
                 $defaults[$key] = $raw.Defaults.$key
             }
         }
+    }
+
+    # Phase I per directive 34 + nodoc 10-category authoritative taxonomy.
+    # NodocCategoryId -> NodocCategorySlug mapping (kebab-case, ARM-stable).
+    $nodocSlugMap = @{
+        1  = 'endpoint-device-management'
+        2  = 'endpoint-configuration'
+        3  = 'vulnerability-management'
+        4  = 'identity-protection'
+        5  = 'configuration-and-settings'
+        6  = 'exposure-management-xspm'
+        7  = 'threat-analytics'
+        8  = 'action-center'
+        9  = 'multi-tenant-operations'
+        10 = 'streaming-api'
     }
 
     # iter-14.0 audit gate: every entry MUST have Category + Purpose declared
@@ -506,6 +530,32 @@ function Get-MDEEndpointManifest {
             if (-not $entry.ContainsKey($key)) {
                 $entry[$key] = $defaults[$key]
             }
+        }
+
+        # Phase I per directive 34: derive NodocCategorySlug from NodocCategoryId
+        # (lookup table above) if not explicitly set per-entry.
+        if (-not $entry.ContainsKey('NodocCategorySlug')) {
+            if ($entry.ContainsKey('NodocCategoryId') -and $nodocSlugMap.ContainsKey([int]$entry.NodocCategoryId)) {
+                $entry['NodocCategorySlug'] = $nodocSlugMap[[int]$entry.NodocCategoryId]
+            } else {
+                $entry['NodocCategorySlug'] = 'unknown'
+            }
+        }
+
+        # Phase I per directive 34: derive SourceName from Stream + StreamSubtype
+        # if not explicitly set per-entry. Convention: <Stream-without-_CL>_<TitleCaseSubtype>
+        # e.g. MDE_AdvancedFeatures_CL + portal-api -> MDE_AdvancedFeatures_PortalApi
+        if (-not $entry.ContainsKey('SourceName')) {
+            $streamBase = $entry.Stream -replace '_CL$', ''
+            # Title-case the subtype: split on hyphen, capitalize each word, join
+            $parts = $entry.StreamSubtype -split '-'
+            $titleCased = New-Object System.Collections.Generic.List[string]
+            foreach ($p in $parts) {
+                if ([string]::IsNullOrEmpty($p)) { continue }
+                $titleCased.Add($p.Substring(0,1).ToUpperInvariant() + $p.Substring(1))
+            }
+            $subtypeTitle = $titleCased -join ''
+            $entry['SourceName'] = "${streamBase}_${subtypeTitle}"
         }
         # iter-14.0 audit-scope gate: 'public-api-covered' MUST NOT appear in
         # this manifest (the connector's purpose is portal-only telemetry; if
