@@ -55,12 +55,12 @@ XdrLogRaider is a three-layer Sentinel Solution:
 │  │       (forward-scalable to multi-portal in v0.2.0+)        │       │
 │  │                                                            │       │
 │  │  Timer functions (6 total, all timer-triggered):           │       │
-│  │    heartbeat-5m                                            │       │
-│  │    poll-fast-10m         (ActionCenter + MachineActions)   │       │
-│  │    poll-exposure-1h      (XSPM graph + Exposure snapshots) │       │
-│  │    poll-config-6h        (rules / RBAC / integrations)     │       │
-│  │    poll-inventory-1d     (settings / identity / metadata)  │       │
-│  │    poll-maintenance-1w   (DataExportSettings — rare-change)│       │
+│  │    Connector-Heartbeat                                            │       │
+│  │    Defender-ActionCenter-Refresh         (ActionCenter + MachineActions)   │       │
+│  │    Defender-XspmGraph-Refresh      (XSPM graph + Exposure snapshots) │       │
+│  │    Defender-Configuration-Refresh        (rules / RBAC / integrations)     │       │
+│  │    Defender-Inventory-Refresh     (settings / identity / metadata)  │       │
+│  │    Defender-Maintenance-Refresh   (DataExportSettings — rare-change)│       │
 │  └────────────────────────────────────────────────────────────┘       │
 │                                                                        │
 │  ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────────┐ │

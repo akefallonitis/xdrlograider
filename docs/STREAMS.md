@@ -14,11 +14,11 @@ The connector groups streams by **how often it polls them**, not by an arbitrary
 
 | Tier | Cadence | Cron | Streams (active) | Timer function |
 |---|---|---|---|---|
-| `fast` | every 10 min | `0 */10 * * * *` | 2 | `poll-fast-10m` |
-| `exposure` | hourly @ :25 | `0 25 * * * *` | 7 | `poll-exposure-1h` |
-| `config` | every 6h @ :35 | `0 35 */6 * * *` | 14 | `poll-config-6h` |
-| `inventory` | daily @ 02:00 UTC | `0 0 2 * * *` | 21 | `poll-inventory-1d` |
-| `maintenance` | weekly Sun @ 03:00 UTC | `0 0 3 * * 0` | 1 (+1 deprecated, excluded from poll) | `poll-maintenance-1w` |
+| `fast` | every 10 min | `0 */10 * * * *` | 2 | `Defender-ActionCenter-Refresh` |
+| `exposure` | hourly @ :25 | `0 25 * * * *` | 7 | `Defender-XspmGraph-Refresh` |
+| `config` | every 6h @ :35 | `0 35 */6 * * *` | 14 | `Defender-Configuration-Refresh` |
+| `inventory` | daily @ 02:00 UTC | `0 0 2 * * *` | 21 | `Defender-Inventory-Refresh` |
+| `maintenance` | weekly Sun @ 03:00 UTC | `0 0 3 * * 0` | 1 (+1 deprecated, excluded from poll) | `Defender-Maintenance-Refresh` |
 
 Cadence reflects the data's actual change-rate. Action Center events flow continuously so the `fast` tier polls every 10 min; XSPM graph data churn-rate is well under 1h so the `exposure` tier matches the workbook hourly refresh; rule + RBAC + integration changes happen during weekday admin sessions so `config` polls every 6 hours; settings + identity + metadata are typically stable day-over-day so `inventory` is daily; data-export configuration only changes during architectural reviews so `maintenance` is weekly.
 
@@ -121,7 +121,7 @@ One non-telemetry stream emitted by the Function App itself, not polled from the
 
 | Table | Emitted by | Cadence | Schema |
 |---|---|---|---|
-| `MDE_Heartbeat_CL` | every poll-* timer + heartbeat-5m | per invocation | 9 cols: `TimeGenerated, FunctionName, Tier, StreamsAttempted, StreamsSucceeded, RowsIngested, LatencyMs, HostName, Notes(dynamic)` |
+| `MDE_Heartbeat_CL` | every poll-* timer + Connector-Heartbeat | per invocation | 9 cols: `TimeGenerated, FunctionName, Tier, StreamsAttempted, StreamsSucceeded, RowsIngested, LatencyMs, HostName, Notes(dynamic)` |
 
 Auth chain diagnostics (the previous `App Insights customEvents` table) moved to **App Insights `customEvents`** in v0.1.0-beta first publish. Query examples:
 

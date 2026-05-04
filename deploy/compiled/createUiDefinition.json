@@ -281,6 +281,44 @@
             }
           }
         ]
+      },
+      {
+        "name": "postDeploy",
+        "label": "Post-deploy verification",
+        "subLabel": {
+          "preValidation": "Auth setup + verify guidance",
+          "postValidation": "OK"
+        },
+        "bladeTitle": "Post-deploy verification",
+        "elements": [
+          {
+            "name": "infoPostDeploy",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Info",
+              "text": "After deployment completes, run two operator-facing scripts to (1) seed the service account credentials in Key Vault, and (2) verify connector health.\\n\\nStep 1 — Seed auth secrets in Key Vault:\\n  pwsh ./tools/Initialize-XdrLogRaiderAuth.ps1 -KeyVaultName <kv-name>\\n\\nStep 2 — Verify connector health (after ~10 min for first poll cycle):\\n  pwsh ./tools/Test-ConnectorHealth.ps1\\n\\nExpected: HEALTHY verdict + heartbeat freshness < 15 min + zero AuthChain.* exceptions."
+            }
+          },
+          {
+            "name": "infoEnableRules",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Warning",
+              "text": "All 18 analytic rules ship DISABLED per Microsoft Sentinel best practice. After verification, enable the 4 XdrOps-* operational rules in Sentinel UI:\\n  • XdrOps-ConnectorStaleStream — alerts on stream ingest stalls\\n  • XdrOps-AuthChainFailure — alerts on auth-chain anomalies\\n  • XdrOps-DlqDepthAlert — alerts on DLQ backpressure\\n  • XdrOps-ServiceAccountAnomalousSignIn — uses the SERVICE_ACCOUNT_UPN you provided in step 2 to detect sign-in anomalies\\n\\nThe 14 detection rules are operator-tunable per environment; review then enable selectively."
+            }
+          },
+          {
+            "name": "infoSecurity",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Info",
+              "text": "Verify supply-chain integrity: all release artifacts (function-app.zip, mainTemplate.json, sentinelContent.json, createUiDefinition.json, solution-*.zip, sbom.spdx.json) are Sigstore-cosign signed.\\n\\nVerification command:\\n  cosign verify-blob --certificate-identity-regexp 'akefallonitis' --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' --signature <artifact>.sig --bundle <artifact>.bundle <artifact>"
+            }
+          }
+        ]
       }
     ],
     "outputs": {

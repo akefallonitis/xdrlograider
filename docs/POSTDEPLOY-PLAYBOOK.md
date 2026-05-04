@@ -91,7 +91,7 @@ az storage entity show `
 
 ## Step 3 — Verify ingestion started (≈ 15 more minutes)
 
-After Step 2 + one more hour (for the `poll-inventory-1d` timer to fire), run:
+After Step 2 + one more hour (for the `Defender-Inventory-Refresh` timer to fire), run:
 
 ```powershell
 $env:XDRLR_ONLINE = 'true'
@@ -128,7 +128,7 @@ MDE_Heartbeat_CL
 | summarize PerTier = makeset(Tier), Runs = count() by FunctionName, bin(TimeGenerated, 1h)
 | order by TimeGenerated desc
 ```
-**Expect**: 6 function names present (heartbeat-5m + 5 poll-* cadence-tier timers). Each poll-p* should appear at its scheduled cadence.
+**Expect**: 6 function names present (Connector-Heartbeat + 5 poll-* cadence-tier timers). Each poll-p* should appear at its scheduled cadence.
 
 ### 4b. Auth health
 ```kql

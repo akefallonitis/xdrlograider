@@ -241,6 +241,40 @@ function Send-ToLogAnalytics {
                         Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.compression_ratio' -Value ([double]$compressionRatio)  -Properties $metricProps -OperationId $DlqOperationId
                         Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.retry_count'       -Value ([double]$batchRetryCount)   -Properties $metricProps -OperationId $DlqOperationId
                         Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.dce_latency_ms'    -Value ([double]$callLatencyMs)     -Properties $metricProps -OperationId $DlqOperationId
+
+                        # Phase M (R3) per directive 33 + .claude/plans/immutable-splashing-waffle.md:
+                        # Per-batch partial-success rate. For successful batches this is 1.0 (all rows
+                        # accepted). DCE 207 multi-status responses where a subset of rows fail would
+                        # surface < 1.0 (Microsoft Logs Ingestion API returns 207 with per-row errors
+                        # for transformKql failures). Currently DCE returns 200 = all-or-nothing per
+                        # batch; this metric is the operator hook for future per-row error visibility.
+                        Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.row_success_rate' -Value 1.0 -Properties $metricProps -OperationId $DlqOperationId
+
+                        # Phase M (R4) per directive 33 + .claude/plans/immutable-splashing-waffle.md:
+                        # Freshness SLI = age of the FIRST row in the batch when ingested. For event-stream
+                        # tiers (ActionCenter) this measures portal-to-DCE latency; for snapshot-replace
+                        # tiers (Configuration/Inventory/Maintenance) this is poll-cycle freshness.
+                        # Operators alert when freshness > expected cadence × 2.
+                        $rowAgeSeconds = $null
+                        if ($batch.Count -gt 0) {
+                            $firstRow = $batch[0]
+                            # Try multiple common timestamp fields per manifest ProjectionMap conventions
+                            $sourceTime = $null
+                            foreach ($prop in 'TimeGenerated', 'EventTime', 'CreatedTime', 'StartTime', 'LastSeenUtc') {
+                                if ($firstRow.PSObject.Properties[$prop] -and $firstRow.$prop) {
+                                    try {
+                                        $sourceTime = [datetime]::Parse([string]$firstRow.$prop).ToUniversalTime()
+                                        break
+                                    } catch { }
+                                }
+                            }
+                            if ($sourceTime) {
+                                $rowAgeSeconds = [math]::Max(0.0, ([datetime]::UtcNow - $sourceTime).TotalSeconds)
+                            }
+                        }
+                        if ($null -ne $rowAgeSeconds) {
+                            Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.row_age_seconds' -Value ([double]$rowAgeSeconds) -Properties $metricProps -OperationId $DlqOperationId
+                        }
                     }
 
                     $totalBatches++

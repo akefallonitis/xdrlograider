@@ -178,8 +178,8 @@ If the deployer identity isn't granted in the workspace's subscription, the cros
 ## Audit trail
 
 All Azure-side actions are logged by default. Recommended extras:
-- **Key Vault diagnostic settings** → send to workspace (track MI secret reads)
-- **Storage diagnostic settings** → send to workspace (track checkpoint writes)
+- **Key Vault diagnostic settings** → send to workspace (track MI secret reads) **(OPTIONAL — operator enables manually if desired; xdrlograider does NOT auto-configure KV diagnostics per the principle of least operator surprise. Per directive 37: each tenant has different cost/compliance constraints; operator decides per-environment.)**
+- **Storage diagnostic settings** → send to workspace (track checkpoint writes) **(OPTIONAL)**
 - **FA App Insights** → already wired; `traces` table shows every `Invoke-MDEEndpoint` call + auth chain events
 
 All portal-side actions by the service account appear in Entra sign-in logs + MDE audit logs — visible in Sentinel if you've enabled those connectors.

@@ -15,7 +15,7 @@ The connector emits operational telemetry through the Function App's Application
 | `exceptions` | Errors operators alert on — auth failures, ingest drops, transport faults. Auto-captures stack trace + Properties. | `AuthChain.AADSTSError` (typed via `ErrorClass`), `Ingest.DlqStuck`, `Ingest.DlqDropped`, KV credential fetch failures, post-reauth-retry portal failures, DCE ingest failures |
 | `dependencies` | Outbound HTTP / Azure SDK calls. Auto-correlates via OperationId for end-to-end transaction view. | Portal `POST /apiproxy/...` (target=hostname; name=path), DCE `POST .../streams/...` (target=DCE endpoint; resultCode/duration per attempt) |
 | `traces` | Structured diagnostics — Write-Information / Write-Warning equivalents with property bags. Operators search by SeverityLevel + structured customDimensions. | Diagnostic logs that don't fit the other categories (e.g. "manifest cache loaded N entries", "tier-poll started for N streams"). |
-| `requests` | Function App auto-instruments timer trigger invocations — we don't re-emit. | (FA runtime; `AppRequests | where Name == 'poll-fast-10m'`) |
+| `requests` | Function App auto-instruments timer trigger invocations — we don't re-emit. | (FA runtime; `AppRequests | where Name == 'Defender-ActionCenter-Refresh'`) |
 
 ## Why NOT customEvents for everything?
 

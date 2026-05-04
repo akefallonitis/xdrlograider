@@ -5,7 +5,7 @@ Daily, weekly, and quarterly operational tasks for XdrLogRaider.
 ## Daily (2 min)
 
 ```kql
-// Is the connector alive? (heartbeat-5m + 5 cadence-tier polls)
+// Is the connector alive? (Connector-Heartbeat + 5 cadence-tier polls)
 MDE_Heartbeat_CL
 | where TimeGenerated > ago(1h)
 | summarize LastSeen = max(TimeGenerated) by FunctionName

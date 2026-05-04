@@ -22,7 +22,7 @@ Operators choose one at deploy time via the `authMethod` parameter. The choice a
 ```
                            Function App worker
                        ┌─────────────────────────┐
-                       │ poll-inventory-1d   │ (timer fires)
+                       │ Defender-Inventory-Refresh   │ (timer fires)
                        └────────────┬────────────┘
                                     │
                                     ▼
