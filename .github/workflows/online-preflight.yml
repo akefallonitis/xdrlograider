@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Install PowerShell 7
         shell: bash
@@ -83,7 +83,7 @@ jobs:
           }
 
       - name: Az PowerShell login (OIDC federation)
-        uses: azure/login@a65d910e8af852a8061c627c456678983e180302  # v2.4.1
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43  # v2.4.1
         with:
           client-id:       ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id:       ${{ secrets.AZURE_TENANT_ID }}
@@ -125,7 +125,7 @@ jobs:
 
       - name: On drift — open issue
         if: failure()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
             const title = `[online-preflight] Portal shape drift detected — ${new Date().toISOString().split('T')[0]}`;
