@@ -296,17 +296,20 @@ jobs:
           if ($entries | Where-Object { $_ -like 'functions/*' }) {
               throw "function-app.zip has a 'functions/' wrapper. Function directories MUST be at root for Azure Functions runtime to load them."
           }
-          # 4. All 6 expected function dirs at root with function.json.
-          # Per directive 12 + Phase B in .claude/plans/immutable-splashing-waffle.md,
-          # functions are named by CAPABILITY (ActionCenter, XspmGraph, etc.) not
-          # by CADENCE (10m, 1h, etc.) — operator-meaningful FA Overview tab.
+          # 4. All 8 expected function dirs at root with function.json.
+          # Per directive 12 + Phase B: capability-named timers (not cron-named).
+          # Per directive 16 + Phase H: 2 Durable Functions added (orchestrator + activity).
           $expectedFuncs = @(
+              # Simple timers (6 capability-named):
               'Connector-Heartbeat',
               'Defender-ActionCenter-Refresh',
               'Defender-XspmGraph-Refresh',
               'Defender-Configuration-Refresh',
               'Defender-Inventory-Refresh',
-              'Defender-Maintenance-Refresh'
+              'Defender-Maintenance-Refresh',
+              # Durable Functions (Phase H per directive 16):
+              'Xdr-PollOrchestrator',
+              'Xdr-PollStream'
           )
           foreach ($func in $expectedFuncs) {
               if ($entries -notcontains "$func/function.json") {

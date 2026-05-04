@@ -154,13 +154,16 @@ Describe 'Timer thin-wrapper shape: <Folder>' -ForEach $TimerCases {
         $values | Should -Contain $Folder
     }
 
-    It 'body is consolidated (<= 2 total commands; proves the 45-line boilerplate dedup held)' {
-        # v0.1.0-beta canonical thin wrapper: exactly 1 CommandAst across the
-        # whole file — the Invoke-TierPollWithHeartbeat call. Allow up to 2
-        # so a defensive guard or extra single call can be added without test
-        # churn, but anything approaching the old ~20-command fat body fails.
+    It 'body is consolidated (<= 4 total commands; Phase H Durable starter pattern)' {
+        # Phase H per directive 16: timers are now Durable Functions starters.
+        # The if/else pattern uses 3-4 CommandAst nodes:
+        #   1. Start-NewOrchestration (Durable path)
+        #   2. Write-Information (Durable path)
+        #   3. Invoke-TierPollWithHeartbeat (legacy fallback)
+        # Updated cap from 2 to 4 to accommodate Durable Functions consolidation.
+        # Anything approaching the old ~20-command fat body still fails.
         $totalCommands = @($script:Parsed.Commands).Count
-        $totalCommands | Should -BeLessOrEqual 2 -Because 'v0.1.0-beta thin wrapper should contain at most 2 CommandAst nodes (just the helper call)'
+        $totalCommands | Should -BeLessOrEqual 4 -Because 'Phase H Durable starter pattern uses 3-4 CommandAst (Start-NewOrchestration + Write-Information + legacy Invoke-TierPollWithHeartbeat)'
     }
 
     It 'does not reference any removed / legacy Lara* function' {
