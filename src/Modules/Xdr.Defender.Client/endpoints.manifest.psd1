@@ -93,13 +93,14 @@
     #     MDE_DataExportSettings_CL. Each entry's per-entry comment documents
     #     the public-API delta + why we keep the portal version.
     #
-    # Per-tier breakdown (verified by tests/unit/Manifest.* gates):
-    #   fast        =  2 streams (Action Center events, every 10 min)
-    #   exposure    =  7 streams (XSPM graph + Exposure snapshots, hourly)
-    #   config      = 14 streams (alert/detect rules + RBAC + integrations, every 6h)
-    #   inventory   = 21 streams (device + identity + metadata long-tail, daily)
-    #   maintenance =  2 streams (DataExport active + StreamingApi deprecated, weekly)
-    #   TOTAL       = 46 entries (45 active + 1 deprecated)
+    # Per-tier breakdown (capability-themed names per Phase B; counts verified
+    # 2026-05-04 audit — corrected from prior off-by-one in inventory count):
+    #   ActionCenter  =  2 streams (Action Center events, every 10 min)
+    #   XspmGraph     =  7 streams (XSPM graph + Exposure snapshots, hourly)
+    #   Configuration = 14 streams (alert/detect rules + RBAC + integrations, every 6h)
+    #   Inventory     = 20 streams (device + identity + metadata long-tail, daily)
+    #   Maintenance   =  2 streams (DataExport active + StreamingApi deprecated, weekly)
+    #   TOTAL         = 45 entries (44 active + 1 deprecated)
     # ============================================================================
 
     Defaults = @{

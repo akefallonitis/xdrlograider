@@ -233,7 +233,50 @@ function Pop-XdrIngestDlq {
     }
 
     $output = New-Object System.Collections.Generic.List[pscustomobject]
+    $expiredCount = 0
+    $now = [datetime]::UtcNow
     foreach ($e in $rawEntries) {
+        # Phase L.1 (B5) — TTL consumer per Section 0.A of plan.
+        # Push side stamps ExpiresUtc + TtlDays; Pop side skips + DELETES
+        # expired entries so the DLQ doesn't grow unbounded for genuinely
+        # unrecoverable batches (e.g., portal API permanent shape change).
+        # Per Section 0.A in plan: this completes the half-implementation
+        # documented in the prior CHANGELOG.
+        if ($e.PSObject.Properties['ExpiresUtc'] -and $e.ExpiresUtc) {
+            $expiresUtc = $null
+            try { $expiresUtc = [datetime]::Parse([string]$e.ExpiresUtc).ToUniversalTime() } catch {}
+            if ($expiresUtc -and $expiresUtc -lt $now) {
+                # Expired — emit Ingest.DlqExpired exception + delete + skip
+                if (Get-Command -Name Send-XdrAppInsightsException -ErrorAction SilentlyContinue) {
+                    $ttlDaysStr = if ($e.PSObject.Properties['TtlDays']) { [string]$e.TtlDays } else { 'unknown' }
+                    $msg = ("DLQ entry expired: PartitionKey='{0}' RowKey='{1}' ExpiresUtc={2} (was {3} days TTL); auto-deleting." -f `
+                        $e.PartitionKey, $e.RowKey, $e.ExpiresUtc, $ttlDaysStr)
+                    Send-XdrAppInsightsException -Exception ([System.Exception]::new($msg)) `
+                        -SeverityLevel 'Warning' `
+                        -OperationId $OperationId `
+                        -Properties @{
+                            ErrorClass     = 'Ingest.DlqExpired'
+                            Stream         = $StreamName
+                            RowKey         = [string]$e.RowKey
+                            ExpiresUtc     = [string]$e.ExpiresUtc
+                            FirstFailedUtc = if ($e.PSObject.Properties['FirstFailedUtc']) { [string]$e.FirstFailedUtc } else { '' }
+                            Reason         = if ($e.PSObject.Properties['Reason']) { [string]$e.Reason } else { '' }
+                            AttemptCount   = if ($e.PSObject.Properties['AttemptCount']) { [string]$e.AttemptCount } else { '0' }
+                            Phase          = 'dlq-pop-ttl-expired'
+                        }
+                }
+                # Delete via Remove-XdrIngestDlqEntry (paired helper below)
+                try {
+                    Remove-XdrIngestDlqEntry -StorageAccountName $StorageAccountName -TableName $TableName `
+                        -PartitionKey ([string]$e.PartitionKey) -RowKey ([string]$e.RowKey) | Out-Null
+                    $expiredCount++
+                } catch {
+                    Write-Warning ("Pop-XdrIngestDlq: failed to delete expired DLQ entry: {0}" -f $_.Exception.Message)
+                }
+                continue
+            }
+        }
+
         $rowsJson = $null
         if ($e.PSObject.Properties['RowsJson'] -and $e.RowsJson) {
             # Decode: base64 → gunzip → UTF-8 string → JSON array
@@ -289,6 +332,13 @@ function Pop-XdrIngestDlq {
             -Properties @{ Stream = $StreamName; Outcome = 'drained' } -OperationId $OperationId
         Send-XdrAppInsightsCustomMetric -MetricName 'xdr.dlq.depth' -Value ([double]$output.Count) `
             -Properties @{ Stream = $StreamName } -OperationId $OperationId
+        # Phase L.1 TTL consumer metric: track how many entries auto-evicted
+        # per Pop call. Operators alert on sustained nonzero (= portal API
+        # permanent failure pattern; manual intervention needed).
+        if ($expiredCount -gt 0) {
+            Send-XdrAppInsightsCustomMetric -MetricName 'xdr.dlq.ttl_evicted_count' -Value ([double]$expiredCount) `
+                -Properties @{ Stream = $StreamName } -OperationId $OperationId
+        }
     }
     return ,$output.ToArray()
 }

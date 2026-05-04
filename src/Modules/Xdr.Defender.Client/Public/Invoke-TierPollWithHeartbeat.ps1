@@ -168,20 +168,16 @@ function Invoke-TierPollWithHeartbeat {
         $errMsg = $_.Exception.Message
         Write-Error "$FunctionName FATAL: $errMsg"
 
-        # Implicit auth-selftest FAILURE path: write flag so the gate above
-        # cooldown-skips on next run instead of retrying every cadence cycle.
-        # Failures BEFORE Connect-DefenderPortal succeeds (KV unreachable,
-        # bad credentials, AADSTS, etc.) all flow through here. Failures
-        # AFTER successful auth (DCE 5xx, table-missing) also flow here — the
-        # next run's cooldown gives the upstream service time to recover.
-        try {
-            Set-XdrAuthSelfTestFlag `
-                -StorageAccountName $config.StorageAccountName `
-                -CheckpointTable $config.CheckpointTable `
-                -Success $false -Stage 'fatal' -Reason $errMsg
-        } catch {
-            Write-Warning ("{0}: failed to write auth-selftest=failed flag: {1}" -f $FunctionName, $_.Exception.Message)
-        }
+        # CRITICAL FIX (Phase L.0 per .claude/plans/immutable-splashing-waffle.md
+        # Section 0.A): the auth-selftest gate was deleted in commit bc9ab51 —
+        # both Get-XdrAuthSelfTestFlag and Set-XdrAuthSelfTestFlag functions
+        # removed. The orphan call here was missed; it would throw "command
+        # not found" on EVERY fatal error, masking the original fatal AND
+        # preventing the heartbeat below from emitting (try/catch swallows the
+        # secondary error but the operator loses signal of what actually died).
+        #
+        # Removed: Set-XdrAuthSelfTestFlag call (was lines 177-184).
+        # The fatal-error heartbeat below remains the canonical operator signal.
 
         try {
             Write-Heartbeat -DceEndpoint $config.DceEndpoint -DcrImmutableId $heartbeatDcrId `
