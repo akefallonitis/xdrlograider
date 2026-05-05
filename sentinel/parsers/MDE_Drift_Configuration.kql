@@ -1,0 +1,58 @@
+// SYNOPSIS:
+//   Computes drift across the Configuration tier — field-level diff between current
+//   and previous snapshots. Sources from Defender_<Category>_CL tables with
+//   SourceName filter
+//
+//
+// PARAMETERS:
+//   lookback - ISO 8601 duration, default 7d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 6h. Matches the Configuration-tier poll cadence.
+//
+// INVOCATION:
+//   MDE_Drift_Configuration(7d, 6h) | where StreamName == 'MDE_<Stream>_CL'
+//   MDE_Drift_Configuration()    // applies defaults
+//
+// NOTES:
+//   - (2026-05-04): rewritten to source from Defender_<Category>_CL
+//     tables with SourceName filter. Drift logic preserved from v0.1.0 GA.
+//   - Drift is computed over the per-stream typed columns (DCR-projected at
+//     ingest); RawJson is preserved as a fallback. The parser never re-parses RawJson.
+//   - Output schema: TimeGenerated, StreamName, EntityId, FieldName, OldValue,
+//     NewValue, SnapshotCurrent, SnapshotPrevious, ChangeType.
+
+let MDE_Drift_Configuration = (lookback:timespan = 7d, window:timespan = 6h) {
+    // Metadata + envelope columns excluded from field-level diff.
+    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'SourceName', 'EntityId', 'RawJson', 'Type', 'TenantId']);
+    let sources = union (Defender_ConfigurationAndSettings_CL | where SourceName in ('MDE_PreviewFeatures_CL', 'MDE_AlertServiceConfig_CL', 'MDE_AlertTuning_CL', 'MDE_SuppressionRules_CL', 'MDE_CustomDetections_CL', 'MDE_TenantAllowBlock_CL', 'MDE_ConnectedApps_CL', 'MDE_IntuneConnection_CL', 'MDE_PurviewSharing_CL', 'MDE_RbacDeviceGroups_CL', 'MDE_UnifiedRbacRoles_CL', 'MDE_UserPreferences_CL', 'MDE_CloudAppsConfig_CL')), (Defender_ThreatAnalytics_CL | where SourceName in ('MDE_ThreatAnalytics_CL', 'MDE_ThreatAnalyticsEnriched_CL', 'MDE_ThreatAnalyticsTopThreats_CL'))
+        | where TimeGenerated > ago(lookback);
+    let current = sources
+        | where TimeGenerated > ago(window)
+        | summarize arg_max(TimeGenerated, *) by SourceName, EntityId
+        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);
+    let previous = sources
+        | where TimeGenerated between (ago(lookback) .. ago(window))
+        | summarize arg_max(TimeGenerated, *) by SourceName, EntityId
+        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);
+    current
+    | join kind=leftouter previous on SourceName, EntityId
+    | where hash(tostring(TypedBag)) != hash(tostring(TypedBag1)) or isnull(TypedBag1)
+    | extend CurrentFields  = bag_keys(TypedBag)
+    | extend PreviousFields = iff(isnull(TypedBag1), dynamic([]), bag_keys(TypedBag1))
+    | mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (
+        extend
+            NewValue = tostring(TypedBag[tostring(field)]),
+            OldValue = tostring(iff(isnull(TypedBag1), '', TypedBag1[tostring(field)]))
+        | where NewValue != OldValue
+      )
+    | project
+        TimeGenerated,
+        StreamName       = SourceName,
+        EntityId,
+        FieldName        = tostring(field),
+        OldValue,
+        NewValue,
+        SnapshotCurrent  = TimeGenerated,
+        SnapshotPrevious = TimeGenerated1,
+        ChangeType       = iff(isnull(TypedBag1), "Added", iff(isnull(TypedBag[tostring(field)]), "Removed", "Modified"))
+};
+MDE_Drift_Configuration

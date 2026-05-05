@@ -1,0 +1,43 @@
+id: 7e2c8a4f-1b3d-4f5a-8c2d-9b6e3f0a1d4c
+name: "[XdrOps] Connector auth chain failure - elevated AADSTS exception rate"
+description: |
+  XdrLogRaider's portal authentication chain (TOTP / passkey / ESTS / sccauth /
+  XSRF-TOKEN exchange) is producing exceptions at elevated rate, indicating:
+   - service account credentials need rotation (rare; admin-managed per directive 39)
+   - TOTP seed mismatch
+   - Entra Conditional Access policy change blocking the SP
+   - portal API auth contract change
+
+  Per directive 38 + B8 in .claude/plans/immutable-splashing-waffle.md.
+  Operator-enabled (ships disabled per Sentinel Solution best practice).
+
+  Triage in docs/AUTH.md + docs/RUNBOOK.md "Auth chain failure" section.
+severity: High
+enabled: false
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - AppExceptions
+queryFrequency: 1h
+queryPeriod: 4h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+relevantTechniques:
+  - T1078
+query: |
+  // Filter to XdrLogRaider Function App App Insights, then to AuthChain.* exception classes.
+  // Threshold: >3 AuthChain.* exceptions in 1h window (more than transient ESTS flake).
+  AppExceptions
+  | where TimeGenerated > ago(4h)
+  | extend ErrorClass = tostring(Properties.ErrorClass)
+  | where ErrorClass startswith "AuthChain."
+  | summarize FailureCount = count(), Stages = make_set(ErrorClass) by bin(TimeGenerated, 1h)
+  | where FailureCount > 3
+  | project TimeGenerated, FailureCount, Stages
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: SingleAlert
+suppressionEnabled: true
+suppressionDuration: PT2H

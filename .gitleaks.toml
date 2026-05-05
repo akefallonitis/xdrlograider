@@ -1,0 +1,47 @@
+# Custom gitleaks config for XdrLogRaider.
+#
+# Extends the default config and adds an allowlist for captured portal-response
+# fixtures under tests/fixtures/live-responses/. Those files contain legitimate
+# Microsoft Secure Score + XSPM recommendation identifiers that gitleaks' default
+# "linkedin-client-id" / "generic-api-key" regexes match by coincidence.
+#
+# Every fixture is PII-scrubbed by tools/Capture-EndpointSchemas.ps1 (GUIDs
+# replaced with zeros, UPNs replaced with user@example.com, IPs replaced with
+# 0.0.0.0, tenant-domain tokens replaced with example-tenant) so no real secret
+# can enter these paths.
+
+[extend]
+# Extend default rules; don't replace.
+useDefault = true
+
+[allowlist]
+description = "Allowlist for test fixtures + test-unit Pester files (all mock/stub data)"
+# Paths — regex patterns of file paths to skip secret scanning on.
+#
+# tests/unit/*.Tests.ps1 files contain:
+#   - RFC 6238 TOTP test vectors (e.g. 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ') —
+#     these are standards-published test strings, not real secrets.
+#   - Stub PEM headers like '-----BEGIN EC PRIVATE KEY-----...' — obvious
+#     truncated placeholders used to validate format-detection code paths.
+#   - Fake UPNs, fake client IDs, fake credential IDs — all clearly non-real.
+# Every test-mock pattern is vetted by PR review; this allowlist prevents
+# gitleaks false-positives from blocking CI.
+paths = [
+    '''tests/fixtures/live-responses/.*\.json$''',
+    '''tests/fixtures/sample-snapshots/.*\.json$''',
+    '''tests/unit/.*\.Tests\.ps1$''',
+    # Azure built-in role definition GUIDs are public, well-known identifiers
+    # (e.g. 4633458b-17de-408a-b874-0445c86b69e6 = Key Vault Secrets User).
+    # They're published at learn.microsoft.com/azure/role-based-access-control/
+    # built-in-roles and are not secrets. Gitleaks' generic-api-key regex
+    # matches them by UUID-entropy coincidence.
+    '''deploy/compiled/.*\.json$''',
+]
+
+# Additional regexes: always allow Azure built-in role GUIDs wherever they appear.
+regexes = [
+    # Azure RBAC built-in role IDs — 36-char UUIDs in the standard format.
+    # Examples already in use: Key Vault Secrets User, Storage Table Data
+    # Contributor, Monitoring Metrics Publisher. Documented public identifiers.
+    '''[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}''',
+]

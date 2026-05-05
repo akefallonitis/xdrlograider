@@ -1,0 +1,142 @@
+name: Validate Solution
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/**'
+      - 'sentinel/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  arm-ttk:
+    name: ARM-TTK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Install ARM-TTK
+        shell: pwsh
+        run: |
+          git clone --depth 1 https://github.com/Azure/arm-ttk.git /tmp/arm-ttk
+
+      - name: Run ARM-TTK
+        shell: pwsh
+        run: |
+          Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
+          if (Test-Path ./deploy/compiled/mainTemplate.json) {
+              $results = Test-AzTemplate -TemplatePath ./deploy/compiled/mainTemplate.json
+              $failed = $results | Where-Object { -not $_.Passed }
+              if ($failed) {
+                  $failed | Format-Table Name, Warnings, Errors -AutoSize
+                  throw "$($failed.Count) ARM-TTK test(s) failed"
+              }
+              Write-Host "ARM-TTK: all tests passed" -ForegroundColor Green
+          } else {
+              Write-Warning "No compiled ARM template found; skipping ARM-TTK"
+          }
+
+  workbook-schema:
+    name: Workbook JSON schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Validate workbook JSON
+        shell: pwsh
+        run: |
+          $workbooks = Get-ChildItem -Path ./sentinel/workbooks -Filter *.json -ErrorAction SilentlyContinue
+          foreach ($wb in $workbooks) {
+              try {
+                  $content = Get-Content $wb.FullName -Raw | ConvertFrom-Json
+                  if (-not $content.items) { throw "Missing 'items' property in $($wb.Name)" }
+                  Write-Host "OK: $($wb.Name)" -ForegroundColor Green
+              } catch {
+                  throw "Invalid workbook JSON in $($wb.Name): $_"
+              }
+          }
+
+  analytic-rule-schema:
+    name: Analytic rule YAML schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Install YAML parser
+        shell: pwsh
+        run: Install-Module -Name powershell-yaml -Force -Scope CurrentUser
+
+      - name: Validate analytic rule YAML
+        shell: pwsh
+        run: |
+          Import-Module powershell-yaml
+          $rules = Get-ChildItem -Path ./sentinel/analytic-rules -Filter *.yaml -ErrorAction SilentlyContinue
+          if (-not $rules) { throw "No analytic-rule YAML files found under ./sentinel/analytic-rules" }
+          foreach ($rule in $rules) {
+              try {
+                  $content = (Get-Content $rule.FullName -Raw) | ConvertFrom-Yaml
+                  $required = @('id', 'name', 'description', 'severity', 'query', 'queryFrequency', 'queryPeriod', 'triggerOperator', 'triggerThreshold')
+                  foreach ($prop in $required) {
+                      if (-not $content.ContainsKey($prop) -and $prop -ne 'triggerThreshold') {
+                          throw "Missing '$prop' in $($rule.Name)"
+                      }
+                  }
+                  Write-Host "OK: $($rule.Name)" -ForegroundColor Green
+              } catch {
+                  throw "Invalid analytic rule YAML in $($rule.Name): $_"
+              }
+          }
+
+  hunting-query-yaml:
+    name: Hunting query YAML
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Install YAML parser
+        shell: pwsh
+        run: Install-Module -Name powershell-yaml -Force -Scope CurrentUser
+
+      - name: Validate hunting query YAML
+        shell: pwsh
+        run: |
+          Import-Module powershell-yaml
+          $queries = Get-ChildItem -Path ./sentinel/hunting-queries -Filter *.yaml -ErrorAction SilentlyContinue
+          foreach ($q in $queries) {
+              try {
+                  $content = (Get-Content $q.FullName -Raw) | ConvertFrom-Yaml
+                  $required = @('name', 'description', 'query')
+                  foreach ($prop in $required) {
+                      if (-not $content.$prop) { throw "Missing '$prop' in $($q.Name)" }
+                  }
+                  Write-Host "OK: $($q.Name)" -ForegroundColor Green
+              } catch {
+                  throw "Invalid hunting query YAML in $($q.Name): $_"
+              }
+          }
+
+  createui-schema:
+    name: createUiDefinition schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Validate createUiDefinition.json
+        shell: pwsh
+        run: |
+          $ui = './deploy/compiled/createUiDefinition.json'
+          if (-not (Test-Path $ui)) {
+              Write-Warning "createUiDefinition.json not present; skipping"
+              exit 0
+          }
+          $content = Get-Content $ui -Raw | ConvertFrom-Json
+          if (-not $content.'$schema') { throw "Missing \$schema" }
+          if (-not $content.handler) { throw "Missing handler" }
+          if ($content.handler -ne 'Microsoft.Azure.CreateUIDef') {
+              throw "handler must be 'Microsoft.Azure.CreateUIDef', got '$($content.handler)'"
+          }
+          if (-not $content.parameters) { throw "Missing parameters" }
+          Write-Host "createUiDefinition: schema OK" -ForegroundColor Green

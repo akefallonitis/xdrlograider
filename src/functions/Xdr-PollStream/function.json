@@ -1,0 +1,10 @@
+{
+  "description": "Phase H — Durable Functions activity. Receives { Portal, Tier, StreamName, StreamPath } from orchestrator; performs auth + single-stream poll + ingest; returns @{ StreamName, RowsIngested, LatencyMs, Success, Error }. Per directive 16. Activities CAN do non-deterministic work (KV reads, portal API calls, current time).",
+  "bindings": [
+    {
+      "name": "Input",
+      "type": "activityTrigger",
+      "direction": "in"
+    }
+  ]
+}

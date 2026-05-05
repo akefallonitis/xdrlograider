@@ -1,0 +1,69 @@
+id: 7e8c9d2a-1b4f-4d3e-8a6c-9e2d4f5a6b7c
+name: "[XdrOps] Connector row-volume spike — cost-budget gate"
+description: |
+  XdrLogRaider's ingest pipeline emits `xdr.ingest.row_count_per_hour` per
+  stream. This rule detects when any stream's hourly row count exceeds
+  3× its 7-day rolling baseline — a cost-budget gate that catches:
+
+    1. Operator-driven schema explosion (e.g., adding wildcard PathParams that
+       fan out 100x).
+    2. Tenant-side breach scenario (e.g., suddenly 10k device-control policy
+       rows where there were 50 — operator should investigate intent).
+    3. Connector regression that deduplicates incorrectly and blasts every
+       row twice.
+    4. ProjectionMap mis-configuration causing row multiplication
+       (e.g., property-bag flatten on the wrong field).
+
+  Suppresses for 4h after first fire to prevent alert flood when the spike
+  is legitimate (e.g., onboarding a new fleet).
+
+  Operator-enabled (ships `enabled: false` per Sentinel Solution best practice).
+  D'.49 in v0.1.0 GA plan: cost-budget runtime gate.
+
+  Triage in docs/RUNBOOK.md "Row-volume spike" section.
+severity: Medium
+enabled: false
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - AppMetrics
+queryFrequency: 1h
+queryPeriod: P7D
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Impact
+relevantTechniques:
+  - T1565
+query: |
+  // Per-stream cost-budget gate. The metric is emitted by Send-ToLogAnalytics
+  // on every successful ingest batch with the Stream property set so we can
+  // group per-stream and compare a 1h sliding window against a 7d baseline.
+  let recentWindow = 1h;
+  let baselineWindow = 7d;
+  let spikeFactor = 3.0;
+  let recent =
+      AppMetrics
+      | where TimeGenerated > ago(recentWindow)
+      | where Name == "xdr.ingest.row_count_per_hour"
+      | extend Stream = tostring(Properties.Stream)
+      | summarize RecentRows = sum(Value) by Stream;
+  let baseline =
+      AppMetrics
+      | where TimeGenerated between (ago(baselineWindow) .. ago(recentWindow))
+      | where Name == "xdr.ingest.row_count_per_hour"
+      | extend Stream = tostring(Properties.Stream)
+      | summarize BaselineRowsPerHour = avg(Value) by Stream;
+  recent
+  | join kind=leftouter baseline on Stream
+  | extend BaselineRowsPerHour = coalesce(BaselineRowsPerHour, 0.0)
+  | where BaselineRowsPerHour > 0  // skip cold-start streams (no baseline yet)
+  | where RecentRows > BaselineRowsPerHour * spikeFactor
+  | extend SpikeRatio = round(RecentRows / BaselineRowsPerHour, 2)
+  | extend AlertReason = strcat("Stream ", Stream, " row volume ", SpikeRatio, "x baseline (recent=", RecentRows, " vs avg=", round(BaselineRowsPerHour, 1), "/h)")
+  | project TimeGenerated = now(), Stream, RecentRows, BaselineRowsPerHour, SpikeRatio, AlertReason
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: AlertPerResult
+suppressionEnabled: true
+suppressionDuration: PT4H

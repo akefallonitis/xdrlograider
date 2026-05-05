@@ -1,0 +1,15 @@
+{
+  "description": "XSPM attack path Added/Removed set-diff scenario — tests the MDE_Drift_P3Exposure parser's set-diff logic",
+  "before": [
+    { "TimeGenerated": "2026-04-21T10:00:00Z", "SourceStream": "MDE_XspmAttackPaths_CL", "EntityId": "path-001", "RawJson": "{\"pathId\":\"path-001\",\"entryNode\":\"user-contractor\",\"targetNode\":\"db-prod-01\",\"hops\":4,\"score\":8.2}" },
+    { "TimeGenerated": "2026-04-21T10:00:00Z", "SourceStream": "MDE_XspmAttackPaths_CL", "EntityId": "path-002", "RawJson": "{\"pathId\":\"path-002\",\"entryNode\":\"svc-backup\",\"targetNode\":\"dc-primary\",\"hops\":3,\"score\":9.1}" }
+  ],
+  "after": [
+    { "TimeGenerated": "2026-04-22T10:00:00Z", "SourceStream": "MDE_XspmAttackPaths_CL", "EntityId": "path-002", "RawJson": "{\"pathId\":\"path-002\",\"entryNode\":\"svc-backup\",\"targetNode\":\"dc-primary\",\"hops\":3,\"score\":9.1}" },
+    { "TimeGenerated": "2026-04-22T10:00:00Z", "SourceStream": "MDE_XspmAttackPaths_CL", "EntityId": "path-003", "RawJson": "{\"pathId\":\"path-003\",\"entryNode\":\"user-intern\",\"targetNode\":\"file-server\",\"hops\":2,\"score\":7.5}" }
+  ],
+  "expectedDrift": [
+    { "StreamName": "MDE_XspmAttackPaths_CL", "EntityId": "path-001", "ChangeType": "Removed" },
+    { "StreamName": "MDE_XspmAttackPaths_CL", "EntityId": "path-003", "ChangeType": "Added" }
+  ]
+}

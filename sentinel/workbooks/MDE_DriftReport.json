@@ -1,0 +1,71 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDE_DriftReport",
+  "items": [
+    {
+      "name": "header",
+      "content": {
+        "json": "# MDE Drift Report\n\nAll configuration drift across P0/P1/P2/P5/P7 categories, unioned and enriched with AuditLogs attribution."
+      },
+      "type": 1
+    },
+    {
+      "name": "parameters",
+      "content": {
+        "parameters": [
+          {
+            "value": { "durationMs": 604800000 },
+            "id": "tr",
+            "name": "TimeRange",
+            "version": "KqlParameterItem/1.0",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          }
+        ],
+        "queryType": 0,
+        "style": "pills",
+        "version": "KqlParameterItem/1.0"
+      },
+      "type": 9
+    },
+    {
+      "name": "panel-1",
+      "content": {
+        "queryType": 0,
+        "title": "Drift events over time, by category",
+        "size": 0,
+        "query": "union\n  (MDE_Drift_Inventory({TimeRange:value}, 1h) | extend Category = \"P0 Config\"),\n  (MDE_Drift_Configuration({TimeRange:value}, 30m) | extend Category = \"P1 Pipeline\"),\n  (MDE_Drift_Configuration({TimeRange:value}, 1d) | extend Category = \"P2 Governance\"),\n  (MDE_Drift_Inventory({TimeRange:value}, 1d) | extend Category = \"P5 Identity\"),\n  (MDE_Drift_Configuration({TimeRange:value}, 1d) | extend Category = \"P7 Metadata\")\n| summarize Changes = count() by Category, bin(TimeGenerated, 1h)\n| render timechart",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    },
+    {
+      "name": "panel-2",
+      "content": {
+        "queryType": 0,
+        "title": "Recent drift events (all categories)",
+        "size": 0,
+        "query": "union\n  (MDE_Drift_Inventory({TimeRange:value}, 1h)),\n  (MDE_Drift_Configuration({TimeRange:value}, 30m)),\n  (MDE_Drift_Configuration({TimeRange:value}, 1d)),\n  (MDE_Drift_Inventory({TimeRange:value}, 1d)),\n  (MDE_Drift_Configuration({TimeRange:value}, 1d))\n| project TimeGenerated, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType\n| order by TimeGenerated desc\n| take 100",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    }
+  ],
+  "version": "Notebook/1.0"
+}

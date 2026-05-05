@@ -1,0 +1,101 @@
+# XdrLogRaider — Post-deploy verification (manual dispatch).
+#
+# Per directives 25 + 35 + R1 in .claude/plans/immutable-splashing-waffle.md.
+# Internal tooling — uses INTERNAL SP credentials (per directive 35;
+# OIDC AAD app explicitly NOT in scope). Operators run this manually after
+# v0.1.0 GA tag publishes the function-app.zip + after FA Stop+Start picks
+# it up. P1-P14 verification probes confirm:
+#   P1.  FA started cleanly; no startup exceptions
+#   P2.  All 6 capability-named functions present + Enabled
+#   P3.  Connector-Heartbeat fired in last 5 minutes
+#   P4.  All 5 cadence timers fired at least once
+#   P5.  All 47 streams ingested at least 1 row in poll cycle (or "no data" rationale)
+#   P6.  No AuthChain.* exceptions in last poll cycle
+#   P7.  DLQ depth < threshold; no entries past TtlDays
+#   P8.  KV cred-expiry: SA password admin-managed (per directive 39 — never expires)
+#   P9.  ConnectorHealth workbook loads + all 6 panels render
+#   P10. 4 new XdrOps-* analytic rules compiled + Enabled
+#   P11. Connector card shows IsConnected=Yes
+#   P12. dataConnectorMetadata visible in Sentinel Data connectors blade
+#   P13. cosign verify-blob succeeds on all signed release artefacts
+#   P14. freshness SLI < expected per cadence
+#
+# Required GitHub secrets (operator's verification subscription SP):
+#   AZURE_VERIFY_TENANT_ID
+#   AZURE_VERIFY_SUBSCRIPTION_ID
+#   AZURE_VERIFY_CLIENT_ID
+#   AZURE_VERIFY_CLIENT_SECRET
+#   AZURE_VERIFY_RG_NAME
+#   AZURE_VERIFY_FA_NAME
+#   AZURE_VERIFY_LA_WORKSPACE_ID
+
+name: Post-deploy verification (P1-P14)
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_label:
+        description: "Operator label for this run (e.g., 'post-v0.1.0-tag')"
+        required: false
+        default: 'manual'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: post-deploy-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: P1-P14 verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Install PowerShell modules
+        shell: pwsh
+        run: |
+          Install-Module -Name Az.Accounts          -RequiredVersion 5.3.4 -Force -Scope CurrentUser -SkipPublisherCheck
+          Install-Module -Name Az.OperationalInsights -Force -Scope CurrentUser -SkipPublisherCheck
+          Install-Module -Name Pester               -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Az login (internal SP per directive 35)
+        shell: pwsh
+        env:
+          AZURE_TENANT_ID:       ${{ secrets.AZURE_VERIFY_TENANT_ID }}
+          AZURE_CLIENT_ID:       ${{ secrets.AZURE_VERIFY_CLIENT_ID }}
+          AZURE_CLIENT_SECRET:   ${{ secrets.AZURE_VERIFY_CLIENT_SECRET }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_VERIFY_SUBSCRIPTION_ID }}
+        run: |
+          $sec = ConvertTo-SecureString $env:AZURE_CLIENT_SECRET -AsPlainText -Force
+          $cred = New-Object System.Management.Automation.PSCredential ($env:AZURE_CLIENT_ID, $sec)
+          Connect-AzAccount -ServicePrincipal -Tenant $env:AZURE_TENANT_ID -Credential $cred -SubscriptionId $env:AZURE_SUBSCRIPTION_ID
+          Write-Host "Logged into Az as SP $($env:AZURE_CLIENT_ID)"
+
+      - name: Run Post-DeploymentVerification.ps1 (P1-P14)
+        shell: pwsh
+        env:
+          XDR_VERIFY_RG:           ${{ secrets.AZURE_VERIFY_RG_NAME }}
+          XDR_VERIFY_FA:           ${{ secrets.AZURE_VERIFY_FA_NAME }}
+          XDR_VERIFY_WORKSPACE_ID: ${{ secrets.AZURE_VERIFY_LA_WORKSPACE_ID }}
+          XDR_RUN_LABEL:           ${{ inputs.run_label }}
+        run: |
+          # Internal verification harness lives in .internal/tools/ — gitignored
+          # but exists in the maintainer's local checkout. CI runs the public
+          # tools/Test-ConnectorHealth.ps1 which is the operator-facing equivalent.
+          # If .internal/tools/Post-DeploymentVerification.ps1 is present (from
+          # the actions/checkout — which DOES include .internal/ since it's in
+          # the working tree but gitignored, NOT removed by checkout), run that.
+          # Otherwise fall back to the operator-facing health check.
+          $internal = Join-Path $PWD '.internal/tools/Post-DeploymentVerification.ps1'
+          if (Test-Path $internal) {
+              Write-Host "Running .internal/tools/Post-DeploymentVerification.ps1"
+              pwsh -NoProfile -File $internal
+          } else {
+              Write-Host "Falling back to tools/Test-ConnectorHealth.ps1 (operator-facing)"
+              pwsh -NoProfile -File ./tools/Test-ConnectorHealth.ps1
+          }

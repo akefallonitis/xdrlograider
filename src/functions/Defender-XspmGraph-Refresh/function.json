@@ -1,0 +1,17 @@
+{
+  "description": "Hourly @ :25 — Exposure Management (XSPM) tier. Polls 18 streams: 7 baseline (MDE_AssetRules_CL, MDE_XspmInitiatives_CL, MDE_ExposureSnapshots_CL, MDE_ExposureRecommendations_CL, MDE_XspmAttackPaths_CL, MDE_XspmChokePoints_CL, MDE_XspmTopTargets_CL) + 11 Phase 2 v0.1.0 GA additions (MDE_AssetClassificationSchema_CL, MDE_PostureInitiativesSummarized_CL, MDE_PostureMetrics_CL, MDE_AppsSecureScore_CL, MDE_DataSecureScore_CL, MDE_IdentitySecureScore_CL, MDE_PostureSecurityEvents_CL, MDE_PostureTenants_CL, MDE_AttackSurfaceAttackPaths_CL, MDE_AttackSurfaceChokepoints_CL, MDE_XspmConnectors_CL). Cadence-paired with the Sentinel exposure workbook (hourly refresh). XSPM graph data churn-rate is well under 1h so a faster poll wastes XSPM-API quota.",
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 25 * * * *",
+      "runOnStartup": false
+    },
+    {
+      "name": "Starter",
+      "type": "durableClient",
+      "direction": "in"
+    }
+  ]
+}

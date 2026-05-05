@@ -1,0 +1,72 @@
+# XdrLogRaider .gitattributes
+#
+# Internal/external phasing separation (per directive 27 in
+# .claude/plans/immutable-splashing-waffle.md): defense-in-depth on top of
+# .gitignore. Even if a maintainer accidentally `git add`s something under
+# .internal/, the `export-ignore` attribute prevents it from leaking into
+# `git archive` outputs (release tarballs, GitHub source-zip downloads).
+#
+# This separation enforces:
+#   - Operator-facing artifacts ship in repo root + tools/ + docs/ + sentinel/
+#     + deploy/ + src/  (transparent + auditable for security review)
+#   - Internal-dev artifacts (.internal/, .claude/) NEVER reach public ZIPs
+#
+# Verified by: tests/arm/WorkflowActionsPinned.Tests.ps1 (Phase A1.4 extension)
+# + .github/workflows/release.yml grep gate
+#
+# References:
+#   docs/RELEASE-PROCESS.md  — full release supply-chain checklist
+#   docs/SECURITY-NOTES.md   — separation-of-concerns rationale
+
+# Internal-only: never released
+.internal/             export-ignore
+.claude/               export-ignore
+
+# Local-only dev artifacts: never released
+*.secret               export-ignore
+*.key                  export-ignore
+*.pem                  export-ignore
+*.pfx                  export-ignore
+*.passkey.json         export-ignore
+local.settings.json    export-ignore
+tests/.env.local       export-ignore
+tests/.env.*.local     export-ignore
+my-passkey.json        export-ignore
+NOTES.local.md         export-ignore
+TODO.local.md          export-ignore
+.scratch/              export-ignore
+.protection-restore.json export-ignore
+
+# Test results (regenerated; never released)
+tests/results/         export-ignore
+
+# OS / editor noise (never released)
+.DS_Store              export-ignore
+Thumbs.db              export-ignore
+Desktop.ini            export-ignore
+*.swp                  export-ignore
+*~                     export-ignore
+
+# Line-ending normalization for cross-platform consistency
+* text=auto eol=lf
+
+# PowerShell scripts: enforce LF (Linux Function App runtime)
+*.ps1   text eol=lf
+*.psm1  text eol=lf
+*.psd1  text eol=lf
+
+# YAML / JSON: LF (CI workflows + ARM templates)
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+
+# Markdown: LF
+*.md    text eol=lf
+
+# Binary files (no diff, no text conversion)
+*.png   binary
+*.jpg   binary
+*.gif   binary
+*.svg   text eol=lf
+*.zip   binary
+*.pdf   binary
