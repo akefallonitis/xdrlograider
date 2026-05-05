@@ -80,7 +80,18 @@ Refactors the 7 bucket-fill DCRs (DCR-1 through DCR-7, sequential 10-flow bucket
 - Operator sees 13 DCRs in the connector RG instead of 7 — descriptive names make the topology self-documenting.
 - Re-deploy migrates DCRs cleanly (workspace tables persist, only DCR resources replaced).
 
-**Why deferred from v0.1.0 GA**: scope. v0.1.0 GA shipped with the column-type conflicts FIXED and a CI gate (`SchemaConsistency.Tests.ps1`) preventing regression — the deployment works correctly today. The DCR rename is a topology refactor that benefits operator UX without changing functional behaviour, so it ships as a separate v0.1.0.1 patch with its own observation cycle.
+**Additional v0.1.0.1 scope (gaps surfaced during v0.1.0 GA preflight)**:
+
+- **`tools/Build-DcrSection.ps1`** — codegen for the DCR resource block + `DCR_IMMUTABLE_IDS_JSON` env-var construction + RBAC role-assignments matrix. Eliminates the 1000-line hand-edit risk that introduced the column-conflict class in v0.1.0 GA.
+- **`tools/Audit-DcrSchema.ps1`** — operator-runnable audit (mirror of `tests/arm/SchemaConsistency.Tests.ps1`) so they can verify schema integrity locally before deploying without invoking Pester.
+- **`tools/Verify-CosignArtifacts.ps1`** — one-command Sigstore-cosign verify-blob over all 6 release artifacts; today operators copy/paste 6 separate commands.
+- **Per-table data dictionary** in `docs/SCHEMA.md` — for each `Defender_<Category>_CL` table, list every column (typed + RawJson) with its source stream, type, and example. Closes the "which stream contributes which column" knowledge gap.
+- **Sample-query refresh** — 5 queries per stream × 59 streams = 295 sample queries in `XdrLogRaider_DataConnector.json` need an automated regen (`tools/Build-SampleQueries.ps1`) when columns are renamed. Today renames require manual sample-query updates.
+- **CI: ARM-TTK** — adopt the official Microsoft ARM Template Test Toolkit alongside the existing `Validate-ArmJson.ps1`. Catches Marketplace-grade issues (apiVersion drift, idempotency, parameter coverage) before the v1.0.0 certification window.
+- **CI: Deploy what-if with role-assignments** — grant the GitHub Actions SP `User Access Administrator` so what-if runs the full 32+15-role-assignment template and not the stripped 32-resource subset.
+- **Per-tenant column documentation** — list "which streams populate which columns" in the workbook's hover text, so operators don't have to read `docs/SCHEMA.md`.
+
+**Why deferred from v0.1.0 GA**: scope. v0.1.0 GA shipped with the column-type conflicts properly fixed via per-stream rename (no fallbacks) AND a CI gate (`SchemaConsistency.Tests.ps1`) preventing regression — the deployment works correctly today with full type fidelity. The above items are topology and developer-experience improvements, not functional bugs, so they ship as a separate v0.1.0.1 patch with its own observation cycle.
 
 ---
 
