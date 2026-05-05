@@ -150,6 +150,68 @@ Describe 'Schema Consistency — Cross-stream column type agreement per consolid
     }
 }
 
+Describe 'Schema Consistency — DCR streamDecl vs Workspace Table column types' {
+
+    It 'every DCR streamDecl column type matches the workspace table column type for the dataFlow output stream' {
+        # Recursively find all workspace tables (top-level + nested deployment).
+        function Find-Tables {
+            param($Node)
+            $found = @()
+            if ($Node -is [array]) {
+                foreach ($r in $Node) { $found += Find-Tables -Node $r }
+                return $found
+            }
+            if ($Node.type -eq 'Microsoft.OperationalInsights/workspaces/tables') {
+                $found += $Node
+            }
+            if ($Node.type -eq 'Microsoft.Resources/deployments' -and $Node.properties.template.resources) {
+                $found += Find-Tables -Node $Node.properties.template.resources
+            }
+            return $found
+        }
+        $allTables = Find-Tables -Node $script:Tpl.resources
+
+        # Index workspace table columns by table name
+        $tableCols = @{}
+        foreach ($t in $allTables) {
+            $tname = $null
+            if ($t.name -match "/([A-Za-z_]+_CL)'") { $tname = $Matches[1] }
+            elseif ($t.name -match "concat\([^,]+,\s*'/(.+)'\)") { $tname = $Matches[1] }
+            if (-not $tname -or -not $t.properties.schema.columns) { continue }
+            $tableCols[$tname] = @{}
+            foreach ($c in $t.properties.schema.columns) { $tableCols[$tname][$c.name] = $c.type }
+        }
+
+        # Index DCR dataFlows: stream -> outputStream
+        $flows = @()
+        foreach ($d in $script:Tpl.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' }) {
+            foreach ($df in $d.properties.dataFlows) {
+                $sn = ($df.streams[0] -replace '^Custom-', '')
+                $out = $df.outputStream -replace '^Custom-', ''
+                $flows += @{ Stream = $sn; OutputStream = $out }
+            }
+        }
+
+        # Check: for each dataFlow, every column in the streamDecl must agree on type with the workspace table
+        $mismatches = New-Object System.Collections.ArrayList
+        foreach ($f in $flows) {
+            if (-not $script:DcrStreamDecls.ContainsKey($f.Stream)) { continue }
+            if (-not $tableCols.ContainsKey($f.OutputStream)) { continue }
+            $sd = $script:DcrStreamDecls[$f.Stream]
+            $tc = $tableCols[$f.OutputStream]
+            foreach ($colKvp in $sd.GetEnumerator()) {
+                if ($tc.ContainsKey($colKvp.Key) -and $tc[$colKvp.Key] -ne $colKvp.Value) {
+                    [void]$mismatches.Add(("{0} -> {1}.{2}: streamDecl='{3}' tableCol='{4}'" -f $f.Stream, $f.OutputStream, $colKvp.Key, $colKvp.Value, $tc[$colKvp.Key]))
+                }
+            }
+        }
+        if ($mismatches.Count -gt 0) {
+            $mismatches | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+        }
+        $mismatches.Count | Should -Be 0 -Because 'DCR transform output column type must match the workspace table column type, or Azure deployment fails with InvalidTransformOutput at provisioning time'
+    }
+}
+
 Describe 'Schema Consistency — DCR-to-category coverage (bucket-fill detection)' {
 
     It '<dcrName> covers <maxCategories> or fewer categories' -ForEach @(

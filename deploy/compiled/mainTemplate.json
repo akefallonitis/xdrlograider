@@ -3592,8 +3592,12 @@
                       "type": "string"
                     },
                     {
-                      "name": "Action",
+                      "name": "SuppressionAction",
                       "type": "int"
+                    },
+                    {
+                      "name": "AllowBlockAction",
+                      "type": "string"
                     },
                     {
                       "name": "AlertTitle",
@@ -3608,8 +3612,16 @@
                       "type": "int"
                     },
                     {
-                      "name": "Scope",
+                      "name": "SuppressionScope",
                       "type": "int"
+                    },
+                    {
+                      "name": "RbacScope",
+                      "type": "string"
+                    },
+                    {
+                      "name": "PreferenceScope",
+                      "type": "string"
                     },
                     {
                       "name": "UpdateTime",
@@ -3780,11 +3792,11 @@
                     },
                     {
                       "name": "TotalAccessRequests",
-                      "type": "int"
+                      "type": "long"
                     },
                     {
                       "name": "TotalBlockedCount",
-                      "type": "int"
+                      "type": "long"
                     },
                     {
                       "name": "UpdateTime",
@@ -4538,7 +4550,7 @@
                     },
                     {
                       "name": "Keywords",
-                      "type": "string"
+                      "type": "dynamic"
                     },
                     {
                       "name": "LastUpdatedOn",
@@ -4566,7 +4578,7 @@
                     },
                     {
                       "name": "Tags",
-                      "type": "string"
+                      "type": "dynamic"
                     },
                     {
                       "name": "Title",
