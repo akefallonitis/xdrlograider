@@ -45,7 +45,7 @@ BeforeAll {
 
 Describe 'Metrics.TierPoll.PollDuration — xdr.stream.poll_duration_ms emitted per stream with Tier dimension' {
 
-    # iter-14.0 Phase 2 (v0.1.0 GA): renamed from xdr.poll.duration_ms to
+    # v0.1.0 GA (v0.1.0 GA): renamed from xdr.poll.duration_ms to
     # xdr.stream.poll_duration_ms to align with Section 2.3 native-routing rubric
     # (consistent xdr.stream.* prefix with xdr.stream.rows_emitted). Old metric
     # name retired — operators with existing KQL must update to the new name.
@@ -92,6 +92,13 @@ Describe 'Metrics.Ingest.RowsBytesLatency — Send-ToLogAnalytics emits the 5 pe
     It 'emits xdr.ingest.dce_latency_ms' {
         $src = Get-Content -LiteralPath $script:SendToLogAnPath -Raw
         $src | Should -Match "Send-XdrAppInsightsCustomMetric\s+-MetricName\s+'xdr\.ingest\.dce_latency_ms'"
+    }
+
+    It 'emits xdr.ingest.row_count_per_hour (D''.49 v0.1.0 GA Phase 5.12 cost-budget gate)' {
+        # Per-stream hourly row count metric for XdrOps-RowVolumeSpike rule.
+        # Alerts when stream's hourly count exceeds 3x its 7-day baseline.
+        $src = Get-Content -LiteralPath $script:SendToLogAnPath -Raw
+        $src | Should -Match "Send-XdrAppInsightsCustomMetric\s+-MetricName\s+'xdr\.ingest\.row_count_per_hour'"
     }
 }
 

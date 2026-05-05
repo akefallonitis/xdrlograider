@@ -15,7 +15,7 @@ function ConvertTo-MDEIngestRow {
         Operators query typed columns directly — no more
         `parse_json(RawJson) | extend …` everywhere.
 
-        Backward-compat: ProjectionMap is OPTIONAL. Streams without one still
+        v0.1.0 GA scope: ProjectionMap is OPTIONAL. Streams without one still
         produce TimeGenerated + SourceStream + EntityId + RawJson + any -Extras.
         RawJson is preserved on every row regardless of projection for
         forensic / future-proofing.
@@ -53,7 +53,7 @@ function ConvertTo-MDEIngestRow {
         [hashtable] $ProjectionMap = $null
     )
 
-    # Phase I REVERTED per user feedback (2026-05-04): NodocCategoryId/Slug/SourceName/
+    # Phase I REVERTED per user feedback (2026-05-04): CategoryId/Slug/SourceName/
     # StreamSubtype/SchemaSource are MANIFEST-INTERNAL REFERENCES ONLY, not per-row
     # operator-visible columns. Operators query typed cols + RawJson; nodoc taxonomy
     # is for code/test/doc reference (groupby in manifest scripts), not for row data.
@@ -75,14 +75,14 @@ function ConvertTo-MDEIngestRow {
     }
 
     if (-not $isBoundary -and $ProjectionMap -and $ProjectionMap.Count -gt 0) {
-        # iter-14.0 — for property-bag streams (Shape 3 in Expand-MDEResponse),
+        # v0.1.0 GA — for property-bag streams (Shape 3 in Expand-MDEResponse),
         # the entity is the property VALUE (often a scalar like $true/$false).
         # The manifest convention `FeatureName = '$tostring:EntityId'` lets the
         # operator project the property NAME as a typed col. Synthesise a
         # projection-context object that wraps the entity + exposes EntityId
         # so JSONPath hints like `$tostring:EntityId` resolve. The original
         # $Raw is still used for RawJson serialization above.
-        # iter-13.4 defense: edge-case entities (empty pscustomobject, hashtable
+        # pre-v0.1.0.4 defense: edge-case entities (empty pscustomobject, hashtable
         # with one null-valued property, etc) must NOT crash the cloner under
         # Set-StrictMode -Version Latest. Wrap each access in try/catch +
         # explicit null guards.
@@ -226,7 +226,7 @@ function Expand-MDEResponse {
         Without this, single-object responses fall into Shape 3 (property-bag
         flatten) and operator queries against typed cols return null because
         the cols are designed for the whole-object shape, not per-property
-        rows. iter-14.0 Phase 1 addition.
+        rows. v0.1.0 GA addition.
 
     .OUTPUTS
         [hashtable[]] — array of @{ Id; Entity } pairs.
@@ -332,7 +332,7 @@ function Expand-MDEResponse {
         }
     }
 
-    # --- iter-14.0 Phase 1: SingleObjectAsRow override ----------------------
+    # --- v0.1.0 GA: SingleObjectAsRow override ----------------------
     # When the manifest declares SingleObjectAsRow=$true and the response is
     # a single object (not array, not wrapper, not scalar), wrap into a
     # 1-element array so Shape 1 emits ONE per-entity row instead of Shape 3
@@ -379,7 +379,7 @@ function Expand-MDEResponse {
     }
 
     # --- Shape 4: scalar (bool/int/string/double) ----------------------------
-    # iter-14.0 Phase 3.4 — wrap so the row schema (TimeGenerated/EntityId/RawJson)
+    # v0.1.0 GA — wrap so the row schema (TimeGenerated/EntityId/RawJson)
     # stays consistent across all streams. Without this, scalar responses
     # produced 0 rows and the heartbeat counted them as "no data".
     if ($Response -is [bool] -or $Response -is [int] -or $Response -is [long] -or
@@ -396,7 +396,7 @@ function Expand-MDEResponse {
     # This is the "v0.1.0-beta legacy" case — a few endpoints return shaped
     # like {FeatureName: bool, OtherFeature: bool, …}. We flatten each top-level
     # property into a row with EntityId=propertyName.
-    # iter-14.0 Phase 3 EntityId-wrapper-key fix lives in shape 2 above —
+    # v0.1.0 GA EntityId-wrapper-key fix lives in shape 2 above —
     # streams whose response is `{Results:[…], Count:N}` should declare
     # UnwrapProperty='Results'. Streams that legitimately return a flat
     # property-bag (e.g. AdvancedFeatures = {AntiTampering: true, …}) still
@@ -421,154 +421,8 @@ function Expand-MDEResponse {
     return ,$pairs
 }
 
-$script:MDEEndpointManifestCache = $null
-
-function Get-MDEEndpointManifest {
-    <#
-    .SYNOPSIS
-        Returns the endpoint manifest as a Stream-keyed hashtable (cached for the
-        module's lifetime).
-
-    .DESCRIPTION
-        Loads `endpoints.manifest.psd1` (sibling of the Endpoints/ folder) on first
-        call via `Import-PowerShellDataFile`. Converts the flat `Endpoints = @(...)`
-        array into a hashtable indexed by Stream name for O(1) lookup by the
-        dispatcher (`Invoke-MDEEndpoint`) and tier-poller (`Invoke-MDETierPoll`).
-
-        Subsequent calls return the cached table.
-
-    .PARAMETER Force
-        Re-read the manifest from disk, discarding the cache. Useful in tests.
-
-    .OUTPUTS
-        [hashtable] — keys are stream names (e.g. 'MDE_PUAConfig_CL');
-                      values are the per-entry hashtables from the manifest.
-    #>
-    [CmdletBinding()]
-    [OutputType([hashtable])]
-    param(
-        [switch] $Force
-    )
-
-    if (-not $Force -and $script:MDEEndpointManifestCache) {
-        return $script:MDEEndpointManifestCache
-    }
-
-    # _EndpointHelpers.ps1 lives at <moduleRoot>/Endpoints/_EndpointHelpers.ps1.
-    $manifestPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'endpoints.manifest.psd1'
-    if (-not (Test-Path $manifestPath)) {
-        throw "Endpoint manifest not found: $manifestPath"
-    }
-
-    $raw = Import-PowerShellDataFile -Path $manifestPath
-    if (-not $raw.Endpoints) {
-        throw "Manifest at $manifestPath missing required 'Endpoints' array"
-    }
-
-    # iter-14.0 schema: apply manifest-level Defaults at load time so entries
-    # don't need to repeat common values on every line. Defaults block carries:
-    #   Portal              (default 'security.microsoft.com')
-    #   MFAMethodsSupported (default @('CredentialsTotp', 'Passkey'))
-    #   AuditScope          (default 'portal-only')
-    #   IdProperty          (default $null — Expand-MDEResponse heuristic list)
-    #   ProjectionMap       (default @{} — populated per-stream in Phase 4)
-    # Per-entry values OVERRIDE Defaults. Loader sets the field on every entry
-    # so consumers (Invoke-MDEEndpoint, ConvertTo-MDEIngestRow, parsers, etc.)
-    # always see a populated field.
-    $defaults = @{
-        Portal                  = 'security.microsoft.com'
-        MFAMethodsSupported     = @('CredentialsTotp', 'Passkey')
-        AuditScope              = 'portal-only'
-        IdProperty              = $null
-        ProjectionMap           = @{}
-        # Phase E + Phase I per directives 15 + 32 + 34 + plan Section 2.A:
-        SchemaSource            = 'live-capture'
-        StreamSubtype           = 'portal-api'
-        SnapshotDedupRationale  = 'snapshot-replace'
-    }
-    if ($raw.PSObject.Properties['Defaults'] -and $raw.Defaults) {
-        foreach ($key in $defaults.Keys.Clone()) {
-            if ($raw.Defaults.PSObject.Properties[$key]) {
-                $defaults[$key] = $raw.Defaults.$key
-            }
-        }
-    }
-
-    # Phase I per directive 34 + nodoc 10-category authoritative taxonomy.
-    # NodocCategoryId -> NodocCategorySlug mapping (kebab-case, ARM-stable).
-    $nodocSlugMap = @{
-        1  = 'endpoint-device-management'
-        2  = 'endpoint-configuration'
-        3  = 'vulnerability-management'
-        4  = 'identity-protection'
-        5  = 'configuration-and-settings'
-        6  = 'exposure-management-xspm'
-        7  = 'threat-analytics'
-        8  = 'action-center'
-        9  = 'multi-tenant-operations'
-        10 = 'streaming-api'
-    }
-
-    # iter-14.0 audit gate: every entry MUST have Category + Purpose declared
-    # (no defaults — operators need explicit categorization). Test gates assert
-    # this; loader surfaces a clear error so the source of malformed entries
-    # is the violating manifest line, not a downstream NRE.
-    $mandatoryFields = @('Stream', 'Path', 'Tier', 'Category', 'Purpose', 'Availability')
-
-    $indexed = @{}
-    foreach ($entry in $raw.Endpoints) {
-        $missingField = $mandatoryFields | Where-Object { -not $entry.ContainsKey($_) -or [string]::IsNullOrWhiteSpace([string]$entry[$_]) } | Select-Object -First 1
-        if ($missingField) {
-            Write-Warning "Skipping malformed manifest entry (missing $missingField): $($entry | ConvertTo-Json -Compress -Depth 3)"
-            continue
-        }
-        if ($indexed.ContainsKey($entry.Stream)) {
-            throw "Duplicate Stream '$($entry.Stream)' in manifest"
-        }
-        # Apply each Default field if the entry doesn't override it.
-        foreach ($key in $defaults.Keys) {
-            if (-not $entry.ContainsKey($key)) {
-                $entry[$key] = $defaults[$key]
-            }
-        }
-
-        # Phase I per directive 34: derive NodocCategorySlug from NodocCategoryId
-        # (lookup table above) if not explicitly set per-entry.
-        if (-not $entry.ContainsKey('NodocCategorySlug')) {
-            if ($entry.ContainsKey('NodocCategoryId') -and $nodocSlugMap.ContainsKey([int]$entry.NodocCategoryId)) {
-                $entry['NodocCategorySlug'] = $nodocSlugMap[[int]$entry.NodocCategoryId]
-            } else {
-                $entry['NodocCategorySlug'] = 'unknown'
-            }
-        }
-
-        # Phase I per directive 34: derive SourceName from Stream + StreamSubtype
-        # if not explicitly set per-entry. Convention: <Stream-without-_CL>_<TitleCaseSubtype>
-        # e.g. MDE_AdvancedFeatures_CL + portal-api -> MDE_AdvancedFeatures_PortalApi
-        if (-not $entry.ContainsKey('SourceName')) {
-            $streamBase = $entry.Stream -replace '_CL$', ''
-            # Title-case the subtype: split on hyphen, capitalize each word, join
-            $parts = $entry.StreamSubtype -split '-'
-            $titleCased = New-Object System.Collections.Generic.List[string]
-            foreach ($p in $parts) {
-                if ([string]::IsNullOrEmpty($p)) { continue }
-                $titleCased.Add($p.Substring(0,1).ToUpperInvariant() + $p.Substring(1))
-            }
-            $subtypeTitle = $titleCased -join ''
-            $entry['SourceName'] = "${streamBase}_${subtypeTitle}"
-        }
-        # iter-14.0 audit-scope gate: 'public-api-covered' MUST NOT appear in
-        # this manifest (the connector's purpose is portal-only telemetry; if
-        # something is publicly-API-covered, operators should use the official
-        # connector instead). Test gate enforces this; loader surfaces a clean
-        # error so the violating entry can be removed.
-        if ($entry.AuditScope -eq 'public-api-covered') {
-            throw "Manifest entry '$($entry.Stream)' has AuditScope='public-api-covered'. The connector ingests portal-only telemetry; publicly-API-covered streams must be removed (use the official Microsoft Sentinel data connector instead)."
-        }
-        $indexed[$entry.Stream] = $entry
-    }
-
-    $script:MDEEndpointManifestCache = $indexed
-    Write-Verbose "Get-MDEEndpointManifest: loaded $($indexed.Count) endpoint entries"
-    return $indexed
-}
+# Phase J D'.1 (2026-05-04): manifest loader extracted to Xdr.Common.Manifest
+# module for v0.2.0 multi-portal forward-compat. The Get-MDEEndpointManifest
+# v0.1.0 GA scope alias was removed per user directive: "v0.1.0 GA is a NEW clean
+# baseline, no legacy/v0.1.0 GA scope needed". All callers now use
+# Get-XdrEndpointManifest -Portal Defender directly (28 call sites updated).

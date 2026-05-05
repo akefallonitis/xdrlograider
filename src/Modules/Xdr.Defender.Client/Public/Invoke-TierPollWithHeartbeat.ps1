@@ -48,7 +48,7 @@ function Invoke-TierPollWithHeartbeat {
 
     .PARAMETER FunctionName
         The timer-function folder name (e.g. 'poll-fast-10m'). Used as
-        the FunctionName label in MDE_Heartbeat_CL so operators can correlate
+        the FunctionName label in XdrConnectorHealth_CL so operators can correlate
         heartbeat rows to App Insights invocations.
 
     .PARAMETER Portal
@@ -57,7 +57,7 @@ function Invoke-TierPollWithHeartbeat {
         a no-op; reserved for v0.2.0+ multi-portal expansion.
 
     .OUTPUTS
-        None. Writes a row to MDE_Heartbeat_CL on every invocation (success or
+        None. Writes a row to XdrConnectorHealth_CL on every invocation (success or
         fatal). Re-throws on fatal so the Azure Functions runtime marks the
         invocation failed.
 
@@ -72,7 +72,7 @@ function Invoke-TierPollWithHeartbeat {
         [Parameter(Mandatory)]
         # Phase B.3 capability-themed Tier values per directive 12 in
         # .claude/plans/immutable-splashing-waffle.md. v0.1.0 GA = first publish;
-        # no back-compat for legacy fast/exposure/config names per directive 43.
+        # no v0.1.0 GA scope for legacy fast/exposure/config names per directive 43.
         [ValidateSet('ActionCenter', 'XspmGraph', 'Configuration', 'Inventory', 'Maintenance')]
         [string] $Tier,
 
@@ -120,14 +120,14 @@ function Invoke-TierPollWithHeartbeat {
     }
 
     # Resolve the Heartbeat DCR immutableId once — every Write-Heartbeat call
-    # in this function targets MDE_Heartbeat_CL, so we look it up upfront and
+    # in this function targets XdrConnectorHealth_CL, so we look it up upfront and
     # reuse. Per-stream DCR resolution for data streams happens inside
     # Invoke-MDETierPoll using the same helper.
-    $heartbeatDcrId = Get-DcrImmutableIdForStream -StreamName 'MDE_Heartbeat_CL'
+    $heartbeatDcrId = Get-DcrImmutableIdForStream -StreamName 'XdrConnectorHealth_CL'
 
     # Top-level try/catch: on any fatal (KV down, auth rejected, DCE unreachable)
     # emit a heartbeat row with Notes.fatalError so operators see the failure
-    # in MDE_Heartbeat_CL rather than silence, then re-throw for App Insights.
+    # in XdrConnectorHealth_CL rather than silence, then re-throw for App Insights.
     #
     # Architectural note: there is NO auth-selftest gate. Earlier iterations had
     # a Storage-Table-backed Get/Set flag pair to "skip polling until auth
@@ -153,7 +153,7 @@ function Invoke-TierPollWithHeartbeat {
         $notes = [ordered]@{ errors = $result.Errors }
         # Pass through Rate429Count + GzipBytes when available (v0.1.0-beta
         # Phase 2 additions — surface rate-limit pressure + compression
-        # effectiveness to MDE_Heartbeat_CL).
+        # effectiveness to XdrConnectorHealth_CL).
         if ($result.PSObject.Properties['Rate429Count']) { $notes['rate429Count'] = $result.Rate429Count }
         if ($result.PSObject.Properties['GzipBytes'])    { $notes['gzipBytes']    = $result.GzipBytes }
 

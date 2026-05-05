@@ -3,7 +3,7 @@
 <#
 .SYNOPSIS
     Pester 5 unit tests for the L2 Defender-portal-specific module
-    Xdr.Defender.Auth (iter-14.0 Phase 1).
+    Xdr.Defender.Auth (v0.1.0 GA).
 
 .DESCRIPTION
     Migrated out of tests/unit/Xdr.Portal.Auth.Tests.ps1 when the monolithic

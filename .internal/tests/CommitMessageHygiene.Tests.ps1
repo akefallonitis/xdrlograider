@@ -1,7 +1,7 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Locks the iter-14.0 Phase 0.5 commit-msg hook: blocks AI-attribution
+    Locks the v0.1.0 GA commit-msg hook: blocks AI-attribution
     trailer leaks (Co-Authored-By: Claude, noreply@anthropic.com,
     "Generated with Claude") at the commit-msg stage.
 
@@ -63,7 +63,7 @@ AfterAll {
     }
 }
 
-Describe 'Commit-message hygiene hook (iter-14.0 Phase 0.5)' {
+Describe 'Commit-message hygiene hook (v0.1.0 GA)' {
 
     Context 'Versioned hook source' {
 
@@ -137,7 +137,7 @@ Describe 'Commit-message hygiene hook (iter-14.0 Phase 0.5)' {
 
         It 'Accepts a clean commit message (no AI trailers)' -Skip:(-not $script:HasBash) {
             $msgFile = Join-Path $script:TempDir "msg-$(Get-Random).txt"
-            "feat(iter-14.0): clean message`n`nDescription with no AI attribution." | Set-Content -LiteralPath $msgFile -Encoding ascii
+            "feat(v0.1.0 GA): clean message`n`nDescription with no AI attribution." | Set-Content -LiteralPath $msgFile -Encoding ascii
             & $script:BashPath $script:VersionedHook $msgFile *> $null
             $LASTEXITCODE | Should -Be 0 -Because 'clean messages must pass'
         }

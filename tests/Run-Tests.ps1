@@ -84,6 +84,15 @@ Import-Module $pester.Path -Force
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
+# Phase J.A (2026-05-04): module RequiredModules lookup needs src/Modules in
+# PSModulePath. Tests import .psd1 files via explicit paths but the
+# RequiredModules dependency chain (e.g. Xdr.Defender.Client requires
+# Xdr.Common.Manifest) resolves by name via PSModulePath.
+$srcModules = Join-Path $repoRoot 'src' 'Modules'
+if ($env:PSModulePath -notlike "*$srcModules*") {
+    $env:PSModulePath = "$srcModules$([System.IO.Path]::PathSeparator)$env:PSModulePath"
+}
+
 # --- Category → paths ---------------------------------------------------------
 
 $paths = switch ($Category) {
@@ -94,7 +103,7 @@ $paths = switch ($Category) {
     'predeploy'    { @('./tests/integration/Auth-Chain-Live.Tests.ps1', './tests/integration/Predeploy-Validation.Tests.ps1', './tests/integration/Deployment-WhatIf.Tests.ps1') }
     'whatif'       { @('./tests/integration/Deployment-WhatIf.Tests.ps1') }
     'all-offline'  { @('./tests/unit', './tests/kql', './tests/arm') }
-    # iter-14.0 Phase 4 (v0.1.0 GA): online-preflight runs after fixture refresh
+    # v0.1.0 GA (v0.1.0 GA): online-preflight runs after fixture refresh
     # to assert committed fixtures still match live portal shape (catches portal
     # drift before deploy). See Section 3 step 6 + Section 5 of senior-architect plan.
     'online-preflight' { @('./tests/online') }
@@ -185,14 +194,15 @@ if ($Category -in @('unit', 'all-offline')) {
     # Pester 5's CoveragePath glob resolution is fragile across OSes — resolve
     # the globs ourselves so the reporter sees real files and emits non-zero
     # coverage. Empty list disables coverage silently.
-    # v1.0.2: timer-function bodies (src/functions/**/run.ps1) are verified via
-    # AST + Execution tests (see tests/unit/TimerFunctions.Shape.Tests.ps1 +
-    # TimerFunctions.Execution.Tests.ps1) rather than line-coverage — the 200 LOC
-    # of non-library glue code dragged the real coverage metric down by ~15
-    # percentage points without signal. Modules + tools remain line-covered.
+    # Coverage scope: src/Modules/ only (the runtime connector code).
+    # EXCLUDED:
+    #   - src/functions/**/run.ps1 — verified via AST + Execution tests
+    #     (TimerFunctions.Shape.Tests.ps1 + TimerFunctions.Execution.Tests.ps1)
+    #   - tools/*.ps1 — operator scripts that run against live Azure; not
+    #     reasonably unit-testable with mocks (would test too little vs cost).
+    #     Verified via syntax-parse tests (PowerShellSyntax.Tests.ps1).
     $covFiles = @(
         (Get-ChildItem "$repoRoot/src/Modules" -Recurse -Filter *.ps1 -File -ErrorAction SilentlyContinue).FullName
-        (Get-ChildItem "$repoRoot/tools" -Filter *.ps1 -File -ErrorAction SilentlyContinue).FullName
     ) | Where-Object { $_ }
     if ($covFiles) {
         $cfg.CodeCoverage.Path = $covFiles

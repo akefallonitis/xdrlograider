@@ -70,7 +70,7 @@ function Pop-XdrIngestDlq {
         (via Remove-XdrIngestDlqEntry on success).
 
     .DESCRIPTION
-        v0.1.0-beta first publish: paired with Push-XdrIngestDlq. Drains the
+        v0.1.0 GA first publish: paired with Push-XdrIngestDlq. Drains the
         ingest dead-letter queue at the start of each tier poll cycle.
         Failed batches that previously would have been LOST when
         Send-ToLogAnalytics threw on retry-exhaust are now persisted in

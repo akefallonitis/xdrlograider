@@ -109,8 +109,8 @@ Describe 'Cmdlet → bundled module coverage (Linux Consumption Legion + Az.Stor
         $missing | Should -BeNullOrEmpty -Because "modules referenced by cmdlet calls must be bundled (otherwise CommandNotFoundException at runtime):`n$(($missing | ForEach-Object { '    ' + $_ }) -join "`n")"
     }
 
-    It 'iter-13.15 transition gate: src/ does NOT call any AzTable cmdlets in code (only docstring references allowed)' {
-        # Locks the iter-13.15 transition: ad-hoc reintroduction of AzTable
+    It 'pre-v0.1.0 transition gate: src/ does NOT call any AzTable cmdlets in code (only docstring references allowed)' {
+        # Locks the pre-v0.1.0 transition: ad-hoc reintroduction of AzTable
         # cmdlets would be a regression. Comments are allowed (history).
         $azTableCallsInCode = @()
         foreach ($file in $script:SrcFiles) {
@@ -121,12 +121,12 @@ Describe 'Cmdlet → bundled module coverage (Linux Consumption Legion + Az.Stor
                 $azTableCallsInCode += "$($file.FullName): $($m.Value)"
             }
         }
-        $azTableCallsInCode | Should -BeNullOrEmpty -Because 'iter-13.15 replaced all AzTable cmdlet calls with Invoke-XdrStorageTableEntity. Any reintroduction is a regression.'
+        $azTableCallsInCode | Should -BeNullOrEmpty -Because 'pre-v0.1.0 replaced all AzTable cmdlet calls with Invoke-XdrStorageTableEntity. Any reintroduction is a regression.'
     }
 
-    It 'iter-13.15 transition gate: src/ does NOT call legacy Storage Table context cmdlets in code' {
+    It 'pre-v0.1.0 transition gate: src/ does NOT call legacy Storage Table context cmdlets in code' {
         # New-AzStorageContext / Get-AzStorageTable / New-AzStorageTable were
-        # used pre-iter-13.15 to bridge to AzTable. With Invoke-XdrStorageTableEntity
+        # used pre-pre-v0.1.0 to bridge to AzTable. With Invoke-XdrStorageTableEntity
         # there is no need for any context object — token + URI is sufficient.
         $legacyCallsInCode = @()
         foreach ($file in $script:SrcFiles) {
@@ -137,6 +137,6 @@ Describe 'Cmdlet → bundled module coverage (Linux Consumption Legion + Az.Stor
                 $legacyCallsInCode += "$($file.FullName): $($m.Value)"
             }
         }
-        $legacyCallsInCode | Should -BeNullOrEmpty -Because 'iter-13.15 removed runtime Storage Table context creation; the table is created at deploy time by Bicep and entity ops use Invoke-XdrStorageTableEntity directly.'
+        $legacyCallsInCode | Should -BeNullOrEmpty -Because 'pre-v0.1.0 removed runtime Storage Table context creation; the table is created at deploy time by Bicep and entity ops use Invoke-XdrStorageTableEntity directly.'
     }
 }

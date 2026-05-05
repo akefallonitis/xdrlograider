@@ -50,7 +50,7 @@
         "queryType": 0,
         "title": "Active attack paths",
         "size": 0,
-        "query": "MDE_XspmAttackPaths_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by EntityId\n| project PathId, Source, Target, HopCount, Severity, Status, CreatedTime, TimeGenerated\n| order by Severity asc, HopCount asc",
+        "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmAttackPaths_CL'\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by EntityId\n| project PathId, Source, Target, HopCount, Severity, Status, CreatedTime, TimeGenerated\n| order by Severity asc, HopCount asc",
         "version": "KqlItem/1.0"
       },
       "type": 3
@@ -61,7 +61,7 @@
         "queryType": 0,
         "title": "Exposure score trend",
         "size": 0,
-        "query": "MDE_ExposureSnapshots_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize AvgScore = avg(Score) by bin(TimeGenerated, 1d)\n| render timechart",
+        "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_ExposureSnapshots_CL'\n| where TimeGenerated > ago({TimeRange:value})\n| summarize AvgScore = avg(Score) by bin(TimeGenerated, 1d)\n| render timechart",
         "version": "KqlItem/1.0"
       },
       "type": 3

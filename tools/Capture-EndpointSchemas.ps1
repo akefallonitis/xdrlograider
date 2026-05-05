@@ -78,12 +78,20 @@ Get-Content $envFile | ForEach-Object {
     }
 }
 
-# -------- Import modules — 5 real modules in dep order (no shim layer) ------
-Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Auth'           'Xdr.Common.Auth.psd1')                 -Force
-Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest'       'Xdr.Sentinel.Ingest.psd1')             -Force
-Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Auth'         'Xdr.Defender.Auth.psd1')               -Force
-Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client'       'Xdr.Defender.Client.psd1')             -Force
-Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Connector.Orchestrator' 'Xdr.Connector.Orchestrator.psd1')     -Force
+# -------- Import modules — dep order (L1 common → L2 auth → L3 client → L4 orchestrator)
+# Common.Manifest + Common.Telemetry are L1 dependencies of Sentinel.Ingest + Defender.Client
+# (extracted in Phase J for v0.2.0 multi-portal forward-compat).
+$srcModules = Join-Path $repoRoot 'src' 'Modules'
+if ($env:PSModulePath -notlike "*$srcModules*") {
+    $env:PSModulePath = "$srcModules$([System.IO.Path]::PathSeparator)$env:PSModulePath"
+}
+Import-Module (Join-Path $srcModules 'Xdr.Common.Auth'            'Xdr.Common.Auth.psd1')             -Force
+Import-Module (Join-Path $srcModules 'Xdr.Common.Manifest'        'Xdr.Common.Manifest.psd1')         -Force
+Import-Module (Join-Path $srcModules 'Xdr.Common.Telemetry'       'Xdr.Common.Telemetry.psd1')        -Force
+Import-Module (Join-Path $srcModules 'Xdr.Sentinel.Ingest'        'Xdr.Sentinel.Ingest.psd1')         -Force
+Import-Module (Join-Path $srcModules 'Xdr.Defender.Auth'          'Xdr.Defender.Auth.psd1')           -Force
+Import-Module (Join-Path $srcModules 'Xdr.Defender.Client'        'Xdr.Defender.Client.psd1')         -Force
+Import-Module (Join-Path $srcModules 'Xdr.Connector.Orchestrator' 'Xdr.Connector.Orchestrator.psd1') -Force
 
 # -------- Build session --------------------------------------------------
 $portalHost = if ($env:XDRLR_TEST_PORTAL_HOST) { $env:XDRLR_TEST_PORTAL_HOST } else { 'security.microsoft.com' }
@@ -177,7 +185,7 @@ function Invoke-Redact {
 }
 
 # -------- Walk the manifest ---------------------------------------------
-$manifest = Get-MDEEndpointManifest
+$manifest = Get-XdrEndpointManifest -Portal Defender
 $entries  = @($manifest.Values)
 
 New-Item -Path $OutDir -ItemType Directory -Force | Out-Null
@@ -216,7 +224,7 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
         Stream         = $stream
         Tier           = $tier
         Availability   = $availability
-        Deferred       = $deferred    # legacy field for back-compat
+        Deferred       = $deferred    # legacy field for v0.1.0 GA scope
         Method         = $method
         Path           = $path
         Status         = '-'
@@ -227,7 +235,7 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
         Notes          = ''
     }
 
-    # Legacy Deferred back-compat (v0.1.0-beta.1 manifests have no Deferred
+    # Legacy Deferred v0.1.0 GA scope (v0.1.0-beta.1 manifests have no Deferred
     # entries, but older manifests might still).
     if ($deferred -and -not $IncludeDeferred) {
         $row.Status = 'SKIP-deferred'
@@ -331,9 +339,9 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
     # -------- Ingest-row fixture --------
     # Same pipeline as the Function App: Expand-MDEResponse -> ConvertTo-MDEIngestRow.
     # Always emits an ingest file (even '[]') so downstream tests can rely on presence.
-    # iter-14.0: pass UnwrapProperty + ProjectionMap so wrapper-key responses
+    # v0.1.0 GA: pass UnwrapProperty + ProjectionMap so wrapper-key responses
     # iterate per-entity AND typed cols populate. (The capture script had the same
-    # silent bugs Invoke-MDEEndpoint had until iter-14.0; commits 77f5e8d+690b625
+    # silent bugs Invoke-MDEEndpoint had until v0.1.0 GA; commits 77f5e8d+690b625
     # fixed them in the FA pipeline; we mirror here so fixtures reflect production.)
     $ingestPath = Join-Path $OutDir ("{0}-ingest.json" -f $stream)
     try {

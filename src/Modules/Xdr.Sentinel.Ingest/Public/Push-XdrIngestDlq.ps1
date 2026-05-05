@@ -4,7 +4,7 @@ function Push-XdrIngestDlq {
         Persists a failed batch of rows to the ingest dead-letter queue (DLQ).
 
     .DESCRIPTION
-        v0.1.0-beta first publish: production-readiness gate for terminal
+        v0.1.0 GA first publish: production-readiness gate for terminal
         DCE ingest failures. Pre-fix, Send-ToLogAnalytics threw on 5x-retry
         exhaustion → timer trigger caught the exception → rows lost forever
         (no replay path). Post-fix, terminal failures spool to a Storage
@@ -174,7 +174,7 @@ function Push-XdrIngestDlq {
     if ($rowsJsonB64.Length -gt $maxRowsJsonChars) {
         $msg = "Push-XdrIngestDlq: gzipped+base64 batch is $($rowsJsonB64.Length) chars (cap $maxRowsJsonChars). Stream='$StreamName' Rows=$($Rows.Count) UncompressedBytes=$batchSizeBytes — DROPPING. Operator must reduce row size or split upstream."
         Write-Warning $msg
-        # iter-14.0 Phase 2 (v0.1.0 GA): row-drop threshold exceeded → native
+        # v0.1.0 GA (v0.1.0 GA): row-drop threshold exceeded → native
         # `exceptions` table per Section 2.3. DLQ drops are true errors operators
         # must alert on — belongs in AppExceptions, not customEvents.
         # Operators query: AppExceptions | where ProblemId contains 'DlqDropped' | summarize by Stream.

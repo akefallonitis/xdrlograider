@@ -26,7 +26,7 @@ description: <description>
 requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal
     dataTypes:
-      - MDE_Heartbeat_CL
+      - XdrConnectorHealth_CL
 tactics: [ Discovery, ... ]
 relevantTechniques: [ T1595, ... ]
 query: | <KQL>

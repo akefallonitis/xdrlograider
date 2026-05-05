@@ -38,7 +38,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_Heartbeat_CL\n| where TimeGenerated > ago(1h)\n| where Tier == 'P0'\n| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by FunctionName\n| extend Status = iff(LastSeen > ago(30m), 'Healthy', 'Stale')",
+        "query": "XdrConnectorHealth_CL\n| where TimeGenerated > ago(1h)\n| where Tier == 'P0'\n| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by FunctionName\n| extend Status = iff(LastSeen > ago(30m), 'Healthy', 'Stale')",
         "size": 0,
         "title": "Connector health (last hour)",
         "queryType": 0,
@@ -61,7 +61,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_LiveResponseConfig_CL\n| summarize arg_max(TimeGenerated, *) by FeatureName\n| project FeatureName, IsEnabled, TimeGenerated\n| order by FeatureName asc",
+        "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_LiveResponseConfig_CL'\n| summarize arg_max(TimeGenerated, *) by FeatureName\n| project FeatureName, IsEnabled, TimeGenerated\n| order by FeatureName asc",
         "size": 0,
         "title": "Live Response config",
         "queryType": 0,

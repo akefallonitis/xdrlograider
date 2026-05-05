@@ -259,7 +259,7 @@ Describe 'Live auth chain against real tenant' -Tag 'online', 'live' {
             Mock Invoke-MDEEndpoint {
                 param($Session, $Stream, $FromUtc, $PathParams)
                 # On 2nd run we MUST see a -FromUtc for filterable streams
-                $manifest = Get-MDEEndpointManifest
+                $manifest = Get-XdrEndpointManifest -Portal Defender
                 $entry = $manifest[$Stream]
                 $filter = if ($entry -is [hashtable]) { $entry['Filter'] } else { $null }
                 if ($filter) {

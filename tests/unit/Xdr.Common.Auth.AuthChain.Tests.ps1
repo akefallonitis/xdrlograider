@@ -3,7 +3,7 @@
 <#
 .SYNOPSIS
     Fixture-based Pester 5 unit tests for the L1 Entra auth chain in
-    Xdr.Common.Auth (iter-14.0 Phase 1).
+    Xdr.Common.Auth (v0.1.0 GA).
 
 .DESCRIPTION
     Migrated out of tests/unit/Xdr.Portal.Auth.AuthChain.Tests.ps1 when the

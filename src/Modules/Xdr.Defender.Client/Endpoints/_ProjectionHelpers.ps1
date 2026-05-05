@@ -1,4 +1,4 @@
-# iter-14.0 Phase 4 — typed-column ingest projection helpers.
+# v0.1.0 GA — typed-column ingest projection helpers.
 #
 # Design:
 #   Manifest ProjectionMap is a hashtable @{ TargetColumn = JSONPath-or-typed-hint }.

@@ -32,7 +32,7 @@ Describe 'Sentinel analytic rules — ship-disabled doctrine (iter 13.9 S2)' {
             }
         }
         $offenders | Should -BeNullOrEmpty -Because (
-            'iter-13.9 S2 lock: every analytic rule must ship enabled=false so customers ' +
+            'pre-v0.1.0.9 S2 lock: every analytic rule must ship enabled=false so customers ' +
             'opt in per-rule. Offenders: ' + [Environment]::NewLine + ($offenders -join [Environment]::NewLine)
         )
     }

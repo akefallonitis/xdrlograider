@@ -46,7 +46,7 @@ $session = Connect-DefenderPortal -Method $authMethod -Credential $credential -P
 Write-Host "  sccauth acquired (TenantId $($session.TenantId))"
 Write-Host ""
 
-$manifest = Get-MDEEndpointManifest   # returns hashtable keyed by Stream name
+$manifest = Get-XdrEndpointManifest -Portal Defender   # returns hashtable keyed by Stream name
 $entries  = @($manifest.Values)       # flatten to array for iteration
 Write-Host "Probing $($entries.Count) endpoints..."
 

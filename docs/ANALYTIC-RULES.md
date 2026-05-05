@@ -32,7 +32,7 @@ severity: Informational | Low | Medium | High
 requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal
     dataTypes:
-      - MDE_Heartbeat_CL
+      - XdrConnectorHealth_CL
 queryFrequency: 15m
 queryPeriod: 2h
 triggerOperator: gt

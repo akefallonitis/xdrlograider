@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-    iter-14.0 Phase 1 architectural test gate: enforces the L1/L2 boundary
+    v0.1.0 GA architectural test gate: enforces the L1/L2 boundary
     between Xdr.Common.Auth (portal-generic Entra layer) and the L2 portal
     modules (Xdr.Defender.Auth today; Xdr.Purview.Auth / Xdr.Intune.Auth /
     Xdr.Entra.Auth in v0.2.0).
@@ -63,7 +63,7 @@ BeforeAll {
     )
 }
 
-Describe 'Xdr.Common.Auth L1/L2 boundary — no Defender-specific strings (iter-14.0 gate)' {
+Describe 'Xdr.Common.Auth L1/L2 boundary — no Defender-specific strings (v0.1.0 GA gate)' {
     BeforeAll {
         $script:CommonFiles = @()
         foreach ($sub in @('Public', 'Private')) {

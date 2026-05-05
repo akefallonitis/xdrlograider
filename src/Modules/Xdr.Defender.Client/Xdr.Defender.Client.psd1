@@ -8,16 +8,17 @@
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
     Description           = 'L3 Defender-portal manifest dispatcher. Per-stream Invoke-MDEEndpoint + per-tier Invoke-MDETierPoll + shared Invoke-TierPollWithHeartbeat timer body, backed by the endpoints.manifest.psd1 catalogue (45 streams across P0-P7 tiers, all read-only). Builds on the L2 Xdr.Defender.Auth cookie-exchange layer.'
-    RequiredModules       = @('Xdr.Defender.Auth')
+    RequiredModules       = @('Xdr.Defender.Auth', 'Xdr.Common.Manifest')
     # Public surface: single dispatcher + per-tier poller + shared timer body +
-    # manifest loader + 3 underlying helpers. The 45 stream names live in
+    # 3 underlying helpers. The 46 stream names live in
     # endpoints.manifest.psd1 (not in this file) so adding/retiring an endpoint
     # is a one-line manifest change.
+    # Note: manifest loader (Get-XdrEndpointManifest) lives in Xdr.Common.Manifest
+    # module (Phase J D'.1 extraction for v0.2.0 multi-portal forward-compat).
     FunctionsToExport     = @(
         'Invoke-MDEEndpoint',
         'Invoke-MDETierPoll',
         'Invoke-TierPollWithHeartbeat',
-        'Get-MDEEndpointManifest',
         'Invoke-MDEPortalEndpoint',
         'ConvertTo-MDEIngestRow',
         'Expand-MDEResponse'

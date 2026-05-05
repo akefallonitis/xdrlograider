@@ -30,7 +30,7 @@ foreach ($file in $private + $public) {
     }
 }
 
-# v0.1.0-beta first publish: TTL-bounded KV secret cache.
+# v0.1.0 GA first publish: TTL-bounded KV secret cache.
 # These module-scope hashtables persist across Get-XdrAuthFromKeyVault calls
 # within the same FA worker process. TTL default is 60 minutes (override
 # via env var KV_CACHE_TTL_MINUTES). On expiry, the next call evicts +

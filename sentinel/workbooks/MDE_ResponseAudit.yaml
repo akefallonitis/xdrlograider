@@ -7,9 +7,9 @@ Logo: '<img src="https://raw.githubusercontent.com/akefallonitis/xdrlograider/ma
 Data:
   - DataConnector: XdrLogRaiderInternal
     DataTypes:
-      - MDE_Heartbeat_CL
-      - MDE_ActionCenter_CL
-      - MDE_MachineActions_CL
+      - XdrConnectorHealth_CL
+      - Defender_ActionCenter_CL | where SourceName == 'MDE_ActionCenter_CL'
+      - Defender_ActionCenter_CL | where SourceName == 'MDE_MachineActions_CL'
 WorkbookKey: MDE_ResponseAudit
 SourceCenter: sentinel
 FileName: MDE_ResponseAudit.json

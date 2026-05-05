@@ -152,7 +152,7 @@ Data Connectors blade** is the source of truth: the **XdrLogRaider** card flips
 to **Connected** within 5–10 minutes of the first successful poll. That's it —
 no CLI tools to run.
 
-Underlying signal: the connector writes a row to `MDE_Heartbeat_CL` every
+Underlying signal: the connector writes a row to `XdrConnectorHealth_CL` every
 5 minutes; the data-connector's `connectivityCriterias` query reads it and
 flips the card. If the card stays **Disconnected** for >15 minutes after
 `Initialize-XdrLogRaiderAuth.ps1`, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).

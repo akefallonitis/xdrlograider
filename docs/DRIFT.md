@@ -94,7 +94,7 @@ union
 
 ## Cost
 
-Drift queries are read-only. Log Analytics charges for ingestion (write) + scanned data (query on some tiers). Configuration streams are low-volume (~50-200 MB/day all tiers), so both ingestion and scan costs are minimal. See [COST.md](COST.md).
+Drift queries are read-only. Log Analytics charges for ingestion (write) + scanned data (query on some tiers). Configuration streams are low-volume (~50-200 MB/day all tiers), so both ingestion and scan costs are minimal. Operator-tunable retention, cadence overrides, and AppInsights verbosity are documented in [OPERATOR-KQL-PACK.md](OPERATOR-KQL-PACK.md).
 
 ## Adding a new drift rule
 

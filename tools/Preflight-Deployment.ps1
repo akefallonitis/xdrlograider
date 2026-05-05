@@ -252,13 +252,13 @@ try {
 # -----------------------------------------------------------------
 Write-Host "--- 6/8  Schema consistency ---" -ForegroundColor Cyan
 try {
-    # Manifest count — load 5 real modules in dep order (no shim layer in v0.1.0-beta first publish)
+    # Manifest count — load 5 real modules in dep order (no shim layer in v0.1.0 GA first publish)
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1')                 -Force -ErrorAction Stop
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1')         -Force -ErrorAction Stop
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1')             -Force -ErrorAction Stop
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1')         -Force -ErrorAction Stop
     Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Connector.Orchestrator' 'Xdr.Connector.Orchestrator.psd1') -Force -ErrorAction Stop
-    $manifest = Get-MDEEndpointManifest -Force
+    $manifest = Get-XdrEndpointManifest -Portal Defender -Force
     if ($manifest.Count -eq 46) {
         Add-Check -Section '6-Schema' -Name 'Manifest = 46 streams' -Status Pass -Detail "$($manifest.Count) streams"
     } else {

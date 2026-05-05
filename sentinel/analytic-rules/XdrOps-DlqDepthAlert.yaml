@@ -5,7 +5,7 @@ description: |
   rows that have been waiting too long OR queue depth exceeded operational
   threshold, indicating sustained DCE 5xx/429 backpressure.
 
-  Per directive 38 + B5 in .claude/plans/immutable-splashing-waffle.md.
+  
   Operator-enabled (ships disabled per Sentinel Solution best practice).
 
   Thresholds (operator-tuneable in query):
@@ -14,7 +14,7 @@ description: |
 
   Triage in docs/RUNBOOK.md "DLQ backlog" section.
   Auto-drain: Pop-XdrIngestDlq runs at start of every Defender-*-Refresh poll
-  to retry stuck batches (with TTL eviction per Phase F.4).
+  to retry stuck batches with TTL eviction.
 severity: Medium
 enabled: false
 requiredDataConnectors:

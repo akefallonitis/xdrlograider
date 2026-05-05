@@ -29,11 +29,11 @@ BeforeAll {
 
 Describe 'Least-privilege role-assignment invariants (Y1-only)' {
 
-    It 'declares exactly 7 role assignments (Y1-only baseline)' {
-        # 5-DCR shape: KV Secrets User + Storage Table Data Contributor +
-        # 5x Monitoring Metrics Publisher (one per DCR) = 7. Strict count
+    It 'declares exactly 9 role assignments (v0.1.0 GA Phase 2 — 7-DCR shape)' {
+        # 7-DCR shape: KV Secrets User + Storage Table Data Contributor +
+        # 7x Monitoring Metrics Publisher (one per DCR) = 9. Strict count
         # gate: any new role assignment requires updating this number.
-        $script:RoleAssignments.Count | Should -Be 7 -Because 'Y1-only baseline: KV Secrets User + Storage Table + 5x Monitoring Metrics Publisher (one per DCR) = 7'
+        $script:RoleAssignments.Count | Should -Be 9 -Because 'v0.1.0 GA Phase 2: KV Secrets User + Storage Table + 7x Monitoring Metrics Publisher (one per DCR) = 9'
     }
 
     It 'every role assignment uses a SPECIFIC scope (no subscription() or resourceGroup() scopes)' {
@@ -112,7 +112,7 @@ Describe 'Y1-only role matrix (canonical role IDs)' {
     }
 
     It 'grants Monitoring Metrics Publisher (3913510d-42f4-4e42-8a64-420c390055eb) on every DCR (5 total)' {
-        # 5-DCR shape: one role assignment per DCR sharing the DCE. The
+        # 7-DCR shape (v0.1.0 GA Phase 2): one role assignment per DCR sharing the DCE. The
         # roleDefinitionId is built via resourceId() that references the
         # variable `monitoringMetricsPublisherRoleId`, so we match either the
         # literal GUID OR the variable reference (the resolved value is
@@ -122,7 +122,7 @@ Describe 'Y1-only role matrix (canonical role IDs)' {
             $rd -match '3913510d-42f4-4e42-8a64-420c390055eb' -or
             $rd -match "variables\(\s*'monitoringMetricsPublisherRoleId'\s*\)"
         })
-        $mmp.Count | Should -Be 5 -Because 'each of the 5 DCRs needs its own Monitoring Metrics Publisher role'
+        $mmp.Count | Should -Be 7 -Because 'each of the 7 DCRs needs its own Monitoring Metrics Publisher role (4x10 + 5(7) + 6(7) + 7(6) Phase 2 distribution)'
 
         # Belt-and-braces: variable must hold the canonical MMP GUID
         $script:Arm.variables.monitoringMetricsPublisherRoleId |

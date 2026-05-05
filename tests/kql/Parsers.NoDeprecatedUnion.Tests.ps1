@@ -56,13 +56,13 @@ Describe 'Sentinel parsers — no unconditional union of deprecated streams (ite
         }
 
         $offenders | Should -BeNullOrEmpty -Because (
-            'iter-13.9 S1 lock: deprecated streams produce zero rows; remove from parser unions to keep source-table lists honest. Offenders:' +
+            'pre-v0.1.0.9 S1 lock: deprecated streams produce zero rows; remove from parser unions to keep source-table lists honest. Offenders:' +
             [Environment]::NewLine + ($offenders -join [Environment]::NewLine)
         )
     }
 
     It 'baseline parser count is exactly 4 — one per cadence tier with snapshot semantics (Exposure / Configuration / Inventory / Maintenance). The fast tier carries events, not snapshots, so has no parser.' {
         $parsers = @(Get-ChildItem -Path $script:ParsersDir -Filter '*.kql' -File)
-        $parsers.Count | Should -Be 4 -Because 'v0.1.0-beta first publish: 4 cadence-tier parsers, no more, no fewer'
+        $parsers.Count | Should -Be 4 -Because 'v0.1.0 GA first publish: 4 cadence-tier parsers, no more, no fewer'
     }
 }

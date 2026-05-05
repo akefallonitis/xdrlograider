@@ -77,7 +77,7 @@ function Resolve-EntraInterruptPage {
                 }
             }
             default {
-                # iter-13.9 (O1): unknown pgid is a diagnostic event — Entra introduced
+                # pre-v0.1.0.9 (O1): unknown pgid is a diagnostic event — Entra introduced
                 # a new interrupt page we don't handle yet. Capture diagnostic context
                 # at Warning level so operators can root-cause from App Insights.
                 $sErrorCode = Get-EntraField -Object $state -Name 'sErrorCode' -Default ''

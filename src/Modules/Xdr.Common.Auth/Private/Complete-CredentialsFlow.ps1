@@ -25,7 +25,7 @@ function Complete-CredentialsFlow {
     if (-not $password)   { throw "CredentialsTotp requires 'password'" }
     if (-not $totpBase32) { throw "CredentialsTotp requires 'totpBase32'" }
 
-    # iter-13.15 (Phase C) discipline: wrap secret-bearing variables in try/finally so
+    # pre-v0.1.0 (Phase C) discipline: wrap secret-bearing variables in try/finally so
     # the password (and downstream credBody) are removed from the local scope as soon
     # as control leaves this function — including on exception paths. PS strings are
     # GC-managed (immutable); we cannot zero memory but we do reduce lifetime to GC
@@ -59,8 +59,8 @@ function Complete-CredentialsFlow {
         if ($errCode) {
             $errTxt = Get-EntraField -Object $authState -Name 'sErrTxt' -Default ''
             $msg = Get-EntraErrorMessage -Code $errCode -DefaultText $errTxt
-            # iter-13.9 (C3): include UPN so operators can triage from
-            # MDE_Heartbeat_CL.Notes alone without correlating App Insights.
+            # pre-v0.1.0.9 (C3): include UPN so operators can triage from
+            # XdrConnectorHealth_CL.Notes alone without correlating App Insights.
             throw "Authentication failed for UPN='$upn' (AADSTS$errCode): $msg"
         }
 

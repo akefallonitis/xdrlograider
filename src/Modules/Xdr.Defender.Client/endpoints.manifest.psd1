@@ -38,7 +38,7 @@
     #     Purpose        operator-facing one-line description
     #     Availability   'live' | 'tenant-gated' | 'deprecated'
     #
-    #   Per-entry OPTIONAL (defaults via Defaults block + Get-MDEEndpointManifest):
+    #   Per-entry OPTIONAL (defaults via Defaults block + Get-XdrEndpointManifest -Portal Defender):
     #     Method            'GET' (default) or 'POST'
     #     Filter            query-string param name for delta polling
     #     IdProperty        string[] — per-entry override of Expand-MDEResponse's
@@ -63,7 +63,7 @@
     #                       response is a single configuration object that
     #                       should be one operator-friendly row (e.g.
     #                       MDE_TenantContext_CL, MDE_ConnectedApps_CL,
-    #                       MDE_UserPreferences_CL). iter-14.0 Phase 1 add.
+    #                       MDE_UserPreferences_CL). v0.1.0 GA add.
     #     Portal            override Defaults.Portal (v0.2.0+ multi-portal entries
     #                       set this to compliance.microsoft.com / intune.microsoft.com / etc).
     #     MFAMethodsSupported  string[] — defaults to @('CredentialsTotp','Passkey').
@@ -113,7 +113,7 @@
         # Phase I per directives 32 + 34 + plan Section 2.A:
         StreamSubtype           = 'portal-api'  # v0.2.0 adds 'xdrinternals' + 'hybrid'
         SnapshotDedupRationale  = 'snapshot-replace'  # default for snapshot-style ingest; per-stream override for event-stream tiers
-        # NodocCategorySlug derived at manifest-load from NodocCategoryId via lookup table:
+        # CategorySlug derived at manifest-load from CategoryId via lookup table:
         #   1=endpoint-device-management, 2=endpoint-configuration, 3=vulnerability-management,
         #   4=identity-protection, 5=configuration-and-settings, 6=exposure-management-xspm,
         #   7=threat-analytics, 8=action-center, 9=multi-tenant-operations, 10=streaming-api
@@ -127,61 +127,61 @@
             Path = '/apiproxy/mtp/settings/GetAdvancedFeaturesSetting'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
-            NodocCategoryId = 2  # nodoc-authoritative (Phase D.1)
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'Tenant-wide MDE feature toggles (Tamper Protection, EDR-block, Web Content Filtering, etc.)'
             Availability = 'live'
             # Property-bag stream: response is { FeatureName1: bool, FeatureName2: bool, ... }
             # with 30+ properties. Each property name → one row via Shape 3 flattening.
-            # iter-14.0 Phase 1: ProjectionMap follows the property-bag convention
+            # v0.1.0 GA: ProjectionMap follows the property-bag convention
             # FeatureName + IsEnabled (per-property declarations cannot resolve under
             # Shape 3 because the per-row entity is the property VALUE — a scalar bool —
             # not an object with named fields).
             # Legacy cols (EnableWdavAntiTampering/AatpIntegrationEnabled/etc) declared
-            # back-compat for additive-only schema (ARM rejects col drops); they project
+            # v0.1.0 GA scope for additive-only schema (ARM rejects col drops); they project
             # from fields that don't exist on the per-row scalar entity → always null.
             # Operators should query IsEnabled going forward.
             ProjectionMap = @{
                 FeatureName = '$tostring:EntityId'   # property name (synthesized in projContext)
                 IsEnabled   = '$tobool:value'        # property value
-                # Legacy back-compat (always null with corrected Shape 3 handling):
+                # Legacy v0.1.0 GA scope (always null with corrected Shape 3 handling):
                 EnableWdavAntiTampering       = '$tobool:EnableWdavAntiTampering'
                 AatpIntegrationEnabled        = '$tobool:AatpIntegrationEnabled'
                 EnableMcasIntegration         = '$tobool:EnableMcasIntegration'
                 AutoResolveInvestigatedAlerts = '$tobool:AutoResolveInvestigatedAlerts'
             }
         }
-        # iter-13.9 (B4): query-string drift fix per XDRInternals canonical source
+        # pre-v0.1.0.9 (B4): query-string drift fix per XDRInternals canonical source
         # — Get-XdrConfigurationPreviewFeatures.ps1 uses ?context=MdatpContext.
         @{
             Stream = 'MDE_PreviewFeatures_CL'
             Path = '/apiproxy/mtp/settings/GetPreviewExperienceSetting?context=MdatpContext'
             Tier = 'Configuration'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Preview-ring enrolment for tenant-wide MDE features (gradual rollout state)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): { IsOptIn: false, SliceId: 100 }
             # Single object with mixed-type properties → Shape 3 flatten yields 2 rows
             # (EntityId='IsOptIn'+value=false, EntityId='SliceId'+value=100).
-            # iter-14.0 Phase 1: FeatureName + Value convention; Value as string is
+            # v0.1.0 GA: FeatureName + Value convention; Value as string is
             # universal (operators parse if numeric). Legacy cols preserved as
-            # back-compat (always null with corrected Shape 3 handling).
+            # v0.1.0 GA scope (always null with corrected Shape 3 handling).
             ProjectionMap = @{
                 FeatureName = '$tostring:EntityId'
                 Value       = '$tostring:value'
-                # Legacy back-compat (always null):
-                SettingId = '$tostring:EntityId'  # alias of FeatureName for back-compat
+                # Legacy v0.1.0 GA scope (always null):
+                SettingId = '$tostring:EntityId'  # alias of FeatureName for v0.1.0 GA scope
                 IsOptIn   = '$tobool:IsOptIn'
                 SliceId   = '$toint:SliceId'
             }
         }
-        # iter-13.9 (B4): ?includeDetails=true per Get-XdrConfigurationAlertServiceSetting.ps1
+        # pre-v0.1.0.9 (B4): ?includeDetails=true per Get-XdrConfigurationAlertServiceSetting.ps1
         @{
             Stream = 'MDE_AlertServiceConfig_CL'
             Path = '/apiproxy/mtp/alertsApiService/workloads/disabled?includeDetails=true'
             Tier = 'Configuration'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Per-workload alert-source enable/disable matrix (which detection sources fire alerts)'
             Availability = 'live'
             # Fixture: empty object (live response). Per-Category convention.
@@ -193,15 +193,15 @@
                 ModifiedBy      = '$tostring:ModifiedBy'
             }
         }
-        # iter-13.9 (B3): nodoc-cited path — XDRInternals has no Get-Xdr*AlertTuning cmdlet.
-        # iter-14.0 Phase 4 (v0.1.0 GA): added UnwrapProperty='items' per fixture shape.
+        # pre-v0.1.0.9 (B3): nodoc-cited path — XDRInternals has no Get-Xdr*AlertTuning cmdlet.
+        # v0.1.0 GA (v0.1.0 GA): added UnwrapProperty='items' per fixture shape.
         @{
             Stream = 'MDE_AlertTuning_CL'
             Path = '/apiproxy/mtp/alertsEmailNotifications/email_notifications'
             Tier = 'Configuration'
             UnwrapProperty = 'items'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Email-notification rules for alerts (recipients, severity filters, delivery cadence)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): { items: [] } — empty in
@@ -222,7 +222,7 @@
             Tier = 'Configuration'
             Filter = 'fromDate'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Operator-defined alert suppression rules (which alerts are deliberately silenced + scope)'
             Availability = 'live'
             # Fixture: array of rule objects with Id/RuleTitle/CreatedBy/CreationTime/IsEnabled/Scope/Action/RuleType/MatchingAlertsCount.
@@ -240,7 +240,7 @@
                 UpdateTime          = '$todatetime:UpdateTime'
             }
         }
-        # iter-13.9 (B4): pagination + unified-rules-list flag per XDRInternals
+        # pre-v0.1.0.9 (B4): pagination + unified-rules-list flag per XDRInternals
         # Get-XdrAdvancedHuntingUnifiedDetectionRules.ps1 — without pageSize=10000
         # the response is truncated to the default-page count.
         @{
@@ -250,7 +250,7 @@
             Filter = 'fromDate'
             UnwrapProperty = 'Rules'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Tenant-defined custom detection rules (KQL-driven scheduled hunts that mint alerts)'
             Availability = 'live'
             # Fixture: empty (no rules in test tenant). Convention from unified-detections shape.
@@ -270,17 +270,17 @@
             Path = '/apiproxy/mtp/siamApi/Onboarding'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
-            NodocCategoryId = 2  # nodoc-authoritative (Phase D.1)
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'Device-control + onboarding-package configuration (USB/printer/disk policies)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): { onboarded: 0, notOnboarded: 0, hasPermissions: true }
             # Property-bag with mixed types (int + bool) → Shape 3 flatten.
-            # iter-14.0 Phase 1: FeatureName + Value (string, universal). Legacy
-            # cols preserved as back-compat (always null with corrected handling).
+            # v0.1.0 GA: FeatureName + Value (string, universal). Legacy
+            # cols preserved as v0.1.0 GA scope (always null with corrected handling).
             ProjectionMap = @{
                 FeatureName    = '$tostring:EntityId'
                 Value          = '$tostring:value'
-                # Legacy back-compat (always null):
+                # Legacy v0.1.0 GA scope (always null):
                 Onboarded      = '$toint:onboarded'
                 NotOnboarded   = '$toint:notOnboarded'
                 HasPermissions = '$tobool:hasPermissions'
@@ -292,23 +292,23 @@
             Tier = 'Inventory'
             UnwrapProperty = 'TopParentCategories'
             Category = 'Endpoint Configuration'
-            NodocCategoryId = 2  # nodoc-authoritative (Phase D.1)
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'Web Content Filtering policy state + top blocked-category report'
             Availability = 'live'
             # Live response shape (captured 2026-05-03):
             # { UpdateTime: <iso>, TopParentCategories: [{ Name, ActivityDeltaPercentage,
             #   IsDeltaPercentageValid, TotalAccessRequests, TotalBlockedCount }, ...] }
-            # iter-14.0 Phase 1: UnwrapProperty='TopParentCategories' so each
+            # v0.1.0 GA: UnwrapProperty='TopParentCategories' so each
             # category is a per-entity row (Shape 1). UpdateTime is a wrapper-level
             # field — lost on unwrap; row's TimeGenerated suffices.
-            # Legacy cols (FeatureName/UpdateTime) preserved as back-compat.
+            # Legacy cols (FeatureName/UpdateTime) preserved as v0.1.0 GA scope.
             ProjectionMap = @{
                 CategoryName            = '$tostring:Name'
                 ActivityDeltaPercentage = '$toint:ActivityDeltaPercentage'
                 IsDeltaPercentageValid  = '$tobool:IsDeltaPercentageValid'
                 TotalAccessRequests     = '$tolong:TotalAccessRequests'
                 TotalBlockedCount       = '$tolong:TotalBlockedCount'
-                # Legacy back-compat (post-unwrap entity has no FeatureName/UpdateTime):
+                # Legacy v0.1.0 GA scope (post-unwrap entity has no FeatureName/UpdateTime):
                 FeatureName             = '$tostring:Name'  # alias of CategoryName
                 UpdateTime              = '$todatetime:UpdateTime'
             }
@@ -318,19 +318,19 @@
             Path = '/apiproxy/mtp/webThreatProtection/webThreats/reports/webThreatSummary'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
-            NodocCategoryId = 2  # nodoc-authoritative (Phase D.1)
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'Microsoft Defender SmartScreen aggregated web-threat report (impressions + block actions)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03):
             # { TotalThreats:0, Phishing:0, Malicious:0, ..., UpdateTime: <iso> }
             # Property-bag of int counters + 1 datetime → Shape 3 flatten yields
-            # 10 rows (one per counter + UpdateTime row). iter-14.0 Phase 1:
+            # 10 rows (one per counter + UpdateTime row). v0.1.0 GA:
             # FeatureName + Value (string, universal — operator parses int if needed).
-            # Legacy per-counter cols preserved as back-compat (always null).
+            # Legacy per-counter cols preserved as v0.1.0 GA scope (always null).
             ProjectionMap = @{
                 FeatureName     = '$tostring:EntityId'
                 Value           = '$tostring:value'
-                # Legacy back-compat (always null with corrected Shape 3 handling):
+                # Legacy v0.1.0 GA scope (always null with corrected Shape 3 handling):
                 TotalThreats    = '$toint:TotalThreats'
                 Phishing        = '$toint:Phishing'
                 Malicious       = '$toint:Malicious'
@@ -339,24 +339,24 @@
                 LastModifiedUtc = '$todatetime:UpdateTime'
             }
         }
-        # iter-13.9 (B4): ?useV2Api=true&useV3Api=true per Get-XdrEndpointConfigurationLiveResponse.ps1
+        # pre-v0.1.0.9 (B4): ?useV2Api=true&useV3Api=true per Get-XdrEndpointConfigurationLiveResponse.ps1
         @{
             Stream = 'MDE_LiveResponseConfig_CL'
             Path = '/apiproxy/mtp/liveResponseApi/get_properties?useV2Api=true&useV3Api=true'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
-            NodocCategoryId = 2  # nodoc-authoritative (Phase D.1)
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'Live Response service properties + script-library config + tab-completion enablement'
             Availability = 'live'
             # Live response shape (captured 2026-05-03):
             # { AutomatedIrLiveResponse: true, AutomatedIrUnsignedScripts: true, LiveResponseForServers: true }
             # Pure-bool property-bag → Shape 3 flatten yields 3 rows.
-            # iter-14.0 Phase 1: FeatureName + IsEnabled.
-            # Legacy per-property cols preserved as back-compat (always null).
+            # v0.1.0 GA: FeatureName + IsEnabled.
+            # Legacy per-property cols preserved as v0.1.0 GA scope (always null).
             ProjectionMap = @{
                 FeatureName                = '$tostring:EntityId'
                 IsEnabled                  = '$tobool:value'
-                # Legacy back-compat (always null with corrected Shape 3 handling):
+                # Legacy v0.1.0 GA scope (always null with corrected Shape 3 handling):
                 AutomatedIrLiveResponse    = '$tobool:AutomatedIrLiveResponse'
                 AutomatedIrUnsignedScripts = '$tobool:AutomatedIrUnsignedScripts'
                 LiveResponseForServers     = '$tobool:LiveResponseForServers'
@@ -369,17 +369,17 @@
             Path = '/apiproxy/mtp/responseApiPortal/senseauth/allownonauthsense'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
-            NodocCategoryId = 2  # nodoc-authoritative (Phase D.1)
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'Sense-auth posture (whether unauthenticated telemetry from Sense agent is accepted)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): scalar bool `true`.
             # Shape 4 → ONE row with EntityId='value', value=<bool>.
-            # iter-14.0 Phase 1: AllowNonAuthSense was redundant duplicate of IsEnabled
-            # — preserved as back-compat alias.
+            # v0.1.0 GA: AllowNonAuthSense was redundant duplicate of IsEnabled
+            # — preserved as v0.1.0 GA scope alias.
             ProjectionMap = @{
                 FeatureName       = '$tostring:EntityId'
                 IsEnabled         = '$tobool:value'
-                AllowNonAuthSense = '$tobool:value'  # back-compat alias of IsEnabled
+                AllowNonAuthSense = '$tobool:value'  # v0.1.0 GA scope alias of IsEnabled
             }
         }
         @{
@@ -387,18 +387,18 @@
             Path = '/apiproxy/mtp/autoIr/ui/properties/'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
-            NodocCategoryId = 2  # nodoc-authoritative (Phase D.1)
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'Potentially-Unwanted-Application enforcement scope (block / audit / off + per-platform)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03):
             # { AutomatedIrPuaAsSuspicious: false, IsAutomatedIrContainDeviceEnabled: true }
             # Pure-bool property-bag → Shape 3 flatten yields 2 rows.
-            # iter-14.0 Phase 1: FeatureName + IsEnabled.
-            # Legacy per-property cols preserved as back-compat (always null).
+            # v0.1.0 GA: FeatureName + IsEnabled.
+            # Legacy per-property cols preserved as v0.1.0 GA scope (always null).
             ProjectionMap = @{
                 FeatureName                       = '$tostring:EntityId'
                 IsEnabled                         = '$tobool:value'
-                # Legacy back-compat (always null with corrected Shape 3 handling):
+                # Legacy v0.1.0 GA scope (always null with corrected Shape 3 handling):
                 AutomatedIrPuaAsSuspicious        = '$tobool:AutomatedIrPuaAsSuspicious'
                 IsAutomatedIrContainDeviceEnabled = '$tobool:IsAutomatedIrContainDeviceEnabled'
             }
@@ -409,7 +409,7 @@
             Path = '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
-            NodocCategoryId = 2  # nodoc-authoritative (Phase D.1)
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'MEM-bridged antivirus policy filter facets (Intune + Configuration Manager scope)'
             Availability = 'tenant-gated'
             # Fixture: tenant-gated (no live data). Convention: AV policy filter facets.
@@ -426,7 +426,7 @@
             Path = '/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues'
             Tier = 'Configuration'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Tenant Allow-Block-List (TABL) filter facet — IP/URL/file-hash indicator inventory'
             Availability = 'tenant-gated'
             # Fixture: tenant-gated (no live data). Convention: TABL indicator filter facet.
@@ -446,7 +446,7 @@
             Path = '/apiproxy/mtp/mdeCustomCollection/rules'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
-            NodocCategoryId = 2  # nodoc-authoritative (Phase D.1)
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'Custom event-collection rules (what extra MDE telemetry the tenant is gathering)'
             Availability = 'tenant-gated'
             IdProperty = @('ruleId', 'RuleId', 'id', 'Id')
@@ -482,7 +482,7 @@
             Tier = 'Maintenance'
             UnwrapProperty = 'value'
             Category = 'Streaming API'
-            NodocCategoryId = 10  # nodoc-authoritative (Phase D.1)
+            CategoryId = 10  # nodoc-authoritative (Phase D.1)
             Purpose = 'Streaming API configuration: which workspaces / event-hubs / storage receive exported MDE telemetry'
             AuditScope = 'hybrid'
             Availability = 'live'
@@ -490,7 +490,7 @@
             # { @odata.context, value: [{ id, designatedTenantId, eventHubProperties,
             #   storageAccountProperties, workspaceProperties: { workspaceResourceId,
             #   subscriptionId, resourceGroup, name }, logs: [{ category, enabled }] }] }
-            # iter-14.0 Phase 4: added UnwrapProperty='value' (caught by ProjectionResolution gate).
+            # v0.1.0 GA: added UnwrapProperty='value' (caught by ProjectionResolution gate).
             ProjectionMap = @{
                 ConfigId        = '$tostring:id'
                 Destination     = '$tostring:workspaceProperties.name'
@@ -507,13 +507,13 @@
             Tier = 'Configuration'
             SingleObjectAsRow = $true
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'OAuth + service-app inventory connected to the tenant Defender API surface'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): single object (NOT array
             # despite path suggesting "all"). One app per response in test tenant.
             # { Id, DisplayName, Enabled, LatestConnectivity, ApplicationSettingsLink, MonthlyStatistics:[int*] }.
-            # iter-14.0 Phase 1: SingleObjectAsRow=$true so per-row entity is the
+            # v0.1.0 GA: SingleObjectAsRow=$true so per-row entity is the
             # whole app object → typed cols project from named fields.
             # v0.2.0 follow-up: investigate whether tenants with multiple connected
             # apps return an array (verify against XDRInternals canonical client).
@@ -531,22 +531,22 @@
             Tier = 'Inventory'
             SingleObjectAsRow = $true
             Category = 'Multi-Tenant Operations'
-            NodocCategoryId = 9  # nodoc-authoritative (Phase D.1)
+            CategoryId = 9  # nodoc-authoritative (Phase D.1)
             Purpose = 'Authenticated-tenant context: tenant ID, region, M365 sku, cross-tenant flags'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): single object with ~76 properties:
             # { EnvironmentName, OrgId, GeoRegion, DataCenter, AccountMode, AccountType,
             #   IsSuspended, IsMtpEligible, IsMdatpActive, IsSentinelActive, Features:{...},
             #   ActiveMtpWorkloads: [int*], ... }.
-            # iter-14.0 Phase 1: SingleObjectAsRow=$true forces ONE per-entity row
+            # v0.1.0 GA: SingleObjectAsRow=$true forces ONE per-entity row
             # (operator-friendly), not 76 per-property rows. Per-row entity is the
             # whole tenant-context object — typed cols project from named fields.
             # NOTE: column is `MdeTenantId` (not `TenantId`) — `TenantId` is a Log Analytics
             # SYSTEM-RESERVED column auto-typed as `guid`; declaring our own clashes at DCR validation.
-            # Legacy `TenantName` col preserved as back-compat alias of EnvironmentName.
+            # Legacy `TenantName` col preserved as v0.1.0 GA scope alias of EnvironmentName.
             ProjectionMap = @{
                 MdeTenantId      = '$tostring:OrgId'
-                TenantName       = '$tostring:EnvironmentName'  # back-compat alias
+                TenantName       = '$tostring:EnvironmentName'  # v0.1.0 GA scope alias
                 EnvironmentName  = '$tostring:EnvironmentName'
                 Region           = '$tostring:GeoRegion'
                 DataCenter       = '$tostring:DataCenter'
@@ -570,14 +570,14 @@
             Headers = @{ 'mtoproxyurl' = 'MTO' }
             SingleObjectAsRow = $true
             Category = 'Multi-Tenant Operations'
-            NodocCategoryId = 9  # nodoc-authoritative (Phase D.1)
+            CategoryId = 9  # nodoc-authoritative (Phase D.1)
             Purpose = 'MTO tenant-group definitions + per-group workload (alerts/incidents/dashboards) state'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): single object representing
             # the tenant's MTO group: { entityType, name, tenantGroupId, type,
             # description, allTenantsCount, exposedTargetTenantsInfo,
             # creationTime, lastUpdated, lastUpdatedByUpn, tenantId }.
-            # iter-14.0 Phase 4: SingleObjectAsRow=$true so per-row entity is the
+            # v0.1.0 GA: SingleObjectAsRow=$true so per-row entity is the
             # whole tenant-group object (caught by ProjectionResolution gate).
             # NOTE: column is `MdeTenantId` (not `TenantId`) — `TenantId` is a Log Analytics
             # SYSTEM-RESERVED column auto-typed as `guid`; declaring our own clashes at DCR validation.
@@ -592,13 +592,13 @@
                 LastUpdatedByUpn = '$tostring:lastUpdatedByUpn'
             }
         }
-        # iter-13.8 — DEPRECATED. Canonical surface is MDE_DataExportSettings_CL.
+        # pre-v0.1.0.8 — DEPRECATED. Canonical surface is MDE_DataExportSettings_CL.
         @{
             Stream = 'MDE_StreamingApiConfig_CL'
             Path = '/apiproxy/mtp/streamingapi/streamingApiConfiguration'
             Tier = 'Maintenance'
             Category = 'Streaming API'
-            NodocCategoryId = 10  # nodoc-authoritative (Phase D.1)
+            CategoryId = 10  # nodoc-authoritative (Phase D.1)
             Purpose = 'DEPRECATED — superseded by MDE_DataExportSettings_CL. Returns 404 on modern tenants.'
             Availability = 'deprecated'
             # Deprecated stream — no ProjectionMap (canonical surface is MDE_DataExportSettings_CL).
@@ -609,12 +609,12 @@
             Path = '/apiproxy/mtp/responseApiPortal/onboarding/intune/status'
             Tier = 'Configuration'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Defender ↔ Intune connector status (link-state, last-handshake, scope enrolment)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): scalar int `0` (0 = not connected).
             # Shape 4 → ONE row with EntityId='value', value=<int>.
-            # iter-14.0 Phase 1: keep both Status (int) + IsEnabled (bool: 0=false / nonzero=true).
+            # v0.1.0 GA: keep both Status (int) + IsEnabled (bool: 0=false / nonzero=true).
             ProjectionMap = @{
                 FeatureName = '$tostring:EntityId'
                 Status      = '$toint:value'
@@ -626,17 +626,17 @@
             Path = '/apiproxy/mtp/wdatpInternalApi/compliance/alertSharing/status'
             Tier = 'Configuration'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Defender ↔ Purview alert-sharing toggle + per-domain scope'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): scalar bool `false`.
             # Shape 4 → ONE row with EntityId='value', value=<bool>.
-            # iter-14.0 Phase 1: AlertSharingEnabled was redundant duplicate of IsEnabled
-            # — preserved as back-compat alias.
+            # v0.1.0 GA: AlertSharingEnabled was redundant duplicate of IsEnabled
+            # — preserved as v0.1.0 GA scope alias.
             ProjectionMap = @{
                 FeatureName         = '$tostring:EntityId'
                 IsEnabled           = '$tobool:value'
-                AlertSharingEnabled = '$tobool:value'  # back-compat alias of IsEnabled
+                AlertSharingEnabled = '$tobool:value'  # v0.1.0 GA scope alias of IsEnabled
             }
         }
 
@@ -650,7 +650,7 @@
             Tier = 'Configuration'
             UnwrapProperty = 'items'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'RBAC device groups + AAD-group bindings + per-group machine count + role assignments'
             AuditScope = 'hybrid'
             Availability = 'live'
@@ -667,18 +667,18 @@
                 RuleCount             = '$toint:GroupRules.length'
             }
         }
-        # iter-13.9 (B3): nodoc-cited path; verified live 2026-04-28.
+        # pre-v0.1.0.9 (B3): nodoc-cited path; verified live 2026-04-28.
         @{
             Stream = 'MDE_UnifiedRbacRoles_CL'
             Path = '/apiproxy/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions'
             Tier = 'Configuration'
             UnwrapProperty = 'value'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Unified-RBAC role definitions: per-role permission bitmaps + assigned principals'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): { value: [], isPartial: false }
-            # — empty in test tenant. iter-14.0 Phase 4: added UnwrapProperty='value'
+            # — empty in test tenant. v0.1.0 GA: added UnwrapProperty='value'
             # (caught by ProjectionResolution gate). Per-row entity carries unified-RBAC
             # role-definition shape.
             ProjectionMap = @{
@@ -695,7 +695,7 @@
             Path = '/apiproxy/mtp/xspmatlas/assetrules'
             Tier = 'XspmGraph'
             Category = 'Exposure Management (XSPM)'
-            NodocCategoryId = 6  # nodoc-authoritative (Phase D.1)
+            CategoryId = 6  # nodoc-authoritative (Phase D.1)
             Purpose = 'Critical-asset classification rules (which devices/identities feed XSPM as crown jewels)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
@@ -721,7 +721,7 @@
             Path = '/apiproxy/radius/api/radius/serviceaccounts/classificationrule/getall'
             Tier = 'Inventory'
             Category = 'Identity Protection (MDI)'
-            NodocCategoryId = 4  # nodoc-authoritative (Phase D.1)
+            CategoryId = 4  # nodoc-authoritative (Phase D.1)
             Purpose = 'MDI service-account classification rules (which AD accounts MDI flags as service accounts)'
             Availability = 'live'
             # Fixture: null (no rules in test tenant). Convention: MDI service-account classification rule shape.
@@ -742,7 +742,7 @@
             Tier = 'XspmGraph'
             Filter = 'fromDate'
             Category = 'Exposure Management (XSPM)'
-            NodocCategoryId = 6  # nodoc-authoritative (Phase D.1)
+            CategoryId = 6  # nodoc-authoritative (Phase D.1)
             Purpose = 'XSPM exposure initiatives + per-initiative completion progress + recommended actions'
             Availability = 'live'
             # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
@@ -765,7 +765,7 @@
             Tier = 'XspmGraph'
             Filter = 'fromDate'
             Category = 'Exposure Management (XSPM)'
-            NodocCategoryId = 6  # nodoc-authoritative (Phase D.1)
+            CategoryId = 6  # nodoc-authoritative (Phase D.1)
             Purpose = 'XSPM posture-snapshot deltas (what changed in exposure score / metrics over time)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
@@ -780,7 +780,7 @@
                 InitiativeId  = '$tostring:initiativeId'
             }
         }
-        # iter-14.0 portal-only audit (2026-04-29): MDE_SecureScoreBreakdown_CL DROPPED
+        # v0.1.0 GA portal-only audit (2026-04-29): MDE_SecureScoreBreakdown_CL DROPPED
         # — Microsoft Graph /security/secureScores covers identical data with
         # identical shape. Operators should use the official Graph Security data
         # connector. See docs/STREAMS-REMOVED.md (when added in Phase 12).
@@ -789,7 +789,7 @@
             Path = '/apiproxy/mtp/posture/oversight/recommendations'
             Tier = 'XspmGraph'
             Category = 'Exposure Management (XSPM)'
-            NodocCategoryId = 6  # nodoc-authoritative (Phase D.1)
+            CategoryId = 6  # nodoc-authoritative (Phase D.1)
             Purpose = 'XSPM remediation recommendations (per-initiative actionable steps + criticality + effort)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
@@ -830,7 +830,7 @@
             }
             Tier = 'XspmGraph'
             Category = 'Exposure Management (XSPM)'
-            NodocCategoryId = 6  # nodoc-authoritative (Phase D.1)
+            CategoryId = 6  # nodoc-authoritative (Phase D.1)
             Purpose = 'XSPM attack-path graph (multi-hop privesc/lateral chains from low-privilege entry to crown jewels)'
             IdProperty = @('attackPathId', 'id')
             Availability = 'live'
@@ -871,7 +871,7 @@ AttackPathDiscovery
             }
             Tier = 'XspmGraph'
             Category = 'Exposure Management (XSPM)'
-            NodocCategoryId = 6  # nodoc-authoritative (Phase D.1)
+            CategoryId = 6  # nodoc-authoritative (Phase D.1)
             Purpose = 'XSPM chokepoints — single nodes that appear on many attack paths (highest-leverage remediation targets)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
@@ -908,7 +908,7 @@ AttackPathsV2
             }
             Tier = 'XspmGraph'
             Category = 'Exposure Management (XSPM)'
-            NodocCategoryId = 6  # nodoc-authoritative (Phase D.1)
+            CategoryId = 6  # nodoc-authoritative (Phase D.1)
             Purpose = 'XSPM top-targeted assets — critical assets reachable by the most active attack paths'
             Availability = 'live'
             # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
@@ -932,7 +932,7 @@ AttackPathsV2
             Tier = 'Inventory'
             Headers = @{ 'api-version' = '1.0' }
             Category = 'Vulnerability Management (TVM)'
-            NodocCategoryId = 3  # nodoc-authoritative (Phase D.1)
+            CategoryId = 3  # nodoc-authoritative (Phase D.1)
             Purpose = 'TVM security-baseline profile compliance (CIS / Microsoft baselines applied to device fleet)'
             Availability = 'tenant-gated'
             # Tenant-gated (no live data — TVM addon not licensed in test tenant).
@@ -947,7 +947,7 @@ AttackPathsV2
             # NOTE: legacy `Compliance` column was typed `boolean` in v0.1.0-beta
             # initial DCR but the upstream API returns a percentage (real).
             # `CompliancePct` is the additive replacement; queries should migrate
-            # to `CompliancePct` going forward (Compliance preserved for back-compat).
+            # to `CompliancePct` going forward (Compliance preserved for v0.1.0 GA scope).
             # Legacy cols (Compliance/DeviceCount/LastScanUtc/Score) are declared
             # in the ProjectionMap so the DCR-mirror gate sees them as part of the
             # contract. They project from convention names that don't appear in
@@ -960,7 +960,7 @@ AttackPathsV2
                 CompliantDevices    = '$toint:compliantDevices'
                 NonCompliantDevices = '$toint:nonCompliantDevices'
                 LastModifiedUtc     = '$todatetime:lastModifiedDateTime'
-                # Legacy back-compat (always null with the corrected upstream shape):
+                # Legacy v0.1.0 GA scope (always null with the corrected upstream shape):
                 Compliance          = '$tobool:isCompliant'
                 DeviceCount         = '$toint:assetsCount'
                 LastScanUtc         = '$todatetime:lastUpdate'
@@ -975,7 +975,7 @@ AttackPathsV2
             Tier = 'Inventory'
             UnwrapProperty = 'DomainControllers'
             Category = 'Identity Protection (MDI)'
-            NodocCategoryId = 4  # nodoc-authoritative (Phase D.1)
+            CategoryId = 4  # nodoc-authoritative (Phase D.1)
             Purpose = 'MDI domain-controller onboarding state (per-DC sensor health + last-seen + IP)'
             Availability = 'live'
             # Fixture: null (no MDI in test tenant). Convention: MDI DC onboarding shape.
@@ -1003,7 +1003,7 @@ AttackPathsV2
             UnwrapProperty = 'ServiceAccounts'
             Tier = 'Inventory'
             Category = 'Identity Protection (MDI)'
-            NodocCategoryId = 4  # nodoc-authoritative (Phase D.1)
+            CategoryId = 4  # nodoc-authoritative (Phase D.1)
             Purpose = 'MDI service-account inventory (auto-classified service accounts + activity heuristics)'
             Availability = 'live'
             # Fixture: { ServiceAccounts: [] } (no service accounts in test tenant). Convention: MDI service-account row shape.
@@ -1024,7 +1024,7 @@ AttackPathsV2
             Path = '/apiproxy/aatp/api/sensors/domainControllerCoverage'
             Tier = 'Inventory'
             Category = 'Identity Protection (MDI)'
-            NodocCategoryId = 4  # nodoc-authoritative (Phase D.1)
+            CategoryId = 4  # nodoc-authoritative (Phase D.1)
             Purpose = 'MDI sensor coverage per domain controller (which DCs have working sensors / sync state)'
             Availability = 'tenant-gated'
             # Fixture: tenant-gated (no MDI). Convention: per-DC sensor-coverage row shape.
@@ -1041,7 +1041,7 @@ AttackPathsV2
             Path = '/apiproxy/aatp/api/alertthresholds/withExpiry'
             Tier = 'Inventory'
             Category = 'Identity Protection (MDI)'
-            NodocCategoryId = 4  # nodoc-authoritative (Phase D.1)
+            CategoryId = 4  # nodoc-authoritative (Phase D.1)
             Purpose = 'MDI alert-threshold tuning per detection (when each MDI rule fires + temporary overrides)'
             Availability = 'tenant-gated'
             IdProperty = @('AlertName', 'AlertType', 'Id')
@@ -1068,7 +1068,7 @@ AttackPathsV2
                 ThresholdLevel      = '$tostring:Threshold'
                 AvailableThresholds = '$tostring:AvailableThresholds[*]'
                 ExpiresUtc          = '$todatetime:Expiry'
-                # Legacy back-compat (always null with the corrected upstream shape):
+                # Legacy v0.1.0 GA scope (always null with the corrected upstream shape):
                 ThresholdId         = '$tostring:Id'
                 AlertType           = '$tostring:AlertType'
                 IsEnabled           = '$tobool:IsEnabled'
@@ -1081,7 +1081,7 @@ AttackPathsV2
             Path = '/apiproxy/aatp/api/remediationActions/configuration'
             Tier = 'Inventory'
             Category = 'Identity Protection (MDI)'
-            NodocCategoryId = 4  # nodoc-authoritative (Phase D.1)
+            CategoryId = 4  # nodoc-authoritative (Phase D.1)
             Purpose = 'MDI gMSA remediation-action configuration (which managed-service-accounts MDI uses for password resets)'
             Availability = 'tenant-gated'
             # Fixture: tenant-gated (no MDI). Convention: gMSA remediation-action shape.
@@ -1095,7 +1095,7 @@ AttackPathsV2
         }
 
         # ----------------------------------------------------------------------
-        # iter-14.0 Phase 3: UnwrapProperty='Results' + IdProperty=@('ActionId') fixes
+        # v0.1.0 GA: UnwrapProperty='Results' + IdProperty=@('ActionId') fixes
         # the wrapper-key bug. Response shape is {Count:N, Results:[…]}; without
         # UnwrapProperty operators saw 2 rows (EntityId='Results', EntityId='Count')
         # instead of 1868 per-action rows.
@@ -1107,7 +1107,7 @@ AttackPathsV2
             UnwrapProperty = 'Results'
             IdProperty = @('ActionId', 'Id', 'id')
             Category = 'Action Center'
-            NodocCategoryId = 8  # nodoc-authoritative (Phase D.1)
+            CategoryId = 8  # nodoc-authoritative (Phase D.1)
             Purpose = 'Action Center history — every cross-workload remediation action (block/quarantine/investigation) with operator + status'
             Availability = 'live'
             # Fixture: array of { InvestigationId, ActionId, StartTime, EndTime, ActionType, ActionDecision, DecidedBy, Comment, RelatedEntities, EntityType, EventTime, ActionStatus, ActionSource, Product, MachineId, ComputerName, UserPrincipalName, ActionAutomationType }.
@@ -1136,7 +1136,7 @@ AttackPathsV2
             Tier = 'Configuration'
             Filter = 'fromDate'
             Category = 'Threat Analytics'
-            NodocCategoryId = 7  # nodoc-authoritative (Phase D.1)
+            CategoryId = 7  # nodoc-authoritative (Phase D.1)
             Purpose = 'Threat Analytics active outbreaks + per-tenant exposure score + tracked-actor links'
             Availability = 'live'
             # Fixture: array of { Id, DisplayName, CreatedOn, StartedOn, LastUpdatedOn, Severity, Keywords, References, IOAIds, MitigationTypes, ReportType, Tags, IsVNext, SecureScoreIds }.
@@ -1162,19 +1162,19 @@ AttackPathsV2
             Tier = 'Configuration'
             SingleObjectAsRow = $true
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Per-analyst portal preferences (homepage layout, default filters) — drift detector for shared accounts'
             Availability = 'live'
             # Live response shape (captured 2026-05-03):
             # { user_preferences: "<JSON-string of operator's saved preferences>" }
-            # iter-14.0 Phase 1: SingleObjectAsRow=$true → ONE row per response;
+            # v0.1.0 GA: SingleObjectAsRow=$true → ONE row per response;
             # the user_preferences JSON-string is preserved as both a typed col
             # (UserPreferencesJson) AND in RawJson for forensic queries. Operators
             # can drill into the inner JSON via parse_json(UserPreferencesJson).
-            # Legacy cols preserved as back-compat (always null with corrected handling).
+            # Legacy cols preserved as v0.1.0 GA scope (always null with corrected handling).
             ProjectionMap = @{
                 UserPreferencesJson = '$tostring:user_preferences'
-                # Legacy back-compat (always null with SingleObjectAsRow):
+                # Legacy v0.1.0 GA scope (always null with SingleObjectAsRow):
                 SettingId           = '$tostring:EntityId'
                 Name                = '$tostring:Name'
                 IsEnabled           = '$tobool:IsEnabled'
@@ -1192,7 +1192,7 @@ AttackPathsV2
             Headers = @{ 'mtoproxyurl' = 'MTO' }
             UnwrapProperty = 'tenantInfoList'
             Category = 'Multi-Tenant Operations'
-            NodocCategoryId = 9  # nodoc-authoritative (Phase D.1)
+            CategoryId = 9  # nodoc-authoritative (Phase D.1)
             Purpose = 'MTO tenant picker — list of tenants this MSSP/parent has cross-tenant access to'
             Availability = 'live'
             # Fixture: { tenantInfoList: [{ selected, lostAccess, name, tenantId, tenantAadEnvironment }] }.
@@ -1215,7 +1215,7 @@ AttackPathsV2
             Tier = 'Inventory'
             UnwrapProperty = 'sums'
             Category = 'Endpoint Device Management'
-            NodocCategoryId = 1  # nodoc-authoritative (Phase D.1)
+            CategoryId = 1  # nodoc-authoritative (Phase D.1)
             Purpose = 'Per-SKU device license rollup (how many devices on each MDE plan / per-OS / per-region)'
             AuditScope = 'hybrid'
             Availability = 'live'
@@ -1232,7 +1232,7 @@ AttackPathsV2
             Path = '/apiproxy/mcas/cas/api/v1/settings/'
             Tier = 'Configuration'
             Category = 'Configuration and Settings'
-            NodocCategoryId = 5  # nodoc-authoritative (Phase D.1)
+            CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'MCAS / Defender for Cloud Apps general settings (regions, integrations, notification policy)'
             Availability = 'tenant-gated'
             # Fixture: tenant-gated (no MCAS). Convention: MCAS settings property-bag.
@@ -1277,7 +1277,7 @@ AttackPathsV2
             Tier = 'Inventory'
             Filter = 'fromDate'
             Category = 'Endpoint Device Management'
-            NodocCategoryId = 1  # nodoc-authoritative (Phase D.1)
+            CategoryId = 1  # nodoc-authoritative (Phase D.1)
             Purpose = 'Per-device unified timeline (process/file/network/registry events with portal-side correlation + grouping)'
             UnwrapProperty = 'Results'
             IdProperty = @('eventId', 'EventId', 'id', 'Id')
@@ -1305,7 +1305,7 @@ AttackPathsV2
             Tier = 'ActionCenter'
             Filter = 'fromDate'
             Category = 'Action Center'
-            NodocCategoryId = 8  # nodoc-authoritative (Phase D.1)
+            CategoryId = 8  # nodoc-authoritative (Phase D.1)
             Purpose = 'Per-device action results (Live Response per-step script output + AIR linkage; richer than public MDE /api/machineactions)'
             IdProperty = @('actionId', 'ActionId', 'id', 'Id')
             AuditScope = 'hybrid'
@@ -1322,5 +1322,286 @@ AttackPathsV2
                 ScriptOutput     = '$json:scriptOutputs'
             }
         }
+
+        # ====================================================================
+        # Phase 2 (v0.1.0 GA) — 17 NEW Tier A streams from nodoc catalog sweep
+        # Wisely selected: dropped per-entity drilldowns + scalar counts.
+        # All snapshot — drift parsers detect changes. ProjectionMaps minimal
+        # at capture time; refined post-fixture-capture per actual response shape.
+        # ====================================================================
+
+        # ---- ConfigurationAndSettings (1) ----------------------------------
+        @{
+            Stream = 'MDE_AssetClassificationSchema_CL'
+            Path = '/apiproxy/mtp/xspmatlas/assetrules/querybuilder/schema'
+            Tier = 'XspmGraph'
+            Category = 'Configuration and Settings'
+            CategoryId = 5
+            Purpose = 'Critical-asset classification schema (operator-defined query DSL for asset criticality rules)'
+            Availability = 'live'
+            UnwrapProperty = 'schema'
+            # Fixture: { schema: [{ assetType, properties: [{ name, propertyType }] }] }
+            ProjectionMap = @{
+                AssetType     = '$tostring:assetType'
+                Properties    = '$json:properties'
+                PropertyCount = '$toint:properties.length'
+            }
+        }
+
+        # ---- ExposureManagement / XSPM (11) --------------------------------
+        @{
+            Stream = 'MDE_PostureInitiativesSummarized_CL'
+            Path = '/apiproxy/mtp/posture/oversight/initiatives/summarized'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'Summary of all posture-management initiatives (KPIs, completion%, owner)'
+            Availability = 'live'
+            UnwrapProperty = 'results'
+            # Fixture (empty in test tenant): { results: [], recordsCount: 0 }
+            # Per-row schema per nodoc: id, name, completionPercentage, owner, startDate, endDate, status
+            ProjectionMap = @{
+                InitiativeId         = '$tostring:id'
+                Name                 = '$tostring:name'
+                CompletionPercentage = '$todouble:completionPercentage'
+                Status               = '$tostring:status'
+            }
+        }
+        @{
+            Stream = 'MDE_PostureMetrics_CL'
+            Path = '/apiproxy/mtp/posture/oversight/metrics'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'List of available posture-oversight metrics catalog'
+            Availability = 'live'
+            UnwrapProperty = 'results'
+            # Fixture: { results: [{ id, version, name, category, latestCount, latestTotal, latestValue, sentimentType, weight, recommendations[], workloads[] }] }
+            ProjectionMap = @{
+                MetricId       = '$tostring:id'
+                MetricName     = '$tostring:name'
+                Category       = '$tostring:category'
+                LatestCount    = '$todouble:latestCount'
+                LatestTotal    = '$todouble:latestTotal'
+                LatestValue    = '$todouble:latestValue'
+                SentimentType  = '$tostring:sentimentType'
+                Weight         = '$todouble:weight'
+            }
+        }
+        @{
+            Stream = 'MDE_AppsSecureScore_CL'
+            Path = '/apiproxy/mtp/posture/oversight/metrics/category_apps_secure_score'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'SaaS apps secure-score metric (per-category posture)'
+            Availability = 'live'
+            SingleObjectAsRow = $true
+            # Fixture: SINGLE OBJECT { id, version, name, category, latestCount, latestTotal, latestValue, sentimentType, weight }
+            ProjectionMap = @{
+                MetricId      = '$tostring:id'
+                MetricName    = '$tostring:name'
+                Category      = '$tostring:category'
+                LatestCount   = '$todouble:latestCount'
+                LatestTotal   = '$todouble:latestTotal'
+                LatestValue   = '$todouble:latestValue'
+                SentimentType = '$tostring:sentimentType'
+            }
+        }
+        @{
+            Stream = 'MDE_DataSecureScore_CL'
+            Path = '/apiproxy/mtp/posture/oversight/metrics/category_data_secure_score'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'Data secure-score metric (per-category posture)'
+            Availability = 'live'
+            SingleObjectAsRow = $true
+            ProjectionMap = @{
+                MetricId      = '$tostring:id'
+                MetricName    = '$tostring:name'
+                Category      = '$tostring:category'
+                LatestCount   = '$todouble:latestCount'
+                LatestTotal   = '$todouble:latestTotal'
+                LatestValue   = '$todouble:latestValue'
+                SentimentType = '$tostring:sentimentType'
+            }
+        }
+        @{
+            Stream = 'MDE_IdentitySecureScore_CL'
+            Path = '/apiproxy/mtp/posture/oversight/metrics/category_identity_secure_score'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'Identity secure-score metric (per-category posture)'
+            Availability = 'live'
+            SingleObjectAsRow = $true
+            ProjectionMap = @{
+                MetricId      = '$tostring:id'
+                MetricName    = '$tostring:name'
+                Category      = '$tostring:category'
+                LatestCount   = '$todouble:latestCount'
+                LatestTotal   = '$todouble:latestTotal'
+                LatestValue   = '$todouble:latestValue'
+                SentimentType = '$tostring:sentimentType'
+            }
+        }
+        # MDE_IdentitySecureScore_CL — moved earlier in file (duplicate avoided)
+        # MDE_PostureRecommendationsAggregated_CL DROPPED — nodoc spec notes
+        # "Bundle-discovered; direct GET probing returns 500 without page-specific
+        # parameters". Not pollable as a snapshot stream. Defer to v0.1.1 if/when
+        # the contextual params can be discovered.
+        @{
+            Stream = 'MDE_PostureSecurityEvents_CL'
+            Path = '/apiproxy/mtp/posture/oversight/securityEvents'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'Posture security events stream (configuration changes affecting posture)'
+            Availability = 'live'
+            UnwrapProperty = 'results'
+            # Fixture: { results: [{ id, eventType, eventTime, tenantId, isGlobal, createdTimestamp, properties: { resourceId, resourceType, driftStartTime, driftEndTime, driftPercentage, resourceName } }] }
+            ProjectionMap = @{
+                EventId          = '$tostring:id'
+                EventType        = '$tostring:eventType'
+                EventTime        = '$todatetime:eventTime'
+                CreatedTimestamp = '$todatetime:createdTimestamp'
+                IsGlobal         = '$tobool:isGlobal'
+                Properties       = '$json:properties'
+            }
+        }
+        @{
+            Stream = 'MDE_PostureTenants_CL'
+            Path = '/apiproxy/mtp/posture/oversight/tenants'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'Posture-oversight tenant configuration (per-tenant onboarding state)'
+            Availability = 'live'
+            SingleObjectAsRow = $true
+            # Fixture: SINGLE OBJECT { orgId, tenantId, geoRegion, dataCenter, mpsDataCenter, mpsSliceId, oversightSliceId, lastUpdated, featureFlags: {...} }
+            ProjectionMap = @{
+                OrgId            = '$tostring:orgId'
+                GeoRegion        = '$tostring:geoRegion'
+                DataCenter       = '$tostring:dataCenter'
+                MpsDataCenter    = '$tostring:mpsDataCenter'
+                MpsSliceId       = '$toint:mpsSliceId'
+                OversightSliceId = '$toint:oversightSliceId'
+                LastUpdated      = '$todatetime:lastUpdated'
+                FeatureFlags     = '$json:featureFlags'
+            }
+        }
+        @{
+            Stream = 'MDE_AttackSurfaceAttackPaths_CL'
+            Path = '/apiproxy/mtp/xspmatlas/attacksurface/attackpaths'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'Attack-surface attack paths list (XSPM analytical paths, distinct from existing XspmAttackPaths_CL graph view)'
+            Availability = 'live'
+            UnwrapProperty = 'Records'
+            # Fixture (empty in tenant): { Records: [], TotalRecords: 0 }
+            # Per-row schema (per nodoc spec): id, sourceEntityId, targetEntityId, pathType, severity
+            ProjectionMap = @{
+                AttackPathId   = '$tostring:id'
+                SourceEntityId = '$tostring:sourceEntityId'
+                TargetEntityId = '$tostring:targetEntityId'
+                PathType       = '$tostring:pathType'
+                Severity       = '$tostring:severity'
+            }
+        }
+        @{
+            Stream = 'MDE_AttackSurfaceChokepoints_CL'
+            Path = '/apiproxy/mtp/xspmatlas/attacksurface/chokepoints/list'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'Attack-surface choke points (analytical view; distinct from existing XspmChokePoints_CL)'
+            Availability = 'live'
+            UnwrapProperty = 'Results'
+            # Fixture (empty): { Results: [], TotalCount: 0 }
+            # Per-row schema (nodoc): id, entityId, entityType, chokePointScore, exposedPathsCount
+            # NOTE: 'entityId' from response renamed to 'ChokepointEntityId' to avoid
+            # collision with base ingest column 'EntityId'.
+            ProjectionMap = @{
+                ChokepointId       = '$tostring:id'
+                ChokepointEntityId = '$tostring:entityId'
+                EntityType         = '$tostring:entityType'
+                ChokePointScore    = '$todouble:chokePointScore'
+                ExposedPathsCount  = '$toint:exposedPathsCount'
+            }
+        }
+        @{
+            Stream = 'MDE_XspmConnectors_CL'
+            Path = '/apiproxy/mtp/XspmConnectors/connectors/getAllConnectors'
+            Tier = 'XspmGraph'
+            Category = 'Exposure Management (XSPM)'
+            CategoryId = 6
+            Purpose = 'Configured XSPM data connectors (data sources feeding XSPM graph)'
+            Availability = 'live'
+            UnwrapProperty = 'results'
+            # Fixture (empty): { results: [], recordsCount: 0 }
+            # Per-row schema (nodoc): id, name, connectorType, status, lastSyncTime
+            ProjectionMap = @{
+                ConnectorId   = '$tostring:id'
+                ConnectorName = '$tostring:name'
+                ConnectorType = '$tostring:connectorType'
+                Status        = '$tostring:status'
+                LastSyncTime  = '$todatetime:lastSyncTime'
+            }
+        }
+
+        # ---- ThreatAnalytics (5) -------------------------------------------
+        @{
+            Stream = 'MDE_ThreatAnalyticsEnriched_CL'
+            Path = '/apiproxy/mtp/threatAnalytics/outbreaks/outbreaksEnrichedDataMtp'
+            Tier = 'Configuration'
+            Category = 'Threat Analytics'
+            CategoryId = 7
+            Purpose = 'Threat-analytics enriched outbreak data (full payload with severity + sectors + threat-actor mapping)'
+            Availability = 'live'
+            UnwrapProperty = 'Items'
+            # Fixture: { Items: [{ Id, DisplayName, LastUpdatedOn, CreatedOn, StartedOn, ImpactedEntitiesCount: {...}, AlertsCount: {...}, ReportType, Tags[], ExposureSeverity, ExposureScore }] }
+            ProjectionMap = @{
+                OutbreakId        = '$tostring:Id'
+                DisplayName       = '$tostring:DisplayName'
+                ReportType        = '$tostring:ReportType'
+                ExposureSeverity  = '$tostring:ExposureSeverity'
+                ExposureScore     = '$toint:ExposureScore'
+                CreatedOn         = '$todatetime:CreatedOn'
+                StartedOn         = '$todatetime:StartedOn'
+                LastUpdatedOn     = '$todatetime:LastUpdatedOn'
+                Tags              = '$json:Tags'
+                ScaExposedDevices = '$toint:ScaExposedDevices'
+                VaExposedDevices  = '$toint:VaExposedDevices'
+            }
+        }
+        @{
+            Stream = 'MDE_ThreatAnalyticsTopThreats_CL'
+            Path = '/apiproxy/mtp/threatAnalytics/outbreaks/topthreats'
+            Tier = 'Configuration'
+            Category = 'Threat Analytics'
+            CategoryId = 7
+            Purpose = 'Threat-analytics top threats summary (curated highest-severity active outbreaks)'
+            Availability = 'live'
+            SingleObjectAsRow = $true
+            # Fixture: SINGLE OBJECT { TotalThreatRequiresAction, ThreatsExposure[], TotalActiveThreats, ThreatExposureCalculationStatus, CurrentAlertsCount[] }
+            ProjectionMap = @{
+                TotalThreatRequiresAction       = '$toint:TotalThreatRequiresAction'
+                TotalActiveThreats              = '$toint:TotalActiveThreats'
+                ThreatExposureCalculationStatus = '$tostring:ThreatExposureCalculationStatus'
+                ThreatsExposure                 = '$json:ThreatsExposure'
+                CurrentAlertsCount              = '$json:CurrentAlertsCount'
+            }
+        }
+        # MDE_ThreatAnalyticsOutbreaksList_CL DROPPED — nodoc-documented path
+        # /mtp/threatAnalyticsAPI/outbreaks returns 404 (path appears to have
+        # changed/been deprecated). Existing MDE_ThreatAnalytics_CL covers
+        # the same data via working path /apiproxy/mtp/threatAnalytics/outbreaks.
+        # Re-evaluate in v0.1.1 if the alternate API surface returns.
+        # MDE_IndicatorReputation_CL + MDE_UrlReputation_CL DROPPED — both require
+        # ?query=<IOC> URL parameter (per-indicator lookup APIs, not snapshot-poll).
+        # These are operator-driven lookups against specific IOCs, not data-stream
+        # endpoints. Defer to v0.1.1 if a "list known IOCs" alternative emerges.
     )
 }

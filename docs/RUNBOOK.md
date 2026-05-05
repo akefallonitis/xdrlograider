@@ -6,7 +6,7 @@ Daily, weekly, and quarterly operational tasks for XdrLogRaider.
 
 ```kql
 // Is the connector alive? (Connector-Heartbeat + 5 cadence-tier polls)
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(1h)
 | summarize LastSeen = max(TimeGenerated) by FunctionName
 | extend AgeMinutes = datetime_diff("minute", now(), LastSeen)
@@ -19,7 +19,7 @@ customEvents
 | project timestamp, name, customDimensions
 
 // Any inventory-tier streams failing silently?
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(2h) and Tier == 'inventory'
 | summarize Success = max(StreamsSucceeded), Attempted = max(StreamsAttempted) by FunctionName
 | where Success < Attempted
@@ -52,7 +52,7 @@ MDE_Heartbeat_CL
 
 ### Auth chain failure (no AuthChain.Completed in App Insights)
 
-**Symptom**: `customEvents` in App Insights shows `AuthChain.AADSTSError` events with no recent `AuthChain.Completed`, and `MDE_Heartbeat_CL` rows show `StreamsSucceeded = 0`. All tier pollers refuse to run (they gate on the auth-selftest flag) so nothing ingests until this resolves.
+**Symptom**: `customEvents` in App Insights shows `AuthChain.AADSTSError` events with no recent `AuthChain.Completed`, and `XdrConnectorHealth_CL` rows show `StreamsSucceeded = 0`. All tier pollers refuse to run (they gate on the auth-selftest flag) so nothing ingests until this resolves.
 
 ```kql
 // App Insights — most recent auth chain event
@@ -85,7 +85,7 @@ Until fixed, **no data flows** — the auth-selftest gate is intentional (see `d
 
 ### Specific stream endpoint broken (Microsoft hardened it)
 
-1. Identify via `MDE_Heartbeat_CL | extend e = tostring(parse_json(Notes).errors) | where isnotempty(e)`
+1. Identify via `XdrConnectorHealth_CL | extend e = tostring(parse_json(Notes).errors) | where isnotempty(e)`
 2. File `portal_endpoint_broken` issue with repo — see template
 3. Workaround: remove the broken stream from the tier poller temporarily
 4. Wait for release with fix / removal
@@ -94,7 +94,7 @@ Until fixed, **no data flows** — the auth-selftest gate is intentional (see `d
 
 1. `Usage | where DataType startswith "MDE_" | summarize GBs = sum(Quantity) / 1000 by DataType | order by GBs desc`
 2. Identify the noisy stream
-3. Increase `cadence` parameter for that stream in the ARM / Bicep, redeploy
+3. Increase `cadence` parameter for that stream in the ARM template (`deploy/compiled/mainTemplate.json`), redeploy
 4. Consider adding hash-based dedupe in the endpoint wrapper
 
 ### Service account compromised

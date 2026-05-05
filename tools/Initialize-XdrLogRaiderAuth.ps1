@@ -17,7 +17,7 @@
     After this script completes, wait ~5-10 minutes then query App Insights:
         customEvents | where name in ('AuthChain.AADSTSError', 'AuthChain.Completed') | order by timestamp desc | take 5
     or check workspace heartbeat:
-        MDE_Heartbeat_CL | where StreamsSucceeded > 0 | order by TimeGenerated desc | take 1
+        XdrConnectorHealth_CL | where StreamsSucceeded > 0 | order by TimeGenerated desc | take 1
 
 .PARAMETER KeyVaultName
     Name of the Key Vault. Output of the deploy wizard includes this.
@@ -283,7 +283,7 @@ Write-Host "  ✓ Done." -ForegroundColor Green
 Write-Host ""
 Write-Host "  Within 5-10 minutes the Function App's heartbeat timer + first poll fire." -ForegroundColor Gray
 Write-Host "  The Sentinel **Data Connectors** blade flips the **XdrLogRaider** card to" -ForegroundColor Gray
-Write-Host "  **Connected** when MDE_Heartbeat_CL has a row with StreamsSucceeded > 0." -ForegroundColor Gray
+Write-Host "  **Connected** when XdrConnectorHealth_CL has a row with StreamsSucceeded > 0." -ForegroundColor Gray
 Write-Host ""
 Write-Host "  If the card stays Disconnected past 15 min, see docs/TROUBLESHOOTING.md." -ForegroundColor Gray
 Write-Host ""

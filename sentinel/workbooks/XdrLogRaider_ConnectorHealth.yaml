@@ -1,4 +1,4 @@
-# XdrLogRaider — Connector Health workbook (Phase F.1 / B6).
+# XdrLogRaider — Connector Health workbook (/ B6).
 #
 # Operator-facing single-pane dashboard for connector health. 6 panels:
 #   1. Per-capability poll freshness (last vs cadence threshold)
@@ -32,7 +32,7 @@ author: Alex Kefallonitis
 version: 1.0.0
 lastUpdated: 2026-05-03
 sources:
-  - MDE_Heartbeat_CL
+  - XdrConnectorHealth_CL
   - AppExceptions
   - AppMetrics
   - SigninLogs

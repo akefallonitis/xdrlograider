@@ -32,7 +32,7 @@
 
 BeforeDiscovery {
     # BeforeDiscovery for inline -Skip clauses (Bicep is archived to
-    # .internal/bicep-reference/ in v0.1.0-beta first publish).
+    # .internal/bicep-reference/ in v0.1.0 GA first publish).
     $script:DiscoveryRepoRoot          = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
     $script:DiscoveryFunctionAppBicep  = Join-Path $script:DiscoveryRepoRoot 'deploy' 'modules' 'function-app.bicep'
 }
@@ -57,7 +57,7 @@ Describe 'Single-runspace mode — FA app settings (mainTemplate.json + bicep)' 
         $script:BicepContent = if (Test-Path -LiteralPath $script:FunctionAppBicepPath) {
             Get-Content $script:FunctionAppBicepPath -Raw
         } else { $null }
-        # v0.1.0-beta first publish: appSettings switched from a flat array
+        # v0.1.0 GA first publish: appSettings switched from a flat array
         # of {name,value} entries to an ARM expression string that builds
         # the array via concat() of tier-driven variant variables. Either
         # shape is valid; this helper extracts the (name -> literal-value)

@@ -47,12 +47,12 @@ Describe 'mainTemplate.json — schema + structure' {
     }
 
     It 'mainTemplate variables.packageUrl resolves /releases/latest/download/function-app.zip (no functionAppZipVersion parameter)' {
-        # v0.1.0-beta first publish: drops the functionAppZipVersion wizard
+        # v0.1.0 GA first publish: drops the functionAppZipVersion wizard
         # field. The Function App ZIP URL tracks GitHub Releases /latest
         # unconditionally (Marketplace best practice for community connectors).
         # /latest resolves to the most-recent non-prerelease tag — operators
         # don't have to edit the wizard for routine upgrades.
-        $script:MainTemplate.parameters.PSObject.Properties.Name | Should -Not -Contain 'functionAppZipVersion' -Because 'parameter retired in v0.1.0-beta first publish'
+        $script:MainTemplate.parameters.PSObject.Properties.Name | Should -Not -Contain 'functionAppZipVersion' -Because 'parameter retired in v0.1.0 GA first publish'
         $packageUrl = $script:MainTemplate.variables.packageUrl
         $packageUrl | Should -Match '/releases/latest/download/function-app\.zip' -Because 'packageUrl must point at /releases/latest/download/function-app.zip'
     }
@@ -137,15 +137,15 @@ Describe 'mainTemplate.json — schema + structure' {
         $funcApp.identity.type | Should -Be 'SystemAssigned'
     }
 
-    It 'creates exactly 7 role assignments for the MI (Y1 baseline: KV Secrets User + Storage Table Contributor + 5x Monitoring Metrics Publisher per DCR)' {
-        # 5 DCRs sharing one DCE → 5 separate Monitoring Metrics Publisher
+    It 'creates exactly 9 role assignments for the MI (v0.1.0 GA Phase 2 baseline: KV Secrets User + Storage Table Contributor + 7x Monitoring Metrics Publisher per DCR)' {
+        # 7 DCRs sharing one DCE → 7 separate Monitoring Metrics Publisher
         # role assignments (the Logs Ingestion API authorizes per DCR). With
-        # KV Secrets User + Storage Table Contributor, that's 7 unconditional
+        # KV Secrets User + Storage Table Contributor, that's 9 unconditional
         # role assignments on Y1. (FC1/EP1 add Storage File SMB Share
         # Contributor; that role is conditional and not in the compiled JSON's
         # Y1 default — counted separately by the LeastPrivilege test.)
         $roleAssignments = @($script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Authorization/roleAssignments' })
-        $roleAssignments.Count | Should -Be 7
+        $roleAssignments.Count | Should -Be 9
     }
 
     It 'has a nested deployment for cross-RG custom tables' {
@@ -494,14 +494,16 @@ Describe 'DCR — Azure service-quota gates' {
         }
     }
 
-    It '5 DCRs partition 47 streams 4x10 + 1x7 (canonical Microsoft Learn shape)' {
-        # 47 streams > 10-flow-per-DCR cap → split across 5 DCRs sharing 1 DCE.
+    It '7 DCRs partition 60 streams 4x10 + 1x7 + 1x7 + 1x6 (v0.1.0 GA Phase 2 shape)' {
+        # 60 streams > 10-flow-per-DCR cap → split across 7 DCRs sharing 1 DCE.
         # Each DCR's dataFlows array has one flow per stream with explicit
-        # outputStream + transformKql='source' (Microsoft Learn
-        # data-collection-rule-structure canonical pattern).
-        # 47 = 46 data + 1 operational (Heartbeat). AuthTestResult retired in
-        # v0.1.0-beta first publish (auth chain → App Insights customEvents).
-        @($script:Dcrs).Count | Should -Be 5 -Because '47 streams > 10-flow cap per DCR; canonical split is 5 DCRs sharing 1 DCE'
+        # outputStream + transformKql="source | extend SourceName='<Stream>'"
+        # (Microsoft Learn data-collection-rule-structure canonical pattern +
+        # SourceName injection per Phase J.C.2-5 table consolidation).
+        # 60 = 59 data (46 baseline + 13 Tier A new) + 1 operational
+        # (XdrConnectorHealth_CL). AuthTestResult retired in v0.1.0 GA first
+        # publish (auth chain → AppInsights customEvents).
+        @($script:Dcrs).Count | Should -Be 7 -Because 'v0.1.0 GA Phase 2: 60 streams > 10-flow cap per DCR; canonical split is 7 DCRs sharing 1 DCE (4x10 + 5(7) + 6(7) + 7(6))'
         $declCounts = @()
         $allStreams = @()
         foreach ($dcr in $script:Dcrs) {
@@ -512,8 +514,9 @@ Describe 'DCR — Azure service-quota gates' {
             }
         }
         $sortedCounts = @($declCounts | Sort-Object)
-        $sortedCounts | Should -Be @(7, 10, 10, 10, 10) -Because 'partition 4x10 + 1x7 (alphabetical, see deploy/modules/dce-dcr.bicep)'
-        @($allStreams | Sort-Object -Unique).Count | Should -Be 47 -Because 'every declared stream must appear in exactly one dataFlow'
+        # v0.1.0 GA Phase 2: 7 DCRs holding 60 streams (4x10 + 1x7 baseline + dcr-defender-6 with 7 + dcr-defender-7 with 6 for Tier A new streams)
+        $sortedCounts | Should -Be @(6, 7, 7, 10, 10, 10, 10) -Because 'partition 4x10 + 5(7) + 6(7) + 7(6) — 7 DCRs after Phase 2 Tier A additions'
+        @($allStreams | Sort-Object -Unique).Count | Should -Be 60 -Because 'every declared stream must appear in exactly one dataFlow (59 data + 1 ops = 60)'
     }
 
     It 'no dataFlow combines multiple streams with a transformKql (Microsoft DCR rule)' {
@@ -546,18 +549,25 @@ Describe 'DCR — Azure service-quota gates' {
         $hasTablesDep | Should -BeTrue -Because 'DCR must dependsOn customTables-* nested deploy or it races the table creation'
     }
 
-    It 'every dataFlow has outputStream set to its single stream (Microsoft Learn canonical shape)' {
-        # 5-DCR shape: every dataFlow is single-stream with explicit
-        # outputStream='Custom-X' + transformKql='source'. Azure rejects
-        # multi-stream dataFlows that lack outputStream with InvalidTransformOutput.
-        # See deploy/modules/dce-dcr.bicep + tests/arm/DcrShape.Tests.ps1.
+    It 'every dataFlow has outputStream set + transformKql injects SourceName (Phase J.C.2-5 architecture)' {
+        # Phase J.C.2-5 (2026-05-04): 47 per-stream MDE_*_CL workspace tables
+        # consolidated to 10 per-category Defender_<Category>_CL tables. DCR
+        # dataFlows now project source streams to category outputStreams via
+        # transformKql='source | extend SourceName=''<Stream>''.
+        # XdrConnectorHealth_CL ops stream stays 1:1 (identity transform OK).
         foreach ($dcr in $script:Dcrs) {
             for ($i = 0; $i -lt @($dcr.properties.dataFlows).Count; $i++) {
                 $df = $dcr.properties.dataFlows[$i]
                 @($df.streams).Count | Should -Be 1 -Because 'canonical pattern is single-stream per dataFlow'
                 $df.PSObject.Properties['outputStream'] | Should -Not -BeNullOrEmpty -Because 'outputStream MUST be set to avoid InvalidTransformOutput'
-                $df.outputStream | Should -Be $df.streams[0] -Because 'outputStream must match the single stream'
-                $df.transformKql | Should -Be 'source' -Because 'identity transform per Microsoft canonical sample'
+
+                $sourceStream = $df.streams[0]
+                if ($sourceStream -eq 'Custom-XdrConnectorHealth_CL') {
+                    $df.outputStream | Should -Be 'Custom-XdrConnectorHealth_CL' -Because 'XdrConnectorHealth_CL ops table is 1:1'
+                } else {
+                    $df.outputStream | Should -Match '^Custom-Defender_\w+_CL$' -Because "stream '$sourceStream' must project to a Defender_<Category>_CL table per Phase J.C.2-5"
+                    $df.transformKql | Should -Match "source\s*\|\s*extend\s+SourceName\s*=\s*'" -Because "data dataFlow for '$sourceStream' must inject SourceName via transformKql"
+                }
             }
         }
     }
@@ -585,13 +595,20 @@ Describe 'DCR streams — completeness' {
         $script:DcrStreamKeys = $script:DcrStreamKeys | Sort-Object -Unique
     }
 
-    It 'DCR includes 46 MDE_*_CL data stream declarations + 1 operational table' {
-        # 46 active+deprecated data streams + 1 operational (Heartbeat). The
-        # legacy MDE_AuthTestResult_CL stream was retired in v0.1.0-beta first
+    It 'DCR includes 46 MDE_*_CL data stream declarations + 1 XdrConnectorHealth_CL operational table' {
+        # 46 active+deprecated MDE_* data streams + 1 operational (XdrConnectorHealth_CL).
+        # Phase K (2026-05-04): operational table renamed XdrConnectorHealth_CL -> XdrConnectorHealth_CL
+        # for multi-portal forward-compat (Xdr* prefix transcends portal).
+        # The legacy MDE_AuthTestResult_CL stream was retired in v0.1.0-beta first
         # publish — auth chain diagnostics moved to App Insights customEvents
         # (AuthChain.* event names) instead of a dedicated workspace table.
-        $mdeStreams = $script:DcrStreamKeys | Where-Object { $_ -match '^Custom-MDE_\w+_CL$' }
-        @($mdeStreams).Count | Should -BeGreaterOrEqual 47 -Because '46 data streams + Heartbeat = 47 total stream declarations'
+        # StrictMode-safe: wrap Where-Object output in @() so .Count works even
+        # when result is a single value or null (PowerShell collection coercion).
+        $mdeStreams = @($script:DcrStreamKeys | Where-Object { $_ -match '^Custom-MDE_\w+_CL$' })
+        $opsStreams = @($script:DcrStreamKeys | Where-Object { $_ -match '^Custom-XdrConnectorHealth_CL$' })
+        $mdeStreams.Count | Should -BeGreaterOrEqual 46 -Because '46 MDE_* data streams'
+        $opsStreams.Count | Should -Be 1 -Because '1 XdrConnectorHealth_CL operational table'
+        ($mdeStreams.Count + $opsStreams.Count) | Should -BeGreaterOrEqual 47 -Because '46 data + 1 ops = 47 total stream declarations'
     }
 
     It 'DCR has NO dropped streams (v1.0.0 P4 + v1.0.2 + v0.1.0-beta.1 removals)' {

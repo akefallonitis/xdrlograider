@@ -45,16 +45,18 @@ XdrLogRaider supports two unattended, auto-refreshing auth methods for `security
 
 ## Conditional Access compatibility
 
-| Policy control | Credentials+TOTP | Passkey |
-|---|---|---|
-| Require MFA | Pass (TOTP satisfies) | Pass (FIDO2 satisfies) |
-| Require phishing-resistant MFA | **Fail** | Pass |
-| Require compliant device | **Fail** | **Fail** |
-| Require hybrid join | **Fail** | **Fail** |
-| Block legacy auth | Pass (login flow is modern) | Pass |
-| Sign-in risk policies | May trigger (no device) | May trigger (no device) |
+The connector uses real Entra sign-in flow — Conditional Access policies apply normally. **No bypass is performed.** TOTP and Passkey both satisfy "Require MFA". The only hard blocker is **device-compliance / hybrid-join** policies because the Function App outbound IP is not a managed device.
 
-If your tenant requires compliant device, run the Function App on an Arc-enabled managed endpoint OR document a named-location CA exception for the service account's service-principal IP. See [RUNBOOK.md](RUNBOOK.md).
+| Policy control | Credentials+TOTP | Passkey | Operator action if enforced |
+|---|---|---|---|
+| Require MFA | Pass (TOTP satisfies) | Pass (FIDO2 satisfies) | **No action needed** — both methods satisfy MFA |
+| Require phishing-resistant MFA | Fail | Pass | Use Passkey method |
+| Require compliant device | **Fail** | **Fail** | **Exclude the service account** from this policy |
+| Require hybrid join | **Fail** | **Fail** | **Exclude the service account** from this policy |
+| Block legacy auth | Pass (modern flow) | Pass | No action needed |
+| Sign-in risk policies | May trigger | May trigger | Add FA outbound IPs to a named location OR exclude the SA |
+
+**TL;DR for typical tenants**: TOTP + Passkey both satisfy MFA — **CA is not a blocker on its own**. The single common scenario that needs operator action is **device-compliance / hybrid-join**: exclude the connector service account from those policies. The XdrOps-ServiceAccountAnomalousSignIn analytic rule monitors the SA for compromise patterns (anomalous country/IP/device, failed-then-success cred-stuffing, sign-in outside poll cadence) — operator MUST enable it post-deploy as the security-boundary control.
 
 ### Required CA exemption (most tenants)
 

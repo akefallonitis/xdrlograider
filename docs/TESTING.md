@@ -4,7 +4,7 @@ The XdrLogRaider test matrix has **four quadrants** — organised around *when* 
 
 | | **Local / offline** | **Online** |
 |---|---|---|
-| **Pre-deploy** | `all-offline` — 1184 tests (v0.1.0-beta iter 12), zero external deps | `local-online` — real portal sign-in from laptop |
+| **Pre-deploy** | `all-offline` — 1184 tests (v0.1.0 GA iter 12), zero external deps | `local-online` — real portal sign-in from laptop |
 | **Post-deploy** | — | `e2e` — KQL verification of deployed workspace |
 
 **No service principals. No app registrations. No stored Azure credentials in CI.** CI only runs the offline quadrant. You run online tests from your own laptop with your own `Connect-AzAccount` session.
@@ -124,7 +124,7 @@ pwsh ./tests/Run-Tests.ps1 -Category e2e
 
 **Expected**: 3-block Pester run covering:
 - **Resource group contains expected resources** — FA, KV, Storage, DCE, DCR all present
-- **Ingestion signal** — `MDE_Heartbeat_CL` has recent rows; `App Insights customEvents.Success=true`; `MDE_AdvancedFeatures_CL` has at least one row; ≥3 of 5 sampled P0 streams have data
+- **Ingestion signal** — `XdrConnectorHealth_CL` has recent rows; `App Insights customEvents.Success=true`; `MDE_AdvancedFeatures_CL` has at least one row; ≥3 of 5 sampled P0 streams have data
 - **Sentinel content deployed** — parser functions registered (≥6); hunting queries registered (≥10); Compliance Dashboard workbook exists
 
 If blocks fail:

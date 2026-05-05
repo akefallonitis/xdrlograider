@@ -29,7 +29,7 @@ Symptom → cause → fix for common issues.
 **Fix**: `az keyvault purge --name <name> --location <region>` then redeploy.
 
 ### Function App times out during first run
-**Cause**: module dependencies installing from `requirements.psd1` on cold start (legacy behavior from older builds). v0.1.0-beta ships pre-bundled modules under `Modules/` so this should NOT happen.
+**Cause**: module dependencies installing from `requirements.psd1` on cold start (legacy behavior from older builds). v0.1.0 GA ships pre-bundled modules under `Modules/` so this should NOT happen.
 **Fix**: wait ~10 minutes. Check Function App → Monitor → Invocations. If still stuck, restart the Function App.
 
 ### Function App fails every invocation with "Failed to install function app dependencies (Managed Dependencies / Legion)"
@@ -41,7 +41,7 @@ from requirements.psd1 and include the function app dependencies with the
 function app content.'
 ```
 **Symptoms downstream of this bug**: heartbeat sporadic (3 of 24 5-min bins), no AuthChain.Completed events in App Insights customEvents, 44 of 47 tables empty, App Insights `AppExceptions` shows 200+ exceptions/h with this exact message.
-**Fix**: redeploy from `v0.1.0-beta` tag (post iter 13). Iter 13 ships:
+**Fix**: redeploy from `v0.1.0 GA` tag (post iter 13). Iter 13 ships:
 - `requirements.psd1` empty (module references removed)
 - `host.json` `managedDependency.Enabled = false`
 - Az.Accounts/Az.KeyVault/Az.Storage bundled INSIDE `function-app.zip` under `Modules/` via `Save-Module` in `release.yml`
@@ -97,7 +97,7 @@ See also: [RUNBOOK.md § Auth self-test failure](RUNBOOK.md#auth-self-test-failu
 
 ### Workbook shows "No data for these queries"
 **Cause**: ingestion not yet producing rows, or time range too narrow.
-**Fix**: check `MDE_Heartbeat_CL` has entries; widen time range.
+**Fix**: check `XdrConnectorHealth_CL` has entries; widen time range.
 
 ### KQL error: "Failed to resolve table or column expression named 'MDE_AdvancedFeatures_CL'"
 **Cause**: custom table not yet created in Log Analytics (created by ARM deployment).
@@ -122,17 +122,17 @@ See also: [RUNBOOK.md § Auth self-test failure](RUNBOOK.md#auth-self-test-failu
 ### Sentinel → Data Connectors doesn't show XdrLogRaider
 **Cause**: the `solution-*` cross-RG nested deploy did not run (workspace permissions, race condition, or an early-rolled mainTemplate from before iteration 12). The connector appears via a `Microsoft.OperationalInsights/workspaces/providers/dataConnectors` resource of kind `GenericUI` (apiVersion `2021-03-01-preview` — canonical for community FA-based connectors per Trend Micro Vision One reference, verified in Azure-Sentinel master 2026-04-26) plus its parent `contentPackages` Solution and the `DataConnector` metadata back-link.
 **Fix**:
-1. Confirm the deployed `mainTemplate.json` SHA matches `raw.githubusercontent.com/akefallonitis/xdrlograider/v0.1.0-beta/...` (older versions used `kind: StaticUI` which Sentinel's UI blade indexer treats differently for non-Microsoft publishers, leaving the card hidden).
+1. Confirm the deployed `mainTemplate.json` SHA matches `raw.githubusercontent.com/akefallonitis/xdrlograider/v0.1.0 GA/...` (older versions used `kind: StaticUI` which Sentinel's UI blade indexer treats differently for non-Microsoft publishers, leaving the card hidden).
 2. Run `pwsh ./tools/Validate-ArmJson.ps1` on the deployed template — it asserts the `solution-*` nested deploy is present with `kind=GenericUI` + `apiVersion=2021-03-01-preview` + `extensionResourceId()`-form metadata parentId.
 3. Check the deployment history in your workspace RG for a `solution-<suffix>` deployment status. Re-run the ARM template if it's missing.
 4. Verify the workspace IS Sentinel-enabled (`Microsoft.SecurityInsights/onboardingStates` exists).
 
 ### Function App in "Runtime: Error" state — no functions loaded
 **Cause**: older builds shipped `function-app.zip` with a `functions/` wrapper directory. Azure Functions PowerShell runtime walks the zip ROOT for function dirs containing `function.json`. With the wrapper, runtime found 0 functions → "Runtime: Error", 0 heartbeat rows, hidden connector card.
-**Fix**: redeploy from `v0.1.0-beta` tag. The current `function-app.zip` is flat — function dirs at root, no wrapper, no `local.settings.json*` stowaways. Verified by `tests/unit/FunctionAppZip.Structure.Tests.ps1` (Pester gate) + `release.yml` post-build assertion.
+**Fix**: redeploy from `v0.1.0 GA` tag. The current `function-app.zip` is flat — function dirs at root, no wrapper, no `local.settings.json*` stowaways. Verified by `tests/unit/FunctionAppZip.Structure.Tests.ps1` (Pester gate) + `release.yml` post-build assertion.
 
 ### Connector card shows "Not connected"
-**Cause**: `MDE_Heartbeat_CL` has no rows in the last hour.
+**Cause**: `XdrConnectorHealth_CL` has no rows in the last hour.
 **Fix**: check Function App is running; check self-test has passed.
 
 ### Sentinel Content Hub shows "DEPRECATED" tag on XdrLogRaider — duplicate entries visible
@@ -174,18 +174,18 @@ Invoke-RestMethod -Uri $dcUri -Headers $headers -Method Delete -ErrorAction Sile
 2. For each: Manage → Uninstall (Microsoft's UI handles cascade delete of metadata)
 3. Wait 2-3 min for indexer to settle
 
-**Then redeploy from `v0.1.0-beta` tag** — v0.1.0-beta ships canonical fields (`description` plain text, `categories.verticals`, `isPreview`/`isNew`), preventing the DEPRECATED auto-tag on fresh installs. v0.1.0-beta also locks `contentId='community.xdrlograider'` (qualified) so future version bumps won't create displayName-collision duplicates.
+**Then redeploy from `v0.1.0 GA` tag** — v0.1.0 GA ships canonical fields (`description` plain text, `categories.verticals`, `isPreview`/`isNew`), preventing the DEPRECATED auto-tag on fresh installs. v0.1.0 GA also locks `contentId='community.xdrlograider'` (qualified) so future version bumps won't create displayName-collision duplicates.
 
 **Permanent prevention**:
-- New `tools/Validate-ArmJson.ps1` gate: `description` (plain text) MUST be present + `categories.verticals` MUST be defined
-- `contentId` is now stable (`community.xdrlograider`) — won't change between v0.1.0-beta → v0.1.0 GA → v1.0.0
-- `docs/UPGRADE.md` documents the cleanup-before-rename procedure for any future displayName / contentId changes
+- `tools/Validate-ArmJson.ps1` gate: `description` (plain text) MUST be present + `categories.verticals` MUST be defined
+- `contentId` is stable (`community.xdrlograider`) — won't change across version bumps
+- If displayName / contentId changes are unrecoverable, run a fresh ARM deploy with a new projectPrefix.
 
 ## Cost issues
 
 ### Ingestion costs higher than expected
 **Cause**: high-volume stream (commonly `MDE_DataExportSettings_CL` for tenants with many export configs, `MDE_XspmAttackPaths_CL` for wide attack surface).
-**Fix**: increase cadence for that stream; see [COST.md](COST.md).
+**Fix**: increase cadence for that stream; see operator-tunable cadence + retention overrides in [OPERATOR-KQL-PACK.md](OPERATOR-KQL-PACK.md).
 
 ### Function App execution count spiked
 **Cause**: Stuck timer keeps retrying.

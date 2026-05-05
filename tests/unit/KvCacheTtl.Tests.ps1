@@ -1,7 +1,7 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    v0.1.0-beta first publish — KV secret cache TTL test gates.
+    v0.1.0 GA first publish — KV secret cache TTL test gates.
 
 .DESCRIPTION
     Production-readiness invariant: the FA worker must NOT keep KV secrets
@@ -54,9 +54,9 @@ AfterAll {
 # Note: Pester 5 forbids BeforeEach in the container root. Each Describe
 # declares its own BeforeEach to reset cache state for test isolation.
 
-Describe 'KvCache.ModuleSurface — exports + back-compat' {
+Describe 'KvCache.ModuleSurface — exports + v0.1.0 GA scope' {
 
-    It 'Get-XdrAuthFromKeyVault is exported (back-compat)' {
+    It 'Get-XdrAuthFromKeyVault is exported (v0.1.0 GA scope)' {
         (Get-Module Xdr.Common.Auth).ExportedFunctions.Keys | Should -Contain 'Get-XdrAuthFromKeyVault'
     }
 
@@ -68,7 +68,7 @@ Describe 'KvCache.ModuleSurface — exports + back-compat' {
         $cmd = Get-Command Get-XdrAuthFromKeyVault
         $cmd.Parameters.ContainsKey('Force')       | Should -BeTrue -Because 'manual eviction hook'
         $cmd.Parameters.ContainsKey('OperationId') | Should -BeTrue -Because 'AI correlation'
-        # Back-compat: VaultUri + AuthMethod must remain mandatory.
+        # v0.1.0 GA scope: VaultUri + AuthMethod must remain mandatory.
         $isMandatory = {
             param($p)
             $paramAttr = @($p.Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }) |

@@ -62,7 +62,7 @@ function Connect-DefenderPortalWithCookies {
     $xsrfCookie.Secure = $true
     $session.Cookies.Add($uri, $xsrfCookie)
 
-    # iter-14.0 Phase 14B: stamp a CorrelationId so downstream
+    # v0.1.0 GAB: stamp a CorrelationId so downstream
     # Invoke-DefenderPortalRequest + Invoke-MDETierPoll calls stitch their
     # AI events on a stable operation id even for cookie-built sessions.
     $correlationId = [Guid]::NewGuid().ToString()

@@ -69,13 +69,13 @@ BeforeAll {
     $env:SERVICE_ACCOUNT_UPN   = 'svc-test@example.com'
     $env:DCE_ENDPOINT          = 'https://test-dce.eastus-1.ingest.monitor.azure.com'
     # Build a stub DCR_IMMUTABLE_IDS_JSON covering every stream in the manifest
-    # plus MDE_Heartbeat_CL. All keys map to the same stub `dcr-12345` since
+    # plus XdrConnectorHealth_CL. All keys map to the same stub `dcr-12345` since
     # Send-ToLogAnalytics is mocked anyway — only the helper's lookup must succeed.
     $manifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $manifestData = Import-PowerShellDataFile -Path $manifestPath
     $stubMap = @{}
     foreach ($e in $manifestData.Endpoints) { $stubMap[$e.Stream] = 'dcr-12345' }
-    $stubMap['MDE_Heartbeat_CL'] = 'dcr-12345'
+    $stubMap['XdrConnectorHealth_CL'] = 'dcr-12345'
     $env:DCR_IMMUTABLE_IDS_JSON = ($stubMap | ConvertTo-Json -Compress)
     $env:STORAGE_ACCOUNT_NAME  = 'teststorage'
     $env:CHECKPOINT_TABLE_NAME = 'connectorCheckpoints'
@@ -230,7 +230,7 @@ Describe 'End-to-end timer fire — Invoke-TierPollWithHeartbeat (inventory tier
         }
         # Contract: fatal MUST re-throw (Azure Functions runtime needs to mark
         # the invocation failed) AND the heartbeat-with-fatalError MUST fire
-        # before re-throwing (so operators can see in MDE_Heartbeat_CL).
+        # before re-throwing (so operators can see in XdrConnectorHealth_CL).
         $outcome.Threw | Should -BeTrue -Because "fatal error must re-throw so Azure Functions runtime marks invocation failed"
         $outcome.ErrMsg | Should -Match 'Key Vault unreachable' -Because 'the original error message must propagate'
     }

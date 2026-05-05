@@ -1,13 +1,13 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Behavioral + contract tests for the iter-13.15 Invoke-XdrStorageTableEntity
+    Behavioral + contract tests for the pre-v0.1.0 Invoke-XdrStorageTableEntity
     helper — the unified Storage Table entity-ops abstraction.
 
 .DESCRIPTION
     The helper replaces 4 scattered call sites that previously mixed AzTable
     cmdlets and ad-hoc Invoke-RestMethod blocks (with the wrong PUT semantic
-    in iter-13.14). Tests cover:
+    in pre-v0.1.0.14). Tests cover:
       - Parameter binding (ValidateSet, Mandatory, -Entity-required-for-Upsert)
       - Source-level contract assertions (URI shape, header set per operation,
         HttpClient caching, no-If-Match-on-Upsert)
@@ -73,11 +73,11 @@ Describe 'Invoke-XdrStorageTableEntity — module surface + parameter binding' {
 Describe 'Invoke-XdrStorageTableEntity — source-level contract assertions' {
     # These tests inspect the helper source directly. They lock invariants
     # that are too risky to leave to runtime-only verification (e.g. the
-    # critical "no If-Match on Upsert" semantic that caused iter-13.14).
+    # critical "no If-Match on Upsert" semantic that caused pre-v0.1.0.14).
 
     It 'URI is built with literal single-quotes around PartitionKey/RowKey (not URL-encoded)' {
         # Azure Tables REST accepts the canonical form; URL-encoding the quotes
-        # caused 404 in earlier iter-13.x tests. The literal form must be used.
+        # caused 404 in earlier pre-v0.1.0.x tests. The literal form must be used.
         # Single-quoted regex string so PowerShell does not try to expand $PartitionKey / $RowKey.
         $script:HelperSource | Should -Match 'PartitionKey=''\$PartitionKey'',RowKey=''\$RowKey''' -Because 'URI must use literal single quotes; URL-encoding triggers 404 from Azure Tables'
     }
@@ -104,8 +104,8 @@ Describe 'Invoke-XdrStorageTableEntity — source-level contract assertions' {
         $script:HelperSource | Should -Match "If-Match.*\*" -Because 'Delete must send If-Match: ''*'' for unconditional delete'
     }
 
-    It 'Upsert operation does NOT make a TryAddWithoutValidation call for If-Match (CRITICAL — locks iter-13.14 root cause)' {
-        # The iter-13.14 bug: PUT + If-Match: '*' = "Update Entity" (404 if row
+    It 'Upsert operation does NOT make a TryAddWithoutValidation call for If-Match (CRITICAL — locks pre-v0.1.0.14 root cause)' {
+        # The pre-v0.1.0.14 bug: PUT + If-Match: '*' = "Update Entity" (404 if row
         # missing). Without If-Match, PUT = "Insert-Or-Replace Entity" (creates
         # if missing). The Upsert branch must NOT make a TryAddWithoutValidation
         # call adding the If-Match header. Comments mentioning "If-Match" inside
@@ -116,7 +116,7 @@ Describe 'Invoke-XdrStorageTableEntity — source-level contract assertions' {
         # Strip comments first so docstring references don't false-positive.
         $branchBody = [regex]::Replace($upsertBranch.Groups[1].Value, '<#[\s\S]*?#>', '')
         $branchBody = [regex]::Replace($branchBody, '(?m)#.*$', '')
-        $branchBody | Should -Not -Match "TryAddWithoutValidation\s*\(\s*['""]If-Match['""]" -Because 'iter-13.14 root cause: PUT with If-Match becomes Update Entity (404 on missing row). Upsert MUST NOT send If-Match.'
+        $branchBody | Should -Not -Match "TryAddWithoutValidation\s*\(\s*['""]If-Match['""]" -Because 'pre-v0.1.0.14 root cause: PUT with If-Match becomes Update Entity (404 on missing row). Upsert MUST NOT send If-Match.'
     }
 
     It 'Get returns null on HTTP 404 (not throw)' {

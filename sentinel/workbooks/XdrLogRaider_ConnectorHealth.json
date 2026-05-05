@@ -4,7 +4,7 @@
     {
       "type": 1,
       "content": {
-        "json": "# XdrLogRaider — Connector Health\n\nOperator-facing dashboard for the XdrLogRaider Defender XDR portal-only telemetry connector.\n\nPanels:\n1. Per-tier last-fresh poll markers (5 capability tiers + heartbeat)\n2. Auth chain failures last 24h (AppExceptions filtered to AuthChain.*)\n3. DLQ depth and oldest-entry age\n4. Freshness SLI per consolidated category\n5. Per-row partial-success rate per stream\n6. Service account sign-in anomaly summary (uses $(SERVICE_ACCOUNT_UPN) deployment parameter)\n\nFor triage workflows see [docs/RUNBOOK.md](https://github.com/akefallonitis/xdrlograider/blob/main/docs/RUNBOOK.md)."
+        "json": "# XdrLogRaider — Connector Health\n\nOperator-facing dashboard for the XdrLogRaider Defender XDR portal-only telemetry connector.\n\nPanels:\n1. Per-tier last-fresh poll markers (5 capability tiers + heartbeat)\n2. Auth chain failures last 24h (AppExceptions filtered to AuthChain.*)\n3. DLQ depth and oldest-entry age\n4. Freshness SLI per consolidated category\n5. Per-row partial-success rate per stream\n6. Service account sign-in anomaly summary (uses $(SERVICE_ACCOUNT_UPN) deployment parameter)\n7. Per-stream freshness (workspace-side last row per SourceName across 10 category tables) — v0.1.0 GA\n\nFor triage workflows see [docs/RUNBOOK.md](https://github.com/akefallonitis/xdrlograider/blob/main/docs/RUNBOOK.md)."
       },
       "name": "title"
     },
@@ -25,12 +25,34 @@
             },
             "typeSettings": {
               "selectableValues": [
-                { "durationMs": 3600000 },
-                { "durationMs": 14400000 },
-                { "durationMs": 86400000 },
-                { "durationMs": 604800000 }
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                }
               ]
             }
+          },
+          {
+            "id": "0bb22222-2222-2222-2222-222222222222",
+            "version": "KqlParameterItem/1.0",
+            "name": "Portal",
+            "label": "Portal",
+            "type": 2,
+            "isRequired": true,
+            "value": "Defender",
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "jsonData": "[{\"value\":\"Defender\",\"label\":\"Defender\"}]"
           }
         ],
         "style": "above",
@@ -42,7 +64,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "MDE_Heartbeat_CL\n| where TimeGenerated {TimeRange}\n| summarize LastSeenUtc = max(TimeGenerated), HeartbeatCount = count(), TotalRowsIngested = sum(RowsIngested) by FunctionName\n| extend StaleMinutes = datetime_diff('minute', now(), LastSeenUtc)\n| extend Status = case(\n    FunctionName == 'Connector-Heartbeat'           and StaleMinutes <= 10,    'Healthy',\n    FunctionName == 'Defender-ActionCenter-Refresh' and StaleMinutes <= 20,    'Healthy',\n    FunctionName == 'Defender-XspmGraph-Refresh'    and StaleMinutes <= 120,   'Healthy',\n    FunctionName == 'Defender-Configuration-Refresh' and StaleMinutes <= 720,  'Healthy',\n    FunctionName == 'Defender-Inventory-Refresh'    and StaleMinutes <= 2880,  'Healthy',\n    FunctionName == 'Defender-Maintenance-Refresh'  and StaleMinutes <= 20160, 'Healthy',\n    'Stale'\n)\n| project FunctionName, Status, StaleMinutes, LastSeenUtc, HeartbeatCount, TotalRowsIngested\n| sort by FunctionName asc",
+        "query": "XdrConnectorHealth_CL\n| where TimeGenerated {TimeRange}\n| summarize LastSeenUtc = max(TimeGenerated), HeartbeatCount = count(), TotalRowsIngested = sum(RowsIngested) by FunctionName\n| extend StaleMinutes = datetime_diff('minute', now(), LastSeenUtc)\n| extend Status = case(\n    FunctionName == 'Connector-Heartbeat'           and StaleMinutes <= 10,    'Healthy',\n    FunctionName == 'Defender-ActionCenter-Refresh' and StaleMinutes <= 20,    'Healthy',\n    FunctionName == 'Defender-XspmGraph-Refresh'    and StaleMinutes <= 120,   'Healthy',\n    FunctionName == 'Defender-Configuration-Refresh' and StaleMinutes <= 720,  'Healthy',\n    FunctionName == 'Defender-Inventory-Refresh'    and StaleMinutes <= 2880,  'Healthy',\n    FunctionName == 'Defender-Maintenance-Refresh'  and StaleMinutes <= 20160, 'Healthy',\n    'Stale'\n)\n| project FunctionName, Status, StaleMinutes, LastSeenUtc, HeartbeatCount, TotalRowsIngested\n| sort by FunctionName asc",
         "size": 0,
         "title": "Per-capability poll freshness (last vs cadence threshold)",
         "queryType": 0,
@@ -56,8 +78,17 @@
               "formatOptions": {
                 "thresholdsOptions": "colors",
                 "thresholdsGrid": [
-                  { "operator": "==", "thresholdValue": "Healthy", "representation": "green", "text": "{0}{1}" },
-                  { "operator": "Default", "representation": "redBright", "text": "{0}{1}" }
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Healthy",
+                    "representation": "green",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "Default",
+                    "representation": "redBright",
+                    "text": "{0}{1}"
+                  }
                 ]
               }
             }
@@ -125,6 +156,55 @@
         "resourceType": "microsoft.operationalinsights/workspaces"
       },
       "name": "panel-6-service-account-anomaly"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "// Per-stream workspace-side freshness: last TimeGenerated per SourceName across\n// all 10 consolidated Defender_<Category>_CL tables (architecture).\n// Operators use this to spot a stream that's stopped landing rows even when the\n// poll function is firing (e.g., portal API change, partial DCR rejection).\nunion isfuzzy=true\n    Defender_EndpointDeviceManagement_CL,\n    Defender_EndpointConfiguration_CL,\n    Defender_VulnerabilityManagement_CL,\n    Defender_IdentityProtection_CL,\n    Defender_ConfigurationAndSettings_CL,\n    Defender_ExposureManagement_CL,\n    Defender_ThreatAnalytics_CL,\n    Defender_ActionCenter_CL,\n    Defender_MultiTenantOperations_CL,\n    Defender_StreamingApi_CL\n| where TimeGenerated > ago(7d)\n| summarize LastSeenUtc = max(TimeGenerated), RowsLast24h = countif(TimeGenerated > ago(24h)) by SourceName\n| extend StaleMinutes = datetime_diff('minute', now(), LastSeenUtc)\n| extend Status = case(\n    StaleMinutes <= 60,    'Fresh',\n    StaleMinutes <= 1440,  'StaleHourly',\n    StaleMinutes <= 10080, 'StaleDaily',\n    'NoData'\n)\n| project SourceName, Status, StaleMinutes, LastSeenUtc, RowsLast24h\n| sort by StaleMinutes desc",
+        "size": 0,
+        "title": "Per-stream freshness (workspace-side) — last row landed per SourceName across 10 category tables",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "Status",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "colors",
+                "thresholdsGrid": [
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Fresh",
+                    "representation": "green",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "StaleHourly",
+                    "representation": "yellow",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "==",
+                    "thresholdValue": "StaleDaily",
+                    "representation": "orange",
+                    "text": "{0}{1}"
+                  },
+                  {
+                    "operator": "Default",
+                    "representation": "redBright",
+                    "text": "{0}{1}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "name": "panel-7-per-stream-freshness"
     }
   ],
   "fallbackResourceIds": [

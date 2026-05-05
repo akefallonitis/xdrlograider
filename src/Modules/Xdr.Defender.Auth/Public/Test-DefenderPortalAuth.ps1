@@ -29,7 +29,7 @@ function Test-DefenderPortalAuth {
     [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory)]
-        # iter-13.12: accept BOTH PascalCase + snake_case so the ARM template's
+        # pre-v0.1.0.12: accept BOTH PascalCase + snake_case so the ARM template's
         # `authMethod` parameter ('credentials_totp' / 'passkey') flows through
         # profile.ps1 → $env:AUTH_METHOD → here without intermediate normalization.
         [ValidateSet('CredentialsTotp', 'Passkey', 'credentials_totp', 'passkey')]
@@ -84,7 +84,7 @@ function Test-DefenderPortalAuth {
                 -TimeoutSec 30
             $result.SampleCallHttpCode  = 200
             $result.SampleCallLatencyMs = [int]$stageStopwatch.ElapsedMilliseconds
-            # iter-13.2: strict-mode-safe AuthInfo presence check
+            # pre-v0.1.0.2: strict-mode-safe AuthInfo presence check
             $hasAuthInfo = ($null -ne $sample) -and
                            ($sample.PSObject.Properties['AuthInfo']) -and
                            ($null -ne $sample.AuthInfo)

@@ -42,7 +42,7 @@ AfterAll {
     Remove-Module Xdr.Common.Auth   -Force -ErrorAction SilentlyContinue
 }
 
-Describe 'Passkey unattended auth method — contract lock (iter 13.9 P1; iter-14.0 location)' {
+Describe 'Passkey unattended auth method — contract lock (iter 13.9 P1; v0.1.0 GA location)' {
 
     It 'Connect-DefenderPortal -Method parameter accepts Passkey value' {
         $cmd = Get-Command -Module Xdr.Defender.Auth -Name Connect-DefenderPortal -ErrorAction Stop

@@ -50,7 +50,7 @@
         "queryType": 0,
         "title": "Action Center summary by status",
         "size": 0,
-        "query": "MDE_MachineActions_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by ActionId\n| summarize Count = count() by ActionStatus, ActionType\n| order by Count desc",
+        "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_MachineActions_CL'\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by ActionId\n| summarize Count = count() by ActionStatus, ActionType\n| order by Count desc",
         "version": "KqlItem/1.0",
         "visualization": "barchart"
       },
@@ -62,7 +62,7 @@
         "queryType": 0,
         "title": "Device timeline events (per-device)",
         "size": 0,
-        "query": "MDE_DeviceTimeline_CL\n| where TimeGenerated > ago({TimeRange:value})\n| project EventTime, MachineId, EventType, EventId, ProcessName, FileName, Severity, TimeGenerated\n| order by EventTime desc\n| take 200",
+        "query": "Defender_EndpointDeviceManagement_CL | where SourceName == 'MDE_DeviceTimeline_CL'\n| where TimeGenerated > ago({TimeRange:value})\n| project EventTime, MachineId, EventType, EventId, ProcessName, FileName, Severity, TimeGenerated\n| order by EventTime desc\n| take 200",
         "version": "KqlItem/1.0",
         "visualization": "table"
       },
@@ -74,7 +74,7 @@
         "queryType": 0,
         "title": "Machine actions detail (Live Response output and AIR linkage)",
         "size": 0,
-        "query": "MDE_MachineActions_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by ActionId\n| extend DurationMinutes = iff(isnotnull(CompletedTime) and isnotnull(CreatedTime), datetime_diff('minute', CompletedTime, CreatedTime), int(null))\n| project CreatedTime, CompletedTime, DurationMinutes, ActionId, ActionType, ActionStatus, MachineId, Operator, InvestigationId, ScriptOutput, TimeGenerated\n| order by CreatedTime desc",
+        "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_MachineActions_CL'\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by ActionId\n| extend DurationMinutes = iff(isnotnull(CompletedTime) and isnotnull(CreatedTime), datetime_diff('minute', CompletedTime, CreatedTime), int(null))\n| project CreatedTime, CompletedTime, DurationMinutes, ActionId, ActionType, ActionStatus, MachineId, Operator, InvestigationId, ScriptOutput, TimeGenerated\n| order by CreatedTime desc",
         "version": "KqlItem/1.0",
         "visualization": "table"
       },

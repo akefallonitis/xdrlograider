@@ -3,7 +3,7 @@
 <#
 .SYNOPSIS
     Pester 5 unit tests for Defender-portal-specific auth-chain helpers
-    (iter-14.0 Phase 1).
+    (v0.1.0 GA).
 
 .DESCRIPTION
     Migrated out of tests/unit/Xdr.Portal.Auth.AuthChain.Tests.ps1. Covers:

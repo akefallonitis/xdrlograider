@@ -5,7 +5,7 @@
     typed-col extraction gate.
 
 .DESCRIPTION
-    iter-14.0 Phase 4 (v0.1.0 GA). Implements Section 2.7 (defensive code) +
+    v0.1.0 GA (v0.1.0 GA). Implements Section 2.7 (defensive code) +
     Section 3 step 5 (unit-test gate that catches projection mismatches at PR
     time) of the senior-architect plan.
 
@@ -20,7 +20,7 @@
        Expand-MDEResponse + ConvertTo-MDEIngestRow against the first fixture
        row and assert at least ONE typed col extracts a non-null value (where
        the fixture has data). Catches the class of bug that produced the
-       iter-14.0 property-bag mismatch (every typed col returned null).
+       v0.1.0 GA property-bag mismatch (every typed col returned null).
 
     Skip-on-missing-fixture is acceptable here — the FA.ParsingPipeline gate
     enforces fixture coverage. This test focuses on the projection-resolution

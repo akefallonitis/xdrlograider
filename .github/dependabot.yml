@@ -23,5 +23,5 @@ updates:
         patterns:
           - "*"
 
-  # Terraform / other IaC left as a stub — project is Bicep/ARM, no Terraform.
-  # Add here if we ever introduce Python / Node / Go tooling.
+  # ARM-only deployment (single hand-authored mainTemplate.json source of truth).
+  # No Terraform / Bicep / Pulumi / Helm; no Python / Node / Go tooling.

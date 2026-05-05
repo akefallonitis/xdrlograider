@@ -32,7 +32,7 @@
 
 BeforeAll {
     $script:Root = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
-    # iter-14.0: target the L2 module directly so InModuleScope can mock
+    # v0.1.0 GA: target the L2 module directly so InModuleScope can mock
     # Update-XsrfToken + Connect-DefenderPortal (the real implementations).
     # Xdr.Portal.Auth is still imported so the surface tests at module level
     # continue to find Connect-DefenderPortal etc., but the request-level error
@@ -49,7 +49,7 @@ BeforeAll {
     $manifestData = Import-PowerShellDataFile -Path $manifestPath
     $stubMap = @{}
     foreach ($e in $manifestData.Endpoints) { $stubMap[$e.Stream] = 'dcr-fake' }
-    $stubMap['MDE_Heartbeat_CL'] = 'dcr-fake'
+    $stubMap['XdrConnectorHealth_CL'] = 'dcr-fake'
     $env:DCR_IMMUTABLE_IDS_JSON = ($stubMap | ConvertTo-Json -Compress)
     $module = Get-Module Xdr.Sentinel.Ingest
     if ($module) { & $module { $script:DcrIdMap = $null } }
@@ -63,7 +63,7 @@ AfterAll {
     Remove-Item Env:\DCR_IMMUTABLE_IDS_JSON -ErrorAction SilentlyContinue
 }
 
-Describe 'API error handling — Invoke-DefenderPortalRequest (iter-14.0 home)' {
+Describe 'API error handling — Invoke-DefenderPortalRequest (v0.1.0 GA home)' {
 
     It 'surfaces 403 Forbidden without attempting reauth' {
         InModuleScope Xdr.Defender.Auth {
@@ -216,7 +216,7 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             param($Sess, $Cfg)
             # P4 was intentionally dropped — no streams carry Tier='P4' in the manifest.
             # But ValidateSet rejects P4 directly. Simulate empty tier by mocking manifest.
-            Mock Get-MDEEndpointManifest { @{} }
+            Mock Get-XdrEndpointManifest { @{} }
             { Invoke-MDETierPoll -Session $Sess -Tier 'Inventory' -Config $Cfg } | Should -Not -Throw
         }
     }

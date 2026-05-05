@@ -24,17 +24,22 @@
 
 BeforeAll {
     $script:RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force
+    # Phase J D'.22 (2026-05-04): Send-XdrAppInsights* helpers extracted from
+    # Xdr.Sentinel.Ingest into Xdr.Common.Telemetry. Import the new module.
+    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Telemetry' 'Xdr.Common.Telemetry.psd1') -Force
 }
 
 AfterAll {
-    Remove-Module Xdr.Sentinel.Ingest -Force -ErrorAction SilentlyContinue
+    Remove-Module Xdr.Common.Telemetry -Force -ErrorAction SilentlyContinue
 }
 
 Describe 'Dependency.Surface — Send-XdrAppInsightsDependency exported with the documented signature' {
 
-    It 'is exported by the Xdr.Sentinel.Ingest module' {
-        (Get-Module Xdr.Sentinel.Ingest).ExportedFunctions.Keys | Should -Contain 'Send-XdrAppInsightsDependency'
+    It 'is exported by the Xdr.Common.Telemetry module (Phase J D''.22)' {
+        # Phase J D'.22 (2026-05-04): AppInsights helpers moved from
+        # Xdr.Sentinel.Ingest to Xdr.Common.Telemetry — clean separation of
+        # concerns (operator surface vs SRE/dev surface; see plan §5.2.quater).
+        (Get-Module Xdr.Common.Telemetry).ExportedFunctions.Keys | Should -Contain 'Send-XdrAppInsightsDependency'
     }
 
     It 'declares the documented parameter set (Target/Name/Success/DurationMs/ResultCode/Type/OperationId/Properties)' {
@@ -109,7 +114,7 @@ Describe 'Dependency.FallbackInformation — Write-Information fallback when no 
 Describe 'Dependency.SecretRedaction — Properties hashtable secret keys are redacted before emission' {
 
     It 'redacts secret keys via the shared ConvertTo-XdrAiSafeProperties helper' {
-        InModuleScope Xdr.Sentinel.Ingest {
+        InModuleScope Xdr.Common.Telemetry {
             $props = @{
                 Stream     = 'Custom-MDE_X_CL'
                 upn        = 'svc@contoso.com'
@@ -147,7 +152,7 @@ Describe 'Dependency.SecretRedaction — Properties hashtable secret keys are re
 Describe 'Dependency.OperationIdStamped — Add-XdrAiAmbientContext is the source of OperationId stamping' {
 
     It 'auto-generates a GUID OperationId when none is supplied (shared with other Send-XdrAppInsights*)' {
-        InModuleScope Xdr.Sentinel.Ingest {
+        InModuleScope Xdr.Common.Telemetry {
             $props = [System.Collections.Generic.Dictionary[string,string]]::new()
             $ambient = Add-XdrAiAmbientContext -Properties $props -OperationId $null
             $ambient.OperationId | Should -Not -BeNullOrEmpty
@@ -156,7 +161,7 @@ Describe 'Dependency.OperationIdStamped — Add-XdrAiAmbientContext is the sourc
     }
 
     It 'pass-through OperationId is preserved verbatim' {
-        InModuleScope Xdr.Sentinel.Ingest {
+        InModuleScope Xdr.Common.Telemetry {
             $props = [System.Collections.Generic.Dictionary[string,string]]::new()
             $known = '9f3b2c1a-4b5e-4d8c-9f0a-1234567890ab'
             $ambient = Add-XdrAiAmbientContext -Properties $props -OperationId $known

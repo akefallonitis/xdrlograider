@@ -16,7 +16,7 @@ In scope:
 - PowerShell modules (`src/Modules/*`)
 - Azure Functions (`src/functions/*`)
 - Helper script (`tools/Initialize-XdrLogRaiderAuth.ps1`)
-- ARM/Bicep deployment templates (`deploy/*`)
+- ARM deployment templates (`deploy/*`)
 - Sentinel content (parsers, workbooks, analytic rules)
 
 Out of scope:

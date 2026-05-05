@@ -108,7 +108,7 @@ Describe 'Pre-deploy: Portal API coverage' -Tag 'predeploy', 'live' {
 
     It "At least $script:MinGreenStreams manifest streams return usable data" -Skip:(-not $script:RunLive) {
         $session = Connect-MDEPortal -Method $script:AuthMethod -Credential $script:Credential -PortalHost $script:PortalHost
-        $entries = @((Get-MDEEndpointManifest).Values)
+        $entries = @((Get-XdrEndpointManifest -Portal Defender).Values)
         Write-Host "  Manifest declares $($entries.Count) streams; threshold: $script:MinGreenStreams green."
 
         $greenCount = 0
@@ -128,7 +128,7 @@ Describe 'Pre-deploy: Portal API coverage' -Tag 'predeploy', 'live' {
     }
 
     It 'Every filterable endpoint has a non-empty Filter field in manifest' -Skip:(-not $script:RunLive) {
-        $entries = @((Get-MDEEndpointManifest).Values)
+        $entries = @((Get-XdrEndpointManifest -Portal Defender).Values)
         $filterable = $entries | Where-Object { $_.Filter }
         $filterable.Count | Should -BeGreaterThan 0
 

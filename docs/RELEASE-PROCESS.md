@@ -1,10 +1,43 @@
 # Release process
 
-How v1.x releases are cut.
+How v0.1.0 GA + future releases are cut.
+
+## Branch protection workflow (v0.1.0 GA + later)
+
+**`main` is protected**. All work goes via `release/<version>` branches with squashed merge.
+
+### Workflow
+
+1. Create release branch: `git checkout -b release/v<X.Y.Z>` from `main` HEAD
+2. Implement all changes locally (modules, ARM, content, tests, docs)
+3. Run full offline pyramid GREEN: `pwsh tests/Run-Tests.ps1 -Category all-offline` (target: 1583+ tests passing, 0 failures)
+4. Run local ARM what-if (read-only) against verification subscription
+5. **USER APPROVAL GATE** — wait for explicit approval before any push to `main`
+6. Squash-merge release branch → `main` (one cohesive commit)
+7. `release.yml` builds + signs artifacts on tag push
+8. Update FA `WEBSITE_RUN_FROM_PACKAGE` to new release URL + Stop/Start
+9. **Phase Q live verification** (Q.0-Q.11 + D'.33 per-resource depth + 1-week observation)
+10. **USER APPROVAL GATE** — wait for explicit approval before tagging
+11. Tag `vX.Y.Z` + write comprehensive CHANGELOG entry (FIRST WRITE — per user directive: no CHANGELOG entries until proven working)
+
+### Required reviewers
+
+Per `CODEOWNERS`:
+- ARM template changes → @akefallonitis (ARM expert)
+- Module dependency graph changes → @akefallonitis (architecture)
+- Sentinel content (rules/workbooks/hunting/parsers) → @akefallonitis (content)
+- All other changes → @akefallonitis
+
+### Senior-architect methodology (per plan §7)
+
+- **7-step gate per phase**: pre-phase audit → execute → offline test → no push → reaudit → consolidate → next
+- **3-layer test pyramid**: offline + online preflight + post-deploy P1-P14 — all 3 GREEN before tag
+- **Coverage axes**: 10 axes per phase (§7.5) — code/stale-ref/test/doc/security/CHANGELOG/back-compat/forward-compat/operator-UX/CI
+- **Honesty gates**: code shipped ≠ done; pushed ≠ verified; tests pass ≠ production-ready
 
 ## Pre-release checklist
 
-- [ ] **All offline tests pass** — `pwsh ./tests/Run-Tests.ps1 -Category all-offline` returns the current pass count (1450+ as of v0.1.0-beta) with 0 fail
+- [ ] **All offline tests pass** — `pwsh ./tests/Run-Tests.ps1 -Category all-offline` returns the current pass count (1450+ as of v0.1.0 GA) with 0 fail
 - [ ] **PSScriptAnalyzer 0 errors** — `Invoke-ScriptAnalyzer -Path ./src, ./tools, ./tests -Recurse -Settings ./.config/PSScriptAnalyzerSettings.psd1 | Where-Object Severity -eq 'Error'` is empty
 - [ ] **ARM validate PASS** — `pwsh ./tools/Validate-ArmJson.ps1`
 - [ ] **Preflight PASS** — `pwsh ./tools/Preflight-Deployment.ps1 -SkipOnline` reports `PRE-DEPLOY READY: YES`

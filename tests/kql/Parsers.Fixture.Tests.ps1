@@ -112,12 +112,17 @@ Describe 'Parser static audit — per cadence tier' -ForEach $script:ParserCases
         )
 
         $text = Get-Content $_.Path -Raw
-        $unionMatch = [regex]::Match($text, 'union\s+withsource=_Table\s+([\s\S]*?)(?=\|\s*where|\|\s*summarize|\|\s*extend|\Z)', 'IgnoreCase')
+        # Phase J.D.5 D'.34 (2026-05-04): parsers rewritten for Phase J.C.2-5
+        # architecture. Sources are now `Defender_<Category>_CL | where SourceName in (...)`.
+        # Extract source streams from `SourceName in (...)` filter clauses.
         $script:ParserTables = @()
-        if ($unionMatch.Success) {
-            $script:ParserTables = [regex]::Matches($unionMatch.Groups[1].Value, '\bMDE_[A-Za-z0-9]+_CL\b') |
-                ForEach-Object { $_.Value } | Sort-Object -Unique
+        $sourceNameMatches = [regex]::Matches($text, "SourceName\s+in\s*\(([^\)]+)\)", 'IgnoreCase')
+        foreach ($m in $sourceNameMatches) {
+            $listContent = $m.Groups[1].Value
+            $script:ParserTables += [regex]::Matches($listContent, "'(MDE_[A-Za-z0-9]+_CL)'") |
+                ForEach-Object { $_.Groups[1].Value }
         }
+        $script:ParserTables = @($script:ParserTables | Sort-Object -Unique)
 
         # Column extraction: find the LAST `| project` block and scan it for
         # every identifier that could be an output column.

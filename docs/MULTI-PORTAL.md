@@ -85,7 +85,7 @@ Replace placeholder with `Invoke-EntraTierPoll` + `Get-EntraEndpointManifest`:
 ```powershell
 function Get-EntraEndpointManifest {
     # Loads manifest entries with Portal='Entra'
-    # Returns same shape as Get-MDEEndpointManifest (manifest-driven dispatch)
+    # Returns same shape as Get-XdrEndpointManifest -Portal Defender (manifest-driven dispatch)
 }
 
 function Invoke-EntraTierPoll {
@@ -113,7 +113,7 @@ Add Entra portal endpoints to `endpoints.manifest.psd1`:
     Path           = '/api/conditionalAccess/policies'
     Tier           = 'Configuration'
     Category       = 'Identity Protection (MDI)'
-    NodocCategoryId= 4
+    CategoryId= 4
     UnwrapProperty = 'value'
     IdProperty     = @('id')
     ProjectionMap  = @{ ... }
@@ -169,4 +169,4 @@ Recommend Option B for v0.2.0 to avoid FA function explosion.
 - Multi-portal scaffolding tests: `tests/unit/MultiPortalScaffolding.Tests.ps1`
 - Module split layer test: `tests/unit/ModuleSplit.LayerBoundaries.Tests.ps1`
 - Plan: `.claude/plans/immutable-splashing-waffle.md` (internal)
-- Defender XDR portal API reference: https://nodoc.nathanmcnulty.com/defender (10-category authoritative taxonomy used for NodocCategoryId)
+- Defender XDR portal API reference: https://nodoc.nathanmcnulty.com/defender (10-category authoritative taxonomy used for CategoryId)

@@ -5,7 +5,7 @@
 # The local .git/hooks/commit-msg is a copy installed via tools/Install-GitHooks.ps1.
 # Re-run that helper after pulling repo changes that update this file.
 #
-# Rationale (iter-14.0 Phase 0.5 + Phase 12.1):
+# Rationale (v0.1.0 GA + Phase 12.1):
 #   The repo's contributor graph is operator-facing. AI-attribution trailers
 #   (Co-Authored-By: Claude, noreply@anthropic.com, etc.) make automated
 #   tools appear as public contributors. We block them at the commit-msg
@@ -29,7 +29,7 @@ if echo "$SCRUBBED" | grep -iqE '^[[:space:]]*co-authored-by:[[:space:]]*claude'
     echo "" >&2
     echo "ERROR: commit message contains a 'Co-Authored-By: Claude' trailer." >&2
     echo "       Remove the trailer line before committing." >&2
-    echo "       (See iter-14.0 Phase 0.5 / Phase 12.1 for context.)" >&2
+    echo "       (See v0.1.0 GA / Phase 12.1 for context.)" >&2
     echo "" >&2
     exit 1
 fi

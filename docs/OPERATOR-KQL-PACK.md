@@ -1,4 +1,4 @@
-# Operator KQL Pack
+# Operator KQL Pack (v0.1.0 GA)
 
 Canned KQL queries for the most common day-to-day operations on the
 XdrLogRaider connector. Paste into the Microsoft Sentinel **Logs** view
@@ -8,11 +8,61 @@ The connector emits structured telemetry across two surfaces:
 
 | Surface | Where | Use case |
 |---|---|---|
-| `MDE_*_CL` custom tables | Log Analytics workspace | Drift detection, content queries, analytic rules |
-| `customEvents` / `customMetrics` / `AppTraces` | Application Insights | Auth chain diagnostics, per-stream poll outcomes, latency / retry / rate-429 telemetry |
+| `Defender_<Category>_CL` consolidated tables (10 + `XdrConnectorHealth_CL`) | Log Analytics workspace | Drift detection, content queries, analytic rules |
+| `AppRequests` / `AppEvents` / `AppMetrics` / `AppExceptions` / `AppTraces` / `AppDependencies` | Application Insights | Auth chain diagnostics, per-stream poll outcomes, latency / retry / rate-429 telemetry |
 
-Each query below is portable — no parameters required other than
-optional time-range overrides.
+Each query below is portable — no parameters required other than optional time-range overrides.
+
+## Two operator-side query patterns
+
+The connector uses two complementary KQL patterns. Operators choose based on **what question they're answering**:
+
+### Pattern A — Snapshot streams use `arg_max` for "current state"
+
+For streams that re-ingest **full state per poll** (51 of 59 streams; everything except the 8 `Filter='fromDate'` delta streams), every poll deposits a fresh full snapshot. Operators querying "what's the current state?" use `arg_max` to retrieve the latest row per entity:
+
+```kql
+Defender_ConfigurationAndSettings_CL
+| where SourceName == 'MDE_AdvancedFeatures_CL'
+| where TimeGenerated > ago(7d)
+| summarize arg_max(TimeGenerated, *) by EntityId
+| project FeatureName = EntityId, IsEnabled, TimeGenerated
+| order by FeatureName asc
+```
+
+This pattern works for: feature flags, RBAC roles, suppression rules, secure-score breakdown, exposure recommendations, attack paths, posture metrics — anything where the operator wants the LATEST state, not the change history.
+
+### Pattern B — Drift parsers use `mv-apply` for "change events"
+
+For streams that need **field-level change detection** (any snapshot stream is eligible), the v0.1.0 GA architecture provides 4 cadence-tier drift parsers (`MDE_Drift_Configuration`, `MDE_Drift_Inventory`, `MDE_Drift_Exposure`, `MDE_Drift_Maintenance`). Operators query the parser, NOT the raw table:
+
+```kql
+MDE_Drift_Configuration(7d, 6h)
+| where StreamName == 'MDE_AdvancedFeatures_CL'
+| where ChangeType == 'Modified'
+| where FieldName in ('TamperProtectionEnabled', 'EdrInBlockMode')
+| project TimeGenerated, EntityId, FieldName, OldValue, NewValue, ChangeType
+| order by TimeGenerated desc
+```
+
+This pattern works for: configuration drift alerts, RBAC change tracking, posture-score regressions, exposure-recommendation lifecycle, threat-analytics outbreak deltas — anything where the operator wants the CHANGE history, not the current state.
+
+### When to use which
+
+| Question | Pattern |
+|---|---|
+| What's the current value of feature X? | A — `arg_max` on the category table |
+| Did feature X change in the last 24h? | B — drift parser |
+| Which entities are missing from yesterday's poll? | B — drift parser (ChangeType == 'Removed') |
+| What's the row count per stream over time? | A — direct count() on category table |
+| Which entities had ANY field change between two snapshots? | B — drift parser |
+| What's the latest XSPM attack-path score for entity Y? | A — `arg_max` on `Defender_ExposureManagement_CL` filtered by SourceName |
+
+Operators **NEVER** need to write `arg_max` against the parser output (the parser already runs `arg_max` internally for its current/previous join). Operators **NEVER** need to manually compare two snapshots — the parser does field-level diff via `mv-apply set_union(CurrentFields, PreviousFields)` and emits `ChangeType` (Added | Removed | Modified) per field.
+
+This is the v0.1.0 GA D'.50 architectural pattern. It avoids per-stream operator-side `arg_max` boilerplate that bloats rule queries to 50+ lines and degrades query CPU.
+
+Each query below is portable — no parameters required other than optional time-range overrides.
 
 ---
 
@@ -21,7 +71,7 @@ optional time-range overrides.
 Single-row Connected / Degraded / Failed verdict.
 
 ```kql
-let last5m = MDE_Heartbeat_CL | where TimeGenerated > ago(5m);
+let last5m = XdrConnectorHealth_CL | where TimeGenerated > ago(5m);
 let pollSuccess = toscalar(last5m | where StreamsSucceeded > 0 | count);
 let authFailures = toscalar(
     customEvents
@@ -35,7 +85,7 @@ print
         pollSuccess == 0, "DEGRADED — no successful polls in last 5m",
         "HEALTHY"
     ),
-    LastHeartbeat = toscalar(MDE_Heartbeat_CL | summarize max(TimeGenerated))
+    LastHeartbeat = toscalar(XdrConnectorHealth_CL | summarize max(TimeGenerated))
 ```
 
 ---
@@ -68,7 +118,7 @@ heartbeat tier. Includes the embedded `Notes.rate429Count` and
 `Notes.gzipBytes` fields.
 
 ```kql
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(24h)
 | extend n = parse_json(Notes)
 | project TimeGenerated, Tier, FunctionName, StreamsAttempted, StreamsSucceeded,
@@ -204,7 +254,7 @@ Analytics, broken out by stream.
 ```kql
 union MDE_*_CL
 | where TimeGenerated > ago(7d)
-| where Type !in ("MDE_Heartbeat_CL")
+| where Type !in ("XdrConnectorHealth_CL")
 | summarize
       Rows  = count(),
       Bytes = sum(_BilledSize)
@@ -278,7 +328,7 @@ print Stream = allStreams
 
 ## 13. "Wire-chaining sanity check — typed columns vs RawJson"
 
-Verify that operator queries are hitting typed columns (the v0.1.0-beta
+Verify that operator queries are hitting typed columns (the v0.1.0 GA
 typed-column ingest model) rather than only `RawJson`. A row count of 0 here means
 the ProjectionMap fired correctly. A row count > 0 means a stream is
 emitting only `RawJson` and missing typed-column extraction — file an
@@ -299,7 +349,7 @@ target stream's typed columns.)
 ## See also
 
 - [`docs/SCHEMA-CATALOG.md`](./SCHEMA-CATALOG.md) — typed-column reference per stream
-- [`docs/QUERY-MIGRATION-GUIDE.md`](./QUERY-MIGRATION-GUIDE.md) — RawJson → typed-column patterns
+- [`docs/SCHEMA-CATALOG.md`](./SCHEMA-CATALOG.md) — per-stream typed-column reference for KQL authors
 - [`docs/ANALYTIC-RULES-VETTING.md`](./ANALYTIC-RULES-VETTING.md) — per-rule operator narrative
 - [`docs/RUNBOOK.md`](./RUNBOOK.md) — operational runbook
 - [`docs/TROUBLESHOOTING.md`](./TROUBLESHOOTING.md) — failure-mode catalog

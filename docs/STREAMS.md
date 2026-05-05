@@ -1,8 +1,10 @@
-# Streams catalogue (v0.1.0-beta)
+# Streams catalogue (v0.1.0 GA)
 
-**46 portal-only stream entries** (45 active + 1 deprecated) grouped into **5 cadence tiers**, all with documented path + method + body + headers verified against XDRInternals + live-captured against a full-access admin account.
+**59 portal-only stream entries** (58 active + 1 deprecated) grouped into **5 cadence tiers**, all with documented path + method + body + headers verified against XDRInternals + nodoc OpenAPI spec catalogue + live-captured against a full-access admin account.
 
-The portal-only audit DROPPED `MDE_SecureScoreBreakdown_CL` — publicly-API-covered by Microsoft Graph `/security/secureScores`; operators should use the official Graph Security data connector for that data. See [`STREAMS-REMOVED.md`](STREAMS-REMOVED.md) for the full removal history.
+v0.1.0 GA Phase 2 added **13 Tier A new streams** from the nodoc-catalog sweep (live-captured 2026-05-04): 11 in `XspmGraph` tier (Posture metrics + SecureScore per-category + Attack Surface analytical paths/chokepoints + XSPM Connectors + Asset Classification Schema + Posture Tenants/Initiatives/Security Events) and 2 in `Configuration` tier (Threat Analytics enriched + top threats).
+
+The portal-only audit DROPPED `MDE_SecureScoreBreakdown_CL` — publicly-API-covered by Microsoft Graph `/security/secureScores`; operators should use the official Graph Security data connector for that data. Deprecated streams are documented inline via the manifest `Availability='deprecated'` field with a Purpose note explaining the deprecation reason.
 
 The source of truth is [`src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1`](../src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1). Live-response fixtures live under `tests/fixtures/live-responses/`.
 
@@ -15,8 +17,8 @@ The connector groups streams by **how often it polls them**, not by an arbitrary
 | Tier | Cadence | Cron | Streams (active) | Timer function |
 |---|---|---|---|---|
 | `fast` | every 10 min | `0 */10 * * * *` | 2 | `Defender-ActionCenter-Refresh` |
-| `exposure` | hourly @ :25 | `0 25 * * * *` | 7 | `Defender-XspmGraph-Refresh` |
-| `config` | every 6h @ :35 | `0 35 */6 * * *` | 14 | `Defender-Configuration-Refresh` |
+| `exposure` | hourly @ :25 | `0 25 * * * *` | 18 (7 baseline + 11 v0.1.0 GA Phase 2) | `Defender-XspmGraph-Refresh` |
+| `config` | every 6h @ :35 | `0 35 */6 * * *` | 16 (14 baseline + 2 v0.1.0 GA Phase 2 ThreatAnalytics) | `Defender-Configuration-Refresh` |
 | `inventory` | daily @ 02:00 UTC | `0 0 2 * * *` | 21 | `Defender-Inventory-Refresh` |
 | `maintenance` | weekly Sun @ 03:00 UTC | `0 0 3 * * 0` | 1 (+1 deprecated, excluded from poll) | `Defender-Maintenance-Refresh` |
 
@@ -43,9 +45,9 @@ Action Center events — operator-visible response actions and Live Response per
 | `MDE_ActionCenter_CL` | `/apiproxy/mtp/actionCenter/actioncenterui/history-actions` | GET | live |
 | `MDE_MachineActions_CL` | `/apiproxy/mtp/responseApiPortal/machineactions` | GET | tenant-gated |
 
-## exposure (hourly @ :25, 7 streams)
+## exposure (hourly @ :25, 18 streams)
 
-Exposure Management (XSPM) — graph-shaped surfaces (attack paths, choke points, top targets) plus exposure recommendations and asset rules. Cadence-paired with the Sentinel exposure workbook (hourly refresh). XSPM graph data churn-rate is well under 1h so a faster poll wastes XSPM-API quota.
+Exposure Management (XSPM) — graph-shaped surfaces (attack paths, choke points, top targets) plus exposure recommendations and asset rules + posture metrics + SecureScore per-category + attack-surface analytical views (v0.1.0 GA Phase 2). Cadence-paired with the Sentinel exposure workbook (hourly refresh). XSPM graph data churn-rate is well under 1h so a faster poll wastes XSPM-API quota.
 
 | Stream | Path | Method | Availability |
 |---|---|---|---|
@@ -56,10 +58,21 @@ Exposure Management (XSPM) — graph-shaped surfaces (attack paths, choke points
 | `MDE_XspmAttackPaths_CL` | `/apiproxy/mtp/xspmatlas/attacksurface/query` | POST | live |
 | `MDE_XspmChokePoints_CL` | `/apiproxy/mtp/xspmatlas/attacksurface/query` | POST | live |
 | `MDE_XspmTopTargets_CL` | `/apiproxy/mtp/xspmatlas/attacksurface/query` | POST | live |
+| `MDE_AssetClassificationSchema_CL` | `/apiproxy/mtp/xspmatlas/assetrules/querybuilder/schema` | GET | live |
+| `MDE_PostureInitiativesSummarized_CL` | `/apiproxy/mtp/posture/oversight/initiatives/summarized` | GET | live |
+| `MDE_PostureMetrics_CL` | `/apiproxy/mtp/posture/oversight/metrics` | GET | live |
+| `MDE_AppsSecureScore_CL` | `/apiproxy/mtp/posture/oversight/securescore/apps` | GET | live |
+| `MDE_DataSecureScore_CL` | `/apiproxy/mtp/posture/oversight/securescore/data` | GET | live |
+| `MDE_IdentitySecureScore_CL` | `/apiproxy/mtp/posture/oversight/securescore/identity` | GET | live |
+| `MDE_PostureSecurityEvents_CL` | `/apiproxy/mtp/posture/oversight/securityEvents` | GET | live |
+| `MDE_PostureTenants_CL` | `/apiproxy/mtp/posture/oversight/tenants` | GET | live |
+| `MDE_AttackSurfaceAttackPaths_CL` | `/apiproxy/mtp/xspmatlas/attacksurface/attackPaths/list` | POST | live |
+| `MDE_AttackSurfaceChokepoints_CL` | `/apiproxy/mtp/xspmatlas/attacksurface/chokepoints/list` | POST | live |
+| `MDE_XspmConnectors_CL` | `/apiproxy/mtp/xspmatlas/connectors` | GET | live |
 
-## config (every 6h @ :35, 14 streams)
+## config (every 6h @ :35, 16 streams)
 
-Configuration / detection-rule tier — alert-pipeline rules, tenant policy, integration state, RBAC, threat intel, operator preferences, CASB integration. 6h matches Defender admin's typical weekday-work-cycle change cadence.
+Configuration / detection-rule tier — alert-pipeline rules, tenant policy, integration state, RBAC, threat intel + threat-analytics enriched outbreaks (v0.1.0 GA Phase 2), operator preferences, CASB integration. 6h matches Defender admin's typical weekday-work-cycle change cadence.
 
 | Stream | Path | Method | Availability |
 |---|---|---|---|
@@ -75,6 +88,8 @@ Configuration / detection-rule tier — alert-pipeline rules, tenant policy, int
 | `MDE_RbacDeviceGroups_CL` | `/apiproxy/mtp/rbacManagementApi/rbac/machine_groups` | GET | live |
 | `MDE_UnifiedRbacRoles_CL` | `/apiproxy/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions` | GET | live |
 | `MDE_ThreatAnalytics_CL` | `/apiproxy/mtp/threatAnalytics/outbreaks` | GET | live |
+| `MDE_ThreatAnalyticsEnriched_CL` | `/apiproxy/mtp/threatAnalytics/outbreaks/enriched` | GET | live |
+| `MDE_ThreatAnalyticsTopThreats_CL` | `/apiproxy/mtp/threatAnalytics/outbreaks/topThreats` | GET | live |
 | `MDE_UserPreferences_CL` | `/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference` | GET | live |
 | `MDE_CloudAppsConfig_CL` | `/apiproxy/mcas/cas/api/v1/settings` | GET | tenant-gated |
 
@@ -121,9 +136,9 @@ One non-telemetry stream emitted by the Function App itself, not polled from the
 
 | Table | Emitted by | Cadence | Schema |
 |---|---|---|---|
-| `MDE_Heartbeat_CL` | every poll-* timer + Connector-Heartbeat | per invocation | 9 cols: `TimeGenerated, FunctionName, Tier, StreamsAttempted, StreamsSucceeded, RowsIngested, LatencyMs, HostName, Notes(dynamic)` |
+| `XdrConnectorHealth_CL` | every poll-* timer + Connector-Heartbeat | per invocation | 9 cols: `TimeGenerated, FunctionName, Tier, StreamsAttempted, StreamsSucceeded, RowsIngested, LatencyMs, HostName, Notes(dynamic)` |
 
-Auth chain diagnostics (the previous `App Insights customEvents` table) moved to **App Insights `customEvents`** in v0.1.0-beta first publish. Query examples:
+Auth chain diagnostics (the previous `App Insights customEvents` table) moved to **App Insights `customEvents`** in v0.1.0 GA first publish. Query examples:
 
 ```kql
 // Auth chain status (App Insights)
@@ -135,7 +150,7 @@ customEvents
 
 ```kql
 // Connector health (workspace)
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(1h)
 | where StreamsSucceeded > 0
 | order by TimeGenerated desc

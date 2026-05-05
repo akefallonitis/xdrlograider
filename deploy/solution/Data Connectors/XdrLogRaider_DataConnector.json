@@ -2,81 +2,1629 @@
   "id": "XdrLogRaiderInternal",
   "title": "XdrLogRaider — Defender XDR Internal Telemetry",
   "publisher": "Community",
-  "descriptionMarkdown": "Ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance, identity, action center, threat analytics) that is not exposed by public Microsoft Graph Security or Microsoft 365 Defender / MDE public APIs.\n\n- **45 active data streams** grouped into 5 cadence tiers (fast 10m, exposure 1h, config 6h, inventory 1d, maintenance 1w) + 1 operational stream (Heartbeat) — **46 dataTypes on the connector card**; **47 custom tables** in your workspace (one deprecated stream's table is preserved for historical data and excluded from the card).\n- Per-stream typed columns at ingest via projection map; `RawJson` preserved alongside for forensic queries.\n- Drift detection via 4 cadence-bucket KQL parsers operating on typed-column bag (`pack_all() - metaCols`).\n- 7 workbooks (incl. Action Center for Device Timeline + Machine Actions), 14 analytic rules (ship disabled per Microsoft Sentinel best practice), 9 hunting queries.\n- Auth chain diagnostics in App Insights `customEvents` (AuthChain.* event names).\n- Unified Entra-layer auth (TOTP or Software Passkey) — single primitive for unattended production across all Microsoft 365 portals.\n- Multi-portal forward-compat foundation (Defender ships today; Entra, Purview, Intune planned).\n\nSee [repo README](https://github.com/akefallonitis/xdrlograider) for setup, deployment, permissions, and operator runbook.",
-  "graphQueriesTableName": "MDE_Heartbeat_CL",
+  "descriptionMarkdown": "Ingests Microsoft Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, posture, identity, action center, threat analytics) that is not exposed by public Microsoft Graph Security or Microsoft 365 Defender / MDE public APIs.\n\n- **58 active data streams + 1 deprecated** (59 total) grouped into 5 cadence tiers (fast 10m, exposure 1h, config 6h, inventory 1d, maintenance 1w) + 1 operational stream (XdrConnectorHealth_CL).\n- **11 consolidated workspace tables** (10 `Defender_<Category>_CL` per nathanmcnulty 10-category taxonomy + 1 ops table) ingested via 7 DCRs sharing 1 DCE.\n- Per-stream typed columns at ingest via DCR projection map; `RawJson` preserved on every row for forensic queries.\n- Drift detection via 4 cadence-bucket KQL parsers (Configuration, Inventory, Exposure, Maintenance) using `mv-apply set_union(CurrentFields, PreviousFields)` field-level diff.\n- **8 workbooks** (incl. ConnectorHealth with 9 panels: per-tier freshness, auth-chain failures, DLQ depth, freshness SLI, partial-success rate, service-account anomaly, per-stream workspace-side freshness).\n- **20 analytic rules** (14 detection + 6 XdrOps incl. RowVolumeSpike cost-budget gate) — all ship `enabled: false` per Microsoft Sentinel Solution best practice.\n- **9 hunting queries** + 4 drift parsers + **390 sample queries** (every active stream has 5-query operator anchor).\n- Auth chain diagnostics in AppInsights native tables (AppRequests + AppDependencies + AppExceptions + AppTraces + AppEvents + AppMetrics).\n- Unified Entra-layer auth (TOTP or Software Passkey) — single primitive for unattended production.\n- Pure Defender connector — single-tenant. Multi-portal expansion + Function App multi-tenancy reintroduced in v0.2.0.\n\nSee [repo README](https://github.com/akefallonitis/xdrlograider) for setup, deployment, permissions, and operator runbook.",
+  "graphQueriesTableName": "XdrConnectorHealth_CL",
   "graphQueries": [
     {
       "metricName": "Heartbeat (last 24h)",
       "legend": "XdrLogRaider heartbeats",
-      "baseQuery": "MDE_Heartbeat_CL | where TimeGenerated > ago(24h) | summarize count() by bin(TimeGenerated, 1h)"
+      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | summarize count() by bin(TimeGenerated, 1h)"
     }
   ],
   "sampleQueries": [
     {
-      "description": "Recent auth chain events (App Insights customEvents)",
-      "query": "customEvents | where name in ('AuthChain.AADSTSError', 'AuthChain.Completed') | order by timestamp desc | take 10"
+      "description": "Connector liveness — heartbeat in last 1h with stream success",
+      "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | order by TimeGenerated desc | take 10"
     },
     {
-      "description": "Heartbeat by tier, last 24h (including Rate429Count + GzipBytes from Notes)",
-      "query": "MDE_Heartbeat_CL | where TimeGenerated > ago(24h) | extend n = parse_json(Notes) | project TimeGenerated, Tier, FunctionName, StreamsSucceeded, StreamsAttempted, RowsIngested, LatencyMs, Rate429Count = toint(n.rate429Count), GzipBytes = tolong(n.gzipBytes)"
+      "description": "Heartbeat by tier with metrics from Notes",
+      "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | extend n = parse_json(Notes) | project TimeGenerated, Tier, FunctionName, StreamsSucceeded, StreamsAttempted, RowsIngested, LatencyMs, Rate429Count = toint(n.rate429Count), GzipBytes = tolong(n.gzipBytes)"
     },
     {
-      "description": "Suppression rules modified in the last 24h",
-      "query": "MDE_SuppressionRules_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, RawJson"
+      "description": "Auth chain events (App Insights customEvents)",
+      "query": "AppEvents | where Name in ('AuthChain.AADSTSError', 'AuthChain.Completed', 'AuthChain.Started') | order by TimeGenerated desc | take 20"
+    },
+    {
+      "description": "AppExceptions with AuthChain ErrorClass — root cause auth failures",
+      "query": "AppExceptions | where TimeGenerated > ago(24h) | where Properties.ErrorClass startswith 'AuthChain.' | summarize Count = count() by ProblemId = tostring(Properties.ErrorClass), AADSTSCode = tostring(Properties.AADSTSCode) | order by Count desc"
+    },
+    {
+      "description": "Durable Functions orchestration correlation per heartbeat",
+      "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(6h) | where isnotempty(OrchestrationInstanceId) | project TimeGenerated, FunctionName, Tier, OrchestrationInstanceId, DurableActivityCount, DurableActivitySuccessful, FunctionType"
+    },
+    {
+      "description": "Multi Tenant Operations - latest snapshots per source",
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Multi Tenant Operations - count per source stream (last 24h)",
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Multi Tenant Operations - field changes detected via parse_json(RawJson)",
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Multi Tenant Operations - distinct entities per source",
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Multi Tenant Operations - ingest freshness per source (gap from now)",
+      "query": "Defender_MultiTenantOperations_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "Configuration And Settings - latest snapshots per source",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Configuration And Settings - count per source stream (last 24h)",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Configuration And Settings - field changes detected via parse_json(RawJson)",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Configuration And Settings - distinct entities per source",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Configuration And Settings - ingest freshness per source (gap from now)",
+      "query": "Defender_ConfigurationAndSettings_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "Endpoint Device Management - latest snapshots per source",
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Endpoint Device Management - count per source stream (last 24h)",
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Endpoint Device Management - field changes detected via parse_json(RawJson)",
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Endpoint Device Management - distinct entities per source",
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Endpoint Device Management - ingest freshness per source (gap from now)",
+      "query": "Defender_EndpointDeviceManagement_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "Exposure Management - latest snapshots per source",
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Exposure Management - count per source stream (last 24h)",
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Exposure Management - field changes detected via parse_json(RawJson)",
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Exposure Management - distinct entities per source",
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Exposure Management - ingest freshness per source (gap from now)",
+      "query": "Defender_ExposureManagement_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "Streaming Api - latest snapshots per source",
+      "query": "Defender_StreamingApi_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Streaming Api - count per source stream (last 24h)",
+      "query": "Defender_StreamingApi_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Streaming Api - field changes detected via parse_json(RawJson)",
+      "query": "Defender_StreamingApi_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Streaming Api - distinct entities per source",
+      "query": "Defender_StreamingApi_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Streaming Api - ingest freshness per source (gap from now)",
+      "query": "Defender_StreamingApi_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "Threat Analytics - latest snapshots per source",
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Threat Analytics - count per source stream (last 24h)",
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Threat Analytics - field changes detected via parse_json(RawJson)",
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Threat Analytics - distinct entities per source",
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Threat Analytics - ingest freshness per source (gap from now)",
+      "query": "Defender_ThreatAnalytics_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "Vulnerability Management - latest snapshots per source",
+      "query": "Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Vulnerability Management - count per source stream (last 24h)",
+      "query": "Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Vulnerability Management - field changes detected via parse_json(RawJson)",
+      "query": "Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Vulnerability Management - distinct entities per source",
+      "query": "Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Vulnerability Management - ingest freshness per source (gap from now)",
+      "query": "Defender_VulnerabilityManagement_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "Identity Protection - latest snapshots per source",
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Identity Protection - count per source stream (last 24h)",
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Identity Protection - field changes detected via parse_json(RawJson)",
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Identity Protection - distinct entities per source",
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Identity Protection - ingest freshness per source (gap from now)",
+      "query": "Defender_IdentityProtection_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "Action Center - latest snapshots per source",
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Action Center - count per source stream (last 24h)",
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Action Center - field changes detected via parse_json(RawJson)",
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Action Center - distinct entities per source",
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Action Center - ingest freshness per source (gap from now)",
+      "query": "Defender_ActionCenter_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "Endpoint Configuration - latest snapshots per source",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by SourceName, EntityId | take 50"
+    },
+    {
+      "description": "Endpoint Configuration - count per source stream (last 24h)",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | summarize Count = count(), Latest = max(TimeGenerated) by SourceName | order by Count desc"
+    },
+    {
+      "description": "Endpoint Configuration - field changes detected via parse_json(RawJson)",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | extend Raw = parse_json(RawJson) | project TimeGenerated, SourceName, EntityId, Raw | take 100"
+    },
+    {
+      "description": "Endpoint Configuration - distinct entities per source",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | summarize EntityCount = dcount(EntityId), Streams = make_set(SourceName) by SourceName | order by EntityCount desc"
+    },
+    {
+      "description": "Endpoint Configuration - ingest freshness per source (gap from now)",
+      "query": "Defender_EndpointConfiguration_CL | summarize LastSeen = max(TimeGenerated) by SourceName | extend AgeMinutes = datetime_diff('minute', now(), LastSeen) | order by AgeMinutes desc"
+    },
+    {
+      "description": "MDE_Drift_Configuration — all changes (last 7d default lookback)",
+      "query": "MDE_Drift_Configuration() | order by TimeGenerated desc | take 100"
+    },
+    {
+      "description": "MDE_Drift_Configuration — changes by SourceName (top 10)",
+      "query": "MDE_Drift_Configuration() | summarize ChangeCount = count() by StreamName | order by ChangeCount desc | take 10"
+    },
+    {
+      "description": "MDE_Drift_Configuration — changes by EntityId (top 20)",
+      "query": "MDE_Drift_Configuration() | summarize ChangeCount = count() by EntityId, StreamName | order by ChangeCount desc | take 20"
+    },
+    {
+      "description": "MDE_Drift_Configuration — changes by ChangeType (Added/Removed/Modified)",
+      "query": "MDE_Drift_Configuration() | summarize Count = count() by ChangeType, StreamName | order by Count desc"
+    },
+    {
+      "description": "MDE_Drift_Configuration — most-changed fields",
+      "query": "MDE_Drift_Configuration() | summarize ChangeCount = count() by FieldName, StreamName | order by ChangeCount desc | take 30"
+    },
+    {
+      "description": "MDE_Drift_Inventory — all changes (last 7d default lookback)",
+      "query": "MDE_Drift_Inventory() | order by TimeGenerated desc | take 100"
+    },
+    {
+      "description": "MDE_Drift_Inventory — changes by SourceName (top 10)",
+      "query": "MDE_Drift_Inventory() | summarize ChangeCount = count() by StreamName | order by ChangeCount desc | take 10"
+    },
+    {
+      "description": "MDE_Drift_Inventory — changes by EntityId (top 20)",
+      "query": "MDE_Drift_Inventory() | summarize ChangeCount = count() by EntityId, StreamName | order by ChangeCount desc | take 20"
+    },
+    {
+      "description": "MDE_Drift_Inventory — changes by ChangeType (Added/Removed/Modified)",
+      "query": "MDE_Drift_Inventory() | summarize Count = count() by ChangeType, StreamName | order by Count desc"
+    },
+    {
+      "description": "MDE_Drift_Inventory — most-changed fields",
+      "query": "MDE_Drift_Inventory() | summarize ChangeCount = count() by FieldName, StreamName | order by ChangeCount desc | take 30"
+    },
+    {
+      "description": "MDE_Drift_Exposure — all changes (last 7d default lookback)",
+      "query": "MDE_Drift_Exposure() | order by TimeGenerated desc | take 100"
+    },
+    {
+      "description": "MDE_Drift_Exposure — changes by SourceName (top 10)",
+      "query": "MDE_Drift_Exposure() | summarize ChangeCount = count() by StreamName | order by ChangeCount desc | take 10"
+    },
+    {
+      "description": "MDE_Drift_Exposure — changes by EntityId (top 20)",
+      "query": "MDE_Drift_Exposure() | summarize ChangeCount = count() by EntityId, StreamName | order by ChangeCount desc | take 20"
+    },
+    {
+      "description": "MDE_Drift_Exposure — changes by ChangeType (Added/Removed/Modified)",
+      "query": "MDE_Drift_Exposure() | summarize Count = count() by ChangeType, StreamName | order by Count desc"
+    },
+    {
+      "description": "MDE_Drift_Exposure — most-changed fields",
+      "query": "MDE_Drift_Exposure() | summarize ChangeCount = count() by FieldName, StreamName | order by ChangeCount desc | take 30"
+    },
+    {
+      "description": "MDE_Drift_Maintenance — all changes (last 7d default lookback)",
+      "query": "MDE_Drift_Maintenance() | order by TimeGenerated desc | take 100"
+    },
+    {
+      "description": "MDE_Drift_Maintenance — changes by SourceName (top 10)",
+      "query": "MDE_Drift_Maintenance() | summarize ChangeCount = count() by StreamName | order by ChangeCount desc | take 10"
+    },
+    {
+      "description": "MDE_Drift_Maintenance — changes by EntityId (top 20)",
+      "query": "MDE_Drift_Maintenance() | summarize ChangeCount = count() by EntityId, StreamName | order by ChangeCount desc | take 20"
+    },
+    {
+      "description": "MDE_Drift_Maintenance — changes by ChangeType (Added/Removed/Modified)",
+      "query": "MDE_Drift_Maintenance() | summarize Count = count() by ChangeType, StreamName | order by Count desc"
+    },
+    {
+      "description": "MDE_Drift_Maintenance — most-changed fields",
+      "query": "MDE_Drift_Maintenance() | summarize ChangeCount = count() by FieldName, StreamName | order by ChangeCount desc | take 30"
+    },
+    {
+      "description": "DLQ depth alert — entries by stream",
+      "query": "AppMetrics | where TimeGenerated > ago(24h) | where Name == 'xdr.dlq.depth' | summarize MaxDepth = max(Value), AvgDepth = avg(Value) by Stream = tostring(Properties.Stream)"
+    },
+    {
+      "description": "DLQ TTL evictions",
+      "query": "AppMetrics | where TimeGenerated > ago(7d) | where Name == 'xdr.dlq.ttl_evicted_count' | summarize TotalEvictions = sum(Value) by bin(TimeGenerated, 1d)"
+    },
+    {
+      "description": "Ingest row success rate (D'.20 metric)",
+      "query": "AppMetrics | where TimeGenerated > ago(24h) | where Name == 'xdr.ingest.row_success_rate' | summarize AvgSuccess = avg(Value) by bin(TimeGenerated, 1h)"
+    },
+    {
+      "description": "Ingest row age — freshness SLI",
+      "query": "AppMetrics | where TimeGenerated > ago(24h) | where Name == 'xdr.ingest.row_age_seconds' | summarize MaxAge = max(Value), AvgAge = avg(Value) by bin(TimeGenerated, 1h), Stream = tostring(Properties.Stream)"
+    },
+    {
+      "description": "Auth chain step duration metric (Phase J D'.4)",
+      "query": "AppMetrics | where TimeGenerated > ago(24h) | where Name == 'xdr.auth.chain_step_duration_ms' | summarize AvgMs = avg(Value), P95Ms = percentile(Value, 95) by bin(TimeGenerated, 1h), Step = tostring(Properties.Step)"
+    },
+    {
+      "description": "Stream poll duration distribution",
+      "query": "AppMetrics | where TimeGenerated > ago(24h) | where Name == 'xdr.stream.poll_duration_ms' | summarize MaxMs = max(Value), P95Ms = percentile(Value, 95), AvgMs = avg(Value) by Stream = tostring(Properties.Stream) | order by MaxMs desc"
+    },
+    {
+      "description": "Rate-limit (429) pressure per stream",
+      "query": "AppMetrics | where TimeGenerated > ago(24h) | where Name == 'xdr.portal.rate429_count' | summarize Total429 = sum(Value) by Stream = tostring(Properties.Stream) | order by Total429 desc"
+    },
+    {
+      "description": "AuthChain.RateLimited events (operator alert source)",
+      "query": "AppEvents | where TimeGenerated > ago(24h) | where Name == 'AuthChain.RateLimited' | project TimeGenerated, RetryAttempt = tostring(Properties.RetryAttempt), RetryAfterMs = toint(Properties.RetryAfterMs), Outcome = tostring(Properties.Outcome) | order by TimeGenerated desc"
+    },
+    {
+      "description": "Stale streams - no rows in expected cadence × 2 window",
+      "query": "let staleThreshold = 60min; XdrConnectorHealth_CL | where TimeGenerated > ago(2h) | where Tier != 'Heartbeat' | summarize LastSeen = max(TimeGenerated) by Tier, FunctionName | extend AgeMin = datetime_diff('minute', now(), LastSeen) | where AgeMin > 60"
+    },
+    {
+      "description": "Connector startup exceptions (after FA cold start)",
+      "query": "AppExceptions | where TimeGenerated > ago(1h) | where ProblemId contains 'startup' or OuterMessage contains 'cold-start' | project TimeGenerated, ProblemId, Type, OuterMessage"
+    },
+    {
+      "description": "Heartbeat with fatalError notes (catastrophic per-tier failures)",
+      "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | extend n = parse_json(Notes) | where isnotempty(n.fatalError) | project TimeGenerated, FunctionName, Tier, FatalError = tostring(n.fatalError)"
+    },
+    {
+      "description": "Per-poll stream success rate (StreamsSucceeded/StreamsAttempted)",
+      "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | where Tier != 'Heartbeat' | extend SuccessRate = todouble(StreamsSucceeded) / todouble(StreamsAttempted) | summarize AvgSuccess = avg(SuccessRate) by Tier"
+    },
+    {
+      "description": "Auth-chain steps slower than expected baseline",
+      "query": "AppMetrics | where TimeGenerated > ago(24h) | where Name == 'xdr.auth.chain_step_duration_ms' | extend Step = tostring(Properties.Step), DurationSec = todouble(Value) / 1000.0 | where DurationSec > 10 | project TimeGenerated, Step, DurationSec | order by DurationSec desc"
+    },
+    {
+      "description": "AppDependencies — portal HTTPS call failures",
+      "query": "AppDependencies | where TimeGenerated > ago(24h) | where Target contains 'security.microsoft.com' | where Success == false | summarize FailureCount = count(), LastFailure = max(TimeGenerated) by Target, Name | order by FailureCount desc"
+    },
+    {
+      "description": "AppRequests — function invocation success rate",
+      "query": "AppRequests | where TimeGenerated > ago(24h) | summarize Total = count(), Failures = countif(Success == false), SuccessRate = (countif(Success == true) * 100.0) / count() by Name | order by SuccessRate asc"
+    },
+    {
+      "description": "Custom drift parser — config tier with tight window",
+      "query": "MDE_Drift_Configuration(7d, 1h) | where StreamName == 'MDE_AlertTuning_CL' | order by TimeGenerated desc"
+    },
+    {
+      "description": "Multi-parser union — all tier drift events",
+      "query": "union (MDE_Drift_Configuration()), (MDE_Drift_Inventory()), (MDE_Drift_Exposure()), (MDE_Drift_Maintenance()) | summarize Count = count() by ChangeType, StreamName"
+    },
+    {
+      "description": "Inventory drift filtered by entity",
+      "query": "MDE_Drift_Inventory(14d, 1d) | where EntityId contains 'admin' | take 50"
+    },
+    {
+      "description": "Maintenance tier — DataExportSettings changes (rare)",
+      "query": "MDE_Drift_Maintenance() | where StreamName == 'MDE_DataExportSettings_CL'"
+    },
+    {
+      "description": "Exposure tier - XSPM attack-path drift",
+      "query": "MDE_Drift_Exposure() | where StreamName contains 'XspmAttackPaths' | order by TimeGenerated desc"
+    },
+    {
+      "description": "Drift count by ChangeType + day",
+      "query": "MDE_Drift_Configuration() | summarize Count = count() by ChangeType, bin(TimeGenerated, 1d)"
+    },
+    {
+      "description": "Drift over arbitrary lookback (parameterized)",
+      "query": "MDE_Drift_Configuration(30d, 1h) | where ChangeType == 'Added' | take 100"
+    },
+    {
+      "description": "Compare current vs previous values for given EntityId",
+      "query": "MDE_Drift_Inventory() | where EntityId == 'YOUR-ENTITY-ID' | project TimeGenerated, FieldName, OldValue, NewValue, ChangeType"
+    },
+    {
+      "description": "Top-changed entities across all tiers",
+      "query": "union (MDE_Drift_Configuration()), (MDE_Drift_Inventory()), (MDE_Drift_Exposure()), (MDE_Drift_Maintenance()) | summarize ChangeCount = count() by EntityId, StreamName | order by ChangeCount desc | take 20"
+    },
+    {
+      "description": "Field-level removed-since-baseline (potential rollback signal)",
+      "query": "MDE_Drift_Configuration() | where ChangeType == 'Removed' | summarize Count = count() by FieldName, StreamName | order by Count desc | take 30"
+    },
+    {
+      "description": "MDE_AdvancedFeatures_CL - latest snapshot per entity",
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_AdvancedFeatures_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50"
+    },
+    {
+      "description": "MDE_AdvancedFeatures_CL - row count over last 7d",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AdvancedFeatures_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_AdvancedFeatures_CL - distinct entities per day",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AdvancedFeatures_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_AdvancedFeatures_CL - field-level diff (raw JSON inspection)",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AdvancedFeatures_CL' | extend Raw = parse_json(RawJson) | take 20"
+    },
+    {
+      "description": "MDE_AdvancedFeatures_CL - freshness gap (last seen)",
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_AdvancedFeatures_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)"
+    },
+    {
+      "description": "MDE_AlertTuning_CL - latest snapshot per entity",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_AlertTuning_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50"
+    },
+    {
+      "description": "MDE_AlertTuning_CL - row count over last 7d",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AlertTuning_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_AlertTuning_CL - distinct entities per day",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AlertTuning_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_AlertTuning_CL - field-level diff (raw JSON inspection)",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AlertTuning_CL' | extend Raw = parse_json(RawJson) | take 20"
+    },
+    {
+      "description": "MDE_AlertTuning_CL - freshness gap (last seen)",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_AlertTuning_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)"
+    },
+    {
+      "description": "MDE_SuppressionRules_CL - latest snapshot per entity",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_SuppressionRules_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50"
+    },
+    {
+      "description": "MDE_SuppressionRules_CL - row count over last 7d",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_SuppressionRules_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_SuppressionRules_CL - distinct entities per day",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_SuppressionRules_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_SuppressionRules_CL - field-level diff (raw JSON inspection)",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_SuppressionRules_CL' | extend Raw = parse_json(RawJson) | take 20"
+    },
+    {
+      "description": "MDE_SuppressionRules_CL - freshness gap (last seen)",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_SuppressionRules_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)"
+    },
+    {
+      "description": "MDE_LiveResponseConfig_CL - latest snapshot per entity",
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_LiveResponseConfig_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50"
+    },
+    {
+      "description": "MDE_LiveResponseConfig_CL - row count over last 7d",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_LiveResponseConfig_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_LiveResponseConfig_CL - distinct entities per day",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_LiveResponseConfig_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_LiveResponseConfig_CL - field-level diff (raw JSON inspection)",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_LiveResponseConfig_CL' | extend Raw = parse_json(RawJson) | take 20"
+    },
+    {
+      "description": "MDE_LiveResponseConfig_CL - freshness gap (last seen)",
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_LiveResponseConfig_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)"
+    },
+    {
+      "description": "MDE_AntivirusPolicy_CL - latest snapshot per entity",
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_AntivirusPolicy_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50"
+    },
+    {
+      "description": "MDE_AntivirusPolicy_CL - row count over last 7d",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AntivirusPolicy_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_AntivirusPolicy_CL - distinct entities per day",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AntivirusPolicy_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_AntivirusPolicy_CL - field-level diff (raw JSON inspection)",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AntivirusPolicy_CL' | extend Raw = parse_json(RawJson) | take 20"
+    },
+    {
+      "description": "MDE_AntivirusPolicy_CL - freshness gap (last seen)",
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_AntivirusPolicy_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)"
+    },
+    {
+      "description": "MDE_PUAConfig_CL - latest snapshot per entity",
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_PUAConfig_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50"
+    },
+    {
+      "description": "MDE_PUAConfig_CL - row count over last 7d",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PUAConfig_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_PUAConfig_CL - distinct entities per day",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PUAConfig_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_PUAConfig_CL - field-level diff (raw JSON inspection)",
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_PUAConfig_CL' | extend Raw = parse_json(RawJson) | take 20"
+    },
+    {
+      "description": "MDE_PUAConfig_CL - freshness gap (last seen)",
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_PUAConfig_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)"
+    },
+    {
+      "description": "MDE_TenantAllowBlock_CL - latest snapshot per entity",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_TenantAllowBlock_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50"
+    },
+    {
+      "description": "MDE_TenantAllowBlock_CL - row count over last 7d",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_TenantAllowBlock_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_TenantAllowBlock_CL - distinct entities per day",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_TenantAllowBlock_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_TenantAllowBlock_CL - field-level diff (raw JSON inspection)",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_TenantAllowBlock_CL' | extend Raw = parse_json(RawJson) | take 20"
+    },
+    {
+      "description": "MDE_TenantAllowBlock_CL - freshness gap (last seen)",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_TenantAllowBlock_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)"
+    },
+    {
+      "description": "MDE_RbacDeviceGroups_CL - latest snapshot per entity",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_RbacDeviceGroups_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50"
+    },
+    {
+      "description": "MDE_RbacDeviceGroups_CL - row count over last 7d",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_RbacDeviceGroups_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_RbacDeviceGroups_CL - distinct entities per day",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_RbacDeviceGroups_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_RbacDeviceGroups_CL - field-level diff (raw JSON inspection)",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_RbacDeviceGroups_CL' | extend Raw = parse_json(RawJson) | take 20"
+    },
+    {
+      "description": "MDE_RbacDeviceGroups_CL - freshness gap (last seen)",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_RbacDeviceGroups_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)"
+    },
+    {
+      "description": "MDE_UnifiedRbacRoles_CL - latest snapshot per entity",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_UnifiedRbacRoles_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50"
+    },
+    {
+      "description": "MDE_UnifiedRbacRoles_CL - row count over last 7d",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_UnifiedRbacRoles_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_UnifiedRbacRoles_CL - distinct entities per day",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_UnifiedRbacRoles_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc"
+    },
+    {
+      "description": "MDE_UnifiedRbacRoles_CL - field-level diff (raw JSON inspection)",
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_UnifiedRbacRoles_CL' | extend Raw = parse_json(RawJson) | take 20"
+    },
+    {
+      "description": "MDE_UnifiedRbacRoles_CL - freshness gap (last seen)",
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_UnifiedRbacRoles_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_AssetClassificationSchema_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_AssetClassificationSchema_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AssetClassificationSchema_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AssetClassificationSchema_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AssetClassificationSchema_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AssetClassificationSchema_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AssetClassificationSchema_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_AssetClassificationSchema_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_AssetClassificationSchema_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_AssetClassificationSchema_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_PostureInitiativesSummarized_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_PostureInitiativesSummarized_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PostureInitiativesSummarized_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PostureInitiativesSummarized_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PostureInitiativesSummarized_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PostureInitiativesSummarized_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_PostureInitiativesSummarized_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_PostureInitiativesSummarized_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_PostureInitiativesSummarized_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_PostureInitiativesSummarized_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_PostureMetrics_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_PostureMetrics_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PostureMetrics_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PostureMetrics_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PostureMetrics_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PostureMetrics_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_PostureMetrics_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_PostureMetrics_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_PostureMetrics_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_PostureMetrics_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_AppsSecureScore_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_AppsSecureScore_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AppsSecureScore_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AppsSecureScore_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AppsSecureScore_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AppsSecureScore_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AppsSecureScore_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_AppsSecureScore_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_AppsSecureScore_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_AppsSecureScore_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_DataSecureScore_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_DataSecureScore_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DataSecureScore_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DataSecureScore_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DataSecureScore_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DataSecureScore_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_DataSecureScore_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_DataSecureScore_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_DataSecureScore_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_DataSecureScore_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_IdentitySecureScore_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_IdentitySecureScore_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IdentitySecureScore_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IdentitySecureScore_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IdentitySecureScore_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IdentitySecureScore_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_IdentitySecureScore_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_IdentitySecureScore_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_IdentitySecureScore_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_IdentitySecureScore_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_PostureSecurityEvents_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_PostureSecurityEvents_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PostureSecurityEvents_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PostureSecurityEvents_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PostureSecurityEvents_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PostureSecurityEvents_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_PostureSecurityEvents_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_PostureSecurityEvents_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_PostureSecurityEvents_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_PostureSecurityEvents_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_PostureTenants_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_PostureTenants_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PostureTenants_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PostureTenants_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PostureTenants_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PostureTenants_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_PostureTenants_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_PostureTenants_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_PostureTenants_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_PostureTenants_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_AttackSurfaceAttackPaths_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_AttackSurfaceAttackPaths_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AttackSurfaceAttackPaths_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AttackSurfaceAttackPaths_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AttackSurfaceAttackPaths_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AttackSurfaceAttackPaths_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AttackSurfaceAttackPaths_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_AttackSurfaceAttackPaths_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_AttackSurfaceAttackPaths_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_AttackSurfaceAttackPaths_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_AttackSurfaceChokepoints_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_AttackSurfaceChokepoints_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AttackSurfaceChokepoints_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AttackSurfaceChokepoints_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AttackSurfaceChokepoints_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AttackSurfaceChokepoints_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AttackSurfaceChokepoints_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_AttackSurfaceChokepoints_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_AttackSurfaceChokepoints_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_AttackSurfaceChokepoints_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmConnectors_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_XspmConnectors_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmConnectors_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmConnectors_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmConnectors_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmConnectors_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_XspmConnectors_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_XspmConnectors_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmConnectors_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_XspmConnectors_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where SourceName == 'MDE_ThreatAnalyticsEnriched_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_ThreatAnalyticsEnriched_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ThreatAnalyticsEnriched_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ThreatAnalyticsEnriched_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ThreatAnalyticsEnriched_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ThreatAnalyticsEnriched_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_ThreatAnalyticsEnriched_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_ThreatAnalyticsEnriched_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where SourceName == 'MDE_ThreatAnalyticsEnriched_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_ThreatAnalyticsEnriched_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where SourceName == 'MDE_ThreatAnalyticsTopThreats_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_ThreatAnalyticsTopThreats_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ThreatAnalyticsTopThreats_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ThreatAnalyticsTopThreats_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ThreatAnalyticsTopThreats_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ThreatAnalyticsTopThreats_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_ThreatAnalyticsTopThreats_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_ThreatAnalyticsTopThreats_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where SourceName == 'MDE_ThreatAnalyticsTopThreats_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_ThreatAnalyticsTopThreats_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_PreviewFeatures_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_PreviewFeatures_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PreviewFeatures_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PreviewFeatures_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PreviewFeatures_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PreviewFeatures_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_PreviewFeatures_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_PreviewFeatures_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_PreviewFeatures_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_PreviewFeatures_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_AlertServiceConfig_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_AlertServiceConfig_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AlertServiceConfig_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AlertServiceConfig_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AlertServiceConfig_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AlertServiceConfig_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AlertServiceConfig_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_AlertServiceConfig_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_AlertServiceConfig_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_AlertServiceConfig_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_CustomDetections_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_CustomDetections_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_CustomDetections_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_CustomDetections_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_CustomDetections_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_CustomDetections_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_CustomDetections_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_CustomDetections_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_CustomDetections_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_CustomDetections_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_DeviceControlPolicy_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_DeviceControlPolicy_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DeviceControlPolicy_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DeviceControlPolicy_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DeviceControlPolicy_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DeviceControlPolicy_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_DeviceControlPolicy_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_DeviceControlPolicy_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_DeviceControlPolicy_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_DeviceControlPolicy_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_WebContentFiltering_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_WebContentFiltering_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_WebContentFiltering_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_WebContentFiltering_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_WebContentFiltering_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_WebContentFiltering_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_WebContentFiltering_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_WebContentFiltering_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_WebContentFiltering_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_WebContentFiltering_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_SmartScreenConfig_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_SmartScreenConfig_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_SmartScreenConfig_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_SmartScreenConfig_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_SmartScreenConfig_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_SmartScreenConfig_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_SmartScreenConfig_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_SmartScreenConfig_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_SmartScreenConfig_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_SmartScreenConfig_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_AuthenticatedTelemetry_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_AuthenticatedTelemetry_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AuthenticatedTelemetry_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AuthenticatedTelemetry_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AuthenticatedTelemetry_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AuthenticatedTelemetry_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AuthenticatedTelemetry_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_AuthenticatedTelemetry_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_AuthenticatedTelemetry_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_AuthenticatedTelemetry_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_CustomCollection_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_CustomCollection_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_CustomCollection_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_CustomCollection_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_CustomCollection_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_CustomCollection_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_CustomCollection_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_CustomCollection_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_CustomCollection_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_CustomCollection_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_StreamingApi_CL | where SourceName == 'MDE_DataExportSettings_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_DataExportSettings_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_StreamingApi_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DataExportSettings_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DataExportSettings_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_StreamingApi_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DataExportSettings_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DataExportSettings_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_StreamingApi_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_DataExportSettings_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_DataExportSettings_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_StreamingApi_CL | where SourceName == 'MDE_DataExportSettings_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_DataExportSettings_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_ConnectedApps_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_ConnectedApps_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ConnectedApps_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ConnectedApps_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ConnectedApps_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ConnectedApps_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_ConnectedApps_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_ConnectedApps_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_ConnectedApps_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_ConnectedApps_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where SourceName == 'MDE_TenantContext_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_TenantContext_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_TenantContext_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_TenantContext_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_TenantContext_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_TenantContext_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_TenantContext_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_TenantContext_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where SourceName == 'MDE_TenantContext_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_TenantContext_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where SourceName == 'MDE_TenantWorkloadStatus_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_TenantWorkloadStatus_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_TenantWorkloadStatus_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_TenantWorkloadStatus_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_TenantWorkloadStatus_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_TenantWorkloadStatus_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_TenantWorkloadStatus_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_TenantWorkloadStatus_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where SourceName == 'MDE_TenantWorkloadStatus_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_TenantWorkloadStatus_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_IntuneConnection_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_IntuneConnection_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IntuneConnection_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IntuneConnection_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IntuneConnection_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IntuneConnection_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_IntuneConnection_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_IntuneConnection_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_IntuneConnection_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_IntuneConnection_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_PurviewSharing_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_PurviewSharing_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PurviewSharing_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PurviewSharing_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_PurviewSharing_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_PurviewSharing_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_PurviewSharing_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_PurviewSharing_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_PurviewSharing_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_PurviewSharing_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_AssetRules_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_AssetRules_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AssetRules_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AssetRules_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_AssetRules_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_AssetRules_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_AssetRules_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_AssetRules_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_AssetRules_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_AssetRules_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_SAClassification_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_SAClassification_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_SAClassification_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_SAClassification_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_SAClassification_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_SAClassification_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_SAClassification_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_SAClassification_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_SAClassification_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_SAClassification_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmInitiatives_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_XspmInitiatives_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmInitiatives_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmInitiatives_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmInitiatives_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmInitiatives_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_XspmInitiatives_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_XspmInitiatives_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmInitiatives_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_XspmInitiatives_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_ExposureSnapshots_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_ExposureSnapshots_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ExposureSnapshots_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ExposureSnapshots_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ExposureSnapshots_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ExposureSnapshots_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_ExposureSnapshots_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_ExposureSnapshots_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_ExposureSnapshots_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_ExposureSnapshots_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_ExposureRecommendations_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_ExposureRecommendations_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ExposureRecommendations_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ExposureRecommendations_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ExposureRecommendations_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ExposureRecommendations_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_ExposureRecommendations_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_ExposureRecommendations_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_ExposureRecommendations_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_ExposureRecommendations_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmAttackPaths_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_XspmAttackPaths_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmAttackPaths_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmAttackPaths_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmAttackPaths_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmAttackPaths_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_XspmAttackPaths_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_XspmAttackPaths_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmAttackPaths_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_XspmAttackPaths_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmChokePoints_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_XspmChokePoints_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmChokePoints_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmChokePoints_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmChokePoints_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmChokePoints_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_XspmChokePoints_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_XspmChokePoints_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmChokePoints_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_XspmChokePoints_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmTopTargets_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_XspmTopTargets_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmTopTargets_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmTopTargets_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_XspmTopTargets_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_XspmTopTargets_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_XspmTopTargets_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_XspmTopTargets_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmTopTargets_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_XspmTopTargets_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_VulnerabilityManagement_CL | where SourceName == 'MDE_SecurityBaselines_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_SecurityBaselines_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_SecurityBaselines_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_SecurityBaselines_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_SecurityBaselines_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_SecurityBaselines_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_SecurityBaselines_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_SecurityBaselines_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_VulnerabilityManagement_CL | where SourceName == 'MDE_SecurityBaselines_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_SecurityBaselines_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_IdentityOnboarding_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_IdentityOnboarding_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IdentityOnboarding_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IdentityOnboarding_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IdentityOnboarding_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IdentityOnboarding_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_IdentityOnboarding_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_IdentityOnboarding_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_IdentityOnboarding_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_IdentityOnboarding_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_IdentityServiceAccounts_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_IdentityServiceAccounts_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IdentityServiceAccounts_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IdentityServiceAccounts_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IdentityServiceAccounts_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IdentityServiceAccounts_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_IdentityServiceAccounts_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_IdentityServiceAccounts_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_IdentityServiceAccounts_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_IdentityServiceAccounts_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_DCCoverage_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_DCCoverage_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DCCoverage_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DCCoverage_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DCCoverage_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DCCoverage_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_DCCoverage_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_DCCoverage_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_DCCoverage_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_DCCoverage_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_IdentityAlertThresholds_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_IdentityAlertThresholds_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IdentityAlertThresholds_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IdentityAlertThresholds_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_IdentityAlertThresholds_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_IdentityAlertThresholds_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_IdentityAlertThresholds_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_IdentityAlertThresholds_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_IdentityAlertThresholds_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_IdentityAlertThresholds_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_RemediationAccounts_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_RemediationAccounts_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_RemediationAccounts_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_RemediationAccounts_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_RemediationAccounts_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_RemediationAccounts_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_RemediationAccounts_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_RemediationAccounts_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_RemediationAccounts_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_RemediationAccounts_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_ActionCenter_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_ActionCenter_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ActionCenter_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ActionCenter_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ActionCenter_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ActionCenter_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_ActionCenter_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_ActionCenter_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_ActionCenter_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_ActionCenter_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where SourceName == 'MDE_ThreatAnalytics_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_ThreatAnalytics_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ThreatAnalytics_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ThreatAnalytics_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_ThreatAnalytics_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_ThreatAnalytics_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_ThreatAnalytics_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_ThreatAnalytics_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ThreatAnalytics_CL | where SourceName == 'MDE_ThreatAnalytics_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_ThreatAnalytics_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_UserPreferences_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_UserPreferences_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_UserPreferences_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_UserPreferences_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_UserPreferences_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_UserPreferences_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_UserPreferences_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_UserPreferences_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_UserPreferences_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_UserPreferences_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where SourceName == 'MDE_MtoTenants_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_MtoTenants_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_MtoTenants_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_MtoTenants_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_MtoTenants_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_MtoTenants_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_MtoTenants_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_MtoTenants_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_MultiTenantOperations_CL | where SourceName == 'MDE_MtoTenants_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_MtoTenants_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where SourceName == 'MDE_LicenseReport_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_LicenseReport_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_LicenseReport_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_LicenseReport_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_LicenseReport_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_LicenseReport_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_LicenseReport_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_LicenseReport_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where SourceName == 'MDE_LicenseReport_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_LicenseReport_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_CloudAppsConfig_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_CloudAppsConfig_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_CloudAppsConfig_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_CloudAppsConfig_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_CloudAppsConfig_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_CloudAppsConfig_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_CloudAppsConfig_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_CloudAppsConfig_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_CloudAppsConfig_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_CloudAppsConfig_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where SourceName == 'MDE_DeviceTimeline_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_DeviceTimeline_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DeviceTimeline_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DeviceTimeline_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_DeviceTimeline_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_DeviceTimeline_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_DeviceTimeline_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_DeviceTimeline_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_EndpointDeviceManagement_CL | where SourceName == 'MDE_DeviceTimeline_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_DeviceTimeline_CL - freshness gap (last seen)"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_MachineActions_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
+      "description": "MDE_MachineActions_CL - latest snapshot per entity"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_MachineActions_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_MachineActions_CL - row count over last 7d"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_MachineActions_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
+      "description": "MDE_MachineActions_CL - distinct entities per day"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_MachineActions_CL' | extend Raw = parse_json(RawJson) | take 20",
+      "description": "MDE_MachineActions_CL - field-level diff (raw JSON inspection)"
+    },
+    {
+      "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_MachineActions_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
+      "description": "MDE_MachineActions_CL - freshness gap (last seen)"
     }
   ],
   "dataTypes": [
-    { "name": "MDE_Heartbeat_CL",                "lastDataReceivedQuery": "MDE_Heartbeat_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_AdvancedFeatures_CL",         "lastDataReceivedQuery": "MDE_AdvancedFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_PreviewFeatures_CL",          "lastDataReceivedQuery": "MDE_PreviewFeatures_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_AlertServiceConfig_CL",       "lastDataReceivedQuery": "MDE_AlertServiceConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_AlertTuning_CL",              "lastDataReceivedQuery": "MDE_AlertTuning_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_SuppressionRules_CL",         "lastDataReceivedQuery": "MDE_SuppressionRules_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_CustomDetections_CL",         "lastDataReceivedQuery": "MDE_CustomDetections_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_DeviceControlPolicy_CL",      "lastDataReceivedQuery": "MDE_DeviceControlPolicy_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_WebContentFiltering_CL",      "lastDataReceivedQuery": "MDE_WebContentFiltering_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_SmartScreenConfig_CL",        "lastDataReceivedQuery": "MDE_SmartScreenConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_LiveResponseConfig_CL",       "lastDataReceivedQuery": "MDE_LiveResponseConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_AuthenticatedTelemetry_CL",   "lastDataReceivedQuery": "MDE_AuthenticatedTelemetry_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_PUAConfig_CL",                "lastDataReceivedQuery": "MDE_PUAConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_AntivirusPolicy_CL",          "lastDataReceivedQuery": "MDE_AntivirusPolicy_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_TenantAllowBlock_CL",         "lastDataReceivedQuery": "MDE_TenantAllowBlock_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_CustomCollection_CL",         "lastDataReceivedQuery": "MDE_CustomCollection_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_DataExportSettings_CL",       "lastDataReceivedQuery": "MDE_DataExportSettings_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_ConnectedApps_CL",            "lastDataReceivedQuery": "MDE_ConnectedApps_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_TenantContext_CL",            "lastDataReceivedQuery": "MDE_TenantContext_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_TenantWorkloadStatus_CL",     "lastDataReceivedQuery": "MDE_TenantWorkloadStatus_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_DeviceTimeline_CL",           "lastDataReceivedQuery": "MDE_DeviceTimeline_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_IntuneConnection_CL",         "lastDataReceivedQuery": "MDE_IntuneConnection_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_PurviewSharing_CL",           "lastDataReceivedQuery": "MDE_PurviewSharing_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_RbacDeviceGroups_CL",         "lastDataReceivedQuery": "MDE_RbacDeviceGroups_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_UnifiedRbacRoles_CL",         "lastDataReceivedQuery": "MDE_UnifiedRbacRoles_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_AssetRules_CL",               "lastDataReceivedQuery": "MDE_AssetRules_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_SAClassification_CL",         "lastDataReceivedQuery": "MDE_SAClassification_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_XspmInitiatives_CL",          "lastDataReceivedQuery": "MDE_XspmInitiatives_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_ExposureSnapshots_CL",        "lastDataReceivedQuery": "MDE_ExposureSnapshots_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_ExposureRecommendations_CL",  "lastDataReceivedQuery": "MDE_ExposureRecommendations_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_XspmAttackPaths_CL",          "lastDataReceivedQuery": "MDE_XspmAttackPaths_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_XspmChokePoints_CL",          "lastDataReceivedQuery": "MDE_XspmChokePoints_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_XspmTopTargets_CL",           "lastDataReceivedQuery": "MDE_XspmTopTargets_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_SecurityBaselines_CL",        "lastDataReceivedQuery": "MDE_SecurityBaselines_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_IdentityOnboarding_CL",       "lastDataReceivedQuery": "MDE_IdentityOnboarding_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_IdentityServiceAccounts_CL",  "lastDataReceivedQuery": "MDE_IdentityServiceAccounts_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_DCCoverage_CL",               "lastDataReceivedQuery": "MDE_DCCoverage_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_IdentityAlertThresholds_CL",  "lastDataReceivedQuery": "MDE_IdentityAlertThresholds_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_RemediationAccounts_CL",      "lastDataReceivedQuery": "MDE_RemediationAccounts_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_ActionCenter_CL",             "lastDataReceivedQuery": "MDE_ActionCenter_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_ThreatAnalytics_CL",          "lastDataReceivedQuery": "MDE_ThreatAnalytics_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_UserPreferences_CL",          "lastDataReceivedQuery": "MDE_UserPreferences_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_MtoTenants_CL",               "lastDataReceivedQuery": "MDE_MtoTenants_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_LicenseReport_CL",            "lastDataReceivedQuery": "MDE_LicenseReport_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_CloudAppsConfig_CL",          "lastDataReceivedQuery": "MDE_CloudAppsConfig_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
-    { "name": "MDE_MachineActions_CL",           "lastDataReceivedQuery": "MDE_MachineActions_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
+    {
+      "name": "XdrConnectorHealth_CL",
+      "lastDataReceivedQuery": "XdrConnectorHealth_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_EndpointDeviceManagement_CL",
+      "lastDataReceivedQuery": "Defender_EndpointDeviceManagement_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_EndpointConfiguration_CL",
+      "lastDataReceivedQuery": "Defender_EndpointConfiguration_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_VulnerabilityManagement_CL",
+      "lastDataReceivedQuery": "Defender_VulnerabilityManagement_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_IdentityProtection_CL",
+      "lastDataReceivedQuery": "Defender_IdentityProtection_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_ConfigurationAndSettings_CL",
+      "lastDataReceivedQuery": "Defender_ConfigurationAndSettings_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_ExposureManagement_CL",
+      "lastDataReceivedQuery": "Defender_ExposureManagement_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_ThreatAnalytics_CL",
+      "lastDataReceivedQuery": "Defender_ThreatAnalytics_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_ActionCenter_CL",
+      "lastDataReceivedQuery": "Defender_ActionCenter_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_MultiTenantOperations_CL",
+      "lastDataReceivedQuery": "Defender_MultiTenantOperations_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    },
+    {
+      "name": "Defender_StreamingApi_CL",
+      "lastDataReceivedQuery": "Defender_StreamingApi_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)"
+    }
   ],
   "connectivityCriteria": [
     {
       "type": "IsConnectedQuery",
-      "value": [ "MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | project IsConnected = isnotempty(TimeGenerated)" ]
+      "value": [
+        "XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | where Tier != 'Heartbeat' | where StreamsSucceeded > 0 | where RowsIngested > 0 | top 1 by TimeGenerated desc | project IsConnected = true"
+      ]
     }
   ],
   "availability": {
@@ -90,7 +1638,11 @@
         "permissionsDisplayText": "read and write permissions on the workspace",
         "providerDisplayName": "Workspace",
         "scope": "Workspace",
-        "requiredPermissions": { "read": true, "write": true, "delete": true }
+        "requiredPermissions": {
+          "read": true,
+          "write": true,
+          "delete": true
+        }
       }
     ],
     "customs": [
@@ -119,7 +1671,7 @@
     },
     {
       "title": "Confirm connector liveness",
-      "description": "Within 5-10 minutes the Function App's heartbeat timer + first poll fire. The connector card reads MDE_Heartbeat_CL for the IsConnected indicator. For auth chain diagnostics, query App Insights customEvents:",
+      "description": "Within 5-10 minutes the Function App's heartbeat timer + first poll fire. The connector card reads XdrConnectorHealth_CL for the IsConnected indicator. For auth chain diagnostics, query App Insights customEvents:",
       "instructions": [
         {
           "type": "CopyableLabel",

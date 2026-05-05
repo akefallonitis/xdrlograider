@@ -5,7 +5,7 @@ function Get-XdrPortalRate429Count {
 
     .DESCRIPTION
         Consumed by Invoke-MDETierPoll (in Xdr.Defender.Client) to populate
-        MDE_Heartbeat_CL.Notes.rate429Count. The counter lives in
+        XdrConnectorHealth_CL.Notes.rate429Count. The counter lives in
         $script:Rate429Count inside Xdr.Defender.Auth.psm1; this accessor is
         the public read-path for callers in sibling modules.
 

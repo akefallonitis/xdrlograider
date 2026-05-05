@@ -10,7 +10,7 @@ $ErrorActionPreference = 'Stop'
 # terminating error (caught + heartbeat'd) instead of a silent warning.
 $PSNativeCommandUseErrorActionPreference = $true
 
-# Cold-start telemetry — consumers in MDE_Heartbeat_CL can compute
+# Cold-start telemetry — consumers in XdrConnectorHealth_CL can compute
 # first-fire-after-cold-start latency via (TimeGenerated - ColdStartUtc).
 $global:XdrLogRaiderColdStartUtc = [datetime]::UtcNow
 
@@ -90,35 +90,24 @@ $modulesPath = Join-Path $PSScriptRoot 'Modules'
 #                                  Get-XdrEndpointManifest / Expand-XdrResponse /
 #                                  ConvertTo-XdrIngestRow / Invoke-XdrEndpoint /
 #                                  Invoke-DefenderTierPoll)
-#   L2 Xdr.Entra.Auth          — Entra portal scaffolding stub (v0.2.0 roadmap)
-#   L3 Xdr.Entra.Client        — Entra portal scaffolding stub (v0.2.0 roadmap)
-#   L2 Xdr.Purview.Auth        — Purview portal scaffolding stub (v0.2.0 roadmap)
-#   L3 Xdr.Purview.Client      — Purview portal scaffolding stub (v0.2.0 roadmap)
-#   L2 Xdr.Intune.Auth         — Intune portal scaffolding stub (v0.2.0 roadmap)
-#   L3 Xdr.Intune.Client       — Intune portal scaffolding stub (v0.2.0 roadmap)
 #   L4 Xdr.Connector.Orchestrator — top-level routing surface (Connect-XdrPortal +
 #                                    Invoke-XdrTierPoll + Test-XdrPortalAuth +
 #                                    Get-XdrPortalManifest + Get-XdrConnectorHealth +
-#                                    Test-XdrConnectorConfig). Portal routes table
-#                                    references all L2/L3 modules; v0.2.0 extends bodies.
+#                                    Test-XdrConnectorConfig). v0.1.0 GA = single-portal
+#                                    (Defender). v0.2.0 reintroduces L2/L3 portal
+#                                    modules (Entra/Purview/Intune) with real bodies.
 #
-# v0.2.0 will fill in Entra/Purview/Intune Connect/Test/Poll/Manifest function
-# bodies; the architectural seam is final in v0.1.0 GA — no architectural
-# change required for v0.2.0, only content addition.
-# See .claude/plans/immutable-splashing-waffle.md Section 2.1 for details.
+# v0.1.0 GA scope (per user 2026-05-05): pure Defender connector. v0.2.0 adds
+# multi-portal expansion + FA multi-tenancy support together.
+# See .claude/plans/immutable-splashing-waffle.md for details.
 
 $coreModules = @(
     'Xdr.Common.Auth',
+    'Xdr.Common.Manifest',
+    'Xdr.Common.Telemetry',
     'Xdr.Sentinel.Ingest',
     'Xdr.Defender.Auth',
     'Xdr.Defender.Client',
-    # v0.1.0 GA Phase A.3 multi-portal scaffolding stubs:
-    'Xdr.Entra.Auth',
-    'Xdr.Entra.Client',
-    'Xdr.Purview.Auth',
-    'Xdr.Purview.Client',
-    'Xdr.Intune.Auth',
-    'Xdr.Intune.Client',
     # L4 must be last — its psd1 RequiredModules references all the above
     'Xdr.Connector.Orchestrator'
 )

@@ -1,71 +1,40 @@
 // SYNOPSIS:
-//   Computes drift across the Inventory tier — endpoint config + MDI
-//   identity + tenant context + metadata long-tail. Field-level diff (one
-//   row per StreamName, EntityId, FieldName that changed between observation
-//   windows). Sources: AdvancedFeatures, DeviceControlPolicy,
-//   WebContentFiltering, SmartScreenConfig, LiveResponseConfig,
-//   AuthenticatedTelemetry, PUAConfig, AntivirusPolicy, CustomCollection,
-//   TenantContext, TenantWorkloadStatus, SAClassification, IdentityOnboarding,
-//   IdentityServiceAccounts, DCCoverage, IdentityAlertThresholds,
-//   RemediationAccounts, SecurityBaselines, MtoTenants, LicenseReport,
-//   DeviceTimeline.
+//   Computes drift across the Inventory tier — field-level diff between current
+//   and previous snapshots. Sources from Defender_<Category>_CL tables with
+//   SourceName filter
+//
 //
 // PARAMETERS:
-//   lookback - ISO 8601 duration, default 30d. How far back to look for the "previous" snapshot.
-//   window   - ISO 8601 duration, default 1d. Matches the inventory-tier daily poll cadence.
+//   lookback - ISO 8601 duration, default 14d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 1d. Matches the Inventory-tier poll cadence.
 //
 // INVOCATION:
-//   MDE_Drift_Inventory(30d, 1d) | where StreamName == "MDE_DCCoverage_CL"
-//   MDE_Drift_Inventory()        // applies defaults
+//   MDE_Drift_Inventory(14d, 1d) | where StreamName == 'MDE_<Stream>_CL'
+//   MDE_Drift_Inventory()    // applies defaults
 //
 // NOTES:
-//   - Parameterized as a KQL function so workbooks/rules can plumb
-//     {TimeRange:value} from the time-picker without forking the parser body.
+//   - (2026-05-04): rewritten to source from Defender_<Category>_CL
+//     tables with SourceName filter. Drift logic preserved from v0.1.0 GA.
 //   - Drift is computed over the per-stream typed columns (DCR-projected at
-//     ingest); RawJson is preserved on each table as a fallback for fields
-//     not in the manifest's ProjectionMap, but the parser never re-parses it.
-//   - MDE_DeviceTimeline_CL is tenant-gated. The table is created at deploy
-//     time; unioning it when the tenant has not provisioned the timeline
-//     surface yields zero rows but keeps the parser's source list stable.
+//     ingest); RawJson is preserved as a fallback. The parser never re-parses RawJson.
+//   - Output schema: TimeGenerated, StreamName, EntityId, FieldName, OldValue,
+//     NewValue, SnapshotCurrent, SnapshotPrevious, ChangeType.
 
-let MDE_Drift_Inventory = (lookback:timespan = 30d, window:timespan = 1d) {
-    // Metadata + envelope columns to exclude from field-level diff (these are
-    // bookkeeping; only typed data columns from the manifest ProjectionMap
-    // count as "fields" for drift detection).
-    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'EntityId', 'RawJson', '_Table', 'Type', 'TenantId']);
-    let sources = union withsource=_Table
-        MDE_AdvancedFeatures_CL,
-        MDE_DeviceControlPolicy_CL,
-        MDE_WebContentFiltering_CL,
-        MDE_SmartScreenConfig_CL,
-        MDE_LiveResponseConfig_CL,
-        MDE_AuthenticatedTelemetry_CL,
-        MDE_PUAConfig_CL,
-        MDE_AntivirusPolicy_CL,
-        MDE_CustomCollection_CL,
-        MDE_TenantContext_CL,
-        MDE_TenantWorkloadStatus_CL,
-        MDE_SAClassification_CL,
-        MDE_IdentityOnboarding_CL,
-        MDE_IdentityServiceAccounts_CL,
-        MDE_DCCoverage_CL,
-        MDE_IdentityAlertThresholds_CL,
-        MDE_RemediationAccounts_CL,
-        MDE_SecurityBaselines_CL,
-        MDE_MtoTenants_CL,
-        MDE_LicenseReport_CL,
-        MDE_DeviceTimeline_CL
+let MDE_Drift_Inventory = (lookback:timespan = 14d, window:timespan = 1d) {
+    // Metadata + envelope columns excluded from field-level diff.
+    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'SourceName', 'EntityId', 'RawJson', 'Type', 'TenantId']);
+    let sources = union (Defender_EndpointConfiguration_CL | where SourceName in ('MDE_AdvancedFeatures_CL', 'MDE_DeviceControlPolicy_CL', 'MDE_WebContentFiltering_CL', 'MDE_SmartScreenConfig_CL', 'MDE_LiveResponseConfig_CL', 'MDE_AuthenticatedTelemetry_CL', 'MDE_PUAConfig_CL', 'MDE_AntivirusPolicy_CL', 'MDE_CustomCollection_CL')), (Defender_EndpointDeviceManagement_CL | where SourceName in ('MDE_LicenseReport_CL', 'MDE_DeviceTimeline_CL')), (Defender_IdentityProtection_CL | where SourceName in ('MDE_SAClassification_CL', 'MDE_IdentityOnboarding_CL', 'MDE_IdentityServiceAccounts_CL', 'MDE_DCCoverage_CL', 'MDE_IdentityAlertThresholds_CL', 'MDE_RemediationAccounts_CL')), (Defender_MultiTenantOperations_CL | where SourceName in ('MDE_TenantContext_CL', 'MDE_TenantWorkloadStatus_CL', 'MDE_MtoTenants_CL')), (Defender_VulnerabilityManagement_CL | where SourceName in ('MDE_SecurityBaselines_CL'))
         | where TimeGenerated > ago(lookback);
     let current = sources
         | where TimeGenerated > ago(window)
-        | summarize arg_max(TimeGenerated, *) by _Table, EntityId
+        | summarize arg_max(TimeGenerated, *) by SourceName, EntityId
         | extend TypedBag = bag_remove_keys(pack_all(), metaCols);
     let previous = sources
         | where TimeGenerated between (ago(lookback) .. ago(window))
-        | summarize arg_max(TimeGenerated, *) by _Table, EntityId
+        | summarize arg_max(TimeGenerated, *) by SourceName, EntityId
         | extend TypedBag = bag_remove_keys(pack_all(), metaCols);
     current
-    | join kind=leftouter previous on _Table, EntityId
+    | join kind=leftouter previous on SourceName, EntityId
     | where hash(tostring(TypedBag)) != hash(tostring(TypedBag1)) or isnull(TypedBag1)
     | extend CurrentFields  = bag_keys(TypedBag)
     | extend PreviousFields = iff(isnull(TypedBag1), dynamic([]), bag_keys(TypedBag1))
@@ -77,7 +46,7 @@ let MDE_Drift_Inventory = (lookback:timespan = 30d, window:timespan = 1d) {
       )
     | project
         TimeGenerated,
-        StreamName       = _Table,
+        StreamName       = SourceName,
         EntityId,
         FieldName        = tostring(field),
         OldValue,

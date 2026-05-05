@@ -6,7 +6,7 @@
     nodoc, DefenderHarvester, FalconForce blog series).
 
 .DESCRIPTION
-    Live evidence (iter-13.8 path-research audit, 2026-04-27): two manifest
+    Live evidence (pre-v0.1.0.8 path-research audit, 2026-04-27): two manifest
     entries had paths that didn't match any canonical research source —
     `MDE_CustomCollection_CL` used `/model` instead of `/rules` (XDRInternals
     `Get-/New-/Set-XdrEndpointConfigurationCustomCollectionRule.ps1`), and
@@ -34,38 +34,38 @@ BeforeAll {
     $script:CanonicalPathMap = @{
         # ---- P0 ----
         '/apiproxy/mtp/settings/GetAdvancedFeaturesSetting'                                                = 'XDRInternals:Get-XdrEndpointConfigurationAdvancedFeature.ps1'
-        '/apiproxy/mtp/settings/GetPreviewExperienceSetting?context=MdatpContext'                          = 'XDRInternals:Get-XdrConfigurationPreviewFeatures.ps1 (iter-13.9 added context query-string)'
-        '/apiproxy/mtp/alertsApiService/workloads/disabled?includeDetails=true'                            = 'XDRInternals:Get-XdrConfigurationAlertServiceSetting.ps1 (iter-13.9 added includeDetails)'
+        '/apiproxy/mtp/settings/GetPreviewExperienceSetting?context=MdatpContext'                          = 'XDRInternals:Get-XdrConfigurationPreviewFeatures.ps1 (pre-v0.1.0.9 added context query-string)'
+        '/apiproxy/mtp/alertsApiService/workloads/disabled?includeDetails=true'                            = 'XDRInternals:Get-XdrConfigurationAlertServiceSetting.ps1 (pre-v0.1.0.9 added includeDetails)'
         '/apiproxy/mtp/alertsEmailNotifications/email_notifications'                                       = 'nodoc:alert-tuning surface (XDRInternals has no Get-Xdr*AlertTuning cmdlet)'
         '/apiproxy/mtp/suppressionRulesService/suppressionRules'                                           = 'XDRInternals:Get-XdrSuppressionRule.ps1'
-        '/apiproxy/mtp/huntingService/rules/unified?pageIndex=1&pageSize=10000&sortOrder=Ascending&isUnifiedRulesListEnabled=true' = 'XDRInternals:Get-XdrAdvancedHuntingUnifiedDetectionRules.ps1 (iter-13.9 added pagination + unifiedRulesList flag)'
+        '/apiproxy/mtp/huntingService/rules/unified?pageIndex=1&pageSize=10000&sortOrder=Ascending&isUnifiedRulesListEnabled=true' = 'XDRInternals:Get-XdrAdvancedHuntingUnifiedDetectionRules.ps1 (pre-v0.1.0.9 added pagination + unifiedRulesList flag)'
         '/apiproxy/mtp/siamApi/Onboarding'                                                                 = 'XDRInternals:Get-XdrEndpointConfigurationDeviceControl.ps1 / Get-XdrIdentityOnboarding.ps1'
         '/apiproxy/mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories'                = 'XDRInternals:Get-XdrEndpointConfigurationWebContentFiltering.ps1'
         '/apiproxy/mtp/webThreatProtection/webThreats/reports/webThreatSummary'                            = 'XDRInternals:Get-XdrEndpointConfigurationSmartScreen.ps1'
-        '/apiproxy/mtp/liveResponseApi/get_properties?useV2Api=true&useV3Api=true'                         = 'XDRInternals:Get-XdrEndpointConfigurationLiveResponse.ps1 (iter-13.9 added V2/V3 api flags)'
+        '/apiproxy/mtp/liveResponseApi/get_properties?useV2Api=true&useV3Api=true'                         = 'XDRInternals:Get-XdrEndpointConfigurationLiveResponse.ps1 (pre-v0.1.0.9 added V2/V3 api flags)'
         '/apiproxy/mtp/responseApiPortal/senseauth/allownonauthsense'                                      = 'XDRInternals:Get-XdrEndpointConfigurationAuthenticatedTelemetry.ps1'
         '/apiproxy/mtp/autoIr/ui/properties/'                                                              = 'XDRInternals:Get-XdrEndpointConfigurationPotentiallyUnwantedApplications.ps1'
         '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters'         = 'MS Learn:defender-endpoint/mde-security-settings-management (Intune-bridge surface)'
         '/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues'                            = 'Portal trace:tenant-allow-block (papin namespace; preview surface)'
-        '/apiproxy/mtp/mdeCustomCollection/rules'                                                          = 'XDRInternals:Get-/New-/Set-XdrEndpointConfigurationCustomCollectionRule.ps1 (iter-13.8 corrected from /model)'
+        '/apiproxy/mtp/mdeCustomCollection/rules'                                                          = 'XDRInternals:Get-/New-/Set-XdrEndpointConfigurationCustomCollectionRule.ps1 (pre-v0.1.0.8 corrected from /model)'
 
         # ---- P1 ----
         '/apiproxy/mtp/wdatpApi/dataexportsettings'                                                        = 'XDRInternals:Get-XdrDataExportSetting.ps1'
         '/apiproxy/mtp/responseApiPortal/apps/all'                                                         = 'XDRInternals:Get-XdrConnectedApp.ps1'
         '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true'                                     = 'XDRInternals:Get-XdrTenantContext.ps1'
         '/apiproxy/mtoapi/tenantGroups'                                                                    = 'XDRInternals:Get-XdrMtoTenantGroup.ps1 (mtoproxyurl:MTO header required)'
-        '/apiproxy/mtp/streamingapi/streamingApiConfiguration'                                             = 'DEPRECATED in iter-13.8 (path renamed; canonical now collides with /wdatpApi/dataexportsettings)'
+        '/apiproxy/mtp/streamingapi/streamingApiConfiguration'                                             = 'DEPRECATED in pre-v0.1.0.8 (path renamed; canonical now collides with /wdatpApi/dataexportsettings)'
         '/apiproxy/mtp/responseApiPortal/onboarding/intune/status'                                         = 'XDRInternals:Get-XdrEndpointConfigurationIntuneConnection.ps1'
         '/apiproxy/mtp/wdatpInternalApi/compliance/alertSharing/status'                                    = 'XDRInternals:Get-XdrEndpointConfigurationPurviewSharing.ps1'
 
         # ---- P2 ----
-        '/apiproxy/mtp/rbacManagementApi/rbac/machine_groups?addAadGroupNames=true&addMachineGroupCount=false' = 'XDRInternals:Get-XdrEndpointDeviceRbacGroup.ps1 (iter-13.9 added addAadGroupNames + UnwrapProperty=items)'
+        '/apiproxy/mtp/rbacManagementApi/rbac/machine_groups?addAadGroupNames=true&addMachineGroupCount=false' = 'XDRInternals:Get-XdrEndpointDeviceRbacGroup.ps1 (pre-v0.1.0.9 added addAadGroupNames + UnwrapProperty=items)'
         '/apiproxy/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions'                    = 'nodoc:URBAC roleDefinitions (XDRInternals Get-XdrConfigurationUnifiedRBACWorkload uses /tenantinfo/, different surface)'
         '/apiproxy/mtp/xspmatlas/assetrules'                                                               = 'XDRInternals:Get-XdrXspmAssetRule.ps1'
         '/apiproxy/radius/api/radius/serviceaccounts/classificationrule/getall'                            = 'XDRInternals:Get-XdrIdentityServiceAccountClassification.ps1'
 
         # ---- P3 ----
-        # iter-14.0 (2026-04-29): MDE_SecureScoreBreakdown_CL DROPPED — publicly-API-covered
+        # v0.1.0 GA (2026-04-29): MDE_SecureScoreBreakdown_CL DROPPED — publicly-API-covered
         # by Microsoft Graph /security/secureScores. Citation removed because the path no
         # longer corresponds to any manifest entry (orphan-citation gate).
         '/apiproxy/mtp/posture/oversight/initiatives'                                                      = 'XDRInternals:Get-XdrXspmInitiative.ps1'
@@ -86,14 +86,29 @@ BeforeAll {
 
         # ---- P6 ----
         '/apiproxy/mtp/threatAnalytics/outbreaks'                                                          = 'XDRInternals:Get-XdrThreatAnalytic.ps1'
-        '/apiproxy/mtp/actionCenter/actioncenterui/history-actions'                                        = 'XDRInternals:Get-XdrActionsCenterHistory.ps1 (iter-13.10 rolled back query-string after live audit returned 400; original param-less form is correct)'
+        '/apiproxy/mtp/actionCenter/actioncenterui/history-actions'                                        = 'XDRInternals:Get-XdrActionsCenterHistory.ps1 (pre-v0.1.0.10 rolled back query-string after live audit returned 400; original param-less form is correct)'
         '/apiproxy/mtp/responseApiPortal/machineactions'                                                   = 'XDRInternals:Get-XdrEndpointDeviceActionResult.ps1'
 
         # ---- P7 ----
         '/apiproxy/mtoapi/tenants/TenantPicker'                                                            = 'XDRInternals:Get-XdrMtoTenant.ps1 (mtoproxyurl:MTO header required)'
         '/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference'                     = 'XDRInternals:Get-XdrUserPreference.ps1'
         '/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machines/skuReport'                             = 'XDRInternals:Get-XdrLicenseReport.ps1 (UnwrapProperty=sums)'
-        '/apiproxy/mcas/cas/api/v1/settings/'                                                              = 'XDRInternals:Get-XdrCloudAppsGeneralSetting.ps1 (iter-13.9 added trailing slash; MS Learn /defender-cloud-apps confirms canonical)'
+        '/apiproxy/mcas/cas/api/v1/settings/'                                                              = 'XDRInternals:Get-XdrCloudAppsGeneralSetting.ps1 (pre-v0.1.0.9 added trailing slash; MS Learn /defender-cloud-apps confirms canonical)'
+
+        # ---- v0.1.0 GA Phase 2 (2026-05-04): 13 Tier A new streams from nodoc catalog sweep ----
+        '/apiproxy/mtp/xspmatlas/assetrules/querybuilder/schema'                     = 'nodoc:configuration.yml — XSPM critical-asset classification schema (DSL for asset-rule querybuilder)'
+        '/apiproxy/mtp/posture/oversight/initiatives/summarized'                     = 'nodoc:exposure_management.yml — posture-oversight initiatives summary'
+        '/apiproxy/mtp/posture/oversight/metrics'                                    = 'nodoc:exposure_management.yml — posture-oversight metrics catalog'
+        '/apiproxy/mtp/posture/oversight/metrics/category_apps_secure_score'         = 'nodoc:exposure_management.yml — SaaS apps secure-score metric'
+        '/apiproxy/mtp/posture/oversight/metrics/category_data_secure_score'         = 'nodoc:exposure_management.yml — data secure-score metric'
+        '/apiproxy/mtp/posture/oversight/metrics/category_identity_secure_score'     = 'nodoc:exposure_management.yml — identity secure-score metric'
+        '/apiproxy/mtp/posture/oversight/securityEvents'                             = 'nodoc:exposure_management.yml — posture security events stream'
+        '/apiproxy/mtp/posture/oversight/tenants'                                    = 'nodoc:exposure_management.yml — posture-oversight tenant configuration'
+        '/apiproxy/mtp/xspmatlas/attacksurface/attackpaths'                          = 'nodoc:exposure_management.yml — XSPM attack-surface attack paths analytical view'
+        '/apiproxy/mtp/xspmatlas/attacksurface/chokepoints/list'                     = 'nodoc:exposure_management.yml — XSPM attack-surface choke points'
+        '/apiproxy/mtp/XspmConnectors/connectors/getAllConnectors'                   = 'nodoc:exposure_management.yml — XSPM data connectors list'
+        '/apiproxy/mtp/threatAnalytics/outbreaks/outbreaksEnrichedDataMtp'           = 'nodoc:threat_analytics.yml — Threat Analytics enriched outbreak data'
+        '/apiproxy/mtp/threatAnalytics/outbreaks/topthreats'                         = 'nodoc:threat_analytics.yml — Threat Analytics top threats summary'
     }
 }
 
@@ -118,7 +133,7 @@ Describe 'Path drift regression gate (iter 13.8)' {
         }
 
         $unattested | Should -BeNullOrEmpty -Because (
-            'iter-13.8: every manifest path must be attested against a canonical research source. ' +
+            'pre-v0.1.0.8: every manifest path must be attested against a canonical research source. ' +
             'Add the path + citation to $script:CanonicalPathMap in this test file when adding a new entry. ' +
             'Unattested entries:' + [Environment]::NewLine + ($unattested -join [Environment]::NewLine)
         )
@@ -131,36 +146,36 @@ Describe 'Path drift regression gate (iter 13.8)' {
         # Paths we deliberately retired — re-introducing one without bumping
         # iter version would silently re-introduce the bug class.
         $retiredPaths = @(
-            '/apiproxy/mtp/mdeCustomCollection/model'  # iter-13.8: corrected to /rules per XDRInternals
+            '/apiproxy/mtp/mdeCustomCollection/model'  # pre-v0.1.0.8: corrected to /rules per XDRInternals
         )
 
         $revivals = @()
         foreach ($e in $entries) {
             if ($retiredPaths -contains $e.Path -and $e.Availability -ne 'deprecated') {
-                $revivals += "$($e.Stream) -> $($e.Path) (re-introduced after iter-13.8 retirement)"
+                $revivals += "$($e.Stream) -> $($e.Path) (re-introduced after pre-v0.1.0.8 retirement)"
             }
         }
 
         $revivals | Should -BeNullOrEmpty -Because (
-            'iter-13.8: re-introducing a retired path without justification re-opens the bug class. ' +
+            'pre-v0.1.0.8: re-introducing a retired path without justification re-opens the bug class. ' +
             'Either correct the path OR mark the entry Availability=deprecated. Revivals: ' + ($revivals -join '; ')
         )
     }
 
-    It 'every deprecated entry has a documented STREAMS-REMOVED.md note' {
+    It 'every deprecated entry has a Purpose note explaining the deprecation reason' {
+        # v0.1.0 GA: deprecated streams self-document via the manifest Purpose field
+        # Deprecated streams now self-document via the Purpose field in the manifest.
         $manifest = Import-PowerShellDataFile -Path $script:ManifestPath
-        $deprecated = @($manifest.Endpoints | Where-Object { $_.Availability -eq 'deprecated' }).Stream
-
-        $streamsRemoved = Get-Content (Join-Path $script:RepoRoot 'docs/STREAMS-REMOVED.md') -Raw
+        $deprecated = @($manifest.Endpoints | Where-Object { $_.Availability -eq 'deprecated' })
 
         $missing = @()
-        foreach ($s in $deprecated) {
-            if ($streamsRemoved -notmatch [regex]::Escape($s)) {
-                $missing += $s
+        foreach ($d in $deprecated) {
+            if ([string]::IsNullOrWhiteSpace($d.Purpose) -or $d.Purpose.Length -lt 20) {
+                $missing += $d.Stream
             }
         }
         $missing | Should -BeNullOrEmpty -Because (
-            'iter-13.8: every deprecated stream must be documented in STREAMS-REMOVED.md so operators know not to wire downstream parsers/rules to it. Missing: ' + ($missing -join ', ')
+            'every deprecated stream must self-document via its Purpose field (operator must understand why the stream is deprecated). Missing: ' + ($missing -join ', ')
         )
     }
 
@@ -184,7 +199,7 @@ Describe 'Path drift regression gate (iter 13.8)' {
         }
         # Deprecated entries' paths are intentionally retained
         $orphans | Should -BeNullOrEmpty -Because (
-            'iter-13.8: a citation in CanonicalPathMap that no longer corresponds to a manifest entry is dead code. Orphans: ' + ($orphans -join '; ')
+            'pre-v0.1.0.8: a citation in CanonicalPathMap that no longer corresponds to a manifest entry is dead code. Orphans: ' + ($orphans -join '; ')
         )
     }
 }

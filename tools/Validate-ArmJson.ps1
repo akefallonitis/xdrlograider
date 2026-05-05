@@ -482,7 +482,7 @@ if (Test-Path $mainPath) {
         if ($haveDataConnector) {
             # ITER 13: dataTypes count gate — embedded mainTemplate.json copy
             # must list ALL 47 tables (45 data + Heartbeat + AuthTestResult),
-            # not the 3-table stub we shipped pre-iter-13. Standalone
+            # not the 3-table stub we shipped pre-pre-v0.1.0. Standalone
             # XdrLogRaider_DataConnector.json was already complete; this
             # gate locks the embedded copy in sync.
             $dt = $haveDataConnector[0].properties.connectorUiConfig.dataTypes
@@ -499,9 +499,9 @@ if (Test-Path $mainPath) {
             # fired). Auth chain diagnostics live in App Insights customEvents,
             # not in a workspace table.
             $conQuery = $haveDataConnector[0].properties.connectorUiConfig.connectivityCriterias[0].value[0]
-            if ($conQuery -notmatch 'MDE_Heartbeat_CL' -or $conQuery -notmatch 'StreamsSucceeded' -or $conQuery -notmatch 'IsConnected\s*=\s*isnotempty') {
+            if ($conQuery -notmatch 'XdrConnectorHealth_CL' -or $conQuery -notmatch 'StreamsSucceeded' -or $conQuery -notmatch 'IsConnected\s*=\s*isnotempty') {
                 Write-Host ("FAIL : connectivityCriterias query does not match the v0.1.0-beta shape. Got: $conQuery") -ForegroundColor Red
-                Write-Host ("       Expected: 'MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | project IsConnected = isnotempty(TimeGenerated)'") -ForegroundColor Yellow
+                Write-Host ("       Expected: 'XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | project IsConnected = isnotempty(TimeGenerated)'") -ForegroundColor Yellow
                 $anyFail = $true
             } else {
                 Write-Host ("OK   : connectivityCriterias query uses Heartbeat + StreamsSucceeded gate (proves poll-success, not just timer-firing)") -ForegroundColor Green
@@ -614,7 +614,7 @@ if (Test-Path $hostJsonPath) {
 # pattern (Marketplace best practice for community connectors). GitHub's
 # /latest endpoint resolves to the most-recent non-prerelease tag — operators
 # don't have to edit the wizard for routine upgrades. Pinning a specific tag
-# is documented as an advanced override in docs/DEPLOY-METHODS.md.
+# is an advanced override (operators with private repos use Azure Portal "Deploy a custom template" upload-from-file).
 # Gate: every code path that builds packageUrl must point at /releases/latest.
 # ============================================================================
 

@@ -1,205 +1,86 @@
 # Roadmap
 
-Capability ladder for the connector. Each version below is a discrete shipping
-milestone with explicit deliverables.
+Capability ladder for the connector. Each version below is a discrete shipping milestone with explicit deliverables.
 
-The connector's purpose is **portal-only telemetry from Microsoft Defender XDR
-(and, in v0.2.0+, additional Microsoft 365 portals) that is not exposed by
-official Microsoft Graph / public APIs**. Surfaces already covered by Microsoft
-Graph Security or by the Microsoft 365 Defender Public APIs are explicitly out
-of scope — operators should use the corresponding official Microsoft Sentinel
-data connectors for those.
+The connector's purpose is **portal-only telemetry from Microsoft Defender XDR (and, in v0.2.0+, additional Microsoft 365 portals) that is not exposed by official Microsoft Graph / public APIs**. Surfaces already covered by Microsoft Graph Security or by the Microsoft 365 Defender Public APIs are explicitly out of scope — operators should use the corresponding official Microsoft Sentinel data connectors for those.
 
 ---
 
-## v0.1.0-beta — production-ready first publish
+## v0.1.0 GA — pure Defender connector (current release)
 
-The current shipping version. Production-grade for unattended ingestion of
-Microsoft Defender XDR portal-only telemetry into a customer-owned Sentinel
-workspace.
+Production-grade unattended ingestion of Microsoft Defender XDR portal-only telemetry into a customer-owned Sentinel workspace.
 
 **Architecture**:
-- 46 portal-only data streams + 1 operational Heartbeat = 47 streams total,
-  partitioned across 5 DCRs sharing 1 DCE (Microsoft canonical pattern: each
-  dataFlow single-stream with `outputStream` + `transformKql='source'`).
-- 5 cadence-purpose tiers: `fast` (10 min — 2 streams), `exposure` (1h — 7),
-  `config` (6h — 14), `inventory` (daily — 21), `maintenance` (weekly — 1);
-  each tier on its own timer-triggered Function. Tenant-feature-gated streams
-  (MDI / MCAS / TVM / Intune AV / MDO / Custom Collection) skip cleanly when
-  the tenant feature isn't licensed.
-- Per-stream typed columns at ingest via projection map; `RawJson` preserved
-  alongside for forensic queries.
-- 5-module L1-L4 architecture (`Xdr.Common.Auth` + `Xdr.Defender.Auth` +
-  `Xdr.Sentinel.Ingest` + `Xdr.Defender.Client` + `Xdr.Connector.Orchestrator`)
-  — portal-generic L1+L4 lets v0.2.0 add new portals as file-add operations.
 
-**Auth**:
-- CredentialsTotp (RFC 6238) + Software Passkey (FIDO2 ECDSA-P256) for
-  unattended portal sign-in. Both auto-refresh; 50-min portal-cookie cache,
-  3h30m hard rotate, 401-reactive re-auth. KV-stored credentials, never
-  logged at any verbosity. Auth chain diagnostics flow to App Insights
-  `customEvents` (`AuthChain.*` event names) — secrets-redacted.
-- Key Vault credential cache TTL (1h default) — rotated KV secrets pick up
-  automatically on next cache miss; no Function App restart required.
+- **59 portal-only data streams** + 1 operational heartbeat = 60 streams total, partitioned across **7 DCRs** (4×10 + 5(7) + 6(7) + 7(6) — Azure 10-flow cap respected) sharing 1 DCE.
+- DCR `transformKql='source | extend SourceName='<Stream>''` injects per-stream identity into per-category tables (Microsoft Learn canonical pattern + SourceName-injection).
+- **5 cadence tiers** with dedicated timer functions: `fast` (10 min — 2 streams), `exposure` (1h — 18), `config` (6h — 16), `inventory` (daily — 21), `maintenance` (weekly — 1). Tenant-feature-gated streams (MDI / TVM / MCAS / Intune / MDO / Custom Collection) skip cleanly when the tenant feature isn't licensed.
+- **11 consolidated workspace tables**: 10 `Defender_<Category>_CL` per nathanmcnulty 10-category taxonomy + 1 `XdrConnectorHealth_CL` ops table.
+- Per-stream typed columns at ingest via DCR `ProjectionMap`; `RawJson` preserved on every row for forensic queries.
+- Drift detection via 4 cadence-tier KQL parsers (`MDE_Drift_Configuration` / `MDE_Drift_Inventory` / `MDE_Drift_Exposure` / `MDE_Drift_Maintenance`) using `mv-apply set_union(CurrentFields, PreviousFields)` field-level diff.
+- **7 PowerShell modules**: L1 Common (Auth + Manifest + Telemetry) + L1 Sentinel.Ingest + L2 Defender.Auth + L3 Defender.Client + L4 Connector.Orchestrator. Pure Defender connector — no multi-portal stubs in v0.1.0.
+- **8 Function App functions**: Connector-Heartbeat (5min) + 5 Defender-{Tier}-Refresh timers + Xdr-PollOrchestrator (Durable orchestration) + Xdr-PollStream (Durable activity).
+- Manifest-driven dispatch: 1 `Invoke-MDEEndpoint` for all 59 streams (no per-stream handlers).
+- Auth: Credentials+TOTP + Software Passkey (MFA-enforced unattended) + DirectCookies (test/diagnostic).
+- KV TTL cache (60min default) for credential reuse; cache-eviction telemetry to AppInsights.
+- DLQ (`xdrIngestDlq`) + checkpoint table (`connectorCheckpoints`) on shared Storage Account, SAMI-accessed.
+- AppInsights NATIVE telemetry (no extra workspace diag-settings): `AppRequests` + `AppDependencies` + `AppExceptions` + `AppTraces` + `AppEvents` + `AppMetrics` (incl. `xdr.auth.chain_step_duration_ms` / `xdr.dlq.depth` / `xdr.ingest.row_count_per_hour` cost-budget gate).
 
-**Reliability**:
-- HTTPS Logs Ingestion API with gzip compression (5-10× bandwidth);
-  413 split-and-retry; per-batch + cumulative metrics in
-  `MDE_Heartbeat_CL.Notes`.
-- 429 Retry-After honoured; on terminal failure, batches go to a
-  `dlq` Storage Table dead-letter queue (partitioned by stream); poll-* timer
-  functions retry from DLQ at the start of each cycle before issuing new
-  polls. **No data loss on rate-limit storms.**
-- Null-response → boundary marker row (heartbeat-visible) instead of silent
-  zero.
+**Sentinel content**:
 
-**Security**:
-- System-Assigned Managed Identity only — 7 narrowly-scoped role
-  assignments (KV Secrets User on KV; Storage Table Contributor on Storage;
-  Monitoring Metrics Publisher per-DCR × 5).
-- Optional `restrictPublicNetwork` parameter for regulated tenants
-  (Storage / Key Vault / App Insights public-network-access disabled).
-- Key Vault Get/List Secret events flow to the workspace via Diagnostic
-  Settings (`enableKeyVaultDiagnostics` default true) — full credential-access
-  audit trail.
-- Pre-commit hook blocks accidental AI-attribution trailers; GitHub Actions
-  pinned to commit SHAs; SBOM (SPDX) shipped per release.
+- 8 workbooks (incl. ConnectorHealth with 9 panels: per-tier freshness, auth-chain failures, DLQ depth, freshness SLI, partial-success rate, service-account anomaly, per-stream workspace-side freshness).
+- 20 analytic rules (14 detection + 6 XdrOps incl. RowVolumeSpike cost-budget runtime gate). All ship `enabled: false` per Microsoft Sentinel Solution best practice.
+- 9 hunting queries.
+- 4 cadence-tier drift parsers.
+- 390 sample queries (every active stream has 5-query operator anchor).
 
-**Hosting plans**:
-- `consumption-y1` (default) — lowest cost; Y1 Linux content-share platform
-  constraint requires the shared key (Microsoft documented platform behaviour);
-  partial Managed Identity.
-- `flex-fc1` — modern Flex Consumption; full Managed Identity (no shared
-  keys); container-based deployment.
-- `premium-ep1` — Elastic Premium; full MI + always-warm + private-endpoint
-  capable.
-- All 3 deploy paths covered by ARM conditional appSettings (`HostingPlanAppSettingsConsistency.Tests.ps1` gate).
+**Supply chain**:
 
-**Sentinel content** (toggleable via `deploySentinelContent` parameter):
-- 4 KQL parsers (`MDE_Drift_*` per cadence bucket — drift detection on typed
-  columns)
-- 14 analytic rules (ship `enabled: false` per Microsoft best practice;
-  operator opts in)
-- 9 hunting queries with `author`/`version`/`tags` metadata
-- 7 workbooks including Action Center for Device Timeline + Machine Actions
-- All custom tables explicit `plan: 'Analytics'`
-
-**Observability**:
-- App Insights structured telemetry — `traces` (routine flow) + `customEvents`
-  (`AuthChain.*`, `Stream.Polled`, etc.) + `customMetrics` (`xdr.poll.duration_ms`,
-  `xdr.ingest.{rows,bytes_compressed,retry_count,dce_latency_ms}`,
-  `xdr.dlq.{push_count,pop_count,depth}`, `xdr.kv.{cache_hit,cache_miss}`)
-  + `exceptions` (full stacks) + `dependencies` (every portal HTTP call +
-  every DCE batch). `OperationId`-stamped for end-to-end transaction view.
-- Idempotency keys (`x-ms-client-request-id`) on every DCE batch — DCE-side
-  retry deduplication.
-
-**Test coverage**: 1450+ offline tests / 0 fail; `tools/Validate-ArmJson.ps1`
-PASS; `tools/Preflight-Deployment.ps1` PRE-DEPLOY READY: YES; preventive
-`tests/integration/Deployment-WhatIf.Tests.ps1` runs `az deployment group
-what-if` against the compiled ARM (catches deploy-time RP semantic violations
-offline before they hit the operator's tenant). Static gates for: DCR shape
-(5 invariants), nested-template parameter alignment + scope=inner + storage-
-name length (4 invariants), no-listKeys-in-variables (2 invariants),
-system-reserved column names (TenantId/_ResourceId/ etc.), hunting query
-field lengths (TagValue MaxLength), env-as-tag default, KV cache TTL,
-DLQ round-trip, AppInsights dependency tracking + metrics density. Operator's
-only post-deploy step is `Initialize-XdrLogRaiderAuth.ps1` to upload auth
-secrets — the **Sentinel Data Connectors blade** flips the **XdrLogRaider**
-card to **Connected** within 5–10 minutes of the first successful poll
-(driven by `MDE_Heartbeat_CL` via the connector's `connectivityCriterias`).
-
-**Forward-compat hooks** (no refactor needed for v0.2.0):
-- Manifest `Portal` field per stream + L4 orchestrator dispatches by
-  `manifest.Portal`
-- ARM additive parameter slots reserved for v0.2.0 BYO infrastructure
-  (`existingDceResourceId` / `existingDcrResourceIds`)
+- ARM-only deployment (single hand-authored `mainTemplate.json` source of truth; no Bicep auto-compile).
+- Cosign keyless signing (Sigstore Fulcio + Rekor) on 6 release artifacts.
+- SBOM SPDX-JSON via Anchore action.
+- 8-job CI: secret-scan + lint + unit-tests + static-validate + deploy-whatif + auto-recompile-gate + auto-rezip-gate + coverage-gate.
+- Dependabot weekly updates.
 
 ---
 
-## v0.2.0 — multi-portal expansion + new streams
+## v0.2.0 — multi-portal expansion + Function App multi-tenancy
 
-Additive only. No breaking changes to v0.1.0 manifest.
+Reintroduces multi-portal modules (with real bodies, not stubs) and adds Function App multi-tenancy support so one connector deployment polls multiple Defender (and v0.2.0+ Entra/Purview/Intune) tenants.
 
-**New portal-only streams** (~15-20, candidate list in `docs/CANDIDATE-STREAMS-V0.2.0.md`):
-- XSPM atlas: `MDE_XspmTopEntryPoint_CL`
-- Identity / hunting: `MDE_AdvancedHuntingUserHistory_CL`
-- Datalake catalogue: `MDE_DatalakeDatabase_CL` + `MDE_DatalakeTableSchema_CL`
-- RBAC depth: `MDE_DeviceRbacGroup_CL` + `MDE_DeviceRbacGroupScope_CL`
-- Asset criticality: `MDE_ConfigurationCriticalAsset_CL` + Schema
-- Vulnerability tracking: `MDE_TvmRemediationTasks_CL`
-- Network detection: `MDE_NdrSensorConfig_CL`
+**Planned scope**:
 
-**Multi-portal foundation** (the `Portal=` abstraction goes wide):
-- `admin.microsoft.com` — M365 tenant config + licence posture
-- `entra.microsoft.com` — Entra ID tenant config + Conditional Access
-  posture
-- `compliance.microsoft.com` — Purview DLP / eDiscovery config
-- `intune.microsoft.com` — Intune device/policy config
+- New L2 Auth + L3 Client modules: `Xdr.Entra.Auth` + `Xdr.Entra.Client` + `Xdr.Purview.Auth` + `Xdr.Purview.Client` + `Xdr.Intune.Auth` + `Xdr.Intune.Client` (6 modules — back from v0.2.0+ deferral).
+- Per-portal workspace tables: `Entra_<Category>_CL`, `Purview_<Category>_CL`, `Intune_<Category>_CL` under the same nodoc 10-category taxonomy.
+- `XdrConnectorHealth_CL.Portal` column populated with non-Defender values.
+- Function App multi-tenancy: per-tenant secret namespacing in KV (`mde-portal-{tenant}-password` etc.). `Initialize-XdrLogRaiderAuth.ps1` adds multi-tenant seeding. New ARM parameters for tenant configuration matrix.
+- Coverage gate raised to ≥75% (v0.1.0 GA Phase 5 reaches ≥50% intermediate).
+- Pester parallelism for faster CI.
+- Manifest hot-load caching for cadence-tier duration.
 
-Each new portal is a file-add: per-portal `Xdr.<Portal>.Auth` (L2) +
-`Xdr.<Portal>.Client` (L3) + manifest entries with `Portal=<portal>`. Zero
-changes to existing modules.
+**Operator impact**:
 
-**Operational hardening**:
-- KV secret rotation event-grid hook (replaces v0.1.0-beta's TTL-based
-  cache invalidation with push-based)
-- BYO DCE/DCR via additive Bicep parameters (`existingDceResourceId` +
-  `existingDcrResourceIds[]`) for tenants with shared monitoring
-  infrastructure
-- Local Bicep direct-deploy support (`_artifactsLocation` parameter pattern)
-  alongside the Deploy-to-Azure URL flow
-- Time-filter coverage extension on `Filter='fromDate'` for endpoints whose
-  server-side date filtering was deferred from v0.1.0-beta pending live
-  per-endpoint verification
+- Existing `Defender_<Category>_CL` tables + KQL queries continue to work UNCHANGED.
+- New ARM parameters for tenant matrix; existing single-tenant deploy stays valid.
 
 ---
 
-## v1.0 — Microsoft Sentinel Solution Gallery listing
+## v1.0+ — Microsoft Sentinel Solution Gallery listing
 
-Microsoft Sentinel Solution submission merged into
-`Azure/Azure-Sentinel/Solutions/XdrLogRaider/`. Content Hub listing live.
+Submission to the Microsoft Sentinel Content Hub Solutions Gallery as a partner-validated solution.
 
-**Submission deliverables** (per Microsoft Sentinel Solution submission
-criteria):
-- CodeQL gate in CI (security scanning)
-- Workbook gallery metadata (`galleryItem.json` per workbook)
-- Accessibility (WCAG-AA)
-- Localisation (en-US baseline + de-DE / ja-JP / fr-FR / es-ES)
-- Full MITRE Att&ck coverage matrix per analytic rule
-- Threat model artifact (STRIDE per surface; data-flow trust-boundary diagram)
-- EV publisher certificate (code-signing the function-app.zip)
-- Marketplace baseline parameter defaults: `hostingPlan=flex-fc1`,
-  `restrictPublicNetwork=true`, `legacyEnvInName=false`
+**Planned scope**:
+
+- Multi-region / multi-tenant production matrix testing.
+- Premium hosting plan default (Flex Consumption / EP1) for regulated workloads with `restrictPublicNetwork=true` and Private Endpoints.
+- Solution Gallery package signed + partner-validated.
+- ≥3 Solution Gallery screenshots demonstrating connector card + workbooks + analytic rule integration.
 
 ---
 
-## Future capabilities (out of band — additive when delivered)
+## Out of scope (architectural exclusions)
 
-- **Durable Functions orchestrator** — collapse the 5 cadence-tier timers
-  to 1 orchestrator + N activities if total stream count exceeds ~100 across
-  multi-portal expansion. Trade-off: loses per-tier App Insights operation
-  isolation.
-- **Multi-tenant fan-out** (MSSP scenario) — single connector instance
-  polling N customer tenants. Manifest `TenantId` field slot reserved.
-- **Customer-pinned Function App package** — first-class support for
-  pinning `WEBSITE_RUN_FROM_PACKAGE` to a private blob alongside the
-  GitHub Releases default.
-
----
-
-## Non-goals (permanent scope guardrails)
-
-- **Microsoft Graph Security / Microsoft 365 Defender Public APIs** — out of
-  scope. The connector's value proposition is portal-only telemetry NOT
-  reachable via Graph. Graph-covered streams have official Microsoft Sentinel
-  data connectors and operators should use those.
-- **Schema-lock typed columns without RawJson preservation** — RawJson is
-  always preserved alongside typed columns; portal API drift is real and
-  schema-lock loses rows silently.
-- **HAR capture as a research source** — XDRInternals + nodoc +
-  MDEAutomator + DefenderHarvester + live-authenticated capture together
-  are sufficient. HAR is a fallback only.
-- **Premium FA plan as default** — Consumption Y1 stays the default. Flex
-  Consumption + Elastic Premium are opt-ins for tenants with specific
-  Managed-Identity / latency / private-endpoint requirements.
+- **Container Apps migration**: Y1 Linux Consumption is sufficient for projected stream volume + cadence.
+- **FA-side content-hash dedup**: drift parsers + time-series model already solve change detection.
+- **Operator-side `arg_max` in ops queries**: drift parsers do change detection internally; operators query parser output.
+- **Backward-compat code paths for v0.1.0 GA migration**: v0.1.0 is a clean baseline; no migration code paths kept.

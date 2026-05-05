@@ -56,7 +56,7 @@ function Invoke-MDEEndpoint {
 
         [Parameter(Mandatory)]
         [ValidateScript({
-            $manifest = Get-MDEEndpointManifest
+            $manifest = Get-XdrEndpointManifest -Portal Defender
             if ($_ -notin $manifest.Keys) {
                 throw "Unknown Stream '$_'. Known streams: $($manifest.Keys -join ', ')"
             }
@@ -68,7 +68,7 @@ function Invoke-MDEEndpoint {
         [hashtable] $PathParams = @{}
     )
 
-    $entry = (Get-MDEEndpointManifest)[$Stream]
+    $entry = (Get-XdrEndpointManifest -Portal Defender)[$Stream]
 
     # --- Path substitution ---
     $path = $entry.Path
@@ -146,7 +146,7 @@ function Invoke-MDEEndpoint {
     if ($entry.ContainsKey('UnwrapProperty') -and $entry.UnwrapProperty) {
         $expandArgs['UnwrapProperty'] = [string]$entry.UnwrapProperty
     }
-    # iter-14.0 Phase 1: SingleObjectAsRow forces single-object responses to
+    # v0.1.0 GA: SingleObjectAsRow forces single-object responses to
     # emit ONE per-entity row (Shape 1) instead of N per-property rows (Shape 3).
     # Used for endpoints returning a single configuration object that's
     # operator-friendly as one row (TenantContext, ConnectedApps, UserPreferences).
@@ -202,14 +202,14 @@ function Invoke-MDEEndpoint {
             } else {
                 [string]$rawId
             }
-            # iter-14.0 BUGFIX (CRITICAL — was silent in v0.1.0-beta): pass the
+            # v0.1.0 GA BUGFIX (CRITICAL — was silent in v0.1.0-beta): pass the
             # manifest's ProjectionMap so ConvertTo-MDEIngestRow extracts typed
             # columns. Without -ProjectionMap, the dispatcher silently emits
             # rows with only the 4 base columns + RawJson — every typed column
             # in every MDE_*_CL table came out NULL. Live verification on
             # MDE_AdvancedFeatures_CL / MDE_TenantContext_CL / MDE_PUAConfig_CL
             # confirmed NULL across the board pre-fix. ProjectionMap is always
-            # at least @{} (Get-MDEEndpointManifest's Defaults block guarantees
+            # at least @{} (Get-XdrEndpointManifest -Portal Defender's Defaults block guarantees
             # the field exists), so a $null guard is unnecessary but harmless.
             $projMap = if ($entry.ContainsKey('ProjectionMap') -and $entry.ProjectionMap) { $entry.ProjectionMap } else { $null }
             # Phase I REVERTED per user feedback (2026-05-04): nodoc taxonomy

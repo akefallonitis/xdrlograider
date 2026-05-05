@@ -5,7 +5,7 @@
     Catches portal-side schema drift before deploy.
 
 .DESCRIPTION
-    iter-14.0 Phase 4 (v0.1.0 GA). Implements Section 3 step 6 (online preflight)
+    v0.1.0 GA (v0.1.0 GA). Implements Section 3 step 6 (online preflight)
     + Section 5 (CI/CD pipeline) of the senior-architect plan.
 
     For each `live` stream in the manifest, fetches the live portal response and
@@ -40,6 +40,9 @@ BeforeDiscovery {
 BeforeAll {
     $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
     $script:FixturesDir = Join-Path $script:RepoRoot 'tests' 'fixtures' 'live-responses'
+    # Phase J.F.NEW.1 (D'.46): Pester 5 BeforeDiscovery $script:* vars don't
+    # propagate into the Run phase. Reload manifest here for It-block use.
+    $script:Manifest = Import-PowerShellDataFile -Path (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1')
 
     # Load .env.local
     $envFile = Join-Path $script:RepoRoot 'tests' '.env.local'
@@ -99,16 +102,19 @@ Describe 'CapturePreflight — committed fixture matches live portal shape' -For
             return
         }
 
-        # Try live invocation
+        # Try live invocation — keep try/catch tight around portal call only,
+        # because Set-ItResult -Skipped throws an exception that would be
+        # caught here and incorrectly converted into a Should-failure.
+        $live = $null
         try {
             $live = Invoke-MDEEndpoint -Session $script:Session -Stream $streamName
-            if ($null -eq $live -or @($live).Count -eq 0) {
-                Set-ItResult -Skipped -Because "Live portal returned 0 rows for $streamName (operator-empty tenant); cannot diff"
-                return
-            }
         } catch {
             $msg = $_.Exception.Message
             $msg | Should -BeNullOrEmpty -Because "live portal call for $streamName failed: $msg. Possible portal-API drift; investigate."
+            return
+        }
+        if ($null -eq $live -or @($live).Count -eq 0) {
+            Set-ItResult -Skipped -Because "Live portal returned 0 rows for $streamName (operator-empty tenant); cannot diff"
             return
         }
 

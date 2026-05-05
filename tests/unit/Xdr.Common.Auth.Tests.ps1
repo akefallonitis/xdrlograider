@@ -3,14 +3,14 @@
 <#
 .SYNOPSIS
     Pester 5 unit tests for the L1 portal-generic Entra-layer module
-    Xdr.Common.Auth (iter-14.0 Phase 1).
+    Xdr.Common.Auth (v0.1.0 GA).
 
 .DESCRIPTION
     Migrated out of tests/unit/Xdr.Portal.Auth.Tests.ps1 when the monolithic
     Xdr.Portal.Auth was split into:
         - L1 Xdr.Common.Auth   (Entra primitives — TOTP, passkey, ESTS auth, KV)
         - L2 Xdr.Defender.Auth (Defender-portal-specific cookie exchange)
-        - Xdr.Portal.Auth      (backward-compat shim re-exporting MDE-prefixed wrappers)
+        - Xdr.Portal.Auth      (v0.1.0 GA scope shim re-exporting MDE-prefixed wrappers)
 
     Tests for crypto primitives (Get-TotpCode, Invoke-PasskeyChallenge) and the
     public Entra entry points (Get-EntraEstsAuth, Resolve-EntraInterruptPage,

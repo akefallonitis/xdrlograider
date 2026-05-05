@@ -7,19 +7,14 @@
     Author                = 'Alex Kefallonitis'
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
-    Description           = 'L4 portal-routing dispatcher. Provides a single -Portal-keyed entry point (Connect-XdrPortal, Invoke-XdrTierPoll, Test-XdrPortalAuth, Get-XdrPortalManifest) plus v0.1.0 GA helpers Get-XdrConnectorHealth + Test-XdrConnectorConfig. Routes to the right L2 auth + L3 client modules based on an internal portal-routing table. v0.1.0 GA: Defender = live; Entra/Purview/Intune = scaffolding-stub (v0.2.0 roadmap).'
+    Description           = 'L4 portal-routing dispatcher. Provides a single -Portal-keyed entry point (Connect-XdrPortal, Invoke-XdrTierPoll, Test-XdrPortalAuth, Get-XdrPortalManifest) plus v0.1.0 GA helpers Get-XdrConnectorHealth + Test-XdrConnectorConfig. Routes to the right L2 auth + L3 client modules based on an internal portal-routing table. v0.1.0 GA: Defender = live (single-portal). v0.2.0 reintroduces Entra/Purview/Intune modules with real bodies + FA multi-tenancy support.'
     RequiredModules       = @(
         'Xdr.Common.Auth',
+        'Xdr.Common.Manifest',
+        'Xdr.Common.Telemetry',
         'Xdr.Defender.Auth',
         'Xdr.Defender.Client',
-        'Xdr.Sentinel.Ingest',
-        # v0.1.0 GA Phase A.3 multi-portal scaffolding stubs (forward-compat):
-        'Xdr.Entra.Auth',
-        'Xdr.Entra.Client',
-        'Xdr.Purview.Auth',
-        'Xdr.Purview.Client',
-        'Xdr.Intune.Auth',
-        'Xdr.Intune.Client'
+        'Xdr.Sentinel.Ingest'
     )
     FunctionsToExport     = @(
         'Connect-XdrPortal',

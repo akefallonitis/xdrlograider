@@ -81,7 +81,7 @@ function Invoke-WorkspaceQuery {
 # ----- Signal 1: Heartbeat in last N minutes -----
 $heartbeatLookback = "${HeartbeatLookbackMinutes}m"
 $heartbeatQuery = @"
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago($heartbeatLookback)
 | where StreamsSucceeded > 0
 | summarize Latest = max(TimeGenerated), Count = count(), Tiers = make_set(Tier)
@@ -134,7 +134,7 @@ $authResult = if ($authRows -and ($authRows | Select-Object -First 1).ErrorCount
 
 # ----- Signal 3: Per-tier stream coverage in last 24h -----
 $coverageQuery = @"
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(24h)
 | where Tier in ('fast', 'exposure', 'config', 'inventory', 'maintenance')
 | summarize TierLastSeen = max(TimeGenerated), TierStreamsSucceeded = max(StreamsSucceeded) by Tier

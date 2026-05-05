@@ -55,13 +55,13 @@ MDE_<Stream>_CL
 | extend MyField = tostring(parse_json(RawJson).fieldNameInJson)
 ```
 
-This pattern continues to work indefinitely; the typed columns are additive, not a replacement. See [QUERY-MIGRATION-GUIDE.md](QUERY-MIGRATION-GUIDE.md) for the full migration recipe.
+This pattern continues to work indefinitely; the typed columns are additive, not a replacement.
 
 ### Operational tables (not in this catalog)
 
 Two tables are emitted by the connector itself, not polled from the portal, and follow their own fixed schema (no projection map):
 
-- `MDE_Heartbeat_CL` — one row per timer invocation. Columns: `TimeGenerated, FunctionName, Tier, StreamsAttempted, StreamsSucceeded, RowsIngested, LatencyMs, HostName, Notes(dynamic)`. See [OPERATIONS.md](OPERATIONS.md) for the heartbeat KQL cookbook.
+- `XdrConnectorHealth_CL` — one row per timer invocation. Columns: `TimeGenerated, FunctionName, Tier, StreamsAttempted, StreamsSucceeded, RowsIngested, LatencyMs, HostName, Notes(dynamic)`. See [OPERATIONS.md](OPERATIONS.md) for the heartbeat KQL cookbook.
 - `App Insights customEvents (AuthChain.* events)` — one row per auth self-test. Columns: `TimeGenerated, Method, PortalHost, Upn, Success, Stage, FailureReason, EstsMs, SccauthMs, SampleCallHttpCode, SampleCallLatencyMs, SccauthAcquiredUtc`. See [UNATTENDED-AUTH.md](UNATTENDED-AUTH.md).
 
 The remainder of this document covers the 46 telemetry streams.
@@ -1260,7 +1260,6 @@ MDE_CloudAppsConfig_CL
 
 - [STREAMS.md](STREAMS.md) — higher-level per-stream summary, polling cadence, availability legend, tier counts.
 - [DRIFT.md](DRIFT.md) — pure-KQL drift model; how the per-tier parsers compute change records on top of these tables.
-- [QUERY-MIGRATION-GUIDE.md](QUERY-MIGRATION-GUIDE.md) — recipe for migrating queries written against `RawJson` to use the typed columns above.
 - [ANALYTIC-RULES-VETTING.md](ANALYTIC-RULES-VETTING.md) — per-rule narrative + which streams + columns each rule depends on.
 - [WORKBOOKS.md](WORKBOOKS.md) — per-workbook field references.
 - [`endpoints.manifest.psd1`](../src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1) — source of truth for the projection map of every stream.

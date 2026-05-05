@@ -6,7 +6,7 @@
     manifest's ProjectionMap for that stream.
 
 .DESCRIPTION
-    iter-14.0 Phase 3 (v0.1.0 GA). Closes the SSoT loop per Section 2.1 of the
+    v0.1.0 GA (v0.1.0 GA). Closes the SSoT loop per Section 2.1 of the
     senior-architect plan: manifest is the source of truth for typed cols;
     Sentinel content references must be valid against it.
 

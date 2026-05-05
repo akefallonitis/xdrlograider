@@ -41,7 +41,7 @@ BeforeAll {
         'Get-LaraAuthSelfTestFlag',
         'Invoke-LaraTierPoll',
         'Connect-LaraPortal',
-        # Shim wrappers removed in v0.1.0-beta first publish — code must call
+        # Shim wrappers removed in v0.1.0 GA first publish — code must call
         # the real-module names directly (Connect-DefenderPortal etc.).
         'Connect-MDEPortal',
         'Connect-MDEPortalWithCookies',
@@ -272,7 +272,7 @@ Describe 'Invoke-TierPollWithHeartbeat helper shape (single source of truth for 
             }
             if ($hasFatalError) { break }
         }
-        $hasFatalError | Should -BeTrue -Because "catch block must emit Notes with a 'fatalError' field so operators see the failure in MDE_Heartbeat_CL"
+        $hasFatalError | Should -BeTrue -Because "catch block must emit Notes with a 'fatalError' field so operators see the failure in XdrConnectorHealth_CL"
     }
 
     It 'catch block re-throws (so Application Insights logs the fatal)' {

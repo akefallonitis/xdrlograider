@@ -102,7 +102,7 @@ pwsh ./tests/Run-Tests.ps1 -Category e2e
 
 **Success**: every assertion green:
 - `resource group contains Function App / Key Vault / DCE / DCR / Storage` ✓
-- `MDE_Heartbeat_CL has rows in the last hour` ✓
+- `XdrConnectorHealth_CL has rows in the last hour` ✓
 - `App Insights customEvents (AuthChain.* events) shows latest Success=true` ✓
 - `MDE_AdvancedFeatures_CL has at least one row` ✓
 - `at least 3 P0 streams have ingested rows` ✓
@@ -112,7 +112,7 @@ pwsh ./tests/Run-Tests.ps1 -Category e2e
 
 **If per-tier test shows fewer populated streams than expected**:
 - **Expected baseline**: 25 of 45 streams populate immediately (validated by pre-deploy audit). 10 streams are marked `Deferred=true` in the manifest because their paths/body schemas are still under research — they will NOT emit rows until the manifest is updated in a follow-up commit.
-- **To see which are deferred**: `pwsh -c "(Get-MDEEndpointManifest).Values | Where { `$_.Deferred } | Select Stream, DeferReason"`
+- **To see which are deferred**: `pwsh -c "(Get-XdrEndpointManifest -Portal Defender).Values | Where { `$_.Deferred } | Select Stream, DeferReason"`
 - **To poll them anyway for research**: `Invoke-MDETierPoll -IncludeDeferred` (not used by timer functions).
 
 ---
@@ -123,7 +123,7 @@ For the first day, monitor these KQL queries in the workspace (paste into Log An
 
 ### 4a. Heartbeat health
 ```kql
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(2h)
 | summarize PerTier = makeset(Tier), Runs = count() by FunctionName, bin(TimeGenerated, 1h)
 | order by TimeGenerated desc
@@ -169,7 +169,7 @@ After 48 hours of green heartbeats + stable ingestion:
 2. **Pin the dashboards** (`MDE Compliance Dashboard`, `MDE Exposure Dashboard`, `MDE Audit Dashboard`) to your Sentinel workspace.
 3. **Set up alerting** on heartbeat staleness:
    ```kql
-   MDE_Heartbeat_CL
+   XdrConnectorHealth_CL
    | where TimeGenerated > ago(2h)
    | summarize LastSeen = max(TimeGenerated) by FunctionName
    | where LastSeen < ago(1h)
@@ -205,7 +205,7 @@ The manifest ships with 25 verified streams + 27 marked for follow-up. To enable
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `MDE_Heartbeat_CL` empty after 30 min | FA not running / MI not granted | Check FA `state` + 3 role assignments on MI |
+| `XdrConnectorHealth_CL` empty after 30 min | FA not running / MI not granted | Check FA `state` + 3 role assignments on MI |
 | `App Insights customEvents (AuthChain.* events).Success = false` | Credentials mismatch / TOTP seed wrong | Re-run `Initialize-XdrLogRaiderAuth.ps1` with corrected values |
 | Only 1-2 streams populated | Auth working but endpoints 4xx/5xx | Expected — 25/52 is today's baseline; iterate on deferred set |
 | `AADSTS9000410` in logs | ProcessAuth ContentType regression | Should not happen in v1.0+ — file bug |

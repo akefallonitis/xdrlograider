@@ -5,7 +5,7 @@
     the auth chain MUST emit a Write-Warning with diagnostic context (so
     operators can root-cause from App Insights traces).
 
-    iter-14.0 update: Resolve-InterruptPage was renamed to Resolve-EntraInterruptPage
+    v0.1.0 GA update: Resolve-InterruptPage was renamed to Resolve-EntraInterruptPage
     and moved out of Xdr.Portal.Auth/Private/Get-EstsCookie.ps1 into
     Xdr.Common.Auth/Public/Resolve-EntraInterruptPage.ps1. The source-level
     diagnostic-warning lock is unchanged otherwise.
@@ -38,7 +38,7 @@ AfterAll {
     Remove-Module Xdr.Common.Auth -Force -ErrorAction SilentlyContinue
 }
 
-Describe 'Auth chain — unknown pgid emits Write-Warning (iter 13.9 O1 lock; iter-14.0 location)' {
+Describe 'Auth chain — unknown pgid emits Write-Warning (iter 13.9 O1 lock; v0.1.0 GA location)' {
 
     It 'Resolve-EntraInterruptPage default branch contains diagnostic Write-Warning' {
         # Source-level assertion: read the file + verify the default branch
@@ -73,7 +73,7 @@ Describe 'Auth chain — unknown pgid emits Write-Warning (iter 13.9 O1 lock; it
             }
         }
         $hasDefaultWithWarning | Should -BeTrue -Because (
-            'iter-13.9 O1 lock: the default branch of the pgid switch in ' +
+            'pre-v0.1.0.9 O1 lock: the default branch of the pgid switch in ' +
             'Resolve-EntraInterruptPage MUST emit a Write-Warning so unknown ' +
             'interrupts (e.g. AADSTS399218 user-confirmation surface) leave ' +
             'a diagnostic trail for operators in App Insights.'
@@ -86,7 +86,7 @@ Describe 'Auth chain — unknown pgid emits Write-Warning (iter 13.9 O1 lock; it
     }
 
     It 'KmsiInterrupt + CmsiInterrupt + ConvergedProofUpRedirect handlers still present (regression guard)' {
-        # iter-13.x has been hardening this surface; a future refactor must
+        # pre-v0.1.0.x has been hardening this surface; a future refactor must
         # not accidentally drop one of the 3 known handlers.
         $resolvePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Public' 'Resolve-EntraInterruptPage.ps1'
         $content = Get-Content $resolvePath -Raw

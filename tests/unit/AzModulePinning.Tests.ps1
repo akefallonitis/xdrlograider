@@ -1,7 +1,7 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Locks the iter-13.15 module bundle: Az.Accounts + Az.KeyVault + Az.Storage
+    Locks the pre-v0.1.0 module bundle: Az.Accounts + Az.KeyVault + Az.Storage
     pinned with RequiredVersion (exact pin). AzTable + Az.Resources REMOVED.
 
 .DESCRIPTION
@@ -20,7 +20,7 @@
     Locked invariants:
     - Every bundled module uses RequiredVersion (exact pin, no floating).
     - Az.Accounts + Az.KeyVault + Az.Storage are bundled.
-    - AzTable + Az.Resources are NOT bundled (iter-13.15 transition gate).
+    - AzTable + Az.Resources are NOT bundled (pre-v0.1.0 transition gate).
 #>
 
 BeforeAll {
@@ -40,13 +40,13 @@ Describe 'Az.* module bundling — RequiredVersion enforcement (no floating vers
     It 'release.yml uses RequiredVersion (NOT MinimumVersion) for module bundling' {
         # MinimumVersion lets PSGallery serve whatever-latest. Each release
         # silently picks a different snapshot. Az.Storage 9.x silently broke
-        # iter-13's table cmdlet usage. RequiredVersion guarantees reproducible
+        # pre-v0.1.0's table cmdlet usage. RequiredVersion guarantees reproducible
         # builds + tested-version pinning.
-        $script:ReleaseYmlContent | Should -Match 'RequiredVersion' -Because 'iter-13.2 locked exact-version pinning'
+        $script:ReleaseYmlContent | Should -Match 'RequiredVersion' -Because 'pre-v0.1.0.2 locked exact-version pinning'
         # Soft check — MinimumVersion may still appear in comments, but not as a
         # parameter to Save-Module
         $minVerInSaveModule = $script:ReleaseYmlContent -match 'Save-Module[^\r\n]*-MinimumVersion'
-        $minVerInSaveModule | Should -BeFalse -Because 'iter-13.2 must NOT use Save-Module -MinimumVersion (floating dependency hell)'
+        $minVerInSaveModule | Should -BeFalse -Because 'pre-v0.1.0.2 must NOT use Save-Module -MinimumVersion (floating dependency hell)'
     }
 
     It 'release.yml bundles Az.Accounts at the pinned version' {
@@ -67,33 +67,33 @@ Describe 'Az.* module bundling — RequiredVersion enforcement (no floating vers
     }
 }
 
-Describe 'iter-13.15 transition gate — AzTable + Az.Resources MUST NOT be bundled' {
-    # These modules were bundled in iter-13.2 → iter-13.14. iter-13.15 removed
+Describe 'pre-v0.1.0 transition gate — AzTable + Az.Resources MUST NOT be bundled' {
+    # These modules were bundled in pre-v0.1.0.2 → pre-v0.1.0.14. pre-v0.1.0 removed
     # them when Storage Table ops moved to System.Net.Http.HttpClient via
     # Invoke-XdrStorageTableEntity. This gate locks the transition: any
     # accidental re-add to release.yml fails CI immediately.
 
-    It 'release.yml does NOT bundle AzTable (replaced by Invoke-XdrStorageTableEntity in iter-13.15)' {
-        $script:ReleaseYmlContent | Should -Not -Match "Name\s*=\s*'AzTable';\s*RequiredVersion" -Because 'iter-13.15: AzTable removed; Storage Table ops use Invoke-XdrStorageTableEntity (System.Net.Http.HttpClient + MI token via Get-AzAccessToken).'
+    It 'release.yml does NOT bundle AzTable (replaced by Invoke-XdrStorageTableEntity in pre-v0.1.0)' {
+        $script:ReleaseYmlContent | Should -Not -Match "Name\s*=\s*'AzTable';\s*RequiredVersion" -Because 'pre-v0.1.0: AzTable removed; Storage Table ops use Invoke-XdrStorageTableEntity (System.Net.Http.HttpClient + MI token via Get-AzAccessToken).'
     }
 
     It 'release.yml does NOT bundle Az.Resources (only existed as AzTable transitive dep)' {
-        $script:ReleaseYmlContent | Should -Not -Match "Name\s*=\s*'Az\.Resources';\s*RequiredVersion" -Because 'iter-13.15: Az.Resources only existed because AzTable required it. With AzTable gone, no remaining dependency.'
+        $script:ReleaseYmlContent | Should -Not -Match "Name\s*=\s*'Az\.Resources';\s*RequiredVersion" -Because 'pre-v0.1.0: Az.Resources only existed because AzTable required it. With AzTable gone, no remaining dependency.'
     }
 }
 
 Describe 'release.yml post-build gates — bundle integrity assertions' {
 
-    It 'release.yml asserts every bundled Az.* module .psd1 is present in zip (iter-13.15: 3 modules)' {
+    It 'release.yml asserts every bundled Az.* module .psd1 is present in zip (pre-v0.1.0: 3 modules)' {
         # Iter 13.15: 3 bundled modules (Az.Accounts, Az.KeyVault, Az.Storage).
         # Missing any one re-triggers a silent no-op bug.
         $script:ReleaseYmlContent | Should -Match "Az\.Accounts.*Az\.KeyVault.*Az\.Storage" -Because 'release.yml validation loop must check all bundled modules'
     }
 
     It 'release.yml asserts AzTable + Az.Resources are NOT in the zip (negative-bundle gate)' {
-        # iter-13.15: enforce removal stays effective even if Save-Module cache
+        # v0.1.0 GA: enforce removal stays effective even if Save-Module cache
         # leaks an old version into the staging dir. The actual gate text in
-        # release.yml is "AzTable + Az.Resources confirmed NOT bundled (iter-13.15 transition)".
-        $script:ReleaseYmlContent | Should -Match 'AzTable.*Az\.Resources.*NOT bundled.*iter-13\.15' -Because 'release.yml must include the negative-bundle assertion to prevent regression'
+        # release.yml is "AzTable + Az.Resources confirmed NOT bundled (pre-v0.1.0 transition)".
+        $script:ReleaseYmlContent | Should -Match 'AzTable.*Az\.Resources.*NOT bundled' -Because 'release.yml must include the negative-bundle assertion to prevent regression'
     }
 }

@@ -3,7 +3,7 @@
 .SYNOPSIS
     Offline parse-time + module-export regression gates for the Function App
     runtime code. Catches the EXACT class of bugs that escaped to production
-    in iter-13 deployment:
+    in pre-v0.1.0 deployment:
 
       Bug A: validate-auth-selftest/run.ps1 had 5 parse errors from "$fn:"
              pattern (PowerShell parses `$fn:` as scope qualifier; needs
@@ -39,7 +39,7 @@ BeforeAll {
 
 Describe 'PowerShell parse-time correctness for Function App runtime files' {
     # Parses every .ps1 / .psm1 file under src/ with the SAME parser the Azure
-    # Functions PowerShell runtime uses. Catches the iter-13 Bug A class of
+    # Functions PowerShell runtime uses. Catches the pre-v0.1.0 Bug A class of
     # syntax error that PSScriptAnalyzer warnings don't reliably surface.
 
     BeforeAll {
@@ -103,7 +103,7 @@ Describe 'PowerShell parse-time correctness for Function App runtime files' {
 }
 
 Describe 'Module export contract — psd1 FunctionsToExport must match psm1 Export-ModuleMember' {
-    # Catches the iter-13 Bug B class: psm1 Export-ModuleMember filters out a
+    # Catches the pre-v0.1.0 Bug B class: psm1 Export-ModuleMember filters out a
     # function that the psd1 FunctionsToExport claims to export. PowerShell
     # uses the INTERSECTION → function silently unavailable to callers.
 
@@ -118,13 +118,16 @@ Describe 'Module export contract — psd1 FunctionsToExport must match psm1 Expo
         })
     }
 
-    It 'enumerates expected module manifests (11 modules in v0.1.0 GA - 5 live + 6 multi-portal scaffolding stubs)' {
-        # v0.1.0 GA architecture per Phase A.3 in .claude/plans/immutable-splashing-waffle.md:
-        #   5 live: Xdr.Common.Auth, Xdr.Sentinel.Ingest, Xdr.Defender.Auth,
-        #           Xdr.Defender.Client, Xdr.Connector.Orchestrator
-        #   6 stubs: Xdr.{Entra,Purview,Intune}.{Auth,Client} - throw "NOT IMPLEMENTED"
-        #            errors when called; v0.2.0 fills in bodies
-        @($script:ModuleManifests).Count | Should -Be 11 -Because "v0.1.0 GA = 5 live + 6 scaffolding stubs"
+    It 'enumerates expected module manifests (7 modules in v0.1.0 GA - pure Defender connector)' {
+        # v0.1.0 GA architecture (per user 2026-05-05 — pure Defender connector,
+        # multi-portal stubs deferred to v0.2.0 with FA multi-tenancy support):
+        #   L1 Common: Xdr.Common.Auth, Xdr.Common.Manifest, Xdr.Common.Telemetry
+        #   L1 Ingest: Xdr.Sentinel.Ingest
+        #   L2 Auth:   Xdr.Defender.Auth
+        #   L3 Client: Xdr.Defender.Client
+        #   L4 Orch:   Xdr.Connector.Orchestrator
+        # v0.2.0 reintroduces Entra/Purview/Intune Auth/Client modules with real bodies.
+        @($script:ModuleManifests).Count | Should -Be 7 -Because "v0.1.0 GA = 7 live modules (no multi-portal stubs)"
     }
 
     It 'every psd1 FunctionsToExport entry is also in the corresponding psm1 Export-ModuleMember' {

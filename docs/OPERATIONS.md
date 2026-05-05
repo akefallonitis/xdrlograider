@@ -7,7 +7,7 @@ Day-two SRE guidance for XdrLogRaider in production. Complements
 
 ```kql
 // Is the connector alive, authenticated, and efficient?
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(30m)
 | extend n = parse_json(Notes)
 | summarize
@@ -54,7 +54,7 @@ traces
 ### 3. 429 rate per tier
 
 ```kql
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(24h)
 | extend n = parse_json(Notes)
 | extend r429 = toint(n.rate429Count)
@@ -66,7 +66,7 @@ MDE_Heartbeat_CL
 ### 4. Gzip compression ratio trend
 
 ```kql
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(7d)
 | extend n = parse_json(Notes)
 | extend gz = tolong(n.gzipBytes)
@@ -120,10 +120,10 @@ Minimum viable set; create in Azure Portal → Sentinel workspace → Alerts.
 
 | Signal | Condition | Severity | Action |
 |--------|-----------|----------|--------|
-| Fatal heartbeat | `MDE_Heartbeat_CL | where parse_json(Notes).fatalError != ''` count > 0 in last 30 min | High | Page on-call |
+| Fatal heartbeat | `XdrConnectorHealth_CL | where parse_json(Notes).fatalError != ''` count > 0 in last 30 min | High | Page on-call |
 | Auth self-test fail | `App Insights customEvents | where Success == false` count > 2 consecutive | High | Page + run RUNBOOK auth-chain |
-| Rate429 steady-state | `MDE_Heartbeat_CL | extend r429=toint(parse_json(Notes).rate429Count) | where r429 > 5` over 1h | Medium | Investigate tenant-side portal quota, consider reducing poll frequency |
-| Ingestion silence | `MDE_Heartbeat_CL | summarize max(TimeGenerated)` older than `2 × max-cron-interval` | High | FA stopped; check App Insights Exception telemetry |
+| Rate429 steady-state | `XdrConnectorHealth_CL | extend r429=toint(parse_json(Notes).rate429Count) | where r429 > 5` over 1h | Medium | Investigate tenant-side portal quota, consider reducing poll frequency |
+| Ingestion silence | `XdrConnectorHealth_CL | summarize max(TimeGenerated)` older than `2 × max-cron-interval` | High | FA stopped; check App Insights Exception telemetry |
 
 ## Reducing portal load (if Rate429 stays non-zero)
 
@@ -131,7 +131,7 @@ Minimum viable set; create in Azure Portal → Sentinel workspace → Alerts.
 2. **Reduce jitter ceiling**: `Invoke-MDETierPoll` uses 80-320ms per call — if you've added tracked extra headers/body, raise to 200-600ms.
 3. **Add Filter on static streams**: streams without `Filter` re-pull the full snapshot every cycle. Audit candidates post-deploy:
    ```kql
-   MDE_Heartbeat_CL | where TimeGenerated > ago(1d) | extend n = parse_json(Notes) | where tolong(n.gzipBytes) > 50000 | summarize avg(tolong(n.gzipBytes)) by Tier
+   XdrConnectorHealth_CL | where TimeGenerated > ago(1d) | extend n = parse_json(Notes) | where tolong(n.gzipBytes) > 50000 | summarize avg(tolong(n.gzipBytes)) by Tier
    ```
 
 ## Package delivery — switching from GitHub URL to private blob
@@ -143,7 +143,7 @@ For regulated/air-gapped tenants, mirror to a private blob:
 ```powershell
 # On admin workstation with Az.Storage
 $sa = 'yourcontainerstorageacct'
-$ver = 'v0.1.0-beta'
+$ver = 'v0.1.0 GA'
 Invoke-WebRequest `
   "https://github.com/akefallonitis/xdrlograider/releases/download/$ver/function-app.zip" `
   -OutFile "function-app-$ver.zip"
@@ -172,7 +172,7 @@ The Function App's SAMI must already have `Key Vault Secrets User` (which the te
 
 ## When the XSPM streams come back
 
-`MDE_XspmChokePoints_CL` + `MDE_XspmTopTargets_CL` are currently `tenant-gated` with bodies that returned 400 on 2026-04-24 (regressed from 200 in v0.1.0-beta.1). When a future release ships corrected bodies:
+`MDE_XspmChokePoints_CL` + `MDE_XspmTopTargets_CL` are currently `tenant-gated` with bodies that returned 400 on 2026-04-24 (regressed from 200 in v0.1.0 GA.1). When a future release ships corrected bodies:
 
 1. Redeploy the Function App with the new release tag.
 2. Confirm via:

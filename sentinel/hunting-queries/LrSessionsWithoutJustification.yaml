@@ -11,11 +11,11 @@ tags:
 requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal
     dataTypes:
-      - MDE_Heartbeat_CL
+      - XdrConnectorHealth_CL
 tactics:
   - Discovery
   - Collection
 relevantTechniques:
   - T1059
 query: |
-  MDE_ActionCenter_CL | where TimeGenerated > ago(7d) | extend Type = tostring(parse_json(RawJson).actionType), InvestigationId = tostring(parse_json(RawJson).investigationId) | where Type has "LiveResponse" and isempty(InvestigationId)
+  Defender_ActionCenter_CL | where SourceName == 'MDE_ActionCenter_CL' | where TimeGenerated > ago(7d) | extend Type = tostring(parse_json(RawJson).actionType), InvestigationId = tostring(parse_json(RawJson).investigationId) | where Type has "LiveResponse" and isempty(InvestigationId)

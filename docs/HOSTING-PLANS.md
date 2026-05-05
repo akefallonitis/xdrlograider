@@ -1,6 +1,6 @@
-# Hosting plan — v0.1.0-beta
+# Hosting plan — v0.1.0 GA
 
-> **TL;DR** — v0.1.0-beta ships a single hosting plan: **Linux Consumption Y1**.
+> **TL;DR** — v0.1.0 GA ships a single hosting plan: **Linux Consumption Y1**.
 > No `hostingPlan` parameter; no operator decision required. Multi-tier (FC1 / EP1)
 > returns in v0.2.0 once the `functionAppConfig` shape is fully tested across all
 > three plans.

@@ -67,7 +67,7 @@ Describe 'Invoke-TierPollWithHeartbeat — fatal-error catch-block semantics' {
         $catchText | Should -Match '\$_\.Exception\.Message' -Because 'catch must capture the inner exception message into $errMsg'
     }
 
-    It 'catch body writes a fatalError note (visible in MDE_Heartbeat_CL)' {
+    It 'catch body writes a fatalError note (visible in XdrConnectorHealth_CL)' {
         $catchText = ($script:TopTry.CatchClauses | ForEach-Object { $_.Body.Extent.Text }) -join "`n"
         $catchText | Should -Match 'fatalError' -Because 'catch must emit a heartbeat row with Notes.fatalError so operators see the failure'
     }

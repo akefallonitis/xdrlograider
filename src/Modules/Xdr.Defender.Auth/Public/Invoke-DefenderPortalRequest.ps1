@@ -74,7 +74,7 @@ function Invoke-DefenderPortalRequest {
 
     $portalHost = $Session.PortalHost
 
-    # iter-14.0 Phase 14B: reuse the auth-chain CorrelationId stamped by
+    # v0.1.0 GAB: reuse the auth-chain CorrelationId stamped by
     # Connect-DefenderPortal so the AI end-to-end transaction view stitches
     # auth -> portal request -> 429-retry -> 401-reauth on a single op id.
     # Falls back to a fresh GUID for sessions built via

@@ -5,7 +5,7 @@
     ProjectionMap to ConvertTo-MDEIngestRow.
 
 .DESCRIPTION
-    LIVE EVIDENCE (iter-14.0, 2026-05-03 — workspace 3f75ec26-...):
+    LIVE EVIDENCE (v0.1.0 GA, 2026-05-03 — workspace 3f75ec26-...):
         Every MDE_*_CL row's typed cols were NULL across ALL 47 streams since
         v0.1.0-beta because Invoke-MDEEndpoint constructed the
         ConvertTo-MDEIngestRow call without -ProjectionMap. The dispatcher
@@ -118,7 +118,7 @@ Describe 'Invoke-MDEEndpoint forwards manifest ProjectionMap to ConvertTo-MDEIng
         # Property-bag streams (Shape 3) — each top-level property becomes
         # one row with EntityId=propertyName, Entity=propertyValue. The
         # manifest's ProjectionMap projects EntityId itself + RawJson.
-        # Per Get-MDEEndpointManifest Defaults block ProjectionMap is always at
+        # Per Get-XdrEndpointManifest -Portal Defender Defaults block ProjectionMap is always at
         # least @{} so the forwarding path is exercised.
         $mockShape = [pscustomobject]@{
             EnableWdavAntiTampering       = $true

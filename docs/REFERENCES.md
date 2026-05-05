@@ -82,8 +82,8 @@ Official KQL parser. We use it in CI to validate all KQL files (parsers, analyti
 ### [ARM-TTK (Template Toolkit)](https://github.com/Azure/arm-ttk)
 Official ARM template best-practices tester. Used in CI to validate `mainTemplate.json` before every release.
 
-### [Bicep](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/)
-ARM template DSL. v0.1.0-beta ships a hand-authored ARM template as the single source of truth (`deploy/compiled/mainTemplate.json`) — matching the canonical Microsoft Sentinel Solutions repo pattern. Bicep returns in v0.2.0 as a developer-experience source for direct-deploy workflows; the compiled ARM remains the authoritative artefact for the Deploy button.
+### [ARM templates](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/)
+Hand-authored ARM is the single source of truth (`deploy/compiled/mainTemplate.json`) — matching the canonical Microsoft Sentinel Solutions repo pattern. No Bicep auto-compile. ARM is the only deployment artefact.
 
 ## Standards + specifications
 

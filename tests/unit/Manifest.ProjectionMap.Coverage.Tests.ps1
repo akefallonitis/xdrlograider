@@ -1,7 +1,7 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    iter-14.0 Phase 4B — manifest ProjectionMap coverage gate. Asserts every
+    v0.1.0 GAB — manifest ProjectionMap coverage gate. Asserts every
     non-deprecated entry has a populated ProjectionMap (>=3 typed columns) with
     valid type-cast-hint syntax + LA-table-safe column names.
 
@@ -42,7 +42,7 @@ BeforeAll {
     Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
     Import-Module $script:ClientPsd1     -Force -ErrorAction Stop
 
-    $script:Manifest = Get-MDEEndpointManifest -Force
+    $script:Manifest = Get-XdrEndpointManifest -Portal Defender -Force
 
     # Valid type-cast hints (left side of ':' in the hint string). Match
     # _ProjectionHelpers.ps1 regex: tostring|toint|tobool|todatetime|todouble|
@@ -85,14 +85,14 @@ Describe 'Manifest.ProjectionMap.Populated' {
         }
     }
 
-    It 'all 45 non-deprecated streams have populated ProjectionMap' {
+    It 'all 58 non-deprecated streams have populated ProjectionMap (v0.1.0 GA Phase 2: 59 - 1 deprecated)' {
         $populated = 0
         foreach ($stream in $script:Manifest.Keys) {
             $entry = $script:Manifest[$stream]
             if ($entry.Availability -eq 'deprecated') { continue }
             if ($entry.ProjectionMap -and @($entry.ProjectionMap.Keys).Count -ge 3) { $populated++ }
         }
-        $populated | Should -Be 45 -Because 'every non-deprecated stream populates ProjectionMap for typed-column ingest (46 - 1 deprecated)'
+        $populated | Should -Be 58 -Because 'every non-deprecated stream populates ProjectionMap for typed-column ingest (59 - 1 deprecated)'
     }
 }
 

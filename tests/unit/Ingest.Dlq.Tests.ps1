@@ -1,7 +1,7 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    v0.1.0-beta first publish — Ingest dead-letter-queue (DLQ) test gates.
+    v0.1.0 GA first publish — Ingest dead-letter-queue (DLQ) test gates.
 
 .DESCRIPTION
     Production-readiness invariant: terminal Send-ToLogAnalytics failures
@@ -24,7 +24,7 @@
                                 -DlqStorageAccount is supplied + does
                                 NOT throw (returns DlqEnqueued > 0).
       Dlq.SendToLA.LegacyThrow  Without -DlqStorageAccount, terminal
-                                failure still throws (back-compat).
+                                failure still throws (v0.1.0 GA scope).
       Dlq.AttemptCountIncrement On replay failure, the entry is re-Pushed
                                 with AttemptCount+1.
       Dlq.AppInsightsEvents     Push emits Ingest.DlqEnqueued; Remove
@@ -66,12 +66,12 @@ Describe 'Dlq.ModuleSurface — exports + signatures' {
         (Get-Module Xdr.Sentinel.Ingest).ExportedFunctions.Keys | Should -Contain 'Remove-XdrIngestDlqEntry'
     }
 
-    It 'Send-ToLogAnalytics declares -DlqStorageAccount and -DlqOperationId parameters (back-compat shape unchanged)' {
+    It 'Send-ToLogAnalytics declares -DlqStorageAccount and -DlqOperationId parameters (v0.1.0 GA scope shape unchanged)' {
         $cmd = Get-Command Send-ToLogAnalytics
         $cmd.Parameters.ContainsKey('DlqStorageAccount') | Should -BeTrue
         $cmd.Parameters.ContainsKey('DlqOperationId')    | Should -BeTrue
 
-        # Back-compat: original mandatory parameters MUST remain unchanged.
+        # v0.1.0 GA scope: original mandatory parameters MUST remain unchanged.
         # The .Attributes collection contains all parameter attributes
         # (Parameter, ValidateNotNullOrEmpty, AllowEmptyCollection, etc.).
         # Only [Parameter()] attributes carry the .Mandatory boolean — filter
@@ -177,7 +177,7 @@ Describe 'Dlq.Push.RoundTrip — Push-XdrIngestDlq writes the expected entity sh
 
 Describe 'Dlq.Push.OversizeDropped — >100 KB compressed batches are dropped + emit DlqDropped exception' {
 
-    # iter-14.0 Phase 2 (v0.1.0 GA): Ingest.DlqDropped migrated from customEvent
+    # v0.1.0 GA (v0.1.0 GA): Ingest.DlqDropped migrated from customEvent
     # to AppExceptions per Section 2.3 native-routing rubric (errors operators
     # alert on belong in exceptions). Properties identify the error class via
     # `ErrorClass='Ingest.DlqDropped'` so KQL queries pivot the same.
@@ -412,7 +412,7 @@ Describe 'Dlq.SendToLA.Terminal — Send-ToLogAnalytics enqueues + does NOT thro
     }
 }
 
-Describe 'Dlq.SendToLA.LegacyThrow — without -DlqStorageAccount, terminal failure still throws (back-compat)' {
+Describe 'Dlq.SendToLA.LegacyThrow — without -DlqStorageAccount, terminal failure still throws (v0.1.0 GA scope)' {
 
     It 'throws DCE ingest failed when -DlqStorageAccount is omitted' {
         InModuleScope Xdr.Sentinel.Ingest {

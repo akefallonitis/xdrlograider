@@ -7,11 +7,9 @@ Thanks for your interest in contributing. This project is community-driven and o
 XdrLogRaider ships `deploy/compiled/mainTemplate.json` as the canonical, hand-authored ARM template.
 
 - The Deploy-to-Azure URL pulls this file directly.
-- There is no Bicep auto-compilation. The previous Bicep modules are archived in `.internal/bicep-reference/` (gitignored).
+- There is no Bicep auto-compilation. ARM is the only deployment artefact.
 - When fixing bugs or adding features, edit `mainTemplate.json` directly.
 - This pattern matches Microsoft's own `Azure/Azure-Sentinel/Solutions/` repository.
-
-Re-introduction of Bicep + auto-compile is planned for v0.2.0 with proper testing.
 
 ## Quick links
 
@@ -25,8 +23,7 @@ Re-introduction of Bicep + auto-compile is planned for v0.2.0 with proper testin
 ### Prerequisites
 
 - PowerShell 7.4+ (Windows, Linux, or macOS)
-- Azure CLI 2.50+ (for deployment testing)
-- Bicep CLI (for ARM template changes)
+- Azure CLI 2.50+ or `Az.Resources` PowerShell module (for ARM template what-if + deploy testing)
 - [Pester](https://pester.dev/) 5.0+ (`Install-Module Pester -Force -Scope CurrentUser`)
 - [PSScriptAnalyzer](https://github.com/PowerShell/PSScriptAnalyzer) (`Install-Module PSScriptAnalyzer -Force -Scope CurrentUser`)
 
@@ -73,7 +70,7 @@ $env:XDRLR_TEST_KV = 'test-kv-name'
 
 - Modules: `Xdr.Portal.Auth`, `XdrLogRaider.<Component>`
 - Tables (Log Analytics): `MDE_<Category>_CL` (all portal-only telemetry)
-- Heartbeat/diagnostic tables: `MDE_Heartbeat_CL`, `MDE_AuthTestResult_CL`
+- Heartbeat/diagnostic tables: `XdrConnectorHealth_CL`, `MDE_AuthTestResult_CL`
 - KQL parsers (functions): `MDE_Drift_P<N><Category>`
 - Workbooks: `MDE_<Purpose>Dashboard.json`
 - Analytic rules: `MDE_<Event>_Detection.json`
@@ -85,13 +82,14 @@ $env:XDRLR_TEST_KV = 'test-kv-name'
 - Include a `// SYNOPSIS:` comment at the top of each file
 - Default time windows: 24h for workbook defaults, explicit `ago()` for rules
 
-### Bicep
+### ARM template
 
-- Modular: one Bicep file per Azure resource category in `deploy/modules/`
+- `deploy/compiled/mainTemplate.json` is hand-authored (single source of truth)
 - Parameterize everything — no hard-coded names, sizes, or regions
-- Always provide parameter descriptions via `@description('...')`
-- Use `@allowed([...])` for enumerated values
-- Output only what downstream modules need
+- Always provide parameter `metadata.description` strings
+- Use `allowedValues` for enumerated values
+- ARM `outputs` expose post-deploy values operators need (KV name, DCE endpoint, DCR immutable IDs, postDeployCommand)
+- Cross-RG / cross-subscription nested deployments via `Microsoft.Resources/deployments` with explicit `subscriptionId` + `resourceGroup`
 
 ## Adding a new telemetry stream
 
@@ -118,11 +116,100 @@ Follow this checklist when proposing a new `MDE_*_CL` stream:
 1. Fork and branch — `feature/my-change`, `fix/bug-name`, `docs/updates`
 2. Make changes following coding standards above
 3. Run `./tests/Run-Tests.ps1 -Category all-offline` locally — must pass
-4. Commit with conventional-commit-style message (`feat:`, `fix:`, `docs:`, `test:`, `chore:`)
-5. Open PR using the template — fill in every section
-6. CI must pass on all 3 OS
-7. One approving review required
-8. Squash-merge preferred; rebase-merge OK for multi-commit features
+4. Run `./tools/Run-WiringAudit.ps1` if you touched manifest, ARM, or sentinel/ — must exit 0
+5. Commit with conventional-commit-style message (`feat:`, `fix:`, `docs:`, `test:`, `chore:`)
+6. Open PR using the template — fill in every section
+7. CI must pass on all 3 OS (8 jobs: secret-scan / lint / unit-tests / static-validate / deploy-whatif / auto-recompile-gate / auto-rezip-gate / coverage-gate)
+8. One approving review required
+9. Squash-merge preferred; rebase-merge OK for multi-commit features
+
+## SemVer
+
+XdrLogRaider follows [Semantic Versioning 2.0.0](https://semver.org/) strictly. The version is the operator-facing contract — operators rely on the cadence to know what's safe to upgrade in place vs. what needs a breaking-change review.
+
+| Bump | When | Examples |
+|---|---|---|
+| **MAJOR** (`X.y.z`) | Breaking change to operator interface — workspace table schema change, removed manifest stream, changed deploy parameter, removed/renamed module export | `v0.1.0 → v0.2.0` (multi-portal stubs reintroduced with body), `v1.0.0 → v2.0.0` (workspace table consolidation) |
+| **MINOR** (`x.Y.z`) | New stream / new analytic rule / new workbook panel / new ARM resource — additive only, no operator-side migration required | `v0.1.0 → v0.1.1` (5 new XSPM streams added), `v0.1.0 → v0.2.0` (FA multi-tenancy) |
+| **PATCH** (`x.y.Z`) | Bug fix / docs / test / non-functional change — operator can upgrade in place with zero attention | `v0.1.0 → v0.1.0.1` (Phase 5 coverage gate), `v0.1.0 → v0.1.0.2` (parser KQL bug fix) |
+
+**Pre-release suffixes** (`X.Y.Z-beta`, `X.Y.Z-rc.N`) follow PEP 440 / SemVer pre-release semantics.
+
+**Tag format**: `vX.Y.Z` (e.g., `v0.1.0`). The leading `v` is mandatory — release.yml uses `${{ github.ref_name }}` directly in URLs and SBOM names.
+
+**Deprecation policy**: a stream marked `Availability = 'deprecated'` in the manifest stays in the codebase for ONE major version; it's removed entirely at the next major bump. Analytic rules / hunting queries / drift parsers stop referencing deprecated streams (so KQL stays clean) and the manifest's `Purpose` field documents the deprecation reason.
+
+## Conventional Commits
+
+Every commit message follows [Conventional Commits 1.0.0](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types** (in order of frequency in this repo):
+
+| Type | When |
+|---|---|
+| `feat` | New stream / new ARM resource / new analytic rule / new docs section |
+| `fix` | Bug fix in code, tests, ARM, or sentinel content |
+| `docs` | Pure documentation update (no code changes) |
+| `test` | New tests or test fixes (no production code changes) |
+| `refactor` | Code reorganisation that doesn't change behaviour |
+| `chore` | Tooling / CI / dependency updates |
+| `release` | Release commit that bumps version + tags |
+
+**Scope** (optional but recommended):
+- `manifest` — endpoints.manifest.psd1 changes
+- `arm` — mainTemplate.json or createUiDefinition.json
+- `parsers` — sentinel/parsers/*.kql
+- `workbooks` — sentinel/workbooks/*.json
+- `rules` — sentinel/analytic-rules/*.yaml
+- `hunting` — sentinel/hunting-queries/*.yaml
+- `auth` — Xdr.Common.Auth, Xdr.Defender.Auth modules
+- `client` — Xdr.Defender.Client (manifest dispatcher)
+- `ingest` — Xdr.Sentinel.Ingest (DCR sender)
+- `orch` — Xdr.Connector.Orchestrator (Durable Functions wiring)
+- `ci` — .github/workflows/
+
+**Examples**:
+
+```
+feat(manifest): add MDE_PostureMetrics_CL Tier A stream
+
+Captures posture-management metric-catalog snapshots hourly. Live-captured
+2026-05-04 from /apiproxy/mtp/posture/oversight/metrics. Maps to
+Defender_ExposureManagement_CL with 5 typed columns + RawJson fallback.
+
+D'.49 cost-budget gate: <500 KB/day at projected operator scale.
+```
+
+```
+fix(parsers): MDE_Drift_Configuration drops stale Threat Analytics streams
+
+Phase 3 reaudit (2026-05-05): parser referenced 3 streams that don't exist
+in the manifest (MDE_IndicatorReputation_CL / OutbreaksList / UrlReputation).
+Removed from the SourceName filter to keep parser column-shape stable.
+
+Refs: tests/kql/Parsers.Fixture.Tests.ps1 — was failing in pyramid.
+```
+
+```
+docs(architecture): v0.1.0 GA separation-of-concerns refresh
+
+Workspace = operator surface (Defender_<Cat>_CL + XdrConnectorHealth_CL).
+AppInsights = SRE surface (AppRequests / AppDependencies / AppExceptions /
+AppTraces / AppEvents / AppMetrics).
+XdrOps-* analytic rules = bridge — read AppInsights, fire operator-visible
+Sentinel alerts.
+
+```
+
+**Footer**: `Refs:`, `Closes #N`, `Co-Authored-By:` are recognised. Breaking changes use `BREAKING CHANGE:` prefix in the body — they trigger a MAJOR bump per SemVer.
 
 ## Reporting a portal endpoint breakage
 

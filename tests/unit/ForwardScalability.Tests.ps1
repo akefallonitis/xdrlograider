@@ -20,7 +20,7 @@
 
     Verified invariants:
       1. Manifest Defaults.Portal = 'security.microsoft.com' applied at load.
-         Every entry loaded via Get-MDEEndpointManifest has a Portal field.
+         Every entry loaded via Get-XdrEndpointManifest -Portal Defender has a Portal field.
 
       2. Invoke-TierPollWithHeartbeat accepts optional -Portal param (defaults
          security.microsoft.com).
@@ -75,7 +75,7 @@ Describe 'J2 invariant 1 — manifest Defaults.Portal applied at load' {
     }
 
     It 'every loaded manifest entry has a Portal field (default applied if missing)' {
-        $m = Get-MDEEndpointManifest -Force
+        $m = Get-XdrEndpointManifest -Portal Defender -Force
         $m.Count | Should -BeGreaterThan 0
         foreach ($stream in $m.Keys) {
             $entry = $m[$stream]
@@ -85,7 +85,7 @@ Describe 'J2 invariant 1 — manifest Defaults.Portal applied at load' {
     }
 
     It 'v0.1.0-beta every entry resolves to security.microsoft.com (single-portal)' {
-        $m = Get-MDEEndpointManifest -Force
+        $m = Get-XdrEndpointManifest -Portal Defender -Force
         $portals = $m.Values | ForEach-Object { $_.Portal } | Sort-Object -Unique
         $portals | Should -Be @('security.microsoft.com') -Because 'v0.1.0-beta scope is security portal only; v0.2.0 adds others'
     }
@@ -242,8 +242,8 @@ Describe 'J2 invariant 5 — L2 Xdr.Defender.Auth is portal-aware (template for 
 
 Describe 'J2 invariant 6 — adding a new portal in v0.2.0 requires only additive changes' {
 
-    It 'Get-MDEEndpointManifest filter-by-Portal works' {
-        $m = Get-MDEEndpointManifest -Force
+    It 'Get-XdrEndpointManifest -Portal Defender filter-by-Portal works' {
+        $m = Get-XdrEndpointManifest -Portal Defender -Force
         $security = $m.Values | Where-Object { $_.Portal -eq 'security.microsoft.com' }
         @($security).Count | Should -Be $m.Count -Because 'v0.1.0-beta: 100% security-portal'
 
@@ -256,7 +256,7 @@ Describe 'J2 invariant 6 — adding a new portal in v0.2.0 requires only additiv
 
     It 'docs/PORTAL-COOKIE-CATALOG.md documents the L2 template for v0.2.0 portal additions' {
         $catalog = Join-Path $script:RepoRoot 'docs' 'PORTAL-COOKIE-CATALOG.md'
-        Test-Path -LiteralPath $catalog | Should -BeTrue -Because 'iter-14.0 Phase 1.5 deliverable — v0.2.0 portal-add reference'
+        Test-Path -LiteralPath $catalog | Should -BeTrue -Because 'v0.1.0 GA deliverable — v0.2.0 portal-add reference'
         $content = Get-Content -LiteralPath $catalog -Raw
         $content | Should -Match 'Defender XDR.*security\.microsoft\.com'
         $content | Should -Match 'Purview.*compliance\.microsoft\.com'

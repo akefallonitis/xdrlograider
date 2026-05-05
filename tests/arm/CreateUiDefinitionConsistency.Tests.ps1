@@ -12,7 +12,7 @@
     deployment fails with InvalidTemplate / unrecognized parameter. If a
     dropdown emits a value not in the ARM allowedValues, deployment fails
     with `<value> is not part of allowed value(s)` (the exact bug surfaced
-    in v0.1.0-beta first publish - the wizard emitted `consumption-y1` but
+    in v0.1.0 GA first publish - the wizard emitted `consumption-y1` but
     the ARM functionPlanSku parameter only allowed `Y1`/`EP1`/`EP2`).
 
     Gate categories:

@@ -50,7 +50,7 @@
         "queryType": 0,
         "title": "Action Center summary by type and status",
         "size": 0,
-        "query": "MDE_ActionCenter_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize Count = count() by ActionType, ActionStatus\n| render barchart",
+        "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_ActionCenter_CL'\n| where TimeGenerated > ago({TimeRange:value})\n| summarize Count = count() by ActionType, ActionStatus\n| render barchart",
         "version": "KqlItem/1.0"
       },
       "type": 3
@@ -61,7 +61,7 @@
         "queryType": 0,
         "title": "Time-to-action by action type",
         "size": 0,
-        "query": "MDE_ActionCenter_CL\n| where TimeGenerated > ago({TimeRange:value})\n| where isnotnull(StartTime) and isnotnull(EndTime)\n| extend TimeToActionMinutes = datetime_diff('minute', EndTime, StartTime)\n| project TimeGenerated, ActionId, ActionType, ActionStatus, ActionDecision, Operator, MachineId, ComputerName, TimeToActionMinutes\n| order by TimeGenerated desc",
+        "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_ActionCenter_CL'\n| where TimeGenerated > ago({TimeRange:value})\n| where isnotnull(StartTime) and isnotnull(EndTime)\n| extend TimeToActionMinutes = datetime_diff('minute', EndTime, StartTime)\n| project TimeGenerated, ActionId, ActionType, ActionStatus, ActionDecision, Operator, MachineId, ComputerName, TimeToActionMinutes\n| order by TimeGenerated desc",
         "version": "KqlItem/1.0"
       },
       "type": 3

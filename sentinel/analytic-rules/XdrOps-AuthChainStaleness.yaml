@@ -1,0 +1,66 @@
+id: 9c8a3f1e-2d5b-4a7c-8e9f-0b1d2c3a4b5d
+name: "[XdrOps] Connector auth chain staleness - silent hang detection"
+description: |
+  XdrLogRaider's auth chain has stopped emitting AuthChain.Completed events,
+  indicating a SILENT hang somewhere in the auth flow (Get-EntraEstsAuth or
+  Get-DefenderSccauth). Heartbeat may still fire from Connector-Heartbeat
+  function (timer trigger), but actual data polls are dead.
+
+  Different from XdrOps-AuthChainFailure which alerts on >3 AuthChain.*
+  exception count: this rule alerts on ABSENCE of AuthChain.Completed
+  events. The two are complementary — failure rule catches "noisy
+  failures", staleness rule catches "silent death".
+
+  Phase J D'.3 (2026-05-04). Operator-enabled (ships disabled per Sentinel
+  Solution best practice). Triage:
+    - Check FA in Azure portal: is it Running? Are functions firing?
+    - Check Application Insights: are there AppRequests (function
+      invocations) but no AppEvents (AuthChain.Completed)?
+    - Try Connect-DefenderPortal locally with same service-account
+      credentials — does it succeed?
+  See docs/AUTH.md + docs/RUNBOOK.md "Auth chain hang" section.
+severity: High
+enabled: false
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - AppEvents
+queryFrequency: 30m
+queryPeriod: 2h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+relevantTechniques:
+  - T1078
+query: |
+  // Phase J D'.3 (2026-05-04): silent-hang detection in XdrLogRaider auth chain.
+  // Service accounts that have NOT successfully completed an auth chain in
+  // the last 30 minutes despite the Connector-Heartbeat timer firing.
+  let staleThresholdMinutes = 30;
+  // Service accounts seen on AuthChain.Started but not AuthChain.Completed
+  // since the staleness threshold.
+  let recentStarts = AppEvents
+    | where TimeGenerated > ago(2h)
+    | where Name == 'AuthChain.Started'
+    | extend Upn = tostring(Properties.Upn);
+  let recentCompletes = AppEvents
+    | where TimeGenerated > ago(2h)
+    | where Name == 'AuthChain.Completed'
+    | extend Upn = tostring(Properties.Upn)
+    | summarize LastCompleted = max(TimeGenerated) by Upn;
+  recentStarts
+  | summarize Started = count() by Upn
+  | join kind=leftouter (recentCompletes) on Upn
+  | extend MinutesSinceLastCompleted = datetime_diff('minute', now(), coalesce(LastCompleted, datetime(1970-01-01)))
+  | where MinutesSinceLastCompleted > staleThresholdMinutes
+  | project TimeGenerated = now(), Upn, MinutesSinceLastCompleted, LastCompleted, Started
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: Upn
+eventGroupingSettings:
+  aggregationKind: SingleAlert
+suppressionEnabled: true
+suppressionDuration: PT1H

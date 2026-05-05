@@ -30,16 +30,16 @@ Typical response times:
 3. Security-sensitive issues: email `al.kefallonitis@gmail.com` directly
    rather than file a public issue
 
-## Known limitations (v0.1.0-beta)
+## Known limitations (v0.1.0 GA)
 
 | Limitation | Impact | Workaround / status |
 |------------|--------|---------------------|
 | 9 of 45 streams return 4xx on tenants without the relevant Microsoft feature/license (MDI, TVM add-on, MTO, etc.) | Expected behaviour — classified `tenant-feature-gated`. No rows until customer provisions the feature. | Auto-activates when customer enables feature; no code change needed. |
 | 2 streams require `Defender XDR Operator` / `MCAS Administrator` roles beyond `Security Reader` + `Defender XDR Analyst` | Expected — classified `role-gated`. Rows appear only if customer elevates service account. | Documented in `docs/PERMISSIONS.md`. |
 | XSPM endpoints require XSPM/Defender CSPM license | Expected — tenants without license see empty responses from XSPM queries. | License gating; nothing we can do. |
-| Portal API drift risk | Unofficial APIs change without notice. v0.1.0-beta discovered 5 URLs drifted since v0.1.0-beta.1 — all fixed with evidence. | Live-capture harness (`tests/integration/Audit-Endpoints-Live.ps1`) runs regularly; quarterly re-audit recommended. |
+| Portal API drift risk | Unofficial APIs change without notice. v0.1.0 GA discovered 5 URLs drifted since v0.1.0 GA — all fixed with evidence. | Live-capture harness (`tests/integration/Audit-Endpoints-Live.ps1`) runs regularly; quarterly re-audit recommended. |
 | DirectCookies auth not production-ready | Cookies expire in 4-24h without auto-refresh. | `Initialize-XdrLogRaiderAuth.ps1` refuses `cookies` as a production KV method. Use CredentialsTotp or Passkey for production. |
-| Content Hub UI may show partial connection status during first 5 min | "IsConnected" query keys on `MDE_Heartbeat_CL` rows; heartbeat fires every 5 min. | Wait one full heartbeat cycle (up to 5 min) after deploy. |
+| Content Hub UI may show partial connection status during first 5 min | "IsConnected" query keys on `XdrConnectorHealth_CL` rows; heartbeat fires every 5 min. | Wait one full heartbeat cycle (up to 5 min) after deploy. |
 
 ## Contact
 

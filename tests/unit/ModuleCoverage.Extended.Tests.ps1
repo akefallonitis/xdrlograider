@@ -5,10 +5,10 @@
     weren't exercised by the targeted auth/dispatcher/tier/ingest tests.
 
     Targets:
-      Xdr.Common.Auth (L1 Entra layer; iter-14.0):
+      Xdr.Common.Auth (L1 Entra layer; v0.1.0 GA):
         - n/a (covered by Xdr.Common.Auth.Tests.ps1 + Xdr.Common.Auth.AuthChain.Tests.ps1)
 
-      Xdr.Defender.Auth (L2 Defender; iter-14.0):
+      Xdr.Defender.Auth (L2 Defender; v0.1.0 GA):
         - Update-XsrfToken error paths (missing cookie, expired session)
         - Test-DefenderPortalAuth stages (mocked via Connect-DefenderPortal)
 
@@ -40,7 +40,7 @@ AfterAll {
     Remove-Module Xdr.Common.Auth     -Force -ErrorAction SilentlyContinue
 }
 
-Describe 'Update-XsrfToken (Xdr.Defender.Auth — iter-14.0 home)' {
+Describe 'Update-XsrfToken (Xdr.Defender.Auth — v0.1.0 GA home)' {
 
     It 'throws when the portal cookie jar has no XSRF-TOKEN' {
         InModuleScope Xdr.Defender.Auth {
@@ -179,7 +179,7 @@ Describe 'Test-DefenderPortalAuth stage reporting' {
         }
     }
 
-    It 'reports Success=true + TenantId when every step green (post iter-14.0 split)' {
+    It 'reports Success=true + TenantId when every step green (post v0.1.0 GA split)' {
         InModuleScope Xdr.Defender.Auth {
             $s = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
             $uri = [System.Uri]::new('https://security.microsoft.com/')

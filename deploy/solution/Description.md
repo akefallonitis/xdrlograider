@@ -1,14 +1,21 @@
-# XdrLogRaider — Sentinel Solution Description
+# XdrLogRaider — Sentinel Solution Description (v0.1.0 GA)
 
 ## What it does
 
 XdrLogRaider ingests **Microsoft Defender XDR portal-only telemetry** into
-Microsoft Sentinel — configuration, compliance, drift, exposure, and
-governance data that the public Graph Security API, Defender XDR API, and
-MDE public APIs don't expose. Think: Defender settings that only appear in
-the `security.microsoft.com` portal UI (advanced features, alert tuning,
-custom detections, RBAC device groups, XSPM attack paths, MDI service
-accounts) — now queryable in KQL.
+Microsoft Sentinel — configuration, compliance, drift, exposure, posture,
+and governance data that the public Graph Security API, Defender XDR API,
+and MDE public APIs don't expose. Think: Defender settings that only appear
+in the `security.microsoft.com` portal UI (advanced features, alert tuning,
+custom detections, RBAC device groups, XSPM attack paths, posture metrics,
+secure-score per-category, attack-surface analytical paths, threat-analytics
+enriched outbreaks, MDI service accounts) — now queryable in KQL.
+
+**v0.1.0 GA** ships **59 streams** (46 baseline + 13 Tier A nodoc-catalog
+additions, all live-captured) across **11 consolidated workspace tables**
+(10 `Defender_<Category>_CL` per category + 1 `XdrConnectorHealth_CL` ops
+table). Pure Defender connector; multi-portal expansion + Function App
+multi-tenancy reintroduced in v0.2.0.
 
 ## Why
 
@@ -33,7 +40,7 @@ answer "what changed, when, and how".
 
 | Asset | Count | Notes |
 |-------|------:|-------|
-| Custom Log Analytics tables | **47** | 45 data streams + `MDE_Heartbeat_CL` + `MDE_AuthTestResult_CL` |
+| Custom Log Analytics tables | **47** | 45 data streams + `XdrConnectorHealth_CL` + `MDE_AuthTestResult_CL` |
 | Data streams (endpoints polled) | **45** | Across 7 compliance tiers (P0 Compliance, P1 Pipeline, P2 Governance, P3 Exposure, P5 Identity, P6 Audit/AIR, P7 Metadata) |
 | KQL drift parsers | **6** | Per-tier `MDE_Drift_P*` — typed-column-bag diff (`pack_all() - metaCols`) |
 | Analytic rules | **14** | Ship `enabled: false` — customer enables selectively after review |

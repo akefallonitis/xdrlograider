@@ -17,7 +17,7 @@
     functions' ValidateSet accepted only PascalCase the FA would crash
     before reaching the auth chain.
 
-    Permanent fix preserved across the v0.1.0-beta first publish refactor:
+    Permanent fix preserved across the v0.1.0 GA first publish refactor:
       - Test-DefenderPortalAuth accepts both cases + normalizes internally
       - Connect-DefenderPortal accepts both cases + normalizes internally
       - Get-XdrAuthFromKeyVault accepts both cases
@@ -26,7 +26,7 @@
 
 BeforeDiscovery {
     # BeforeDiscovery for inline -Skip clauses (Bicep is archived to
-    # .internal/bicep-reference/ in v0.1.0-beta first publish).
+    # .internal/bicep-reference/ in v0.1.0 GA first publish).
     $script:DiscoveryRepoRoot  = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
     $script:DiscoveryMainBicep = Join-Path $script:DiscoveryRepoRoot 'deploy' 'main.bicep'
 }

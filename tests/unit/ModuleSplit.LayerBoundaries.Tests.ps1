@@ -7,31 +7,27 @@
     (would create a cycle).
 
 .DESCRIPTION
-    Layer map (v0.1.0 GA — 5 live + 6 multi-portal scaffolding stubs per Phase A.3):
+    Layer map (v0.1.0 GA — pure Defender connector, 7 modules total):
       L1 Xdr.Common.Auth          portal-generic Entra (TOTP, passkey, ESTS)
+      L1 Xdr.Common.Manifest      generic per-portal manifest loader
+      L1 Xdr.Common.Telemetry     AppInsights helpers (SRE/dev surface)
       L1 Xdr.Sentinel.Ingest      portal-generic ingest (DCE/DCR + Storage Table)
       L2 Xdr.Defender.Auth        Defender-specific cookie exchange (sccauth + XSRF)
-      L3 Xdr.Defender.Client      Defender-portal manifest dispatcher (46 streams)
-      L2 Xdr.Entra.Auth           Entra portal scaffolding stub (v0.2.0 roadmap)
-      L3 Xdr.Entra.Client         Entra portal scaffolding stub (v0.2.0 roadmap)
-      L2 Xdr.Purview.Auth         Purview portal scaffolding stub (v0.2.0 roadmap)
-      L3 Xdr.Purview.Client       Purview portal scaffolding stub (v0.2.0 roadmap)
-      L2 Xdr.Intune.Auth          Intune portal scaffolding stub (v0.2.0 roadmap)
-      L3 Xdr.Intune.Client        Intune portal scaffolding stub (v0.2.0 roadmap)
+      L3 Xdr.Defender.Client      Defender-portal manifest dispatcher (59 streams)
       L4 Xdr.Connector.Orchestrator  portal-routing dispatcher (Connect-XdrPortal etc.
                                       + Get-XdrConnectorHealth + Test-XdrConnectorConfig)
 
+    NOTE (v0.1.0 GA scope per user 2026-05-05): Multi-portal stubs (Entra/Purview/Intune
+    × Auth/Client) are DEFERRED to v0.2.0. v0.2.0 reintroduces them with real bodies
+    + FA multi-tenancy support.
+
     Invariants enforced here:
-      1. L3 Xdr.Defender.Client RequiredModules: only L2 Xdr.Defender.Auth
+      1. L3 Xdr.Defender.Client RequiredModules: only L2 Xdr.Defender.Auth + Xdr.Common.Manifest
          (no L4, no L1 ingest — would be a cycle / cross-leg).
-      2. L4 Xdr.Connector.Orchestrator RequiredModules cover L1+L2+L3 + all 6 stubs
-         (so the dispatcher can call into them).
-      3. 11 modules total: 5 live + 6 multi-portal scaffolding stubs.
-         No MDE-prefixed legacy shim modules left.
+      2. L4 Xdr.Connector.Orchestrator RequiredModules cover L1+L2+L3 (live modules only).
+      3. 7 modules total. No multi-portal stubs in v0.1.0.
       4. Orchestrator routing: Connect-XdrPortal -Portal 'Defender' resolves
          through to Connect-DefenderPortal; unknown -Portal throws.
-      5. Stub modules throw informative "v0.2.0 roadmap" errors when called
-         (covered by MultiPortalScaffolding.Tests.ps1 Phase A.4.4).
 #>
 
 BeforeAll {
@@ -45,27 +41,32 @@ BeforeAll {
     $script:DefAuthPsd1     = Join-Path $script:ModulesRoot 'Xdr.Defender.Auth'         'Xdr.Defender.Auth.psd1'
 }
 
-Describe 'Five-module architecture — no shim modules remain' {
+Describe 'Module architecture — pure Defender connector, no stubs in v0.1.0' {
 
-    It 'src/Modules contains exactly the 11 v0.1.0-GA modules (5 live + 6 scaffolding stubs)' {
+    It 'src/Modules contains exactly the 7 v0.1.0-GA modules (Defender + L1 common + L4 orchestrator)' {
         $dirs = @(Get-ChildItem -LiteralPath $script:ModulesRoot -Directory | Sort-Object Name | ForEach-Object Name)
         $expected = @(
-            'Xdr.Common.Auth',           # L1 live
-            'Xdr.Connector.Orchestrator', # L4 live
-            'Xdr.Defender.Auth',          # L2 live
-            'Xdr.Defender.Client',        # L3 live
-            'Xdr.Entra.Auth',             # L2 stub (v0.2.0)
-            'Xdr.Entra.Client',           # L3 stub (v0.2.0)
-            'Xdr.Intune.Auth',            # L2 stub (v0.2.0)
-            'Xdr.Intune.Client',          # L3 stub (v0.2.0)
-            'Xdr.Purview.Auth',           # L2 stub (v0.2.0)
-            'Xdr.Purview.Client',         # L3 stub (v0.2.0)
-            'Xdr.Sentinel.Ingest'         # L1 live
+            'Xdr.Common.Auth',            # L1 — Entra ESTS + TOTP + passkey
+            'Xdr.Common.Manifest',        # L1 — generic per-portal manifest loader
+            'Xdr.Common.Telemetry',       # L1 — AppInsights helpers (SRE surface)
+            'Xdr.Connector.Orchestrator', # L4 — portal-routing dispatcher
+            'Xdr.Defender.Auth',          # L2 — Defender cookie exchange
+            'Xdr.Defender.Client',        # L3 — Defender manifest dispatcher
+            'Xdr.Sentinel.Ingest'         # L1 — DCE/DCR + Storage Table + DLQ
         )
-        $dirs | Should -Be $expected -Because 'v0.1.0 GA: 5 live modules + 6 multi-portal scaffolding stubs (Entra/Purview/Intune × Auth/Client). Stubs ship empty placeholders; v0.2.0 fills bodies.'
+        $dirs | Should -Be $expected -Because 'v0.1.0 GA scope per user 2026-05-05: pure Defender connector. Multi-portal stubs (Entra/Purview/Intune × Auth/Client) deferred to v0.2.0 + FA multi-tenancy.'
     }
 
-    It 'src/Modules/Xdr.Portal.Auth, XdrLogRaider.Client, XdrLogRaider.Ingest are deleted' {
+    It 'no multi-portal stub directories exist in v0.1.0' {
+        Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'Xdr.Entra.Auth')     | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'Xdr.Entra.Client')   | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'Xdr.Purview.Auth')   | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'Xdr.Purview.Client') | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'Xdr.Intune.Auth')    | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'Xdr.Intune.Client')  | Should -BeFalse
+    }
+
+    It 'src/Modules/Xdr.Portal.Auth, XdrLogRaider.Client, XdrLogRaider.Ingest are deleted (legacy)' {
         Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'Xdr.Portal.Auth')      | Should -BeFalse
         Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'XdrLogRaider.Client')  | Should -BeFalse
         Test-Path -LiteralPath (Join-Path $script:ModulesRoot 'XdrLogRaider.Ingest')  | Should -BeFalse
@@ -81,21 +82,20 @@ Describe 'L1-L4 layering — manifest RequiredModules graph' {
         $req | Should -Not -Contain 'Xdr.Connector.Orchestrator' -Because 'L3 cannot depend on L4 (cycle)'
     }
 
-    It 'L4 Xdr.Connector.Orchestrator RequiredModules contains L1+L2+L3 + 6 multi-portal stubs' {
+    It 'L4 Xdr.Connector.Orchestrator RequiredModules contains L1+L2+L3 live (no stubs in v0.1.0)' {
         $manifest = Import-PowerShellDataFile -Path $script:OrchestratorPsd1
         $req = @($manifest.RequiredModules)
-        # Live module dependencies
-        $req | Should -Contain 'Xdr.Common.Auth'      -Because 'L4 routes into L1 Entra'
+        # Live module dependencies (v0.1.0 = pure Defender)
+        $req | Should -Contain 'Xdr.Common.Auth'      -Because 'L4 routes into L1 Entra ESTS auth'
+        $req | Should -Contain 'Xdr.Common.Manifest'  -Because 'L4 calls Get-XdrEndpointManifest -Portal'
+        $req | Should -Contain 'Xdr.Common.Telemetry' -Because 'L4 emits AppInsights traces/events'
         $req | Should -Contain 'Xdr.Sentinel.Ingest'  -Because 'L4 routes into L1 ingest'
         $req | Should -Contain 'Xdr.Defender.Auth'    -Because 'L4 routes into L2 cookie exchange'
         $req | Should -Contain 'Xdr.Defender.Client'  -Because 'L4 routes into L3 client dispatcher'
-        # v0.1.0 GA Phase A.3: multi-portal scaffolding stubs
-        $req | Should -Contain 'Xdr.Entra.Auth'       -Because 'L4 PortalRoutes references Entra stub'
-        $req | Should -Contain 'Xdr.Entra.Client'     -Because 'L4 PortalRoutes references Entra stub'
-        $req | Should -Contain 'Xdr.Purview.Auth'     -Because 'L4 PortalRoutes references Purview stub'
-        $req | Should -Contain 'Xdr.Purview.Client'   -Because 'L4 PortalRoutes references Purview stub'
-        $req | Should -Contain 'Xdr.Intune.Auth'      -Because 'L4 PortalRoutes references Intune stub'
-        $req | Should -Contain 'Xdr.Intune.Client'    -Because 'L4 PortalRoutes references Intune stub'
+        # No stubs — v0.2.0 reintroduces with real bodies
+        $req | Should -Not -Contain 'Xdr.Entra.Auth'    -Because 'v0.1.0 GA: Entra stub deferred to v0.2.0'
+        $req | Should -Not -Contain 'Xdr.Purview.Auth'  -Because 'v0.1.0 GA: Purview stub deferred to v0.2.0'
+        $req | Should -Not -Contain 'Xdr.Intune.Auth'   -Because 'v0.1.0 GA: Intune stub deferred to v0.2.0'
     }
 
     It 'L4 Xdr.Connector.Orchestrator FunctionsToExport is the portal-routing surface + v0.1.0 GA helpers' {
@@ -128,21 +128,15 @@ Describe 'Orchestrator portal-routing dispatch (offline)' {
     BeforeAll {
         # Load the layered modules in dependency order. Tests run InModuleScope
         # against the orchestrator and stub the per-portal connect/test functions.
-        # v0.1.0 GA Phase A.3: also load 6 multi-portal scaffolding stubs
-        # (referenced by orchestrator psd1 RequiredModules).
+        # v0.1.0 GA: pure Defender connector, 7 modules total (no portal stubs).
         Get-Module Xdr.* | Remove-Module -Force -ErrorAction SilentlyContinue
 
         Import-Module $script:CommonAuthPsd1   -Force -ErrorAction Stop
+        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Common.Manifest' 'Xdr.Common.Manifest.psd1')   -Force -ErrorAction Stop
+        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Common.Telemetry' 'Xdr.Common.Telemetry.psd1') -Force -ErrorAction Stop
         Import-Module $script:SentinelPsd1     -Force -ErrorAction Stop
         Import-Module $script:DefAuthPsd1      -Force -ErrorAction Stop
         Import-Module $script:DefClientPsd1    -Force -ErrorAction Stop
-        # 6 scaffolding stubs (Phase A.3)
-        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Entra.Auth' 'Xdr.Entra.Auth.psd1')       -Force -ErrorAction Stop
-        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Entra.Client' 'Xdr.Entra.Client.psd1')   -Force -ErrorAction Stop
-        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Purview.Auth' 'Xdr.Purview.Auth.psd1')   -Force -ErrorAction Stop
-        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Purview.Client' 'Xdr.Purview.Client.psd1') -Force -ErrorAction Stop
-        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Intune.Auth' 'Xdr.Intune.Auth.psd1')     -Force -ErrorAction Stop
-        Import-Module (Join-Path $script:ModulesRoot 'Xdr.Intune.Client' 'Xdr.Intune.Client.psd1') -Force -ErrorAction Stop
         Import-Module $script:OrchestratorPsd1 -Force -ErrorAction Stop
     }
 

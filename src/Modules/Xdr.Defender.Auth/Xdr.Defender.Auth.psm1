@@ -1,6 +1,6 @@
 # Xdr.Defender.Auth — L2 Defender-portal-specific auth + request layer.
 #
-# Architecture (iter-14.0):
+# Architecture (v0.1.0 GA):
 #   L1 Xdr.Common.Auth   ← portal-generic Entra-layer primitives (REQUIRED)
 #   L2 Xdr.Defender.Auth ← THIS MODULE (Defender-specific cookie exchange)
 #   L2 v0.2.0 siblings   ← Xdr.Purview.Auth, Xdr.Intune.Auth, Xdr.Entra.Auth
@@ -30,7 +30,7 @@ $script:Rate429Count = 0
 # 401/440 mid-tier-poll.
 $script:SessionMaxAgeMinutes = 210
 
-# iter-13.15 Phase C — count-based rotation. Beyond the time-based 3h30m refresh,
+# pre-v0.1.0 Phase C — count-based rotation. Beyond the time-based 3h30m refresh,
 # also rotate after a request-count threshold to bound replay-window risk if
 # the FA process is compromised. Defense-in-depth.
 $script:RequestCount = 0

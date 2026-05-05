@@ -50,7 +50,7 @@ Describe 'Service-account role consistency across docs' {
                 if ($line -match '(?i)(do not|don''?t|never|wrong|over-?privileged|forbid|warning|red flag|⚠|excluded|NOT recommended)') { continue }
                 # Skip lines mentioning Security Administrator only in tabular comparisons or quotes
                 if ($line -match '(?i)`Security Administrator`.*(write capability|leak|attacker)') { continue }
-                # Skip explanatory / comparative / instructional mentions (iter-13.8)
+                # Skip explanatory / comparative / instructional mentions (pre-v0.1.0.8)
                 if ($line -match '(?i)(even Security Administrator|auto-grants|previously[- ]tagged|previously-tagged|counter[- ]example|downgrade|cannot be role[- ]blocking|wasn''?t role[- ]blocking|live audit|returned 403|returned 4xx|returned 4\d\d)') { continue }
                 # Match plain "Security Administrator" only — NOT compound roles
                 # like "Cloud App Security Administrator" (legitimate MCAS role for
@@ -99,20 +99,20 @@ Describe 'Service-account role consistency across docs' {
         $content | Should -Match '(?i)least-privilege' -Because 'PERMISSIONS.md must explicitly call out the least-privilege model'
         $content | Should -Match '(?i)downgrade to' -Because 'PERMISSIONS.md must instruct operators to downgrade if they have over-privileged'
         $content | Should -Match '(?i)`Security Administrator`' -Because 'must explicitly name the wrong role as a counter-example'
-        # Per-endpoint detail (iter-13.8: previously role-gated streams now in tenant-gated table with feature names)
-        $content | Should -Match '(?i)MDE_CustomCollection_CL.*(MDE Custom Collection|Custom Collection feature|Custom Collection model)' -Because 'iter-13.8: CustomCollection should appear in tenant-gated table with the feature name'
-        $content | Should -Match '(?i)MDE_CloudAppsConfig_CL.*(MCAS|Defender for Cloud Apps)' -Because 'iter-13.8: CloudAppsConfig should appear in tenant-gated table with the feature name'
+        # Per-endpoint detail (pre-v0.1.0.8: previously role-gated streams now in tenant-gated table with feature names)
+        $content | Should -Match '(?i)MDE_CustomCollection_CL.*(MDE Custom Collection|Custom Collection feature|Custom Collection model)' -Because 'pre-v0.1.0.8: CustomCollection should appear in tenant-gated table with the feature name'
+        $content | Should -Match '(?i)MDE_CloudAppsConfig_CL.*(MCAS|Defender for Cloud Apps)' -Because 'pre-v0.1.0.8: CloudAppsConfig should appear in tenant-gated table with the feature name'
         # Tenant feature detail
         $content | Should -Match '(?i)MDE_DCCoverage_CL.*(MDI|Defender for Identity)' -Because 'tenant-gated stream detail must name the underlying feature'
     }
 
-    It 'iter-13.8 manifest has zero role-gated streams (category retired)' {
+    It 'pre-v0.1.0.8 manifest has zero role-gated streams (category retired)' {
         $manifestPath = Join-Path $script:RepoRoot 'src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1'
         $manifest = Import-PowerShellDataFile -Path $manifestPath
         # Strict-mode-safe: enumerate first, THEN .Count. The .Stream chain
         # produces $null when zero matches, and $null.Count crashes under strict.
         $roleGated = @($manifest.Endpoints | Where-Object { $_.Availability -eq 'role-gated' })
-        @($roleGated).Count | Should -Be 0 -Because 'iter-13.8: Microsoft Learn confirms Security Admin auto-grants Full Access in MCAS + MDE settings, so 403 cannot be role-blocking. All previously role-gated streams have been re-categorised to tenant-gated.'
+        @($roleGated).Count | Should -Be 0 -Because 'pre-v0.1.0.8: Microsoft Learn confirms Security Admin auto-grants Full Access in MCAS + MDE settings, so 403 cannot be role-blocking. All previously role-gated streams have been re-categorised to tenant-gated.'
     }
 
     It 'manifest tenant-gated streams match the PERMISSIONS.md tenant-feature detail table' {

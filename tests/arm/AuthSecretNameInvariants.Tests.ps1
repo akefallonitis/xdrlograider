@@ -5,11 +5,11 @@
     naming convention.
 
 .DESCRIPTION
-    Live-deploy bug class hit in v0.1.0-beta first-publish:
+    Live-deploy bug class hit in v0.1.0 GA first-publish:
       AUTH_SECRET_NAME = 'mde-portal-auth'  (legacy single-JSON-blob name)
       Actual KV secrets = 'mde-portal-upn', 'mde-portal-password',
                           'mde-portal-totp', 'mde-portal-auth-method'
-                          (per-field secrets per iter-13 refactor)
+                          (per-field secrets per pre-v0.1.0 refactor)
 
     Get-XdrAuthFromKeyVault builds names as "$SecretPrefix-upn" etc., so
     when AUTH_SECRET_NAME='mde-portal-auth', it tries to read
@@ -40,7 +40,7 @@ Describe 'AuthSecretName.MatchesKvSecretPrefix' {
         $script:ArmRaw | Should -Match "'AUTH_SECRET_NAME',\s*'value',\s*'mde-portal'(?!-auth)" -Because (
             "AUTH_SECRET_NAME must equal 'mde-portal' (the KV secret prefix). " +
             "The legacy 'mde-portal-auth' value was a single-JSON-blob secret " +
-            "name that became invalid after iter-13 refactored to 4 per-field " +
+            "name that became invalid after pre-v0.1.0 refactored to 4 per-field " +
             "secrets. With the wrong prefix, Get-XdrAuthFromKeyVault builds " +
             "non-existent secret names and returns @{upn=`$null;...}, causing " +
             "Connect-DefenderPortal to throw 'Credential hashtable must include upn'."
@@ -50,7 +50,7 @@ Describe 'AuthSecretName.MatchesKvSecretPrefix' {
     It "AUTH_SECRET_NAME ARM env var is NOT 'mde-portal-auth' (the legacy single-blob name)" {
         $script:ArmRaw | Should -Not -Match "'AUTH_SECRET_NAME',\s*'value',\s*'mde-portal-auth'" -Because (
             'mde-portal-auth was the legacy single-JSON-blob secret name. ' +
-            'After iter-13 refactor to per-field secrets, this prefix is invalid. ' +
+            'After pre-v0.1.0 refactor to per-field secrets, this prefix is invalid. ' +
             "Use 'mde-portal' instead."
         )
     }

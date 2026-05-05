@@ -58,7 +58,7 @@ BeforeAll {
     # at a single stub `dcr-stub` since Send-ToLogAnalytics is mocked.
     $stubMap = @{}
     foreach ($e in $script:Entries) { $stubMap[$e.Stream] = 'dcr-stub' }
-    $stubMap['MDE_Heartbeat_CL'] = 'dcr-stub'
+    $stubMap['XdrConnectorHealth_CL'] = 'dcr-stub'
     $env:DCR_IMMUTABLE_IDS_JSON = ($stubMap | ConvertTo-Json -Compress)
     # Reset module-scope cache so the env var is observed.
     $module = Get-Module Xdr.Sentinel.Ingest
@@ -106,8 +106,8 @@ Describe 'Manifest Availability schema (declarative contract)' {
     }
 
     It 'manifest contains the expected baseline of <ExpectedCount> endpoints (drift detector)' -ForEach @(
-        @{ Description = 'total endpoints (2 added: DeviceTimeline + MachineActions; 1 dropped: SecureScoreBreakdown — Graph /security/secureScores covers)'; ExpectedCount = 46; Filter = { $true } }
-        @{ Description = 'live endpoints (~80% target)';                   ExpectedCount = 35; Filter = { $args[0].Availability -eq 'live' } }
+        @{ Description = 'total endpoints (46 baseline + 13 Tier A new in v0.1.0 GA Phase 2)'; ExpectedCount = 59; Filter = { $true } }
+        @{ Description = 'live endpoints (~80% target)';                   ExpectedCount = 48; Filter = { $args[0].Availability -eq 'live' } }
         @{ Description = 'role-gated endpoints (retired category)'; ExpectedCount = 0; Filter = { $args[0].Availability -eq 'role-gated' } }
         @{ Description = 'tenant-gated endpoints';                         ExpectedCount = 10; Filter = { $args[0].Availability -eq 'tenant-gated' } }
         @{ Description = 'deprecated endpoints (StreamingApiConfig path collision)'; ExpectedCount = 1; Filter = { $args[0].Availability -eq 'deprecated' } }
@@ -122,7 +122,7 @@ Describe 'Invoke-MDETierPoll — per-stream failure isolation (behavioral gate)'
 
     It 'one stream throwing does NOT abort the rest of the tier' {
         $outcome = InModuleScope Xdr.Defender.Client {
-            $manifest = Get-MDEEndpointManifest
+            $manifest = Get-XdrEndpointManifest -Portal Defender
             $p0Streams = @($manifest.Values | Where-Object { $_.Tier -eq 'inventory' })
 
             $script:CallNumber = 0

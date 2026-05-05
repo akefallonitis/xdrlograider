@@ -14,7 +14,7 @@ assignees: ''
 
 ## Break timeline
 
-- **Last known working date**: <!-- YYYY-MM-DD, based on `MDE_Heartbeat_CL` or manual verification -->
+- **Last known working date**: <!-- YYYY-MM-DD, based on `XdrConnectorHealth_CL` or manual verification -->
 - **First observed failure date**: <!-- YYYY-MM-DD -->
 - **Currently broken**: <!-- Yes / Intermittent -->
 

@@ -112,13 +112,13 @@ When xdrlograider goes to Microsoft Marketplace:
 | Publisher certificate | Required (EV code-signing in release.yml) |
 | CodeQL gate | High-severity blocking |
 | SBOM | SPDX 2.3 + CycloneDX 1.5 emitted by release.yml |
-| Validation lab | `deploy/validation-lab.bicep` for Microsoft reviewers |
+| Validation lab | hand-authored ARM `deploy/compiled/mainTemplate.json` (no separate validation-lab artefact) |
 
-Operators upgrading from v0.1.0-beta to v1.2 keep their explicit parameter values. Default flips only affect new deploys.
+Operators upgrading from v0.1.0 GA to v1.2 keep their explicit parameter values. Default flips only affect new deploys.
 
 ## Operator action items
 
-### v0.1.0-beta operators (today)
+### v0.1.0 GA operators (today)
 
 1. Choose `hostingPlan` consciously (see [HOSTING-PLANS.md](HOSTING-PLANS.md))
 2. Tightly scope FA Contributor RBAC (only deployment automation accounts; no human standing access)
@@ -127,7 +127,7 @@ Operators upgrading from v0.1.0-beta to v1.2 keep their explicit parameter value
 
 ### Upgrading to future versions
 
-When upgrading to v1.0 (Microsoft Sentinel Solution Gallery listing): review the new defaults (`restrictPublicNetwork: true`, `hostingPlan: flex-fc1`). To keep v0.1.0-beta defaults, set them explicitly in your ARM parameter file.
+When upgrading to v1.0 (Microsoft Sentinel Solution Gallery listing): review the new defaults (`restrictPublicNetwork: true`, `hostingPlan: flex-fc1`). To keep v0.1.0 GA defaults, set them explicitly in your ARM parameter file.
 
 ## Reporting security issues
 

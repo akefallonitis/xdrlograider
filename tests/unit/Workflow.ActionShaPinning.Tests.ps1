@@ -1,7 +1,7 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    iter-14.0 Phase 14 — GitHub Actions SHA-pinning gate.
+    v0.1.0 GA — GitHub Actions SHA-pinning gate.
     Asserts every `uses:` line in `.github/workflows/*.yml` references an action
     by full 40-character commit SHA (NOT a moveable tag like `@v4` or `@main`).
 
@@ -75,7 +75,7 @@ Describe 'Workflow.ActionShaPinning' {
 
         if ($violations.Count -gt 0) {
             $msg = "SHA-pinning violations:`n  " + ($violations -join "`n  ")
-            $msg | Should -BeNullOrEmpty -Because 'iter-14.0 Phase 14: every GitHub Action `uses:` must reference an immutable 40-char commit SHA. Update via Dependabot or manually.'
+            $msg | Should -BeNullOrEmpty -Because 'v0.1.0 GA: every GitHub Action `uses:` must reference an immutable 40-char commit SHA. Update via Dependabot or manually.'
         } else {
             $true | Should -BeTrue
         }
@@ -110,7 +110,7 @@ Describe 'Workflow.NoMoveableRefs' {
             }
         }
         if ($offenders.Count -gt 0) {
-            ($offenders -join "`n") | Should -BeNullOrEmpty -Because 'iter-14.0 Phase 14: literal-tag references are moveable; pin to commit SHA'
+            ($offenders -join "`n") | Should -BeNullOrEmpty -Because 'v0.1.0 GA: literal-tag references are moveable; pin to commit SHA'
         } else {
             $true | Should -BeTrue
         }
@@ -129,7 +129,7 @@ Describe 'Workflow.NoMoveableRefs' {
             }
         }
         if ($offenders.Count -gt 0) {
-            ($offenders -join "`n") | Should -BeNullOrEmpty -Because 'iter-14.0 Phase 14: branch references are extremely-moveable; pin to commit SHA'
+            ($offenders -join "`n") | Should -BeNullOrEmpty -Because 'v0.1.0 GA: branch references are extremely-moveable; pin to commit SHA'
         } else {
             $true | Should -BeTrue
         }

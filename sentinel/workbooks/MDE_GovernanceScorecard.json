@@ -50,7 +50,7 @@
         "queryType": 0,
         "title": "RBAC device groups (current state)",
         "size": 0,
-        "query": "MDE_RbacDeviceGroups_CL\n| summarize arg_max(TimeGenerated, *) by EntityId\n| project Name, GroupId, Description, Priority, AutoRemediationLevel, MachineCount, RuleCount, IsUnassigned, LastUpdated, TimeGenerated",
+        "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_RbacDeviceGroups_CL'\n| summarize arg_max(TimeGenerated, *) by EntityId\n| project Name, GroupId, Description, Priority, AutoRemediationLevel, MachineCount, RuleCount, IsUnassigned, LastUpdated, TimeGenerated",
         "version": "KqlItem/1.0"
       },
       "type": 3

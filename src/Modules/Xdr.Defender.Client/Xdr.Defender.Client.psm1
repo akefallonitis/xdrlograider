@@ -3,7 +3,7 @@
 # Architecture (v1.0):
 #   endpoints.manifest.psd1         single catalogue of 52 streams (Tier, Path, Filter, IdProperty)
 #   Endpoints/_EndpointHelpers.ps1  shared helpers:
-#                                     Get-MDEEndpointManifest  (cached manifest loader)
+#                                     Get-XdrEndpointManifest -Portal Defender  (cached manifest loader)
 #                                     Invoke-MDEPortalEndpoint (structured HTTP wrapper)
 #                                     ConvertTo-MDEIngestRow   (row normaliser)
 #                                     Expand-MDEResponse       (response flattener)
@@ -45,13 +45,12 @@ foreach ($file in $publicFiles) {
 
 # 3) Warm the manifest cache at import time so any first-call latency stays in
 #    cold-start rather than first real poll.
-$null = Get-MDEEndpointManifest
+$null = Get-XdrEndpointManifest -Portal Defender
 
 Export-ModuleMember -Function @(
     'Invoke-MDEEndpoint',
     'Invoke-MDETierPoll',
     'Invoke-TierPollWithHeartbeat',
-    'Get-MDEEndpointManifest',
     'Invoke-MDEPortalEndpoint',
     'ConvertTo-MDEIngestRow',
     'Expand-MDEResponse'

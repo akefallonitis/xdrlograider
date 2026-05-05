@@ -20,7 +20,7 @@ BeforeDiscovery {
     $script:DceDcrBicep       = Join-Path $repoRoot 'deploy' 'modules' 'dce-dcr.bicep'
 
     # System tables declared ONLY in DCR + custom-tables; NOT in endpoints manifest.
-    $script:SystemStreams = @('MDE_Heartbeat_CL')
+    $script:SystemStreams = @('XdrConnectorHealth_CL')
 }
 
 BeforeAll {
@@ -32,7 +32,7 @@ BeforeAll {
 
     # Pester 5 — BeforeDiscovery script vars do NOT carry into the Run phase;
     # re-declare the system stream list here.
-    $script:SystemStreams = @('MDE_Heartbeat_CL')
+    $script:SystemStreams = @('XdrConnectorHealth_CL')
 
     # -------- Manifest -------------------------------------------------------
     $manifest = Import-PowerShellDataFile -Path $script:ManifestPath
@@ -92,12 +92,16 @@ BeforeAll {
                         $r.PSObject.Properties.Name -contains 'name') {
                         # Case (b): plain "workspace/TableName"
                         $tblName = ($r.name -split '/')[-1]
-                        if ($tblName -match '^MDE_\w+_CL$') {
+                        # Phase J.C.2-5 (2026-05-04): 47 per-stream MDE_*_CL tables
+                        # consolidated to 10 per-category Defender_<Category>_CL.
+                        # XdrConnectorHealth_CL is the operational table (transcends portals).
+                        # Pattern accepts: Defender_<PascalCategory>_CL OR XdrConnectorHealth_CL.
+                        if ($tblName -match '^(Defender_\w+_CL|XdrConnectorHealth_CL)$') {
                             $script:CustomTables += $tblName
                             continue
                         }
-                        # Case (c): ARM expression — extract "/MDE_Xyz_CL" substring
-                        if ($r.name -match "'/(MDE_\w+_CL)'") {
+                        # Case (c): ARM expression — extract "/Defender_X_CL" or "/XdrConnectorHealth_CL" substring
+                        if ($r.name -match "'/(Defender_\w+_CL|XdrConnectorHealth_CL)'") {
                             $script:CustomTables += $matches[1]
                             continue
                         }
@@ -106,7 +110,7 @@ BeforeAll {
                             $r.properties.PSObject.Properties.Name -contains 'schema' -and
                             $r.properties.schema.PSObject.Properties.Name -contains 'name') {
                             $schemaName = $r.properties.schema.name
-                            if ($schemaName -is [string] -and $schemaName -match '^MDE_\w+_CL$') {
+                            if ($schemaName -is [string] -and $schemaName -match '^(Defender_\w+_CL|XdrConnectorHealth_CL)$') {
                                 $script:CustomTables += $schemaName
                             }
                         }
@@ -131,60 +135,56 @@ BeforeAll {
             Sort-Object -Unique)
     }
 
-    # -------- Drift report -------------------------------------------------
-    # Build an array of [stream,status] pairs for any mismatches. A single
-    # Should assertion on .Count gives us a one-line pass but prints the
-    # full drift list on failure via -Because.
-    $script:Drift = @()
-    $manifestSet     = $script:ManifestStreams
-    $dcrDataSet      = @($script:DcrStreams  | Where-Object { $_ -notin $script:SystemStreams })
-    $tableDataSet    = @($script:CustomTables | Where-Object { $_ -notin $script:SystemStreams })
-
-    foreach ($s in $manifestSet) {
-        if ($s -notin $dcrDataSet)   { $script:Drift += [pscustomobject]@{ Stream = $s; Status = 'missing-in-dcr' } }
-        if ($s -notin $tableDataSet) { $script:Drift += [pscustomobject]@{ Stream = $s; Status = 'missing-in-custom-tables' } }
+    # -------- Phase J.C.2-5 architecture: per-stream → category-table mapping ----
+    # Manifest declares 46 streams → DCR streamDeclarations 47 (46 data + 1 ops).
+    # Workspace tables 11 (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL).
+    # Each stream maps to a CategoryTable derived from CategoryId.
+    $script:CategoryMap = @{
+        1='EndpointDeviceManagement'; 2='EndpointConfiguration'; 3='VulnerabilityManagement';
+        4='IdentityProtection';       5='ConfigurationAndSettings'; 6='ExposureManagement';
+        7='ThreatAnalytics';          8='ActionCenter'; 9='MultiTenantOperations'; 10='StreamingApi'
     }
-    foreach ($s in $dcrDataSet) {
-        if ($s -notin $manifestSet) { $script:Drift += [pscustomobject]@{ Stream = $s; Status = 'orphan-dcr-stream' } }
-    }
-    foreach ($s in $tableDataSet) {
-        if ($s -notin $manifestSet) { $script:Drift += [pscustomobject]@{ Stream = $s; Status = 'orphan-custom-table' } }
+    $script:StreamToCatTable = @{}
+    foreach ($entry in $manifest.Endpoints) {
+        if ($entry.ContainsKey('CategoryId') -and $entry.CategoryId -and $script:CategoryMap.ContainsKey([int]$entry.CategoryId)) {
+            $script:StreamToCatTable[$entry.Stream] = "Defender_$($script:CategoryMap[[int]$entry.CategoryId])_CL"
+        }
     }
 }
 
-Describe 'Manifest / DCR / custom-tables consistency' {
+Describe 'Manifest / DCR / custom-tables consistency (Phase J.C.2-5: 47→10 consolidation)' {
 
-    It 'manifest contains exactly 46 streams' {
-        $script:ManifestStreams.Count | Should -Be 46
+    It 'manifest contains exactly 59 streams (46 baseline + 13 Tier A new in v0.1.0 GA Phase 2)' {
+        $script:ManifestStreams.Count | Should -Be 59
     }
 
-    It 'DCR declares exactly 47 streams (46 data + 1 system Heartbeat)' {
-        $script:DcrStreams.Count | Should -Be 47
+    It 'DCR declares 59 source streams + 1 ops (XdrConnectorHealth_CL) = 60 total streamDeclarations' {
+        $script:DcrStreams.Count | Should -Be 60 -Because 'DCR keeps Custom-MDE_*_CL incoming streamDeclarations + 1 XdrConnectorHealth_CL ops'
     }
 
-    It 'custom-tables declares exactly 47 tables (46 data + 1 system Heartbeat)' {
-        $script:CustomTables.Count | Should -Be 47
+    It 'custom-tables declares 10 per-category Defender_*_CL + 1 XdrConnectorHealth_CL = 11 total' {
+        $script:CustomTables.Count | Should -Be 11 -Because 'Phase J.C.2-5: 47 per-stream tables consolidated to 10 per-category + 1 ops'
     }
 
-    It 'DCR contains the Heartbeat system stream' {
-        $script:DcrStreams | Should -Contain 'MDE_Heartbeat_CL'
-        # AuthTestResult was retired in v0.1.0-beta first publish — auth chain
-        # diagnostics moved to App Insights customEvents (AuthChain.* names).
-        $script:DcrStreams | Should -Not -Contain 'MDE_AuthTestResult_CL'
+    It 'DCR contains the XdrConnectorHealth_CL ops stream' {
+        $script:DcrStreams | Should -Contain 'XdrConnectorHealth_CL'
+        $script:DcrStreams | Should -Not -Contain 'MDE_AuthTestResult_CL' -Because 'auth chain diagnostics moved to App Insights customEvents in v0.1.0 GA first publish'
     }
 
-    It 'custom-tables contains the Heartbeat table' {
-        $script:CustomTables | Should -Contain 'MDE_Heartbeat_CL'
+    It 'custom-tables contains the XdrConnectorHealth_CL ops table' {
+        $script:CustomTables | Should -Contain 'XdrConnectorHealth_CL'
         $script:CustomTables | Should -Not -Contain 'MDE_AuthTestResult_CL'
     }
 
-    It 'zero drift between the three layers' {
-        $driftList = ($script:Drift | ForEach-Object { "$($_.Stream) -> $($_.Status)" }) -join "`n  "
-        $script:Drift.Count | Should -Be 0 -Because "drift detected:`n  $driftList"
+    It 'custom-tables contains all 10 Defender_<Category>_CL tables' {
+        foreach ($cat in $script:CategoryMap.Values) {
+            $expected = "Defender_${cat}_CL"
+            $script:CustomTables | Should -Contain $expected -Because "Phase J.C.2-5: each nodoc category has a Defender_<Category>_CL table"
+        }
     }
 }
 
-Describe 'Per-stream DCR coverage' -ForEach @(
+Describe 'Per-stream DCR coverage (Phase J.C.2-5)' -ForEach @(
     # One It per manifest stream, so failure picks out the bad row precisely.
     # BeforeDiscovery doesn't run the Import, so we re-read the manifest here.
     (Import-PowerShellDataFile -Path (Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1')).Endpoints |
@@ -195,7 +195,10 @@ Describe 'Per-stream DCR coverage' -ForEach @(
         $script:DcrStreams | Should -Contain $StreamName
     }
 
-    It "stream <StreamName> (<Tier>) has a custom table" {
-        $script:CustomTables | Should -Contain $StreamName
+    It "stream <StreamName> (<Tier>) maps to a Defender_<Category>_CL table" {
+        # Phase J.C.2-5: each stream maps to a category table via CategoryTable derivation.
+        $catTable = $script:StreamToCatTable[$StreamName]
+        $catTable | Should -Not -BeNullOrEmpty -Because "stream <StreamName> must have CategoryId in manifest"
+        $script:CustomTables | Should -Contain $catTable -Because "stream <StreamName> maps to category table $catTable which must exist in workspace"
     }
 }

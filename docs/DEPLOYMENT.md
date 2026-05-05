@@ -52,7 +52,7 @@ The deploy creates resources in **two distinct scopes**:
                            ▼
 ┌── Workspace RG (where your existing Sentinel workspace lives)─┐
 │     - 47 custom tables in the workspace (45 telemetry +       │
-│       MDE_Heartbeat_CL + App Insights customEvents)               │
+│       XdrConnectorHealth_CL + App Insights customEvents)               │
 │     - Sentinel Data Connector UI card                         │
 │     - 6 KQL parsers + 6 workbooks + 14 analytic rules +       │
 │       9 hunting queries (via sentinelContent.json)           │
@@ -174,7 +174,7 @@ Wait for the first P0 poll cycle, then:
 
 ```kql
 // Are P0 streams ingesting?
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where Tier == 'P0' and TimeGenerated > ago(2h)
 | summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by FunctionName
 
@@ -222,5 +222,4 @@ az keyvault purge --name <kv-name> --location <region>
 - [GETTING-AUTH-MATERIAL.md](GETTING-AUTH-MATERIAL.md) — How to obtain TOTP / passkey / cookies
 - [RUNBOOK.md](RUNBOOK.md) — Daily/weekly operator tasks + rotation
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Symptom → cause → fix
-- [COST.md](COST.md) — Monthly cost model
 - [ARCHITECTURE.md](ARCHITECTURE.md) — Component diagram + data flow + trust boundaries

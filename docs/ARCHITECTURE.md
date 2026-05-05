@@ -1,4 +1,4 @@
-# Architecture
+# Architecture (v0.1.0 GA)
 
 ## Overview
 
@@ -7,6 +7,45 @@ XdrLogRaider is a three-layer Sentinel Solution:
 1. **Admin-side helper** (one-off, ~2 min) — uploads auth material to Key Vault
 2. **Azure Function App** (unattended, forever) — polls Defender XDR portal, ingests to Log Analytics
 3. **Sentinel content** (parsers + workbooks + analytic rules + hunting queries) — surfaces drift and posture
+
+## Separation of concerns (v0.1.0 GA D'.52 — refresh)
+
+The v0.1.0 GA architecture explicitly distinguishes three observability surfaces with different audiences and SLOs:
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│ OPERATOR SURFACE — Sentinel workspace tables                          │
+│   • 10 Defender_<Category>_CL tables (consolidated per nathanmcnulty 10-category taxonomy) │
+│   • 1 XdrConnectorHealth_CL ops table                                 │
+│   • 4 drift parsers (Configuration, Inventory, Exposure, Maintenance) │
+│   • 8 workbooks + 14 detection analytic rules + 9 hunting queries     │
+│   • 390 sample queries                                                │
+│   • Audience: SOC analysts, threat hunters, security engineers        │
+│   • SLO: row freshness within cadence × 2 (e.g., XSPM ≤ 2h)          │
+└──────────────────────────────────────────────────────────────────────┘
+                            ▲
+                            │ XdrOps-* analytic rules read AppInsights
+                            │ and FIRE operator-visible Sentinel alerts
+                            │ (the BRIDGE between SRE + operator surfaces)
+                            │
+┌──────────────────────────────────────────────────────────────────────┐
+│ SRE SURFACE — AppInsights native tables                              │
+│   • AppRequests       FA function invocations (auto-instrumented)    │
+│   • AppDependencies   Portal HTTPS calls + KV/Storage SDK calls      │
+│   • AppExceptions     AuthChain.AADSTSError, Ingest.DlqStuck, etc.   │
+│   • AppTraces         Write-Information / Write-Verbose routes       │
+│   • AppEvents         AuthChain.Started/Completed, KV.CacheEvicted   │
+│   • AppMetrics        xdr.auth.chain_step_duration_ms,               │
+│                       xdr.dlq.depth, xdr.ingest.row_age_seconds,     │
+│                       xdr.ingest.row_count_per_hour (D'.49 cost gate)│
+│   • Audience: SREs, on-call engineers, connector authors             │
+│   • SLO: AppRequests success rate ≥ 99%; auth-chain p95 ≤ 30s       │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+**Why this matters**: operators querying drift parsers don't need to know about poll cadence, KV cache expiry, or DCR endpoint latency. SREs investigating incidents don't need to know about per-stream typed-column projections. The XdrOps-* analytic rules (5 in v0.1.0 GA: AuthChainFailure, AuthChainStaleness, ConnectorStaleStream, DlqDepthAlert, ServiceAccountAnomalousSignIn + RowVolumeSpike) BRIDGE the two surfaces: they read AppInsights metrics/exceptions and fire operator-visible Sentinel alerts when SRE-side health threatens operator-side data quality.
+
+This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsights NATIVE usage — no extra workspace diag-settings).
 
 ## Component diagram
 
@@ -71,7 +110,7 @@ XdrLogRaider is a three-layer Sentinel Solution:
 │                                                                        │
 │  ┌────────────────────────────────────────────────────────────┐       │
 │  │ DCE + DCR  (location = WORKSPACE region)                   │       │
-│  │   47 streams declared → routed to LA custom tables         │       │
+│  │   60 streams declared (7 DCRs) → routed to LA custom tables│       │
 │  │   (46 data + MDE_Heartbeat operational)                    │       │
 │  └────────────────────────────────────────────────────────────┘       │
 └────────────────────────────────────────────────────────────────────────┘
@@ -88,7 +127,7 @@ XdrLogRaider is a three-layer Sentinel Solution:
 │  │                                                            │       │
 │  │   47 custom tables written by cross-RG nested deployment:  │       │
 │  │     MDE_*_CL  (46 data tables)                             │       │
-│  │     MDE_Heartbeat_CL                                       │       │
+│  │     XdrConnectorHealth_CL                                       │       │
 │  │                                                            │       │
 │  │   Sentinel content written by cross-RG nested deployment:  │       │
 │  │     4 Parsers (one per cadence tier with snapshot          │       │
@@ -147,7 +186,7 @@ MI eliminates rotation burden for Azure-to-Azure auth. User auth material (passk
 ### Why PowerShell 7.4
 Cross-platform (Linux Consumption plan is cheapest), built-in HTTP + WebSession + Crypto, aligns with the PowerShell-heavy security-research tooling ecosystem (XDRInternals, nodoc, DefenderHarvester).
 
-## Multi-portal extensibility (v0.1.0-beta J2 — forward-scalable)
+## Multi-portal extensibility (v0.1.0 GA J2 — forward-scalable)
 
 The architecture is designed so adding another Microsoft portal (e.g.
 `admin.microsoft.com`, `entra.microsoft.com`, `compliance.microsoft.com`,
@@ -157,11 +196,11 @@ shipped module internals. Four invariants make this safe:
 ### 1. Manifest-level `Portal` annotation + loader default
 
 `endpoints.manifest.psd1` declares `Defaults = @{ Portal = 'security.microsoft.com' }`.
-`Get-MDEEndpointManifest` (in `_EndpointHelpers.ps1`) applies the default to
+`Get-XdrEndpointManifest -Portal Defender` (in `_EndpointHelpers.ps1`) applies the default to
 any entry that doesn't override. Entries can opt in to a different portal:
 
 ```powershell
-# Current entry (v0.1.0-beta — security portal implicitly)
+# Current entry (v0.1.0 GA — security portal implicitly)
 @{ Stream = 'MDE_AdvancedFeatures_CL'; Path = '/apiproxy/mtp/settings/...'; Tier = 'inventory'; Availability = 'live' }
 
 # Future v0.2.0 entry — explicit non-default portal
@@ -235,7 +274,7 @@ schema-agnostic-at-query:
    portal fields land in `RawJson` and stay queryable; the manifest's
    `ProjectionMap` evolves in a follow-up release without DCR redeploy
    pain.
-3. **Re-parseability.** If a v0.1.0-beta projection is imperfect, v0.2.0
+3. **Re-parseability.** If a v0.1.0 GA projection is imperfect, v0.2.0
    can improve the projection and re-run drift against the same
    historical `RawJson` rows.
 
@@ -243,21 +282,21 @@ Trade-off: query-time compute instead of ingest-time compute. Acceptable
 for the low-volume config-drift domain where workbooks run intermittently
 and not every few-seconds per ingestion burst.
 
-## Error-handling + App Insights taxonomy (v0.1.0-beta)
+## Error-handling + App Insights taxonomy (v0.1.0 GA)
 
 Errors flow through a deliberate taxonomy so operators can triage in one
 query instead of greping raw stack traces:
 
 | Layer | Error type | Surfaces as | Operator KQL hook |
 |-------|-----------|-------------|-------------------|
-| Portal 429 | Rate-limited | `$script:Rate429Count` incremented; exhausted → `[MDERateLimited]` message prefix thrown | `MDE_Heartbeat_CL \| extend n = parse_json(Notes) \| summarize sum(toint(n.rate429Count))` |
+| Portal 429 | Rate-limited | `$script:Rate429Count` incremented; exhausted → `[MDERateLimited]` message prefix thrown | `XdrConnectorHealth_CL \| extend n = parse_json(Notes) \| summarize sum(toint(n.rate429Count))` |
 | Portal 401/440 | Session expired | Reactive reauth via cached credentials; transparent to caller | App Insights: `customEvents \| where name == 'AuthChain.AADSTSError' \| project timestamp, customDimensions` |
 | Portal 403 | Auth OK but not permitted | Surfaced to caller; no reauth spin | Heartbeat `fatalError` note if persistent |
-| Portal 4xx other | Request malformed | Stream-level error captured in tier-poll `Errors` hashtable; heartbeat `Notes.errors` | `MDE_Heartbeat_CL \| extend err = parse_json(tostring(parse_json(Notes).errors)) \| where isnotempty(err)` |
+| Portal 4xx other | Request malformed | Stream-level error captured in tier-poll `Errors` hashtable; heartbeat `Notes.errors` | `XdrConnectorHealth_CL \| extend err = parse_json(tostring(parse_json(Notes).errors)) \| where isnotempty(err)` |
 | Portal 5xx | Portal-side failure | Exponential backoff retry (5 attempts); final throw surfaces to caller | Same as above |
 | DCE 413 | Payload too large | Batch halved + recursed (capped depth 3); transparent to caller | `traces \| where message startswith 'DCE 413'` |
 | DCE 429/5xx | DCE throttling | Exponential backoff retry (5 attempts) inside `Send-ToLogAnalytics` | `traces \| where message contains 'DCE ingest transient'` |
-| Timer fatal | Any exception not handled above | `Write-Heartbeat` with `Notes.fatalError = <message>`, then `throw` so App Insights catches | `MDE_Heartbeat_CL \| where parse_json(Notes).fatalError != ''` |
+| Timer fatal | Any exception not handled above | `Write-Heartbeat` with `Notes.fatalError = <message>`, then `throw` so App Insights catches | `XdrConnectorHealth_CL \| where parse_json(Notes).fatalError != ''` |
 | Cold-start failure | Missing envvar / module load fail | `profile.ps1` throws hard → Function App host logs | App Insights `traces` severity=Error |
 
 Full KQL cookbook in `docs/OPERATIONS.md`.

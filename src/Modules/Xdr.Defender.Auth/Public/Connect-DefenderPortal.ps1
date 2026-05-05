@@ -62,7 +62,7 @@ function Connect-DefenderPortal {
     [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory)]
-        # iter-13.12: accept snake_case alias from ARM env-var passthrough.
+        # pre-v0.1.0.12: accept snake_case alias from ARM env-var passthrough.
         [ValidateSet('CredentialsTotp', 'Passkey', 'credentials_totp', 'passkey')]
         [string] $Method,
 
@@ -76,7 +76,7 @@ function Connect-DefenderPortal {
         [switch] $Force
     )
 
-    # iter-13.12: normalize snake_case → PascalCase so downstream paths see one shape.
+    # pre-v0.1.0.12: normalize snake_case → PascalCase so downstream paths see one shape.
     $Method = switch ($Method) {
         'credentials_totp' { 'CredentialsTotp' }
         'passkey'          { 'Passkey' }
@@ -88,7 +88,7 @@ function Connect-DefenderPortal {
 
     $cacheKey = "$upn::$PortalHost"
 
-    # iter-14.0 Phase 14B: per-Connect correlation GUID stitched onto every AI
+    # v0.1.0 GAB: per-Connect correlation GUID stitched onto every AI
     # emission for this auth chain (cache evict / cold-start ESTS / sccauth /
     # downstream Invoke-DefenderPortalRequest 401-reauth retries). Stamped on
     # the cache entry so downstream wrappers can reuse it.
@@ -136,17 +136,36 @@ function Connect-DefenderPortal {
     }
     $authStartedUtc = [datetime]::UtcNow
     try {
+        # Phase J D'.4 (2026-05-04): per-step duration metric for operator
+        # visibility into WHICH step is slow (Entra ESTS vs Defender sccauth).
+        # Emits to AppInsights AppMetrics; operators chart by Step dimension.
+        $stepSw = [System.Diagnostics.Stopwatch]::StartNew()
         $entraAuth = Get-EntraEstsAuth `
             -Method     $Method `
             -Credential $Credential `
             -ClientId   $script:DefenderClientId `
             -PortalHost $PortalHost `
             -TenantId   $TenantId
+        $stepSw.Stop()
+        if (Get-Command -Name Send-XdrAppInsightsCustomMetric -ErrorAction SilentlyContinue) {
+            Send-XdrAppInsightsCustomMetric -MetricName 'xdr.auth.chain_step_duration_ms' `
+                -Value ([double]$stepSw.ElapsedMilliseconds) `
+                -Properties @{ Step = 'EntraEsts'; Portal = 'Defender'; Method = $Method } `
+                -OperationId $correlationId
+        }
 
         # --- L2: verify Defender portal cookies + auto-resolve TenantId ---
+        $stepSw.Restart()
         $sccauth = Get-DefenderSccauth -Session $entraAuth.Session -PortalHost $PortalHost -TenantId $TenantId
+        $stepSw.Stop()
+        if (Get-Command -Name Send-XdrAppInsightsCustomMetric -ErrorAction SilentlyContinue) {
+            Send-XdrAppInsightsCustomMetric -MetricName 'xdr.auth.chain_step_duration_ms' `
+                -Value ([double]$stepSw.ElapsedMilliseconds) `
+                -Properties @{ Step = 'DefenderSccauth'; Portal = 'Defender'; Method = $Method } `
+                -OperationId $correlationId
+        }
     } catch {
-        # iter-14.0 Phase 2 (v0.1.0 GA): AADSTS error → native `exceptions` table
+        # v0.1.0 GA (v0.1.0 GA): AADSTS error → native `exceptions` table
         # per Section 2.3 of senior-architect plan. AADSTS failures ARE genuine
         # errors that operators should alert on — belongs in AppExceptions, not
         # customEvents. Send-XdrAppInsightsException auto-captures stack trace +

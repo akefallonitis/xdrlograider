@@ -260,10 +260,119 @@ jobs:
           name: deploy-whatif-results
           path: ./tests/results/
 
+  auto-recompile-gate:
+    # D'.18 v0.1.0 GA Phase 5.6: regenerate sentinelContent.json + assert no diff.
+    # Operators editing sentinel/parsers/*.kql, workbooks, or rules must commit
+    # the regenerated compiled artifact at the same time. CI catches drift.
+    name: Sentinel-content recompile gate (D'.18)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Regenerate compiled sentinelContent.json + check diff
+        shell: pwsh
+        run: |
+          # Run the compiler tool that emits deploy/compiled/sentinelContent.json
+          # from the sentinel/ source files (parsers, workbooks, rules, hunting).
+          pwsh -File ./tools/Build-SentinelContent.ps1
+          # Any uncommitted change to deploy/compiled/sentinelContent.json means
+          # the operator forgot to recompile after editing source content.
+          $diff = git diff --exit-code -- deploy/compiled/sentinelContent.json
+          if ($LASTEXITCODE -ne 0) {
+              Write-Host "::error::sentinelContent.json drift detected — operator must run tools/Build-SentinelContent.ps1 + commit the result." -ForegroundColor Red
+              git diff -- deploy/compiled/sentinelContent.json
+              exit 1
+          }
+          Write-Host "sentinelContent.json: in sync with sentinel/ sources" -ForegroundColor Green
+
+  auto-rezip-gate:
+    # D'.19 v0.1.0 GA Phase 5.7: dry-run package the function-app.zip from src/.
+    # Catches packaging errors before they hit release.yml + WEBSITE_RUN_FROM_PACKAGE.
+    name: Function App package dry-run gate (D'.19)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Dry-run package src/ -> function-app.zip
+        shell: pwsh
+        run: |
+          # Mirror the release.yml packaging steps WITHOUT uploading. Validate:
+          #   - profile.ps1 + functions/ + Modules/ are all present
+          #   - .internal/ is NOT included (gitignored, but verify here too)
+          #   - tests/ is NOT included
+          #   - manifest.psd1 + endpoints.psd1 + private helpers all packaged
+          $tmpDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_.FullName }
+          $zipPath = Join-Path $tmpDir.FullName 'function-app.zip'
+          # Stage src/ only — same shape as release.yml.
+          $stage = Join-Path $tmpDir.FullName 'stage'
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+          Copy-Item -Path './src/*' -Destination $stage -Recurse -Force
+          Compress-Archive -Path "$stage/*" -DestinationPath $zipPath -CompressionLevel Optimal
+          $size = (Get-Item $zipPath).Length
+          Write-Host "function-app.zip dry-run: $([math]::Round($size/1024,1)) KB"
+          # Sanity-check exclusions
+          $forbidden = @('tests', '.internal', '.github', 'docs', 'node_modules')
+          foreach ($f in $forbidden) {
+              if (Test-Path (Join-Path $stage $f)) {
+                  Write-Host "::error::function-app.zip contains forbidden path '$f'" -ForegroundColor Red
+                  exit 1
+              }
+          }
+          # Sanity-check required entries
+          foreach ($req in 'profile.ps1','host.json','functions','Modules') {
+              if (-not (Test-Path (Join-Path $stage $req))) {
+                  Write-Host "::error::function-app.zip missing required entry '$req'" -ForegroundColor Red
+                  exit 1
+              }
+          }
+          Write-Host "function-app.zip dry-run: shape valid (no forbidden paths; all required entries present)" -ForegroundColor Green
+
+  coverage-gate:
+    # D'.20 v0.1.0 GA Phase 5.8: Pester code coverage >= 50% (intermediate gate;
+    # >=75% is the v0.1.0.1 target). Soft-fails for now (warning) — promote to
+    # hard-fail in v0.1.0.1 once instrumentation is verified across all modules.
+    name: Pester coverage gate (D'.20)
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Install Pester
+        shell: pwsh
+        run: Install-Module -Name Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+      - name: Run coverage measurement
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path './tests/results' -Force | Out-Null
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = './tests/unit'
+          $cfg.Run.Exit = $false
+          $cfg.Run.Throw = $false
+          $cfg.Output.Verbosity = 'Minimal'
+          $cfg.CodeCoverage.Enabled = $true
+          $cfg.CodeCoverage.Path = @('./src/Modules/**/Public/*.ps1', './src/Modules/**/Private/*.ps1')
+          $cfg.CodeCoverage.OutputFormat = 'JaCoCo'
+          $cfg.CodeCoverage.OutputPath = './tests/results/coverage.xml'
+          $result = Invoke-Pester -Configuration $cfg
+          $coverage = if ($result.CodeCoverage.NumberOfCommandsAnalyzed -gt 0) {
+              [math]::Round(100.0 * $result.CodeCoverage.NumberOfCommandsExecuted / $result.CodeCoverage.NumberOfCommandsAnalyzed, 2)
+          } else { 0 }
+          Write-Host "Coverage: $coverage% ($($result.CodeCoverage.NumberOfCommandsExecuted)/$($result.CodeCoverage.NumberOfCommandsAnalyzed))"
+          if ($coverage -lt 50) {
+              Write-Host "::warning::Coverage $coverage% below 50% v0.1.0 GA Phase 5 gate — soft-fail (will become hard-fail in v0.1.0.1)" -ForegroundColor Yellow
+          } else {
+              Write-Host "Coverage $coverage% meets 50% gate" -ForegroundColor Green
+          }
+      - name: Upload coverage report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: coverage-report
+          path: ./tests/results/coverage.xml
+
   summary:
     name: CI summary
     runs-on: ubuntu-latest
-    needs: [secret-scan, lint, unit-tests, static-validate, deploy-whatif]
+    needs: [secret-scan, lint, unit-tests, static-validate, deploy-whatif, auto-recompile-gate, auto-rezip-gate, coverage-gate]
     if: always()
     steps:
       - name: Summary
@@ -274,12 +383,18 @@ jobs:
           echo "- Unit tests:       ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Static validate:  ${{ needs.static-validate.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Deploy what-if:   ${{ needs.deploy-whatif.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Recompile gate:   ${{ needs.auto-recompile-gate.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Rezip gate:       ${{ needs.auto-rezip-gate.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Coverage gate:    ${{ needs.coverage-gate.result }}" >> $GITHUB_STEP_SUMMARY
           # deploy-whatif self-skips on missing secrets (exits 0); only fail
           # the workflow if it actually failed (non-success / non-skipped).
           if [ "${{ needs.secret-scan.result }}" != "success" ] \
              || [ "${{ needs.lint.result }}" != "success" ] \
              || [ "${{ needs.unit-tests.result }}" != "success" ] \
              || [ "${{ needs.static-validate.result }}" != "success" ] \
+             || [ "${{ needs.auto-recompile-gate.result }}" != "success" ] \
+             || [ "${{ needs.auto-rezip-gate.result }}" != "success" ] \
+             || [ "${{ needs.coverage-gate.result }}" = "failure" ] \
              || [ "${{ needs.deploy-whatif.result }}" = "failure" ]; then
             exit 1
           fi

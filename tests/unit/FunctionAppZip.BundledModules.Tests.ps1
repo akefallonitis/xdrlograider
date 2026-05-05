@@ -1,7 +1,7 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Validates that the iter-13 Linux Consumption "Legion" managed-dependencies
+    Validates that the pre-v0.1.0 Linux Consumption "Legion" managed-dependencies
     fix is correctly wired across requirements.psd1, host.json, and the
     release.yml Save-Module step.
 
@@ -25,7 +25,7 @@
       5. release.yml must validate bundled modules are present in the final zip
 
     Iter-12 had ONE dependency-management bug (zip flatten) that caused FA
-    Runtime: Error. Iter-13 reveals the SECOND dependency bug (Legion managed
+    Runtime: Error. pre-v0.1.0 reveals the SECOND dependency bug (Legion managed
     deps). This gate prevents either from regressing.
 #>
 
@@ -76,7 +76,7 @@ Describe 'release.yml Save-Module step + bundled-modules invariant gates' {
     }
 
     It 'release.yml Save-Module command for Az.Accounts present' {
-        $script:ReleaseYmlContent | Should -Match 'Save-Module' -Because 'iter-13 requires Az modules bundled at release time'
+        $script:ReleaseYmlContent | Should -Match 'Save-Module' -Because 'pre-v0.1.0 requires Az modules bundled at release time'
         $script:ReleaseYmlContent | Should -Match "Name\s*=\s*'Az\.Accounts'" -Because 'Az.Accounts needed for Connect-AzAccount -Identity (SAMI auth)'
     }
 

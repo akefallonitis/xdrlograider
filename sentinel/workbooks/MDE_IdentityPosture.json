@@ -50,7 +50,7 @@
         "queryType": 0,
         "title": "Domain controller sensor coverage",
         "size": 0,
-        "query": "MDE_DCCoverage_CL\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by EntityId\n| summarize Coverage = countif(IsActive == true), Total = count()\n| extend CoveragePct = todouble(Coverage) / todouble(Total) * 100",
+        "query": "Defender_IdentityProtection_CL | where SourceName == 'MDE_DCCoverage_CL'\n| where TimeGenerated > ago({TimeRange:value})\n| summarize arg_max(TimeGenerated, *) by EntityId\n| summarize Coverage = countif(IsActive == true), Total = count()\n| extend CoveragePct = todouble(Coverage) / todouble(Total) * 100",
         "version": "KqlItem/1.0"
       },
       "type": 3

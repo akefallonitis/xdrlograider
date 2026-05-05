@@ -15,14 +15,14 @@ function Get-XdrAuthFromKeyVault {
           <prefix>-sccauth     (DirectCookies; Defender-specific cookie name)
           <prefix>-xsrf        (DirectCookies; Defender-specific cookie name)
 
-        Default `-SecretPrefix = 'mde-portal'` for backward-compatibility with
+        Default `-SecretPrefix = 'mde-portal'` for v0.1.0 GA scope with
         v0.1.0-beta deployments. v0.2.0 multi-portal deployments will use distinct
         prefixes per portal (e.g., `purview-portal`, `intune-portal`).
 
-        v0.1.0-beta first publish — TTL CACHE (production-readiness gate):
+        v0.1.0 GA first publish — TTL CACHE (production-readiness gate):
           Pre-fix: secrets fetched on every call. KV throttles tenant-wide
           at 2,000 ops/10 sec/vault, and a tier-poll could read 3 secrets
-          per stream × 47 streams = 141 reads/cycle. The 2026-04-30
+          per stream × 59 streams = 177 reads/cycle. The 2026-04-30
           ballpit-tenant load-test caught us at 800+ KV reads/min during
           tier transitions.
 
@@ -105,7 +105,7 @@ function Get-XdrAuthFromKeyVault {
     $vaultName = ([uri]$VaultUri).Host.Split('.')[0]
 
     # ------------------------------------------------------------------------
-    # TTL cache — v0.1.0-beta first publish.
+    # TTL cache — v0.1.0 GA first publish.
     # ------------------------------------------------------------------------
     # $script:CredentialCache and $script:CredentialCacheExpiry are
     # initialised in the parent module (Xdr.Common.Auth.psm1) so they

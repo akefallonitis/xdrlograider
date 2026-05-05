@@ -12,8 +12,8 @@ This is the canonical reference for "what does each stream do, what's its curren
 | Cadence | Polling tier: `fast` (10m), `exposure` (1h), `config` (6h), `inventory` (1d), `maintenance` (1w) |
 | Avail | `live` (test tenant returns 2xx + has data), `tenant-gated` (correctly errors on test tenant — needs MDI/TVM/MEM/MCAS license), `deprecated` |
 | Shape | Response-handling pattern (per `Expand-MDEResponse`): array, wrapper-array (UnwrapProperty), property-bag (Shape 3), scalar (Shape 4), single-object (SingleObjectAsRow) |
-| Manifest | ✅ correct, ⚠️ rewritten in iter-14.0 Phase 1 |
-| DCR | ✅ matches manifest ProjectionMap; legacy back-compat cols preserved |
+| Manifest | ✅ correct, ⚠️ rewritten in v0.1.0 GA |
+| DCR | ✅ matches manifest ProjectionMap; legacy v0.1.0 GA scope cols preserved |
 | Live verified | ✅ healthy + row count, ⚠️ live-but-no-data, ⏳ within-cadence (next fire), ❌ correctly tenant-gated |
 
 ## Fast tier (10-min cadence)
@@ -27,31 +27,44 @@ This is the canonical reference for "what does each stream do, what's its curren
 
 | Stream | Avail | Shape | Manifest | DCR | Live verified |
 |---|---|---|---|---|---|
-| MDE_AssetRules_CL | live | wrapper `rules` (iter-14.0) | ✅ | ✅ | ✅ healthy (130 critical-asset rules) |
-| MDE_XspmInitiatives_CL | live | wrapper `results` (iter-14.0) | ✅ | ✅ | ✅ healthy (10 initiatives) |
+| MDE_AssetRules_CL | live | wrapper `rules` (v0.1.0 GA) | ✅ | ✅ | ✅ healthy (130 critical-asset rules) |
+| MDE_XspmInitiatives_CL | live | wrapper `results` (v0.1.0 GA) | ✅ | ✅ | ✅ healthy (10 initiatives) |
 | MDE_ExposureSnapshots_CL | live | wrapper `results` | ✅ | ✅ | ⏳ within-cadence (no recent posture updates) |
 | MDE_ExposureRecommendations_CL | live | wrapper `results` | ✅ | ✅ | ✅ healthy (10 recommendations) |
 | MDE_XspmAttackPaths_CL | live | wrapper `data` POST | ✅ | ✅ | ✅ healthy (12 paths) |
 | MDE_XspmChokePoints_CL | live | wrapper `data` POST | ✅ | ✅ | ✅ healthy (12 chokepoints) |
 | MDE_XspmTopTargets_CL | live | wrapper `data` POST | ✅ | ✅ | ✅ healthy (12 top targets) |
+| MDE_AssetClassificationSchema_CL | live | wrapper `schema` (v0.1.0 GA Phase 2) | ✅ | ✅ | ✅ live captured 2026-05-04 (XSPM critical-asset rule DSL) |
+| MDE_PostureInitiativesSummarized_CL | live | wrapper `results` (v0.1.0 GA Phase 2) | ✅ | ✅ | ✅ live captured 2026-05-04 (posture initiatives KPIs) |
+| MDE_PostureMetrics_CL | live | wrapper `results` (v0.1.0 GA Phase 2) | ✅ | ✅ | ✅ live captured 2026-05-04 (metrics catalog) |
+| MDE_AppsSecureScore_CL | live | single-object (v0.1.0 GA Phase 2) | ✅ + SingleObjectAsRow | ✅ | ✅ live captured 2026-05-04 (per-category SaaS apps score) |
+| MDE_DataSecureScore_CL | live | single-object (v0.1.0 GA Phase 2) | ✅ + SingleObjectAsRow | ✅ | ✅ live captured 2026-05-04 (per-category data score) |
+| MDE_IdentitySecureScore_CL | live | single-object (v0.1.0 GA Phase 2) | ✅ + SingleObjectAsRow | ✅ | ✅ live captured 2026-05-04 (per-category identity score) |
+| MDE_PostureSecurityEvents_CL | live | wrapper `results` (v0.1.0 GA Phase 2) | ✅ | ✅ | ✅ live captured 2026-05-04 (config-change events affecting posture) |
+| MDE_PostureTenants_CL | live | single-object (v0.1.0 GA Phase 2) | ✅ + SingleObjectAsRow | ✅ | ✅ live captured 2026-05-04 (posture-oversight tenant config) |
+| MDE_AttackSurfaceAttackPaths_CL | live | wrapper `Records` (v0.1.0 GA Phase 2) | ✅ | ✅ | ✅ live captured 2026-05-04 (attack-surface analytical paths) |
+| MDE_AttackSurfaceChokepoints_CL | live | wrapper `Results` (v0.1.0 GA Phase 2) | ✅ | ✅ | ✅ live captured 2026-05-04 (attack-surface choke points) |
+| MDE_XspmConnectors_CL | live | wrapper `results` (v0.1.0 GA Phase 2) | ✅ | ✅ | ✅ live captured 2026-05-04 (configured XSPM data connectors) |
 
 ## Config tier (6-hour cadence)
 
 | Stream | Avail | Shape | Manifest | DCR | Live verified |
 |---|---|---|---|---|---|
-| MDE_PreviewFeatures_CL | live | property-bag (Shape 3) | ⚠️ Phase 1 (FeatureName + Value) | ✅ | ✅ healthy (FeatureName populated; per-property cols back-compat null) |
+| MDE_PreviewFeatures_CL | live | property-bag (Shape 3) | ⚠️ Phase 1 (FeatureName + Value) | ✅ | ✅ healthy (FeatureName populated; per-property cols v0.1.0 GA scope null) |
 | MDE_AlertServiceConfig_CL | live | array | ✅ | ✅ | ⏳ empty in tenant (no per-workload overrides) |
-| MDE_AlertTuning_CL | live | wrapper `items` (iter-14.0 Phase 4) | ⚠️ Phase 4 added UnwrapProperty | ✅ | ⏳ empty in tenant (no email rules) |
+| MDE_AlertTuning_CL | live | wrapper `items` (v0.1.0 GA) | ⚠️ Phase 4 added UnwrapProperty | ✅ | ⏳ empty in tenant (no email rules) |
 | MDE_SuppressionRules_CL | live | array | ✅ | ✅ | ✅ healthy (18 rules) |
 | MDE_CustomDetections_CL | live | wrapper `Rules` | ✅ | ✅ | ⏳ empty in tenant (no custom detections deployed) |
 | MDE_TenantAllowBlock_CL | tenant-gated | facet | ⚠️ misrouted; v0.2.0 path correction | ✅ | ❌ tenant returns 500; v0.2.0 swap to `/indicators/getQuery` |
 | MDE_RbacDeviceGroups_CL | live | wrapper `items` | ✅ | ✅ | ✅ healthy (4 device groups) |
-| MDE_UnifiedRbacRoles_CL | live | wrapper `value` (iter-14.0 Phase 4) | ⚠️ Phase 4 added UnwrapProperty | ✅ | ⏳ empty in tenant |
-| MDE_ConnectedApps_CL | live | single-object (iter-14.0 Phase 1) | ⚠️ Phase 1 SingleObjectAsRow | ✅ | ✅ healthy (1 connected app) |
+| MDE_UnifiedRbacRoles_CL | live | wrapper `value` (v0.1.0 GA) | ⚠️ Phase 4 added UnwrapProperty | ✅ | ⏳ empty in tenant |
+| MDE_ConnectedApps_CL | live | single-object (v0.1.0 GA) | ⚠️ Phase 1 SingleObjectAsRow | ✅ | ✅ healthy (1 connected app) |
 | MDE_IntuneConnection_CL | live | scalar (Shape 4) | ⚠️ Phase 1 (FeatureName + Status + IsEnabled) | ✅ | ✅ healthy (Status=0, IsEnabled=false — Intune not connected) |
 | MDE_PurviewSharing_CL | live | scalar (Shape 4) | ⚠️ Phase 1 (FeatureName + IsEnabled; legacy AlertSharingEnabled) | ✅ | ✅ healthy (false) |
-| MDE_UserPreferences_CL | live | single-object (iter-14.0 Phase 1) | ⚠️ Phase 1 SingleObjectAsRow + UserPreferencesJson | ✅ | ✅ healthy (1 row with full operator preferences JSON) |
+| MDE_UserPreferences_CL | live | single-object (v0.1.0 GA) | ⚠️ Phase 1 SingleObjectAsRow + UserPreferencesJson | ✅ | ✅ healthy (1 row with full operator preferences JSON) |
 | MDE_ThreatAnalytics_CL | live | array (large) | ✅ | ✅ | ✅ healthy (2,960 outbreak rows) |
+| MDE_ThreatAnalyticsEnriched_CL | live | wrapper `Items` (v0.1.0 GA Phase 2) | ✅ | ✅ | ✅ live captured 2026-05-04 (enriched outbreak payload — severity + sectors + threat actor) |
+| MDE_ThreatAnalyticsTopThreats_CL | live | single-object (v0.1.0 GA Phase 2) | ✅ + SingleObjectAsRow | ✅ | ✅ live captured 2026-05-04 (curated top active outbreaks) |
 
 ## Inventory tier (1-day cadence)
 
@@ -65,16 +78,16 @@ This is the canonical reference for "what does each stream do, what's its curren
 | MDE_AuthenticatedTelemetry_CL | live | scalar (Shape 4) | ⚠️ Phase 1 (FeatureName + IsEnabled; legacy AllowNonAuthSense) | ✅ | ✅ healthy (1 row, true) |
 | MDE_PUAConfig_CL | live | property-bag | ⚠️ Phase 1 (FeatureName + IsEnabled; legacy 2 per-property) | ✅ | ✅ healthy (2 rows) |
 | MDE_AntivirusPolicy_CL | tenant-gated | facet | ⚠️ misrouted; v0.2.0 path correction | ✅ | ❌ tenant 400 — no MEM in test tenant |
-| MDE_CustomCollection_CL | tenant-gated | array | ✅ (iter-14.0) | ✅ | ❌ tenant 403 — needs role |
-| MDE_TenantContext_CL | live | single-object (iter-14.0 Phase 1) | ⚠️ Phase 1 SingleObjectAsRow + 13 typed cols | ✅ | ✅ healthy (1 row with EnvironmentName/OrgId/Region/etc) |
-| MDE_TenantWorkloadStatus_CL | live | single-object (iter-14.0 Phase 4) | ⚠️ Phase 4 SingleObjectAsRow | ✅ | ✅ healthy (1 row with tenant workgroup) |
+| MDE_CustomCollection_CL | tenant-gated | array | ✅ (v0.1.0 GA) | ✅ | ❌ tenant 403 — needs role |
+| MDE_TenantContext_CL | live | single-object (v0.1.0 GA) | ⚠️ Phase 1 SingleObjectAsRow + 13 typed cols | ✅ | ✅ healthy (1 row with EnvironmentName/OrgId/Region/etc) |
+| MDE_TenantWorkloadStatus_CL | live | single-object (v0.1.0 GA) | ⚠️ Phase 4 SingleObjectAsRow | ✅ | ✅ healthy (1 row with tenant workgroup) |
 | MDE_SAClassification_CL | live | wrapper (verify; tenant-empty) | ✅ | ✅ | ❌ no MDI service-account classification rules |
 | MDE_IdentityOnboarding_CL | live | wrapper `DomainControllers` | ✅ | ✅ | ❌ no MDI in tenant |
 | MDE_IdentityServiceAccounts_CL | live | wrapper `ServiceAccounts` POST | ✅ | ✅ | ❌ no MDI in tenant |
 | MDE_DCCoverage_CL | tenant-gated | singleton | ⚠️ misrouted; v0.2.0 | ✅ | ❌ no MDI in tenant |
-| MDE_IdentityAlertThresholds_CL | tenant-gated | wrapper `AlertThresholds` (iter-14.0) | ✅ + back-compat | ✅ | ❌ no MDI |
+| MDE_IdentityAlertThresholds_CL | tenant-gated | wrapper `AlertThresholds` (v0.1.0 GA) | ✅ + v0.1.0 GA scope | ✅ | ❌ no MDI |
 | MDE_RemediationAccounts_CL | tenant-gated | singleton config | ⚠️ misrouted; v0.2.0 | ✅ | ❌ no MDI |
-| MDE_SecurityBaselines_CL | tenant-gated | wrapper `results` (iter-14.0) | ✅ + back-compat | ✅ | ❌ no TVM |
+| MDE_SecurityBaselines_CL | tenant-gated | wrapper `results` (v0.1.0 GA) | ✅ + v0.1.0 GA scope | ✅ | ❌ no TVM |
 | MDE_DeviceTimeline_CL | tenant-gated | wrapper `Results` POST (verify Items vs Results in v0.2.0) | ✅ | ✅ | ❌ no timeline opt-in |
 | MDE_MtoTenants_CL | live | wrapper `tenantInfoList` | ✅ | ✅ | ✅ healthy (1 tenant) |
 | MDE_LicenseReport_CL | live | wrapper `sums` | ✅ | ✅ | ✅ healthy (per-SKU rollup rows) |
@@ -84,8 +97,8 @@ This is the canonical reference for "what does each stream do, what's its curren
 
 | Stream | Avail | Shape | Manifest | DCR | Live verified |
 |---|---|---|---|---|---|
-| MDE_DataExportSettings_CL | live (hybrid) | wrapper `value` (iter-14.0 Phase 4) | ⚠️ Phase 4 added UnwrapProperty | ✅ | ✅ healthy (workspace destination row) |
-| MDE_StreamingApiConfig_CL | deprecated | n/a | n/a | declared back-compat | ❌ 404 expected (deprecated path); v0.2.0 may remove entirely |
+| MDE_DataExportSettings_CL | live (hybrid) | wrapper `value` (v0.1.0 GA) | ⚠️ Phase 4 added UnwrapProperty | ✅ | ✅ healthy (workspace destination row) |
+| MDE_StreamingApiConfig_CL | deprecated | n/a | n/a | declared v0.1.0 GA scope | ❌ 404 expected (deprecated path); v0.2.0 may remove entirely |
 
 ## Operator KQL conventions
 

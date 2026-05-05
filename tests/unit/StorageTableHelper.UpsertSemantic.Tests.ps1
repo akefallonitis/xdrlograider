@@ -1,11 +1,11 @@
 #Requires -Modules Pester
 <#
 .SYNOPSIS
-    Iter-13.14 root-cause regression gate: locks the invariant that
+    pre-v0.1.0.14 root-cause regression gate: locks the invariant that
     Invoke-XdrStorageTableEntity Upsert NEVER sends an `If-Match` header.
 
 .DESCRIPTION
-    The iter-13.14 production breakage was caused by sending
+    The pre-v0.1.0.14 production breakage was caused by sending
     `If-Match: '*'` on a PUT to the Azure Tables REST endpoint. With
     `If-Match: '*'` the PUT becomes "Update Entity" (which 404s if the
     row doesn't exist yet) — first-run validate-auth-selftest then
@@ -26,7 +26,7 @@ BeforeAll {
     $script:HelperSource = Get-Content $script:HelperPath -Raw
 }
 
-Describe 'iter-13.14 root-cause regression gate — Upsert MUST NOT send If-Match' {
+Describe 'pre-v0.1.0.14 root-cause regression gate — Upsert MUST NOT send If-Match' {
 
     It 'helper file exists at the canonical path' {
         $script:HelperPath | Should -Exist
@@ -40,7 +40,7 @@ Describe 'iter-13.14 root-cause regression gate — Upsert MUST NOT send If-Matc
 
         # Strip PowerShell comments from the branch body so that documentation/
         # historical references to "If-Match" inside the branch (which we WANT
-        # there to remind future maintainers of the iter-13.14 root cause) do
+        # there to remind future maintainers of the pre-v0.1.0.14 root cause) do
         # not false-positive this assertion.
         $branchBody = $upsertBranch.Groups[1].Value
         $branchBody = [regex]::Replace($branchBody, '<#[\s\S]*?#>', '')   # block comments
@@ -48,7 +48,7 @@ Describe 'iter-13.14 root-cause regression gate — Upsert MUST NOT send If-Matc
 
         # Now assert no actual TryAddWithoutValidation('If-Match'...) call.
         $branchBody | Should -Not -Match "TryAddWithoutValidation\s*\(\s*['""]If-Match['""]" -Because (
-            'iter-13.14 root cause: PUT with If-Match becomes Update Entity ' +
+            'pre-v0.1.0.14 root cause: PUT with If-Match becomes Update Entity ' +
             '(returns 404 if row missing). Upsert MUST NOT send If-Match — ' +
             'PUT without If-Match is Insert-Or-Replace, which is what callers want.'
         )
@@ -63,7 +63,7 @@ Describe 'iter-13.14 root-cause regression gate — Upsert MUST NOT send If-Matc
     }
 
     It 'PUT verb is used for Upsert (not MERGE — MERGE has different semantics + Az Tables only-PATCH-method)' {
-        # Earlier iter-13.14 code used Method=Merge in Invoke-RestMethod; that
+        # Earlier pre-v0.1.0.14 code used Method=Merge in Invoke-RestMethod; that
         # would have been Update-Or-Merge semantics (also row-must-exist).
         # PUT-without-If-Match is Insert-Or-Replace which is unambiguously
         # what we want for upsert.

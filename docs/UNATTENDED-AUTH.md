@@ -76,7 +76,7 @@ Operators choose one at deploy time via the `authMethod` parameter. The choice a
 
 - **L2 Xdr.Defender.Auth** knows the Defender-specific cookie names (`sccauth`, `XSRF-TOKEN`) + the portal's TenantContext probe path. It wraps L1 with the `Connect-DefenderPortal` cache and the `Invoke-DefenderPortalRequest` retry/refresh logic. v0.2.0 sibling modules (`Xdr.Purview.Auth`, `Xdr.Intune.Auth`, `Xdr.Entra.Auth`) follow the same template — only their cookie names + client IDs differ.
 
-- **Backward-compat shim** `Xdr.Defender.Auth` re-exports `Connect-DefenderPortal`, `Invoke-DefenderPortalRequest`, `Test-DefenderPortalAuth`, `Get-XdrAuthFromKeyVault`, `Connect-DefenderPortalWithCookies` as wrappers that delegate to the L2 functions. Existing operator scripts that call MDE-prefixed names keep working unchanged.
+- **v0.1.0 GA scope shim** `Xdr.Defender.Auth` re-exports `Connect-DefenderPortal`, `Invoke-DefenderPortalRequest`, `Test-DefenderPortalAuth`, `Get-XdrAuthFromKeyVault`, `Connect-DefenderPortalWithCookies` as wrappers that delegate to the L2 functions. Existing operator scripts that call MDE-prefixed names keep working unchanged.
 
 ## What the connector handles automatically
 
@@ -145,7 +145,7 @@ The L1/L2 auth split delivers the foundation for multi-portal expansion in v0.2.
 
 | Portal | L2 module | Status |
 |---|---|---|
-| Defender XDR (`security.microsoft.com`) | `Xdr.Defender.Auth` | shipped in v0.1.0-beta |
+| Defender XDR (`security.microsoft.com`) | `Xdr.Defender.Auth` | shipped in v0.1.0 GA |
 | Microsoft Purview (`compliance.microsoft.com`) | `Xdr.Purview.Auth` | ⏳ v0.2.0 (likely shares Defender's `sccauth` — verify on first capture) |
 | Microsoft Intune (`intune.microsoft.com`) | `Xdr.Intune.Auth` | ⏳ v0.2.0 |
 | Microsoft Entra (`entra.microsoft.com`) | `Xdr.Entra.Auth` | ⏳ v0.2.0 |

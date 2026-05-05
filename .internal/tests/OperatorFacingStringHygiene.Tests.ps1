@@ -58,7 +58,7 @@ BeforeAll {
     # forbid the title-case "Phase" + alphanumeric label form which is the
     # internal-iteration jargon shape — Phase A, Phase 14B, Phase 9).
     $script:JargonPatterns = @(
-        '\biter-\d+\.\d+\b',          # iter-13.15, iter-14.0
+        '\biter-\d+\.\d+\b',          # pre-v0.1.0, v0.1.0 GA
         '(?-i)\bPhase [A-Z0-9]+\b'    # Phase A, Phase 14B, Phase 9 (case-sensitive)
     )
 
@@ -142,7 +142,7 @@ BeforeAll {
 
     # SYNOPSIS/DESCRIPTION extractor. Returns an array of (line-number, text)
     # pairs covering ONLY content inside `<#  ... #>` comment-help blocks.
-    # Inline `# iter-13.15:` provenance comments are skipped.
+    # Inline `# pre-v0.1.0:` provenance comments are skipped.
     function script:Get-CommentHelpBlocks {
         param([string] $Path)
         if (-not (Test-Path -LiteralPath $Path)) { return @() }
@@ -230,7 +230,7 @@ Describe 'Operator-facing string hygiene — no internal-iteration jargon leaks'
                 }
             }
             $report = Format-MatchReport -Matches $allMatches.ToArray()
-            $allMatches.Count | Should -Be 0 -Because ".SYNOPSIS / .DESCRIPTION are operator-visible via Get-Help. Inline '# iter-13.15:' provenance comments are still allowed and intentionally preserved.`n$report"
+            $allMatches.Count | Should -Be 0 -Because ".SYNOPSIS / .DESCRIPTION are operator-visible via Get-Help. Inline '# pre-v0.1.0:' provenance comments are still allowed and intentionally preserved.`n$report"
         }
     }
 

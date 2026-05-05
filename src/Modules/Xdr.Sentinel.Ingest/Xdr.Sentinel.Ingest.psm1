@@ -1,6 +1,11 @@
 # Xdr.Sentinel.Ingest — L1 portal-generic Sentinel ingest layer
-# (DCE/DCR + Storage Table + Send-XdrAppInsightsEvent). Dot-source
-# public functions and re-export per the manifest.
+# (DCE/DCR + Storage Table + DLQ). Dot-source public functions and
+# re-export per the manifest.
+#
+# Phase J D'.22 (2026-05-04): AppInsights helpers (Send-XdrAppInsights*)
+# extracted to Xdr.Common.Telemetry module — declared in this module's
+# RequiredModules. Callers get them transitively through the dependency
+# chain.
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -35,11 +40,9 @@ $script:XdrTableHttpClient = $null
 # been set."
 $script:DcrIdMap = $null
 
-# Export all public functions. Most files contain a single function whose
-# name matches BaseName, but iter-14.0 Phase 14B's Send-XdrAppInsightsEvent.ps1
-# bundles four Send-XdrAppInsights* entry points + helpers in one file. We
-# enumerate the explicit FunctionsToExport list from the manifest so the
-# bundle's individual functions are picked up correctly.
+# Export public functions per the manifest's FunctionsToExport list.
+# Phase J D'.22 (2026-05-04): Send-XdrAppInsights* moved to
+# Xdr.Common.Telemetry — they're no longer in this manifest.
 $manifestPath = Join-Path $PSScriptRoot 'Xdr.Sentinel.Ingest.psd1'
 $manifest = Import-PowerShellDataFile -Path $manifestPath
 Export-ModuleMember -Function $manifest.FunctionsToExport

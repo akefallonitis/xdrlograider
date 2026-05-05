@@ -342,7 +342,7 @@ Describe 'Set-CheckpointTimestamp / Get-CheckpointTimestamp — edge cases (via 
         }
     }
 
-    It 'Set-CheckpointTimestamp uses Upsert operation (not Get/Delete) — iter-13.15 contract' {
+    It 'Set-CheckpointTimestamp uses Upsert operation (not Get/Delete) — pre-v0.1.0 contract' {
         InModuleScope Xdr.Sentinel.Ingest {
             $script:capturedOp = $null
             Mock Invoke-XdrStorageTableEntity {

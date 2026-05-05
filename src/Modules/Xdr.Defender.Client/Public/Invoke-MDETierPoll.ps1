@@ -38,14 +38,14 @@ function Invoke-MDETierPoll {
         Hashtable/pscustomobject with the connector's runtime config. Required keys:
           DceEndpoint, DcrImmutableIdsJson, StorageAccountName, CheckpointTable.
         Per-stream DCR immutableId is resolved at ingest time via
-        Get-DcrImmutableIdForStream (5-DCR shared-DCE architecture — see
+        Get-DcrImmutableIdForStream (7-DCR shared-DCE architecture — see
         deploy/modules/dce-dcr.bicep for the partition rationale).
 
     .PARAMETER IncludeDeferred
         DEPRECATED — v0.1.0-beta.1 removed the `Deferred` flag in favour of
         `Availability` (live|tenant-gated|role-gated). Every entry is attempted
         by default; tenant-gated/role-gated streams 4xx gracefully and produce
-        zero rows without failure. The switch is retained for back-compat.
+        zero rows without failure. The switch is retained for v0.1.0 GA scope.
 
     .OUTPUTS
         [pscustomobject] with fields:
@@ -70,14 +70,14 @@ function Invoke-MDETierPoll {
         [Parameter(Mandatory)]
         # Phase B.3 capability-themed Tier values per directive 12 in
         # .claude/plans/immutable-splashing-waffle.md. v0.1.0 GA = first publish;
-        # no back-compat for legacy fast/exposure/config names per directive 43.
+        # no v0.1.0 GA scope for legacy fast/exposure/config names per directive 43.
         [ValidateSet('ActionCenter', 'XspmGraph', 'Configuration', 'Inventory', 'Maintenance')]
         [string] $Tier,
         [Parameter(Mandatory)] $Config,
         [switch] $IncludeDeferred
     )
 
-    $manifest = Get-MDEEndpointManifest
+    $manifest = Get-XdrEndpointManifest -Portal Defender
     $tierStreams = @(
         $manifest.Values |
             Where-Object { $_.Tier -eq $Tier } |
@@ -105,7 +105,7 @@ function Invoke-MDETierPoll {
     $totalDlqStuck    = 0
     $errors = @{}
 
-    # v0.1.0-beta first publish: DLQ table name comes from env var (set by
+    # v0.1.0 GA first publish: DLQ table name comes from env var (set by
     # the deploy template). Falls back to the canonical 'xdrIngestDlq' for
     # local-dev / unit-test contexts. We resolve once per tier-poll so it's
     # stable across all streams in this tier.
@@ -123,7 +123,7 @@ function Invoke-MDETierPoll {
         Reset-XdrPortalRate429Count
     }
 
-    # iter-14.0 Phase 14B: reuse the auth-chain CorrelationId stamped by
+    # v0.1.0 GAB: reuse the auth-chain CorrelationId stamped by
     # Connect-DefenderPortal so per-stream Stream.Polled events stitch onto
     # the same end-to-end transaction view as the auth chain that produced
     # the session. Falls back to a fresh GUID per tier-poll for sessions
@@ -140,7 +140,7 @@ function Invoke-MDETierPoll {
         # v0.1.0-beta.1: `Deferred` flag is deprecated. Every entry in the manifest
         # has a documented wire contract and is attempted every poll cycle.
         # tenant-gated / role-gated streams 4xx gracefully — caught by the try
-        # below, producing zero rows without failing the tier. Back-compat: if an
+        # below, producing zero rows without failing the tier. v0.1.0 GA scope: if an
         # older manifest still carries Deferred=$true and the caller passes
         # -IncludeDeferred:$false, we honour that too.
         if ((-not $IncludeDeferred.IsPresent) -and $entry.ContainsKey('Deferred') -and $entry.Deferred) {
@@ -149,7 +149,7 @@ function Invoke-MDETierPoll {
             continue
         }
 
-        # v0.1.0-beta first publish: DLQ drain. Pop up to 5 pending failed
+        # v0.1.0 GA first publish: DLQ drain. Pop up to 5 pending failed
         # batches for this stream from the dead-letter queue and replay them
         # via Send-ToLogAnalytics. Successful replays delete the DLQ row;
         # failures re-enqueue with AttemptCount+1 (operators monitor
@@ -194,7 +194,7 @@ function Invoke-MDETierPoll {
                         $isStuck = $newAttempt -gt 10
                         if ($isStuck) {
                             $totalDlqStuck++
-                            # iter-14.0 Phase 2 (v0.1.0 GA): DLQ retry exhaustion → native
+                            # v0.1.0 GA (v0.1.0 GA): DLQ retry exhaustion → native
                             # `exceptions` table per Section 2.3. Stuck DLQ is a true
                             # error operators alert on — belongs in AppExceptions.
                             # Operators query: AppExceptions | where ProblemId contains 'DlqStuck' | summarize by Stream.
@@ -287,13 +287,13 @@ function Invoke-MDETierPoll {
             $rows = Invoke-MDEEndpoint @invokeArgs
             if ($rows -and $rows.Count -gt 0) {
                 # Resolve the per-stream DCR immutableId from the deploy-time
-                # map (DCR_IMMUTABLE_IDS_JSON env var). 47 streams are
-                # partitioned across 5 DCRs sharing a single DCE — the FA
+                # map (DCR_IMMUTABLE_IDS_JSON env var). 60 streams are
+                # partitioned across 7 DCRs sharing a single DCE — the FA
                 # dispatches each stream to the matching DCR at ingest.
                 $dcrId = Get-DcrImmutableIdForStream -StreamName $stream
-                # v0.1.0-beta first publish: pass DLQ storage account so
+                # v0.1.0 GA first publish: pass DLQ storage account so
                 # terminal failures persist instead of throwing. The
-                # parameter is optional on Send-ToLogAnalytics — back-compat
+                # parameter is optional on Send-ToLogAnalytics — v0.1.0 GA scope
                 # for unit tests asserting the original throw behaviour.
                 $sendArgs = @{
                     DceEndpoint    = $Config.DceEndpoint
@@ -315,6 +315,7 @@ function Invoke-MDETierPoll {
                     $totalDlqEnqueued += [int]$result.DlqEnqueued
                 }
             }
+
             # Checkpoint update regardless of row count — "we ran successfully".
             Set-CheckpointTimestamp `
                 -StorageAccountName $Config.StorageAccountName `
@@ -341,7 +342,7 @@ function Invoke-MDETierPoll {
                     }
             }
         }
-        # iter-14.0 Phase 2 (v0.1.0 GA): native AI-table routing per Section 2.3
+        # v0.1.0 GA (v0.1.0 GA): native AI-table routing per Section 2.3
         # of the senior-architect plan. Per-stream completion is NUMERIC telemetry
         # (RowsEmitted + LatencyMs) — belongs in customMetrics, not customEvents.
         # Operators query: customMetrics | where name in ('xdr.stream.poll_duration_ms','xdr.stream.rows_emitted') | summarize by Stream/Tier.

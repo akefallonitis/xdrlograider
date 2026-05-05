@@ -11,7 +11,7 @@
     directory results in:
       - Function App enters "Runtime: Error" state at cold start
       - 0 functions enumerated in the Functions tab
-      - 0 rows in MDE_Heartbeat_CL
+      - 0 rows in XdrConnectorHealth_CL
       - Connector card hidden in Sentinel Data Connectors blade
         (connectivityCriteria gates blade visibility on heartbeat presence)
 

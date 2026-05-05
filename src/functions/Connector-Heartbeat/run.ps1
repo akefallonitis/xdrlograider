@@ -1,5 +1,5 @@
 # Connector-Heartbeat — regular heartbeat, independent of any auth state.
-# Writes a row to MDE_Heartbeat_CL every 5 minutes confirming the Function App
+# Writes a row to XdrConnectorHealth_CL every 5 minutes confirming the Function App
 # itself is alive. Used by the Sentinel data-connector UI to show connection
 # status. Per directive 12: capability-named (Connector + Heartbeat) not
 # cron-named (heartbeat-5m).
@@ -28,19 +28,23 @@ $config = [pscustomobject]@{
 }
 
 try {
-    # Resolve the Heartbeat DCR immutableId from the deploy-time map.
-    # 47 streams partitioned across 5 DCRs sharing 1 DCE — Heartbeat lives
-    # in DCR-2 per the alphabetical partition (deploy/modules/dce-dcr.bicep).
-    $heartbeatDcrId = Get-DcrImmutableIdForStream -StreamName 'MDE_Heartbeat_CL'
+    # Resolve the XdrConnectorHealth DCR immutableId from the deploy-time map.
+    # Phase K (2026-05-04): renamed XdrConnectorHealth_CL -> XdrConnectorHealth_CL
+    # for multi-portal forward-compat (Defender ships v0.1.0; Entra/Purview/Intune
+    # in v0.2.0 all write to the SAME XdrConnectorHealth_CL — the Xdr* prefix
+    # signals "produced by xdrlograider connector, transcends portal").
+    $heartbeatDcrId = Get-DcrImmutableIdForStream -StreamName 'XdrConnectorHealth_CL'
     Write-Heartbeat `
         -DceEndpoint $config.DceEndpoint `
         -DcrImmutableId $heartbeatDcrId `
         -FunctionName 'Connector-Heartbeat' `
-        -Tier 'overhead' `
+        -Tier 'Heartbeat' `
         -StreamsAttempted 0 `
         -StreamsSucceeded 0 `
         -RowsIngested 0 `
-        -LatencyMs ([int]$sw.ElapsedMilliseconds) | Out-Null
+        -LatencyMs ([int]$sw.ElapsedMilliseconds) `
+        -FunctionType 'Simple' `
+        -Portal 'Defender' | Out-Null
     Write-Information "Connector-Heartbeat complete"
 } catch {
     Write-Error "Connector-Heartbeat failed: $_"

@@ -21,7 +21,7 @@ $tier = $input.Tier
 $functionName = $input.FunctionName  # passed by timer-starter for heartbeat correlation
 
 # DETERMINISTIC: read manifest (cached at module-load; no I/O)
-$manifest = Get-MDEEndpointManifest
+$manifest = Get-XdrEndpointManifest -Portal Defender
 $tierStreams = @(
     $manifest.Values |
     Where-Object {

@@ -95,15 +95,15 @@ Describe 'E2E — ingestion signal' -Tag 'e2e', 'ingestion' {
         }
     }
 
-    It 'MDE_Heartbeat_CL has rows in the last hour' -Skip:(-not $script:RunE2E) {
-        $query = "MDE_Heartbeat_CL | where TimeGenerated > ago(1h) | count"
+    It 'XdrConnectorHealth_CL has rows in the last hour' -Skip:(-not $script:RunE2E) {
+        $query = "XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | count"
         $result = Invoke-AzOperationalInsightsQuery -WorkspaceId $script:Ws.CustomerId -Query $query -ErrorAction Stop
         $count = [int]$result.Results[0].Count
         $count | Should -BeGreaterThan 0 -Because 'connector should be emitting heartbeats'
     }
 
-    It 'Latest MDE_Heartbeat_CL row has StreamsSucceeded > 0 (auth chain produced ingestable rows)' -Skip:(-not $script:RunE2E) {
-        $query = "MDE_Heartbeat_CL | order by TimeGenerated desc | take 1 | project StreamsSucceeded"
+    It 'Latest XdrConnectorHealth_CL row has StreamsSucceeded > 0 (auth chain produced ingestable rows)' -Skip:(-not $script:RunE2E) {
+        $query = "XdrConnectorHealth_CL | order by TimeGenerated desc | take 1 | project StreamsSucceeded"
         $result = Invoke-AzOperationalInsightsQuery -WorkspaceId $script:Ws.CustomerId -Query $query -ErrorAction Stop
         $result.Results | Should -Not -BeNullOrEmpty
         [int]$result.Results[0].StreamsSucceeded | Should -BeGreaterThan 0 -Because 'auth + first-poll must produce at least one ingested stream; AuthChain.* events live in App Insights customEvents now'
@@ -163,9 +163,9 @@ Describe 'E2E — per-tier ingestion coverage' -Tag 'e2e', 'tier-coverage' {
         $populated | Should -BeGreaterOrEqual $MinPopulated -Because "Tier $Tier must have at least $MinPopulated populated streams post-first-poll"
     }
 
-    It 'MDE_Heartbeat_CL shows the 6 timer functions fired in last 2h' -Skip:(-not $script:RunE2E) {
+    It 'XdrConnectorHealth_CL shows the 6 timer functions fired in last 2h' -Skip:(-not $script:RunE2E) {
         $query = @'
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(2h)
 | summarize by FunctionName
 | count
@@ -253,9 +253,9 @@ Describe 'v0.1.0-beta post-deploy efficiency + rate-limit assertions' {
         }
     }
 
-    It 'MDE_Heartbeat_CL.Notes.rate429Count = 0 in steady-state last 30min' -Skip:(-not $script:RunE2E) {
+    It 'XdrConnectorHealth_CL.Notes.rate429Count = 0 in steady-state last 30min' -Skip:(-not $script:RunE2E) {
         $kql = @'
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(30m)
 | extend n = parse_json(Notes)
 | summarize Total429 = sum(toint(n.rate429Count))
@@ -266,9 +266,9 @@ MDE_Heartbeat_CL
         [int]$total | Should -BeLessThan 5 -Because 'sustained 429 rate indicates portal throttling or too-aggressive poll cadence'
     }
 
-    It 'MDE_Heartbeat_CL gzip compression ratio < 0.25 bytes per row' -Skip:(-not $script:RunE2E) {
+    It 'XdrConnectorHealth_CL gzip compression ratio < 0.25 bytes per row' -Skip:(-not $script:RunE2E) {
         $kql = @'
-MDE_Heartbeat_CL
+XdrConnectorHealth_CL
 | where TimeGenerated > ago(1h)
 | extend n = parse_json(Notes)
 | extend gz = tolong(n.gzipBytes)
@@ -309,7 +309,7 @@ customEvents
         # bounded). Heartbeat is always populated; AdvancedFeatures + SuppressionRules
         # are per-tenant-state but should have rows on any typical tenant after
         # one poll cycle.
-        foreach ($table in 'MDE_Heartbeat_CL', 'MDE_AdvancedFeatures_CL', 'MDE_SuppressionRules_CL') {
+        foreach ($table in 'XdrConnectorHealth_CL', 'MDE_AdvancedFeatures_CL', 'MDE_SuppressionRules_CL') {
             $kql = "$table | where TimeGenerated > ago(2h) | count"
             $rows = script:Invoke-E2EKqlScalar -Query $kql
             if ($null -ne $rows) {

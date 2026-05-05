@@ -32,7 +32,7 @@ function Invoke-XdrTierPoll {
         Currently supported: 'Defender'.
 
     .PARAMETER IncludeDeferred
-        Forwarded to the per-portal poller (back-compat for legacy Deferred
+        Forwarded to the per-portal poller (v0.1.0 GA scope for legacy Deferred
         manifest entries).
 
     .OUTPUTS

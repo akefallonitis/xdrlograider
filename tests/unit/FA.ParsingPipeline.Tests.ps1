@@ -100,7 +100,7 @@ Describe 'Pipeline: raw -> Expand-MDEResponse -> ConvertTo-MDEIngestRow' -ForEac
     }
 
     It 'raw fixture exists for <Stream> (<Tier>) — HARD FAIL for live streams' {
-        # iter-14.0 Phase 4 (v0.1.0 GA): hard-fail per Section 2.2 + Section 5
+        # v0.1.0 GA (v0.1.0 GA): hard-fail per Section 2.2 + Section 5
         # of the senior-architect plan. Live streams MUST have committed
         # fixtures; missing fixtures are a methodology violation (someone
         # added a stream without running tools/Capture-EndpointSchemas.ps1).

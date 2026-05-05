@@ -35,44 +35,15 @@ $script:PortalRoutes = @{
         ConnectFn     = 'Connect-DefenderPortal'
         TestFn        = 'Test-DefenderPortalAuth'
         TierPollFn    = 'Invoke-MDETierPoll'
-        ManifestFn    = 'Get-MDEEndpointManifest'
+        ManifestFn    = 'Get-XdrEndpointManifest'   # invoked with -Portal $portalName
         DefaultHost   = 'security.microsoft.com'
-        Status        = 'live'                # v0.1.0 GA — production
+        Status        = 'live'                      # v0.1.0 GA — production
     }
-    # v0.1.0 GA Phase A.3: forward-compat scaffolding (per directive 11 + 17).
-    # These entries point to STUB modules that throw informative
-    # "v0.2.0 roadmap" errors. The L4 routing seam is final; v0.2.0
-    # only fills in function bodies — no architectural change required.
-    'Entra' = @{
-        AuthModule    = 'Xdr.Entra.Auth'
-        ClientModule  = 'Xdr.Entra.Client'
-        ConnectFn     = 'Connect-EntraPortal'
-        TestFn        = 'Test-EntraPortalAuth'
-        TierPollFn    = 'Invoke-EntraTierPoll'
-        ManifestFn    = 'Get-EntraEndpointManifest'
-        DefaultHost   = 'entra.microsoft.com'
-        Status        = 'scaffolding-stub'    # v0.2.0 implementation
-    }
-    'Purview' = @{
-        AuthModule    = 'Xdr.Purview.Auth'
-        ClientModule  = 'Xdr.Purview.Client'
-        ConnectFn     = 'Connect-PurviewPortal'
-        TestFn        = 'Test-PurviewPortalAuth'
-        TierPollFn    = 'Invoke-PurviewTierPoll'
-        ManifestFn    = 'Get-PurviewEndpointManifest'
-        DefaultHost   = 'compliance.microsoft.com'
-        Status        = 'scaffolding-stub'    # v0.2.0 implementation
-    }
-    'Intune' = @{
-        AuthModule    = 'Xdr.Intune.Auth'
-        ClientModule  = 'Xdr.Intune.Client'
-        ConnectFn     = 'Connect-IntunePortal'
-        TestFn        = 'Test-IntunePortalAuth'
-        TierPollFn    = 'Invoke-IntuneTierPoll'
-        ManifestFn    = 'Get-IntuneEndpointManifest'
-        DefaultHost   = 'intune.microsoft.com'
-        Status        = 'scaffolding-stub'    # v0.2.0 implementation
-    }
+    # v0.1.0 GA: pure Defender connector. v0.2.0 reintroduces Entra/Purview/Intune
+    # routing entries with real L2/L3 modules + FA multi-tenancy support.
+    # Per Phase J D'.1 (2026-05-04): all portals will share the unified
+    # Get-XdrEndpointManifest from Xdr.Common.Manifest module — invoked
+    # with -Portal <name> in Get-XdrPortalManifest.
 }
 
 # Helper: validate a -Portal value and return its routing entry. Throws a
@@ -119,15 +90,15 @@ function Get-XdrConnectorHealth {
     Probes each portal in $script:PortalRoutes whose Status='live' and returns
     per-portal status + per-tier last-poll-fresh markers + KV cred-expiry
     days-remaining + DLQ depth + AppInsights recent-exception count.
-    Used by Connector-Heartbeat for MDE_Heartbeat_CL Notes JSON.
+    Used by Connector-Heartbeat for XdrConnectorHealth_CL Notes JSON.
     Used by Test-ConnectorHealth.ps1 for HEALTHY/DEGRADED/FAILED verdict.
     .PARAMETER Portals
     Optional list of portal names to probe. Default: all live portals.
     .OUTPUTS
     pscustomobject — one per portal with nested per-tier + supply-chain status
     .NOTES
-    v0.1.0 GA: Defender is the only live portal. v0.2.0+ extends to Entra/Purview/Intune.
-    Per-portal probe is a NO-OP for scaffolding-stub portals (just returns Status='scaffolding-stub').
+    v0.1.0 GA: Defender is the only portal in the routing table. v0.2.0 reintroduces
+    Entra/Purview/Intune entries with real L2/L3 modules + FA multi-tenancy support.
     #>
     [CmdletBinding()]
     [OutputType([pscustomobject])]

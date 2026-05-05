@@ -147,12 +147,12 @@ Describe 'Analytic rules YAML schema compliance' {
         $metadata = @($compiled.resources | Where-Object {
             $_.type -eq 'Microsoft.OperationalInsights/workspaces/providers/metadata'
         })
-        # v0.1.0 GA Phase F.1 added 4 ops analytic rules (XdrOps-*) + 1 ConnectorHealth workbook
-        # so total metadata back-links: 18 AnalyticsRule + 9 HuntingQuery + 8 Workbook + 4 Parser = 39
-        @($metadata).Count | Should -Be 39 -Because 'v0.1.0 GA: 18 AnalyticsRule (14 detection + 4 XdrOps-*) + 9 HuntingQuery + 8 Workbook (7 + ConnectorHealth) + 4 Parser metadata back-links'
+        # v0.1.0 GA Phase 5.12: 6 ops analytic rules (XdrOps-* + RowVolumeSpike) + 1 ConnectorHealth workbook
+        # so total metadata back-links: 20 AnalyticsRule + 9 HuntingQuery + 8 Workbook + 4 Parser = 41
+        @($metadata).Count | Should -Be 41 -Because 'v0.1.0 GA Phase 5.12: 20 AnalyticsRule (14 detection + 6 XdrOps-*) + 9 HuntingQuery + 8 Workbook (7 + ConnectorHealth) + 4 Parser metadata back-links'
 
         $byKind = $metadata | Group-Object { $_.properties.kind }
-        ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 18  # 14 detection + 4 XdrOps-* (Phase F.1)
+        ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 20  # 14 detection + 6 XdrOps-* (v0.1.0 GA Phase 5.12 added RowVolumeSpike)
         ($byKind | Where-Object Name -eq 'HuntingQuery').Count  | Should -Be 9
         ($byKind | Where-Object Name -eq 'Workbook').Count      | Should -Be 8   # 7 + ConnectorHealth (Phase F.1)
         ($byKind | Where-Object Name -eq 'Parser').Count        | Should -Be 4
@@ -326,14 +326,17 @@ Describe 'Data Connector card schema compliance' {
         }
     }
 
-    It 'dataTypes array lists 46 tables (45 active streams + Heartbeat; deprecated stream excluded from data connector card; AuthTestResult retired)' {
-        @($script:Dc.dataTypes).Count | Should -Be 46
+    It 'dataTypes array lists 11 tables (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL ops, Phase J.C.2-5)' {
+        @($script:Dc.dataTypes).Count | Should -Be 11
     }
 
     It 'every dataType has name + lastDataReceivedQuery' {
+        # Phase J.C.2-5 (2026-05-04): 47 per-stream MDE_*_CL tables consolidated to
+        # 10 per-category Defender_<Category>_CL tables. Pattern allows
+        # Defender_<PascalCategory>_CL OR XdrConnectorHealth_CL ops table.
         foreach ($dt in $script:Dc.dataTypes) {
             $dt.name | Should -Not -BeNullOrEmpty
-            $dt.name | Should -Match '^MDE_\w+_CL$'
+            $dt.name | Should -Match '^(Defender_\w+_CL|XdrConnectorHealth_CL)$'
             $dt.lastDataReceivedQuery | Should -Not -BeNullOrEmpty
         }
     }

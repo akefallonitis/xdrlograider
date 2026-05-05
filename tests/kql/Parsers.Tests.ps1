@@ -42,7 +42,7 @@ Describe 'KQL parsers — content validation' {
 
     It 'each parser declares lookback and window as function parameters' -ForEach $script:Parsers {
         param($Name, $Content)
-        # iter-14.0 Phase 5: parsers are now KQL functions with typed parameters,
+        # v0.1.0 GA: parsers are now KQL functions with typed parameters,
         # not raw KQL with `let lookback = ...; let window = ...;`. Workbooks/rules
         # can override the defaults by passing args (e.g. {TimeRange:value} from
         # the workbook time-picker in Phase 7).
@@ -50,17 +50,26 @@ Describe 'KQL parsers — content validation' {
         $Content | Should -Match 'window\s*:\s*timespan'
     }
 
-    It 'each parser uses union withsource=_Table' -ForEach $script:Parsers {
+    It 'each parser sources from Defender_<Category>_CL with SourceName filter (Phase J.C.2-5)' -ForEach $script:Parsers {
+        # Phase J.D.5 D'.34 (2026-05-04): parsers rewritten for Phase J.C.2-5
+        # architecture. Source pattern is `Defender_<Category>_CL | where SourceName in (...)`.
+        # The legacy `union withsource=_Table` pattern was replaced.
         param($Name, $Content)
-        $Content | Should -Match 'union\s+withsource=_Table'
+        $Content | Should -Match 'Defender_\w+_CL' -Because "parser $Name should source from a Defender_<Category>_CL table"
+        $Content | Should -Match 'SourceName\s+in' -Because "parser $Name should filter source streams via SourceName"
     }
 
-    It 'each parser references only MDE_*_CL tables' -ForEach $script:Parsers {
+    It 'each parser references only MDE_*_CL stream literals (in SourceName filter) and Defender_*_CL category tables' -ForEach $script:Parsers {
         param($Name, $Content)
-        $tableRefs = [regex]::Matches($Content, '\bMDE_\w+_CL\b') | ForEach-Object { $_.Value } | Sort-Object -Unique
-        $tableRefs | ForEach-Object {
-            $_ | Should -Match '^MDE_[\w]+_CL$'
-        }
+        # MDE_*_CL appears as STRING LITERALS inside SourceName filter (manifest stream names).
+        # Defender_*_CL appears as TABLE references at the start of pipelines.
+        # Wrap in @(...) to force array — Sort-Object -Unique returns a scalar
+        # when there's only 1 unique item, which has no .Count property under
+        # Set-StrictMode -Version Latest.
+        $mdeRefs = @([regex]::Matches($Content, "'(MDE_\w+_CL)'") | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+        $defenderRefs = @([regex]::Matches($Content, '\bDefender_\w+_CL\b') | ForEach-Object { $_.Value } | Sort-Object -Unique)
+        $mdeRefs.Count | Should -BeGreaterThan 0 -Because "parser $Name should reference at least 1 source stream by name"
+        $defenderRefs.Count | Should -BeGreaterThan 0 -Because "parser $Name should reference at least 1 category table"
     }
 
     It 'each parser projects standard output columns' -ForEach $script:Parsers {
@@ -70,15 +79,21 @@ Describe 'KQL parsers — content validation' {
         }
     }
 
-    It 'Exposure parser uses set-diff pattern (leftanti) because XSPM streams are graph-structured' {
-        $exposure = Get-Content (Join-Path $script:ParsersDir 'MDE_Drift_Exposure.kql') -Raw
-        $exposure | Should -Match 'leftanti'
+    It 'all parsers use field-level diff via mv-apply (Phase J.D.5 D''.34: unified pattern)' {
+        # Phase J.D.5 (2026-05-04): rewritten parsers all use the same unified
+        # mv-apply field-level diff pattern. The legacy leftanti pattern for
+        # Exposure was replaced with the consistent mv-apply approach.
+        foreach ($name in @('MDE_Drift_Configuration', 'MDE_Drift_Inventory', 'MDE_Drift_Maintenance', 'MDE_Drift_Exposure')) {
+            $content = Get-Content (Join-Path $script:ParsersDir "$name.kql") -Raw
+            $content | Should -Match 'mv-apply' -Because "parser $name should use field-level mv-apply diff pattern"
+        }
     }
 
-    It 'Configuration / Inventory / Maintenance parsers use field-level diff (mv-apply)' {
-        foreach ($name in @('MDE_Drift_Configuration', 'MDE_Drift_Inventory', 'MDE_Drift_Maintenance')) {
+    It 'all parsers source from Defender_<Category>_CL with SourceName filter (Phase J.C.2-5 architecture)' {
+        foreach ($name in @('MDE_Drift_Configuration', 'MDE_Drift_Inventory', 'MDE_Drift_Maintenance', 'MDE_Drift_Exposure')) {
             $content = Get-Content (Join-Path $script:ParsersDir "$name.kql") -Raw
-            $content | Should -Match 'mv-apply'
+            $content | Should -Match 'Defender_\w+_CL' -Because "parser $name should source from a Defender_<Category>_CL table"
+            $content | Should -Match 'SourceName\s+in' -Because "parser $name should filter by SourceName"
         }
     }
 }

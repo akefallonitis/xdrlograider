@@ -57,7 +57,7 @@ Describe 'ReleasePackageUrl.Invariant1 — mainTemplate packageUrl tracks /relea
     It 'mainTemplate.json does NOT define a functionAppZipVersion parameter' {
         $params = @($script:Arm.parameters.PSObject.Properties.Name)
         $params | Should -Not -Contain 'functionAppZipVersion' -Because (
-            'Parameter dropped in v0.1.0-beta first publish; the /latest URL pattern ' +
+            'Parameter dropped in v0.1.0 GA first publish; the /latest URL pattern ' +
             'replaces the operator-edited version pin.'
         )
     }

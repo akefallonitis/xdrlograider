@@ -6,7 +6,7 @@ function Get-XdrPortalManifest {
         -Portal value.
 
     .DESCRIPTION
-        Today routes 'Defender' to Get-MDEEndpointManifest (Xdr.Defender.Client)
+        Today routes 'Defender' to Get-XdrEndpointManifest -Portal Defender (Xdr.Defender.Client)
         and filters by the manifest entry's Portal field. The per-portal
         manifest functions return the full per-portal catalogue; this wrapper
         keeps the operator-facing surface portal-keyed.
@@ -31,17 +31,20 @@ function Get-XdrPortalManifest {
 
     $route = Resolve-XdrPortalRoute -Portal $Portal
 
+    # Phase J D'.1 (2026-05-04): all 4 portals use unified Get-XdrEndpointManifest
+    # from Xdr.Common.Manifest module — invoked with -Portal $Portal. The route's
+    # ManifestFn stores only the function name; -Portal arg supplied here.
     $manifestFn = $route.ManifestFn
     if (-not (Get-Command -Name $manifestFn -ErrorAction SilentlyContinue)) {
-        throw "Get-XdrPortalManifest: per-portal function '$manifestFn' for portal '$Portal' is not available. Ensure module '$($route.ClientModule)' is imported."
+        throw "Get-XdrPortalManifest: function '$manifestFn' is not available. Ensure module 'Xdr.Common.Manifest' is imported."
     }
 
-    # Dispatch through the per-portal client module's session state (Pester-friendly).
-    $clientModule = Get-Module -Name $route.ClientModule
-    $rawManifest = if ($clientModule) {
-        & $clientModule { param($Fn) & $Fn } $manifestFn
+    # Dispatch through Xdr.Common.Manifest module session state (Pester-friendly).
+    $manifestModule = Get-Module -Name 'Xdr.Common.Manifest'
+    $rawManifest = if ($manifestModule) {
+        & $manifestModule { param($Fn, $P) & $Fn -Portal $P } $manifestFn $Portal
     } else {
-        & $manifestFn
+        & $manifestFn -Portal $Portal
     }
     if ($null -eq $rawManifest) { return @{} }
 

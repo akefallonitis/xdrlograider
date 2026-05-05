@@ -45,8 +45,8 @@ function Send-ToLogAnalytics {
         DLQ instead of throwing. The next poll cycle drains the DLQ via
         Pop-XdrIngestDlq.
 
-        v0.1.0-beta first publish: production-readiness gate. Without this
-        parameter, terminal failures still throw (back-compat for callers
+        v0.1.0 GA first publish: production-readiness gate. Without this
+        parameter, terminal failures still throw (v0.1.0 GA scope for callers
         that haven't been wired to provide -DlqStorageAccount yet —
         e.g., unit tests for the original behaviour).
 
@@ -78,9 +78,9 @@ function Send-ToLogAnalytics {
         # 413 split-and-retry recursion depth guard — caller doesn't set;
         # used internally when halving a batch that hit HTTP 413.
         [int] $SplitDepth = 0,
-        # v0.1.0-beta first publish: dead-letter-queue parameters. When
+        # v0.1.0 GA first publish: dead-letter-queue parameters. When
         # supplied, terminal failures spool the failing batch to the DLQ
-        # instead of throwing. NOT mandatory — back-compat for legacy
+        # instead of throwing. NOT mandatory — v0.1.0 GA scope for legacy
         # callers + unit tests asserting the original throw behaviour.
         [string] $DlqStorageAccount,
         [string] $DlqOperationId
@@ -242,6 +242,13 @@ function Send-ToLogAnalytics {
                         Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.retry_count'       -Value ([double]$batchRetryCount)   -Properties $metricProps -OperationId $DlqOperationId
                         Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.dce_latency_ms'    -Value ([double]$callLatencyMs)     -Properties $metricProps -OperationId $DlqOperationId
 
+                        # D'.49 v0.1.0 GA Phase 5.12: per-stream hourly row count for
+                        # cost-budget gate. XdrOps-RowVolumeSpike rule alerts when
+                        # any stream's hourly count exceeds 3x its 7-day baseline
+                        # (catches schema explosion + tenant-side breach + connector
+                        # regression + ProjectionMap mis-config row multiplication).
+                        Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.row_count_per_hour' -Value ([double]$batch.Count) -Properties $metricProps -OperationId $DlqOperationId
+
                         # Phase M (R3) per directive 33 + .claude/plans/immutable-splashing-waffle.md:
                         # Per-batch partial-success rate. For successful batches this is 1.0 (all rows
                         # accepted). DCE 207 multi-status responses where a subset of rows fail would
@@ -350,7 +357,7 @@ function Send-ToLogAnalytics {
                 $isTransient = $statusCode -eq 429 -or ($statusCode -ge 500 -and $statusCode -lt 600) -or $null -eq $statusCode
 
                 if (-not $isTransient -or $attempt -ge $MaxRetries) {
-                    # v0.1.0-beta first publish: terminal failure path. If
+                    # v0.1.0 GA first publish: terminal failure path. If
                     # the caller supplied -DlqStorageAccount, spool the
                     # failing batch to the ingest DLQ instead of throwing —
                     # the next poll cycle drains it via Pop-XdrIngestDlq.

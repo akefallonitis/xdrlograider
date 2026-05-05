@@ -21,9 +21,9 @@
 # uses the same ProjectionMap, so the row column set matches exactly.
 #
 # System-stream invariant:
-#   MDE_Heartbeat_CL — must include the 9 fields Write-Heartbeat emits
+#   XdrConnectorHealth_CL — must include the 9 fields Write-Heartbeat emits
 #
-# (MDE_AuthTestResult_CL retired in v0.1.0-beta first publish — auth chain
+# (MDE_AuthTestResult_CL retired in v0.1.0 GA first publish — auth chain
 # diagnostics moved to App Insights customEvents.)
 
 BeforeDiscovery {
@@ -47,9 +47,13 @@ BeforeAll {
     $script:BaselineCols = @('TimeGenerated', 'SourceStream', 'EntityId', 'RawJson')
 
     # Heartbeat columns per Write-Heartbeat.ps1.
+    # Phase J D'.2 (2026-05-04): added 5 fields for Durable Functions
+    # correlation + multi-portal forward-compat (OrchestrationInstanceId,
+    # DurableActivityCount, DurableActivitySuccessful, FunctionType, Portal).
     $script:HeartbeatCols = @(
         'TimeGenerated', 'FunctionName', 'Tier', 'StreamsAttempted', 'StreamsSucceeded',
-        'RowsIngested', 'LatencyMs', 'HostName', 'Notes'
+        'RowsIngested', 'LatencyMs', 'HostName', 'Notes',
+        'OrchestrationInstanceId', 'DurableActivityCount', 'DurableActivitySuccessful', 'FunctionType', 'Portal'
     )
 
     # Pull every streamDeclaration out of the compiled ARM so we don't have to
@@ -81,8 +85,8 @@ BeforeAll {
 
 Describe 'DCR stream declarations — invariants' {
 
-    It 'DCR declares MDE_Heartbeat_CL with the 9 Write-Heartbeat columns (BUG #1 fix)' {
-        $cols = $script:DcrStreamDecls['MDE_Heartbeat_CL']
+    It 'DCR declares XdrConnectorHealth_CL with the 14 Write-Heartbeat columns (9 base + 5 D''.2 extension)' {
+        $cols = $script:DcrStreamDecls['XdrConnectorHealth_CL']
         $cols | Should -Not -BeNullOrEmpty
         foreach ($c in $script:HeartbeatCols) {
             $cols | Should -Contain $c -Because "Heartbeat column '$c' must be declared in the DCR or Write-Heartbeat emits it to a table that silently drops it"
@@ -92,13 +96,14 @@ Describe 'DCR stream declarations — invariants' {
         $extras.Count | Should -Be 0 -Because "DCR Heartbeat schema has extra columns that Write-Heartbeat never populates: $($extras -join ', ')"
     }
 
-    It 'DCR does NOT declare MDE_AuthTestResult_CL (retired in v0.1.0-beta first publish)' {
+    It 'DCR does NOT declare MDE_AuthTestResult_CL (retired in v0.1.0 GA first publish)' {
         $script:DcrStreamDecls.ContainsKey('MDE_AuthTestResult_CL') | Should -BeFalse `
             -Because 'auth chain diagnostics moved from MDE_AuthTestResult_CL to App Insights customEvents (AuthChain.* event names)'
     }
 
-    It 'DCR declares exactly 47 streams (46 data + 1 system Heartbeat)' {
-        $script:DcrStreamDecls.Count | Should -Be 47
+    It 'DCR declares exactly 60 streams (59 data + 1 system XdrConnectorHealth_CL)' {
+        # v0.1.0 GA Phase 2: 46 baseline + 13 Tier A new streams + 1 ops = 60
+        $script:DcrStreamDecls.Count | Should -Be 60
     }
 }
 

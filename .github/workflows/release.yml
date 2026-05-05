@@ -7,8 +7,8 @@ on:
 
 permissions:
   contents: write
-  # Phase F.3 (B9): Sigstore-cosign keyless signing requires OIDC token to
-  # request short-lived Fulcio cert. Per directive 38 + .claude/plans/immutable-splashing-waffle.md.
+  # Sigstore-cosign keyless signing requires OIDC token to
+  # request short-lived Fulcio cert. 
   id-token: write
 
 jobs:
@@ -52,7 +52,7 @@ jobs:
       - name: Release-gate — no removed-stream references leak into artefacts
         shell: pwsh
         run: |
-          # v0.1.0-beta.1 introduces a grep-gate: any mention of removed stream
+          # Grep-gate locks: any mention of removed stream
           # names in deploy/compiled/* or sentinel/* fails the release. History
           # is documented in docs/STREAMS-REMOVED.md + CHANGELOG.md.
           $removedStreams = @(
@@ -61,8 +61,8 @@ jobs:
               'MDE_ControlledFolderAccess_CL', # v1.0.2 NO_PUBLIC_API
               'MDE_NetworkProtectionConfig_CL',# v1.0.2 NO_PUBLIC_API
               'MDE_ApprovalAssignments_CL',    # v1.0.2 NO_PUBLIC_API
-              'MDE_CriticalAssets_CL',         # v0.1.0-beta.1 WRITE endpoint
-              'MDE_DeviceCriticality_CL'       # v0.1.0-beta.1 WRITE endpoint
+              'MDE_CriticalAssets_CL',         # WRITE endpoint (out of scope: connector is read-only)
+              'MDE_DeviceCriticality_CL'       # WRITE endpoint (out of scope: connector is read-only)
           )
           $grepPaths = @('./deploy/compiled', './sentinel')
           $leaks = @()
@@ -84,7 +84,7 @@ jobs:
       - name: Release-gate — DCR stream count = 47 + all rules enabled:false + Data Connector 46 tables
         shell: pwsh
         run: |
-          # v0.1.0-beta gate triad (belt + suspenders on top of preflight):
+          # Release-gate triad (belt + suspenders on top of preflight):
           #   (1) mainTemplate.json DCR.streamDeclarations.Count == 47
           #       (46 data streams + 1 operational Heartbeat; AuthTestResult retired)
           #   (2) every Microsoft.OperationalInsights/workspaces/savedSearches-Scheduled
@@ -218,7 +218,7 @@ jobs:
           # honors Managed Identity auth natively without depending on the
           # AzTable community module's Microsoft.Azure.Cosmos.Table SDK
           # (which did NOT reliably propagate MI tokens — root cause of
-          # iter-13.13 + iter-13.14 production breakages).
+          # historical production breakages).
           #
           # Az.Storage 7.5.0 retained: still useful for blob/queue ops and
           # for the test scaffolding that creates SDK-style contexts. No
@@ -267,7 +267,7 @@ jobs:
 
           # === SIZE BUDGET GATE ===
           # Bundled Az modules with pruning compress ~3:1 via Compress-Archive
-          # deflate. Empirical: 54 MB raw Modules/ → 18 MB zip. Pre-iter-13 zip
+          # deflate. Empirical: 54 MB raw Modules/ → 18 MB zip. Pre-historical zip
           # (no Az bundle) was 67 KB. So:
           #   < 10 MB: definitely missing Az modules → re-trigger Legion bug.
           #   > 100 MB: unintended trees leaked (huge regression).
@@ -297,8 +297,8 @@ jobs:
               throw "function-app.zip has a 'functions/' wrapper. Function directories MUST be at root for Azure Functions runtime to load them."
           }
           # 4. All 8 expected function dirs at root with function.json.
-          # Per directive 12 + Phase B: capability-named timers (not cron-named).
-          # Per directive 16 + Phase H: 2 Durable Functions added (orchestrator + activity).
+          # capability-named timers (not cron-named).
+          # 2 Durable Functions added (orchestrator + activity).
           $expectedFuncs = @(
               # Simple timers (6 capability-named):
               'Connector-Heartbeat',
@@ -335,14 +335,14 @@ jobs:
           }
           # 6b. Iter 13.15 negative-bundle gate: AzTable + Az.Resources MUST NOT
           # be present in the zip (we explicitly removed them; ensures no stale
-          # cache or accidental re-add reintroduces the iter-13.13/14 bug class).
+          # cache or accidental re-add reintroduces the historical bug class).
           foreach ($removedMod in 'AzTable', 'Az.Resources') {
               $stale = $entries | Where-Object { $_ -match "^Modules/$removedMod/" } | Select-Object -First 1
               if ($stale) {
-                  throw "function-app.zip contains $removedMod ($stale) — iter-13.15 removed this module. The Storage Table HttpClient helper replaces it."
+                  throw "function-app.zip contains $removedMod ($stale) — historical removed this module. The Storage Table HttpClient helper replaces it."
               }
           }
-          Write-Host "  ✓ AzTable + Az.Resources confirmed NOT bundled (iter-13.15 transition)" -ForegroundColor Green
+          Write-Host "  ✓ AzTable + Az.Resources confirmed NOT bundled (historical transition)" -ForegroundColor Green
           # 7. requirements.psd1 must NOT have module references (Legion fix invariant)
           $reqContent = Get-Content "$env:GITHUB_WORKSPACE/src/requirements.psd1" -Raw
           if ($reqContent -match "(?m)^\s*'Az\." -or $reqContent -match "(?m)^\s*Az\." ) {
@@ -371,7 +371,7 @@ jobs:
           upload-artifact: false       # disable implicit artifact upload (needs extra perms)
           upload-release-assets: false  # we attach it ourselves via softprops below
 
-      # Phase F.3 (B9): Sigstore-cosign keyless signing per directive 38 +
+      # Sigstore-cosign keyless signing per directive 38 +
       # production-readiness blocker B9 in .claude/plans/immutable-splashing-waffle.md.
       # Keyless signing uses GitHub Actions OIDC token (id-token: write permission)
       # to obtain a short-lived Fulcio cert; signature is published to public
@@ -495,7 +495,7 @@ jobs:
           # start fails silently → zero polls fire → no telemetry.
           # The "-beta" suffix in the tag name is sufficient operator signal;
           # we do NOT need GitHub's prerelease=true flag, which conflicts with
-          # the /releases/latest packageUrl simplification in v0.1.0-beta.
+          # the /releases/latest packageUrl simplification in v0.1.0 GA.
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
