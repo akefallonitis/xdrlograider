@@ -164,7 +164,10 @@ Describe 'Schema Consistency — DCR streamDecl vs Workspace Table column types'
             if ($Node.type -eq 'Microsoft.OperationalInsights/workspaces/tables') {
                 $found += $Node
             }
-            if ($Node.type -eq 'Microsoft.Resources/deployments' -and $Node.properties.template.resources) {
+            if ($Node.type -eq 'Microsoft.Resources/deployments' -and
+                $Node.PSObject.Properties.Name -contains 'properties' -and
+                $Node.properties.PSObject.Properties.Name -contains 'template' -and
+                $Node.properties.template.PSObject.Properties.Name -contains 'resources') {
                 $found += Find-Tables -Node $Node.properties.template.resources
             }
             return $found
