@@ -89,7 +89,7 @@ function ConvertFrom-YamlSimple {
     [OutputType([hashtable])]
     param([Parameter(Mandatory)] [string] $Yaml)
 
-    $out = @{}
+    $out = [ordered]@{}
     $lines = $Yaml -split "`r?`n"
     $currentKey  = $null
     $currentList = $null
@@ -180,7 +180,7 @@ foreach ($file in (Get-ChildItem -Path $parsersDir -Filter '*.kql' | Sort-Object
         default                   { '' }
     }
 
-    $parsers += @{
+    $parsers += [ordered]@{
         Name       = $name
         Query      = $content
         Parameters = $params
@@ -210,7 +210,7 @@ foreach ($file in (Get-ChildItem -Path $workbooksDir -Filter '*.json' | Sort-Obj
         default                    { $name }
     }
 
-    $workbooks += @{
+    $workbooks += [ordered]@{
         Name          = $name
         DisplayName   = $displayName
         SerializedData = $serialized
@@ -226,7 +226,7 @@ foreach ($file in (Get-ChildItem -Path $rulesDir -Filter '*.yaml' | Sort-Object 
     $yaml = Get-Content $file.FullName -Raw
     $parsed = ConvertFrom-YamlSimple -Yaml $yaml
 
-    $rules += @{
+    $rules += [ordered]@{
         File          = $file.BaseName
         Id            = $parsed.id
         Name          = $parsed.name
@@ -253,7 +253,7 @@ foreach ($file in (Get-ChildItem -Path $huntingDir -Filter '*.yaml' | Sort-Objec
     $yaml = Get-Content $file.FullName -Raw
     $parsed = ConvertFrom-YamlSimple -Yaml $yaml
 
-    $huntingQueries += @{
+    $huntingQueries += [ordered]@{
         File         = $file.BaseName
         Id           = $parsed.id
         Name         = $parsed.name
@@ -271,11 +271,11 @@ $armResources = @()
 
 # Parsers as savedSearches in 'Functions' category
 foreach ($p in $parsers) {
-    $armResources += @{
+    $armResources += [ordered]@{
         type       = 'Microsoft.OperationalInsights/workspaces/savedSearches'
         apiVersion = '2020-08-01'
         name       = "[concat(parameters('workspaceName'), '/', '$($p.Name)')]"
-        properties = @{
+        properties = [ordered]@{
             category           = 'Functions'
             displayName        = $p.Name
             query              = $p.Query
@@ -289,15 +289,15 @@ foreach ($p in $parsers) {
 # Hunting queries as savedSearches in 'Hunting Queries' category
 foreach ($q in $huntingQueries) {
     $tags = @()
-    $tags += @{ name = 'description'; value = $q.Description }
-    $tags += @{ name = 'tactics';     value = ($q.Tactics -join ',') }
-    $tags += @{ name = 'techniques';  value = ($q.Techniques -join ',') }
+    $tags += [ordered]@{ name = 'description'; value = $q.Description }
+    $tags += [ordered]@{ name = 'tactics';     value = ($q.Tactics -join ',') }
+    $tags += [ordered]@{ name = 'techniques';  value = ($q.Techniques -join ',') }
 
-    $armResources += @{
+    $armResources += [ordered]@{
         type       = 'Microsoft.OperationalInsights/workspaces/savedSearches'
         apiVersion = '2020-08-01'
         name       = "[concat(parameters('workspaceName'), '/', '$($q.File)')]"
-        properties = @{
+        properties = [ordered]@{
             category    = 'Hunting Queries'
             displayName = $q.Name
             query       = $q.Query
@@ -309,13 +309,13 @@ foreach ($q in $huntingQueries) {
 
 # Workbooks
 foreach ($w in $workbooks) {
-    $armResources += @{
+    $armResources += [ordered]@{
         type       = 'Microsoft.Insights/workbooks'
         apiVersion = '2022-04-01'
         name       = "[guid(resourceGroup().id, '$($w.Name)')]"
         location   = "[parameters('location')]"
         kind       = 'shared'
-        properties = @{
+        properties = [ordered]@{
             displayName    = $w.DisplayName
             serializedData = $w.SerializedData
             category       = 'sentinel'
@@ -327,12 +327,12 @@ foreach ($w in $workbooks) {
 
 # Analytic rules — extension resources on Microsoft.SecurityInsights
 foreach ($r in $rules) {
-    $armResources += @{
+    $armResources += [ordered]@{
         type       = 'Microsoft.OperationalInsights/workspaces/providers/alertRules'
         apiVersion = '2023-11-01'
         name       = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '$($r.Id)')]"
         kind       = 'Scheduled'
-        properties = @{
+        properties = [ordered]@{
             displayName         = $r.Name
             description         = $r.Description
             severity            = $r.Severity
@@ -355,7 +355,7 @@ foreach ($r in $rules) {
             # parent tags the rule correctly. Sub-technique fidelity remains in
             # the corresponding hunting query's tags[] (savedSearches accepts it).
             techniques          = @($r.Techniques | ForEach-Object { ($_ -replace '\.\d+$', '') })
-            eventGroupingSettings = @{
+            eventGroupingSettings = [ordered]@{
                 aggregationKind = 'SingleAlert'
             }
         }
@@ -459,16 +459,16 @@ foreach ($r in $rules) {
 $armTemplate = [ordered]@{
     '$schema'      = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
     contentVersion = '1.0.0.0'
-    metadata       = @{
+    metadata       = [ordered]@{
         _generator = 'tools/Build-SentinelContent.ps1'
         description = 'XdrLogRaider — Sentinel content (parsers, workbooks, analytic rules, hunting queries).'
     }
-    parameters = @{
-        workspaceName = @{
+    parameters = [ordered]@{
+        workspaceName = [ordered]@{
             type = 'string'
-            metadata = @{ description = 'Log Analytics workspace name.' }
+            metadata = [ordered]@{ description = 'Log Analytics workspace name.' }
         }
-        location = @{
+        location = [ordered]@{
             type = 'string'
             defaultValue = '[resourceGroup().location]'
         }
@@ -485,11 +485,11 @@ $armTemplate = [ordered]@{
         solutionSupport = [ordered]@{ name = 'XdrLogRaider'; email = 'al.kefallonitis@gmail.com'; tier = 'Community'; link = 'https://github.com/akefallonitis/xdrlograider' }
     }
     resources  = $armResources
-    outputs    = @{
-        parsersCount = @{ type = 'int'; value = $parsers.Count }
-        workbooksCount = @{ type = 'int'; value = $workbooks.Count }
-        rulesCount = @{ type = 'int'; value = $rules.Count }
-        huntingQueriesCount = @{ type = 'int'; value = $huntingQueries.Count }
+    outputs    = [ordered]@{
+        parsersCount = [ordered]@{ type = 'int'; value = $parsers.Count }
+        workbooksCount = [ordered]@{ type = 'int'; value = $workbooks.Count }
+        rulesCount = [ordered]@{ type = 'int'; value = $rules.Count }
+        huntingQueriesCount = [ordered]@{ type = 'int'; value = $huntingQueries.Count }
     }
 }
 
