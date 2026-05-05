@@ -232,8 +232,15 @@
                 IsEnabled           = '$tobool:IsEnabled'
                 CreatedTime         = '$todatetime:CreationTime'
                 CreatedBy           = '$tostring:CreatedBy'
-                Scope               = '$toint:Scope'
-                Action              = '$toint:Action'
+                # NORMALIZED to string for consolidated-table compatibility:
+                # Defender_ConfigurationAndSettings_CL.Scope is shared with
+                # MDE_UnifiedRbacRoles_CL.Scope (string) + MDE_UserPreferences_CL.Scope (string).
+                # Defender_ConfigurationAndSettings_CL.Action is shared with
+                # MDE_TenantAllowBlock_CL.Action (string). Sentinel custom tables
+                # auto-derive column type from FIRST DCR streamDecl that writes;
+                # all writers must agree. See tests/arm/SchemaConsistency.Tests.ps1.
+                Scope               = '$tostring:Scope'
+                Action              = '$tostring:Action'
                 AlertTitle          = '$tostring:AlertTitle'
                 MatchingAlertsCount = '$toint:MatchingAlertsCount'
                 IsReadOnly          = '$tobool:IsReadOnly'
@@ -1149,8 +1156,12 @@ AttackPathsV2
                 StartedOn      = '$todatetime:StartedOn'
                 LastUpdatedOn  = '$todatetime:LastUpdatedOn'
                 LastVisitTime  = '$todatetime:LastVisitTime'
-                Tags           = '$tostring:Tags[*]'
-                Keywords       = '$tostring:Keywords[*]'
+                # NORMALIZED to dynamic for consolidated-table compatibility:
+                # Defender_ThreatAnalytics_CL.Tags is shared with
+                # MDE_ThreatAnalyticsEnriched_CL.Tags (dynamic, JSON array).
+                # All writers must agree. See tests/arm/SchemaConsistency.Tests.ps1.
+                Tags           = '$json:Tags'
+                Keywords       = '$json:Keywords'
                 IsVNext        = '$tobool:IsVNext'
             }
         }

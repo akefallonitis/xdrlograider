@@ -44,6 +44,46 @@ Production-grade unattended ingestion of Microsoft Defender XDR portal-only tele
 
 ---
 
+## v0.1.0.1 — DCR-per-category refactor (planned patch)
+
+Refactors the 7 bucket-fill DCRs (DCR-1 through DCR-7, sequential 10-flow buckets that each span 2-7 categories) into **12-13 category-scoped DCRs** with descriptive names. Identified during v0.1.0 GA preflight when consolidated-table column-type conflicts (Action/Scope/Tags) surfaced because multiple categories shared a single DCR but their streams had differing column types per shared column.
+
+**Planned scope**:
+
+- **Per-category DCR naming** — each consolidated workspace table gets a dedicated DCR (or 2 if its streams exceed Azure's 10-flow cap):
+
+  | DCR name | Output table | Streams |
+  |---|---|---|
+  | `xdrlr-dcr-actioncenter` | `Defender_ActionCenter_CL` | 2 |
+  | `xdrlr-dcr-configuration-1` | `Defender_ConfigurationAndSettings_CL` | 10 |
+  | `xdrlr-dcr-configuration-2` | `Defender_ConfigurationAndSettings_CL` | 4 |
+  | `xdrlr-dcr-endpoint-config` | `Defender_EndpointConfiguration_CL` | 9 |
+  | `xdrlr-dcr-endpoint-device` | `Defender_EndpointDeviceManagement_CL` | 2 |
+  | `xdrlr-dcr-exposure-1` | `Defender_ExposureManagement_CL` | 10 |
+  | `xdrlr-dcr-exposure-2` | `Defender_ExposureManagement_CL` | 7 |
+  | `xdrlr-dcr-identity` | `Defender_IdentityProtection_CL` | 6 |
+  | `xdrlr-dcr-multitenant` | `Defender_MultiTenantOperations_CL` | 3 |
+  | `xdrlr-dcr-streaming-api` | `Defender_StreamingApi_CL` | 2 |
+  | `xdrlr-dcr-threat-analytics` | `Defender_ThreatAnalytics_CL` | 3 |
+  | `xdrlr-dcr-vulnerability-mgmt` | `Defender_VulnerabilityManagement_CL` | 1 |
+  | `xdrlr-dcr-ops` | `XdrConnectorHealth_CL` | 1 |
+
+  Total: 13 DCRs (was 7), 60 streamDecls (unchanged).
+
+- **Build script** (`tools/Build-DcrSection.ps1`) emits the DCR section + `DCR_IMMUTABLE_IDS_JSON` env-var construction + RBAC role-assignments deterministically from the manifest. ARM template stays hand-authored everywhere except this auto-regen window.
+- **CI gate** updated: `SchemaConsistency.Tests.ps1` already enforces type consistency; bucket-fill cap tightens from 7 categories per DCR to 1.
+- **RBAC**: 13 Monitoring Metrics Publisher role-assignments per DCR (was 7), 1 KV Secrets User, 1 Storage Table Data Contributor = 15 total (was 9).
+
+**Operator impact**:
+
+- Backward-compatible. Existing `Defender_<Category>_CL` tables + KQL queries continue to work UNCHANGED.
+- Operator sees 13 DCRs in the connector RG instead of 7 — descriptive names make the topology self-documenting.
+- Re-deploy migrates DCRs cleanly (workspace tables persist, only DCR resources replaced).
+
+**Why deferred from v0.1.0 GA**: scope. v0.1.0 GA shipped with the column-type conflicts FIXED and a CI gate (`SchemaConsistency.Tests.ps1`) preventing regression — the deployment works correctly today. The DCR rename is a topology refactor that benefits operator UX without changing functional behaviour, so it ships as a separate v0.1.0.1 patch with its own observation cycle.
+
+---
+
 ## v0.2.0 — multi-portal expansion + Function App multi-tenancy
 
 Reintroduces multi-portal modules (with real bodies, not stubs) and adds Function App multi-tenancy support so one connector deployment polls multiple Defender (and v0.2.0+ Entra/Purview/Intune) tenants.

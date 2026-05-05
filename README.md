@@ -60,6 +60,7 @@ Production polling timers fire on their cadence: `fast` (10 min) ingests Action 
 | Version | Focus | Highlights |
 |---|---|---|
 | **v0.1.0 GA** ← *current* | Pure Defender connector | 59 portal-only streams · 11 consolidated LA tables · 7 DCRs / 1 DCE · 8 workbooks · 20 analytic rules · 4 cadence-tier drift parsers · cosign-signed release artifacts |
+| **v0.1.0.1** | DCR-per-category topology refactor | Renames the 7 bucket-fill DCRs (`xdrlr-dcr-defender-1..7`) to **13 descriptive per-category DCRs** (`xdrlr-dcr-actioncenter`, `xdrlr-dcr-configuration-1/2`, `xdrlr-dcr-exposure-1/2`, etc.). Backward-compatible — workspace tables + KQL queries unchanged. Improves operator UX + simplifies RBAC reasoning |
 | **v0.2.0** | Multi-portal expansion + FA multi-tenancy | Adds `Xdr.Entra.*` + `Xdr.Purview.*` + `Xdr.Intune.*` modules · `Entra_<Category>_CL` / `Purview_<Category>_CL` / `Intune_<Category>_CL` per-portal tables · per-tenant secret namespacing in KV (one FA polls many tenants) · coverage gate raised to ≥75% |
 | **v1.0.0** | Marketplace certification | Azure Marketplace + Microsoft Sentinel Solution Gallery certified listing · default `restrictPublicNetwork=true` baseline · private-endpoint hardening · dedicated SKU support · enterprise-grade tenant onboarding wizard |
 | **v1.x** | Hardening + telemetry depth | 100% functional coverage on every public function · mutation testing · per-stream cost-budget enforcement · DLQ exponential backoff with circuit-breaker · custom workspace tiers per category |
