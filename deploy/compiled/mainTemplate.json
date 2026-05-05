@@ -4790,7 +4790,7 @@
                   "id": "[variables('dataConnectorId')]",
                   "title": "XdrLogRaider — Defender XDR portal telemetry",
                   "publisher": "[variables('solutionPublisher')]",
-                  "descriptionMarkdown": "Polls Microsoft Defender XDR portal-only endpoints (e.g. Action Center, Custom Detections, Exposure Management, Identity, Device Timeline, Machine Actions, XSPM, Threat Analytics) — **59 streams** across 10 functional categories — and lands telemetry in **11 consolidated Log Analytics tables** (10 `Defender_<Category>_CL` per category + 1 `XdrConnectorHealth_CL` ops table). Operators bring their own KQL parsers, hunting queries, analytic rules, and workbooks.\n\nAuthentication: unattended TOTP or software passkey via the service account. Multi-portal forward-compat (Defender today; Entra/Purview/Intune planned for v0.2.0).",
+                  "descriptionMarkdown": "Polls Microsoft Defender XDR portal-only endpoints (e.g. Action Center, Custom Detections, Exposure Management, Identity, Device Timeline, Machine Actions, XSPM, Threat Analytics) — **59 streams** across 10 functional categories — and lands telemetry in **11 consolidated Log Analytics tables** (10 `Defender_<Category>_CL` per category + 1 `XdrConnectorHealth_CL` ops table). Operators bring their own KQL parsers, hunting queries, analytic rules, and workbooks.<br><br>Authentication: unattended TOTP or software passkey via the service account. Multi-portal forward-compat (Defender today; Entra/Purview/Intune planned for v0.2.0).",
                   "graphQueriesTableName": "XdrConnectorHealth_CL",
                   "graphQueries": [
                     {
