@@ -479,7 +479,7 @@ $armTemplate = [ordered]@{
     variables  = [ordered]@{
         solutionId      = 'community.xdrlograider'
         solutionName    = 'XdrLogRaider'
-        solutionVersion = '0.1.0-beta'
+        solutionVersion = '0.1.0'
         solutionSource  = [ordered]@{ kind = 'Solution'; name = 'XdrLogRaider'; sourceId = 'community.xdrlograider' }
         solutionAuthor  = [ordered]@{ name = 'Alex Kefallonitis'; email = 'al.kefallonitis@gmail.com' }
         solutionSupport = [ordered]@{ name = 'XdrLogRaider'; email = 'al.kefallonitis@gmail.com'; tier = 'Community'; link = 'https://github.com/akefallonitis/xdrlograider' }

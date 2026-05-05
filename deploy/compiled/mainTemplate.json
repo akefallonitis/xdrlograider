@@ -4678,7 +4678,7 @@
             "value": "[parameters('workspaceLocation')]"
           },
           "solutionVersion": {
-            "value": "0.1.0-beta"
+            "value": "0.1.0"
           }
         },
         "template": {
@@ -4723,8 +4723,8 @@
                 "contentSchemaVersion": "3.0.0",
                 "displayName": "[variables('solutionName')]",
                 "publisherDisplayName": "[variables('solutionPublisher')]",
-                "description": "Microsoft Sentinel data connector that polls Defender XDR portal-only endpoints and lands telemetry in 47 custom Log Analytics tables. Operators bring their own KQL. Source: https://github.com/akefallonitis/xdrlograider",
-                "descriptionHtml": "<p>Microsoft Sentinel data connector that polls Defender XDR portal-only endpoints and lands telemetry in 47 custom Log Analytics tables. Operators bring their own KQL.</p><p>Source: <a href=\"https://github.com/akefallonitis/xdrlograider\">github.com/akefallonitis/xdrlograider</a></p>",
+                "description": "Microsoft Sentinel custom data connector — 59 Defender XDR portal-only telemetry streams (configuration, compliance, drift, exposure, governance, identity) consolidated into 11 Log Analytics tables (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL). Operators bring their own KQL parsers, rules, and workbooks. v0.1.0 GA. Source: https://github.com/akefallonitis/xdrlograider",
+                "descriptionHtml": "<p>Microsoft Sentinel custom data connector — <strong>59 Defender XDR portal-only telemetry streams</strong> (configuration, compliance, drift, exposure, governance, identity) consolidated into <strong>11 Log Analytics tables</strong> (10 <code>Defender_&lt;Category&gt;_CL</code> + 1 <code>XdrConnectorHealth_CL</code>). PowerShell 7.4 Function App + 7 DCRs sharing 1 DCE + Key Vault for SA credentials. Operators bring their own KQL.</p><p>v0.1.0 GA. Source: <a href=\"https://github.com/akefallonitis/xdrlograider\">github.com/akefallonitis/xdrlograider</a></p>",
                 "contentKind": "Solution",
                 "contentProductId": "[concat(variables('solutionId'), '-sl-', parameters('solutionVersion'))]",
                 "id": "[concat(variables('solutionId'), '-sl-', parameters('solutionVersion'))]",
@@ -4790,7 +4790,7 @@
                   "id": "[variables('dataConnectorId')]",
                   "title": "XdrLogRaider — Defender XDR portal telemetry",
                   "publisher": "[variables('solutionPublisher')]",
-                  "descriptionMarkdown": "Polls Microsoft Defender XDR portal-only endpoints (e.g. Action Center, Custom Detections, Exposure Management, Identity, Device Timeline, Machine Actions) and lands telemetry in 47 custom Log Analytics tables. Operators bring their own KQL parsers, hunting queries, analytic rules, and workbooks.\n\nAuthentication: unattended TOTP or software passkey via the service account. Multi-portal forward-compat (Defender today; Entra/Purview/Intune planned).",
+                  "descriptionMarkdown": "Polls Microsoft Defender XDR portal-only endpoints (e.g. Action Center, Custom Detections, Exposure Management, Identity, Device Timeline, Machine Actions, XSPM, Threat Analytics) — **59 streams** across 10 functional categories — and lands telemetry in **11 consolidated Log Analytics tables** (10 `Defender_<Category>_CL` per category + 1 `XdrConnectorHealth_CL` ops table). Operators bring their own KQL parsers, hunting queries, analytic rules, and workbooks.\n\nAuthentication: unattended TOTP or software passkey via the service account. Multi-portal forward-compat (Defender today; Entra/Purview/Intune planned for v0.2.0).",
                   "graphQueriesTableName": "XdrConnectorHealth_CL",
                   "graphQueries": [
                     {
