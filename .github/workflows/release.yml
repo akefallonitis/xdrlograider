@@ -81,17 +81,17 @@ jobs:
           }
           Write-Host "✓ Release-gate grep clean — 0 removed-stream refs in deploy/compiled + sentinel" -ForegroundColor Green
 
-      - name: Release-gate — DCR stream count = 47 + all rules enabled:false + Data Connector 46 tables
+      - name: Release-gate — DCR streamDecls = 60 + all rules enabled:false + Data Connector 11 tables
         shell: pwsh
         run: |
           # Release-gate triad (belt + suspenders on top of preflight):
-          #   (1) mainTemplate.json DCR.streamDeclarations.Count == 47
-          #       (46 data streams + 1 operational Heartbeat; AuthTestResult retired)
+          #   (1) mainTemplate.json DCR.streamDeclarations.Count == 60
+          #       (59 streams + 1 XdrConnectorHealth_CL operational; spread across
+          #        7 DCRs as 4×10 + 5(7) + 6(7) + 7(6) per Azure 10-flow cap)
           #   (2) every Microsoft.OperationalInsights/workspaces/savedSearches-Scheduled
           #       rule in sentinelContent.json has properties.enabled: false
-          #   (3) Data Connector card dataTypes.Count == 46
-          # These catch regressions that preflight covers but release workflow
-          # would otherwise skip on tagged builds.
+          #   (3) Data Connector card dataTypes.Count == 11
+          #       (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL — D'.11)
 
           # ---- Gate 1: DCR streamDeclarations count ----
           $mainTemplate = Get-Content ./deploy/compiled/mainTemplate.json -Raw | ConvertFrom-Json
@@ -102,8 +102,8 @@ jobs:
                   $streamCount += ($dcr.properties.streamDeclarations.PSObject.Properties.Name).Count
               }
           }
-          if ($streamCount -ne 47) {
-              throw "Gate 1 FAIL: DCR streamDeclarations count = $streamCount (expected 47 = 46 data + Heartbeat operational)"
+          if ($streamCount -ne 60) {
+              throw "Gate 1 FAIL: DCR streamDeclarations count = $streamCount (expected 60 = 59 streams + XdrConnectorHealth_CL operational)"
           }
           Write-Host "Gate 1 OK: DCR streamDeclarations.Count = $streamCount" -ForegroundColor Green
 
@@ -123,8 +123,8 @@ jobs:
           # ---- Gate 3: Data Connector dataTypes count ----
           $dc = Get-Content './deploy/solution/Data Connectors/XdrLogRaider_DataConnector.json' -Raw | ConvertFrom-Json
           $dtCount = @($dc.dataTypes).Count
-          if ($dtCount -ne 46) {
-              throw "Gate 3 FAIL: Data Connector lists $dtCount dataTypes (expected 46 = 45 active streams + Heartbeat; deprecated stream excluded; AuthTestResult retired). Regenerate via tools/Build-SentinelSolution.ps1."
+          if ($dtCount -ne 11) {
+              throw "Gate 3 FAIL: Data Connector lists $dtCount dataTypes (expected 11 = 10 Defender_<Category>_CL consolidated + XdrConnectorHealth_CL ops table per D'.11). Regenerate via tools/Build-SentinelSolution.ps1."
           }
           Write-Host "Gate 3 OK: Data Connector dataTypes.Count = $dtCount" -ForegroundColor Green
 
