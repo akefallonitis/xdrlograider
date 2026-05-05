@@ -55,6 +55,17 @@ If it stays Disconnected past 15 minutes, see [docs/TROUBLESHOOTING.md](docs/TRO
 
 Production polling timers fire on their cadence: `fast` (10 min) ingests Action Center events first; `inventory` (daily 02:00 UTC) ingests the long-tail settings + identity + metadata streams. See [docs/STREAMS.md](docs/STREAMS.md) for the full per-tier breakdown.
 
+## Roadmap
+
+| Version | Focus | Highlights |
+|---|---|---|
+| **v0.1.0 GA** ← *current* | Pure Defender connector | 59 portal-only streams · 11 consolidated LA tables · 7 DCRs / 1 DCE · 8 workbooks · 20 analytic rules · 4 cadence-tier drift parsers · cosign-signed release artifacts |
+| **v0.2.0** | Multi-portal expansion + FA multi-tenancy | Adds `Xdr.Entra.*` + `Xdr.Purview.*` + `Xdr.Intune.*` modules · `Entra_<Category>_CL` / `Purview_<Category>_CL` / `Intune_<Category>_CL` per-portal tables · per-tenant secret namespacing in KV (one FA polls many tenants) · coverage gate raised to ≥75% |
+| **v1.0.0** | Marketplace certification | Azure Marketplace + Microsoft Sentinel Solution Gallery certified listing · default `restrictPublicNetwork=true` baseline · private-endpoint hardening · dedicated SKU support · enterprise-grade tenant onboarding wizard |
+| **v1.x** | Hardening + telemetry depth | 100% functional coverage on every public function · mutation testing · per-stream cost-budget enforcement · DLQ exponential backoff with circuit-breaker · custom workspace tiers per category |
+
+Full per-version deliverables in [docs/ROADMAP.md](docs/ROADMAP.md). Streams are not marked as removed without [docs/STREAMS-REMOVED.md](docs/STREAMS-REMOVED.md) history. New streams get added to the manifest with live-captured fixtures and full 12-edge wiring before they ship.
+
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md) — components, data flow, trust boundaries
@@ -69,6 +80,7 @@ Production polling timers fire on their cadence: `fast` (10 min) ingests Action 
 - [Runbook](docs/RUNBOOK.md) — daily ops, incidents, rotation
 - [Troubleshooting](docs/TROUBLESHOOTING.md) — symptom → fix
 - [References](docs/REFERENCES.md) — all sources cited
+- **[Roadmap](docs/ROADMAP.md)** — what's next: v0.2.0 multi-portal + multi-tenancy, v1.0.0 Marketplace certification, v1.x hardening
 
 ## Contributing
 
