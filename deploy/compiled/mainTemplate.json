@@ -2309,10 +2309,6 @@
                 "type": "dynamic"
               },
               {
-                "name": "Action",
-                "type": "string"
-              },
-              {
                 "name": "AlertTitle",
                 "type": "string"
               },
@@ -2345,8 +2341,12 @@
                 "type": "string"
               },
               {
-                "name": "Scope",
-                "type": "string"
+                "name": "SuppressionAction",
+                "type": "int"
+              },
+              {
+                "name": "SuppressionScope",
+                "type": "int"
               },
               {
                 "name": "UpdateTime",
@@ -2373,7 +2373,7 @@
                 "type": "dynamic"
               },
               {
-                "name": "Action",
+                "name": "AllowBlockAction",
                 "type": "string"
               },
               {
@@ -2747,11 +2747,11 @@
                 "type": "string"
               },
               {
-                "name": "RoleId",
+                "name": "RbacScope",
                 "type": "string"
               },
               {
-                "name": "Scope",
+                "name": "RoleId",
                 "type": "string"
               }
             ]
@@ -2791,7 +2791,7 @@
                 "type": "string"
               },
               {
-                "name": "Scope",
+                "name": "PreferenceScope",
                 "type": "string"
               },
               {

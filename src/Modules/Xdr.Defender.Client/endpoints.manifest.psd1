@@ -232,15 +232,19 @@
                 IsEnabled           = '$tobool:IsEnabled'
                 CreatedTime         = '$todatetime:CreationTime'
                 CreatedBy           = '$tostring:CreatedBy'
-                # NORMALIZED to string for consolidated-table compatibility:
-                # Defender_ConfigurationAndSettings_CL.Scope is shared with
-                # MDE_UnifiedRbacRoles_CL.Scope (string) + MDE_UserPreferences_CL.Scope (string).
-                # Defender_ConfigurationAndSettings_CL.Action is shared with
-                # MDE_TenantAllowBlock_CL.Action (string). Sentinel custom tables
-                # auto-derive column type from FIRST DCR streamDecl that writes;
-                # all writers must agree. See tests/arm/SchemaConsistency.Tests.ps1.
-                Scope               = '$tostring:Scope'
-                Action              = '$tostring:Action'
+                # Per-stream column naming for shared-table disambiguation:
+                # Defender_ConfigurationAndSettings_CL is a consolidated table (D'.11)
+                # that aggregates streams whose source APIs use overloaded field
+                # names (Scope/Action) for semantically different concepts.
+                # SuppressionRules.Scope is an integer enum (rule scope kind);
+                # UnifiedRbacRoles.Scope is an ARM resource ID; UserPreferences.Scope
+                # is a preference name. Renaming to SuppressionScope preserves the
+                # int type and disambiguates from the other streams.
+                # Same logic for SuppressionAction (int enum) vs AllowBlockAction (string).
+                # See tests/arm/SchemaConsistency.Tests.ps1 for the gate that catches
+                # any future cross-stream column-name clash with type disagreement.
+                SuppressionScope    = '$toint:Scope'
+                SuppressionAction   = '$toint:Action'
                 AlertTitle          = '$tostring:AlertTitle'
                 MatchingAlertsCount = '$toint:MatchingAlertsCount'
                 IsReadOnly          = '$tobool:IsReadOnly'
@@ -438,11 +442,13 @@
             Availability = 'tenant-gated'
             # Fixture: tenant-gated (no live data). Convention: TABL indicator filter facet.
             ProjectionMap = @{
-                IndicatorType = '$tostring:Type'
-                Action        = '$tostring:Action'
-                CreatedBy     = '$tostring:CreatedBy'
-                CreatedTime   = '$todatetime:CreatedTime'
-                ExpiryTime    = '$todatetime:ExpirationTime'
+                IndicatorType   = '$tostring:Type'
+                # Renamed from `Action` to disambiguate from MDE_SuppressionRules_CL.SuppressionAction (int).
+                # See tests/arm/SchemaConsistency.Tests.ps1.
+                AllowBlockAction = '$tostring:Action'
+                CreatedBy        = '$tostring:CreatedBy'
+                CreatedTime      = '$todatetime:CreatedTime'
+                ExpiryTime       = '$todatetime:ExpirationTime'
             }
         }
 
@@ -694,7 +700,9 @@
                 IsBuiltIn     = '$tobool:isBuiltIn'
                 CreatedTime   = '$todatetime:createdDateTime'
                 ModifiedBy    = '$tostring:modifiedBy'
-                Scope         = '$tostring:scope'
+                # Renamed from `Scope` to disambiguate from MDE_SuppressionRules_CL.SuppressionScope (int).
+                # See tests/arm/SchemaConsistency.Tests.ps1.
+                RbacScope     = '$tostring:scope'
             }
         }
         @{
@@ -1191,7 +1199,10 @@ AttackPathsV2
                 IsEnabled           = '$tobool:IsEnabled'
                 CreatedTime         = '$todatetime:CreatedTime'
                 CreatedBy           = '$tostring:CreatedBy'
-                Scope               = '$tostring:Scope'
+                # Renamed from `Scope` to disambiguate from MDE_SuppressionRules_CL.SuppressionScope (int)
+                # and MDE_UnifiedRbacRoles_CL.RbacScope (string).
+                # See tests/arm/SchemaConsistency.Tests.ps1.
+                PreferenceScope     = '$tostring:Scope'
             }
         }
 
