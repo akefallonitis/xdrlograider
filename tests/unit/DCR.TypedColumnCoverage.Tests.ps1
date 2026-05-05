@@ -11,9 +11,11 @@
 # worse, FA could project a string while DCR declares a datetime, and
 # typed-col KQL queries would parse-fail.
 #
-# Cast hint -> DCR column type mapping:
+# Cast hint -> DCR column type mapping (matches Project-EntityField in
+# src/Modules/Xdr.Defender.Client/Endpoints/_ProjectionHelpers.ps1):
 #   $tostring (or default)   string
-#   $toint / $tolong         int
+#   $toint                   int
+#   $tolong                  long
 #   $tobool                  boolean
 #   $todatetime              datetime
 #   $todouble / $todecimal   real
@@ -39,7 +41,7 @@ BeforeAll {
     $script:CastTypeMap = @{
         '$tostring'   = 'string'
         '$toint'      = 'int'
-        '$tolong'     = 'int'
+        '$tolong'     = 'long'
         '$tobool'     = 'boolean'
         '$todatetime' = 'datetime'
         '$todouble'   = 'real'
