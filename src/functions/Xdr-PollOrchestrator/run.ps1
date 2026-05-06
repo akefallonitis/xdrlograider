@@ -77,7 +77,6 @@ $results = Wait-DurableTask -Task $activityTasks -Any:$false
 $totalAttempted = $tierStreams.Count
 $totalSucceeded = 0
 $totalRows = 0
-$totalLatencyMs = 0
 $errors = @{}
 foreach ($r in $results) {
     if ($r.Success) {
@@ -86,29 +85,17 @@ foreach ($r in $results) {
     } else {
         $errors[$r.StreamName] = $r.Error
     }
-    if ($r.LatencyMs) { $totalLatencyMs += [int]$r.LatencyMs }
 }
 
-# FINAL STEP: persist a per-tier heartbeat row to XdrConnectorHealth_CL.
-# Without this, the Sentinel data-connector card's connectivityCriteria
-# (`StreamsSucceeded > 0` in XdrConnectorHealth_CL) is never satisfied —
-# only Connector-Heartbeat (5min liveness) writes rows, always with 0 streams.
-# Per BINDING methodology Section 0: chained architecture — fix activity
-# ingestion AND heartbeat persistence in one batch. End-to-end production
-# readiness requires the connector card to flip Connected.
-$heartbeatInput = @{
-    Portal           = $portal
-    Tier             = $tier
-    FunctionName     = $functionName
-    StreamsAttempted = $totalAttempted
-    StreamsSucceeded = $totalSucceeded
-    RowsIngested     = $totalRows
-    LatencyMs        = $totalLatencyMs
-    OrchestrationInstanceId = [string]$Context.InstanceId
-    Errors           = $errors
-}
-$null = Invoke-DurableActivity -FunctionName 'Xdr-WriteHeartbeat' -Input $heartbeatInput
-
+# NOTE (2026-05-06): Heartbeat-persist via Xdr-WriteHeartbeat activity is
+# REMOVED here pending local end-to-end test coverage. Live evidence: adding
+# the call left the FA host in a stalled state (no telemetry post-14:11Z, no
+# function executions resumed across multiple restart+stop+start cycles).
+# Activity files (Xdr-WriteHeartbeat/{function.json,run.ps1}) remain in the
+# zip for future re-integration once we have a Durable runtime mock that
+# proves the orchestrator → activity → Write-Heartbeat call chain locally
+# without deploying. Connector card 'Connected' status remains gated on
+# Connector-Heartbeat liveness rows for v0.1.0 GA.
 return [pscustomobject]@{
     Portal = $portal
     Tier = $tier
