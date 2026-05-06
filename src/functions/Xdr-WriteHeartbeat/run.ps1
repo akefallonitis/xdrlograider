@@ -75,6 +75,10 @@ $notes = @{
 }
 
 try {
+    # FunctionType='Activity' — this Durable activity IS the writer of the
+    # per-tier heartbeat. Write-Heartbeat ValidateSet is
+    # Simple|Starter|Orchestrator|Activity (set in v0.1.0-beta when Durable
+    # was first introduced). 'Activity' is the correct semantic match.
     Write-Heartbeat `
         -DceEndpoint     $env:DCE_ENDPOINT `
         -DcrImmutableId  $heartbeatDcrId `
@@ -85,7 +89,7 @@ try {
         -RowsIngested    $rowsIngested `
         -LatencyMs       $latencyMs `
         -Portal          $portal `
-        -FunctionType    'Durable' `
+        -FunctionType    'Activity' `
         -OrchestrationInstanceId $instanceId `
         -Notes           ([pscustomobject]$notes) | Out-Null
 
