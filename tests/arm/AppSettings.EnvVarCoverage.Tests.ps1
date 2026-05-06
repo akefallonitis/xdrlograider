@@ -46,7 +46,8 @@ BeforeAll {
     foreach ($hit in $envRegex.Matches((Get-Content -Raw $script:HeartbeatPath))) {
         [void]$script:HeartbeatEnvVars.Add($hit.Groups[1].Value)
     }
-    foreach ($hit in $profileRegex.Matches((Get-Content -Raw $script:ProfilePath))) {
+    $script:ProfileSource = Get-Content -Raw $script:ProfilePath
+    foreach ($hit in $profileRegex.Matches($script:ProfileSource)) {
         [void]$script:ProfileRequired.Add($hit.Groups[1].Value)
     }
 
@@ -82,26 +83,35 @@ Describe 'mainTemplate.json appSettings vs FA code parity' {
         }
     }
 
-    Context 'profile.ps1 cold-start required-env-vars list matches activity consumption (regression: missing fail-fast for TENANT_ID + XDR_INGEST_DLQ_TABLE_NAME)' {
+    Context 'profile.ps1 cold-start required-env-vars list matches activity consumption (regression: missing fail-fast for XDR_INGEST_DLQ_TABLE_NAME)' {
 
-        It 'profile.ps1 required-env-vars includes TENANT_ID' {
-            $script:ProfileRequired.Contains('TENANT_ID') | Should -BeTrue -Because 'fail-fast at cold start beats silent activity failure on first poll'
-        }
-
-        It 'profile.ps1 required-env-vars includes XDR_INGEST_DLQ_TABLE_NAME' {
+        It 'profile.ps1 required-env-vars includes XDR_INGEST_DLQ_TABLE_NAME (truly mandatory)' {
             $script:ProfileRequired.Contains('XDR_INGEST_DLQ_TABLE_NAME') | Should -BeTrue -Because 'Pop-XdrIngestDlq -TableName is mandatory; activity reads from $env:XDR_INGEST_DLQ_TABLE_NAME'
         }
 
-        It 'every env var the activity reads is also in profile.ps1 required-env-vars (no silent-failure mode)' {
+        It 'profile.ps1 references TENANT_ID at least once (mentioned via $env:TENANT_ID OR recommended-env-vars list)' {
+            # TENANT_ID is RECOMMENDED but not fail-fast in v0.1.0 single-tenant.
+            # The Defender portal resolves tenant via UPN-implicit when -TenantId is empty.
+            # Pre-existing v0.1.0-beta deployments don't have TENANT_ID set in their FA
+            # appSettings; making profile.ps1 fail-fast on it would break their cold-start
+            # after picking up the new function-app.zip from /releases/latest/.
+            $hasRefInProfile = $script:ProfileSource -match '\$env:TENANT_ID' -or
+                               $script:ProfileSource -match "Name\s*=\s*'TENANT_ID'"
+            $hasRefInProfile | Should -BeTrue -Because 'profile.ps1 must reference TENANT_ID either via $env:TENANT_ID (in Get-XdrLogRaiderConfig) or in the recommended-env-vars list (Warn-but-continue)'
+        }
+
+        It 'every env var the activity reads is in profile.ps1 required OR recommended list (no silent-failure mode)' {
             # Allow a small whitelist: APPLICATIONINSIGHTS_CONNECTION_STRING is set by Functions runtime,
             # KV_CACHE_TTL_MINUTES has a safe default in the auth module.
             $whitelist = @('APPLICATIONINSIGHTS_CONNECTION_STRING','KV_CACHE_TTL_MINUTES','APPLICATIONINSIGHTS_TELEMETRY_SAMPLING_EXCLUDED_TYPES')
+            $tracked = [System.Collections.Generic.HashSet[string]]::new($script:ProfileRequired)
+            # Also include recommended-env-vars entries (Name = '<NAME>' in $recommendedEnvVars block — same regex match)
             $missing = @()
             foreach ($v in $script:ActivityEnvVars) {
                 if ($whitelist -contains $v) { continue }
-                if (-not $script:ProfileRequired.Contains($v)) { $missing += $v }
+                if (-not $tracked.Contains($v)) { $missing += $v }
             }
-            $missing | Should -BeNullOrEmpty -Because "profile.ps1 MUST validate every env var the activity reads. Missing from profile.ps1: $($missing -join ', ')"
+            $missing | Should -BeNullOrEmpty -Because "profile.ps1 MUST validate (require) or recommend every env var the activity reads. Missing: $($missing -join ', ')"
         }
     }
 }

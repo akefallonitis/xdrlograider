@@ -45,7 +45,18 @@ $requiredEnvVars = @(
     @{ Name = 'STORAGE_ACCOUNT_NAME';     Purpose = 'Storage account holding the checkpoint + DLQ tables' }
     @{ Name = 'CHECKPOINT_TABLE_NAME';    Purpose = 'Checkpoint table name (e.g. connectorCheckpoints)' }
     @{ Name = 'XDR_INGEST_DLQ_TABLE_NAME'; Purpose = 'Storage table for ingest DLQ replay (e.g. xdrIngestDlq) — required by Pop-XdrIngestDlq mandatory -TableName param' }
-    @{ Name = 'TENANT_ID';                Purpose = 'Expected tenant GUID for portal sign-in (Connect-DefenderPortal -TenantId)' }
+)
+
+# Soft-recommended env vars: emit a Warning if missing but DO NOT fail-fast.
+# These are gracefully nullable in code paths that read them; missing them
+# degrades observability/security-boundary tightness but does not break ingest.
+# TENANT_ID specifically: the Defender portal resolves tenant from the credential
+# UPN when -TenantId is empty — so single-tenant deployments work without it.
+# v0.2.0 multi-tenant scenarios will require it; until then it is recommended
+# but not mandatory. ARM template SETS it for new deploys; pre-existing v0.1.0
+# deployments without it continue to work.
+$recommendedEnvVars = @(
+    @{ Name = 'TENANT_ID';                Purpose = 'Expected tenant GUID for portal sign-in (Connect-DefenderPortal -TenantId). Optional in v0.1.0 single-tenant; mandatory in v0.2.0 multi-tenant.' }
 )
 
 $missing = @()
@@ -53,6 +64,13 @@ foreach ($var in $requiredEnvVars) {
     $val = [Environment]::GetEnvironmentVariable($var.Name)
     if ([string]::IsNullOrWhiteSpace($val)) {
         $missing += "  - $($var.Name) ($($var.Purpose))"
+    }
+}
+
+foreach ($var in $recommendedEnvVars) {
+    $val = [Environment]::GetEnvironmentVariable($var.Name)
+    if ([string]::IsNullOrWhiteSpace($val)) {
+        Write-Warning ("profile.ps1: recommended env var '{0}' is unset — {1}" -f $var.Name, $var.Purpose)
     }
 }
 

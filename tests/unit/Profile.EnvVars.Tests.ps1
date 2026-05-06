@@ -22,7 +22,9 @@ BeforeDiscovery {
         'STORAGE_ACCOUNT_NAME'
         'CHECKPOINT_TABLE_NAME'
         'XDR_INGEST_DLQ_TABLE_NAME'
-        'TENANT_ID'
+        # TENANT_ID is recommended-only (Warn but don't fail) — Defender portal
+        # resolves tenant via UPN-implicit when -TenantId is empty. Required in
+        # v0.2.0 multi-tenant only.
     )
 }
 
