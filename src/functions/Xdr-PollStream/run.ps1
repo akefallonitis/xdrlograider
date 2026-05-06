@@ -38,22 +38,28 @@ $config = [pscustomobject]@{
 try {
     # Auth — Connect-DefenderPortal caches session per FA instance for ~50 min.
     # First activity in fan-out triggers actual auth; subsequent activities hit cache.
-    # Param names match the actual Get-XdrAuthFromKeyVault signature:
-    #   -VaultUri      (was wrongly named -KeyVaultUri)
-    #   -SecretPrefix  (was wrongly named -SecretName)
-    #   -AuthMethod    (correct)
-    # ServiceAccountUpn / ExpectedTenantId are NOT params of Get-XdrAuthFromKeyVault;
-    # they're passed to Connect-DefenderPortal further down.
+    #
+    # Get-XdrAuthFromKeyVault signature:
+    #   -VaultUri      (mandatory)  KV URI from env: KEY_VAULT_URI
+    #   -SecretPrefix  (default 'mde-portal') from env: AUTH_SECRET_NAME
+    #   -AuthMethod    (mandatory)  from env: AUTH_METHOD
+    # Returns a hashtable: @{ upn; password; totpBase32 } for CredentialsTotp,
+    # @{ upn; passkey } for Passkey, etc. The WHOLE hashtable IS the credential.
+    #
+    # Connect-DefenderPortal signature:
+    #   -Method        (mandatory) AuthMethod string
+    #   -Credential    (mandatory) the whole hashtable returned by Get-XdrAuthFromKeyVault
+    #   -PortalHost    (optional)  default 'security.microsoft.com'
+    #   -TenantId      (optional)  for tenant-scoped sign-in
+    # Returns a session object cached for ~50 min keyed by "<upn>::<host>".
     $authBundle = Get-XdrAuthFromKeyVault `
         -VaultUri     $config.KeyVaultUri `
         -SecretPrefix $config.AuthSecretName `
         -AuthMethod   $config.AuthMethod
-    $session = Connect-DefenderPortal -Method $config.AuthMethod `
-        -Credential $authBundle.Credential `
-        -TotpBase32Secret $authBundle.TotpBase32Secret `
-        -PasskeyJsonPath $authBundle.PasskeyJsonPath `
-        -ServiceAccountUpn $config.ServiceAccountUpn `
-        -ExpectedTenantId $config.ExpectedTenantId
+    $session = Connect-DefenderPortal `
+        -Method     $config.AuthMethod `
+        -Credential $authBundle `
+        -TenantId   $config.ExpectedTenantId
 
     # Pop any DLQ entries for this stream first (drain before fresh ingest)
     $dlqRows = @()

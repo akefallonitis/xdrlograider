@@ -204,6 +204,45 @@ Describe 'Xdr-PollStream — runtime behaviour with realistic Durable activity i
             $src | Should -Match '\[string\]\s*\$AuthMethod'
         }
     }
+
+    Context 'Activity calls Connect-DefenderPortal with correct param names + correct shape (regression: Credential null bug)' {
+
+        It 'Activity passes the WHOLE $authBundle as -Credential (not $authBundle.Credential)' {
+            # Get-XdrAuthFromKeyVault returns @{ upn; password; totpBase32 } for CredentialsTotp.
+            # Connect-DefenderPortal expects the WHOLE hashtable as -Credential.
+            # Activity wrongly used $authBundle.Credential (null) which threw
+            # ParameterBindingValidationException 'Cannot bind argument to Credential because it is null'.
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $activitySource | Should -Match '-Credential\s+\$authBundle\b' -Because 'whole bundle IS the credential hashtable'
+            $activitySource | Should -Not -Match '-Credential\s+\$authBundle\.Credential' -Because 'no nested .Credential property exists on Get-XdrAuthFromKeyVault output'
+        }
+
+        It 'Activity does NOT pass -TotpBase32Secret / -PasskeyJsonPath / -ServiceAccountUpn / -ExpectedTenantId to Connect-DefenderPortal (none are params)' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $connectBlock = if ($activitySource -match '(?ms)Connect-DefenderPortal[^\r\n]*((?:\s*`\s*\r?\n[^\r\n]*)+)') { $Matches[0] } else { '' }
+            $connectBlock | Should -Not -Match '-TotpBase32Secret\s'
+            $connectBlock | Should -Not -Match '-PasskeyJsonPath\s'
+            $connectBlock | Should -Not -Match '-ServiceAccountUpn\s'
+            $connectBlock | Should -Not -Match '-ExpectedTenantId\s' -Because 'Connect-DefenderPortal uses -TenantId, not -ExpectedTenantId'
+        }
+
+        It 'Activity uses -TenantId (the actual Connect-DefenderPortal param)' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $activitySource | Should -Match '-TenantId\s+\$config\.ExpectedTenantId'
+        }
+    }
+
+    Context 'Connect-DefenderPortal signature anchor (catches future drift)' {
+
+        It 'Connect-DefenderPortal has Method + Credential + PortalHost + TenantId parameters' {
+            $cdpPath = Join-Path $script:RepoRoot 'src/Modules/Xdr.Defender.Auth/Public/Connect-DefenderPortal.ps1'
+            $src = Get-Content -Raw $cdpPath
+            $src | Should -Match '\[string\]\s*\$Method'
+            $src | Should -Match '\[hashtable\]\s*\$Credential'
+            $src | Should -Match '\[string\]\s*\$PortalHost'
+            $src | Should -Match '\[string\]\s*\$TenantId'
+        }
+    }
 }
 
 Describe 'Xdr-PollOrchestrator — orchestrator file inspection (locks current correct shape)' {
