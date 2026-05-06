@@ -127,10 +127,15 @@ function Invoke-XdrStorageTableEntity {
     # accepts the canonical (PartitionKey='<pk>',RowKey='<rk>') form directly.
     $uri = switch ($Operation) {
         'Query'       {
+            # Section R+ STRICT-MODE FIX: under Set-StrictMode -Version Latest
+            # (used by Connector-Heartbeat run.ps1), `$base?` parses as one
+            # variable token (PS allows ? in variable names) — throws
+            # "The variable '$base?' cannot be retrieved because it has not been set".
+            # Use ${base} to delimit the variable name explicitly.
             $base = "https://$StorageAccountName.table.core.windows.net/$TableName()"
             if ($Filter) {
                 $encodedFilter = [System.Web.HttpUtility]::UrlEncode($Filter)
-                $base = "$base?`$filter=$encodedFilter"
+                $base = "${base}?`$filter=$encodedFilter"
             }
             $base
         }

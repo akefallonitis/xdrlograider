@@ -40,7 +40,12 @@ BeforeAll {
 Describe 'TierStateAggregate.StrictModeSafety — defensive null-guards + __schedule__ exclusion' {
 
     BeforeEach {
-        Set-StrictMode -Version 3
+        # Section R+ NOTE 2026-05-06T22:00: deployed Connector-Heartbeat run.ps1
+        # uses `Set-StrictMode -Version Latest` (NOT Version 3). Version Latest
+        # is stricter on variable-name interpolation -- caught a real bug where
+        # `$base?` inside a string was parsed as one variable token.
+        # Use Latest in tests to match deployed runtime exactly.
+        Set-StrictMode -Version Latest
     }
 
     AfterEach {
