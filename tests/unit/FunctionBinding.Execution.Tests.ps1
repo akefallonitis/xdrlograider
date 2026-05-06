@@ -98,4 +98,24 @@ Describe 'FunctionBinding.Execution — every run.ps1 has non-shadowing param + 
             "Body MUST use [string]`$ParamName.Property pattern to coerce JValue→String."
         )
     }
+
+    It 'Orchestrator run.ps1 does NOT use `if ($X.Property)` directly on Durable input (JValue→Boolean FormatException)' {
+        # Live forensic 2026-05-06T17:30Z: orchestrator had:
+        #   if ($orchInput.OperationId) { [string]$orchInput.OperationId } else { ... }
+        # The `if ($jvalue)` triggers JValue.IConvertible.ToBoolean which throws:
+        #   "String 'eae21dc4-...' was not recognized as a valid Boolean."
+        # Fix: cast to [string] FIRST, then test [string]::IsNullOrWhiteSpace.
+        $orchPath = Join-Path $PSScriptRoot '..' '..' 'src/functions/Xdr-PollOrchestrator/run.ps1'
+        if (-not (Test-Path $orchPath)) { Set-ItResult -Skipped -Because 'orchestrator not present'; return }
+        $src = Get-Content -Raw $orchPath
+        # Forbidden pattern: `if ($orchInput.X)` or `if ($Context.Input.X)`.
+        # Use word-boundary so we don't match `if ($x.Length -gt 0)` style.
+        $src | Should -Not -Match '(?m)^\s*\$\w+\s*=\s*if\s*\(\s*\$orchInput\.\w+\s*\)' -Because (
+            "JValue→Boolean coercion throws FormatException on GUID/string values. " +
+            "Pattern: cast to [string] FIRST, then test [string]::IsNullOrWhiteSpace."
+        )
+        $src | Should -Not -Match '(?m)^\s*if\s*\(\s*\$Context\.Input\.\w+\s*\)\s*\{' -Because (
+            'Same JValue→Boolean pitfall on $Context.Input.'
+        )
+    }
 }

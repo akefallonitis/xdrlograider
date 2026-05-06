@@ -27,7 +27,11 @@ $tier         = [string]$orchInput.Tier
 $functionName = [string]$orchInput.FunctionName  # passed by timer-starter for heartbeat correlation
 # OperationId propagation (Section R B-4): passed by Xdr-Refresh; falls back to
 # Context.InstanceId so legacy invocations still get a correlation key.
-$operationId  = if ($orchInput.OperationId) { [string]$orchInput.OperationId } else { [string]$Context.InstanceId }
+# CRITICAL: cast to [string] FIRST. `if ($orchInput.OperationId)` would invoke
+# JValue.IConvertible.ToBoolean() which throws FormatException on non-bool values
+# like a GUID string ("String 'guid' was not recognized as a valid Boolean").
+$opIdRaw      = [string]$orchInput.OperationId
+$operationId  = if ([string]::IsNullOrWhiteSpace($opIdRaw)) { [string]$Context.InstanceId } else { $opIdRaw }
 
 # DETERMINISTIC: read manifest. Get-XdrEndpointManifest -Portal $portal returns
 # entries from that portal's manifest file. The Portal filter below is kept for
