@@ -144,7 +144,8 @@ Write-Host ('  dataTypes count   : {0}' -f @($concreteBlock.dataTypes).Count)
 Write-Host ('  dataTypes names   : {0}' -f (($concreteBlock.dataTypes.name) -join ', '))
 $crit = $concreteBlock.connectivityCriteria
 $critPlural = $concreteBlock.connectivityCriterias
-Write-Host ('  criteria key     : {0}' -f (if ($crit) { 'connectivityCriteria (singular - CORRECT)' } elseif ($critPlural) { 'connectivityCriterias (plural - WRONG, Sentinel UI ignores)' } else { 'NONE' }))
+$critLabel = if ($crit) { 'connectivityCriteria (singular - CORRECT)' } elseif ($critPlural) { 'connectivityCriterias (plural - WRONG, Sentinel UI ignores)' } else { 'NONE' }
+Write-Host ('  criteria key     : {0}' -f $critLabel)
 if ($crit) {
     Write-Host ('  IsConnectedQuery  : {0}' -f ($crit[0].value[0]))
 }

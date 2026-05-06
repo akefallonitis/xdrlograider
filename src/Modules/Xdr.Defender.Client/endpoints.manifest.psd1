@@ -549,6 +549,10 @@
             Path = '/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true'
             Tier = 'Inventory'
             SingleObjectAsRow = $true
+            # Section R+: OrgId is the natural stable key (operators query by tenant
+            # OrgId for cross-tenant audits). Without IdProperty override the auto-
+            # heuristic falls to 'idx-0' which is a constant + meaningless for joins.
+            IdProperty = @('OrgId', 'orgId', 'TenantId', 'tenantId')
             Category = 'Multi-Tenant Operations'
             CategoryId = 9  # nodoc-authoritative (Phase D.1)
             Purpose = 'Authenticated-tenant context: tenant ID, region, M365 sku, cross-tenant flags'
@@ -678,6 +682,10 @@
             Path = '/apiproxy/mtp/rbacManagementApi/rbac/machine_groups?addAadGroupNames=true&addMachineGroupCount=false'
             Tier = 'Configuration'
             UnwrapProperty = 'items'
+            # Section R+: MachineGroupId is the natural stable key per item; without
+            # IdProperty override the auto-heuristic falls through to 'idx-N' which
+            # rotates with array order changes + breaks drift joins.
+            IdProperty = @('MachineGroupId', 'machineGroupId', 'Id', 'id')
             Category = 'Configuration and Settings'
             CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'RBAC device groups + AAD-group bindings + per-group machine count + role assignments'

@@ -49,20 +49,25 @@ BeforeAll {
     )
 
     # Walk an ARM template tree to locate the connector block.
-    # Inline-recursive scriptblock (Pester-safe; no module/function pollution).
+    # Strict-mode safe: every property access is gated by PSObject.Properties.Name -contains
+    # check (PS 7.4+ on Linux CI runs StrictMode v3 which throws on missing properties).
     $script:FindConnectorBlock = {
         param($node)
         if (-not $node) { return $null }
-        if ($node.properties -and $node.properties.connectorUiConfig -and $node.properties.connectorUiConfig.dataTypes) {
-            return $node.properties.connectorUiConfig
+        $hasProp = { param($obj, $name) ($null -ne $obj) -and ($obj.PSObject.Properties.Name -contains $name) }
+        if ((& $hasProp $node 'properties') -and (& $hasProp $node.properties 'connectorUiConfig')) {
+            $cui = $node.properties.connectorUiConfig
+            if (& $hasProp $cui 'dataTypes') {
+                return $cui
+            }
         }
-        if ($node.resources) {
+        if (& $hasProp $node 'resources') {
             foreach ($child in $node.resources) {
                 $found = & $script:FindConnectorBlock $child
                 if ($found) { return $found }
             }
         }
-        if ($node.properties -and $node.properties.template -and $node.properties.template.resources) {
+        if ((& $hasProp $node 'properties') -and (& $hasProp $node.properties 'template') -and (& $hasProp $node.properties.template 'resources')) {
             foreach ($child in $node.properties.template.resources) {
                 $found = & $script:FindConnectorBlock $child
                 if ($found) { return $found }
