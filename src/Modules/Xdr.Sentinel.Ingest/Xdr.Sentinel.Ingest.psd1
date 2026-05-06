@@ -26,7 +26,12 @@
         # are persisted to Storage Table xdrIngestDlq + drained on next poll.
         'Push-XdrIngestDlq',
         'Pop-XdrIngestDlq',
-        'Remove-XdrIngestDlqEntry'
+        'Remove-XdrIngestDlqEntry',
+        # v0.1.0 GA Section R consolidation (2026-05-06): per-tier StreamsSucceeded
+        # signal moves into XdrTierState Storage table. Activity writes; Heartbeat reads.
+        'Get-XdrTierCadenceMap',
+        'Set-XdrTierStateRow',
+        'Get-XdrTierStateAggregate'
         # Send-XdrAppInsights* helpers (Trace, CustomEvent, CustomMetric,
         # Exception, Dependency) moved to Xdr.Common.Telemetry per Phase J D'.22.
         # They remain available via the RequiredModules dependency chain.

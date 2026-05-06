@@ -1,0 +1,16 @@
+{
+  "description": "Phase R consolidation (2026-05-06) — universal portal-agnostic refresh dispatcher. Replaces 5 deleted Defender-*-Refresh timer functions AND avoids per-portal duplication for v0.2.0+ (Entra/Purview/Intune). Runs every 1 minute; reads XdrTierState Storage table for ALL enabled (Portal, Tier) pairs; for each whose nextRunUtc <= now, calls Start-NewOrchestration -InputObject @{Portal=<P>;Tier=<T>;FunctionName='Xdr-Refresh'} and updates nextRunUtc = now + cadence (per Get-XdrTierCadenceMap).",
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 * * * * *"
+    },
+    {
+      "name": "Starter",
+      "type": "durableClient",
+      "direction": "in"
+    }
+  ]
+}

@@ -144,7 +144,7 @@ Describe 'Write-Heartbeat — schema' {
             Write-Heartbeat `
                 -DceEndpoint 'https://fake.ingest.monitor.azure.com' `
                 -DcrImmutableId 'dcr-x' `
-                -FunctionName 'Defender-ActionCenter-Refresh' `
+                -FunctionName 'Xdr-Refresh' `
                 -Tier 'ActionCenter' `
                 -StreamsAttempted 19 `
                 -StreamsSucceeded 13 `
@@ -153,7 +153,7 @@ Describe 'Write-Heartbeat — schema' {
 
             $script:sent                   | Should -Not -BeNullOrEmpty
             $script:sent.TimeGenerated     | Should -Not -BeNullOrEmpty
-            $script:sent.FunctionName      | Should -Be 'Defender-ActionCenter-Refresh'
+            $script:sent.FunctionName      | Should -Be 'Xdr-Refresh'
             $script:sent.Tier              | Should -Be 'ActionCenter'
             $script:sent.StreamsAttempted  | Should -Be 19
             $script:sent.StreamsSucceeded  | Should -Be 13

@@ -101,7 +101,7 @@ Describe 'Xdr-PollOrchestrator — runtime behaviour with realistic Durable inpu
             $simulatedInput = [pscustomobject]@{
                 Portal       = 'Defender'
                 Tier         = 'ActionCenter'
-                FunctionName = 'Defender-ActionCenter-Refresh'
+                FunctionName = 'Xdr-Refresh'
             }
             $body = {
                 param($Context)

@@ -185,6 +185,14 @@
       ]
     },
     {
+      "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+      "apiVersion": "2023-05-01",
+      "name": "[concat(variables('stName'), '/default/XdrTierState')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
+      ]
+    },
+    {
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2023-07-01",
       "name": "[variables('kvName')]",

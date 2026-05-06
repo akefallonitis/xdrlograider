@@ -34,18 +34,16 @@ BeforeAll {
     $script:SrcDir     = Join-Path $script:RepoRoot 'src'
     $script:ReleaseYml = Join-Path $script:RepoRoot '.github' 'workflows' 'release.yml'
 
-    # The 6 timer functions that ship with v0.1.0-beta — must all appear at
-    # the zip root (NOT under `functions/`) per Azure Functions runtime spec.
-    # Heartbeat is the operational tier; the 5 polls are the cadence tiers
-    # declared in endpoints.manifest.psd1 (fast/exposure/config/inventory/
-    # maintenance).
+    # Section R consolidation (2026-05-06): 9 functions → 4 functions.
+    # The cadence-tier timer functions (Defender-*-Refresh) are replaced by
+    # one universal portal-agnostic dispatcher Xdr-Refresh; Xdr-WriteHeartbeat
+    # was rolled back; per-tier StreamsSucceeded signal moved to XdrTierState
+    # Storage table aggregated by Connector-Heartbeat.
     $script:ExpectedFunctions = @(
-        'Connector-Heartbeat'
-        'Defender-ActionCenter-Refresh'
-        'Defender-XspmGraph-Refresh'
-        'Defender-Configuration-Refresh'
-        'Defender-Inventory-Refresh'
-        'Defender-Maintenance-Refresh'
+        'Connector-Heartbeat'    # 5-min liveness + per-tier aggregate from XdrTierState
+        'Xdr-Refresh'            # 1-min universal portal-agnostic tier dispatcher
+        'Xdr-PollOrchestrator'   # deterministic Durable orchestrator
+        'Xdr-PollStream'         # Durable activity (per-stream poll + ingest + DLQ + tier-state write)
     )
 
     # Simulate the release.yml staging step — flatten src/functions/* to root.
@@ -98,11 +96,11 @@ Describe 'Function App zip — canonical flat structure (Azure runtime requireme
         Test-Path (Join-Path $script:SrcDir 'functions')      | Should -BeTrue
     }
 
-    It 'src/functions/ contains all 9 expected timer function directories' {
+    It 'src/functions/ contains all 4 expected function directories (Section R consolidation)' {
         $funcSrcDir = Join-Path $script:SrcDir 'functions'
         $actualDirs = @(Get-ChildItem -Path $funcSrcDir -Directory | Select-Object -ExpandProperty Name)
         foreach ($expected in $script:ExpectedFunctions) {
-            $actualDirs | Should -Contain $expected -Because "v0.1.0-beta ships 6 timer functions; '$expected' is missing"
+            $actualDirs | Should -Contain $expected -Because "Section R 4-function consolidation: '$expected' must exist"
         }
     }
 
@@ -126,7 +124,7 @@ Describe 'Function App zip — simulated release.yml package shape' {
         $functionsWrapperEntries.Count | Should -Be 0 -Because "Azure Functions runtime requires function dirs at zip ROOT, not under functions/. v0.1.0-beta first deploy hit this exact bug."
     }
 
-    It 'simulated zip has all 9 function directories at the ROOT' {
+    It 'simulated zip has all 4 function directories at the ROOT (Section R consolidation)' {
         foreach ($func in $script:ExpectedFunctions) {
             $rootFuncJson = "$func/function.json"
             $script:ZipEntries | Should -Contain $rootFuncJson -Because "Azure Functions PowerShell runtime walks zip ROOT for function.json files; '$func' must be at root, not under functions/"
@@ -194,7 +192,7 @@ Describe 'release.yml — zip-build step validation gates' {
         $script:ReleaseYmlContent | Should -Match "functions/' wrapper" -Because 'release.yml must reject zips with functions/ wrapper'
     }
 
-    It 'release.yml asserts all 9 expected function dirs at zip root' {
+    It 'release.yml asserts all 4 expected function dirs at zip root (Section R)' {
         foreach ($func in $script:ExpectedFunctions) {
             $script:ReleaseYmlContent | Should -Match ([regex]::Escape($func)) -Because "release.yml validation must check '$func' is at zip root"
         }

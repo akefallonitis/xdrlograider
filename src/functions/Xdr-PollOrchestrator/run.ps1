@@ -25,6 +25,9 @@ $orchInput    = $Context.Input
 $portal       = [string]$orchInput.Portal
 $tier         = [string]$orchInput.Tier
 $functionName = [string]$orchInput.FunctionName  # passed by timer-starter for heartbeat correlation
+# OperationId propagation (Section R B-4): passed by Xdr-Refresh; falls back to
+# Context.InstanceId so legacy invocations still get a correlation key.
+$operationId  = if ($orchInput.OperationId) { [string]$orchInput.OperationId } else { [string]$Context.InstanceId }
 
 # DETERMINISTIC: read manifest. Get-XdrEndpointManifest -Portal $portal returns
 # entries from that portal's manifest file. The Portal filter below is kept for
@@ -61,10 +64,11 @@ if ($tierStreams.Count -eq 0) {
 $activityTasks = @()
 foreach ($stream in $tierStreams) {
     $activityInput = @{
-        Portal     = $portal
-        Tier       = $tier
-        StreamName = $stream.Stream
-        StreamPath = $stream.Path
+        Portal      = $portal
+        Tier        = $tier
+        StreamName  = $stream.Stream
+        StreamPath  = $stream.Path
+        OperationId = $operationId   # Section R B-4: propagate correlation ID to activity → telemetry → ingest
     }
     $task = Invoke-DurableActivity -FunctionName 'Xdr-PollStream' -Input $activityInput -NoWait
     $activityTasks += $task

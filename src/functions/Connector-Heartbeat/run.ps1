@@ -1,8 +1,12 @@
-# Connector-Heartbeat — regular heartbeat, independent of any auth state.
-# Writes a row to XdrConnectorHealth_CL every 5 minutes confirming the Function App
-# itself is alive. Used by the Sentinel data-connector UI to show connection
-# status. Per directive 12: capability-named (Connector + Heartbeat) not
-# cron-named (heartbeat-5m).
+# Connector-Heartbeat — every 5 min, emits:
+#   1. ONE liveness row (Tier='Heartbeat', StreamsSucceeded=0) — proves FA is alive
+#      regardless of auth/poll state.
+#   2. ONE per-(Portal, Tier) aggregate row built from XdrTierState (Section R).
+#      The Sentinel data-connector card's connectivityCriteria gates on
+#      `StreamsSucceeded > 0` — these rows flip the card to "Connected" as soon
+#      as ANY tier successfully ingests at least one stream.
+#
+# Per .claude/plans/immutable-splashing-waffle.md Section R.
 
 param($Timer)
 
@@ -11,41 +15,60 @@ Set-StrictMode -Version Latest
 
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
 
-# Iter 13.3: read config directly from $env:* (process-scoped, always present
-# per profile.ps1 required-env-vars validation). Eliminates multi-runspace
-# $global state propagation bug that caused "$global:XdrLogRaiderConfig not set"
-# crashes when PSWorkerInProcConcurrencyUpperBound > 1.
 $config = [pscustomobject]@{
-    KeyVaultUri          = $env:KEY_VAULT_URI
-    AuthSecretName       = $env:AUTH_SECRET_NAME
-    AuthMethod           = $env:AUTH_METHOD
-    ServiceAccountUpn    = $env:SERVICE_ACCOUNT_UPN
-    DceEndpoint          = $env:DCE_ENDPOINT
-    DcrImmutableIdsJson  = $env:DCR_IMMUTABLE_IDS_JSON
-    StorageAccountName   = $env:STORAGE_ACCOUNT_NAME
-    CheckpointTable      = $env:CHECKPOINT_TABLE_NAME
-    ExpectedTenantId     = $env:TENANT_ID
+    DceEndpoint        = $env:DCE_ENDPOINT
+    StorageAccountName = $env:STORAGE_ACCOUNT_NAME
 }
 
 try {
-    # Resolve the XdrConnectorHealth DCR immutableId from the deploy-time map.
-    # Phase K (2026-05-04): renamed XdrConnectorHealth_CL -> XdrConnectorHealth_CL
-    # for multi-portal forward-compat (Defender ships v0.1.0; Entra/Purview/Intune
-    # in v0.2.0 all write to the SAME XdrConnectorHealth_CL — the Xdr* prefix
-    # signals "produced by xdrlograider connector, transcends portal").
     $heartbeatDcrId = Get-DcrImmutableIdForStream -StreamName 'XdrConnectorHealth_CL'
+
+    # 1) Liveness pulse (always written, regardless of poll state).
     Write-Heartbeat `
-        -DceEndpoint $config.DceEndpoint `
-        -DcrImmutableId $heartbeatDcrId `
-        -FunctionName 'Connector-Heartbeat' `
-        -Tier 'Heartbeat' `
+        -DceEndpoint      $config.DceEndpoint `
+        -DcrImmutableId   $heartbeatDcrId `
+        -FunctionName     'Connector-Heartbeat' `
+        -Tier             'Heartbeat' `
         -StreamsAttempted 0 `
         -StreamsSucceeded 0 `
-        -RowsIngested 0 `
-        -LatencyMs ([int]$sw.ElapsedMilliseconds) `
-        -FunctionType 'Simple' `
-        -Portal 'Defender' | Out-Null
-    Write-Information "Connector-Heartbeat complete"
+        -RowsIngested     0 `
+        -LatencyMs        ([int]$sw.ElapsedMilliseconds) `
+        -FunctionType     'Simple' `
+        -Portal           'Defender' | Out-Null
+
+    # 2) Per-(Portal, Tier) aggregate rows from XdrTierState.
+    # Section R: replaces the rolled-back Xdr-WriteHeartbeat activity. The
+    # activity writes per-stream rows; the heartbeat reads + aggregates here.
+    $aggregateRows = @()
+    if ($config.StorageAccountName) {
+        try {
+            $aggregateRows = @(Get-XdrTierStateAggregate `
+                -StorageAccountName $config.StorageAccountName `
+                -SinceUtc           ([DateTime]::UtcNow.AddHours(-24)))
+        } catch {
+            Write-Warning ("Connector-Heartbeat: Get-XdrTierStateAggregate failed: {0}" -f $_.Exception.Message)
+        }
+    }
+
+    foreach ($row in $aggregateRows) {
+        try {
+            Write-Heartbeat `
+                -DceEndpoint      $config.DceEndpoint `
+                -DcrImmutableId   $heartbeatDcrId `
+                -FunctionName     'Connector-Heartbeat' `
+                -Tier             $row.Tier `
+                -StreamsAttempted ([int]$row.StreamsAttempted) `
+                -StreamsSucceeded ([int]$row.StreamsSucceeded) `
+                -RowsIngested     ([int]$row.RowsIngested) `
+                -LatencyMs        0 `
+                -FunctionType     'Simple' `
+                -Portal           $row.Portal | Out-Null
+        } catch {
+            Write-Warning ("Connector-Heartbeat: Write-Heartbeat failed for {0}|{1}: {2}" -f $row.Portal, $row.Tier, $_.Exception.Message)
+        }
+    }
+
+    Write-Information ("Connector-Heartbeat complete: emitted 1 liveness + {0} per-tier aggregate rows" -f $aggregateRows.Count)
 } catch {
     Write-Error "Connector-Heartbeat failed: $_"
 }

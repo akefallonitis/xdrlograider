@@ -121,53 +121,46 @@ Describe 'Phase H — Xdr-PollStream (activityTrigger)' {
     }
 }
 
-Describe 'Phase H — 5 Defender-*-Refresh timers refactored to Durable starters' {
-    BeforeAll {
-        $script:Timers = @(
+Describe 'Section R — Xdr-Refresh universal portal-agnostic dispatcher (replaces 5 Defender-*-Refresh timers)' {
+
+    It 'Xdr-Refresh function.json has BOTH timerTrigger AND durableClient bindings' {
+        $functionJsonPath = Join-Path $script:FunctionsDir 'Xdr-Refresh' 'function.json'
+        Test-Path $functionJsonPath | Should -BeTrue -Because 'Section R adds Xdr-Refresh as the single dispatcher'
+        $functionJson = Get-Content -Raw -Path $functionJsonPath | ConvertFrom-Json
+        $bindingTypes = @($functionJson.bindings | ForEach-Object { $_.type })
+        $bindingTypes | Should -Contain 'timerTrigger'  -Because 'fires every 1 min'
+        $bindingTypes | Should -Contain 'durableClient' -Because 'starts orchestrations for due (Portal, Tier) pairs'
+    }
+
+    It 'Xdr-Refresh run.ps1 reads tier-due state + calls Start-NewOrchestration with Xdr-PollOrchestrator' {
+        $runPs1 = Get-Content -Raw -Path (Join-Path $script:FunctionsDir 'Xdr-Refresh' 'run.ps1')
+        $runPs1 | Should -Match 'Get-XdrTierCadenceMap|XdrTierState' -Because 'reads cadence map + tier state'
+        $runPs1 | Should -Match 'Start-NewOrchestration'
+        $runPs1 | Should -Match "FunctionName\s+'Xdr-PollOrchestrator'"
+        $runPs1 | Should -Match '-DurableClient\s+\$Starter'
+    }
+
+    It 'Xdr-Refresh dispatch is portal-agnostic (does NOT hard-code Portal=Defender literal)' {
+        $runPs1 = Get-Content -Raw -Path (Join-Path $script:FunctionsDir 'Xdr-Refresh' 'run.ps1')
+        # The Portal value passed to Start-NewOrchestration MUST come from a variable
+        # (iterating $enabledPortals), not a literal — otherwise v0.2.0+ multi-portal
+        # expansion requires code changes.
+        $runPs1 | Should -Not -Match "InputObject[\s=]+@\{[^}]*Portal\s*=\s*'Defender'\s*[;}]" -Because (
+            'Section R: Xdr-Refresh is portal-agnostic. Portal value comes from $enabledPortals iteration, not hard-coded.'
+        )
+    }
+
+    It 'no Defender-*-Refresh timer directories remain (deleted in Section R consolidation)' {
+        $oldTimers = @(
             'Defender-ActionCenter-Refresh',
             'Defender-XspmGraph-Refresh',
             'Defender-Configuration-Refresh',
             'Defender-Inventory-Refresh',
             'Defender-Maintenance-Refresh'
         )
-    }
-
-    It '<Timer>: function.json has BOTH timerTrigger AND durableClient bindings' -ForEach @(
-        @{ Timer = 'Defender-ActionCenter-Refresh' }
-        @{ Timer = 'Defender-XspmGraph-Refresh' }
-        @{ Timer = 'Defender-Configuration-Refresh' }
-        @{ Timer = 'Defender-Inventory-Refresh' }
-        @{ Timer = 'Defender-Maintenance-Refresh' }
-    ) {
-        $functionJsonPath = Join-Path $script:FunctionsDir $Timer 'function.json'
-        $functionJson = Get-Content -Raw -Path $functionJsonPath | ConvertFrom-Json
-        $bindingTypes = @($functionJson.bindings | ForEach-Object { $_.type })
-        $bindingTypes | Should -Contain 'timerTrigger' -Because "$Timer must keep timer trigger"
-        $bindingTypes | Should -Contain 'durableClient' -Because "$Timer must add durableClient binding for Phase H"
-    }
-
-    It '<Timer>: run.ps1 calls Start-NewOrchestration with Xdr-PollOrchestrator (Durable path)' -ForEach @(
-        @{ Timer = 'Defender-ActionCenter-Refresh' }
-        @{ Timer = 'Defender-XspmGraph-Refresh' }
-        @{ Timer = 'Defender-Configuration-Refresh' }
-        @{ Timer = 'Defender-Inventory-Refresh' }
-        @{ Timer = 'Defender-Maintenance-Refresh' }
-    ) {
-        $runPs1 = Get-Content -Raw -Path (Join-Path $script:FunctionsDir $Timer 'run.ps1')
-        $runPs1 | Should -Match 'Start-NewOrchestration'
-        $runPs1 | Should -Match "FunctionName\s+'Xdr-PollOrchestrator'"
-        $runPs1 | Should -Match '-DurableClient\s+\$Starter'
-    }
-
-    It '<Timer>: run.ps1 has legacy fallback to Invoke-TierPollWithHeartbeat' -ForEach @(
-        @{ Timer = 'Defender-ActionCenter-Refresh' }
-        @{ Timer = 'Defender-XspmGraph-Refresh' }
-        @{ Timer = 'Defender-Configuration-Refresh' }
-        @{ Timer = 'Defender-Inventory-Refresh' }
-        @{ Timer = 'Defender-Maintenance-Refresh' }
-    ) {
-        $runPs1 = Get-Content -Raw -Path (Join-Path $script:FunctionsDir $Timer 'run.ps1')
-        $runPs1 | Should -Match 'Invoke-TierPollWithHeartbeat' -Because 'graceful degradation if DurableClient unavailable'
+        foreach ($t in $oldTimers) {
+            Test-Path (Join-Path $script:FunctionsDir $t) | Should -BeFalse -Because "Section R deletes $t (replaced by Xdr-Refresh)"
+        }
     }
 }
 

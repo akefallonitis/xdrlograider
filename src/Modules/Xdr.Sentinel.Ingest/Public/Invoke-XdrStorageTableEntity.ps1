@@ -85,20 +85,25 @@ function Invoke-XdrStorageTableEntity {
         [ValidateNotNullOrEmpty()]
         [string] $TableName,
 
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
+        # PartitionKey + RowKey required for Get/Upsert/Delete; optional for Query.
         [string] $PartitionKey,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
         [string] $RowKey,
 
         [Parameter(Mandatory)]
-        [ValidateSet('Get', 'Upsert', 'Delete')]
+        [ValidateSet('Get', 'Upsert', 'Delete', 'Query', 'CreateTable')]
         [string] $Operation,
 
-        [hashtable] $Entity = $null
+        [hashtable] $Entity = $null,
+
+        # Query-only: OData $filter expression (e.g., "RowKey eq '__schedule__'").
+        [string] $Filter
     )
+
+    # Validate per-operation requirements.
+    if ($Operation -in @('Get', 'Upsert', 'Delete')) {
+        if ([string]::IsNullOrWhiteSpace($PartitionKey)) { throw "Invoke-XdrStorageTableEntity: -PartitionKey is required for Operation=$Operation." }
+        if ([string]::IsNullOrWhiteSpace($RowKey))       { throw "Invoke-XdrStorageTableEntity: -RowKey is required for Operation=$Operation." }
+    }
 
     Add-Type -AssemblyName System.Net.Http -ErrorAction SilentlyContinue
 
@@ -120,12 +125,25 @@ function Invoke-XdrStorageTableEntity {
 
     # URI built with literal single-quotes (NOT URL-encoded). Azure Tables REST
     # accepts the canonical (PartitionKey='<pk>',RowKey='<rk>') form directly.
-    $uri = "https://$StorageAccountName.table.core.windows.net/$TableName(PartitionKey='$PartitionKey',RowKey='$RowKey')"
+    $uri = switch ($Operation) {
+        'Query'       {
+            $base = "https://$StorageAccountName.table.core.windows.net/$TableName()"
+            if ($Filter) {
+                $encodedFilter = [System.Web.HttpUtility]::UrlEncode($Filter)
+                $base = "$base?`$filter=$encodedFilter"
+            }
+            $base
+        }
+        'CreateTable' { "https://$StorageAccountName.table.core.windows.net/Tables" }
+        default       { "https://$StorageAccountName.table.core.windows.net/$TableName(PartitionKey='$PartitionKey',RowKey='$RowKey')" }
+    }
 
     $httpMethod = switch ($Operation) {
-        'Get'    { [System.Net.Http.HttpMethod]::Get }
-        'Upsert' { [System.Net.Http.HttpMethod]::Put }       # PUT without If-Match = Insert-Or-Replace
-        'Delete' { [System.Net.Http.HttpMethod]::Delete }
+        'Get'         { [System.Net.Http.HttpMethod]::Get }
+        'Upsert'      { [System.Net.Http.HttpMethod]::Put }    # PUT without If-Match = Insert-Or-Replace
+        'Delete'      { [System.Net.Http.HttpMethod]::Delete }
+        'Query'       { [System.Net.Http.HttpMethod]::Get }
+        'CreateTable' { [System.Net.Http.HttpMethod]::Post }
     }
 
     $req = [System.Net.Http.HttpRequestMessage]::new($httpMethod, $uri)
@@ -153,12 +171,26 @@ function Invoke-XdrStorageTableEntity {
         # becomes Update Entity which 404s if the row doesn't exist yet.
     }
 
+    if ($Operation -eq 'CreateTable') {
+        $body = @{ TableName = $TableName } | ConvertTo-Json -Compress
+        $req.Content = [System.Net.Http.StringContent]::new(
+            $body, [System.Text.Encoding]::UTF8, 'application/json')
+    }
+
     $resp = $client.SendAsync($req).GetAwaiter().GetResult()
 
     try {
         # Get 404 means "row doesn't exist yet" — caller decides semantics.
         if ($Operation -eq 'Get' -and $resp.StatusCode -eq [System.Net.HttpStatusCode]::NotFound) {
             return $null
+        }
+        # CreateTable 409 means "table already exists" — idempotent success.
+        if ($Operation -eq 'CreateTable' -and $resp.StatusCode -eq [System.Net.HttpStatusCode]::Conflict) {
+            return $null
+        }
+        # Query 404 means "table doesn't exist yet" — return empty array, caller decides.
+        if ($Operation -eq 'Query' -and $resp.StatusCode -eq [System.Net.HttpStatusCode]::NotFound) {
+            return @()
         }
 
         if (-not $resp.IsSuccessStatusCode) {
@@ -173,6 +205,15 @@ function Invoke-XdrStorageTableEntity {
             $bodyText = $resp.Content.ReadAsStringAsync().GetAwaiter().GetResult()
             if ([string]::IsNullOrWhiteSpace($bodyText)) { return $null }
             return ($bodyText | ConvertFrom-Json)
+        }
+
+        if ($Operation -eq 'Query') {
+            $bodyText = $resp.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+            if ([string]::IsNullOrWhiteSpace($bodyText)) { return @() }
+            $obj = $bodyText | ConvertFrom-Json
+            # Azure Tables REST query response shape: { value: [...] }
+            if ($obj.PSObject.Properties.Name -contains 'value') { return @($obj.value) }
+            return @($obj)
         }
 
         return $null
