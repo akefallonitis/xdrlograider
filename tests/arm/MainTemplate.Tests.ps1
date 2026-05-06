@@ -363,11 +363,15 @@ Describe 'Sentinel Solution shape — connector visible in Data Connectors blade
         $vars.solutionId   | Should -Be 'community.xdrlograider'
     }
 
-    It 'GenericUI dataConnector has connectivityCriterias (Sentinel uses this for Connected status)' {
+    It 'GenericUI dataConnector has connectivityCriteria (Sentinel uses this for Connected status)' {
+        # Section R+ (2026-05-06): the property was misspelled `connectivityCriterias`
+        # (plural) in the pre-Section-R+ template - Sentinel UI silently ignores
+        # the misspelling and the card stays Disconnected. The canonical schema
+        # key is `connectivityCriteria` (singular).
         $inner = @($script:SolutionDeploy.properties.template.resources)
         $dc    = $inner | Where-Object { $_.type -match 'dataConnectors$' } | Select-Object -First 1
-        $dc.properties.connectorUiConfig.connectivityCriterias | Should -Not -BeNullOrEmpty
-        $dc.properties.connectorUiConfig.dataTypes             | Should -Not -BeNullOrEmpty
+        $dc.properties.connectorUiConfig.connectivityCriteria | Should -Not -BeNullOrEmpty
+        $dc.properties.connectorUiConfig.dataTypes            | Should -Not -BeNullOrEmpty
     }
 
     It 'DataConnector metadata back-links to dataConnector via parentId' {

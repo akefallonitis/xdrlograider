@@ -1,27 +1,19 @@
 id: 8a3f9c1d-4b2e-4f7a-9c1e-2d6f8a3b9c5e
 name: "[XdrOps] Connector tier stale - no ingest beyond expected cadence"
 description: |
-  An XdrLogRaider tier has not ingested any rows for >2x its expected cadence,
-  indicating a poll failure, schema drift, portal API change, or auth chain issue.
+  XdrLogRaider tier has not ingested rows for >2x expected cadence (poll failure,
+  schema drift, portal API change, or auth chain issue).
 
-  Per Section R consolidation (2026-05-06): the 5 legacy Defender-*-Refresh
-  timers were collapsed into a single Xdr-Refresh dispatcher; tier identity now
-  lives on the `Tier` column written by Set-XdrTierStateRow + Connector-Heartbeat
-  aggregator. The XdrConnectorHealth_CL row schema carries:
-    FunctionName  -> always 'Connector-Heartbeat' (single emitter post-Section R)
-    Tier          -> 'ActionCenter' | 'XspmGraph' | 'Configuration'
-                   | 'Inventory' | 'Maintenance' | 'Heartbeat'
-
-  Per directive 38 + B7 in .claude/plans/immutable-splashing-waffle.md.
-  Operator-enabled (ships disabled per Sentinel Solution best practice).
+  Section R consolidation (2026-05-06): the 5 Defender-*-Refresh timers were
+  collapsed into one Xdr-Refresh dispatcher; tier identity lives on the `Tier`
+  column written by Set-XdrTierStateRow + Connector-Heartbeat aggregator.
+  XdrConnectorHealth_CL Tier values: ActionCenter | XspmGraph | Configuration
+  | Inventory | Maintenance | Heartbeat. FunctionName is always Connector-Heartbeat.
 
   Thresholds (2x cadence margin):
-    ActionCenter   (10m cadence) -> alert if >20m stale
-    XspmGraph      (1h  cadence) -> alert if >2h  stale
-    Configuration  (6h  cadence) -> alert if >12h stale
-    Inventory      (1d  cadence) -> alert if >2d  stale
-    Maintenance    (1w  cadence) -> alert if >2w  stale
-    Heartbeat      (5m  cadence) -> alert if >10m stale
+    ActionCenter (10m) -> alert >20m | XspmGraph (1h) -> alert >2h
+    Configuration (6h) -> alert >12h | Inventory (1d) -> alert >2d
+    Maintenance (1w) -> alert >2w   | Heartbeat (5m) -> alert >10m
 
   Triage in docs/RUNBOOK.md "Tier stale" section.
 severity: Medium
