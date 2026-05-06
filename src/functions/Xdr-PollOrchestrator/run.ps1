@@ -28,14 +28,16 @@ $functionName = [string]$orchInput.FunctionName  # passed by timer-starter for h
 
 # DETERMINISTIC: read manifest (cached at module-load; no I/O)
 $manifest = Get-XdrEndpointManifest -Portal Defender
+$manifestCount = if ($manifest -and $manifest.Count) { [int]$manifest.Count } else { 0 }
 $tierStreams = @(
     $manifest.Values |
     Where-Object {
-        $_ -is [hashtable] -and
-        $_.ContainsKey('Tier') -and $_.Tier -eq $tier -and
-        (-not $_.ContainsKey('Portal') -or $_.Portal -eq $portal)
+        $_ -is [System.Collections.IDictionary] -and
+        $_.Contains('Tier') -and ([string]$_.Tier -eq [string]$tier) -and
+        (-not $_.Contains('Portal') -or [string]$_.Portal -eq [string]$portal)
     }
 )
+Write-Information ("Xdr-PollOrchestrator: Portal='{0}' Tier='{1}' manifestCount={2} matchedStreams={3}" -f $portal, $tier, $manifestCount, $tierStreams.Count)
 
 if ($tierStreams.Count -eq 0) {
     # No streams for this Portal+Tier combo; emit empty heartbeat
