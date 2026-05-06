@@ -6,11 +6,12 @@
 .DESCRIPTION
     Run before every git commit. Chains:
 
-      1. Pyramid offline tests (tests/Run-Tests.ps1 -Category all-offline) — 1776 tests
+      1. Pyramid offline tests (tests/Run-Tests.ps1 -Category all-offline) — 1844 tests
       2. WiringAudit (tools/Run-WiringAudit.ps1) — 12-edge × 59 streams
       3. ARM JSON validation (tools/Validate-ArmJson.ps1) — cross-RG dependsOn + parameter usage
       4. Manifest validation (tools/Validate-Manifest.ps1) — schema + uniqueness gates
-      5. PSScriptAnalyzer (errors only) — src/, tools/, tests/ scoped
+      5. DCR schema audit (tools/Audit-DcrSchema.ps1) — 4-layer schema integrity
+      6. PSScriptAnalyzer (errors only) — src/, tools/, tests/ scoped
 
     Exit 0 only if ALL stages pass. Exit 1 with structured diagnostic on first failure.
     Run time: ~6-8 minutes locally. Same as CI server-side.
@@ -80,7 +81,13 @@ Run-Stage 'Validate-Manifest' {
     if ($LASTEXITCODE -ne 0) { throw "Validate-Manifest exit $LASTEXITCODE" }
 }
 
-# Stage 5: PSScriptAnalyzer (errors only)
+# Stage 5: DCR schema audit (4-layer integrity)
+Run-Stage 'Audit-DcrSchema' {
+    & (Join-Path $repoRoot 'tools/Audit-DcrSchema.ps1') | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "Audit-DcrSchema exit $LASTEXITCODE — schema layer drift detected; see tests/arm/SchemaConsistency.Tests.ps1 for the gates and tools/Build-DcrSection.ps1 to regenerate" }
+}
+
+# Stage 6: PSScriptAnalyzer (errors only)
 if (-not $SkipLint) {
     Run-Stage 'PSScriptAnalyzer' {
         if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
