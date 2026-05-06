@@ -37,13 +37,26 @@ BeforeAll {
     # Xdr.Portal.Auth is still imported so the surface tests at module level
     # continue to find Connect-DefenderPortal etc., but the request-level error
     # tests work against the L2 module where the actual logic lives.
-    Import-Module "$script:Root/src/Modules/Xdr.Common.Auth/Xdr.Common.Auth.psd1"           -Force
-    # Pre-import Xdr.Common.Telemetry so Xdr.Sentinel.Ingest's RequiredModules
-    # pre-check resolves on Linux CI (where the modules dir is not on PSModulePath).
-    Import-Module "$script:Root/src/Modules/Xdr.Common.Telemetry/Xdr.Common.Telemetry.psd1" -Force
-    Import-Module "$script:Root/src/Modules/Xdr.Defender.Auth/Xdr.Defender.Auth.psd1"       -Force
-    Import-Module "$script:Root/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1"   -Force
-    Import-Module "$script:Root/src/Modules/Xdr.Defender.Client/Xdr.Defender.Client.psd1"   -Force
+    # Section R+ (2026-05-06): -Global flag required so Mock -ModuleName <X>
+    # in It blocks can find these modules. Without -Global, the modules are
+    # imported only into the BeforeAll scope; subsequent It blocks (which run
+    # in their own runspace context) cannot see them and Mock -ModuleName fails
+    # with "No modules named '<X>' are currently loaded". This was a latent
+    # CI-runner-version-dependent bug surfaced post-Section-R+ pipeline rerun.
+    # Section R+ (2026-05-06): -Global flag required so Mock -ModuleName <X>
+    # in It blocks can find these modules (latent bug surfaced post-Section-R+
+    # CI rerun). Xdr.Common.Manifest also required as a pre-import: Xdr.Defender.Client's
+    # RequiredModules declaration silently fails the import without it (the module
+    # then doesn't appear in Get-Module + Mock -ModuleName fails with "No modules
+    # named 'Xdr.Defender.Client'"). The full dep chain in import order:
+    #   Xdr.Common.Telemetry, Xdr.Common.Manifest, Xdr.Common.Auth ->
+    #   Xdr.Defender.Auth -> Xdr.Sentinel.Ingest -> Xdr.Defender.Client
+    Import-Module "$script:Root/src/Modules/Xdr.Common.Auth/Xdr.Common.Auth.psd1"           -Force -Global
+    Import-Module "$script:Root/src/Modules/Xdr.Common.Telemetry/Xdr.Common.Telemetry.psd1" -Force -Global
+    Import-Module "$script:Root/src/Modules/Xdr.Common.Manifest/Xdr.Common.Manifest.psd1"   -Force -Global
+    Import-Module "$script:Root/src/Modules/Xdr.Defender.Auth/Xdr.Defender.Auth.psd1"       -Force -Global
+    Import-Module "$script:Root/src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1"   -Force -Global
+    Import-Module "$script:Root/src/Modules/Xdr.Defender.Client/Xdr.Defender.Client.psd1"   -Force -Global
 
     # Stub DCR_IMMUTABLE_IDS_JSON env var so Get-DcrImmutableIdForStream
     # (called by Invoke-MDETierPoll for every stream) resolves. All keys point
@@ -192,11 +205,14 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             Mock Get-CheckpointTimestamp { $null }
 
             $result = Invoke-MDETierPoll -Session $Sess -Tier 'ActionCenter' -Config $Cfg
-            # fast tier has 2 streams: MDE_ActionCenter_CL + MDE_MachineActions_CL
-            $result.StreamsAttempted | Should -Be 2
-            $result.StreamsSucceeded | Should -Be 1
+            # ActionCenter tier has 3 streams (Section R+ 2026-05-06):
+            #   MDE_ActionCenter_CL + MDE_MachineActions_CL + MDE_DeviceTimeline_CL
+            # (DeviceTimeline promoted from Inventory 24h to ActionCenter 10m for
+            # security-event near-real-time detection per operator directive.)
+            $result.StreamsAttempted | Should -Be 3
+            $result.StreamsSucceeded | Should -Be 2  -Because '1 failure (ActionCenter) + 2 successes (MachineActions + DeviceTimeline)'
             $result.Errors['MDE_ActionCenter_CL'] | Should -Be 'boom'
-            $script:invoked.Count | Should -Be 2 -Because 'All streams in fast tier should have been tried even after one fails'
+            $script:invoked.Count | Should -Be 3 -Because 'All streams in ActionCenter tier should have been tried even after one fails'
         }
     }
 
