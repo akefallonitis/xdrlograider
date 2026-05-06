@@ -8,7 +8,21 @@ function Get-XdrManifestDefaults {
     param()
 
     return @{
-        Portal                  = 'security.microsoft.com'   # FQDN of portal endpoint host
+        # Portal: LOGICAL name (Defender / Entra / Purview / Intune). Matches
+        # the orchestrator's $portal parameter so the entry-level filter
+        # (Where-Object { $_.Portal -eq $portal }) works for both single-portal
+        # (v0.1.0) and multi-portal (v0.2.0+) topologies. The forward-compat
+        # filter is kept on the orchestrator side for v0.2.0 multi-tenant FA
+        # which will fan out across MULTIPLE portals' manifests.
+        #
+        # PortalHost: FQDN of the portal endpoint host. Used by L2 auth modules
+        # (Connect-DefenderPortal -> Session.PortalHost) for URL construction.
+        # Decoupling logical name from FQDN prevents the cast conflict that
+        # surfaced in the v0.1.0 GA preflight (live audit 2026-05-06):
+        # Defaults set Portal='security.microsoft.com' (FQDN) but orchestrator
+        # passed Portal='Defender' (logical) - they never matched -> 0 streams.
+        Portal                  = 'Defender'                  # logical portal name (orchestrator filter target)
+        PortalHost              = 'security.microsoft.com'    # FQDN endpoint host (auth-session URL construction)
         MFAMethodsSupported     = @('CredentialsTotp', 'Passkey')
         AuditScope              = 'portal-only'
         IdProperty              = $null                       # null -> Expand-MDEResponse heuristic

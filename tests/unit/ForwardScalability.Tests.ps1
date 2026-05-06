@@ -55,6 +55,16 @@ BeforeAll {
     $script:ConnectDefPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth'    'Public' 'Connect-DefenderPortal.ps1'
     $script:InvokeDefPath  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth'    'Public' 'Invoke-DefenderPortalRequest.ps1'
 
+    # PSModulePath setup so RequiredModules between sibling Xdr.* modules
+    # resolve on Linux CI runners (Xdr.Defender.Client requires Xdr.Common.Manifest).
+    $modulesDir = Join-Path $script:RepoRoot 'src/Modules'
+    if ($env:PSModulePath -notlike "*$modulesDir*") {
+        $env:PSModulePath = "$modulesDir$([IO.Path]::PathSeparator)$env:PSModulePath"
+    }
+    # Pre-import Xdr.Common.Telemetry + Xdr.Common.Manifest so Xdr.Sentinel.Ingest /
+    # Xdr.Defender.Client RequiredModules pre-check resolves on Linux CI.
+    Import-Module (Join-Path $modulesDir 'Xdr.Common.Telemetry/Xdr.Common.Telemetry.psd1') -Force
+    Import-Module (Join-Path $modulesDir 'Xdr.Common.Manifest/Xdr.Common.Manifest.psd1')   -Force
     Import-Module $script:CommonAuthPsd1 -Force -ErrorAction Stop
     Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
     Import-Module $script:ClientPsd1     -Force -ErrorAction Stop
@@ -84,10 +94,12 @@ Describe 'J2 invariant 1 — manifest Defaults.Portal applied at load' {
         }
     }
 
-    It 'v0.1.0-beta every entry resolves to security.microsoft.com (single-portal)' {
+    It 'v0.1.0 GA every entry resolves to Portal=Defender (logical name) + PortalHost=security.microsoft.com (FQDN)' {
         $m = Get-XdrEndpointManifest -Portal Defender -Force
-        $portals = $m.Values | ForEach-Object { $_.Portal } | Sort-Object -Unique
-        $portals | Should -Be @('security.microsoft.com') -Because 'v0.1.0-beta scope is security portal only; v0.2.0 adds others'
+        $portals     = $m.Values | ForEach-Object { [string]$_.Portal }     | Sort-Object -Unique
+        $portalHosts = $m.Values | ForEach-Object { [string]$_.PortalHost } | Sort-Object -Unique
+        $portals     | Should -Be @('Defender')              -Because 'v0.1.0 GA: Defaults.Portal=Defender (logical) so orchestrator filter matches'
+        $portalHosts | Should -Be @('security.microsoft.com') -Because 'v0.1.0 GA: Defaults.PortalHost=FQDN (used by L2 auth Session.PortalHost)'
     }
 }
 
@@ -242,14 +254,14 @@ Describe 'J2 invariant 5 — L2 Xdr.Defender.Auth is portal-aware (template for 
 
 Describe 'J2 invariant 6 — adding a new portal in v0.2.0 requires only additive changes' {
 
-    It 'Get-XdrEndpointManifest -Portal Defender filter-by-Portal works' {
+    It 'Get-XdrEndpointManifest -Portal Defender filter-by-Portal works (logical name)' {
         $m = Get-XdrEndpointManifest -Portal Defender -Force
-        $security = $m.Values | Where-Object { $_.Portal -eq 'security.microsoft.com' }
-        @($security).Count | Should -Be $m.Count -Because 'v0.1.0-beta: 100% security-portal'
+        $defender = $m.Values | Where-Object { [string]$_.Portal -eq 'Defender' }
+        @($defender).Count | Should -Be $m.Count -Because 'v0.1.0 GA: every entry inherits Portal=Defender from Defaults'
 
-        # Simulate v0.2.0 filter-by-Portal — no entries yet for compliance/intune/entra
-        $compliance = $m.Values | Where-Object { $_.Portal -eq 'compliance.microsoft.com' }
-        @($compliance).Count | Should -Be 0 -Because 'no Purview-portal entries yet; forward-scalable path is empty-but-valid'
+        # Simulate v0.2.0 filter-by-Portal — no entries yet for Entra/Purview/Intune
+        $entra = $m.Values | Where-Object { [string]$_.Portal -eq 'Entra' }
+        @($entra).Count | Should -Be 0 -Because 'no Entra-portal entries yet; forward-scalable path is empty-but-valid'
         $intune = $m.Values | Where-Object { $_.Portal -eq 'intune.microsoft.com' }
         @($intune).Count | Should -Be 0 -Because 'no Intune-portal entries yet; forward-scalable path is empty-but-valid'
     }

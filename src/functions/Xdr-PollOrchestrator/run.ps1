@@ -26,8 +26,13 @@ $portal       = [string]$orchInput.Portal
 $tier         = [string]$orchInput.Tier
 $functionName = [string]$orchInput.FunctionName  # passed by timer-starter for heartbeat correlation
 
-# DETERMINISTIC: read manifest (cached at module-load; no I/O)
-$manifest = Get-XdrEndpointManifest -Portal Defender
+# DETERMINISTIC: read manifest. Get-XdrEndpointManifest -Portal $portal returns
+# entries from that portal's manifest file. The Portal filter below is kept for
+# forward-compat with v0.2.0+ multi-tenant FA scenarios (one orchestrator
+# instance polling MULTIPLE portals' manifests merged into a single hashtable).
+# v0.1.0 GA: Defaults sets Portal='Defender' (logical name) so this filter
+# matches; FQDN moved to a separate PortalHost field used only by L2 auth.
+$manifest = Get-XdrEndpointManifest -Portal $portal
 $manifestCount = if ($manifest -and $manifest.Count) { [int]$manifest.Count } else { 0 }
 $tierStreams = @(
     $manifest.Values |

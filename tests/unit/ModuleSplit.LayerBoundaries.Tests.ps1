@@ -215,13 +215,16 @@ Describe 'Orchestrator portal-routing dispatch (offline)' {
         $entries | Should -Not -BeNullOrEmpty
         $entries.Count | Should -BeGreaterThan 0
         # Every returned entry's Portal should resolve to security.microsoft.com
-        # (the Defender route's default host) — either the entry has that exact
-        # Portal value, or it had no Portal field and the loader applied the
-        # default.
+        # v0.1.0 GA: Defaults split into Portal='Defender' (logical name) +
+        # PortalHost='security.microsoft.com' (FQDN). The orchestrator's filter
+        # matches against logical name; FQDN moved to PortalHost so L2 auth
+        # session URL construction still has access. Either field is acceptable
+        # evidence the entry is Defender-scoped.
         foreach ($key in $entries.Keys) {
             $entry = $entries[$key]
-            $portal = if ($entry.ContainsKey('Portal')) { [string]$entry.Portal } else { 'security.microsoft.com' }
-            $portal | Should -Be 'security.microsoft.com' -Because "entry $key must be a Defender-portal entry"
+            $logical = if ($entry.ContainsKey('Portal'))     { [string]$entry.Portal }     else { '' }
+            $host_   = if ($entry.ContainsKey('PortalHost')) { [string]$entry.PortalHost } else { '' }
+            ($logical -eq 'Defender' -or $host_ -eq 'security.microsoft.com') | Should -BeTrue -Because "entry $key must identify as a Defender-scoped entry via Portal (logical) or PortalHost (FQDN)"
         }
     }
 
