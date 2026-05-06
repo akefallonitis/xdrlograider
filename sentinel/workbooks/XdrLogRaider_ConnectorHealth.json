@@ -64,9 +64,9 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "XdrConnectorHealth_CL\n| where TimeGenerated {TimeRange}\n| summarize LastSeenUtc = max(TimeGenerated), HeartbeatCount = count(), TotalRowsIngested = sum(RowsIngested) by FunctionName\n| extend StaleMinutes = datetime_diff('minute', now(), LastSeenUtc)\n| extend Status = case(\n    FunctionName == 'Connector-Heartbeat'           and StaleMinutes <= 10,    'Healthy',\n    FunctionName == 'Defender-ActionCenter-Refresh' and StaleMinutes <= 20,    'Healthy',\n    FunctionName == 'Defender-XspmGraph-Refresh'    and StaleMinutes <= 120,   'Healthy',\n    FunctionName == 'Defender-Configuration-Refresh' and StaleMinutes <= 720,  'Healthy',\n    FunctionName == 'Defender-Inventory-Refresh'    and StaleMinutes <= 2880,  'Healthy',\n    FunctionName == 'Defender-Maintenance-Refresh'  and StaleMinutes <= 20160, 'Healthy',\n    'Stale'\n)\n| project FunctionName, Status, StaleMinutes, LastSeenUtc, HeartbeatCount, TotalRowsIngested\n| sort by FunctionName asc",
+        "query": "XdrConnectorHealth_CL\n| where TimeGenerated {TimeRange}\n| where isnotempty(Tier)\n| summarize LastSeenUtc = max(TimeGenerated), HeartbeatCount = count(), TotalRowsIngested = sum(RowsIngested) by Portal, Tier\n| extend StaleMinutes = datetime_diff('minute', now(), LastSeenUtc)\n| extend Status = case(\n    Tier == 'Heartbeat'      and StaleMinutes <= 10,    'Healthy',\n    Tier == 'ActionCenter'   and StaleMinutes <= 20,    'Healthy',\n    Tier == 'XspmGraph'      and StaleMinutes <= 120,   'Healthy',\n    Tier == 'Configuration'  and StaleMinutes <= 720,   'Healthy',\n    Tier == 'Inventory'      and StaleMinutes <= 2880,  'Healthy',\n    Tier == 'Maintenance'    and StaleMinutes <= 20160, 'Healthy',\n    'Stale'\n)\n| project Portal, Tier, Status, StaleMinutes, LastSeenUtc, HeartbeatCount, TotalRowsIngested\n| sort by Portal asc, Tier asc",
         "size": 0,
-        "title": "Per-capability poll freshness (last vs cadence threshold)",
+        "title": "Per-tier poll freshness (last vs cadence threshold)",
         "queryType": 0,
         "resourceType": "microsoft.operationalinsights/workspaces",
         "visualization": "table",

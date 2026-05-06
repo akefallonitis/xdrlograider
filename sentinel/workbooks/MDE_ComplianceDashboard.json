@@ -38,7 +38,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "XdrConnectorHealth_CL\n| where TimeGenerated > ago(1h)\n| where Tier == 'P0'\n| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by FunctionName\n| extend Status = iff(LastSeen > ago(30m), 'Healthy', 'Stale')",
+        "query": "XdrConnectorHealth_CL\n| where TimeGenerated > ago(1h)\n| where Tier in ('ActionCenter','XspmGraph','Configuration','Inventory','Maintenance')\n| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by Portal, Tier\n| extend Status = iff(LastSeen > ago(30m), 'Healthy', 'Stale')",
         "size": 0,
         "title": "Connector health (last hour)",
         "queryType": 0,

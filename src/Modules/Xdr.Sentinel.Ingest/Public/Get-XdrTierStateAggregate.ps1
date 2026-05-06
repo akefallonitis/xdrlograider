@@ -53,30 +53,75 @@ function Get-XdrTierStateAggregate {
         [datetime] $SinceUtc = ([DateTime]::UtcNow.AddHours(-24))
     )
 
-    # Query all rows; filter client-side by TimestampUtc > $SinceUtc.
-    # Storage Table OData $filter for datetime is fragile; client-side is simpler
-    # and the table cardinality is bounded (max ~59 streams × 5 tiers × 4 portals = 1180 rows).
+    # Query all rows EXCEPT the dispatcher's __schedule__ control rows.
+    # The Xdr-Refresh dispatcher upserts rows with RowKey='__schedule__' that
+    # carry NextRunUtc + cadence metadata but NO TimestampUtc/Portal/Tier/Success
+    # columns. Including them would (a) trigger StrictMode property-access
+    # crashes on missing columns and (b) inflate StreamsAttempted with non-poll
+    # rows. Server-side filter is cheap (one OData clause) and removes both
+    # risks at the source.
+    #
+    # Schema-side filter rationale:
+    #   per-stream poll rows: PartitionKey='<Portal>|<Tier>', RowKey='<StreamName>'
+    #   schedule rows:        PartitionKey='<Portal>|<Tier>', RowKey='__schedule__'
+    # The (RowKey ne '__schedule__') predicate is exact-match against a literal
+    # so Storage Tables OData scans linearly but it's bounded (~6-20 schedule rows).
     $rows = @(Invoke-XdrStorageTableEntity `
         -StorageAccountName $StorageAccountName `
         -TableName          $TableName `
-        -Operation          'Query')
+        -Operation          'Query' `
+        -Filter             "RowKey ne '__schedule__'")
 
+    # Client-side TimestampUtc filter — defensive null-guard required because:
+    #  1. StrictMode v3 in Azure Functions PowerShell runtime throws on missing
+    #     property access ($_.TimestampUtc when the row lacks the column).
+    #  2. Legacy rows from earlier deploys may not have TimestampUtc.
+    #  3. Storage Table query result is [pscustomobject] — PSObject.Properties.Name
+    #     check is the strict-safe pattern.
     $sinceCutoff = $SinceUtc.ToString('o')
-    $fresh = @($rows | Where-Object { $_.TimestampUtc -gt $sinceCutoff })
+    $fresh = @($rows | Where-Object {
+        ($_.PSObject.Properties.Name -contains 'TimestampUtc') -and
+        ($_.TimestampUtc -gt $sinceCutoff)
+    })
 
     # Group by Portal + Tier; emit aggregate row per group.
+    # Defensive null-guards on every property — same StrictMode rationale.
     $groups = $fresh | Group-Object -Property { "$($_.Portal)|$($_.Tier)" }
     $out = @()
     foreach ($g in $groups) {
         $first = $g.Group[0]
-        $errors = @($g.Group | Where-Object { -not $_.Success } | ForEach-Object { $_.ErrorText } | Where-Object { $_ } | Select-Object -Unique -First 3)
-        $latest = ($g.Group | ForEach-Object { [DateTime]::Parse($_.TimestampUtc) } | Measure-Object -Maximum).Maximum
+        $errors = @(
+            $g.Group |
+                Where-Object { ($_.PSObject.Properties.Name -contains 'Success') -and (-not $_.Success) } |
+                ForEach-Object { if ($_.PSObject.Properties.Name -contains 'ErrorText') { $_.ErrorText } } |
+                Where-Object { $_ } |
+                Select-Object -Unique -First 3
+        )
+        # [DateTime]::Parse may throw on malformed values — wrap each parse defensively.
+        $parsed = @()
+        foreach ($r in $g.Group) {
+            try { $parsed += [DateTime]::Parse($r.TimestampUtc) } catch { }
+        }
+        $latest = if ($parsed.Count) { ($parsed | Measure-Object -Maximum).Maximum } else { [DateTime]::UtcNow }
+
+        $succeededCount = @(
+            $g.Group | Where-Object {
+                ($_.PSObject.Properties.Name -contains 'Success') -and $_.Success
+            }
+        ).Count
+
+        $rowsTotal = (
+            $g.Group | ForEach-Object {
+                if ($_.PSObject.Properties.Name -contains 'RowsIngested') { [int]$_.RowsIngested } else { 0 }
+            } | Measure-Object -Sum
+        ).Sum
+
         $out += [pscustomobject]@{
             Portal             = $first.Portal
             Tier               = $first.Tier
             StreamsAttempted   = $g.Group.Count
-            StreamsSucceeded   = @($g.Group | Where-Object { $_.Success }).Count
-            RowsIngested       = ($g.Group | ForEach-Object { [int]$_.RowsIngested } | Measure-Object -Sum).Sum
+            StreamsSucceeded   = $succeededCount
+            RowsIngested       = $rowsTotal
             LatestTimestampUtc = $latest.ToString('o')
             ErrorsSnippet      = ($errors -join '; ')
         }

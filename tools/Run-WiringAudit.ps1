@@ -123,12 +123,16 @@ $tierToParser = @{
 }
 
 # Tier -> function.json relative path
+# Section R consolidation (2026-05-06): the 5 per-tier Defender-*-Refresh
+# timers were collapsed into a single Xdr-Refresh universal dispatcher
+# (timer + durableClient binding), driven by XdrTierState __schedule__ rows
+# read on every 1-min tick. All 5 cadence tiers now map to ONE function.json.
 $tierToFunction = @{
-    'XspmGraph'      = 'Defender-XspmGraph-Refresh/function.json'
-    'Configuration'  = 'Defender-Configuration-Refresh/function.json'
-    'Inventory'      = 'Defender-Inventory-Refresh/function.json'
-    'Maintenance'    = 'Defender-Maintenance-Refresh/function.json'
-    'ActionCenter'   = 'Defender-ActionCenter-Refresh/function.json'
+    'XspmGraph'      = 'Xdr-Refresh/function.json'
+    'Configuration'  = 'Xdr-Refresh/function.json'
+    'Inventory'      = 'Xdr-Refresh/function.json'
+    'Maintenance'    = 'Xdr-Refresh/function.json'
+    'ActionCenter'   = 'Xdr-Refresh/function.json'
 }
 
 # ----------------------------------------------------------------------------

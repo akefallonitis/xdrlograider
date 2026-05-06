@@ -480,31 +480,38 @@ if (Test-Path $mainPath) {
             }
         }
         if ($haveDataConnector) {
-            # ITER 13: dataTypes count gate — embedded mainTemplate.json copy
-            # must list ALL 47 tables (45 data + Heartbeat + AuthTestResult),
-            # not the 3-table stub we shipped pre-pre-v0.1.0. Standalone
-            # XdrLogRaider_DataConnector.json was already complete; this
-            # gate locks the embedded copy in sync.
+            # Section R+ (2026-05-06): dataTypes was 46 stale MDE_*_CL stream
+            # identifiers (which never materialise as workspace tables) →
+            # connector card showed Disconnected. Now 11 = 10 Defender_<Cat>_CL
+            # consolidated workspace tables + 1 XdrConnectorHealth_CL ops table
+            # — the actual destinations the DCRs ingest into.
             $dt = $haveDataConnector[0].properties.connectorUiConfig.dataTypes
             $dtCount = if ($dt) { @($dt).Count } else { 0 }
-            if ($dtCount -ne 46) {
-                Write-Host ("FAIL : dataConnector.connectorUiConfig.dataTypes.Count = $dtCount; expected 46 (45 active streams + 1 deprecated + Heartbeat = 46 surfaced)") -ForegroundColor Red
+            if ($dtCount -ne 11) {
+                Write-Host ("FAIL : dataConnector.connectorUiConfig.dataTypes.Count = $dtCount; expected 11 (10 Defender_<Category>_CL + XdrConnectorHealth_CL — Section R+ corrects pre-R+ MDE_*_CL drift)") -ForegroundColor Red
                 $anyFail = $true
             } else {
-                Write-Host ("OK   : dataConnector.dataTypes lists 46 tables") -ForegroundColor Green
+                Write-Host ("OK   : dataConnector.dataTypes lists 11 live workspace tables") -ForegroundColor Green
             }
 
-            # connectivityCriterias query — must reference Heartbeat + StreamsSucceeded
-            # filter (proves a poll succeeded, not just that the heartbeat timer
-            # fired). Auth chain diagnostics live in App Insights customEvents,
-            # not in a workspace table.
-            $conQuery = $haveDataConnector[0].properties.connectorUiConfig.connectivityCriterias[0].value[0]
-            if ($conQuery -notmatch 'XdrConnectorHealth_CL' -or $conQuery -notmatch 'StreamsSucceeded' -or $conQuery -notmatch 'IsConnected\s*=\s*isnotempty') {
-                Write-Host ("FAIL : connectivityCriterias query does not match the v0.1.0-beta shape. Got: $conQuery") -ForegroundColor Red
-                Write-Host ("       Expected: 'XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | project IsConnected = isnotempty(TimeGenerated)'") -ForegroundColor Yellow
+            # Section R+ (2026-05-06): the criteria key was misspelled
+            # `connectivityCriterias` (plural) — Sentinel UI silently ignores it.
+            # The correct key is `connectivityCriteria` (singular). Now also
+            # require the tighter live-poll guard (Tier != 'Heartbeat' AND
+            # RowsIngested > 0).
+            $conNode = $haveDataConnector[0].properties.connectorUiConfig.connectivityCriteria
+            if (-not $conNode) {
+                Write-Host ("FAIL : connectorUiConfig.connectivityCriteria (singular) MISSING — Sentinel UI ignores misspelled `connectivityCriterias` (plural)") -ForegroundColor Red
                 $anyFail = $true
             } else {
-                Write-Host ("OK   : connectivityCriterias query uses Heartbeat + StreamsSucceeded gate (proves poll-success, not just timer-firing)") -ForegroundColor Green
+                $conQuery = $conNode[0].value[0]
+                if ($conQuery -notmatch 'XdrConnectorHealth_CL' -or $conQuery -notmatch 'StreamsSucceeded' -or $conQuery -notmatch "Tier\s*!=\s*'Heartbeat'" -or $conQuery -notmatch 'RowsIngested\s*>\s*0') {
+                    Write-Host ("FAIL : connectivityCriteria query does not match the Section R+ shape. Got: $conQuery") -ForegroundColor Red
+                    Write-Host ("       Expected: includes XdrConnectorHealth_CL + StreamsSucceeded > 0 + Tier != 'Heartbeat' + RowsIngested > 0") -ForegroundColor Yellow
+                    $anyFail = $true
+                } else {
+                    Write-Host ("OK   : connectivityCriteria (singular) uses tightened Section R+ guard (Tier != 'Heartbeat' AND StreamsSucceeded > 0 AND RowsIngested > 0)") -ForegroundColor Green
+                }
             }
 
             # CANONICAL DATA-CONNECTOR SHAPE LOCK

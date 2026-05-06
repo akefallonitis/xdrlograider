@@ -24,7 +24,7 @@ relevantTechniques:
   - T1078
 query: |
   MDE_Drift_Configuration(7d, 1d)
-  | where StreamName == "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_UnifiedRbacRoles_CL'"
+  | where StreamName == "MDE_UnifiedRbacRoles_CL"
   | where ChangeType == "Added"
   | where FieldName == "principalId" or FieldName == "principalName"
 entityMappings: []

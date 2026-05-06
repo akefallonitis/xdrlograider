@@ -17,4 +17,7 @@ tactics:
 relevantTechniques:
   - T1082
 query: |
-  Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_CustomDetections_CL' | summarize arg_max(TimeGenerated, *) by EntityId | extend Name = tostring(parse_json(RawJson).displayName), Enabled = tostring(parse_json(RawJson).isEnabled), Query = tostring(parse_json(RawJson).queryText), Schedule = tostring(parse_json(RawJson).schedule) | project EntityId, Name, Enabled, Schedule, Query, TimeGenerated
+  // Time-bounded to last 30d (CustomDetections poll cadence is Configuration tier
+  // = every 6h, so 30d catches ~120 snapshots; arg_max returns latest per EntityId).
+  // Without the bound the workspace scan is unbounded → expensive query.
+  Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(30d) | where SourceName == 'MDE_CustomDetections_CL' | summarize arg_max(TimeGenerated, *) by EntityId | extend Name = tostring(parse_json(RawJson).displayName), Enabled = tostring(parse_json(RawJson).isEnabled), Query = tostring(parse_json(RawJson).queryText), Schedule = tostring(parse_json(RawJson).schedule) | project EntityId, Name, Enabled, Schedule, Query, TimeGenerated

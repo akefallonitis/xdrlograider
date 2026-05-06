@@ -1,20 +1,29 @@
 id: 8a3f9c1d-4b2e-4f7a-9c1e-2d6f8a3b9c5e
-name: "[XdrOps] Connector stream stale - no ingest beyond expected cadence"
+name: "[XdrOps] Connector tier stale - no ingest beyond expected cadence"
 description: |
-  An XdrLogRaider stream has not ingested any rows for >2x its expected cadence,
+  An XdrLogRaider tier has not ingested any rows for >2x its expected cadence,
   indicating a poll failure, schema drift, portal API change, or auth chain issue.
+
+  Per Section R consolidation (2026-05-06): the 5 legacy Defender-*-Refresh
+  timers were collapsed into a single Xdr-Refresh dispatcher; tier identity now
+  lives on the `Tier` column written by Set-XdrTierStateRow + Connector-Heartbeat
+  aggregator. The XdrConnectorHealth_CL row schema carries:
+    FunctionName  -> always 'Connector-Heartbeat' (single emitter post-Section R)
+    Tier          -> 'ActionCenter' | 'XspmGraph' | 'Configuration'
+                   | 'Inventory' | 'Maintenance' | 'Heartbeat'
 
   Per directive 38 + B7 in .claude/plans/immutable-splashing-waffle.md.
   Operator-enabled (ships disabled per Sentinel Solution best practice).
 
   Thresholds (2x cadence margin):
-    Defender-ActionCenter-Refresh    (10m cadence) -> alert if >20m stale
-    Defender-XspmGraph-Refresh       (1h  cadence) -> alert if >2h  stale
-    Defender-Configuration-Refresh   (6h  cadence) -> alert if >12h stale
-    Defender-Inventory-Refresh       (1d  cadence) -> alert if >2d  stale
-    Defender-Maintenance-Refresh     (1w  cadence) -> alert if >2w  stale
+    ActionCenter   (10m cadence) -> alert if >20m stale
+    XspmGraph      (1h  cadence) -> alert if >2h  stale
+    Configuration  (6h  cadence) -> alert if >12h stale
+    Inventory      (1d  cadence) -> alert if >2d  stale
+    Maintenance    (1w  cadence) -> alert if >2w  stale
+    Heartbeat      (5m  cadence) -> alert if >10m stale
 
-  Triage in docs/RUNBOOK.md "Stream stale" section.
+  Triage in docs/RUNBOOK.md "Tier stale" section.
 severity: Medium
 enabled: false
 requiredDataConnectors:
@@ -30,22 +39,23 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
-  let cadenceLimits = datatable(FunctionName: string, MaxStaleMin: long)
+  let cadenceLimits = datatable(Tier: string, MaxStaleMin: long)
   [
-      "Defender-ActionCenter-Refresh",   20,
-      "Defender-XspmGraph-Refresh",      120,
-      "Defender-Configuration-Refresh",  720,
-      "Defender-Inventory-Refresh",      2880,
-      "Defender-Maintenance-Refresh",    20160,
-      "Connector-Heartbeat",             10
+      "ActionCenter",   20,
+      "XspmGraph",      120,
+      "Configuration",  720,
+      "Inventory",      2880,
+      "Maintenance",    20160,
+      "Heartbeat",      10
   ];
   XdrConnectorHealth_CL
   | where TimeGenerated > ago(14d)
-  | summarize LastSeenUtc = max(TimeGenerated) by FunctionName
-  | join kind=inner cadenceLimits on FunctionName
+  | where isnotempty(Tier)
+  | summarize LastSeenUtc = max(TimeGenerated) by Portal, Tier
+  | join kind=inner cadenceLimits on Tier
   | extend StaleMin = datetime_diff('minute', now(), LastSeenUtc)
   | where StaleMin > MaxStaleMin
-  | project FunctionName, LastSeenUtc, StaleMin, MaxStaleMin
+  | project Portal, Tier, LastSeenUtc, StaleMin, MaxStaleMin
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: AlertPerResult

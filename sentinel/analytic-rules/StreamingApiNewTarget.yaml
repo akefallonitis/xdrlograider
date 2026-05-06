@@ -3,7 +3,12 @@ name: MDE streaming API new target
 description: |
   A new Event Hub or Storage target was configured for Defender telemetry streaming. Possible exfiltration channel.
 
-  Note: Microsoft has signaled the upstream streaming-API endpoint may be retired in favor of newer Defender XDR streaming feeds. Heartbeat diagnostics surface 403/404 if the endpoint becomes unreachable. See docs/STREAMS.md for current endpoint-availability tracking.
+  REDIRECTED 2026-05-06: the legacy MDE_StreamingApiConfig_CL endpoint is
+  Availability='deprecated' (returns 404 on modern tenants — see manifest line
+  619). The canonical surface is now MDE_DataExportSettings_CL (Maintenance
+  tier). This rule fires when the Maintenance drift parser observes a NEW
+  data-export target — overlaps with DataExportNewDestination but kept as a
+  semantic alias for operators who searched for "streaming API" specifically.
 severity: Medium
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:
@@ -19,7 +24,7 @@ tactics:
 relevantTechniques:
   - T1537
 query: |
-  MDE_Drift_Maintenance(1h, 10m) | where StreamName == "Defender_StreamingApi_CL | where SourceName == 'MDE_StreamingApiConfig_CL'" | where ChangeType == "Added"
+  MDE_Drift_Maintenance(1h, 10m) | where StreamName == "MDE_DataExportSettings_CL" | where ChangeType == "Added"
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

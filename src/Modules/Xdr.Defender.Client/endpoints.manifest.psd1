@@ -161,18 +161,24 @@
             Purpose = 'Preview-ring enrolment for tenant-wide MDE features (gradual rollout state)'
             Availability = 'live'
             # Live response shape (captured 2026-05-03): { IsOptIn: false, SliceId: 100 }
-            # Single object with mixed-type properties → Shape 3 flatten yields 2 rows
-            # (EntityId='IsOptIn'+value=false, EntityId='SliceId'+value=100).
-            # v0.1.0 GA: FeatureName + Value convention; Value as string is
-            # universal (operators parse if numeric). Legacy cols preserved as
-            # v0.1.0 GA scope (always null with corrected Shape 3 handling).
+            # SingleObjectAsRow = $true (operator directive 2026-05-06):
+            # Previous Shape-3 flatten emitted 2 rows with EntityId=keyName +
+            # RawJson=scalar value, leaving operator confused (typed cols all
+            # null because the per-property context lacks sibling fields).
+            # Switching to SingleObjectAsRow yields ONE coherent row where IsOptIn
+            # + SliceId typed projections resolve against the parent object.
+            # IdProperty=@('SliceId') gives a stable EntityId per slice rather
+            # than 'idx-0'.
+            SingleObjectAsRow = $true
+            IdProperty = @('SliceId')
             ProjectionMap = @{
-                FeatureName = '$tostring:EntityId'
-                Value       = '$tostring:value'
-                # Legacy v0.1.0 GA scope (always null):
-                SettingId = '$tostring:EntityId'  # alias of FeatureName for v0.1.0 GA scope
-                IsOptIn   = '$tobool:IsOptIn'
-                SliceId   = '$toint:SliceId'
+                IsOptIn  = '$tobool:IsOptIn'
+                SliceId  = '$toint:SliceId'
+                # 3rd typed col required by Manifest.ProjectionMap.Populated invariant
+                # (operators must have >=3 typed cols, not just RawJson).
+                # FeatureName projects the SliceId value as a stable label so
+                # operator KQL can group/sort by feature ring without parsing RawJson.
+                FeatureName = '$tostring:SliceId'
             }
         }
         # pre-v0.1.0.9 (B4): ?includeDetails=true per Get-XdrConfigurationAlertServiceSetting.ps1
@@ -642,14 +648,24 @@
             CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Defender ↔ Purview alert-sharing toggle + per-domain scope'
             Availability = 'live'
-            # Live response shape (captured 2026-05-03): scalar bool `false`.
-            # Shape 4 → ONE row with EntityId='value', value=<bool>.
-            # v0.1.0 GA: AlertSharingEnabled was redundant duplicate of IsEnabled
-            # — preserved as v0.1.0 GA scope alias.
+            # Live response shape (corrected 2026-05-06 from operator screenshot):
+            # actually returns `{value: false}` wrapper — NOT bare scalar as
+            # earlier comment claimed. UnwrapProperty='value' opens the wrapper
+            # to bare bool; the helper Shape 4 path then wraps the scalar back
+            # to {value=<bool>} → one row with EntityId='value' + value typed col.
+            # SingleObjectAsRow is mutually exclusive with UnwrapProperty
+            # (validated by Manifest.Schema.Tests) — UnwrapProperty alone here.
+            UnwrapProperty   = 'value'
             ProjectionMap = @{
-                FeatureName         = '$tostring:EntityId'
                 IsEnabled           = '$tobool:value'
-                AlertSharingEnabled = '$tobool:value'  # v0.1.0 GA scope alias of IsEnabled
+                # v0.1.0 GA scope: AlertSharingEnabled retained as semantic alias
+                # (operator audit queries reference both names historically).
+                AlertSharingEnabled = '$tobool:value'
+                # 3rd typed col required by Manifest.ProjectionMap.Populated invariant
+                # (operators must have >=3 typed cols, not just RawJson).
+                # FeatureName projects EntityId ('value' from the unwrap-then-wrap path)
+                # — gives a stable label for operator queries.
+                FeatureName         = '$tostring:EntityId'
             }
         }
 
@@ -1296,11 +1312,18 @@ AttackPathsV2
                 fromDate = ''
                 toDate = ''
             }
-            Tier = 'Inventory'
+            # SECURITY-EVENT POLL CADENCE (operator directive 2026-05-06):
+            # Per-device timeline carries process/file/network/registry events
+            # — security-critical near-real-time detection signals. Moved from
+            # Inventory (24h) to ActionCenter (10m) so SOC operators see new
+            # events within one cadence cycle. The Filter='fromDate' mechanism
+            # uses the checkpoint table so each poll fetches only NEW events
+            # since last successful poll, bounding cost (pageSize=1000).
+            Tier = 'ActionCenter'
             Filter = 'fromDate'
             Category = 'Endpoint Device Management'
             CategoryId = 1  # nodoc-authoritative (Phase D.1)
-            Purpose = 'Per-device unified timeline (process/file/network/registry events with portal-side correlation + grouping)'
+            Purpose = 'Per-device unified timeline (process/file/network/registry events with portal-side correlation + grouping) — SECURITY-EVENT 10-min cadence'
             UnwrapProperty = 'Results'
             IdProperty = @('eventId', 'EventId', 'id', 'Id')
             Availability = 'tenant-gated'
@@ -1363,6 +1386,13 @@ AttackPathsV2
             Availability = 'live'
             UnwrapProperty = 'schema'
             # Fixture: { schema: [{ assetType, properties: [{ name, propertyType }] }] }
+            # IdProperty override: array items have NO id/name top-level key —
+            # heuristic at _EndpointHelpers.ps1:238-245 falls through to 'idx-N'
+            # without this override. assetType is the natural-stable key
+            # ('Devices' / 'Identities' / 'CloudResources').
+            # Live evidence (operator screenshot 2026-05-06): EntityId='idx-0/1/2'
+            # made cross-snapshot drift joins meaningless.
+            IdProperty = @('assetType')
             ProjectionMap = @{
                 AssetType     = '$tostring:assetType'
                 Properties    = '$json:properties'

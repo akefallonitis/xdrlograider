@@ -17,4 +17,6 @@ tactics:
 relevantTechniques:
   - T1078
 query: |
-  MDE_Drift_Configuration(30d, 1d) | where StreamName == "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_UnifiedRbacRoles_CL'" and ChangeType == "Added" | join kind=inner (Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_UnifiedRbacRoles_CL' | summarize arg_max(TimeGenerated, *) by EntityId) on EntityId
+  // Inner join is time-bounded to last 30d (matches outer drift parser lookback)
+  // — without the bound the workspace table scan is unbounded → expensive query.
+  MDE_Drift_Configuration(30d, 1d) | where StreamName == "MDE_UnifiedRbacRoles_CL" and ChangeType == "Added" | join kind=inner (Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(30d) | where SourceName == 'MDE_UnifiedRbacRoles_CL' | summarize arg_max(TimeGenerated, *) by EntityId) on EntityId
