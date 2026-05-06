@@ -15,9 +15,12 @@ param($Input)
 $ErrorActionPreference = 'Stop'
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
 
-$portal     = $Input.Portal
-$tier       = $Input.Tier
-$streamName = $Input.StreamName
+# Activity input from Durable orchestrator is a JObject; .Property returns
+# JValue. Explicit [string] cast prevents the same JValue->String cast crash
+# the orchestrator hit before we fixed it. Safe even if input is already a string.
+$portal     = [string]$Input.Portal
+$tier       = [string]$Input.Tier
+$streamName = [string]$Input.StreamName
 
 # Read FA config from $env:* (process-scoped; always present per profile.ps1)
 $config = [pscustomobject]@{

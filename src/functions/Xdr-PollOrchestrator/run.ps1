@@ -15,10 +15,16 @@
 param($Context)
 
 $ErrorActionPreference = 'Stop'
-$input = $Context.Input
-$portal = $input.Portal
-$tier = $input.Tier
-$functionName = $input.FunctionName  # passed by timer-starter for heartbeat correlation
+
+# Durable Functions hands $Context.Input as a Newtonsoft.Json.Linq.JObject.
+# Accessing .Portal returns a JValue (not a string) — direct use crashes the
+# orchestrator with "Unable to cast object of type 'Newtonsoft.Json.Linq.JValue'
+# to type 'System.String'". Explicit [string] cast normalises the type.
+# (Also avoid $input — it's PowerShell's automatic enumeration variable.)
+$orchInput    = $Context.Input
+$portal       = [string]$orchInput.Portal
+$tier         = [string]$orchInput.Tier
+$functionName = [string]$orchInput.FunctionName  # passed by timer-starter for heartbeat correlation
 
 # DETERMINISTIC: read manifest (cached at module-load; no I/O)
 $manifest = Get-XdrEndpointManifest -Portal Defender

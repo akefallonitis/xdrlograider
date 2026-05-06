@@ -11,12 +11,16 @@
     Verification stages (short-circuit on first hard fail):
 
       1. ARM resources exist:
-         - 1 KV with 5 secrets (mde-portal-{auth-method,upn,password,totp,passkey})
+         - 1 KV with 4 secrets (mde-portal-{auth-method,upn,password,totp})
+           plus optional mde-portal-passkey when authMethod=passkey
          - 1 Storage Account + 2 tables (connectorCheckpoints, xdrIngestDlq)
          - 1 AppInsights component
          - 1 Function App + 1 App Service Plan
-         - 1 DCE + 7 DCRs (defender-1..7)
-         - 9 role assignments (KV Secrets User + Storage Table Data Contributor + 7 MMP)
+         - 1 DCE + 13 per-category DCRs (xdrlr-dcr-actioncenter, -config-alerts-detection,
+           -config-platform-rbac, -endpoint-config, -endpoint-device,
+           -exposure-attack-surface, -exposure-posture-score, -identity, -multitenant,
+           -streaming-api, -threat-analytics, -vuln-mgmt, -ops)
+         - 15 role assignments (KV Secrets User + Storage Table Data Contributor + 13 MMP)
       2. Workspace tables present (11):
          - 10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL
       3. Three-way schema audit per stream:

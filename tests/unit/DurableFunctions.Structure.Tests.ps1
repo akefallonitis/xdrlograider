@@ -39,12 +39,18 @@ Describe 'Phase H — Xdr-PollOrchestrator (orchestrationTrigger)' {
         $functionJson.bindings[0].name | Should -Be 'Context'
     }
 
-    It 'run.ps1 receives $Context input + reads Portal/Tier' {
+    It 'run.ps1 receives $Context input + reads Portal/Tier with explicit [string] cast (JValue runtime safety)' {
+        # Durable Functions delivers $Context.Input as a Newtonsoft.Json.Linq.JObject;
+        # accessing properties returns JValue, NOT string. Direct use crashes the
+        # orchestrator with "Unable to cast object of type 'Newtonsoft.Json.Linq.JValue'
+        # to type 'System.String'". This test asserts the explicit [string] cast is
+        # in place + that we don't shadow PowerShell's automatic $Input variable.
         $runPs1 = Get-Content -Raw -Path (Join-Path $script:OrchPath 'run.ps1')
         $runPs1 | Should -Match 'param\(\$Context\)'
         $runPs1 | Should -Match '\$Context\.Input'
-        $runPs1 | Should -Match '\$portal\s*=\s*\$input\.Portal'
-        $runPs1 | Should -Match '\$tier\s*=\s*\$input\.Tier'
+        $runPs1 | Should -Match '\$portal\s*=\s*\[string\]\$\w+\.Portal'  -Because 'JValue must be cast to string explicitly'
+        $runPs1 | Should -Match '\$tier\s*=\s*\[string\]\$\w+\.Tier'      -Because 'JValue must be cast to string explicitly'
+        $runPs1 | Should -Not -Match '^\s*\$input\s*=\s*\$Context\.Input' -Because 'avoid shadowing PowerShell automatic $Input variable'
     }
 
     It 'run.ps1 uses Invoke-DurableActivity to fan out per stream' {

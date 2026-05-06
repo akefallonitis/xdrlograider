@@ -10,11 +10,11 @@
     at tests/results/post-deploy-<UtcStamp>.md with green/red verdict per phase
     and KQL evidence inline.
 
-    Phases:
-      P1.   ARM resources present (FA, plan, KV, Storage, AI, DCE, DCR, role-assignments, KV/secrets)
-      P2.   Workspace tables present (47 MDE_*_CL with plan: Analytics)
-      P3.   Solution package + 35 metadata back-links + Data Connector card (kind=GenericUI)
-      P3.5. Key Vault structure (RBAC mode + expected secrets + SAMI Secrets User)
+    Phases (v0.1.0 GA layout):
+      P1.   ARM resources present (FA, plan, KV, Storage, AI, DCE, 13 DCRs, role-assignments, KV/secrets)
+      P2.   Workspace tables present (11 = 10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL with plan: Analytics)
+      P3.   Solution package + 41 metadata back-links + Data Connector card (kind=GenericUI)
+      P3.5. Key Vault structure (RBAC mode + 4 expected secrets + SAMI Secrets User)
       P4.   Heartbeat liveness (XdrConnectorHealth_CL last 15 min, StreamsSucceeded > 0)
       P5.  Heartbeat continuous (no gaps in last 2h)
       P6.  Rate limits = 0 (steady state)
@@ -23,9 +23,9 @@
       P9.  App Insights health (exception/error counts within bounds; AuthChain.* events)
       P10. Parser round-trip (each of 4 parsers emits expected schema)
       P11. Drift consistency (manifest <-> DCR <-> tables <-> FA app settings)
-      P12. SAMI verification (7 narrow-scoped roles assigned correctly:
+      P12. SAMI verification (15 narrow-scoped roles assigned correctly:
                               KV Secrets User + Storage Table Data Contributor +
-                              5x Monitoring Metrics Publisher per DCR)
+                              13x Monitoring Metrics Publisher per per-category DCR)
       P13. Markdown report
 
     -AutoFix mode: opt-in. Restarts FA, redeploys latest function-app.zip,
@@ -152,14 +152,14 @@ try {
     Record-Phase 'P1' 'ARM resources present' (@($missing).Count -eq 0) "Found $(@($resources).Count) resources" "Missing types: $($missing -join ', ')"
 } catch { Record-Phase 'P1' 'ARM resources present' $false "Get-AzResource failed: $_" '' }
 
-# P2. Workspace tables (47 MDE_*_CL)
+# P2. Workspace tables (11 = 10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL per v0.1.0 GA D'.11)
 try {
     $tables = Get-AzOperationalInsightsTable -ResourceGroupName $env_['XDRLR_WORKSPACE_RG'] -WorkspaceName $env_['XDRLR_WORKSPACE_NAME'] -ErrorAction Stop |
-        Where-Object Name -match '^MDE_.+_CL$'
-    $expected = 47
+        Where-Object Name -match '^(Defender_.+_CL|XdrConnectorHealth_CL)$'
+    $expected = 11
     $hasAnalytics = @($tables | Where-Object { $_.Plan -eq 'Analytics' }).Count
-    Record-Phase 'P2' 'Workspace MDE_*_CL tables' (@($tables).Count -ge $expected) "Found $(@($tables).Count)/$expected, $hasAnalytics with plan=Analytics" ''
-} catch { Record-Phase 'P2' 'Workspace MDE_*_CL tables' $false "Get-AzOperationalInsightsTable failed: $_" '' }
+    Record-Phase 'P2' 'Workspace consolidated tables' (@($tables).Count -ge $expected) "Found $(@($tables).Count)/$expected, $hasAnalytics with plan=Analytics" ''
+} catch { Record-Phase 'P2' 'Workspace consolidated tables' $false "Get-AzOperationalInsightsTable failed: $_" '' }
 
 # P3. Solution + Data Connector + 35 metadata
 # CRITICAL: Get-AzAccessToken without -ResourceUrl returns a Microsoft Graph
@@ -313,11 +313,11 @@ try {
     }
 } catch { Record-Phase 'P7' 'Compression efficiency' $true 'Heartbeat lacks GzipBytes column (acceptable on older deploys)' '' }
 
-# P8. Per-stream liveness — count tables with rows in 24h
+# P8. Per-stream liveness — count distinct streams (SourceName) ingested across consolidated tables in 24h
 try {
-    $rows = Invoke-WorkspaceKql -Query 'union withsource=Tbl MDE_* | where TimeGenerated > ago(24h) | distinct Tbl | count'
+    $rows = Invoke-WorkspaceKql -Query 'union withsource=Tbl Defender_* | where TimeGenerated > ago(24h) | distinct SourceName | count'
     $count = if (@($rows).Count -gt 0) { [int]$rows[0].Count } else { 0 }
-    Record-Phase 'P8' 'Per-stream liveness' ($count -ge 5) "$count distinct MDE_*_CL tables have rows in last 24h" 'Expect ~36 live streams over time'
+    Record-Phase 'P8' 'Per-stream liveness' ($count -ge 5) "$count distinct streams (SourceName) have rows across Defender_<Cat>_CL tables in last 24h" 'Expect ~48 live streams over time (10 are tenant-feature-gated)'
 } catch { Record-Phase 'P8' 'Per-stream liveness' $false "KQL failed: $_" '' }
 
 # P9. App Insights health
