@@ -41,9 +41,11 @@ $requiredEnvVars = @(
     @{ Name = 'AUTH_METHOD';              Purpose = "Auth method: credentials_totp | passkey" }
     @{ Name = 'SERVICE_ACCOUNT_UPN';      Purpose = 'Service-account UPN logged in diagnostics' }
     @{ Name = 'DCE_ENDPOINT';             Purpose = 'Data Collection Endpoint URL (destination for ingested rows)' }
-    @{ Name = 'DCR_IMMUTABLE_IDS_JSON';   Purpose = 'JSON map: { "MDE_X_CL": "dcr-id", ... } — populated by deploy template from 5 DCR outputs' }
-    @{ Name = 'STORAGE_ACCOUNT_NAME';     Purpose = 'Storage account holding the checkpoint table' }
+    @{ Name = 'DCR_IMMUTABLE_IDS_JSON';   Purpose = 'JSON map: { "MDE_X_CL": "dcr-id", ... } — populated by deploy template from 13 DCR outputs' }
+    @{ Name = 'STORAGE_ACCOUNT_NAME';     Purpose = 'Storage account holding the checkpoint + DLQ tables' }
     @{ Name = 'CHECKPOINT_TABLE_NAME';    Purpose = 'Checkpoint table name (e.g. connectorCheckpoints)' }
+    @{ Name = 'XDR_INGEST_DLQ_TABLE_NAME'; Purpose = 'Storage table for ingest DLQ replay (e.g. xdrIngestDlq) — required by Pop-XdrIngestDlq mandatory -TableName param' }
+    @{ Name = 'TENANT_ID';                Purpose = 'Expected tenant GUID for portal sign-in (Connect-DefenderPortal -TenantId)' }
 )
 
 $missing = @()
@@ -151,6 +153,8 @@ function global:Get-XdrLogRaiderConfig {
         DcrImmutableIdsJson  = $env:DCR_IMMUTABLE_IDS_JSON
         StorageAccountName   = $env:STORAGE_ACCOUNT_NAME
         CheckpointTable      = $env:CHECKPOINT_TABLE_NAME
+        DlqTable             = $env:XDR_INGEST_DLQ_TABLE_NAME
+        ExpectedTenantId     = $env:TENANT_ID
     }
 }
 

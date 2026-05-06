@@ -108,12 +108,19 @@ function Project-EntityField {
         '$tolong'     { try { return [long]$value } catch { return $null } }
         '$tobool'     {
             if ($value -is [bool]) { return $value }
+            if ($value -is [int] -or $value -is [long] -or $value -is [byte]) {
+                # Safe numeric coercion: 0 -> false, anything else -> true
+                return [bool]$value
+            }
             if ($value -is [string]) {
                 $lower = $value.ToLowerInvariant()
-                if ($lower -in @('true','1','yes','enabled','on'))  { return $true }
+                if ($lower -in @('true','1','yes','enabled','on'))   { return $true }
                 if ($lower -in @('false','0','no','disabled','off')) { return $false }
             }
-            try { return [bool]$value } catch { return $null }
+            # Reject the over-permissive [bool]'anything-non-empty'==$true coercion
+            # that silently turned 'unknown'/'pending'/'2' into $true (operator queries
+            # like `where IsEnabled == false` would under-count). Return $null instead.
+            return $null
         }
         '$todatetime' {
             if ($value -is [datetime]) { return $value }

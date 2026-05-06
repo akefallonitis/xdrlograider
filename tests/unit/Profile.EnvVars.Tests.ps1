@@ -21,6 +21,8 @@ BeforeDiscovery {
         'DCR_IMMUTABLE_IDS_JSON'
         'STORAGE_ACCOUNT_NAME'
         'CHECKPOINT_TABLE_NAME'
+        'XDR_INGEST_DLQ_TABLE_NAME'
+        'TENANT_ID'
     )
 }
 
