@@ -137,15 +137,12 @@ Describe 'mainTemplate.json — schema + structure' {
         $funcApp.identity.type | Should -Be 'SystemAssigned'
     }
 
-    It 'creates exactly 9 role assignments for the MI (v0.1.0 GA Phase 2 baseline: KV Secrets User + Storage Table Contributor + 7x Monitoring Metrics Publisher per DCR)' {
-        # 7 DCRs sharing one DCE → 7 separate Monitoring Metrics Publisher
-        # role assignments (the Logs Ingestion API authorizes per DCR). With
-        # KV Secrets User + Storage Table Contributor, that's 9 unconditional
-        # role assignments on Y1. (FC1/EP1 add Storage File SMB Share
-        # Contributor; that role is conditional and not in the compiled JSON's
-        # Y1 default — counted separately by the LeastPrivilege test.)
+    It 'creates exactly 15 role assignments for the MI (v0.1.0 GA: KV Secrets User + Storage Table Contributor + 13x Monitoring Metrics Publisher per per-category DCR)' {
+        # 13 per-category DCRs sharing one DCE → 13 separate Monitoring Metrics Publisher
+        # role assignments. With KV Secrets User + Storage Table Contributor, that's 15
+        # unconditional role assignments on Y1.
         $roleAssignments = @($script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Authorization/roleAssignments' })
-        $roleAssignments.Count | Should -Be 9
+        $roleAssignments.Count | Should -Be 15
     }
 
     It 'has a nested deployment for cross-RG custom tables' {
@@ -175,16 +172,17 @@ Describe 'mainTemplate.json — schema + structure' {
         $dce.PSObject.Properties['kind'] | Should -BeNullOrEmpty
     }
 
-    It 'outputs keyVaultName, dceEndpoint, dcrImmutableIdsJson, 5x dcr#ImmutableId, workspace context' {
-        # 5-DCR shape (Microsoft Learn canonical): the FA needs the per-stream
+    It 'outputs keyVaultName, dceEndpoint, dcrImmutableIdsJson, per-category dcr-suffix ImmutableId outputs, workspace context' {
+        # 13-DCR per-category shape (v0.1.0 GA): the FA needs the per-stream
         # map (dcrImmutableIdsJson) for the lookup helper; operators benefit
-        # from each indexed id being separately accessible (post-deploy
-        # diagnostics, KQL queries against a specific DCR).
+        # from each per-category id being separately accessible.
         $script:MainTemplate.outputs.keyVaultName            | Should -Not -BeNullOrEmpty
         $script:MainTemplate.outputs.dceEndpoint             | Should -Not -BeNullOrEmpty
         $script:MainTemplate.outputs.dcrImmutableIdsJson     | Should -Not -BeNullOrEmpty
-        foreach ($i in 1..5) {
-            $script:MainTemplate.outputs."dcr${i}ImmutableId" | Should -Not -BeNullOrEmpty -Because "indexed output dcr${i}ImmutableId must exist"
+        # Per-suffix outputs (camelCase from kebab-case suffix)
+        $expectedSuffixes = @('actioncenter','configAlertsDetection','configPlatformRbac','endpointConfig','endpointDevice','exposureAttackSurface','exposurePostureScore','identity','multitenant','streamingApi','threatAnalytics','vulnMgmt','ops')
+        foreach ($s in $expectedSuffixes) {
+            $script:MainTemplate.outputs."dcr${s}ImmutableId" | Should -Not -BeNullOrEmpty -Because "per-category output dcr${s}ImmutableId must exist"
         }
         $script:MainTemplate.outputs.workspaceId             | Should -Not -BeNullOrEmpty
         $script:MainTemplate.outputs.workspaceRg             | Should -Not -BeNullOrEmpty
@@ -494,16 +492,12 @@ Describe 'DCR — Azure service-quota gates' {
         }
     }
 
-    It '7 DCRs partition 60 streams 4x10 + 1x7 + 1x7 + 1x6 (v0.1.0 GA Phase 2 shape)' {
-        # 60 streams > 10-flow-per-DCR cap → split across 7 DCRs sharing 1 DCE.
-        # Each DCR's dataFlows array has one flow per stream with explicit
-        # outputStream + transformKql="source | extend SourceName='<Stream>'"
-        # (Microsoft Learn data-collection-rule-structure canonical pattern +
-        # SourceName injection per Phase J.C.2-5 table consolidation).
-        # 60 = 59 data (46 baseline + 13 Tier A new) + 1 operational
-        # (XdrConnectorHealth_CL). AuthTestResult retired in v0.1.0 GA first
-        # publish (auth chain → AppInsights customEvents).
-        @($script:Dcrs).Count | Should -Be 7 -Because 'v0.1.0 GA Phase 2: 60 streams > 10-flow cap per DCR; canonical split is 7 DCRs sharing 1 DCE (4x10 + 5(7) + 6(7) + 7(6))'
+    It '13 DCRs partition 60 streams per-category (v0.1.0 GA shape)' {
+        # 60 streams > 10-flow-per-DCR cap → split across 13 per-category DCRs sharing 1 DCE.
+        # 11 single-category DCRs + 2 categories split into semantic sub-domains
+        # (Configuration: alerts-detection / platform-rbac; Exposure: attack-surface / posture-score).
+        # 60 = 59 data + 1 operational (XdrConnectorHealth_CL).
+        @($script:Dcrs).Count | Should -Be 13 -Because 'v0.1.0 GA: per-category DCRs (10 categories + 2 split into sub-domains + 1 ops = 13)'
         $declCounts = @()
         $allStreams = @()
         foreach ($dcr in $script:Dcrs) {
@@ -514,8 +508,10 @@ Describe 'DCR — Azure service-quota gates' {
             }
         }
         $sortedCounts = @($declCounts | Sort-Object)
-        # v0.1.0 GA Phase 2: 7 DCRs holding 60 streams (4x10 + 1x7 baseline + dcr-defender-6 with 7 + dcr-defender-7 with 6 for Tier A new streams)
-        $sortedCounts | Should -Be @(6, 7, 7, 10, 10, 10, 10) -Because 'partition 4x10 + 5(7) + 6(7) + 7(6) — 7 DCRs after Phase 2 Tier A additions'
+        # 13 DCRs distribution: ops(1) + vuln-mgmt(1) + actioncenter(2) + endpoint-device(2) + streaming-api(2) +
+        # multitenant(3) + threat-analytics(3) + identity(6) + config-alerts(6) + exposure-posture(7) +
+        # config-platform(8) + endpoint-config(9) + exposure-attack(10) = 60 streams across 13 DCRs
+        $sortedCounts | Should -Be @(1, 1, 2, 2, 2, 3, 3, 6, 6, 7, 8, 9, 10) -Because 'per-category DCR distribution'
         @($allStreams | Sort-Object -Unique).Count | Should -Be 60 -Because 'every declared stream must appear in exactly one dataFlow (59 data + 1 ops = 60)'
     }
 

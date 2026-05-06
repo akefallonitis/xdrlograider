@@ -218,10 +218,10 @@ Describe 'Schema Consistency — DCR streamDecl vs Workspace Table column types'
 Describe 'Schema Consistency — DCR-to-category coverage (bucket-fill detection)' {
 
     It '<dcrName> covers <maxCategories> or fewer categories' -ForEach @(
-        # v0.1.0 GA accepts the 7-DCR sequential bucket-fill (no DCR exclusively maps to one category)
-        # v0.1.0.1 ROADMAP: refactor to 13 DCRs (one per consolidated table; split categories with >10 streams).
-        # This test currently asserts the bucket-fill is no WORSE than today: max 7 categories per DCR.
-        @{ dcrName = 'any'; maxCategories = 7 }
+        # v0.1.0 GA: 13 per-category DCRs (one per consolidated table; categories
+        # with >10 streams split into named semantic sub-domains). Each DCR
+        # covers exactly 1 category (sub-domain split is within-category).
+        @{ dcrName = 'any'; maxCategories = 1 }
     ) {
         $script:DcrToCategories = @{}
         $streamToCategory = @{}

@@ -44,9 +44,21 @@ Production-grade unattended ingestion of Microsoft Defender XDR portal-only tele
 
 ---
 
-## v0.1.0.1 — DCR-per-category refactor (planned patch)
+## v0.1.0.1 — remaining tooling polish (planned patch)
 
-Refactors the 7 bucket-fill DCRs (DCR-1 through DCR-7, sequential 10-flow buckets that each span 2-7 categories) into **12-13 category-scoped DCRs** with descriptive names. Identified during v0.1.0 GA preflight when consolidated-table column-type conflicts (Action/Scope/Tags) surfaced because multiple categories shared a single DCR but their streams had differing column types per shared column.
+The DCR-per-category refactor SHIPPED in v0.1.0 (13 descriptive DCRs replacing the original 7 bucket-fill). The remaining v0.1.0.1 scope:
+
+- **`tools/Build-SampleQueries.ps1`** — automated regen of the 5-query-per-stream sample set in `XdrLogRaider_DataConnector.json` so column renames don't require manual updates
+- **CI: ARM-TTK adoption** — official Microsoft ARM Template Test Toolkit alongside the existing `Validate-ArmJson.ps1`
+- **Per-table column data dictionary embedded in workbook hover-text** — operators don't need to leave the workbook to know which stream contributes which column
+- **Pester parallelism** — CI run-time reduction
+- **Manifest hot-load caching** for cadence-tier duration
+
+> Originally v0.1.0.1 was scoped as the DCR refactor + tooling. The DCR refactor moved up to v0.1.0 and shipped with `tools/Build-DcrSection.ps1`, `tools/Audit-DcrSchema.ps1`, `tools/Verify-CosignArtifacts.ps1`, and `docs/SCHEMA.md`. v0.1.0.1 = polish, not architecture.
+
+### v0.1.0 — DCR per-category refactor (SHIPPED)
+
+Refactored the 7 bucket-fill DCRs (DCR-1 through DCR-7, sequential 10-flow buckets that each span 2-7 categories) into **13 category-scoped DCRs** with descriptive names. Identified during v0.1.0 GA preflight when consolidated-table column-type conflicts (Action/Scope/Tags) surfaced because multiple categories shared a single DCR but their streams had differing column types per shared column.
 
 **Planned scope**:
 

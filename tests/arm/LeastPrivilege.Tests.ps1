@@ -29,11 +29,11 @@ BeforeAll {
 
 Describe 'Least-privilege role-assignment invariants (Y1-only)' {
 
-    It 'declares exactly 9 role assignments (v0.1.0 GA Phase 2 — 7-DCR shape)' {
-        # 7-DCR shape: KV Secrets User + Storage Table Data Contributor +
-        # 7x Monitoring Metrics Publisher (one per DCR) = 9. Strict count
+    It 'declares exactly 15 role assignments (v0.1.0 GA — 13-DCR per-category shape)' {
+        # 13-DCR per-category shape: KV Secrets User + Storage Table Data Contributor +
+        # 13x Monitoring Metrics Publisher (one per DCR) = 15. Strict count
         # gate: any new role assignment requires updating this number.
-        $script:RoleAssignments.Count | Should -Be 9 -Because 'v0.1.0 GA Phase 2: KV Secrets User + Storage Table + 7x Monitoring Metrics Publisher (one per DCR) = 9'
+        $script:RoleAssignments.Count | Should -Be 15 -Because 'v0.1.0 GA: KV Secrets User + Storage Table + 13x Monitoring Metrics Publisher (one per per-category DCR) = 15'
     }
 
     It 'every role assignment uses a SPECIFIC scope (no subscription() or resourceGroup() scopes)' {
@@ -111,8 +111,8 @@ Describe 'Y1-only role matrix (canonical role IDs)' {
         $rawTemplate | Should -Match '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
     }
 
-    It 'grants Monitoring Metrics Publisher (3913510d-42f4-4e42-8a64-420c390055eb) on every DCR (5 total)' {
-        # 7-DCR shape (v0.1.0 GA Phase 2): one role assignment per DCR sharing the DCE. The
+    It 'grants Monitoring Metrics Publisher (3913510d-42f4-4e42-8a64-420c390055eb) on every DCR (13 total)' {
+        # 13-DCR per-category shape (v0.1.0 GA): one role assignment per DCR sharing the DCE. The
         # roleDefinitionId is built via resourceId() that references the
         # variable `monitoringMetricsPublisherRoleId`, so we match either the
         # literal GUID OR the variable reference (the resolved value is
@@ -122,7 +122,7 @@ Describe 'Y1-only role matrix (canonical role IDs)' {
             $rd -match '3913510d-42f4-4e42-8a64-420c390055eb' -or
             $rd -match "variables\(\s*'monitoringMetricsPublisherRoleId'\s*\)"
         })
-        $mmp.Count | Should -Be 7 -Because 'each of the 7 DCRs needs its own Monitoring Metrics Publisher role (4x10 + 5(7) + 6(7) + 7(6) Phase 2 distribution)'
+        $mmp.Count | Should -Be 13 -Because 'each of the 13 per-category DCRs needs its own Monitoring Metrics Publisher role'
 
         # Belt-and-braces: variable must hold the canonical MMP GUID
         $script:Arm.variables.monitoringMetricsPublisherRoleId |

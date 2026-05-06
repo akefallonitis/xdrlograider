@@ -81,21 +81,31 @@ jobs:
           }
           Write-Host "✓ Release-gate grep clean — 0 removed-stream refs in deploy/compiled + sentinel" -ForegroundColor Green
 
-      - name: Release-gate — DCR streamDecls = 60 + all rules enabled:false + Data Connector 11 tables
+      - name: Release-gate — DCR layout (13 per-category) + streamDecls = 60 + rules enabled:false + Data Connector 11 tables
         shell: pwsh
         run: |
-          # Release-gate triad (belt + suspenders on top of preflight):
-          #   (1) mainTemplate.json DCR.streamDeclarations.Count == 60
-          #       (59 streams + 1 XdrConnectorHealth_CL operational; spread across
-          #        7 DCRs as 4×10 + 5(7) + 6(7) + 7(6) per Azure 10-flow cap)
-          #   (2) every Microsoft.OperationalInsights/workspaces/savedSearches-Scheduled
-          #       rule in sentinelContent.json has properties.enabled: false
-          #   (3) Data Connector card dataTypes.Count == 11
-          #       (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL — D'.11)
+          # Release-gate quad (belt + suspenders on top of preflight):
+          #   (1a) DCR count == 13 (one per consolidated workspace table; with
+          #        semantic sub-domain split for Configuration and Exposure
+          #        which exceed Azure's 10-flow cap)
+          #   (1b) DCR streamDeclarations.Count == 60 (59 + ops)
+          #   (2)  every analytic rule ships enabled:false
+          #   (3)  Data Connector dataTypes.Count == 11
 
-          # ---- Gate 1: DCR streamDeclarations count ----
+          # ---- Gate 1a: DCR count + naming (per-category, no bucket-fill) ----
           $mainTemplate = Get-Content ./deploy/compiled/mainTemplate.json -Raw | ConvertFrom-Json
           $dcrs = $mainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' }
+          if (@($dcrs).Count -ne 13) {
+              throw "Gate 1a FAIL: DCR count = $(@($dcrs).Count) (expected 13 per-category DCRs after v0.1.0 refactor — see tools/Build-DcrSection.ps1)"
+          }
+          # Reject any DCR with the legacy bucket-fill -defender-N suffix
+          $legacy = @($dcrs | Where-Object { $_.name -match '-defender-\d+' })
+          if ($legacy) {
+              throw "Gate 1a FAIL: $($legacy.Count) DCR(s) still use legacy '-defender-N' naming. Run tools/Build-DcrSection.ps1."
+          }
+          Write-Host "Gate 1a OK: 13 per-category DCRs, no bucket-fill" -ForegroundColor Green
+
+          # ---- Gate 1b: DCR streamDeclarations count ----
           $streamCount = 0
           foreach ($dcr in $dcrs) {
               if ($dcr.properties.streamDeclarations) {
@@ -103,9 +113,9 @@ jobs:
               }
           }
           if ($streamCount -ne 60) {
-              throw "Gate 1 FAIL: DCR streamDeclarations count = $streamCount (expected 60 = 59 streams + XdrConnectorHealth_CL operational)"
+              throw "Gate 1b FAIL: DCR streamDeclarations count = $streamCount (expected 60 = 59 streams + XdrConnectorHealth_CL operational)"
           }
-          Write-Host "Gate 1 OK: DCR streamDeclarations.Count = $streamCount" -ForegroundColor Green
+          Write-Host "Gate 1b OK: DCR streamDeclarations.Count = $streamCount" -ForegroundColor Green
 
           # ---- Gate 2: all analytic rules enabled:false ----
           $content = Get-Content ./deploy/compiled/sentinelContent.json -Raw | ConvertFrom-Json
