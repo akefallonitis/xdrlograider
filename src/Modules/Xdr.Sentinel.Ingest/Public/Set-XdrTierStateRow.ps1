@@ -80,8 +80,14 @@ function Set-XdrTierStateRow {
     }
 
     # Reuse the existing Invoke-XdrStorageTableEntity helper which handles SAMI auth.
-    # On first call (existing deploy without XdrTierState in ARM), the Upsert may
-    # 404 — we then call CreateTable + retry. ARM-deployed clusters skip this fallback.
+    # SENIOR-ARCHITECT INVARIANT: the FA's SAMI is DATA-PLANE only
+    # (Storage Table Data Contributor). The XdrTierState table MUST be provisioned
+    # by the ARM template (deploy/compiled/mainTemplate.json declares it as a
+    # Microsoft.Storage/storageAccounts/tableServices/tables resource). The activity
+    # NEVER attempts CreateTable — that would require control-plane access and
+    # violate least-privilege.
+    # If the Upsert returns 404 TableNotFound, throw a clear actionable error
+    # pointing the operator to the ARM remediation path.
     try {
         Invoke-XdrStorageTableEntity `
             -StorageAccountName $StorageAccountName `
@@ -91,23 +97,13 @@ function Set-XdrTierStateRow {
             -Operation          'Upsert' `
             -Entity             $entity | Out-Null
     } catch {
-        # Defensive fallback: try to create the table then retry.
         if ("$($_.Exception.Message)" -match 'TableNotFound|404') {
-            Invoke-XdrStorageTableEntity `
-                -StorageAccountName $StorageAccountName `
-                -TableName          $TableName `
-                -PartitionKey       'placeholder' `
-                -RowKey             'placeholder' `
-                -Operation          'CreateTable' | Out-Null
-            Invoke-XdrStorageTableEntity `
-                -StorageAccountName $StorageAccountName `
-                -TableName          $TableName `
-                -PartitionKey       $entity.PartitionKey `
-                -RowKey             $entity.RowKey `
-                -Operation          'Upsert' `
-                -Entity             $entity | Out-Null
-        } else {
-            throw
+            throw ("Set-XdrTierStateRow: Storage table '{0}' does not exist on storage account '{1}'. " +
+                   "ARM template MUST provision this table (Microsoft.Storage/storageAccounts/tableServices/tables). " +
+                   "Remediation: redeploy the ARM template OR have an operator with control-plane access PUT to " +
+                   "https://management.azure.com/subscriptions/.../resourceGroups/.../providers/Microsoft.Storage/storageAccounts/{1}/tableServices/default/tables/{0}?api-version=2023-05-01. " +
+                   "The FA's SAMI is data-plane only and MUST NOT create resources." -f $TableName, $StorageAccountName)
         }
+        throw
     }
 }
