@@ -77,6 +77,7 @@ $results = Wait-DurableTask -Task $activityTasks -Any:$false
 $totalAttempted = $tierStreams.Count
 $totalSucceeded = 0
 $totalRows = 0
+$totalLatencyMs = 0
 $errors = @{}
 foreach ($r in $results) {
     if ($r.Success) {
@@ -85,7 +86,28 @@ foreach ($r in $results) {
     } else {
         $errors[$r.StreamName] = $r.Error
     }
+    if ($r.LatencyMs) { $totalLatencyMs += [int]$r.LatencyMs }
 }
+
+# FINAL STEP: persist a per-tier heartbeat row to XdrConnectorHealth_CL.
+# Without this, the Sentinel data-connector card's connectivityCriteria
+# (`StreamsSucceeded > 0` in XdrConnectorHealth_CL) is never satisfied —
+# only Connector-Heartbeat (5min liveness) writes rows, always with 0 streams.
+# Per BINDING methodology Section 0: chained architecture — fix activity
+# ingestion AND heartbeat persistence in one batch. End-to-end production
+# readiness requires the connector card to flip Connected.
+$heartbeatInput = @{
+    Portal           = $portal
+    Tier             = $tier
+    FunctionName     = $functionName
+    StreamsAttempted = $totalAttempted
+    StreamsSucceeded = $totalSucceeded
+    RowsIngested     = $totalRows
+    LatencyMs        = $totalLatencyMs
+    OrchestrationInstanceId = [string]$Context.InstanceId
+    Errors           = $errors
+}
+$null = Invoke-DurableActivity -FunctionName 'Xdr-WriteHeartbeat' -Input $heartbeatInput
 
 return [pscustomobject]@{
     Portal = $portal

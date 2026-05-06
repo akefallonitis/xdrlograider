@@ -1,0 +1,10 @@
+{
+  "description": "Phase H — Durable Functions activity. Final step of Xdr-PollOrchestrator: writes the per-tier heartbeat row to XdrConnectorHealth_CL. Receives the orchestrator's aggregate metrics (StreamsAttempted/Succeeded/RowsIngested/LatencyMs/Errors) + identity (FunctionName/Tier/Portal/OrchestrationInstanceId) and persists via Write-Heartbeat → DCE → DCR. Without this activity, the Sentinel data-connector card stays 'Disconnected' because connectivityCriteria gates on StreamsSucceeded > 0 in XdrConnectorHealth_CL — which only Connector-Heartbeat (5min liveness) writes if no cadence-tier path persists. Binding name 'ActivityInput' MUST match run.ps1 param name and MUST NOT be 'Input' (PowerShell automatic-variable shadow per fb2c6f4 forensic).",
+  "bindings": [
+    {
+      "name": "ActivityInput",
+      "type": "activityTrigger",
+      "direction": "in"
+    }
+  ]
+}
