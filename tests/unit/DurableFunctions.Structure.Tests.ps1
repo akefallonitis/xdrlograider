@@ -74,17 +74,32 @@ Describe 'Phase H — Xdr-PollStream (activityTrigger)' {
         Test-Path -LiteralPath $script:ActivityPath -PathType Container | Should -BeTrue
     }
 
-    It 'function.json declares activityTrigger binding' {
+    It 'function.json declares activityTrigger binding with NON-shadowing name' {
         $functionJson = Get-Content -Raw -Path (Join-Path $script:ActivityPath 'function.json') | ConvertFrom-Json
         $functionJson.bindings.Count | Should -Be 1
         $functionJson.bindings[0].type | Should -Be 'activityTrigger'
         $functionJson.bindings[0].direction | Should -Be 'in'
-        $functionJson.bindings[0].name | Should -Be 'Input'
+        # Binding name MUST NOT be 'Input' — that creates a PS automatic-variable shadow
+        # in run.ps1's param() block, causing the Durable input to silently bind to the
+        # empty pipeline enumerator. Live forensic 2026-05-06.
+        $functionJson.bindings[0].name | Should -Not -Be 'Input' -Because 'PowerShell automatic-variable shadow'
+        $functionJson.bindings[0].name | Should -Match '^[A-Za-z_][A-Za-z0-9_]*$' -Because 'must be valid PS variable name'
     }
 
-    It 'run.ps1 receives $Input + does auth + Invoke-MDEEndpoint + ingest' {
+    It 'function.json binding name MATCHES run.ps1 param name (Azure Functions PS convention)' {
+        $functionJson = Get-Content -Raw -Path (Join-Path $script:ActivityPath 'function.json') | ConvertFrom-Json
+        $bindingName = $functionJson.bindings[0].name
         $runPs1 = Get-Content -Raw -Path (Join-Path $script:ActivityPath 'run.ps1')
-        $runPs1 | Should -Match 'param\(\$Input\)'
+        $runPs1 | Should -Match ('(?m)^\s*param\s*\(\s*\$' + [regex]::Escape($bindingName) + '\s*\)') -Because 'function.json binding name MUST match run.ps1 param name; mismatch breaks input binding'
+    }
+
+    It 'run.ps1 has a param block + does auth + Invoke-MDEEndpoint + ingest (param NOT named $Input — automatic-variable shadow)' {
+        $runPs1 = Get-Content -Raw -Path (Join-Path $script:ActivityPath 'run.ps1')
+        # Regression-locker: param($Input) shadows the PowerShell automatic $Input
+        # variable, causing the binding to silently bind to the empty pipeline
+        # enumerator instead of the JObject from Durable. Verified live 2026-05-06.
+        $runPs1 | Should -Match '(?m)^\s*param\s*\(\s*\$[A-Za-z_][A-Za-z0-9_]*\s*\)'
+        $runPs1 | Should -Not -Match '(?m)^\s*param\s*\(\s*\$Input\s*\)' -Because 'param($Input) shadows PS automatic $Input — activity input never binds. Use a non-Input name + matching function.json binding name.'
         $runPs1 | Should -Match 'Get-XdrAuthFromKeyVault'
         $runPs1 | Should -Match 'Connect-DefenderPortal'
         $runPs1 | Should -Match 'Invoke-MDEEndpoint'

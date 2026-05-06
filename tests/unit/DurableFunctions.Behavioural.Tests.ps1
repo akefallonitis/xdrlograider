@@ -163,13 +163,31 @@ Describe 'Xdr-PollOrchestrator — runtime behaviour with realistic Durable inpu
 
 Describe 'Xdr-PollStream — runtime behaviour with realistic Durable activity inputs' {
 
-    Context 'Activity input access uses [string] cast (regression: JValue crash)' {
+    Context 'Activity input access uses [string] cast AND non-shadowing param name (regression: JValue crash + $Input automatic shadow)' {
 
-        It 'Activity body reads Portal/Tier/StreamName via [string] cast' {
+        It 'Activity param block does NOT use $Input (PowerShell automatic-variable shadow)' {
+            # Live forensic 2026-05-06: param($Input) shadows the PowerShell
+            # automatic $Input pipeline-enumerator variable. The activity binding
+            # silently resolves to the empty automatic, NOT the JObject. Result:
+            # every $Input.Property access returns null, [string]$null='', and
+            # downstream calls (Pop-XdrIngestDlq, Invoke-MDEEndpoint) fail with
+            # empty Stream/StreamName values.
             $activitySource = Get-Content -Raw $script:ActivityPath
-            $activitySource | Should -Match '\$portal\s*=\s*\[string\]\$Input\.Portal'
-            $activitySource | Should -Match '\$tier\s*=\s*\[string\]\$Input\.Tier'
-            $activitySource | Should -Match '\$streamName\s*=\s*\[string\]\$Input\.StreamName'
+            $activitySource | Should -Not -Match '(?m)^\s*param\s*\(\s*\$Input\s*\)' -Because 'param($Input) shadows PowerShell automatic; activity input does not bind. Use $ActivityInput or similar.'
+        }
+
+        It 'Activity body reads Portal/Tier/StreamName via [string] cast on the named param (NOT $Input)' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            # Discover the param name from `param($X)` line; assert reads use it.
+            if ($activitySource -match '(?m)^\s*param\s*\(\s*\$([A-Za-z_][A-Za-z0-9_]*)\s*\)') {
+                $paramName = $Matches[1]
+                $paramName | Should -Not -Be 'Input' -Because 'shadow check'
+                $activitySource | Should -Match ('\$portal\s*=\s*\[string\]\$' + [regex]::Escape($paramName) + '\.Portal')
+                $activitySource | Should -Match ('\$tier\s*=\s*\[string\]\$' + [regex]::Escape($paramName) + '\.Tier')
+                $activitySource | Should -Match ('\$streamName\s*=\s*\[string\]\$' + [regex]::Escape($paramName) + '\.StreamName')
+            } else {
+                throw "Could not extract param name from activity source"
+            }
         }
     }
 

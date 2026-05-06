@@ -9,8 +9,20 @@
 # time, exception handling) — only orchestrators must be deterministic.
 #
 # Per .claude/plans/immutable-splashing-waffle.md Section 2.A.
-
-param($Input)
+#
+# CRITICAL: The activity parameter MUST NOT be named '$Input' — that name
+# shadows PowerShell's automatic $Input variable (the pipeline enumerator).
+# Azure Functions PowerShell host binds the activity input to the parameter,
+# but the parameter-vs-automatic ambiguity causes the parameter binding to
+# silently resolve to the EMPTY automatic $Input (pipeline enumerator) instead
+# of the JObject from Durable. Property access then returns null on every
+# field, [string]$null = '', and downstream calls fail with "Unknown Stream ''".
+#
+# Live forensic 2026-05-06: this caused 100% of activity invocations to throw
+# inside their try/catch (Pop-XdrIngestDlq + Invoke-MDEEndpoint both received
+# empty Stream values) despite the orchestrator correctly fanning out 2
+# matched streams per ActionCenter cadence. Renaming to $ActivityInput fixes it.
+param($ActivityInput)
 
 $ErrorActionPreference = 'Stop'
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
@@ -18,9 +30,9 @@ $sw = [System.Diagnostics.Stopwatch]::StartNew()
 # Activity input from Durable orchestrator is a JObject; .Property returns
 # JValue. Explicit [string] cast prevents the same JValue->String cast crash
 # the orchestrator hit before we fixed it. Safe even if input is already a string.
-$portal     = [string]$Input.Portal
-$tier       = [string]$Input.Tier
-$streamName = [string]$Input.StreamName
+$portal     = [string]$ActivityInput.Portal
+$tier       = [string]$ActivityInput.Tier
+$streamName = [string]$ActivityInput.StreamName
 
 # Read FA config from $env:* (process-scoped; always present per profile.ps1)
 $config = [pscustomobject]@{
