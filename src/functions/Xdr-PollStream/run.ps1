@@ -38,9 +38,16 @@ $config = [pscustomobject]@{
 try {
     # Auth — Connect-DefenderPortal caches session per FA instance for ~50 min.
     # First activity in fan-out triggers actual auth; subsequent activities hit cache.
-    $authBundle = Get-XdrAuthFromKeyVault -KeyVaultUri $config.KeyVaultUri `
-        -SecretName $config.AuthSecretName -AuthMethod $config.AuthMethod `
-        -ServiceAccountUpn $config.ServiceAccountUpn -ExpectedTenantId $config.ExpectedTenantId
+    # Param names match the actual Get-XdrAuthFromKeyVault signature:
+    #   -VaultUri      (was wrongly named -KeyVaultUri)
+    #   -SecretPrefix  (was wrongly named -SecretName)
+    #   -AuthMethod    (correct)
+    # ServiceAccountUpn / ExpectedTenantId are NOT params of Get-XdrAuthFromKeyVault;
+    # they're passed to Connect-DefenderPortal further down.
+    $authBundle = Get-XdrAuthFromKeyVault `
+        -VaultUri     $config.KeyVaultUri `
+        -SecretPrefix $config.AuthSecretName `
+        -AuthMethod   $config.AuthMethod
     $session = Connect-DefenderPortal -Method $config.AuthMethod `
         -Credential $authBundle.Credential `
         -TotpBase32Secret $authBundle.TotpBase32Secret `

@@ -172,6 +172,38 @@ Describe 'Xdr-PollStream — runtime behaviour with realistic Durable activity i
             $activitySource | Should -Match '\$streamName\s*=\s*\[string\]\$Input\.StreamName'
         }
     }
+
+    Context 'Activity calls Get-XdrAuthFromKeyVault with correct param names (regression: ParameterBindingException for KeyVaultUri)' {
+
+        It 'Activity uses -VaultUri (not -KeyVaultUri) — matches actual function signature' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $activitySource | Should -Match '-VaultUri\s+\$config\.KeyVaultUri' -Because 'real param is -VaultUri; -KeyVaultUri throws ParameterBindingException'
+            $activitySource | Should -Not -Match '-KeyVaultUri\s+\$config\.KeyVaultUri' -Because '-KeyVaultUri is NOT a parameter of Get-XdrAuthFromKeyVault'
+        }
+
+        It 'Activity uses -SecretPrefix (not -SecretName) — matches actual function signature' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $activitySource | Should -Match '-SecretPrefix\s+\$config\.AuthSecretName' -Because 'real param is -SecretPrefix; -SecretName is NOT a parameter'
+        }
+
+        It 'Activity does not pass -ServiceAccountUpn or -ExpectedTenantId to Get-XdrAuthFromKeyVault (those go to Connect-DefenderPortal)' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $authBlock = if ($activitySource -match '(?ms)Get-XdrAuthFromKeyVault[^\r\n]*((?:\s*`\s*\r?\n[^\r\n]*)+)') { $Matches[0] } else { '' }
+            $authBlock | Should -Not -Match '-ServiceAccountUpn\s'    -Because 'ServiceAccountUpn is not a Get-XdrAuthFromKeyVault parameter; only Connect-DefenderPortal accepts it'
+            $authBlock | Should -Not -Match '-ExpectedTenantId\s'     -Because 'ExpectedTenantId is not a Get-XdrAuthFromKeyVault parameter; only Connect-DefenderPortal accepts it'
+        }
+    }
+
+    Context 'Get-XdrAuthFromKeyVault function signature anchor (catches future param-name drift)' {
+
+        It 'Get-XdrAuthFromKeyVault has VaultUri + SecretPrefix + AuthMethod parameters' {
+            $kvAuthPath = Join-Path $script:RepoRoot 'src/Modules/Xdr.Common.Auth/Public/Get-XdrAuthFromKeyVault.ps1'
+            $src = Get-Content -Raw $kvAuthPath
+            $src | Should -Match '\[string\]\s*\$VaultUri'
+            $src | Should -Match '\[string\]\s*\$SecretPrefix'
+            $src | Should -Match '\[string\]\s*\$AuthMethod'
+        }
+    }
 }
 
 Describe 'Xdr-PollOrchestrator — orchestrator file inspection (locks current correct shape)' {
