@@ -188,7 +188,9 @@ Describe 'Xdr-PollStream — runtime behaviour with realistic Durable activity i
 
         It 'Activity does not pass -ServiceAccountUpn or -ExpectedTenantId to Get-XdrAuthFromKeyVault (those go to Connect-DefenderPortal)' {
             $activitySource = Get-Content -Raw $script:ActivityPath
-            $authBlock = if ($activitySource -match '(?ms)Get-XdrAuthFromKeyVault[^\r\n]*((?:\s*`\s*\r?\n[^\r\n]*)+)') { $Matches[0] } else { '' }
+            # Multi-line PS continuation block: function name + first-line backtick + zero or more continuation lines + final line.
+            # Anchored on '\s+`' to skip comment occurrences and only match the actual call site.
+            $authBlock = if ($activitySource -match '(?ms)Get-XdrAuthFromKeyVault[^\r\n]*`\r?\n(?:[^\r\n]*`\r?\n)*[^\r\n]*') { $Matches[0] } else { '' }
             $authBlock | Should -Not -Match '-ServiceAccountUpn\s'    -Because 'ServiceAccountUpn is not a Get-XdrAuthFromKeyVault parameter; only Connect-DefenderPortal accepts it'
             $authBlock | Should -Not -Match '-ExpectedTenantId\s'     -Because 'ExpectedTenantId is not a Get-XdrAuthFromKeyVault parameter; only Connect-DefenderPortal accepts it'
         }
@@ -219,7 +221,7 @@ Describe 'Xdr-PollStream — runtime behaviour with realistic Durable activity i
 
         It 'Activity does NOT pass -TotpBase32Secret / -PasskeyJsonPath / -ServiceAccountUpn / -ExpectedTenantId to Connect-DefenderPortal (none are params)' {
             $activitySource = Get-Content -Raw $script:ActivityPath
-            $connectBlock = if ($activitySource -match '(?ms)Connect-DefenderPortal[^\r\n]*((?:\s*`\s*\r?\n[^\r\n]*)+)') { $Matches[0] } else { '' }
+            $connectBlock = if ($activitySource -match '(?ms)Connect-DefenderPortal[^\r\n]*`\r?\n(?:[^\r\n]*`\r?\n)*[^\r\n]*') { $Matches[0] } else { '' }
             $connectBlock | Should -Not -Match '-TotpBase32Secret\s'
             $connectBlock | Should -Not -Match '-PasskeyJsonPath\s'
             $connectBlock | Should -Not -Match '-ServiceAccountUpn\s'
@@ -241,6 +243,83 @@ Describe 'Xdr-PollStream — runtime behaviour with realistic Durable activity i
             $src | Should -Match '\[hashtable\]\s*\$Credential'
             $src | Should -Match '\[string\]\s*\$PortalHost'
             $src | Should -Match '\[string\]\s*\$TenantId'
+        }
+    }
+
+    Context 'Activity calls Pop-XdrIngestDlq with correct param names (regression: missing -TableName)' {
+
+        It 'Activity passes all 4 mandatory Pop-XdrIngestDlq params: StorageAccountName + TableName + StreamName + MaxBatches' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            # Anchor on '\s+`' to skip comment line ('Pop-XdrIngestDlq signature requires:'); match only call site.
+            $popBlock = if ($activitySource -match '(?ms)Pop-XdrIngestDlq\s+`\r?\n(?:[^\r\n]*`\r?\n)*[^\r\n]*') { $Matches[0] } else { '' }
+            $popBlock | Should -Match '-StorageAccountName\s'
+            $popBlock | Should -Match '-TableName\s'  -Because '-TableName is mandatory; missing it caused live ParameterBindingException'
+            $popBlock | Should -Match '-StreamName\s'
+            $popBlock | Should -Match '-MaxBatches\s'
+        }
+
+        It 'Activity reads DLQ table name from $env:XDR_INGEST_DLQ_TABLE_NAME (DlqTable config field)' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $activitySource | Should -Match 'DlqTable\s*=\s*\$env:XDR_INGEST_DLQ_TABLE_NAME' -Because 'DLQ table name is a process env var set by ARM template'
+        }
+    }
+
+    Context 'Activity calls Invoke-MDEEndpoint with correct shape AND ingests via Send-ToLogAnalytics (regression: -Config + missing ingest)' {
+
+        It 'Activity does NOT pass -Config to Invoke-MDEEndpoint (not a parameter)' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $invokeBlock = if ($activitySource -match '(?ms)Invoke-MDEEndpoint[^\r\n]*') { $Matches[0] } else { '' }
+            $invokeBlock | Should -Not -Match '-Config\b' -Because 'Invoke-MDEEndpoint accepts -Session / -Stream / -FromUtc / -PathParams only'
+        }
+
+        It 'Activity treats Invoke-MDEEndpoint result as object[] rows (not @{ RowsIngested })' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            # Old buggy pattern: $result = Invoke-MDEEndpoint ... ; if ($result.RowsIngested) ...
+            # New correct pattern: $freshRows = @(Invoke-MDEEndpoint ...)
+            $activitySource | Should -Match '\$freshRows\s*=\s*@\(Invoke-MDEEndpoint' -Because 'Invoke-MDEEndpoint returns rows; activity must wrap in @() and feed Send-ToLogAnalytics'
+            $activitySource | Should -Not -Match '\$result\.RowsIngested' -Because 'no RowsIngested property on Invoke-MDEEndpoint output'
+        }
+
+        It 'Activity calls Send-ToLogAnalytics to actually ingest (was missing entirely)' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $activitySource | Should -Match 'Send-ToLogAnalytics' -Because 'without this call the activity would never write to DCE -> DCR -> workspace tables'
+            # Anchor on '\s+`' to skip preceding comment lines that mention Send-ToLogAnalytics; match only the actual call site.
+            $sendBlock = if ($activitySource -match '(?ms)Send-ToLogAnalytics\s+`\r?\n(?:[^\r\n]*`\r?\n)*[^\r\n]*') { $Matches[0] } else { '' }
+            $sendBlock | Should -Match '-DceEndpoint\s'
+            $sendBlock | Should -Match '-DcrImmutableId\s'
+            $sendBlock | Should -Match '-StreamName\s'
+            $sendBlock | Should -Match '-Rows\s'
+        }
+
+        It 'Activity resolves DCR immutableId from DCR_IMMUTABLE_IDS_JSON env var' {
+            $activitySource = Get-Content -Raw $script:ActivityPath
+            $activitySource | Should -Match 'DcrImmutableIdsJson.*ConvertFrom-Json' -Because 'per-stream DCR-id resolution is what the env var was built for'
+        }
+    }
+
+    Context 'Pop-XdrIngestDlq + Invoke-MDEEndpoint + Send-ToLogAnalytics signature anchors' {
+
+        It 'Pop-XdrIngestDlq has StorageAccountName + TableName + StreamName + MaxBatches mandatory' {
+            $src = Get-Content -Raw (Join-Path $script:RepoRoot 'src/Modules/Xdr.Sentinel.Ingest/Public/Pop-XdrIngestDlq.ps1')
+            $src | Should -Match '\[Parameter\(Mandatory\)\]\s*\[string\]\s*\$StorageAccountName'
+            $src | Should -Match '\[Parameter\(Mandatory\)\]\s*\[string\]\s*\$TableName'
+            $src | Should -Match '\[Parameter\(Mandatory\)\]\s*\[string\]\s*\$StreamName'
+            $src | Should -Match '\[Parameter\(Mandatory\)\]\s*\[int\]\s*\$MaxBatches'
+        }
+
+        It 'Invoke-MDEEndpoint has Session + Stream parameters (no -Config)' {
+            $src = Get-Content -Raw (Join-Path $script:RepoRoot 'src/Modules/Xdr.Defender.Client/Public/Invoke-MDEEndpoint.ps1')
+            $src | Should -Match '\[pscustomobject\]\s*\$Session'
+            $src | Should -Match '\[string\]\s*\$Stream'
+            $src | Should -Not -Match '\[\w+\]\s*\$Config' -Because 'Invoke-MDEEndpoint never had a -Config parameter'
+        }
+
+        It 'Send-ToLogAnalytics has DceEndpoint + DcrImmutableId + StreamName + Rows mandatory' {
+            $src = Get-Content -Raw (Join-Path $script:RepoRoot 'src/Modules/Xdr.Sentinel.Ingest/Public/Send-ToLogAnalytics.ps1')
+            $src | Should -Match '\[Parameter\(Mandatory\)\]\s*\[string\]\s*\$DceEndpoint'
+            $src | Should -Match '\[Parameter\(Mandatory\)\]\s*\[string\]\s*\$DcrImmutableId'
+            $src | Should -Match '\[Parameter\(Mandatory\)\]\s*\[string\]\s*\$StreamName'
+            $src | Should -Match '\[object\[\]\]\s*\$Rows'
         }
     }
 }

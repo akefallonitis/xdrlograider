@@ -32,6 +32,7 @@ $config = [pscustomobject]@{
     DcrImmutableIdsJson  = $env:DCR_IMMUTABLE_IDS_JSON
     StorageAccountName   = $env:STORAGE_ACCOUNT_NAME
     CheckpointTable      = $env:CHECKPOINT_TABLE_NAME
+    DlqTable             = $env:XDR_INGEST_DLQ_TABLE_NAME
     ExpectedTenantId     = $env:TENANT_ID
 }
 
@@ -61,20 +62,46 @@ try {
         -Credential $authBundle `
         -TenantId   $config.ExpectedTenantId
 
-    # Pop any DLQ entries for this stream first (drain before fresh ingest)
+    # Pop any DLQ entries for this stream first (drain before fresh ingest).
+    # Pop-XdrIngestDlq signature requires:
+    #   -StorageAccountName, -TableName, -StreamName, -MaxBatches  (all mandatory)
     $dlqRows = @()
     try {
-        $dlqEntries = Pop-XdrIngestDlq -StorageAccountName $config.StorageAccountName -StreamName "Custom-$streamName" -MaxBatches 5
-        foreach ($entry in $dlqEntries) {
-            $dlqRows += $entry.Rows
-        }
+        $dlqEntries = Pop-XdrIngestDlq `
+            -StorageAccountName $config.StorageAccountName `
+            -TableName          $config.DlqTable `
+            -StreamName         "Custom-$streamName" `
+            -MaxBatches         5
+        foreach ($entry in $dlqEntries) { $dlqRows += $entry.Rows }
     } catch {
         Write-Warning ("Xdr-PollStream: DLQ pop failed for {0}: {1}" -f $streamName, $_.Exception.Message)
     }
 
-    # Poll fresh data via single-endpoint dispatch
-    $result = Invoke-MDEEndpoint -Session $session -Stream $streamName -Config $config
-    $rowsIngested = if ($result -and $result.RowsIngested) { [int]$result.RowsIngested } else { 0 }
+    # Poll fresh data via the single-endpoint dispatcher. Invoke-MDEEndpoint
+    # returns an object[] of DCE-ready rows (NOT a wrapper with .RowsIngested).
+    # Signature: -Session (pscustomobject), -Stream (string), -FromUtc (optional),
+    # -PathParams (optional). It does NOT take a -Config parameter.
+    $freshRows = @(Invoke-MDEEndpoint -Session $session -Stream $streamName)
+
+    # Resolve the per-stream DCR immutableId from the deploy-time map.
+    $dcrImmutableIds = $config.DcrImmutableIdsJson | ConvertFrom-Json -AsHashtable
+    if (-not $dcrImmutableIds.ContainsKey($streamName)) {
+        throw "Stream '$streamName' missing from DCR_IMMUTABLE_IDS_JSON env var"
+    }
+    $dcrId = [string]$dcrImmutableIds[$streamName]
+
+    # Ingest fresh rows + any DLQ replay rows in a single batch via the DCE.
+    $allRows = @($freshRows) + @($dlqRows)
+    $rowsIngested = 0
+    if ($allRows.Count -gt 0) {
+        Send-ToLogAnalytics `
+            -DceEndpoint     $config.DceEndpoint `
+            -DcrImmutableId  $dcrId `
+            -StreamName      "Custom-$streamName" `
+            -Rows            $allRows `
+            -DlqStorageAccount $config.StorageAccountName | Out-Null
+        $rowsIngested = $allRows.Count
+    }
 
     $sw.Stop()
     return @{
