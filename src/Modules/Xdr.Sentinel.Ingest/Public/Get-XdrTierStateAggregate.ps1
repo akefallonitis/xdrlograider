@@ -79,9 +79,18 @@ function Get-XdrTierStateAggregate {
     #  3. Storage Table query result is [pscustomobject] — PSObject.Properties.Name
     #     check is the strict-safe pattern.
     $sinceCutoff = $SinceUtc.ToString('o')
+    # Section R++++++ orphan filter (2026-05-07T19:15Z): skip rows lacking the
+    # Section R++.A truth-signal cols (Reason, HttpStatus). Pre-R++.A rows are
+    # legacy schema — they cannot be meaningfully aggregated for connector-card
+    # classification (would surface as "no reason" to operators). When manifest
+    # streams change tier (e.g. MDE_DeviceTimeline_CL Inventory → ActionCenter)
+    # OR get retired (deprecated streams stop polling), the original PK row
+    # is never overwritten + becomes orphan. Filter these out so operators see
+    # only current-tier-mapped streams in XdrConnectorHealth_CL.
     $fresh = @($rows | Where-Object {
         ($_.PSObject.Properties.Name -contains 'TimestampUtc') -and
-        ($_.TimestampUtc -gt $sinceCutoff)
+        ($_.TimestampUtc -gt $sinceCutoff) -and
+        ($_.PSObject.Properties.Name -contains 'Reason')   # post-R++.A schema only
     })
 
     # Group by Portal + Tier; emit aggregate row per group.

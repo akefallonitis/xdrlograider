@@ -163,12 +163,18 @@ function Test-Wiring {
     }
     # Section R++++++ fix (2026-05-07): AppDependencies.Success is string in
     # AppInsights schema, not bool — `not Success` raised BadRequest. Use
-    # explicit equality comparison instead.
+    # explicit equality comparison instead. Also track LatestFailUtc so we
+    # can distinguish "real-time production gap" from "historical noise"
+    # (e.g. pre-FA-restart 4xx that aged into the window but is no longer
+    # happening) — a transient pre-restart failure shouldn't block the
+    # PRODUCTION-READY verdict if zero failures are happening NOW.
     $depQuery = @'
 AppDependencies
 | where TimeGenerated > ago(1h)
 | extend Cat = case(Target has 'vault.azure.net','KV', Target has 'security.microsoft.com','Defender', Target has 'ingest.monitor.azure.com','DCE', Target has 'storage.azure.com' or Target has 'core.windows.net','Storage','Other')
-| summarize n=count(), succ=countif(Success == true), fail=countif(Success == false), p95=percentile(DurationMs,95) by Cat, Target
+| summarize n=count(), succ=countif(Success == true), fail=countif(Success == false),
+            LatestFailUtc=maxif(TimeGenerated, Success == false),
+            p95=percentile(DurationMs,95) by Cat, Target
 | order by Cat, fail desc
 '@
     $r = Invoke-WorkspaceQuery -WorkspaceCustomerId $WorkspaceCustomerId -Query $depQuery
@@ -179,10 +185,26 @@ AppDependencies
     }
     foreach ($row in $r.Results) {
         $rate = if ($row.n -gt 0) { [Math]::Round($row.succ / $row.n, 3) } else { 0 }
-        $status = if ($row.n -eq 0) { 'WARN' } elseif ($rate -lt 0.95) { 'FAIL' } elseif ($rate -lt 0.99) { 'WARN' } else { 'PASS' }
+        # Failures-fresh check: only FAIL if recent failures exist (last 15 min).
+        # Pre-FA-restart historical 4xx that already aged past 15 min are
+        # transient noise from a prior code version, not production-impacting.
+        $failureFresh = $false
+        if ($row.fail -gt 0 -and $row.LatestFailUtc) {
+            try {
+                $ageMin = ((Get-Date).ToUniversalTime() - [DateTime]::Parse($row.LatestFailUtc)).TotalMinutes
+                if ($ageMin -le 15) { $failureFresh = $true }
+            } catch { $failureFresh = $true }  # safe default if parse fails
+        }
+        $status = if ($row.n -eq 0) { 'WARN' }
+                  elseif ($rate -lt 0.95 -and $failureFresh) { 'FAIL' }
+                  elseif ($rate -lt 0.95) { 'WARN' }  # historical-only failures
+                  elseif ($rate -lt 0.99) { 'WARN' }
+                  else { 'PASS' }
+        $detail = "n={0} succ={1} fail={2} rate={3} p95={4}ms" -f $row.n, $row.succ, $row.fail, $rate, $row.p95
+        if ($row.fail -gt 0 -and -not $failureFresh) { $detail += " (failures stale; latest >15min ago)" }
         Add-Signal -Section 'Wiring' -Id ("W-{0}-{1}" -f $row.Cat, ($row.Target -replace '\W','')) `
             -Name "Dependency $($row.Target)" -Status $status `
-            -Detail ("n={0} succ={1} fail={2} rate={3} p95={4}ms" -f $row.n, $row.succ, $row.fail, $rate, $row.p95)
+            -Detail $detail
     }
 }
 

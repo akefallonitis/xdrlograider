@@ -522,29 +522,35 @@
 
         @{
             Stream = 'MDE_TenantAllowBlock_CL'
-            # Section R++++++ F6 investigation NEEDS RE-RESEARCH (2026-05-07T17:00):
-            # Lab tenant returns 500 with body `{error:{code:InternalServerError}}`.
-            # Operator directive: "should work tenantallowblock list repeat research readuit properly".
-            # ACTION: re-verify path against nodoc + XDRInternals; check alternate
-            # TABL endpoints (e.g. `/papin/.../indicators` vs `/papin/.../filterValues`
-            # OR `/responseApiPortal/ti/indicators` per nodoc deferred sweep).
-            # Runtime SuccessKind classifies actual response — no manifest-level
-            # speculation about license vs backend.
-            Path = '/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues'
+            # Section R++++++ F6 RESOLVED (2026-05-07T19:15Z): path swap to canonical
+            # `/mtp/responseApiPortal/ti/indicators` per nodoc configuration.yml:1655.
+            # Original `/papin/.../filterValues` returned 500 in lab tenant + only
+            # provides UI filter dropdown facets (not indicator inventory). The new
+            # canonical returns the ACTUAL custom threat indicators with full typed
+            # schema documented in nodoc (NOT pending) — IndicatorId, IndicatorType,
+            # IndicatorValue, IoaDefinitionId, CreationTime, CreatedBy, LastUpdateTime,
+            # IsEnabled, Action, Severity, Title, Category, Description, Application,
+            # GenerateAlert. Operator-valuable for TABL drift queries.
+            Path = '/apiproxy/mtp/responseApiPortal/ti/indicators'
             Tier = 'Configuration'
             Category = 'Configuration and Settings'
             CategoryId = 5  # nodoc-authoritative (Phase D.1)
-            Purpose = 'Tenant Allow-Block-List (TABL) filter facet — IP/URL/file-hash indicator inventory'
+            Purpose = 'Tenant Allow-Block-List (TABL) custom threat indicators (URL/file/IP/cert) — indicator inventory'
             Availability = 'live'
-            # Fixture: tenant-gated (no live data). Convention: TABL indicator filter facet.
+            IdProperty = @('IndicatorId', 'indicatorId', 'Id', 'id')
+            # Live response shape per nodoc configuration.yml:1655: array of
+            # indicator objects (Shape 1). No UnwrapProperty needed — direct array.
+            # Phase 1 GA: minimal ProjectionMap aligned to existing DCR/workspace
+            # cols (additive-only schema preserved). v0.1.0.1 expansion can add
+            # IndicatorValue/IsEnabled/Severity/GenerateAlert/etc.
             ProjectionMap = @{
-                IndicatorType   = '$tostring:Type'
-                # Renamed from `Action` to disambiguate from MDE_SuppressionRules_CL.SuppressionAction (int).
-                # See tests/arm/SchemaConsistency.Tests.ps1.
+                # Renamed from `Action` to disambiguate from MDE_SuppressionRules_CL.
+                # nodoc Action is int; cast to string for col-type consistency.
                 AllowBlockAction = '$tostring:Action'
+                IndicatorType    = '$tostring:IndicatorType'
                 CreatedBy        = '$tostring:CreatedBy'
-                CreatedTime      = '$todatetime:CreatedTime'
-                ExpiryTime       = '$todatetime:ExpirationTime'
+                CreatedTime      = '$todatetime:CreationTime'   # nodoc field name = CreationTime
+                ExpiryTime       = '$todatetime:LastUpdateTime'  # placeholder until ExpirationTime cols added
             }
         }
 
