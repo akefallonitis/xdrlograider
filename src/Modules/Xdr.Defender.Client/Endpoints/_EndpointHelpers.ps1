@@ -245,7 +245,14 @@ function Expand-MDEResponse {
         ),
         [string] $UnwrapProperty,
         [string] $Stream,
-        [switch] $SingleObjectAsRow
+        [switch] $SingleObjectAsRow,
+        # Section R++++++ Phase 1 fix (2026-05-07T17:25Z): for SingleObjectAsRow
+        # streams without a natural id col (TenantContext, UserPreferences,
+        # ThreatAnalyticsTopThreats, AppsSecureScore, etc), the manifest
+        # declares SyntheticEntityId='<stream>-singleton' to give operator
+        # queries a stable EntityId for drift-join. Previously declared in
+        # manifest but never consumed by code → fell to idx-0 fallback.
+        [string] $SyntheticEntityId
     )
 
     # v0.1.0-beta post-deploy hardening: DEBUG-CAPTURE mode.
@@ -371,7 +378,17 @@ function Expand-MDEResponse {
                     }
                 }
             }
-            if (-not $id) { $id = "idx-$i" }
+            if (-not $id) {
+                # Section R++++++ Phase 1 fix: prefer manifest's SyntheticEntityId
+                # over the idx-N fallback. SingleObjectAsRow streams typically
+                # have one row, so syntheticId is stable across polls — gives
+                # operators a deterministic key for drift-join.
+                if ($SyntheticEntityId) {
+                    $id = $SyntheticEntityId
+                } else {
+                    $id = "idx-$i"
+                }
+            }
             $pairs += @{ Id = $id; Entity = $item }
             $i++
         }

@@ -258,6 +258,13 @@ function Invoke-MDEEndpoint {
     if ($entry.ContainsKey('SingleObjectAsRow') -and $entry.SingleObjectAsRow) {
         $expandArgs['SingleObjectAsRow'] = $true
     }
+    # Section R++++++ Phase 1 fix (2026-05-07T17:25Z): wire manifest's
+    # SyntheticEntityId through to Expand-MDEResponse so SingleObjectAsRow
+    # streams with no natural id-col emit a stable synthetic EntityId
+    # (e.g. 'topthreats-singleton') instead of the idx-N fallback.
+    if ($entry.ContainsKey('SyntheticEntityId') -and $entry.SyntheticEntityId) {
+        $expandArgs['SyntheticEntityId'] = [string]$entry.SyntheticEntityId
+    }
 
     # Per-call Extras: carry any PathParams so ingested rows are self-describing
     # (useful for per-machineId / per-investigationId correlation).
