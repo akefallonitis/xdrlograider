@@ -8,6 +8,26 @@ This project adheres to [Semantic Versioning 2.0.0](https://semver.org/) and the
 
 First proven production-ready release. Pure Defender XDR portal-only telemetry connector for Microsoft Sentinel.
 
+### Live-deploy validation fixes (post Phase 1, this turn)
+
+Operator-facing connector card UX + production-deploy hardening surfaced via live audit screenshot + iterative fix-enhance-consolidate cycle:
+
+- **Connector card** — descriptionMarkdown updated 59→65 streams + lists ships-with content (8 workbooks + 20 rules + 9 hunting + 4 parsers + 390+ samples).
+- **Connector card** — `isPreview: false` on both `additionalRequirementBanner.isPreview` (string) + `availability.isPreview` (bool); GA v0.1.0 no longer advertises Preview.
+- **Connector card chart** — graphQueries[0] (Rows ingested last 7d) was bound to `XdrConnectorHealth_CL.RowsIngested SUM` which double-counted: heartbeat aggregator wrote the same 24h-window sum every 5 min, so `sum() over time` re-counted 288 fires/day → chart showed 13,742 vs actual 106,466 in workspace tables (7.7× under-reporting). Rebound to `union Defender_*_CL | summarize Rows=count() by bin(TimeGenerated, 1d)`.
+- **ARM template KV-secret preservation** — added 3-layer guard so ARM redeploy never wipes existing real credentials:
+  - `Deploy-XdrLogRaider.ps1` defaults to passing empty SecureStrings (length 0) for ServicePassword/TotpSeed/PasskeyJson; ARM `condition: greater(length, 0)` skips secret deploy.
+  - `Deploy-XdrLogRaider.ps1` adds `-SkipSecretSeeding` switch + named `-ServicePassword/-TotpSeed/-PasskeyJson` params for explicit seeding.
+  - `mainTemplate.json` belt-and-suspenders: `condition` also rejects `'dummy-not-used-existing-kv-overrides'` sentinel so even if a future caller passes the dummy, secret is preserved.
+- **Verify-EndToEndProduction.ps1 W1** — KQL `not Success` raised BadRequest (Success is string in AppDependencies schema, not bool). Replaced with explicit `Success == false` comparison.
+- **`mainTemplate.json` workspace-table dedup** — `Defender_EndpointConfiguration_CL` had `Platform` col duplicated when MDE_SecurityPolicies_CL was added; ARM customTables nested deploy failed with "columns appear more than once". Deduped.
+- **`SyntheticEntityId` row-builder wiring** (Section R++++++ Phase 1) — manifest declared `SyntheticEntityId='<stream>-singleton'` for SingleObjectAsRow streams (TenantContext, UserPreferences, ThreatAnalyticsTopThreats, AppsSecureScore, DataSecureScore, IdentitySecureScore, PostureTenants, etc.) but the row-builder NEVER consumed it → fell to idx-N fallback. Fixed `Resolve-MDEEntityPairs` to accept new `[string] $SyntheticEntityId` param + use it before idx-N; wired through `Invoke-MDEEndpoint` `$expandArgs`.
+- **`$json:` cast array preservation** — PowerShell pipeline-unwrap quirk (`$value | ConvertTo-Json` collapses 1-element arrays to scalar) caused `$json:GroupRules` against MDE_RbacDeviceGroups_CL with one rule to emit `{"O":1}` instead of `[{"O":1}]`; workspace `dynamic` col stored scalar; operator queries against `array_length(GroupRules)` returned null. Fixed by re-walking source entity to detect array-shape + forcing `ConvertTo-Json -AsArray` on collapsed-single-element values; multi-element arrays serialize naturally without double-wrap.
+
+### New tools (this turn)
+
+- **`tools/Audit-DataQuality.ps1`** — schema-parsing + data-quality audit per stream (A1 row-count + recency, A2 EntityId fallback %, A3 RawJson parseability, A4 typed-col population). Goes beyond "did API return 200" to verify operator content actually queries the typed cols correctly. Exit code 2 on FAIL, 1 on WARN, 0 on PASS.
+
 ### Highlights
 
 - **65 telemetry streams** across 5 cadence tiers (10m / 1h / 6h / 24h / 7d) routed to **11 consolidated workspace tables** (10 `Defender_<Category>_CL` per nodoc D.1 10-category taxonomy + 1 `XdrConnectorHealth_CL` operational table).
