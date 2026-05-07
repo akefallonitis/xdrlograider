@@ -201,7 +201,8 @@ try {
                     $streamName, $eid, $_.Exception.Message)
             }
         }
-        $freshRows = @($aggregated)
+        # Section R++++++ defensive null filter: strip $null elements before ingest.
+        $freshRows = @($aggregated | Where-Object { $null -ne $_ })
         $resultSummary = ($entityResults.GetEnumerator() | Where-Object { $_.Value -gt 0 } | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ', '
         Write-Information ("Xdr-PollStream PerEntityFanout {0}: {1} rows across {2} entities ({3})" -f
             $streamName, $freshRows.Count, $entityIds.Count, $resultSummary)
@@ -237,13 +238,19 @@ try {
                 $platformResults[$platform] = 'error'
             }
         }
-        $freshRows = @($aggregated)
+        # Section R++++++ defensive null filter (2026-05-07T18:55Z): Send-ToLogAnalytics
+        # GetByteCount throws on null when aggregated rows contain $null elements
+        # (one platform returned null, others returned objects). Strip nulls before
+        # ingest. Same defense applies to the standard single-call path below.
+        $freshRows = @($aggregated | Where-Object { $null -ne $_ })
         Write-Information ("Xdr-PollStream PerPlatformFanout {0}: {1} rows across {2} platforms ({3})" -f
             $streamName, $freshRows.Count, $platforms.Count, (($platformResults.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ', '))
     } else {
         # Standard single-call path (no fanout).
         # Invoke-MDEEndpoint returns object[] of DCE-ready rows (NOT a wrapper).
-        $freshRows = @(Invoke-MDEEndpoint @invokeArgs)
+        # Defensive null filter (Section R++++++): strip $null elements that
+        # could otherwise bomb Send-ToLogAnalytics GetByteCount.
+        $freshRows = @(@(Invoke-MDEEndpoint @invokeArgs) | Where-Object { $null -ne $_ })
     }
 
     # Section R++.A: read truth-signal side-channel for Set-XdrTierStateRow.

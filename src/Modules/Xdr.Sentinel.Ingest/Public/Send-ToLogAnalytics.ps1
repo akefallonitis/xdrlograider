@@ -121,7 +121,12 @@ function Send-ToLogAnalytics {
     $currentBytes = 2  # open/close brackets
 
     foreach ($row in $Rows) {
+        # Section R++++++ defensive null filter (2026-05-07T19:00Z): GetByteCount
+        # throws on null, blowing up entire ingest batch. Skip null rows
+        # gracefully so a single bad row doesn't fail the whole stream.
+        if ($null -eq $row) { continue }
         $rowJson = $row | ConvertTo-Json -Depth 20 -Compress
+        if ([string]::IsNullOrEmpty($rowJson)) { continue }
         $rowBytes = [System.Text.Encoding]::UTF8.GetByteCount($rowJson)
 
         # If this single row exceeds the limit, log a warning and skip
