@@ -2050,7 +2050,7 @@
                   ],
                   "verticals": []
                 },
-                "isPreview": "true",
+                "isPreview": "false",
                 "isNew": "true",
                 "threatAnalysisTactics": [
                   "InitialAccess",
@@ -2088,23 +2088,23 @@
                   "id": "[variables('dataConnectorId')]",
                   "title": "XdrLogRaider — Defender XDR portal telemetry",
                   "publisher": "[variables('solutionPublisher')]",
-                  "descriptionMarkdown": "Polls Microsoft Defender XDR portal-only endpoints (e.g. Action Center, Custom Detections, Exposure Management, Identity, Device Timeline, Machine Actions, XSPM, Threat Analytics) — **59 streams** across 10 functional categories — and lands telemetry in **11 consolidated Log Analytics tables** (10 `Defender_<Category>_CL` per category + 1 `XdrConnectorHealth_CL` ops table). Operators bring their own KQL parsers, hunting queries, analytic rules, and workbooks.<br><br>Authentication: unattended TOTP or software passkey via the service account. Multi-portal forward-compat (Defender today; Entra/Purview/Intune planned for v0.2.0).",
+                  "descriptionMarkdown": "Polls Microsoft Defender XDR portal-only endpoints (e.g. Action Center, Custom Detections, Exposure Management, Identity, Device Timeline, Machine Actions, XSPM, Threat Analytics, Vulnerability Management, Endpoint Device Management) — **65 streams** across 10 functional categories — and lands telemetry in **11 consolidated Log Analytics tables** (10 `Defender_<Category>_CL` per category + 1 `XdrConnectorHealth_CL` ops table). Ships with **8 workbooks**, **20 analytic rules** (14 detection + 6 XdrOps; all `enabled:false` per Sentinel best practice), **9 hunting queries**, **4 cadence-tier KQL drift parsers**, and **390+ sample queries**.<br><br>Authentication: unattended TOTP or software passkey via the service account. Multi-portal forward-compat (Defender today; Entra/Purview/Intune planned for v0.2.0).",
                   "graphQueriesTableName": "XdrConnectorHealth_CL",
                   "graphQueries": [
                     {
                       "metricName": "Rows ingested (last 7d)",
                       "legend": "Total rows landed",
-                      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(7d) | where Tier != 'Heartbeat' | summarize sum(RowsIngested) by bin(TimeGenerated, 1d)"
+                      "baseQuery": "union Defender_ActionCenter_CL, Defender_ConfigurationAndSettings_CL, Defender_EndpointConfiguration_CL, Defender_EndpointDeviceManagement_CL, Defender_ExposureManagement_CL, Defender_IdentityProtection_CL, Defender_MultiTenantOperations_CL, Defender_StreamingApi_CL, Defender_ThreatAnalytics_CL, Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(7d) | summarize Rows=count() by bin(TimeGenerated, 1d)"
                     },
                     {
                       "metricName": "Streams succeeded (last 24h)",
                       "legend": "Streams Succeeded",
-                      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | where Tier != 'Heartbeat' | summarize max(StreamsSucceeded) by bin(TimeGenerated, 1h), Tier"
+                      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | where Tier != 'Heartbeat' | summarize StreamsSucceeded=max(StreamsSucceeded) by bin(TimeGenerated, 1h), Tier"
                     },
                     {
                       "metricName": "Heartbeat (last 24h)",
                       "legend": "XdrLogRaider heartbeats",
-                      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | where Tier == 'Heartbeat' | summarize count() by bin(TimeGenerated, 1h)"
+                      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | where Tier == 'Heartbeat' | summarize Heartbeats=count() by bin(TimeGenerated, 1h)"
                     }
                   ],
                   "sampleQueries": [
@@ -2177,7 +2177,7 @@
                   ],
                   "availability": {
                     "status": 1,
-                    "isPreview": true
+                    "isPreview": false
                   },
                   "permissions": {
                     "resourceProvider": [
