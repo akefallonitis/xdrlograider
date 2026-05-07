@@ -293,8 +293,10 @@ Describe 'Xdr-PollStream — runtime behaviour with realistic Durable activity i
         It 'Activity treats Invoke-MDEEndpoint result as object[] rows (not @{ RowsIngested })' {
             $activitySource = Get-Content -Raw $script:ActivityPath
             # Old buggy pattern: $result = Invoke-MDEEndpoint ... ; if ($result.RowsIngested) ...
-            # New correct pattern: $freshRows = @(Invoke-MDEEndpoint ...)
-            $activitySource | Should -Match '\$freshRows\s*=\s*@\(Invoke-MDEEndpoint' -Because 'Invoke-MDEEndpoint returns rows; activity must wrap in @() and feed Send-ToLogAnalytics'
+            # New correct pattern: $freshRows = @(Invoke-MDEEndpoint ...) — Section R++++++ defensive null
+            # filter (2026-05-07) wraps the call in another @(...) | Where-Object null filter, both
+            # patterns are valid: `@(Invoke-MDEEndpoint` OR `@(@(Invoke-MDEEndpoint` (with null-filter pipe).
+            $activitySource | Should -Match '\$freshRows\s*=\s*@\(.*Invoke-MDEEndpoint' -Because 'Invoke-MDEEndpoint returns rows; activity must wrap in @() and feed Send-ToLogAnalytics'
             $activitySource | Should -Not -Match '\$result\.RowsIngested' -Because 'no RowsIngested property on Invoke-MDEEndpoint output'
         }
 
