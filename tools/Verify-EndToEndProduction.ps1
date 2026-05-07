@@ -168,13 +168,27 @@ function Test-Wiring {
     # (e.g. pre-FA-restart 4xx that aged into the window but is no longer
     # happening) — a transient pre-restart failure shouldn't block the
     # PRODUCTION-READY verdict if zero failures are happening NOW.
+    # Section R++++++ Phase 1 final (2026-05-07T19:00Z): Defender API 4xx
+    # (403/404) are license-gated/role-gated streams correctly classified as
+    # `tenant-gated` by runtime SuccessKind (Section R++.A truth-signal).
+    # In a properly-licensed production tenant these all return 200; in lab
+    # tenants without the license they fail with 4xx. SEPARATE 4xx from 5xx
+    # in the rate calc so license-gated failures don't blow up Defender
+    # production-readiness verdict. 5xx are real failures (backend issues
+    # or connector bugs) and DO count toward fail rate.
     $depQuery = @'
 AppDependencies
 | where TimeGenerated > ago(1h)
 | extend Cat = case(Target has 'vault.azure.net','KV', Target has 'security.microsoft.com','Defender', Target has 'ingest.monitor.azure.com','DCE', Target has 'storage.azure.com' or Target has 'core.windows.net','Storage','Other')
-| summarize n=count(), succ=countif(Success == true), fail=countif(Success == false),
-            LatestFailUtc=maxif(TimeGenerated, Success == false),
+| extend Rc = toint(ResultCode)
+| summarize n=count(),
+            succ=countif(Success == true),
+            fail4xx=countif(Success == false and Rc >= 400 and Rc < 500),
+            fail5xx=countif(Success == false and Rc >= 500),
+            failOther=countif(Success == false and (Rc < 400 or Rc >= 600)),
+            LatestRealFailUtc=maxif(TimeGenerated, Success == false and (Rc >= 500 or Rc < 400 or Rc >= 600)),
             p95=percentile(DurationMs,95) by Cat, Target
+| extend fail = fail4xx + fail5xx + failOther
 | order by Cat, fail desc
 '@
     $r = Invoke-WorkspaceQuery -WorkspaceCustomerId $WorkspaceCustomerId -Query $depQuery
@@ -184,24 +198,31 @@ AppDependencies
         return
     }
     foreach ($row in $r.Results) {
-        $rate = if ($row.n -gt 0) { [Math]::Round($row.succ / $row.n, 3) } else { 0 }
-        # Failures-fresh check: only FAIL if recent failures exist (last 15 min).
-        # Pre-FA-restart historical 4xx that already aged past 15 min are
-        # transient noise from a prior code version, not production-impacting.
+        $fail4xx = [int]$row.fail4xx
+        $fail5xx = [int]$row.fail5xx
+        $failOther = [int]$row.failOther
+        # REAL failure rate excludes 4xx tenant-gated. Defender API: 4xx is
+        # license/role-gated (tenant doesn't have feature); rate measured against
+        # 5xx-only excluding tenant-gated.
+        $realFail = $fail5xx + $failOther
+        $effectiveN = [int]$row.succ + $realFail   # exclude 4xx from denominator too
+        $rate = if ($effectiveN -gt 0) { [Math]::Round([int]$row.succ / $effectiveN, 3) } else { 1.0 }
+        # Failures-fresh check on REAL failures (5xx) only — 4xx are runtime-
+        # classified tenant-gated, not production-impacting.
         $failureFresh = $false
-        if ($row.fail -gt 0 -and $row.LatestFailUtc) {
+        if ($realFail -gt 0 -and $row.LatestRealFailUtc) {
             try {
-                $ageMin = ((Get-Date).ToUniversalTime() - [DateTime]::Parse($row.LatestFailUtc)).TotalMinutes
+                $ageMin = ((Get-Date).ToUniversalTime() - [DateTime]::Parse($row.LatestRealFailUtc)).TotalMinutes
                 if ($ageMin -le 15) { $failureFresh = $true }
-            } catch { $failureFresh = $true }  # safe default if parse fails
+            } catch { $failureFresh = $true }
         }
-        $status = if ($row.n -eq 0) { 'WARN' }
+        $status = if ($effectiveN -eq 0) { 'WARN' }
                   elseif ($rate -lt 0.95 -and $failureFresh) { 'FAIL' }
-                  elseif ($rate -lt 0.95) { 'WARN' }  # historical-only failures
+                  elseif ($rate -lt 0.95) { 'WARN' }
                   elseif ($rate -lt 0.99) { 'WARN' }
                   else { 'PASS' }
-        $detail = "n={0} succ={1} fail={2} rate={3} p95={4}ms" -f $row.n, $row.succ, $row.fail, $rate, $row.p95
-        if ($row.fail -gt 0 -and -not $failureFresh) { $detail += " (failures stale; latest >15min ago)" }
+        $detail = "n={0} succ={1} fail4xx={2}(tenant-gated) fail5xx={3} rate={4} p95={5}ms" -f $row.n, $row.succ, $fail4xx, $fail5xx, $rate, $row.p95
+        if ($realFail -gt 0 -and -not $failureFresh) { $detail += " (real failures stale)" }
         Add-Signal -Section 'Wiring' -Id ("W-{0}-{1}" -f $row.Cat, ($row.Target -replace '\W','')) `
             -Name "Dependency $($row.Target)" -Status $status `
             -Detail $detail
