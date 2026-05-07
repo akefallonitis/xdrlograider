@@ -151,6 +151,16 @@ foreach ($entry in $streams) {
     } catch {}
 
     # ============ A4 — Typed col population ============
+    # Property-bag streams (Shape 3) flatten responses to per-property rows where
+    # FeatureName=key + IsEnabled=value. Manifest historically declared "legacy"
+    # cols mapping to fields that don't exist on the per-property scalar entity
+    # (always null by design). These are intentional additive-only schema entries
+    # (ARM rejects col drops). Detect property-bag streams by ProjectionMap shape
+    # and only audit FeatureName + IsEnabled.
+    $isPropertyBag = $projMap -contains 'FeatureName' -and $projMap -contains 'IsEnabled'
+    if ($isPropertyBag) {
+        $projMap = @($projMap | Where-Object { $_ -in @('FeatureName', 'IsEnabled') })
+    }
     if ($projMap.Count -gt 0) {
         # For each ProjectionMap key, check non-null %
         $colChecks = $projMap | ForEach-Object { "isnotnull(['$_'])" }
