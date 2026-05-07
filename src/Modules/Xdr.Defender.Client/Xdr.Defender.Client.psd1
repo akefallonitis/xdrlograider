@@ -7,14 +7,14 @@
     Author                = 'Alex Kefallonitis'
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
-    Description           = 'L3 Defender-portal manifest dispatcher. Per-stream Invoke-MDEEndpoint + per-tier Invoke-MDETierPoll + shared Invoke-TierPollWithHeartbeat timer body, backed by the endpoints.manifest.psd1 catalogue (45 streams across P0-P7 tiers, all read-only). Builds on the L2 Xdr.Defender.Auth cookie-exchange layer.'
+    Description           = 'L3 Defender-portal manifest dispatcher. Per-stream Invoke-MDEEndpoint backed by the endpoints.manifest.psd1 catalogue (65 streams across 5 cadence tiers: ActionCenter / XspmGraph / Configuration / Inventory / Maintenance, all read-only). Builds on the L2 Xdr.Defender.Auth cookie-exchange layer.'
     RequiredModules       = @('Xdr.Defender.Auth', 'Xdr.Common.Manifest')
-    # Public surface: single dispatcher + per-tier poller + shared timer body +
-    # 3 underlying helpers. The 46 stream names live in
-    # endpoints.manifest.psd1 (not in this file) so adding/retiring an endpoint
-    # is a one-line manifest change.
-    # Note: manifest loader (Get-XdrEndpointManifest) lives in Xdr.Common.Manifest
-    # module (Phase J D'.1 extraction for v0.2.0 multi-portal forward-compat).
+    # Public surface: single dispatcher + truth-signal accessor + 3 underlying
+    # helpers exported for v0.2.0 multi-portal extensibility (Entra/Purview/
+    # Intune wrapper modules can re-use the projection + response-expansion
+    # logic without reimplementing). Stream names live in endpoints.manifest.psd1
+    # so adding/retiring an endpoint is a one-line manifest change.
+    # Manifest loader (Get-XdrEndpointManifest) lives in Xdr.Common.Manifest.
     FunctionsToExport     = @(
         'Invoke-MDEEndpoint',
         'Invoke-MDETierPoll',
@@ -33,7 +33,7 @@
             Tags         = @('Defender', 'MDE', 'XDR', 'Portal', 'Endpoints')
             LicenseUri   = 'https://github.com/akefallonitis/xdrlograider/blob/main/LICENSE'
             ProjectUri   = 'https://github.com/akefallonitis/xdrlograider'
-            ReleaseNotes = 'v0.1.0-beta: 45 portal-only endpoints with live-captured fixtures, Availability classification, Headers + UnwrapProperty + forward-scalable Portal= manifest schema, Invoke-TierPollWithHeartbeat shared timer helper. Part of XdrLogRaider v0.1.0-beta.'
+            ReleaseNotes = 'v0.1.0 GA: 65 Defender XDR portal-only streams (PerEntityFanout + PerPlatformFanout + Pagination architectures), live-captured fixtures, runtime SuccessKind classification (live / live-empty / tenant-gated / error), Headers + UnwrapProperty + IdProperty + SyntheticEntityId manifest schema, ProjectionMap with $tostring/$toint/$tobool/$todatetime/$json type casts. Part of XdrLogRaider v0.1.0 GA.'
         }
     }
 }

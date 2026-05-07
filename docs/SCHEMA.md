@@ -51,7 +51,7 @@ Every row also has `RawJson` (the full source-API response, for forensic queries
 | `xdrlr-dcr-vuln-mgmt` | `Defender_VulnerabilityManagement_CL` | 1 |
 | `xdrlr-dcr-ops` | `XdrConnectorHealth_CL` | 1 |
 
-**Total**: 13 DCRs / 60 streamDecls (59 streams + 1 ops) / 11 workspace tables.
+**Total**: 13 DCRs / 66 streamDecls (65 streams + 1 ops) / 11 workspace tables.
 
 ## Per-stream column rename (v0.1.0)
 

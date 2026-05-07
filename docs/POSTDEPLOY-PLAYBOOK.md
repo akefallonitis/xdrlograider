@@ -111,9 +111,9 @@ pwsh ./tests/Run-Tests.ps1 -Category e2e
 - `parser functions / hunting queries / workbook` all deployed ✓
 
 **If per-tier test shows fewer populated streams than expected**:
-- **Expected baseline**: 25 of 45 streams populate immediately (validated by pre-deploy audit). 10 streams are marked `Deferred=true` in the manifest because their paths/body schemas are still under research — they will NOT emit rows until the manifest is updated in a follow-up commit.
-- **To see which are deferred**: `pwsh -c "(Get-XdrEndpointManifest -Portal Defender).Values | Where { `$_.Deferred } | Select Stream, DeferReason"`
-- **To poll them anyway for research**: `Invoke-MDETierPoll -IncludeDeferred` (not used by timer functions).
+- **Expected baseline (v0.1.0 GA)**: ~50 of 65 streams populate immediately in a properly-licensed tenant. ~12 streams are license-gated (MDI, MCAS, TVM Premium, MDE Premium, MEM); they correctly return 4xx + runtime SuccessKind classifies as `tenant-gated` (visible on `XdrConnectorHealth_CL.Reason` per stream). License-gated streams populate when the tenant has the matching license.
+- **To see per-stream classification**: `XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | summarize max(StreamsSucceeded) by Tier`
+- **To see error-classified streams** (real failures vs license-gated): query `XdrConnectorHealth_CL` for `Reason='error'` rows + correlate with `AppExceptions` for the underlying root cause.
 
 ---
 
