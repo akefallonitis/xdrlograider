@@ -404,7 +404,20 @@ function Expand-MDEResponse {
     if ($Response -is [pscustomobject] -or $Response -is [hashtable]) {
         $properties = if ($Response -is [hashtable]) { $Response.GetEnumerator() } else { $Response.PSObject.Properties }
         foreach ($prop in $properties) {
-            $pairs += @{ Id = $prop.Name; Entity = $prop.Value }
+            $value = $prop.Value
+            # Section R++++++ MM fix (2026-05-07): wrap scalar values so RawJson
+            # serializes as parseable JSON (`{"value":false}` not bare `false`).
+            # Operators querying parse_json(RawJson).value get the scalar; without
+            # this wrapper, operator queries silently fail because parse_json('false')
+            # is not a JSON object. Affects 5 streams identified in audit:
+            # AdvancedFeatures, SmartScreenConfig, DeviceControlPolicy, LiveResponseConfig,
+            # PUAConfig. Non-scalar values (nested objects, arrays) pass through unchanged.
+            if ($value -is [bool] -or $value -is [int] -or $value -is [long] -or
+                $value -is [double] -or $value -is [decimal] -or $value -is [string]) {
+                $pairs += @{ Id = $prop.Name; Entity = [pscustomobject]@{ value = $value } }
+            } else {
+                $pairs += @{ Id = $prop.Name; Entity = $value }
+            }
         }
         if ($pairs.Count -eq 0) {
             # Empty object — AppInsights event for visibility, return ZERO rows.

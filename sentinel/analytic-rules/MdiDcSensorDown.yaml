@@ -8,16 +8,23 @@ requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal
     dataTypes:
       - XdrConnectorHealth_CL
-queryFrequency: 15m
-queryPeriod: 2h
+queryFrequency: 4h
+queryPeriod: P2D
 triggerOperator: gt
 triggerThreshold: 0
 tactics:
   - DefenseEvasion
 relevantTechniques:
   - T1562
+# Section R++.C B5/B12 fix (2026-05-07):
+#  - queryPeriod was 2h vs parser lookback 2d → previous-snapshot side empty → false-positive flood
+#    when first poll lands. Aligned to P2D matching parser lookback.
+#  - queryFrequency was 15m vs Inventory cadence 1d → fired ~96x per day on data that updates once/day.
+#    Aligned to 4h (still 6x faster than data updates so no missed events; reasonable cost).
+#  - FieldName was "hasSensor" but manifest projects upstream HasSensor → IsActive (typed bool col).
+#    Drift parser emits typed-col names. Fixed to filter on IsActive.
 query: |
-  MDE_Drift_Inventory(2d, 1h) | where StreamName == "MDE_DCCoverage_CL" | where FieldName == "hasSensor" and OldValue == "true" and NewValue == "false"
+  MDE_Drift_Inventory(2d, 1d) | where StreamName == "MDE_DCCoverage_CL" | where FieldName == "IsActive" and OldValue == "True" and NewValue == "False"
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

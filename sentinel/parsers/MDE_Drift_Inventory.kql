@@ -27,7 +27,7 @@ let MDE_Drift_Inventory = (lookback:timespan = 14d, window:timespan = 1d) {
     // to ActionCenter tier (security events poll every 10m, not 24h). Removed
     // from this Inventory drift parser - ActionCenter has no drift parser by
     // design (event streams, not snapshots).
-    let sources = union (Defender_EndpointConfiguration_CL | where SourceName in ('MDE_AdvancedFeatures_CL', 'MDE_DeviceControlPolicy_CL', 'MDE_WebContentFiltering_CL', 'MDE_SmartScreenConfig_CL', 'MDE_LiveResponseConfig_CL', 'MDE_AuthenticatedTelemetry_CL', 'MDE_PUAConfig_CL', 'MDE_AntivirusPolicy_CL', 'MDE_CustomCollection_CL')), (Defender_EndpointDeviceManagement_CL | where SourceName in ('MDE_LicenseReport_CL')), (Defender_IdentityProtection_CL | where SourceName in ('MDE_SAClassification_CL', 'MDE_IdentityOnboarding_CL', 'MDE_IdentityServiceAccounts_CL', 'MDE_DCCoverage_CL', 'MDE_IdentityAlertThresholds_CL', 'MDE_RemediationAccounts_CL')), (Defender_MultiTenantOperations_CL | where SourceName in ('MDE_TenantContext_CL', 'MDE_TenantWorkloadStatus_CL', 'MDE_MtoTenants_CL')), (Defender_VulnerabilityManagement_CL | where SourceName in ('MDE_SecurityBaselines_CL'))
+    let sources = union (Defender_EndpointConfiguration_CL | where SourceName in ('MDE_AdvancedFeatures_CL', 'MDE_DeviceControlPolicy_CL', 'MDE_WebContentFiltering_CL', 'MDE_SmartScreenConfig_CL', 'MDE_LiveResponseConfig_CL', 'MDE_AuthenticatedTelemetry_CL', 'MDE_PUAConfig_CL', 'MDE_AntivirusPolicy_CL', 'MDE_CustomCollection_CL', 'MDE_SecurityPolicies_CL')), (Defender_EndpointDeviceManagement_CL | where SourceName in ('MDE_LicenseReport_CL', 'MDE_Machines_CL')), (Defender_IdentityProtection_CL | where SourceName in ('MDE_SAClassification_CL', 'MDE_IdentityOnboarding_CL', 'MDE_IdentityServiceAccounts_CL', 'MDE_DCCoverage_CL', 'MDE_IdentityAlertThresholds_CL', 'MDE_RemediationAccounts_CL')), (Defender_MultiTenantOperations_CL | where SourceName in ('MDE_TenantContext_CL', 'MDE_TenantWorkloadStatus_CL', 'MDE_MtoTenants_CL')), (Defender_VulnerabilityManagement_CL | where SourceName in ('MDE_SecurityBaselines_CL', 'MDE_VulnerableMachines_CL', 'MDE_VulnerabilityInventory_CL', 'MDE_SoftwareInventory_CL', 'MDE_RecommendationActions_CL'))
         | where TimeGenerated > ago(lookback);
     let current = sources
         | where TimeGenerated > ago(window)
@@ -42,11 +42,15 @@ let MDE_Drift_Inventory = (lookback:timespan = 14d, window:timespan = 1d) {
     | where hash(tostring(TypedBag)) != hash(tostring(TypedBag1)) or isnull(TypedBag1)
     | extend CurrentFields  = bag_keys(TypedBag)
     | extend PreviousFields = iff(isnull(TypedBag1), dynamic([]), bag_keys(TypedBag1))
+    // Section R++.C B4 fix (2026-05-07): correct Added/Removed/Modified classification.
     | mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (
         extend
-            NewValue = tostring(TypedBag[tostring(field)]),
-            OldValue = tostring(iff(isnull(TypedBag1), '', TypedBag1[tostring(field)]))
-        | where NewValue != OldValue
+            FieldInCurrent  = set_has_element(CurrentFields,  tostring(field)),
+            FieldInPrevious = set_has_element(PreviousFields, tostring(field))
+        | extend
+            NewValue = iff(FieldInCurrent,  tostring(TypedBag[tostring(field)]),  ''),
+            OldValue = iff(FieldInPrevious, tostring(TypedBag1[tostring(field)]), '')
+        | where NewValue != OldValue or (FieldInCurrent != FieldInPrevious)
       )
     | project
         TimeGenerated,
@@ -57,6 +61,10 @@ let MDE_Drift_Inventory = (lookback:timespan = 14d, window:timespan = 1d) {
         NewValue,
         SnapshotCurrent  = TimeGenerated,
         SnapshotPrevious = TimeGenerated1,
-        ChangeType       = iff(isnull(TypedBag1), "Added", iff(isnull(TypedBag[tostring(field)]), "Removed", "Modified"))
+        ChangeType       = case(
+            not(FieldInPrevious), "Added",
+            not(FieldInCurrent),  "Removed",
+            "Modified"
+        )
 };
 MDE_Drift_Inventory

@@ -1,0 +1,43 @@
+id: a1b2c3d4-1111-4003-8003-000000000003
+name: MDE TVM top vulnerable machines + inventory + remediation actions
+description: |
+  Cross-stream TVM hunt joining top-N CVE-exposed machines, vulnerability CVE
+  inventory, software inventory, and recommendation actions from Phase 1 G8 TVM
+  expansion. Returns prioritized remediation work-list. Requires TvmPremium.
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - TVM
+  - Vulnerabilities
+  - Remediation
+  - DefenderXDR
+queryFrequency: 1d
+queryPeriod: 1d
+tactics:
+  - Discovery
+relevantTechniques:
+  - T1082
+  - T1518
+query: |
+  let _topVulnerable = Defender_VulnerabilityManagement_CL
+      | where SourceName == 'MDE_VulnerableMachines_CL'
+      | where TimeGenerated > ago(24h)
+      | summarize arg_max(TimeGenerated, *) by AssetId
+      | project AssetId, MachineName, CveCount, CriticalCveCount, ExposureScore, RiskScore, OsPlatform;
+  let _vulnInventory = Defender_VulnerabilityManagement_CL
+      | where SourceName == 'MDE_VulnerabilityInventory_CL'
+      | where TimeGenerated > ago(24h)
+      | summarize arg_max(TimeGenerated, *) by CveId
+      | project CveId, Severity, CvssV3, AssetCount, ProductName;
+  let _softwareInv = Defender_VulnerabilityManagement_CL
+      | where SourceName == 'MDE_SoftwareInventory_CL'
+      | where TimeGenerated > ago(24h)
+      | summarize arg_max(TimeGenerated, *) by ProductId
+      | project ProductId, ProductName, Vendor, AssetCount, VulnerabilityCount, WeaknessCount;
+  let _recommendations = Defender_VulnerabilityManagement_CL
+      | where SourceName == 'MDE_RecommendationActions_CL'
+      | where TimeGenerated > ago(24h)
+      | summarize arg_max(TimeGenerated, *) by RemediationTaskId
+      | project RemediationTaskId, Title, Status, Priority, AssetCount, CreatedDate, DueDate;
+  union withsource=Stream _topVulnerable, _vulnInventory, _softwareInv, _recommendations
+  | order by Stream asc

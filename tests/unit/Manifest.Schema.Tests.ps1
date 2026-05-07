@@ -29,7 +29,8 @@ BeforeAll {
     $script:Endpoints = @($script:Manifest.Endpoints)
 
     $script:ValidTiers = @('ActionCenter', 'XspmGraph', 'Configuration', 'Inventory', 'Maintenance')
-    $script:ValidAvailability = @('live', 'tenant-gated', 'deprecated')
+    # Section R++.B B9 (2026-05-07): added 'requires-delegated-auth'.
+    $script:ValidAvailability = @('live', 'tenant-gated', 'deprecated', 'requires-delegated-auth', 'role-gated')
     $script:ValidCategories = @(
         'Endpoint Device Management',
         'Endpoint Configuration',

@@ -54,13 +54,15 @@ BeforeAll {
     function global:Get-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey) $null }
     function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
 
-    # Pre-import Xdr.Common.Telemetry so Xdr.Sentinel.Ingest's RequiredModules
-    # pre-check resolves on Linux CI (where the modules dir is not on PSModulePath).
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Telemetry' 'Xdr.Common.Telemetry.psd1') -Force -ErrorAction Stop
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -ErrorAction Stop
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1') -Force -ErrorAction Stop
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1') -Force -ErrorAction Stop
-    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -ErrorAction Stop
+    # Pre-import Xdr.Common.Telemetry + Xdr.Common.Manifest so Xdr.Sentinel.Ingest +
+    # Xdr.Defender.Client RequiredModules pre-checks resolve on Linux CI (where the
+    # modules dir is not on PSModulePath). -Global ensures visibility from RequiredModules.
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Telemetry' 'Xdr.Common.Telemetry.psd1') -Force -Global -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Manifest' 'Xdr.Common.Manifest.psd1') -Force -Global -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -Global -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1') -Force -Global -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1') -Force -Global -ErrorAction Stop
+    Import-Module (Join-Path $repoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -Global -ErrorAction Stop
 
     $script:FixturesDir = Join-Path $repoRoot 'tests' 'fixtures' 'live-responses'
     $script:ExpectedBaselineColumns = @('TimeGenerated', 'SourceStream', 'EntityId', 'RawJson')

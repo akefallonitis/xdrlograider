@@ -45,7 +45,7 @@ BeforeAll {
         '/apiproxy/mtp/liveResponseApi/get_properties?useV2Api=true&useV3Api=true'                         = 'XDRInternals:Get-XdrEndpointConfigurationLiveResponse.ps1 (pre-v0.1.0.9 added V2/V3 api flags)'
         '/apiproxy/mtp/responseApiPortal/senseauth/allownonauthsense'                                      = 'XDRInternals:Get-XdrEndpointConfigurationAuthenticatedTelemetry.ps1'
         '/apiproxy/mtp/autoIr/ui/properties/'                                                              = 'XDRInternals:Get-XdrEndpointConfigurationPotentiallyUnwantedApplications.ps1'
-        '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters'         = 'MS Learn:defender-endpoint/mde-security-settings-management (Intune-bridge surface)'
+        '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters?platform=Windows' = 'nodoc endpoint_configuration.yml:345-376 (Section R+++ 2026-05-07: platform query is REQUIRED — fixes 400 Bad Request; Architecture C PerPlatformFanout in v0.1.0 GA per plan R++++)'
         '/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues'                            = 'Portal trace:tenant-allow-block (papin namespace; preview surface)'
         '/apiproxy/mtp/mdeCustomCollection/rules'                                                          = 'XDRInternals:Get-/New-/Set-XdrEndpointConfigurationCustomCollectionRule.ps1 (pre-v0.1.0.8 corrected from /model)'
 
@@ -72,7 +72,7 @@ BeforeAll {
         '/apiproxy/mtp/posture/oversight/updates'                                                          = 'XDRInternals:Get-XdrXspmExposureSnapshot.ps1'
         '/apiproxy/mtp/posture/oversight/recommendations'                                                  = 'XDRInternals:Get-XdrExposureRecommendation.ps1'
         '/apiproxy/mtp/xspmatlas/attacksurface/query'                                                      = 'XDRInternals:Invoke-XdrXspmHuntingQuery.ps1 (POST + x-tid + x-ms-scenario-name)'
-        '/apiproxy/mtp/tvm/analytics/baseline/profiles?pageIndex=0&pageSize=25'                            = 'XDRInternals:Get-XdrVulnerabilityManagementBaseline.ps1'
+        '/apiproxy/mtp/tvm/analytics/vulnerabilities/baseline'                                             = 'nodoc:vulnerability_management.yml:556 (operationId VulnerabilityManagement.GetBaseline) - Section R+++++ path-drift fix 2026-05-07'
 
         # ---- P5 ----
         '/apiproxy/aatp/api/sensors/domainControllerCoverage'                                              = 'XDRInternals:Get-XdrIdentityDomainControllerCoverage.ps1'
@@ -82,7 +82,10 @@ BeforeAll {
         '/apiproxy/mdi/identity/userapiservice/serviceAccounts'                                            = 'XDRInternals:Get-XdrIdentityServiceAccount.ps1'
 
         # ---- P3 (cont.) — portal-only device timeline ----
-        '/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machinetimeline'                                = 'XDRInternals:Get-XdrEndpointDeviceTimeline.ps1'
+        # Section R++++++ Architecture A (2026-05-07): canonical path with {MachineId}
+        # placeholder per nodoc endpoint_devices.yml:1042-1148. Activity-level fanout
+        # iterates machineIds from MDE_Machines_CL source stream.
+        '/apiproxy/mtp/mdeTimelineExperience/machines/{MachineId}/events'                                  = 'nodoc:endpoint_devices.yml:1042-1148 (operationId EndpointDevices.GetMachineTimelineEvents) - Section R++++++ Architecture A PerEntityFanout 2026-05-07'
 
         # ---- P6 ----
         '/apiproxy/mtp/threatAnalytics/outbreaks'                                                          = 'XDRInternals:Get-XdrThreatAnalytic.ps1'
@@ -93,7 +96,13 @@ BeforeAll {
         '/apiproxy/mtoapi/tenants/TenantPicker'                                                            = 'XDRInternals:Get-XdrMtoTenant.ps1 (mtoproxyurl:MTO header required)'
         '/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference'                     = 'XDRInternals:Get-XdrUserPreference.ps1'
         '/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machines/skuReport'                             = 'XDRInternals:Get-XdrLicenseReport.ps1 (UnwrapProperty=sums)'
-        '/apiproxy/mcas/cas/api/v1/settings/'                                                              = 'XDRInternals:Get-XdrCloudAppsGeneralSetting.ps1 (pre-v0.1.0.9 added trailing slash; MS Learn /defender-cloud-apps confirms canonical)'
+        '/apiproxy/mtp/ndr/machines?hideLowFidelityDevices=true&lookingBackIndays=30&pageIndex=1&pageSize=200&sortByField=riskscore&sortOrder=Descending' = 'nodoc:endpoint_devices.yml:2-66 (operationId EndpointDevices.List) - Section R++++++ Phase 1 Architecture B foundation stream 2026-05-07'
+        '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies' = 'nodoc:endpoint_configuration.yml POST /securityPolicies - Section R++++++ Phase 1 G7 actual policy bodies (ASR/AV/EDR/Firewall) 2026-05-07'
+        '/apiproxy/mtp/tvm/analytics/assets/topVulnerable'                                  = 'nodoc:vulnerability_management.yml /mtp/tvm/analytics/assets/topVulnerable - Section R++++++ Phase 1 G8 TVM expansion 2026-05-07'
+        '/apiproxy/mtp/tvm/analytics/vulnerabilities'                                       = 'nodoc:vulnerability_management.yml /mtp/tvm/analytics/vulnerabilities - Section R++++++ Phase 1 G8 TVM expansion 2026-05-07'
+        '/apiproxy/mtp/tvm/analytics/products'                                              = 'nodoc:vulnerability_management.yml /mtp/tvm/analytics/products - Section R++++++ Phase 1 G8 TVM expansion 2026-05-07'
+        '/apiproxy/mtp/tvm/remediation-tasks/remediationTasks'                              = 'nodoc:vulnerability_management.yml /mtp/tvm/remediation-tasks/remediationTasks - Section R++++++ Phase 1 G8 TVM expansion 2026-05-07'
+        '/apiproxy/mcas/cas/api/v1/settings'                                                               = 'nodoc cloud_apps.yml:222 + openapi.yml:970 (Section R+++ 2026-05-07: trailing slash removed — caused MCAS gateway 500)'
 
         # ---- v0.1.0 GA Phase 2 (2026-05-04): 13 Tier A new streams from nodoc catalog sweep ----
         '/apiproxy/mtp/xspmatlas/assetrules/querybuilder/schema'                     = 'nodoc:configuration.yml — XSPM critical-asset classification schema (DSL for asset-rule querybuilder)'

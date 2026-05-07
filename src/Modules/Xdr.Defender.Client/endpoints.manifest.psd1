@@ -6,6 +6,22 @@
     # connector collects. Dispatched at runtime by Invoke-MDEEndpoint and
     # Invoke-MDETierPoll.
     #
+    # Section R++ (2026-05-07) AVAILABILITY POLICY (operator directive):
+    #   ALL streams declare Availability='live' regardless of lab observations.
+    #   Tenant-gating + license issues are detected DYNAMICALLY at runtime via
+    #   Invoke-MDEEndpoint's SuccessKind side-channel + classified per actual
+    #   API response (live | live-empty | tenant-gated | error). Connector card
+    #   + heartbeat aggregator surface the runtime classification. This way:
+    #     - A fully-licensed production tenant sees no false-negative gating.
+    #     - A lab tenant sees runtime SuccessKind='tenant-gated' for streams
+    #       whose features aren't licensed — surfaced as informational, not failure.
+    #   Two exceptions kept:
+    #     - 'deprecated' (1 stream — MDE_StreamingApiConfig_CL — known 404 on
+    #       all modern tenants per Microsoft documentation; orchestrator skips)
+    #     - RequiresLicense + TenantContextProbe forward-compat fields document
+    #       which licenses help operators understand expected coverage, but do
+    #       NOT short-circuit polling.
+    #
     # Cross-checked with three research sources:
     #   - XDRInternals (github.com/MSCloudInternals/XDRInternals) — 150 paths,
     #     authoritative for POST body schemas (working PowerShell client).
@@ -423,12 +439,34 @@
         # AntivirusPolicy + TenantAllowBlock: nodoc documents GET (not POST). Phase 2c live-captures; retag live if 200.
         @{
             Stream = 'MDE_AntivirusPolicy_CL'
-            Path = '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters'
+            # Section R+++ nodoc-canonical fix (2026-05-07): platform query
+            # param is REQUIRED per nodoc endpoint_configuration.yml:345-376.
+            # Lab returned 400 'Platform filter is required and should have a
+            # valid value.' Default to Windows (operator-preferred + most
+            # common platform). PerPlatformFanout for Linux/macOS/iOS is
+            # v0.1.0.1 work — see plan Architecture C.
+            #
+            # Section R+++++.2 KNOWN SCHEMA PARITY GAP (2026-05-07T15:30):
+            # Live capture shows actual shape is `{ category: { antivirus:[],
+            # edr:[], firewall:[], asr:[], diskEncryption:[] }, technologies:
+            # ['mdm','mdm,microsoftSense'] }` (operator-side filter FACETS,
+            # NOT policy bodies). Existing ProjectionMap cols (FilterName,
+            # FilterValue, Platform, Scope, IsEnabled) DO NOT MAP to this
+            # shape — they project to null. ProjectionResolution test fails
+            # for this stream. Proper fix requires coordinated changes:
+            #   (a) Update ProjectionMap to match actual shape
+            #   (b) Update DCR streamDecl input cols in mainTemplate.json
+            #   (c) Update Defender_EndpointConfiguration_CL workspace table
+            #       cols + transformKql in mainTemplate.json
+            # Tracked as O1 work item in plan R++++++ (5-stream ProjectionMap
+            # canonical rewrites). Actual policy bodies (ASR rules + AV
+            # settings + EDR config) are Phase 1 G7 MDE_SecurityPolicies_CL.
+            Path = '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters?platform=Windows'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
             CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'MEM-bridged antivirus policy filter facets (Intune + Configuration Manager scope)'
-            Availability = 'tenant-gated'
+            Availability = 'live'
             # Fixture: tenant-gated (no live data). Convention: AV policy filter facets.
             ProjectionMap = @{
                 FilterName    = '$tostring:Name'
@@ -438,14 +476,66 @@
                 IsEnabled     = '$tobool:IsEnabled'
             }
         }
+
+        # ====================================================================
+        # G7 — MDE_SecurityPolicies_CL (Section R++++++ Phase 1)
+        # POST endpoint returns ACTUAL POLICY BODIES (ASR rules + AV settings +
+        # Account Protection + Disk Encryption + EDR + Firewall + Web Protection)
+        # Per-platform per request body. Phase 1 baseline = Windows-only;
+        # PerPlatformFanout (Architecture C) for Linux/macOS/iOS = Phase 2.
+        # ====================================================================
+        @{
+            Stream = 'MDE_SecurityPolicies_CL'
+            Path = '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies'
+            Method = 'POST'
+            Body = @{
+                platform = 'Windows'
+            }
+            # Section R++++++ Architecture C (2026-05-07): PerPlatformFanout enabled.
+            # Activity (Xdr-PollStream) detects this field, iterates platforms, calls
+            # Invoke-MDEEndpoint with -BodyOverride @{platform=$p} per platform, tags
+            # each row with Platform col, aggregates into single MDE_SecurityPolicies_CL
+            # stream. Operators query: Defender_EndpointConfiguration_CL
+            #   | where SourceName == 'MDE_SecurityPolicies_CL' | where Platform == 'Linux'
+            PerPlatformFanout = @('Windows', 'Linux', 'macOS', 'iOS')
+            Tier = 'Inventory'
+            Category = 'Endpoint Configuration'
+            CategoryId = 2  # nodoc-authoritative (Phase D.1)
+            Purpose = 'Actual Intune endpoint security POLICY BODIES (ASR rules + AV + Account Protection + Disk Encryption + EDR + Firewall + Web Protection) per platform'
+            Availability = 'live'
+            # nodoc canonical: endpoint_configuration.yml POST /securityPolicies
+            # body { platform: 'Windows'|'Linux'|'macOS'|'iOS' }
+            # Response wraps an array of policy objects. Best-guess shape:
+            # { policies: [{ id, name, type, settings, ruleCount, lastModified }] }
+            UnwrapProperty = 'policies'
+            IdProperty = @('id', 'Id', 'policyId')
+            ProjectionMap = @{
+                PolicyId       = '$tostring:id'
+                PolicyName     = '$tostring:name'
+                PolicyType     = '$tostring:type'
+                Platform       = '$tostring:platform'
+                Status         = '$tostring:status'
+                RuleCount      = '$toint:ruleCount'
+                LastModified   = '$todatetime:lastModified'
+            }
+        }
+
         @{
             Stream = 'MDE_TenantAllowBlock_CL'
+            # Section R++++++ F6 investigation NEEDS RE-RESEARCH (2026-05-07T17:00):
+            # Lab tenant returns 500 with body `{error:{code:InternalServerError}}`.
+            # Operator directive: "should work tenantallowblock list repeat research readuit properly".
+            # ACTION: re-verify path against nodoc + XDRInternals; check alternate
+            # TABL endpoints (e.g. `/papin/.../indicators` vs `/papin/.../filterValues`
+            # OR `/responseApiPortal/ti/indicators` per nodoc deferred sweep).
+            # Runtime SuccessKind classifies actual response — no manifest-level
+            # speculation about license vs backend.
             Path = '/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues'
             Tier = 'Configuration'
             Category = 'Configuration and Settings'
             CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Tenant Allow-Block-List (TABL) filter facet — IP/URL/file-hash indicator inventory'
-            Availability = 'tenant-gated'
+            Availability = 'live'
             # Fixture: tenant-gated (no live data). Convention: TABL indicator filter facet.
             ProjectionMap = @{
                 IndicatorType   = '$tostring:Type'
@@ -467,7 +557,7 @@
             Category = 'Endpoint Configuration'
             CategoryId = 2  # nodoc-authoritative (Phase D.1)
             Purpose = 'Custom event-collection rules (what extra MDE telemetry the tenant is gathering)'
-            Availability = 'tenant-gated'
+            Availability = 'live'
             IdProperty = @('ruleId', 'RuleId', 'id', 'Id')
             # Tenant-gated (no live data). Schema cross-referenced against
             # XDRInternals Get-XdrEndpointConfigurationCustomCollectionRule.ps1
@@ -702,6 +792,8 @@
                 MachineCount          = '$toint:MachineCount'
                 IsUnassigned          = '$tobool:IsUnassignedMachineGroup'
                 RuleCount             = '$toint:GroupRules.length'
+                # Section R++++++ O1 expansion (2026-05-07): full rule bodies for RBAC drift queries.
+                GroupRules            = '$json:GroupRules'
             }
         }
         # pre-v0.1.0.9 (B3): nodoc-cited path; verified live 2026-04-28.
@@ -753,6 +845,9 @@
                 AssetType            = '$tostring:assetType'
                 ClassificationValue  = '$tostring:classificationValue'
                 AffectedAssetsCount  = '$toint:affectedAssetsCount'
+                # Section R++++++ O1 expansion (2026-05-07): rule body + KQL query.
+                KqlQuery             = '$tostring:kqlQuery'
+                RuleDefinition       = '$json:ruleDefinition'
             }
         }
         @{
@@ -967,21 +1062,39 @@ AttackPathsV2
         # P3 — TVM baseline profiles. Returns 400 without 'api-version: 1.0' header.
         @{
             Stream = 'MDE_SecurityBaselines_CL'
-            Path = '/apiproxy/mtp/tvm/analytics/baseline/profiles?pageIndex=0&pageSize=25'
+            # Section R+++++ path-drift fix (2026-05-07T15:00): legacy
+            # /baseline/profiles?pageIndex=0&pageSize=25 returned 400 in lab
+            # (live capture _capture-summary.json: HTTP 400 'Bad Request').
+            # nodoc canonical confirmed at vulnerability_management.yml:556
+            # (operationId VulnerabilityManagement.GetBaseline). Legacy path
+            # was NOT in nodoc — the prior comment claiming XDRInternals
+            # attestation was incorrect (XDRInternals uses nodoc as its
+            # source per operator correction 2026-05-07T12:15). nodoc spec
+            # at line 571 marks response schema as 'pending - baseline data'
+            # so ProjectionMap below is best-guess preserved from prior;
+            # will refine after first successful 200 capture.
+            Path = '/apiproxy/mtp/tvm/analytics/vulnerabilities/baseline'
             Tier = 'Inventory'
             Headers = @{ 'api-version' = '1.0' }
+            # Section R++++++ Architecture F (2026-05-07): Pagination support.
+            # TVM endpoints can return thousands of CVEs/products in production tenants;
+            # default API page size is ~25-200 items. Loop pages until last page or
+            # MaxPages cap. Per-page retry handled by Invoke-MDEPortalEndpoint's 429 logic.
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50
+            }
             Category = 'Vulnerability Management (TVM)'
             CategoryId = 3  # nodoc-authoritative (Phase D.1)
             Purpose = 'TVM security-baseline profile compliance (CIS / Microsoft baselines applied to device fleet)'
-            Availability = 'tenant-gated'
-            # Tenant-gated (no live data — TVM addon not licensed in test tenant).
-            # Schema cross-referenced against XDRInternals
-            # Get-XdrVulnerabilityManagementBaseline.ps1 — root response is
-            # { results: [...], numOfResults: <int> }; cmdlet appends $response.results.
-            # Per-row schema:
+            Availability = 'live'
+            # Per-row schema (best-guess; nodoc response 'pending'):
             #   { id (GUID), name, compliancePct, compliantDevices,
             #     nonCompliantDevices, lastModifiedDateTime, benchmarkName }.
             # `api-version: 1.0` header is mandatory (TVM API gate).
+            # Runtime SuccessKind classifies 4xx as 'tenant-gated' if TVM
+            # Premium license absent.
             UnwrapProperty = 'results'
             # NOTE: legacy `Compliance` column was typed `boolean` in v0.1.0-beta
             # initial DCR but the upstream API returns a percentage (real).
@@ -1004,6 +1117,139 @@ AttackPathsV2
                 DeviceCount         = '$toint:assetsCount'
                 LastScanUtc         = '$todatetime:lastUpdate'
                 Score               = '$todouble:complianceScore'
+            }
+        }
+
+        # ====================================================================
+        # G8 — TVM expansion (Section R++++++ Phase 1 — 4 new streams)
+        # All map to nodoc vulnerability_management.yml endpoints.
+        # License-dependent (TvmPremium); runtime SuccessKind classifies 4xx
+        # as 'tenant-gated' if license absent.
+        # ====================================================================
+        @{
+            Stream = 'MDE_VulnerableMachines_CL'
+            # nodoc canonical: vulnerability_management.yml /mtp/tvm/analytics/assets/topVulnerable
+            Path = '/apiproxy/mtp/tvm/analytics/assets/topVulnerable'
+            Tier = 'Inventory'
+            Headers = @{ 'api-version' = '1.0' }
+            # Section R++++++ Architecture F (2026-05-07): Pagination support.
+            # TVM endpoints can return thousands of CVEs/products in production tenants;
+            # default API page size is ~25-200 items. Loop pages until last page or
+            # MaxPages cap. Per-page retry handled by Invoke-MDEPortalEndpoint's 429 logic.
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50
+            }
+            Category = 'Vulnerability Management (TVM)'
+            CategoryId = 3
+            Purpose = 'Top-N CVE-exposed machines (TVM analytics — most-exposed devices ranked by exposure score)'
+            Availability = 'live'
+            UnwrapProperty = 'results'
+            IdProperty = @('assetId', 'AssetId', 'id', 'Id')
+            ProjectionMap = @{
+                AssetId          = '$tostring:assetId'
+                MachineName      = '$tostring:assetName'
+                CveCount         = '$toint:totalVulnerabilities'
+                CriticalCveCount = '$toint:criticalVulnerabilities'
+                ExposureScore    = '$todouble:exposureScore'
+                RiskScore        = '$tostring:riskScore'
+                OsPlatform       = '$tostring:osPlatform'
+            }
+        }
+
+        @{
+            Stream = 'MDE_VulnerabilityInventory_CL'
+            # nodoc canonical: vulnerability_management.yml /mtp/tvm/analytics/vulnerabilities
+            Path = '/apiproxy/mtp/tvm/analytics/vulnerabilities'
+            Tier = 'Inventory'
+            Headers = @{ 'api-version' = '1.0' }
+            # Section R++++++ Architecture F (2026-05-07): Pagination support.
+            # TVM endpoints can return thousands of CVEs/products in production tenants;
+            # default API page size is ~25-200 items. Loop pages until last page or
+            # MaxPages cap. Per-page retry handled by Invoke-MDEPortalEndpoint's 429 logic.
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50
+            }
+            Category = 'Vulnerability Management (TVM)'
+            CategoryId = 3
+            Purpose = 'CVE inventory — list of vulnerabilities affecting tenant assets with severity + prevalence'
+            Availability = 'live'
+            UnwrapProperty = 'results'
+            IdProperty = @('cveId', 'CveId', 'id', 'Id')
+            ProjectionMap = @{
+                CveId          = '$tostring:cveId'
+                Severity       = '$tostring:severity'
+                CvssV3         = '$todouble:cvssV3'
+                PublishedDate  = '$todatetime:publishedDate'
+                AssetCount     = '$toint:assetsAffected'
+                Description    = '$tostring:description'
+                ProductName    = '$tostring:productName'
+            }
+        }
+
+        @{
+            Stream = 'MDE_SoftwareInventory_CL'
+            # nodoc canonical: vulnerability_management.yml /mtp/tvm/analytics/products
+            Path = '/apiproxy/mtp/tvm/analytics/products'
+            Tier = 'Inventory'
+            Headers = @{ 'api-version' = '1.0' }
+            # Section R++++++ Architecture F (2026-05-07): Pagination support.
+            # TVM endpoints can return thousands of CVEs/products in production tenants;
+            # default API page size is ~25-200 items. Loop pages until last page or
+            # MaxPages cap. Per-page retry handled by Invoke-MDEPortalEndpoint's 429 logic.
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50
+            }
+            Category = 'Vulnerability Management (TVM)'
+            CategoryId = 3
+            Purpose = 'Software product inventory — installed software across tenant with vendor + vulnerability counts'
+            Availability = 'live'
+            UnwrapProperty = 'results'
+            IdProperty = @('productId', 'ProductId', 'id', 'Id')
+            ProjectionMap = @{
+                ProductId           = '$tostring:productId'
+                ProductName         = '$tostring:productName'
+                Vendor              = '$tostring:vendor'
+                AssetCount          = '$toint:assetsCount'
+                VulnerabilityCount  = '$toint:vulnerabilityCount'
+                WeaknessCount       = '$toint:weaknessCount'
+            }
+        }
+
+        @{
+            Stream = 'MDE_RecommendationActions_CL'
+            # nodoc canonical: vulnerability_management.yml /mtp/tvm/analytics/remediations OR /mtp/tvm/remediation-tasks/remediationTasks
+            Path = '/apiproxy/mtp/tvm/remediation-tasks/remediationTasks'
+            Tier = 'Inventory'
+            Headers = @{ 'api-version' = '1.0' }
+            # Section R++++++ Architecture F (2026-05-07): Pagination support.
+            # TVM endpoints can return thousands of CVEs/products in production tenants;
+            # default API page size is ~25-200 items. Loop pages until last page or
+            # MaxPages cap. Per-page retry handled by Invoke-MDEPortalEndpoint's 429 logic.
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50
+            }
+            Category = 'Vulnerability Management (TVM)'
+            CategoryId = 3
+            Purpose = 'Remediation recommendation actions — actionable security improvements with severity + asset count'
+            Availability = 'live'
+            UnwrapProperty = 'results'
+            IdProperty = @('remediationTaskId', 'RemediationTaskId', 'id', 'Id')
+            ProjectionMap = @{
+                RemediationTaskId = '$tostring:remediationTaskId'
+                Title             = '$tostring:title'
+                Status            = '$tostring:status'
+                Priority          = '$tostring:priority'
+                AssetCount         = '$toint:targetAssets'
+                CreatedDate       = '$todatetime:createdOn'
+                DueDate           = '$todatetime:dueOn'
             }
         }
 
@@ -1065,7 +1311,15 @@ AttackPathsV2
             Category = 'Identity Protection (MDI)'
             CategoryId = 4  # nodoc-authoritative (Phase D.1)
             Purpose = 'MDI sensor coverage per domain controller (which DCs have working sensors / sync state)'
-            Availability = 'tenant-gated'
+            Availability = 'live'
+            # Section R++.2 forward-compat: when tenant has MDI, orchestrator
+            # probes MDE_TenantContext_CL.IsMdiActive to short-circuit polls.
+            RequiresLicense    = @('MDI')
+            TenantContextProbe = 'IsMdiActive'
+            # Section R++.B W11: DC name is the natural stable key. Without
+            # IdProperty override, falls to idx-N when MDI lights up — making
+            # cross-snapshot drift joins meaningless.
+            IdProperty = @('Name', 'DCName', 'Domain', 'Id')
             # Fixture: tenant-gated (no MDI). Convention: per-DC sensor-coverage row shape.
             ProjectionMap = @{
                 DCName        = '$tostring:Name'
@@ -1082,7 +1336,7 @@ AttackPathsV2
             Category = 'Identity Protection (MDI)'
             CategoryId = 4  # nodoc-authoritative (Phase D.1)
             Purpose = 'MDI alert-threshold tuning per detection (when each MDI rule fires + temporary overrides)'
-            Availability = 'tenant-gated'
+            Availability = 'live'
             IdProperty = @('AlertName', 'AlertType', 'Id')
             # Tenant-gated (no MDI). Schema cross-referenced against
             # XDRInternals Get-XdrIdentityAlertThreshold.ps1 — root response is
@@ -1122,7 +1376,11 @@ AttackPathsV2
             Category = 'Identity Protection (MDI)'
             CategoryId = 4  # nodoc-authoritative (Phase D.1)
             Purpose = 'MDI gMSA remediation-action configuration (which managed-service-accounts MDI uses for password resets)'
-            Availability = 'tenant-gated'
+            Availability = 'live'
+            RequiresLicense    = @('MDI')
+            TenantContextProbe = 'IsMdiActive'
+            # Section R++.B W11: gMSA UPN is the natural stable key.
+            IdProperty = @('GmsaAccount', 'AccountUpn', 'Domain', 'Id')
             # Fixture: tenant-gated (no MDI). Convention: gMSA remediation-action shape.
             ProjectionMap = @{
                 AccountUpn   = '$tostring:GmsaAccount'
@@ -1204,9 +1462,17 @@ AttackPathsV2
             Path = '/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference'
             Tier = 'Configuration'
             SingleObjectAsRow = $true
+            # Section R++.B B10: synthetic stable EntityId — SingleObjectAsRow
+            # without natural id falls to 'idx-0'. 'user-preferences-singleton'
+            # gives drift snapshots a stable join key.
+            IdProperty = @('__synthetic__')
+            SyntheticEntityId = 'user-preferences-singleton'
             Category = 'Configuration and Settings'
             CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Per-analyst portal preferences (homepage layout, default filters) — drift detector for shared accounts'
+            # Section R++.B9-REVERT (2026-05-07): live audit against tenant
+            # 45f52f35 with SP context returns 200 + data — endpoint is NOT
+            # delegated-auth-only as assumed. Reverted to live.
             Availability = 'live'
             # Live response shape (captured 2026-05-03):
             # { user_preferences: "<JSON-string of operator's saved preferences>" }
@@ -1273,21 +1539,71 @@ AttackPathsV2
             }
         }
 
+        # ====================================================================
+        # MDE_Machines_CL — Architecture B foundation stream (Section R++++++ Phase 1)
+        # Per nodoc endpoint_devices.yml:2-66 (operationId EndpointDevices.List).
+        # Device inventory base; foundation for Architecture A PerEntityFanout
+        # (per-machine DeviceTimeline + future per-machine drill-down streams).
+        # Pagination params per nodoc default (pageIndex=1, pageSize=200).
+        # In production-scale tenants Architecture F adds full pagination loop;
+        # for v0.1.0 GA Phase 1 baseline we cap at first page (200 most-recent
+        # devices ranked by riskscore desc — covers high-priority devices first).
+        # ====================================================================
+        @{
+            Stream = 'MDE_Machines_CL'
+            Path = '/apiproxy/mtp/ndr/machines?hideLowFidelityDevices=true&lookingBackIndays=30&pageIndex=1&pageSize=200&sortByField=riskscore&sortOrder=Descending'
+            Tier = 'Inventory'
+            Category = 'Endpoint Device Management'
+            CategoryId = 1  # nodoc-authoritative (Phase D.1)
+            Purpose = 'Device inventory base — per-MachineId metadata for SOC drill-down + foundation for PerEntityFanout (Architecture A)'
+            Availability = 'live'
+            # nodoc operationId EndpointDevices.List response shape includes:
+            #   { items: [{ machineId, computerDnsName, osPlatform, osVersion,
+            #               healthStatus, riskScore, exposureLevel, lastSeen,
+            #               firstSeen, machineTags, ipAddresses }] }
+            # IdProperty per nodoc machine identifier convention.
+            UnwrapProperty = 'items'
+            IdProperty = @('machineId', 'MachineId', 'id', 'Id')
+            ProjectionMap = @{
+                MachineId        = '$tostring:machineId'
+                ComputerDnsName  = '$tostring:computerDnsName'
+                OsPlatform       = '$tostring:osPlatform'
+                OsVersion        = '$tostring:osVersion'
+                HealthStatus     = '$tostring:healthStatus'
+                RiskScore        = '$tostring:riskScore'
+                ExposureLevel    = '$tostring:exposureLevel'
+                LastSeen         = '$todatetime:lastSeen'
+                FirstSeen        = '$todatetime:firstSeen'
+            }
+        }
+
         @{
             Stream = 'MDE_CloudAppsConfig_CL'
-            Path = '/apiproxy/mcas/cas/api/v1/settings/'
+            # Section R+++ nodoc-canonical fix (2026-05-07): trailing slash
+            # caused MCAS gateway 500 (URL-routing front-door choked on empty
+            # segment after /). nodoc canonical = /mcas/cas/api/v1/settings
+            # (no trailing slash) per cloud_apps.yml:222 + openapi.yml:970.
+            Path = '/apiproxy/mcas/cas/api/v1/settings'
             Tier = 'Configuration'
             Category = 'Configuration and Settings'
             CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'MCAS / Defender for Cloud Apps general settings (regions, integrations, notification policy)'
-            Availability = 'tenant-gated'
-            # Fixture: tenant-gated (no MCAS). Convention: MCAS settings property-bag.
+            Availability = 'live'
+            RequiresLicense    = @('MCAS')
+            TenantContextProbe = 'IsOatpActive'
+            # Section R++.B W12: MCAS settings is a SINGLE OBJECT response, not
+            # a property-bag. Was emitting Shape-3 (per-property rows) under the
+            # old config — fix to SingleObjectAsRow + synthetic stable key.
+            SingleObjectAsRow = $true
+            IdProperty = @('__synthetic__')
+            SyntheticEntityId = 'mcas-settings-singleton'
+            # Fixture: tenant-gated (no MCAS). Convention: MCAS settings single object.
             ProjectionMap = @{
-                SettingId    = '$tostring:EntityId'
                 Region       = '$tostring:Region'
                 IsEnabled    = '$tobool:IsEnabled'
                 CreatedTime  = '$todatetime:CreatedTime'
                 ModifiedBy   = '$tostring:ModifiedBy'
+                SettingId    = '$tostring:EntityId'
             }
         }
 
@@ -1310,31 +1626,34 @@ AttackPathsV2
         # Source: XDRInternals Get-XdrEndpointDeviceTimeline.ps1
         @{
             Stream = 'MDE_DeviceTimeline_CL'
-            Path = '/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machinetimeline'
-            Method = 'POST'
-            Body = @{
-                # Aggregate query (no per-machine filter); operator-side timeline
-                # filter happens via KQL on the typed columns at query time.
-                pageSize = 1000
-                pageIndex = 0
-                fromDate = ''
-                toDate = ''
+            # Section R++++++ Architecture A (2026-05-07): canonical per-machine
+            # endpoint per nodoc endpoint_devices.yml:1042-1148. Activity-level
+            # PerEntityFanout: source MDE_Machines_CL (Architecture B foundation),
+            # iterate machineIds, call canonical path with {MachineId} substitution,
+            # aggregate rows. Composite per-entity checkpoint key {Stream}|{MachineId}.
+            Path = '/apiproxy/mtp/mdeTimelineExperience/machines/{MachineId}/events'
+            Method = 'GET'
+            PathParams = @('MachineId')
+            PerEntityFanout = @{
+                # Source stream provides the entity list (machineIds to iterate)
+                Source                  = 'MDE_Machines_CL'
+                # Field name in source stream rows that supplies the entity ID
+                EntityIdField           = 'machineId'
+                # Path placeholder filled per-entity
+                PathParam               = 'MachineId'
+                # Cap per-cycle to avoid 429-storms in 10K-machine tenants
+                MaxEntitiesPerCycle     = 50
+                # Composite checkpoint key per entity (so per-machine resume works)
+                CheckpointPerEntity     = $true
             }
-            # SECURITY-EVENT POLL CADENCE (operator directive 2026-05-06):
-            # Per-device timeline carries process/file/network/registry events
-            # — security-critical near-real-time detection signals. Moved from
-            # Inventory (24h) to ActionCenter (10m) so SOC operators see new
-            # events within one cadence cycle. The Filter='fromDate' mechanism
-            # uses the checkpoint table so each poll fetches only NEW events
-            # since last successful poll, bounding cost (pageSize=1000).
             Tier = 'ActionCenter'
             Filter = 'fromDate'
             Category = 'Endpoint Device Management'
             CategoryId = 1  # nodoc-authoritative (Phase D.1)
             Purpose = 'Per-device unified timeline (process/file/network/registry events with portal-side correlation + grouping) — SECURITY-EVENT 10-min cadence'
-            UnwrapProperty = 'Results'
+            UnwrapProperty = 'events'
             IdProperty = @('eventId', 'EventId', 'id', 'Id')
-            Availability = 'tenant-gated'
+            Availability = 'live'
             ProjectionMap = @{
                 EventId      = '$tostring:eventId'
                 MachineId    = '$tostring:machineId'
@@ -1354,6 +1673,14 @@ AttackPathsV2
         # Source: XDRInternals Get-XdrEndpointDeviceActionResult.ps1
         @{
             Stream = 'MDE_MachineActions_CL'
+            # Section R+++ nodoc canonical PENDING (2026-05-07): canonical path
+            # is /mtp/actionCenter/actioncenterui/history-actions per nodoc
+            # action_center.yml:2-66. Switching requires DCR streamDecl update +
+            # workspace table schema update + ProjectionMap canonical rewrite per
+            # ActionCenterItem schema (action_center.yml:425-459). Coordinated
+            # change DEFERRED to v0.1.0.1 (architectural, see plan R+++).
+            # v0.1.0 GA keeps legacy XDRInternals path; runtime SuccessKind
+            # (Section R++.A) tags the 404 correctly so heartbeat shows it.
             Path = '/apiproxy/mtp/responseApiPortal/machineactions'
             Tier = 'ActionCenter'
             Filter = 'fromDate'
@@ -1362,7 +1689,7 @@ AttackPathsV2
             Purpose = 'Per-device action results (Live Response per-step script output + AIR linkage; richer than public MDE /api/machineactions)'
             IdProperty = @('actionId', 'ActionId', 'id', 'Id')
             AuditScope = 'hybrid'
-            Availability = 'tenant-gated'
+            Availability = 'live'
             ProjectionMap = @{
                 ActionId         = '$tostring:actionId'
                 ActionType       = '$tostring:actionType'
@@ -1457,6 +1784,10 @@ AttackPathsV2
             Purpose = 'SaaS apps secure-score metric (per-category posture)'
             Availability = 'live'
             SingleObjectAsRow = $true
+            # Section R+++++.2 Section D fix (2026-05-07T15:00): SyntheticEntityId
+            # required because SingleObjectAsRow=true with no IdProperty falls
+            # to idx-0 fallback — drift-join queries broken across polls.
+            SyntheticEntityId = 'apps-secure-score-singleton'
             # Fixture: SINGLE OBJECT { id, version, name, category, latestCount, latestTotal, latestValue, sentimentType, weight }
             ProjectionMap = @{
                 MetricId      = '$tostring:id'
@@ -1477,6 +1808,8 @@ AttackPathsV2
             Purpose = 'Data secure-score metric (per-category posture)'
             Availability = 'live'
             SingleObjectAsRow = $true
+            # Section R+++++.2 Section D fix (2026-05-07T15:00): SyntheticEntityId.
+            SyntheticEntityId = 'data-secure-score-singleton'
             ProjectionMap = @{
                 MetricId      = '$tostring:id'
                 MetricName    = '$tostring:name'
@@ -1496,6 +1829,8 @@ AttackPathsV2
             Purpose = 'Identity secure-score metric (per-category posture)'
             Availability = 'live'
             SingleObjectAsRow = $true
+            # Section R+++++.2 Section D fix (2026-05-07T15:00): SyntheticEntityId.
+            SyntheticEntityId = 'identity-secure-score-singleton'
             ProjectionMap = @{
                 MetricId      = '$tostring:id'
                 MetricName    = '$tostring:name'
@@ -1539,6 +1874,11 @@ AttackPathsV2
             Purpose = 'Posture-oversight tenant configuration (per-tenant onboarding state)'
             Availability = 'live'
             SingleObjectAsRow = $true
+            # Section R+++++.2 Section D fix (2026-05-07T15:00): SyntheticEntityId.
+            # Note: orgId IS available in fixture and would be a more natural
+            # IdProperty — but for cross-tenant deployments orgId varies, so
+            # singleton synthetic key keeps drift-joins stable per tenant.
+            SyntheticEntityId = 'posture-tenants-singleton'
             # Fixture: SINGLE OBJECT { orgId, tenantId, geoRegion, dataCenter, mpsDataCenter, mpsSliceId, oversightSliceId, lastUpdated, featureFlags: {...} }
             ProjectionMap = @{
                 OrgId            = '$tostring:orgId'
@@ -1623,17 +1963,22 @@ AttackPathsV2
             UnwrapProperty = 'Items'
             # Fixture: { Items: [{ Id, DisplayName, LastUpdatedOn, CreatedOn, StartedOn, ImpactedEntitiesCount: {...}, AlertsCount: {...}, ReportType, Tags[], ExposureSeverity, ExposureScore }] }
             ProjectionMap = @{
-                OutbreakId        = '$tostring:Id'
-                DisplayName       = '$tostring:DisplayName'
-                ReportType        = '$tostring:ReportType'
-                ExposureSeverity  = '$tostring:ExposureSeverity'
-                ExposureScore     = '$toint:ExposureScore'
-                CreatedOn         = '$todatetime:CreatedOn'
-                StartedOn         = '$todatetime:StartedOn'
-                LastUpdatedOn     = '$todatetime:LastUpdatedOn'
-                Tags              = '$json:Tags'
-                ScaExposedDevices = '$toint:ScaExposedDevices'
-                VaExposedDevices  = '$toint:VaExposedDevices'
+                OutbreakId             = '$tostring:Id'
+                DisplayName            = '$tostring:DisplayName'
+                ReportType             = '$tostring:ReportType'
+                ExposureSeverity       = '$tostring:ExposureSeverity'
+                ExposureScore          = '$toint:ExposureScore'
+                CreatedOn              = '$todatetime:CreatedOn'
+                StartedOn              = '$todatetime:StartedOn'
+                LastUpdatedOn          = '$todatetime:LastUpdatedOn'
+                Tags                   = '$json:Tags'
+                ScaExposedDevices      = '$toint:ScaExposedDevices'
+                VaExposedDevices       = '$toint:VaExposedDevices'
+                # Section R++++++ O1 expansion (2026-05-07): nested object cols
+                # operators query via parse_json(ImpactedEntitiesCount).devices etc.
+                ImpactedEntitiesCount  = '$json:ImpactedEntitiesCount'
+                AlertsCount            = '$json:AlertsCount'
+                IsTaVNext              = '$tobool:IsTaVNext'
             }
         }
         @{
@@ -1645,6 +1990,12 @@ AttackPathsV2
             Purpose = 'Threat-analytics top threats summary (curated highest-severity active outbreaks)'
             Availability = 'live'
             SingleObjectAsRow = $true
+            # Section R++.B B10: synthetic stable EntityId for SingleObjectAsRow
+            # streams without a natural id field. Without this, every row has
+            # EntityId='idx-0' which makes drift-snapshot joins meaningless.
+            # 'topthreats-singleton' is a constant string so all polls join cleanly.
+            IdProperty = @('__synthetic__')
+            SyntheticEntityId = 'topthreats-singleton'
             # Fixture: SINGLE OBJECT { TotalThreatRequiresAction, ThreatsExposure[], TotalActiveThreats, ThreatExposureCalculationStatus, CurrentAlertsCount[] }
             ProjectionMap = @{
                 TotalThreatRequiresAction       = '$toint:TotalThreatRequiresAction'

@@ -8,16 +8,21 @@ requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal
     dataTypes:
       - XdrConnectorHealth_CL
-queryFrequency: 15m
-queryPeriod: 2h
+queryFrequency: 1h
+queryPeriod: 12h
 triggerOperator: gt
 triggerThreshold: 0
 tactics:
   - DefenseEvasion
 relevantTechniques:
   - T1562.006
+# Section R++++++.4 F4 fix (2026-05-07T15:00): MDE_AlertTuning_CL is on
+# Configuration tier (6h cadence in production). Old (15m freq / 2h period
+# / parser 2h window) over-fired 96x/day AND missed mid-cycle changes.
+# New: parser window 12h (2x cadence) catches every cycle; queryPeriod 12h
+# matches; queryFrequency 1h gives ~6 firings per cycle without storming.
 query: |
-  MDE_Drift_Configuration(2h, 15m) | where StreamName == "MDE_AlertTuning_CL" | where ChangeType == "Modified" | where FieldName in ("conditions","scope")
+  MDE_Drift_Configuration(12h, 1h) | where StreamName == "MDE_AlertTuning_CL" | where ChangeType == "Modified" | where FieldName in ("conditions","scope")
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

@@ -1,6 +1,31 @@
 {
-  "Count": 1869,
+  "Count": 1870,
   "Results": [
+    {
+      "InvestigationId": null,
+      "ActionId": "00000000-0000-0000-0000-000000000000",
+      "StartTime": "2026-05-06T01:50:00.1894757",
+      "EndTime": "2026-05-06T01:51:53.5266895",
+      "ActionType": "CollectInvestigationPackageResponse",
+      "ActionDecision": null,
+      "DecidedBy": "MDE-Alex-App",
+      "UserPrincipalName": "MDE-Alex-App",
+      "Comment": "reboot",
+      "ActionAutomationType": "Manual",
+      "RelatedEntities": [
+        {
+          "EntityType": "Unknown"
+        }
+      ],
+      "AdditionalFields": {},
+      "EntityType": "Unknown",
+      "EventTime": "2026-05-06T01:51:53.7605698",
+      "ActionStatus": "Completed",
+      "ActionSource": "Portal",
+      "Product": "MDE",
+      "MachineId": "REDACTED-HASH",
+      "ComputerName": "larabond2"
+    },
     {
       "InvestigationId": null,
       "ActionId": "00000000-0000-0000-0000-000000000000",
@@ -662,29 +687,6 @@
       "AdditionalFields": {},
       "EntityType": "Unknown",
       "EventTime": "2026-04-07T09:58:06.0329121",
-      "ActionStatus": "Completed",
-      "ActionSource": "PublicApi",
-      "Product": "MDE",
-      "MachineId": "REDACTED-HASH",
-      "ComputerName": "larabond"
-    },
-    {
-      "InvestigationId": null,
-      "ActionId": "00000000-0000-0000-0000-000000000000",
-      "StartTime": "2026-04-07T09:43:52.2729892",
-      "EndTime": "2026-04-07T09:47:25.8061574",
-      "ActionType": "CollectInvestigationPackageResponse",
-      "ActionDecision": null,
-      "DecidedBy": "MDE-Alex-App",
-      "Comment": "lr_reboot: force sensor reconnect to reset LR channel",
-      "RelatedEntities": [
-        {
-          "EntityType": "Unknown"
-        }
-      ],
-      "AdditionalFields": {},
-      "EntityType": "Unknown",
-      "EventTime": "2026-04-07T09:47:25.8061574",
       "ActionStatus": "Completed",
       "ActionSource": "PublicApi",
       "Product": "MDE",

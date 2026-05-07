@@ -36,6 +36,13 @@ on:
   schedule:
     # 04:00 UTC nightly — catches overnight portal-side schema drift
     - cron: '0 4 * * *'
+  push:
+    # Section R++++++.4 F7 (2026-05-07T15:00): release tag guard.
+    # Per Section R Layer C / CI agent C4: live drift detection MUST
+    # fire before release artifacts ship. release.yml depends on this
+    # workflow's success implicitly (tag-triggered).
+    tags:
+      - 'v*'
   pull_request:
     paths:
       - 'src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1'

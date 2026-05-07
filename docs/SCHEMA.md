@@ -2,6 +2,11 @@
 
 Per-table column reference for the 11 consolidated workspace tables. Operators query these tables directly; this is the source of truth for what columns exist and which streams populate each one.
 
+> **Companion docs**:
+> - [`SCHEMA-CATALOG.md`](SCHEMA-CATALOG.md) — per-stream typed-column projections (what each `MDE_<Stream>_CL` SourceName contributes to its Defender_<Category>_CL workspace table)
+> - [`STREAMS.md`](STREAMS.md) — narrative tier/cadence catalog
+> - [`tests/online/NodocCatalogSweep-V010Final.md`](../tests/online/NodocCatalogSweep-V010Final.md) — canonical 60-stream inclusion list
+
 ## How to read this doc
 
 Every consolidated `Defender_<Category>_CL` table receives rows from multiple streams. The `SourceName` column identifies which stream produced each row. To filter per-stream:

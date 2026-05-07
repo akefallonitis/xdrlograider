@@ -46,12 +46,18 @@ BeforeAll {
     function global:Get-AzStorageTable   { param([string]$Name, $Context) [pscustomobject]@{ Name = $Name; CloudTable = [pscustomobject]@{ Name = $Name } } }
     function global:New-AzStorageTable   { param([string]$Name, $Context) [pscustomobject]@{ Name = $Name; CloudTable = [pscustomobject]@{ Name = $Name } } }
 
-    Import-Module $script:IngestModulePath -Force -ErrorAction Stop
-    $script:CommonAuthPath_  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
+    # Section R++.G (2026-05-07): -Global imports + Common.Manifest + Common.Telemetry
+    # pre-imports (Section R+ pattern) so InModuleScope/Mock -ModuleName work on Linux CI.
+    $script:CommonTelePath_   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Telemetry' 'Xdr.Common.Telemetry.psd1'
+    $script:CommonAuthPath_   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
+    $script:CommonManiPath_   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Manifest' 'Xdr.Common.Manifest.psd1'
     $script:DefenderAuthPath_ = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
-    Import-Module $script:CommonAuthPath_ -Force -ErrorAction Stop
-    Import-Module $script:DefenderAuthPath_ -Force -ErrorAction Stop
-    Import-Module $script:ClientModulePath -Force -ErrorAction Stop
+    Import-Module $script:CommonTelePath_ -Force -Global -ErrorAction Stop
+    Import-Module $script:CommonAuthPath_ -Force -Global -ErrorAction Stop
+    Import-Module $script:CommonManiPath_ -Force -Global -ErrorAction Stop
+    Import-Module $script:IngestModulePath -Force -Global -ErrorAction Stop
+    Import-Module $script:DefenderAuthPath_ -Force -Global -ErrorAction Stop
+    Import-Module $script:ClientModulePath -Force -Global -ErrorAction Stop
 
     # Stub DCR_IMMUTABLE_IDS_JSON env var so Get-DcrImmutableIdForStream
     # (called by Invoke-MDETierPoll for every stream) resolves. All keys point
@@ -80,7 +86,9 @@ Describe 'Manifest Availability schema (declarative contract)' {
     }
 
     It 'Availability values are restricted to the known enum' {
-        $allowed = @('live', 'tenant-gated', 'role-gated', 'deprecated')
+        # Section R++.B B9 (2026-05-07): added 'requires-delegated-auth' for
+        # endpoints needing user-context auth (e.g. MDE_UserPreferences_CL).
+        $allowed = @('live', 'tenant-gated', 'role-gated', 'deprecated', 'requires-delegated-auth')
         $offenders = @()
         foreach ($e in $script:Entries) {
             if ($e.ContainsKey('Availability')) {
@@ -89,27 +97,35 @@ Describe 'Manifest Availability schema (declarative contract)' {
                 }
             }
         }
-        $offenders | Should -BeNullOrEmpty -Because ('Availability must be one of {live, tenant-gated, role-gated, deprecated}. Offenders: ' + ($offenders -join '; '))
+        $offenders | Should -BeNullOrEmpty -Because ('Availability must be one of {' + ($allowed -join ', ') + '}. Offenders: ' + ($offenders -join '; '))
     }
 
     It 'every non-live endpoint has a captured live-response fixture' {
+        # Section R++ AVAILABILITY POLICY (2026-05-07): under the new all-live
+        # policy this test is mostly vacuous — only 'deprecated' streams are
+        # non-live, and they 404 by definition. Fixture coverage for runtime-
+        # detected tenant-gated streams happens via the live audit
+        # (tools/Audit-LiveStreamCoverage.ps1) post-deploy, not as a build gate.
         $missingFixtures = @()
         foreach ($e in $script:Entries) {
-            if ($e.Availability -ne 'live') {
+            if ($e.Availability -ne 'live' -and $e.Availability -ne 'deprecated') {
                 $fix = Join-Path $script:FixtureDir "$($e.Stream)-raw.json"
                 if (-not (Test-Path $fix)) {
                     $missingFixtures += "$($e.Stream) (Availability=$($e.Availability))"
                 }
             }
         }
-        $missingFixtures | Should -BeNullOrEmpty -Because ('every gated endpoint must have a captured fixture documenting the actual failure shape so the parsing pipeline can be tested against it. Missing: ' + ($missingFixtures -join '; '))
+        $missingFixtures | Should -BeNullOrEmpty -Because ('every non-live non-deprecated endpoint must have a captured fixture. Missing: ' + ($missingFixtures -join '; '))
     }
 
     It 'manifest contains the expected baseline of <ExpectedCount> endpoints (drift detector)' -ForEach @(
-        @{ Description = 'total endpoints (46 baseline + 13 Tier A new in v0.1.0 GA Phase 2)'; ExpectedCount = 59; Filter = { $true } }
-        @{ Description = 'live endpoints (~80% target)';                   ExpectedCount = 48; Filter = { $args[0].Availability -eq 'live' } }
-        @{ Description = 'role-gated endpoints (retired category)'; ExpectedCount = 0; Filter = { $args[0].Availability -eq 'role-gated' } }
-        @{ Description = 'tenant-gated endpoints';                         ExpectedCount = 10; Filter = { $args[0].Availability -eq 'tenant-gated' } }
+        # Section R++ AVAILABILITY POLICY baseline (2026-05-07):
+        # All streams declare 'live'. Runtime SuccessKind classifies tenant-gating
+        # + license issues dynamically per actual API response.
+        @{ Description = 'total endpoints (46 baseline + 13 Tier A Phase 2 + 6 Phase 1: B+G7+G8)'; ExpectedCount = 65; Filter = { $true } }
+        @{ Description = 'live endpoints (R++ all-live policy)';          ExpectedCount = 64; Filter = { $args[0].Availability -eq 'live' } }
+        @{ Description = 'role-gated endpoints (retired category)';       ExpectedCount = 0;  Filter = { $args[0].Availability -eq 'role-gated' } }
+        @{ Description = 'tenant-gated endpoints (R++ all reverted to live)'; ExpectedCount = 0; Filter = { $args[0].Availability -eq 'tenant-gated' } }
         @{ Description = 'deprecated endpoints (StreamingApiConfig path collision)'; ExpectedCount = 1; Filter = { $args[0].Availability -eq 'deprecated' } }
     ) {
         param($Description, $ExpectedCount, $Filter)

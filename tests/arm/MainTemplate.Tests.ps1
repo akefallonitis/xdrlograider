@@ -496,11 +496,15 @@ Describe 'DCR — Azure service-quota gates' {
         }
     }
 
-    It '13 DCRs partition 60 streams per-category (v0.1.0 GA shape)' {
-        # 60 streams > 10-flow-per-DCR cap → split across 13 per-category DCRs sharing 1 DCE.
+    It '13 DCRs partition 66 streams per-category (v0.1.0 GA shape post-Phase-1: B+G7+G8)' {
+        # 66 streams > 10-flow-per-DCR cap → split across 13 per-category DCRs sharing 1 DCE.
         # 11 single-category DCRs + 2 categories split into semantic sub-domains
         # (Configuration: alerts-detection / platform-rbac; Exposure: attack-surface / posture-score).
-        # 60 = 59 data + 1 operational (XdrConnectorHealth_CL).
+        # 66 = 65 data + 1 operational (XdrConnectorHealth_CL).
+        # Section R++++++ Phase 1 (2026-05-07T16:00):
+        # - Architecture B: +1 to endpoint-device (2→3)
+        # - G7 SecurityPolicies: +1 to endpoint-config (9→10)
+        # - G8 TVM expansion (4 streams): +4 to vuln-mgmt (1→5)
         @($script:Dcrs).Count | Should -Be 13 -Because 'v0.1.0 GA: per-category DCRs (10 categories + 2 split into sub-domains + 1 ops = 13)'
         $declCounts = @()
         $allStreams = @()
@@ -512,11 +516,11 @@ Describe 'DCR — Azure service-quota gates' {
             }
         }
         $sortedCounts = @($declCounts | Sort-Object)
-        # 13 DCRs distribution: ops(1) + vuln-mgmt(1) + actioncenter(2) + endpoint-device(2) + streaming-api(2) +
-        # multitenant(3) + threat-analytics(3) + identity(6) + config-alerts(6) + exposure-posture(7) +
-        # config-platform(8) + endpoint-config(9) + exposure-attack(10) = 60 streams across 13 DCRs
-        $sortedCounts | Should -Be @(1, 1, 2, 2, 2, 3, 3, 6, 6, 7, 8, 9, 10) -Because 'per-category DCR distribution'
-        @($allStreams | Sort-Object -Unique).Count | Should -Be 60 -Because 'every declared stream must appear in exactly one dataFlow (59 data + 1 ops = 60)'
+        # 13 DCRs distribution post-Phase-1: ops(1) + actioncenter(2) + streaming-api(2) + endpoint-device(3) +
+        # multitenant(3) + threat-analytics(3) + vuln-mgmt(5) + identity(6) + config-alerts(6) + exposure-posture(7) +
+        # config-platform(8) + endpoint-config(10) + exposure-attack(10) = 66 streams
+        $sortedCounts | Should -Be @(1, 2, 2, 3, 3, 3, 5, 6, 6, 7, 8, 10, 10) -Because 'per-category DCR distribution post-Phase-1 B+G7+G8'
+        @($allStreams | Sort-Object -Unique).Count | Should -Be 66 -Because 'every declared stream must appear in exactly one dataFlow (65 data + 1 ops = 66)'
     }
 
     It 'no dataFlow combines multiple streams with a transformKql (Microsoft DCR rule)' {

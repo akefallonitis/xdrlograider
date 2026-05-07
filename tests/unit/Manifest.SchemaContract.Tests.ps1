@@ -38,9 +38,17 @@ BeforeAll {
     $script:CommonAuthPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
     $script:DefAuthPsd1    = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
 
-    Import-Module $script:CommonAuthPsd1 -Force -ErrorAction Stop
-    Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
-    Import-Module $script:ClientPsd1     -Force -ErrorAction Stop
+    # Section R++.G (2026-05-07): -Global imports + Telemetry/Manifest pre-imports
+    # so Mock -ModuleName / InModuleScope work + RequiredModules resolve on Linux CI.
+    $script:CommonTelePath_  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Telemetry' 'Xdr.Common.Telemetry.psd1'
+    $script:CommonManiPath_  = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Manifest' 'Xdr.Common.Manifest.psd1'
+    $script:IngestPath_      = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
+    Import-Module $script:CommonTelePath_  -Force -Global -ErrorAction Stop
+    Import-Module $script:CommonAuthPsd1   -Force -Global -ErrorAction Stop
+    Import-Module $script:CommonManiPath_  -Force -Global -ErrorAction Stop
+    Import-Module $script:IngestPath_      -Force -Global -ErrorAction Stop
+    Import-Module $script:DefAuthPsd1      -Force -Global -ErrorAction Stop
+    Import-Module $script:ClientPsd1       -Force -Global -ErrorAction Stop
 
     $script:Manifest = Get-XdrEndpointManifest -Portal Defender -Force
     $script:Raw      = Import-PowerShellDataFile -Path $script:ManifestPath
@@ -278,20 +286,26 @@ Describe 'Manifest.ProjectionMap.Coverage' {
 
 Describe 'Manifest counts (v0.1.0 GA)' {
 
-    It 'manifest contains exactly 59 streams (46 baseline + 13 Tier A in v0.1.0 GA Phase 2)' {
+    It 'manifest contains exactly 65 streams (46 baseline + 13 Tier A Phase 2 + 6 Phase 1: B Machines + G7 SecurityPolicies + G8 4 TVM)' {
         # Baseline: 46 streams (44 + DeviceTimeline + MachineActions HYBRID).
-        # Phase 2 (2026-05-04) added 13 Tier A streams from nodoc catalog sweep:
-        # 1 ConfigurationAndSettings (asset-classification schema), 11 ExposureManagement
-        # (XSPM posture + attack-surface + connectors), 2 ThreatAnalytics (enriched + topThreats).
-        $script:Manifest.Count | Should -Be 59
+        # Phase 2 (2026-05-04) added 13 Tier A streams from nodoc catalog sweep.
+        # Section R++++++ Phase 1 (2026-05-07T16:00) added 6 streams:
+        # - Architecture B: MDE_Machines_CL (Endpoint Device Management foundation)
+        # - G7: MDE_SecurityPolicies_CL (Endpoint Configuration POST endpoint - actual ASR/AV/EDR/Firewall policy bodies)
+        # - G8 TVM expansion (4 streams): MDE_VulnerableMachines_CL + MDE_VulnerabilityInventory_CL + MDE_SoftwareInventory_CL + MDE_RecommendationActions_CL
+        $script:Manifest.Count | Should -Be 65
     }
 
     It 'live + tenant-gated + deprecated counts add up' {
+        # Section R++ AVAILABILITY POLICY (2026-05-07): all streams 'live' except
+        # the 1 'deprecated' (StreamingApiConfig). Runtime SuccessKind dynamically
+        # classifies tenant-gating per actual API response.
         $live        = [int]@($script:Manifest.Values | Where-Object { $_.Availability -eq 'live' }).Count
         $tenantGated = [int]@($script:Manifest.Values | Where-Object { $_.Availability -eq 'tenant-gated' }).Count
         $deprecated  = [int]@($script:Manifest.Values | Where-Object { $_.Availability -eq 'deprecated' }).Count
-        ($live + $tenantGated + $deprecated) | Should -Be 59
-        $live | Should -BeGreaterThan 40
+        ($live + $tenantGated + $deprecated) | Should -Be 65
+        $live | Should -Be 64 -Because 'R++ all-live policy + Phase 1 6 new streams: 65 total - 1 deprecated = 64 live'
+        $tenantGated | Should -Be 0 -Because 'R++ all-live policy: tenant-gating detected dynamically by runtime SuccessKind'
         $deprecated | Should -Be 1 -Because 'MDE_StreamingApiConfig_CL is deprecated; v0.2.0 removes'
     }
 }

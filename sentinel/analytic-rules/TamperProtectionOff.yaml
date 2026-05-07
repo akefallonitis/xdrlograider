@@ -8,16 +8,22 @@ requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal
     dataTypes:
       - XdrConnectorHealth_CL
-queryFrequency: 15m
-queryPeriod: 2h
+queryFrequency: 4h
+queryPeriod: P2D
 triggerOperator: gt
 triggerThreshold: 0
 tactics:
   - DefenseEvasion
 relevantTechniques:
   - T1562.001
+# Section R++++++.4 F4 fix (2026-05-07T15:00): MDE_AdvancedFeatures_CL is
+# on Inventory tier (24h cadence in production). Old (15m freq / 2h
+# period / parser 2h window) over-fired ~96x/day AND only saw 2/24 of
+# polls — catastrophic mismatch. New: parser window 48h (2x cadence),
+# queryPeriod P2D (48h) catches every cycle, queryFrequency 4h gives
+# ~6 firings per cycle without storming.
 query: |
-  MDE_Drift_Inventory(2h, 15m) | where StreamName == "MDE_AdvancedFeatures_CL" | where EntityId has "Tamper" | where FieldName == "Enabled" and NewValue == "false"
+  MDE_Drift_Inventory(48h, 4h) | where StreamName == "MDE_AdvancedFeatures_CL" | where EntityId has "Tamper" | where FieldName == "Enabled" and NewValue == "false"
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: SingleAlert

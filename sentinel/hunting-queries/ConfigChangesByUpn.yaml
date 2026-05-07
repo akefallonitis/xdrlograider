@@ -18,14 +18,17 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
-  // Note: drift EntityIds and AuditLogs target identifiers are not reliable to
-  // join at the record level. This query approximates by actor UPN within a
-  // time window of the drift event, filtered to Defender-related audit
-  // categories.
+  // Section R++.C B7 fix: drift EntityIds and AuditLogs target identifiers
+  // are not reliable to join at the record level. Original implementation
+  // joined on $left.TimeGenerated == $right.AuditTime — exact-second equality
+  // never matches sub-second granularity → all ActorUpn defaulted to "unknown".
+  // Fix: bucket both sides by 5-minute bins (matches the pattern in
+  // MDE_ComplianceDashboard.json:76 recent-changes-table).
   let drift = union
     (MDE_Drift_Inventory(7d, 1d)),
     (MDE_Drift_Configuration(7d, 6h)),
-    (MDE_Drift_Exposure(7d, 1h));
+    (MDE_Drift_Exposure(7d, 1h))
+    | extend DriftBin = bin(TimeGenerated, 5min);
   let audits = AuditLogs
     | where TimeGenerated > ago(7d)
     | where Category in (
@@ -38,9 +41,10 @@ query: |
       )
     | extend ActorUpn = tostring(InitiatedBy.user.userPrincipalName)
     | where isnotempty(ActorUpn)
-    | project AuditTime = TimeGenerated, ActorUpn, Operation = OperationName, Category, AuditResult = Result;
+    | extend AuditBin = bin(TimeGenerated, 5min)
+    | project AuditTime = TimeGenerated, AuditBin, ActorUpn, Operation = OperationName, Category, AuditResult = Result;
   drift
-  | join kind=leftouter (audits) on $left.TimeGenerated == $right.AuditTime
+  | join kind=leftouter (audits) on $left.DriftBin == $right.AuditBin
   | extend ActorUpn = coalesce(ActorUpn, 'unknown (no correlating audit)')
   | summarize DriftEvents = count(),
               Streams = make_set(StreamName),

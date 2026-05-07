@@ -25,53 +25,45 @@
         "mss_missing_best_practices_ensure_effective_secutiy_settings_microsoft_purview_bec"
       ],
       "activeMetricIds": [
-        "mss_bp_logging_threat_detection_capabilities_saas_apps_bec",
-        "mss_users_without_risk_conditional_access_policy",
-        "mss_users_set_mfa",
         "mss_users_with_risk_based_access_control",
-        "mss_users_allow_vulnerable_legacy_protocols",
-        "mss_missing_best_practices_ensure_effective_secutiy_settings_microsoft_purview_bec",
         "mss_bp_secure_outlook_services_settings_bec",
-        "mss_bp_secure_web_services_settings_saas_apps_bec",
-        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender_bec",
-        "mss_missing_best_practices_sensitive_business_data_identified_managed_bec",
         "mss_bp_password_configuration_saas_applications_bec",
-        "mss_users_block_malicious_attachments_policy_configured",
-        "mss_bp_controlling_access_saas_apps_bec",
-        "mss_missing_best_practices_ensure_effective_security_settings_exchange_admin_center_bec",
-        "mss_missing_bp_azure_active_directory_configured_securely_bec",
+        "mss_missing_best_practices_ensure_effective_secutiy_settings_microsoft_purview_bec",
+        "mss_bp_secure_web_services_settings_saas_apps_bec",
         "mss_users_block_malicious_urls_policy_configured",
-        "mss_non_compliant_impersonation_protection_against_financial_fraud"
+        "mss_users_without_risk_conditional_access_policy",
+        "mss_non_compliant_impersonation_protection_against_financial_fraud",
+        "mss_missing_bp_azure_active_directory_configured_securely_bec",
+        "mss_missing_best_practices_sensitive_business_data_identified_managed_bec",
+        "mss_missing_best_practices_ensure_effective_security_settings_exchange_admin_center_bec",
+        "mss_users_set_mfa",
+        "mss_bp_logging_threat_detection_capabilities_saas_apps_bec",
+        "mss_users_block_malicious_attachments_policy_configured",
+        "mss_users_allow_vulnerable_legacy_protocols",
+        "mss_bp_controlling_access_saas_apps_bec",
+        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender_bec"
       ],
       "tenantActiveMetricIds": [
-        "mss_non_compliant_impersonation_protection_against_financial_fraud",
+        "mss_users_with_risk_based_access_control",
+        "mss_missing_best_practices_ensure_effective_secutiy_settings_microsoft_purview_bec",
+        "mss_bp_password_configuration_saas_applications_bec",
         "mss_bp_secure_web_services_settings_saas_apps_bec",
         "mss_missing_best_practices_ensure_effective_security_settings_exchange_admin_center_bec",
-        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender_bec",
-        "mss_users_with_risk_based_access_control",
-        "mss_users_without_risk_conditional_access_policy",
-        "mss_users_block_malicious_attachments_policy_configured",
-        "mss_users_set_mfa",
-        "mss_bp_controlling_access_saas_apps_bec",
-        "mss_bp_password_configuration_saas_applications_bec",
-        "mss_bp_secure_outlook_services_settings_bec",
-        "mss_users_block_malicious_urls_policy_configured",
         "mss_users_allow_vulnerable_legacy_protocols",
-        "mss_bp_logging_threat_detection_capabilities_saas_apps_bec",
-        "mss_missing_best_practices_ensure_effective_secutiy_settings_microsoft_purview_bec",
+        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender_bec",
+        "mss_users_without_risk_conditional_access_policy",
         "mss_missing_bp_azure_active_directory_configured_securely_bec",
+        "mss_bp_controlling_access_saas_apps_bec",
+        "mss_non_compliant_impersonation_protection_against_financial_fraud",
+        "mss_bp_secure_outlook_services_settings_bec",
+        "mss_users_set_mfa",
+        "mss_users_block_malicious_attachments_policy_configured",
+        "mss_users_block_malicious_urls_policy_configured",
+        "mss_bp_logging_threat_detection_capabilities_saas_apps_bec",
         "mss_missing_best_practices_sensitive_business_data_identified_managed_bec"
       ],
       "recommendationIds": [
-        "mdo_safelinksforOfficeApps",
-        "mdo_atpprotection",
-        "exo_mailboxaudit",
-        "mip_search_auditlog",
-        "UserRiskPolicy",
-        "MFARegistrationV2",
         "SigninRiskPolicy",
-        "BlockLegacyAuthentication",
-        "mip_DLP_policies_Teams",
         "mdo_safeattachmentpolicy",
         "mdo_highconfidencephishaction",
         "mdo_phisspamacation",
@@ -88,22 +80,14 @@
         "exo_outlookaddins",
         "CustomerLockBoxEnabled",
         "exo_SPF_records_for_all_domains",
-        "exo_individualsharing",
-        "PWAgePolicyNew",
-        "mip_management_API_enabled_four_workloads",
-        "mip_autosensitivitylabelspoliciesa",
-        "mip_purviewlabelconsent",
-        "mip_sensitivitylabelspolicies",
         "aad_phishing_MFA_strength",
         "aad_custom_banned_passwords",
         "SelfServicePasswordReset",
-        "mdo_safeattachments",
-        "exo_oauth2clientprofileenabled",
-        "AdminMFAV2",
-        "RoleOverlap",
-        "aad_third_party_apps",
-        "IntegratedApps",
+        "mip_DLP_policies_Teams",
+        "mdo_atpprotection",
+        "mip_search_auditlog",
         "mdo_safelinksforemail",
+        "UserRiskPolicy",
         "mdo_targeteduserprotectionaction",
         "mdo_targeteddomainprotectionaction",
         "mdo_mailboxintelligenceprotectionaction",
@@ -114,15 +98,41 @@
         "mdo_targetedusersprotection",
         "mdo_enabledomainstoprotect",
         "mdo_enablemailboxintelligence",
-        "mdo_mailboxintelligenceprotection"
+        "mdo_mailboxintelligenceprotection",
+        "AdminMFAV2",
+        "RoleOverlap",
+        "PWAgePolicyNew",
+        "aad_third_party_apps",
+        "IntegratedApps",
+        "mip_management_API_enabled_four_workloads",
+        "mip_autosensitivitylabelspoliciesa",
+        "mip_purviewlabelconsent",
+        "mip_sensitivitylabelspolicies",
+        "exo_mailboxaudit",
+        "exo_oauth2clientprofileenabled",
+        "MFARegistrationV2",
+        "mdo_safelinksforOfficeApps",
+        "mdo_safeattachments",
+        "BlockLegacyAuthentication",
+        "exo_individualsharing"
       ],
       "recommendationsV2": {
+        "identity": [
+          "SigninRiskPolicy",
+          "aad_phishing_MFA_strength",
+          "aad_custom_banned_passwords",
+          "SelfServicePasswordReset",
+          "UserRiskPolicy",
+          "AdminMFAV2",
+          "RoleOverlap",
+          "PWAgePolicyNew",
+          "aad_third_party_apps",
+          "IntegratedApps",
+          "exo_oauth2clientprofileenabled",
+          "MFARegistrationV2",
+          "BlockLegacyAuthentication"
+        ],
         "apps": [
-          "mdo_safelinksforOfficeApps",
-          "mdo_atpprotection",
-          "exo_mailboxaudit",
-          "mip_search_auditlog",
-          "mip_DLP_policies_Teams",
           "mdo_safeattachmentpolicy",
           "mdo_highconfidencephishaction",
           "mdo_phisspamacation",
@@ -139,9 +149,9 @@
           "exo_outlookaddins",
           "CustomerLockBoxEnabled",
           "exo_SPF_records_for_all_domains",
-          "exo_individualsharing",
-          "mip_management_API_enabled_four_workloads",
-          "mdo_safeattachments",
+          "mip_DLP_policies_Teams",
+          "mdo_atpprotection",
+          "mip_search_auditlog",
           "mdo_safelinksforemail",
           "mdo_targeteduserprotectionaction",
           "mdo_targeteddomainprotectionaction",
@@ -153,22 +163,12 @@
           "mdo_targetedusersprotection",
           "mdo_enabledomainstoprotect",
           "mdo_enablemailboxintelligence",
-          "mdo_mailboxintelligenceprotection"
-        ],
-        "identity": [
-          "UserRiskPolicy",
-          "MFARegistrationV2",
-          "SigninRiskPolicy",
-          "BlockLegacyAuthentication",
-          "PWAgePolicyNew",
-          "aad_phishing_MFA_strength",
-          "aad_custom_banned_passwords",
-          "SelfServicePasswordReset",
-          "exo_oauth2clientprofileenabled",
-          "AdminMFAV2",
-          "RoleOverlap",
-          "aad_third_party_apps",
-          "IntegratedApps"
+          "mdo_mailboxintelligenceprotection",
+          "mip_management_API_enabled_four_workloads",
+          "exo_mailboxaudit",
+          "mdo_safelinksforOfficeApps",
+          "mdo_safeattachments",
+          "exo_individualsharing"
         ],
         "data": [
           "mip_purviewlabelconsent",
@@ -176,31 +176,13 @@
         ]
       },
       "workloads": [
+        "MDI",
+        "AAD",
         "MDA",
         "MDO",
-        "AAD",
-        "MDI",
         "MIP"
       ],
       "suggestions": [
-        {
-          "title": "Subscribe to Microsoft Defender for Cloud Apps and either subscribe to Defender for Office or enable at least one application connector",
-          "description": "To see data associated to this metric Subscribe to 'Defender for Office 365 Plan 1',  or enable at least one of the following application connectors: Microsoft 365, Zendesk.",
-          "actions": [
-            {
-              "text": "Get started with Defender for Cloud Apps",
-              "link": "https://aka.ms/xspm/defender_cloud_apps"
-            },
-            {
-              "text": "Learn more about connectors enablement",
-              "link": "https://aka.ms/connector_enablement"
-            },
-            {
-              "text": "Learn more about Defender for Office",
-              "link": "https://aka.ms/defender_for_office"
-            }
-          ]
-        },
         {
           "title": "Subscribe to Microsoft Defender for Office 365",
           "description": "To see data associated to this metric subscribe to 'Defender for Office 365 Plan 1'",
@@ -208,6 +190,20 @@
             {
               "text": "Learn more about Defender for Office",
               "link": "https://aka.ms/defender_for_office"
+            }
+          ]
+        },
+        {
+          "title": "Subscribe to Defender for Cloud Apps",
+          "description": "To see data associated to this metric Subscribe to Defender for Cloud Apps",
+          "actions": [
+            {
+              "text": "Learn more about Entra ID P1",
+              "link": "https://aka.ms/entra_id"
+            },
+            {
+              "text": "Get started with Defender for Cloud Apps",
+              "link": "https://aka.ms/xspm/defender_cloud_apps"
             }
           ]
         },
@@ -226,16 +222,30 @@
           ]
         },
         {
-          "title": "Subscribe to Defender for Cloud Apps",
-          "description": "To see data associated to this metric Subscribe to Defender for Cloud Apps",
+          "title": "Purchase Microsoft Entra P1 or P2",
+          "description": "To see associated data and leverage security controls purchase Microsoft Entra P1 or P2",
           "actions": [
             {
-              "text": "Learn more about Entra ID P1",
+              "text": "Learn more about Entra ID",
               "link": "https://aka.ms/entra_id"
-            },
+            }
+          ]
+        },
+        {
+          "title": "Subscribe to Microsoft Defender for Cloud Apps and either subscribe to Defender for Office or enable at least one application connector",
+          "description": "To see data associated to this metric Subscribe to 'Defender for Office 365 Plan 1',  or enable at least one of the following application connectors: Microsoft 365, Zendesk.",
+          "actions": [
             {
               "text": "Get started with Defender for Cloud Apps",
               "link": "https://aka.ms/xspm/defender_cloud_apps"
+            },
+            {
+              "text": "Learn more about connectors enablement",
+              "link": "https://aka.ms/connector_enablement"
+            },
+            {
+              "text": "Learn more about Defender for Office",
+              "link": "https://aka.ms/defender_for_office"
             }
           ]
         },
@@ -260,16 +270,6 @@
               "link": "https://aka.ms/defender_for_office"
             }
           ]
-        },
-        {
-          "title": "Purchase Microsoft Entra P1 or P2",
-          "description": "To see associated data and leverage security controls purchase Microsoft Entra P1 or P2",
-          "actions": [
-            {
-              "text": "Learn more about Entra ID",
-              "link": "https://aka.ms/entra_id"
-            }
-          ]
         }
       ],
       "programs": [
@@ -280,7 +280,47 @@
       "dataHistory": [
         {
           "score": 0.449755,
-          "date": "2026-05-03T09:57:12.1056219Z",
+          "date": "2026-05-07T10:11:52.8533957Z",
+          "initiativeId": "business_email_compromise_v2",
+          "lastUpdate": "2026-05-06T01:47:49Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.449755,
+          "date": "2026-05-06T22:10:10.8913816Z",
+          "initiativeId": "business_email_compromise_v2",
+          "lastUpdate": "2026-05-06T01:47:49Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.449755,
+          "date": "2026-05-05T22:08:02.3904023Z",
+          "initiativeId": "business_email_compromise_v2",
+          "lastUpdate": "2026-05-04T07:21:58Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.449755,
+          "date": "2026-05-04T22:04:03.0214062Z",
+          "initiativeId": "business_email_compromise_v2",
+          "lastUpdate": "2026-05-04T07:21:58Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.449755,
+          "date": "2026-05-03T23:00:03.6432601Z",
           "initiativeId": "business_email_compromise_v2",
           "lastUpdate": "2026-05-02T06:32:40Z",
           "tenantId": "00000000-0000-0000-0000-000000000000",
@@ -387,46 +427,6 @@
           "scopingProperties": {
             "deviceGroupIds": []
           }
-        },
-        {
-          "score": 0.453804,
-          "date": "2026-04-22T22:05:42.9896821Z",
-          "initiativeId": "business_email_compromise_v2",
-          "lastUpdate": "2026-04-21T15:04:13Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.453804,
-          "date": "2026-04-21T22:00:08.3066355Z",
-          "initiativeId": "business_email_compromise_v2",
-          "lastUpdate": "2026-04-21T15:04:13Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.459877,
-          "date": "2026-04-20T22:56:07.8517295Z",
-          "initiativeId": "business_email_compromise_v2",
-          "lastUpdate": "2026-04-20T00:14:01Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.459877,
-          "date": "2026-04-19T22:49:50.1045361Z",
-          "initiativeId": "business_email_compromise_v2",
-          "lastUpdate": "2026-04-18T08:17:06Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
         }
       ],
       "threatAnalyticsData": {
@@ -453,33 +453,22 @@
         "mss_missing_best_practices_ensure_effective_security_settings_sharepoint_admin_center"
       ],
       "activeMetricIds": [
-        "mss_missing_best_practices_ensure_effective_secutiy_settings_microsoft_purview",
-        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender",
         "mss_missing_best_practices_ensure_effective_security_m365_admin_center",
-        "mss_missing_best_practices_ensure_effective_security_settings_sharepoint_admin_center",
+        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender",
         "mss_missing_best_practices_ensure_effective_security_settings_exchange_admin_center",
-        "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center"
+        "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
+        "mss_missing_best_practices_ensure_effective_secutiy_settings_microsoft_purview",
+        "mss_missing_best_practices_ensure_effective_security_settings_sharepoint_admin_center"
       ],
       "tenantActiveMetricIds": [
-        "mss_missing_best_practices_ensure_effective_security_settings_exchange_admin_center",
-        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender",
-        "mss_missing_best_practices_ensure_effective_security_settings_sharepoint_admin_center",
         "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
+        "mss_missing_best_practices_ensure_effective_secutiy_settings_microsoft_purview",
         "mss_missing_best_practices_ensure_effective_security_m365_admin_center",
-        "mss_missing_best_practices_ensure_effective_secutiy_settings_microsoft_purview"
+        "mss_missing_best_practices_ensure_effective_security_settings_exchange_admin_center",
+        "mss_missing_best_practices_ensure_effective_security_settings_sharepoint_admin_center",
+        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender"
       ],
       "recommendationIds": [
-        "mip_search_auditlog",
-        "dlp_datalossprevention",
-        "mip_DLP_policies_Teams",
-        "mdo_atpprotection",
-        "mdo_safelinksforOfficeApps",
-        "mdo_commonattachmentsfilter",
-        "mdo_safeattachmentpolicy",
-        "mdo_spam_notifications_only_for_admins",
-        "mdo_antiphishingpolicies",
-        "exo_SPF_records_for_all_domains",
-        "mcas_mda_enabled",
         "admincenter_owned_apps_and_services",
         "forms_phishing_protection",
         "sway_block_sharing_with_outside_users",
@@ -489,10 +478,14 @@
         "PWAgePolicyNew",
         "exo_individualsharing",
         "CustomerLockBoxEnabled",
-        "spo_external_users_sharing",
-        "spo_legacy_auth",
-        "spo_external_sharing_managed",
-        "spo_block_onedrive_sync_unmanaged_devices",
+        "mdo_safelinksforOfficeApps",
+        "mdo_commonattachmentsfilter",
+        "mdo_safeattachmentpolicy",
+        "mdo_atpprotection",
+        "mdo_spam_notifications_only_for_admins",
+        "mdo_antiphishingpolicies",
+        "exo_SPF_records_for_all_domains",
+        "mcas_mda_enabled",
         "exo_outlookaddins",
         "exo_mailboxaudit",
         "mdo_blockmailforward",
@@ -515,44 +508,22 @@
         "UserRiskPolicy",
         "SigninRiskPolicy",
         "aad_password_protection",
-        "SelfServicePasswordReset"
+        "SelfServicePasswordReset",
+        "mip_search_auditlog",
+        "dlp_datalossprevention",
+        "mip_DLP_policies_Teams",
+        "spo_external_users_sharing",
+        "spo_legacy_auth",
+        "spo_external_sharing_managed",
+        "spo_block_onedrive_sync_unmanaged_devices"
       ],
       "recommendationsV2": {
-        "apps": [
-          "mip_search_auditlog",
-          "mip_DLP_policies_Teams",
-          "mdo_atpprotection",
-          "mdo_safelinksforOfficeApps",
-          "mdo_commonattachmentsfilter",
-          "mdo_safeattachmentpolicy",
-          "mdo_spam_notifications_only_for_admins",
-          "mdo_antiphishingpolicies",
-          "exo_SPF_records_for_all_domains",
-          "mcas_mda_enabled",
-          "forms_phishing_protection",
-          "sway_block_sharing_with_outside_users",
-          "exo_individualsharing",
-          "CustomerLockBoxEnabled",
-          "spo_external_sharing_managed",
-          "spo_block_onedrive_sync_unmanaged_devices",
-          "exo_outlookaddins",
-          "exo_mailboxaudit",
-          "mdo_blockmailforward",
-          "exo_mailtipsenabled",
-          "exo_storageproviderrestricted",
-          "exo_transportrulesallowlistdomains"
-        ],
-        "data": [
-          "dlp_datalossprevention"
-        ],
         "identity": [
           "admincenter_owned_apps_and_services",
           "aad_admin_accounts_separate_unassigned_cloud_only",
           "OneAdmin",
           "aad_managed_approved_public_groups_only",
           "PWAgePolicyNew",
-          "spo_external_users_sharing",
-          "spo_legacy_auth",
           "exo_oauth2clientprofileenabled",
           "aad_phishing_MFA_strength",
           "aad_limited_administrative_roles",
@@ -569,7 +540,36 @@
           "UserRiskPolicy",
           "SigninRiskPolicy",
           "aad_password_protection",
-          "SelfServicePasswordReset"
+          "SelfServicePasswordReset",
+          "spo_external_users_sharing",
+          "spo_legacy_auth"
+        ],
+        "apps": [
+          "forms_phishing_protection",
+          "sway_block_sharing_with_outside_users",
+          "exo_individualsharing",
+          "CustomerLockBoxEnabled",
+          "mdo_safelinksforOfficeApps",
+          "mdo_commonattachmentsfilter",
+          "mdo_safeattachmentpolicy",
+          "mdo_atpprotection",
+          "mdo_spam_notifications_only_for_admins",
+          "mdo_antiphishingpolicies",
+          "exo_SPF_records_for_all_domains",
+          "mcas_mda_enabled",
+          "exo_outlookaddins",
+          "exo_mailboxaudit",
+          "mdo_blockmailforward",
+          "exo_mailtipsenabled",
+          "exo_storageproviderrestricted",
+          "exo_transportrulesallowlistdomains",
+          "mip_search_auditlog",
+          "mip_DLP_policies_Teams",
+          "spo_external_sharing_managed",
+          "spo_block_onedrive_sync_unmanaged_devices"
+        ],
+        "data": [
+          "dlp_datalossprevention"
         ]
       },
       "workloads": [
@@ -581,9 +581,49 @@
       "dataHistory": [
         {
           "score": 0.361877,
-          "date": "2026-05-03T10:00:23.3102625Z",
+          "date": "2026-05-07T10:15:56.3141524Z",
           "initiativeId": "cis_microsoft_365_foundations_3_0_0",
-          "lastUpdate": "2026-05-03T07:09:12Z",
+          "lastUpdate": "2026-05-07T06:28:13Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.361877,
+          "date": "2026-05-06T22:13:30.1060786Z",
+          "initiativeId": "cis_microsoft_365_foundations_3_0_0",
+          "lastUpdate": "2026-05-06T20:24:40Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.361877,
+          "date": "2026-05-05T22:11:17.8051697Z",
+          "initiativeId": "cis_microsoft_365_foundations_3_0_0",
+          "lastUpdate": "2026-05-05T18:39:14Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.361877,
+          "date": "2026-05-04T22:07:55.3024968Z",
+          "initiativeId": "cis_microsoft_365_foundations_3_0_0",
+          "lastUpdate": "2026-05-04T17:28:21Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.361877,
+          "date": "2026-05-03T23:03:40.7760055Z",
+          "initiativeId": "cis_microsoft_365_foundations_3_0_0",
+          "lastUpdate": "2026-05-03T16:33:52Z",
           "tenantId": "00000000-0000-0000-0000-000000000000",
           "scopingProperties": {
             "deviceGroupIds": []
@@ -684,46 +724,6 @@
           "date": "2026-04-23T22:14:27.7671267Z",
           "initiativeId": "cis_microsoft_365_foundations_3_0_0",
           "lastUpdate": "2026-04-23T16:37:45Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.362203,
-          "date": "2026-04-22T22:08:56.8902113Z",
-          "initiativeId": "cis_microsoft_365_foundations_3_0_0",
-          "lastUpdate": "2026-04-22T17:39:01Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.362203,
-          "date": "2026-04-21T22:03:19.7269995Z",
-          "initiativeId": "cis_microsoft_365_foundations_3_0_0",
-          "lastUpdate": "2026-04-21T15:29:21Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.362694,
-          "date": "2026-04-20T22:59:24.78387Z",
-          "initiativeId": "cis_microsoft_365_foundations_3_0_0",
-          "lastUpdate": "2026-04-20T12:42:03Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.362694,
-          "date": "2026-04-19T22:53:26.9181899Z",
-          "initiativeId": "cis_microsoft_365_foundations_3_0_0",
-          "lastUpdate": "2026-04-19T15:14:32Z",
           "tenantId": "00000000-0000-0000-0000-000000000000",
           "scopingProperties": {
             "deviceGroupIds": []
@@ -14383,25 +14383,43 @@
         "cloudmapv2_all_critical_devices",
         "cloudmapv2_all_critical_identities"
       ],
-      "activeMetricIds": [],
-      "tenantActiveMetricIds": [],
+      "activeMetricIds": [
+        "ndr_critical_devices_exposed_the_internet",
+        "ndr_critical_devices_with_exposure_level_high",
+        "ndr_critical_devices_with_risk_level_high"
+      ],
+      "tenantActiveMetricIds": [
+        "ndr_critical_devices_with_risk_level_high",
+        "ndr_critical_devices_with_exposure_level_high",
+        "ndr_critical_devices_exposed_the_internet"
+      ],
       "recommendationIds": [
-        "00000000-0000-0000-0000-000000000000",
-        "00000000-0000-0000-0000-000000000000",
-        "high_exposure_mdvm",
         "scid_96",
         "scid_2070",
         "scid_45",
         "scid_72",
         "scid_30",
         "scid_3011",
-        "high_risk_level",
         "00000000-0000-0000-0000-000000000000",
         "00000000-0000-0000-0000-000000000000",
         "00000000-0000-0000-0000-000000000000",
-        "00000000-0000-0000-0000-000000000000"
+        "00000000-0000-0000-0000-000000000000",
+        "high_exposure_mdvm",
+        "00000000-0000-0000-0000-000000000000",
+        "00000000-0000-0000-0000-000000000000",
+        "high_risk_level"
       ],
       "recommendationsV2": {
+        "deviceMisconfiguration": [
+          "scid_96",
+          "scid_2070",
+          "scid_45",
+          "scid_72",
+          "scid_30",
+          "scid_3011",
+          "high_exposure_mdvm",
+          "high_risk_level"
+        ],
         "cloud": [
           "00000000-0000-0000-0000-000000000000",
           "00000000-0000-0000-0000-000000000000",
@@ -14409,37 +14427,13 @@
           "00000000-0000-0000-0000-000000000000",
           "00000000-0000-0000-0000-000000000000",
           "00000000-0000-0000-0000-000000000000"
-        ],
-        "deviceMisconfiguration": [
-          "high_exposure_mdvm",
-          "scid_96",
-          "scid_2070",
-          "scid_45",
-          "scid_72",
-          "scid_30",
-          "scid_3011",
-          "high_risk_level"
         ]
       },
       "workloads": [
-        "MDC",
-        "MDE"
+        "MDE",
+        "MDC"
       ],
       "suggestions": [
-        {
-          "title": "Defender Cloud Security Posture Management plan and agentless VM scanning should be enabled",
-          "description": "To get vulnerability assessment results for cloud resources, go to the Microsoft Defender for Cloud portal, select Environment Settings, choose your subscription, select Defender Plans, and enable the Defender CSPM plan with VM agentless scanning.",
-          "actions": [
-            {
-              "text": "Enable Microsoft Defender CSPM",
-              "link": "https://portal.azure.com/#view/Microsoft_Azure_Security/SecurityMenuBlade/~/EnvironmentSettings"
-            },
-            {
-              "text": "Learn more",
-              "link": "https://aka.ms/xspm/cspm"
-            }
-          ]
-        },
         {
           "title": "Make sure critical devices are defined correctly",
           "description": "We recommend using our critical asset management capabilities. We’ve already provided multiple out-of-the-box classifications for critical devices, including domain controllers, ADFS servers, and more. Review your predefined rules to ensure they meet your organization's needs, and set custom classification queries to make sure any device you deem critical is marked accordingly.",
@@ -14450,7 +14444,7 @@
             },
             {
               "text": "Learn more on critical asset protection",
-              "link": "https://aka.ms/xspm/suggestions/learn-more/1/ndr_critical_devices_with_exposure_level_high"
+              "link": "https://aka.ms/xspm/suggestions/learn-more/1/ndr_critical_devices_exposed_the_internet"
             }
           ]
         },
@@ -14461,20 +14455,6 @@
             {
               "text": "Learn More",
               "link": "https://aka.ms/xspm/suggestions/learn-more/2/ndr_critical_devices_exposed_the_internet"
-            }
-          ]
-        },
-        {
-          "title": "Defender Cloud Security Posture Management plan and agentless containers VA scanning should be enabled",
-          "description": "To get vulnerability assessment results for container images, go to the Microsoft Defender for Cloud portal, choose Environment Settings, select your subscription, select Defender Plans and enable Defender CSPM plan with agentless containers VA scanning configuration.",
-          "actions": [
-            {
-              "text": "Enable Microsoft Defender CSPM",
-              "link": "https://portal.azure.com/#view/Microsoft_Azure_Security/SecurityMenuBlade/~/EnvironmentSettings"
-            },
-            {
-              "text": "Learn more",
-              "link": "https://aka.ms/xspm/cspm"
             }
           ]
         },
@@ -14491,18 +14471,67 @@
               "link": "https://aka.ms/xspm/cspm"
             }
           ]
+        },
+        {
+          "title": "Defender Cloud Security Posture Management plan and agentless VM scanning should be enabled",
+          "description": "To get vulnerability assessment results for cloud resources, the Microsoft Defender Cloud Security Posture Management (CSPM) plan within Microsoft Defender for Cloud should be enabled, with agentless VM scanning configuration on.\nTo enable, go to the Microsoft Defender for Cloud portal, select Environment Settings in the main menu, select your subscription, select Defender Plans and enable Defender CSPM plan with VM agentless scanning configuration.",
+          "actions": [
+            {
+              "text": "Enable Microsoft Defender CSPM",
+              "link": "https://portal.azure.com/#view/Microsoft_Azure_Security/SecurityMenuBlade/~/EnvironmentSettings"
+            },
+            {
+              "text": "Learn more",
+              "link": "https://aka.ms/xspm/cspm"
+            }
+          ]
+        },
+        {
+          "title": "Defender Cloud Security Posture Management plan and agentless containers VA scanning should be enabled",
+          "description": "To get vulnerability assessment results for container images, go to the Microsoft Defender for Cloud portal, choose Environment Settings, select your subscription, select Defender Plans and enable Defender CSPM plan with agentless containers VA scanning configuration.",
+          "actions": [
+            {
+              "text": "Enable Microsoft Defender CSPM",
+              "link": "https://portal.azure.com/#view/Microsoft_Azure_Security/SecurityMenuBlade/~/EnvironmentSettings"
+            },
+            {
+              "text": "Learn more",
+              "link": "https://aka.ms/xspm/cspm"
+            }
+          ]
         }
       ],
       "programs": [],
       "isFavorite": false,
-      "dataHistory": [],
+      "dataHistory": [
+        {
+          "score": 0.777778,
+          "date": "2026-05-07T10:11:47.0069477Z",
+          "initiativeId": "critical_asset_protection",
+          "lastUpdate": "2026-05-06T16:48:37Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.777778,
+          "date": "2026-05-06T22:10:07.6226346Z",
+          "initiativeId": "critical_asset_protection",
+          "lastUpdate": "2026-05-06T16:48:37Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        }
+      ],
       "threatAnalyticsData": {
         "relatedArticles": [],
         "relatedTags": [],
         "slices": []
       },
       "supportGetAggregatedAssets": true,
-      "latestScore": -1.0
+      "latestScore": 0.777778
     },
     {
       "id": "endpoint_security",
@@ -14529,84 +14558,90 @@
         "ndr_critical_devices_with_risk_level_high"
       ],
       "activeMetricIds": [
-        "tvm_edr_in_block_mode",
-        "tvm_endpoints_with_up_to_date_av_signatures",
-        "tvm_agents_not_up_to_date",
-        "ndr_cannot_be_managed_endpoints",
+        "ndr_critical_devices_exposed_the_internet",
+        "tvm_endpoints_host_firewall_disabled_or_misconfigured",
+        "tvm_endpoints_with_tamper_protection_disabled",
         "tvm_endpoints_av_disabled",
         "ndr_agent_coverage_macos_endpoints",
-        "tvm_endpoints_host_firewall_disabled_or_misconfigured",
+        "tvm_agents_not_up_to_date",
+        "ndr_critical_devices_with_exposure_level_high",
         "ndr_agent_coverage_linux_servers",
-        "ndr_agent_coverage_windows_endpoints",
-        "tvm_endpoints_with_tamper_protection_disabled",
-        "ndr_agent_coverage_windows_servers"
-      ],
-      "tenantActiveMetricIds": [
-        "ndr_agent_coverage_windows_endpoints",
-        "ndr_agent_coverage_linux_servers",
+        "tvm_edr_in_block_mode",
         "ndr_agent_coverage_windows_servers",
         "ndr_cannot_be_managed_endpoints",
+        "ndr_agent_coverage_windows_endpoints",
+        "tvm_endpoints_with_up_to_date_av_signatures",
+        "ndr_critical_devices_with_risk_level_high"
+      ],
+      "tenantActiveMetricIds": [
+        "ndr_critical_devices_with_risk_level_high",
+        "ndr_agent_coverage_windows_servers",
+        "ndr_agent_coverage_linux_servers",
+        "ndr_agent_coverage_macos_endpoints",
+        "ndr_agent_coverage_windows_endpoints",
+        "ndr_cannot_be_managed_endpoints",
         "tvm_edr_in_block_mode",
+        "tvm_endpoints_host_firewall_disabled_or_misconfigured",
         "tvm_endpoints_with_tamper_protection_disabled",
         "tvm_endpoints_av_disabled",
-        "tvm_agents_not_up_to_date",
         "tvm_endpoints_with_up_to_date_av_signatures",
-        "tvm_endpoints_host_firewall_disabled_or_misconfigured",
-        "ndr_agent_coverage_macos_endpoints"
+        "tvm_agents_not_up_to_date",
+        "ndr_critical_devices_with_exposure_level_high",
+        "ndr_critical_devices_exposed_the_internet"
       ],
       "recommendationIds": [
-        "scid_2004",
-        "scid_2011",
-        "scid_5095",
-        "scid_6095",
-        "scid_2030",
-        "high_exposure_mdvm",
         "scid_96",
         "scid_2070",
         "scid_45",
         "scid_72",
         "scid_30",
         "scid_3011",
-        "high_risk_level",
-        "scid_2010",
-        "onboard_defender_for_endpoint_macos",
         "scid_2072",
         "scid_2071",
         "scid_2073",
         "scid_5007",
         "scid_51",
-        "onboard_defender_for_endpoint_linux",
-        "scid_2000",
         "scid_2003",
         "scid_5092",
-        "00000000-0000-0000-0000-000000000000"
+        "scid_2010",
+        "onboard_defender_for_endpoint_macos",
+        "scid_2030",
+        "high_exposure_mdvm",
+        "onboard_defender_for_endpoint_linux",
+        "scid_2004",
+        "scid_2000",
+        "00000000-0000-0000-0000-000000000000",
+        "scid_2011",
+        "scid_5095",
+        "scid_6095",
+        "high_risk_level"
       ],
       "recommendationsV2": {
         "deviceMisconfiguration": [
-          "scid_2004",
-          "scid_2011",
-          "scid_5095",
-          "scid_6095",
-          "scid_2030",
-          "high_exposure_mdvm",
           "scid_96",
           "scid_2070",
           "scid_45",
           "scid_72",
           "scid_30",
           "scid_3011",
-          "high_risk_level",
-          "scid_2010",
-          "onboard_defender_for_endpoint_macos",
           "scid_2072",
           "scid_2071",
           "scid_2073",
           "scid_5007",
           "scid_51",
-          "onboard_defender_for_endpoint_linux",
-          "scid_2000",
           "scid_2003",
-          "scid_5092"
+          "scid_5092",
+          "scid_2010",
+          "onboard_defender_for_endpoint_macos",
+          "scid_2030",
+          "high_exposure_mdvm",
+          "onboard_defender_for_endpoint_linux",
+          "scid_2004",
+          "scid_2000",
+          "scid_2011",
+          "scid_5095",
+          "scid_6095",
+          "high_risk_level"
         ],
         "cloud": [
           "00000000-0000-0000-0000-000000000000"
@@ -14626,7 +14661,7 @@
             },
             {
               "text": "Learn more on critical asset protection",
-              "link": "https://aka.ms/xspm/suggestions/learn-more/1/ndr_critical_devices_with_exposure_level_high"
+              "link": "https://aka.ms/xspm/suggestions/learn-more/1/ndr_critical_devices_exposed_the_internet"
             }
           ]
         },
@@ -14647,10 +14682,50 @@
       "isFavorite": false,
       "dataHistory": [
         {
-          "score": 0.706745,
-          "date": "2026-05-03T09:56:59.443479Z",
+          "score": 0.713221,
+          "date": "2026-05-07T10:11:35.764107Z",
           "initiativeId": "endpoint_security",
-          "lastUpdate": "2026-04-30T12:42:02Z",
+          "lastUpdate": "2026-05-06T16:48:37Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.713221,
+          "date": "2026-05-06T22:09:57.6174152Z",
+          "initiativeId": "endpoint_security",
+          "lastUpdate": "2026-05-06T16:48:37Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.692396,
+          "date": "2026-05-05T22:07:50.144092Z",
+          "initiativeId": "endpoint_security",
+          "lastUpdate": "2026-05-05T09:40:31Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.692396,
+          "date": "2026-05-04T22:03:47.0399536Z",
+          "initiativeId": "endpoint_security",
+          "lastUpdate": "2026-05-04T19:52:09Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.685239,
+          "date": "2026-05-03T22:59:48.0024952Z",
+          "initiativeId": "endpoint_security",
+          "lastUpdate": "2026-05-03T18:04:57Z",
           "tenantId": "00000000-0000-0000-0000-000000000000",
           "scopingProperties": {
             "deviceGroupIds": []
@@ -14755,46 +14830,6 @@
           "scopingProperties": {
             "deviceGroupIds": []
           }
-        },
-        {
-          "score": 0.706745,
-          "date": "2026-04-22T22:05:29.9556356Z",
-          "initiativeId": "endpoint_security",
-          "lastUpdate": "2026-04-22T12:35:42Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.706745,
-          "date": "2026-04-21T21:59:55.4797672Z",
-          "initiativeId": "endpoint_security",
-          "lastUpdate": "2026-04-21T10:15:22Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.706745,
-          "date": "2026-04-20T22:55:55.7076453Z",
-          "initiativeId": "endpoint_security",
-          "lastUpdate": "2026-04-19T22:23:59Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.706745,
-          "date": "2026-04-19T22:49:37.7841969Z",
-          "initiativeId": "endpoint_security",
-          "lastUpdate": "2026-04-19T19:17:09Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
         }
       ],
       "threatAnalyticsData": {
@@ -14803,7 +14838,7 @@
         "slices": []
       },
       "supportGetAggregatedAssets": false,
-      "latestScore": 0.706745
+      "latestScore": 0.713221
     },
     {
       "id": "enterprise_iot_security",
@@ -14824,27 +14859,27 @@
         "cloudmapv2_endpoints_not_performing_iot_discovery"
       ],
       "recommendationIds": [
-        "Static_10001",
-        "Static_10003",
         "IoT_Devices_Exposure_Level",
         "critical_vulnerabilities",
         "IoT_Devices_Critical_Vulnerabilities",
         "Static_10000",
         "Static_10002",
+        "Static_10001",
+        "Static_10003",
         "Endpoints_Discovery_IoT_Devices"
       ],
       "recommendationsV2": {
-        "network": [
-          "Static_10001",
-          "Static_10003",
-          "Static_10000",
-          "Static_10002"
-        ],
         "deviceMisconfiguration": [
           "IoT_Devices_Exposure_Level",
           "critical_vulnerabilities",
           "IoT_Devices_Critical_Vulnerabilities",
           "Endpoints_Discovery_IoT_Devices"
+        ],
+        "network": [
+          "Static_10000",
+          "Static_10002",
+          "Static_10001",
+          "Static_10003"
         ]
       },
       "workloads": [
@@ -14855,10 +14890,50 @@
       "isFavorite": false,
       "dataHistory": [
         {
-          "score": 1.0,
-          "date": "2026-05-03T10:00:47.0551531Z",
+          "score": 0.909091,
+          "date": "2026-05-07T10:16:26.4605465Z",
           "initiativeId": "enterprise_iot_security",
-          "lastUpdate": "2026-05-03T05:43:08Z",
+          "lastUpdate": "2026-05-06T18:18:15Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.909091,
+          "date": "2026-05-06T22:13:52.8475296Z",
+          "initiativeId": "enterprise_iot_security",
+          "lastUpdate": "2026-05-06T18:18:15Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 1.0,
+          "date": "2026-05-05T22:11:42.5407946Z",
+          "initiativeId": "enterprise_iot_security",
+          "lastUpdate": "2026-05-05T17:28:05Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 1.0,
+          "date": "2026-05-04T22:08:22.6205043Z",
+          "initiativeId": "enterprise_iot_security",
+          "lastUpdate": "2026-05-04T20:38:17Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 1.0,
+          "date": "2026-05-03T23:04:04.6407927Z",
+          "initiativeId": "enterprise_iot_security",
+          "lastUpdate": "2026-05-03T17:47:19Z",
           "tenantId": "00000000-0000-0000-0000-000000000000",
           "scopingProperties": {
             "deviceGroupIds": []
@@ -14963,46 +15038,6 @@
           "scopingProperties": {
             "deviceGroupIds": []
           }
-        },
-        {
-          "score": 1.0,
-          "date": "2026-04-22T22:09:19.6107926Z",
-          "initiativeId": "enterprise_iot_security",
-          "lastUpdate": "2026-04-22T11:52:43Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 1.0,
-          "date": "2026-04-21T22:03:44.1312889Z",
-          "initiativeId": "enterprise_iot_security",
-          "lastUpdate": "2026-04-21T10:17:29Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 1.0,
-          "date": "2026-04-20T22:59:47.1518756Z",
-          "initiativeId": "enterprise_iot_security",
-          "lastUpdate": "2026-04-19T22:25:42Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 1.0,
-          "date": "2026-04-19T22:53:53.1449887Z",
-          "initiativeId": "enterprise_iot_security",
-          "lastUpdate": "2026-04-19T09:22:42Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
         }
       ],
       "threatAnalyticsData": {
@@ -15011,7 +15046,7 @@
         "slices": []
       },
       "supportGetAggregatedAssets": false,
-      "latestScore": 1.0
+      "latestScore": 0.909091
     },
     {
       "id": "easm",
@@ -15096,40 +15131,60 @@
         "mss_bp_ensure_pingone_identities_configured_securely"
       ],
       "activeMetricIds": [
-        "mss_users_set_mfa",
-        "mss_bp_sharepoint_admin_center_ensure_effective_security_settings",
-        "mss_missing_bp_ensure_effective_password_hygiene",
-        "mss_missing_bp_domain_controllers_configured_securely",
-        "mss_missing_bp_azure_active_directory_configured_securely",
-        "mss_missing_bp_managing_identities_securely_against_ransomware",
-        "mss_mfa_set_for_administrators",
-        "mss_missing_bp_ensure_identities_are_accessing_resources_securely"
-      ],
-      "tenantActiveMetricIds": [
         "mss_missing_bp_managing_identities_securely_against_ransomware",
         "mss_missing_bp_azure_active_directory_configured_securely",
-        "mss_users_set_mfa",
-        "mss_missing_bp_domain_controllers_configured_securely",
         "mss_missing_bp_ensure_identities_are_accessing_resources_securely",
         "mss_missing_bp_ensure_effective_password_hygiene",
+        "mss_mfa_set_for_administrators",
+        "mss_users_set_mfa",
         "mss_bp_sharepoint_admin_center_ensure_effective_security_settings",
-        "mss_mfa_set_for_administrators"
+        "mss_missing_bp_domain_controllers_configured_securely"
+      ],
+      "tenantActiveMetricIds": [
+        "mss_missing_bp_ensure_identities_are_accessing_resources_securely",
+        "mss_missing_bp_ensure_effective_password_hygiene",
+        "mss_missing_bp_domain_controllers_configured_securely",
+        "mss_missing_bp_azure_active_directory_configured_securely",
+        "mss_mfa_set_for_administrators",
+        "mss_bp_sharepoint_admin_center_ensure_effective_security_settings",
+        "mss_users_set_mfa",
+        "mss_missing_bp_managing_identities_securely_against_ransomware"
       ],
       "recommendationIds": [
-        "AATP_Sensor",
-        "AATP_EntraConnectComputersWithNoMdiSensorInstalled",
-        "AATP_AdcsComputersWithNoMdiSensorInstalled",
-        "AATP_AdfsComputersWithNoMdiSensorInstalled",
-        "MFARegistrationV2",
-        "AATP_AzureSsoAccountOldPasswords",
-        "AATP_EntraConnectAccountUnnecessaryReplicationPermission",
-        "AATP_EntraConnectAccountsOldPasswords",
-        "AATP_EntraConnectAccountsWithConnectorAccountAsDefaultAdmin",
-        "AATP_EntraConnectSensitiveAccountsWithUnsafePermissions",
         "AATP_BuiltinKrbtgtAccountWithOldPassword",
         "AATP_InactiveServiceAccounts",
         "AATP_GroupManagedServiceAccountWithUnrecommendedPasswordChangeInterval",
         "AATP_SingleManagedServiceAccountsWithOldPassword",
+        "OneAdmin",
+        "AATP_ClearText",
+        "UserRiskPolicy",
+        "RoleOverlap",
+        "AATP_PwdLAPS",
+        "AATP_PrintSpooler",
+        "AATP_DefenderForIdentityIsNotInstalled",
+        "aad_admin_accounts_separate_unassigned_cloud_only",
+        "aad_admin_consent_workflow",
+        "aad_linkedin_connection_disables",
+        "aad_password_protection",
+        "aad_sign_in_freq_session_timeout",
+        "aad_third_party_apps",
+        "AdminMFAV2",
+        "BlockLegacyAuthentication",
+        "IntegratedApps",
+        "MFARegistrationV2",
+        "PasswordHashSync",
+        "PWAgePolicyNew",
+        "SelfServicePasswordReset",
+        "SigninRiskPolicy",
+        "aad_phishing_MFA_strength",
+        "aad_limited_administrative_roles",
+        "AATP_WeakCipher",
+        "AATP_KerberosDelegations",
+        "AATP_Vpn",
+        "AATP_GroupPolicyAbnormalModificationAssignment",
+        "AATP_PathRisk",
+        "AATP_DnsAdminsGroupWithUnsafePermissions",
+        "AATP_UnsecureAccount",
         "MDA_Atlassian_EnableTwoFactorAuth",
         "MDA_CitrixSF_EnableTwoFactorAuth",
         "MDA_Google_EnableTwoFactorAuth",
@@ -15144,15 +15199,19 @@
         "MDA_Zendesk_ZanAuth",
         "MDA_CitrixSF_ForceSSO",
         "MDA_GitHub_SAML",
-        "AATP_Okta_SensitiveAccountWithOldPassword",
-        "AATP_Okta_Dormant_Link",
-        "AATP_Okta_HighNumberOfSuperAdmins",
-        "AATP_Okta_SensitiveAccountWithoutFactorsAssigned",
-        "AATP_Okta_SensitiveApiToken",
-        "AATP_Okta_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
-        "AATP_GroupPolicyPasswordInPreferences",
-        "AATP_GroupPolicyAssignsUnprivilegedIdentitiesToElevatedLocalGroups",
-        "AATP_GroupPolicyAbnormalModificationAssignment",
+        "AATP_BuiltinAdministratorAccountWithOldPassword",
+        "AATP_DomainControllersWithOldPassword",
+        "AATP_AzureSsoAccountOldPasswords",
+        "AATP_EntraConnectAccountsOldPasswords",
+        "aad_password_protectio",
+        "aad_custom_banned_passwords",
+        "MDA_Zendesk_AdminPassChange",
+        "AATP_ExposedPasswordsInADAttributes",
+        "AATP_AccountsWithNonDefaultPrimaryGroup",
+        "AATP_DormantAccounts",
+        "AATP_AdminSDHolder",
+        "AATP_NonAdminDCSyncAccounts",
+        "AATP_SIDHistory",
         "AATP_ADCSInsecureCertificateEnrollmentIisEndpoints",
         "AATP_ADCSMisconfiguredCertificateAuthorityAcl",
         "AATP_ADCSMisconfiguredCertificateTemplateAcl",
@@ -15163,74 +15222,70 @@
         "AATP_ADCSMisconfiguredRpcEnrollmentSigning",
         "AATP_ADCSCertificateTemplateEnrolementSuppliesSubject",
         "AATP_ADCSCertificateTemplateArbitraryAppPolicies",
-        "spo_legacy_auth",
-        "spo_external_users_sharing",
-        "spo_idle_session_timeout",
+        "AATP_Sensor",
+        "AATP_EntraConnectComputersWithNoMdiSensorInstalled",
+        "AATP_AdcsComputersWithNoMdiSensorInstalled",
+        "AATP_AdfsComputersWithNoMdiSensorInstalled",
+        "AATP_Okta_SensitiveAccountWithOldPassword",
+        "AATP_Okta_Dormant_Link",
+        "AATP_Okta_HighNumberOfSuperAdmins",
+        "AATP_Okta_SensitiveAccountWithoutFactorsAssigned",
+        "AATP_Okta_SensitiveApiToken",
+        "AATP_Okta_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
+        "AATP_EntraConnectAccountUnnecessaryReplicationPermission",
+        "AATP_EntraConnectAccountsWithConnectorAccountAsDefaultAdmin",
+        "AATP_EntraConnectSensitiveAccountsWithUnsafePermissions",
+        "AATP_GroupPolicyPasswordInPreferences",
+        "AATP_GroupPolicyAssignsUnprivilegedIdentitiesToElevatedLocalGroups",
         "AATP_Ping_Dormant",
         "AATP_Ping_HighNumberOfSuperAdmins",
         "AATP_Ping_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
         "AATP_Ping_SensitiveAccountWithoutFactorsAssigned",
         "AATP_Ping_SensitiveAccountWithOldPassword",
-        "AATP_BuiltinAdministratorAccountWithOldPassword",
-        "AATP_DomainControllersWithOldPassword",
-        "AATP_ClearText",
-        "AATP_PwdLAPS",
-        "SelfServicePasswordReset",
-        "PasswordHashSync",
-        "PWAgePolicyNew",
-        "aad_password_protectio",
-        "aad_phishing_MFA_strength",
-        "aad_custom_banned_passwords",
-        "MDA_Zendesk_AdminPassChange",
-        "AATP_ExposedPasswordsInADAttributes",
-        "AATP_PrintSpooler",
+        "spo_legacy_auth",
+        "spo_external_users_sharing",
+        "spo_idle_session_timeout",
         "AATP_UnsecureDomain",
         "AATP_DomainControllerLocalUsers",
-        "AATP_NonAdminDCSyncAccounts",
         "AATP_HoneyToken",
-        "AATP_BuiltinGuestAccountIsEnabled",
-        "AATP_DefenderForIdentityIsNotInstalled",
-        "aad_admin_accounts_separate_unassigned_cloud_only",
-        "aad_admin_consent_workflow",
-        "aad_linkedin_connection_disables",
-        "aad_password_protection",
-        "aad_sign_in_freq_session_timeout",
-        "aad_third_party_apps",
-        "AdminMFAV2",
-        "BlockLegacyAuthentication",
-        "IntegratedApps",
-        "OneAdmin",
-        "RoleOverlap",
-        "SigninRiskPolicy",
-        "UserRiskPolicy",
-        "aad_limited_administrative_roles",
-        "AATP_AccountsWithNonDefaultPrimaryGroup",
-        "AATP_KerberosDelegations",
-        "AATP_WeakCipher",
-        "AATP_PathRisk",
-        "AATP_DormantAccounts",
-        "AATP_AdminSDHolder",
-        "AATP_SIDHistory",
-        "AATP_UnsecureAccount",
-        "AATP_Vpn",
-        "AATP_DnsAdminsGroupWithUnsafePermissions"
+        "AATP_BuiltinGuestAccountIsEnabled"
       ],
       "recommendationsV2": {
         "identity": [
-          "AATP_Sensor",
-          "AATP_EntraConnectComputersWithNoMdiSensorInstalled",
-          "AATP_AdcsComputersWithNoMdiSensorInstalled",
-          "AATP_AdfsComputersWithNoMdiSensorInstalled",
-          "MFARegistrationV2",
-          "AATP_AzureSsoAccountOldPasswords",
-          "AATP_EntraConnectAccountUnnecessaryReplicationPermission",
-          "AATP_EntraConnectAccountsOldPasswords",
-          "AATP_EntraConnectAccountsWithConnectorAccountAsDefaultAdmin",
-          "AATP_EntraConnectSensitiveAccountsWithUnsafePermissions",
           "AATP_BuiltinKrbtgtAccountWithOldPassword",
           "AATP_InactiveServiceAccounts",
           "AATP_GroupManagedServiceAccountWithUnrecommendedPasswordChangeInterval",
           "AATP_SingleManagedServiceAccountsWithOldPassword",
+          "OneAdmin",
+          "AATP_ClearText",
+          "UserRiskPolicy",
+          "RoleOverlap",
+          "AATP_PwdLAPS",
+          "AATP_PrintSpooler",
+          "AATP_DefenderForIdentityIsNotInstalled",
+          "aad_admin_accounts_separate_unassigned_cloud_only",
+          "aad_admin_consent_workflow",
+          "aad_linkedin_connection_disables",
+          "aad_password_protection",
+          "aad_sign_in_freq_session_timeout",
+          "aad_third_party_apps",
+          "AdminMFAV2",
+          "BlockLegacyAuthentication",
+          "IntegratedApps",
+          "MFARegistrationV2",
+          "PasswordHashSync",
+          "PWAgePolicyNew",
+          "SelfServicePasswordReset",
+          "SigninRiskPolicy",
+          "aad_phishing_MFA_strength",
+          "aad_limited_administrative_roles",
+          "AATP_WeakCipher",
+          "AATP_KerberosDelegations",
+          "AATP_Vpn",
+          "AATP_GroupPolicyAbnormalModificationAssignment",
+          "AATP_PathRisk",
+          "AATP_DnsAdminsGroupWithUnsafePermissions",
+          "AATP_UnsecureAccount",
           "MDA_Atlassian_EnableTwoFactorAuth",
           "MDA_CitrixSF_EnableTwoFactorAuth",
           "MDA_Google_EnableTwoFactorAuth",
@@ -15244,14 +15299,18 @@
           "MDA_Zendesk_ZanAuth",
           "MDA_CitrixSF_ForceSSO",
           "MDA_GitHub_SAML",
-          "AATP_Okta_SensitiveAccountWithOldPassword",
-          "AATP_Okta_HighNumberOfSuperAdmins",
-          "AATP_Okta_SensitiveAccountWithoutFactorsAssigned",
-          "AATP_Okta_SensitiveApiToken",
-          "AATP_Okta_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
-          "AATP_GroupPolicyPasswordInPreferences",
-          "AATP_GroupPolicyAssignsUnprivilegedIdentitiesToElevatedLocalGroups",
-          "AATP_GroupPolicyAbnormalModificationAssignment",
+          "AATP_BuiltinAdministratorAccountWithOldPassword",
+          "AATP_DomainControllersWithOldPassword",
+          "AATP_AzureSsoAccountOldPasswords",
+          "AATP_EntraConnectAccountsOldPasswords",
+          "aad_custom_banned_passwords",
+          "MDA_Zendesk_AdminPassChange",
+          "AATP_ExposedPasswordsInADAttributes",
+          "AATP_AccountsWithNonDefaultPrimaryGroup",
+          "AATP_DormantAccounts",
+          "AATP_AdminSDHolder",
+          "AATP_NonAdminDCSyncAccounts",
+          "AATP_SIDHistory",
           "AATP_ADCSInsecureCertificateEnrollmentIisEndpoints",
           "AATP_ADCSMisconfiguredCertificateAuthorityAcl",
           "AATP_ADCSMisconfiguredCertificateTemplateAcl",
@@ -15262,56 +15321,32 @@
           "AATP_ADCSMisconfiguredRpcEnrollmentSigning",
           "AATP_ADCSCertificateTemplateEnrolementSuppliesSubject",
           "AATP_ADCSCertificateTemplateArbitraryAppPolicies",
-          "spo_legacy_auth",
-          "spo_external_users_sharing",
-          "spo_idle_session_timeout",
+          "AATP_Sensor",
+          "AATP_EntraConnectComputersWithNoMdiSensorInstalled",
+          "AATP_AdcsComputersWithNoMdiSensorInstalled",
+          "AATP_AdfsComputersWithNoMdiSensorInstalled",
+          "AATP_Okta_SensitiveAccountWithOldPassword",
+          "AATP_Okta_HighNumberOfSuperAdmins",
+          "AATP_Okta_SensitiveAccountWithoutFactorsAssigned",
+          "AATP_Okta_SensitiveApiToken",
+          "AATP_Okta_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
+          "AATP_EntraConnectAccountUnnecessaryReplicationPermission",
+          "AATP_EntraConnectAccountsWithConnectorAccountAsDefaultAdmin",
+          "AATP_EntraConnectSensitiveAccountsWithUnsafePermissions",
+          "AATP_GroupPolicyPasswordInPreferences",
+          "AATP_GroupPolicyAssignsUnprivilegedIdentitiesToElevatedLocalGroups",
           "AATP_Ping_Dormant",
           "AATP_Ping_HighNumberOfSuperAdmins",
           "AATP_Ping_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
           "AATP_Ping_SensitiveAccountWithoutFactorsAssigned",
           "AATP_Ping_SensitiveAccountWithOldPassword",
-          "AATP_BuiltinAdministratorAccountWithOldPassword",
-          "AATP_DomainControllersWithOldPassword",
-          "AATP_ClearText",
-          "AATP_PwdLAPS",
-          "SelfServicePasswordReset",
-          "PasswordHashSync",
-          "PWAgePolicyNew",
-          "aad_phishing_MFA_strength",
-          "aad_custom_banned_passwords",
-          "MDA_Zendesk_AdminPassChange",
-          "AATP_ExposedPasswordsInADAttributes",
-          "AATP_PrintSpooler",
+          "spo_legacy_auth",
+          "spo_external_users_sharing",
+          "spo_idle_session_timeout",
           "AATP_UnsecureDomain",
           "AATP_DomainControllerLocalUsers",
-          "AATP_NonAdminDCSyncAccounts",
           "AATP_HoneyToken",
-          "AATP_BuiltinGuestAccountIsEnabled",
-          "AATP_DefenderForIdentityIsNotInstalled",
-          "aad_admin_accounts_separate_unassigned_cloud_only",
-          "aad_admin_consent_workflow",
-          "aad_linkedin_connection_disables",
-          "aad_password_protection",
-          "aad_sign_in_freq_session_timeout",
-          "aad_third_party_apps",
-          "AdminMFAV2",
-          "BlockLegacyAuthentication",
-          "IntegratedApps",
-          "OneAdmin",
-          "RoleOverlap",
-          "SigninRiskPolicy",
-          "UserRiskPolicy",
-          "aad_limited_administrative_roles",
-          "AATP_AccountsWithNonDefaultPrimaryGroup",
-          "AATP_KerberosDelegations",
-          "AATP_WeakCipher",
-          "AATP_PathRisk",
-          "AATP_DormantAccounts",
-          "AATP_AdminSDHolder",
-          "AATP_SIDHistory",
-          "AATP_UnsecureAccount",
-          "AATP_Vpn",
-          "AATP_DnsAdminsGroupWithUnsafePermissions"
+          "AATP_BuiltinGuestAccountIsEnabled"
         ],
         "apps": [
           "MDA_Zoom_MFA"
@@ -15325,7 +15360,7 @@
       "suggestions": [
         {
           "title": "Subscribe to Defender for Identity",
-          "description": "Subscribe to Defender for Identity",
+          "description": "To see data associated to this metric deploy Microsoft Defender for Identity sensor",
           "actions": [
             {
               "text": "Get started with Defender for Identity",
@@ -15334,6 +15369,34 @@
             {
               "text": "Learn more about Defender for Identity deployment",
               "link": "https://aka.ms/DeployMDI"
+            }
+          ]
+        },
+        {
+          "title": "Purchase Microsoft Entra P1 or P2",
+          "description": "To see associated data and leverage security controls purchase Microsoft Entra P1 or P2",
+          "actions": [
+            {
+              "text": "Learn more about Entra ID",
+              "link": "https://aka.ms/entra_id"
+            }
+          ]
+        },
+        {
+          "title": "Deploy Microsoft Defender for Identity sensor and and either purchase to Microsoft Entra P1 or P2",
+          "description": "To see data associated to this metric deploy Microsoft Defender for Identity senor and subscribe to Microsoft Entra ID Premium P2",
+          "actions": [
+            {
+              "text": "Get started with Defender for Identity",
+              "link": "https://aka.ms/mdi/sensor-deployment"
+            },
+            {
+              "text": "Learn more about Defender for Identity deployment",
+              "link": "https://aka.ms/DeployMDI"
+            },
+            {
+              "text": "Learn more about Entra ID",
+              "link": "https://aka.ms/entra_id"
             }
           ]
         },
@@ -15352,56 +15415,6 @@
             {
               "text": "Learn more on connectors enablement",
               "link": "https://aka.ms/connector_enablement"
-            }
-          ]
-        },
-        {
-          "title": "Deploy Microsoft Defender for Identity sensor and integrate Okta",
-          "description": "To see data associated to this metric establish the API connection between your Okta environment and Defender for Identity",
-          "actions": [
-            {
-              "text": "Get started with Defender for Identity",
-              "link": "https://aka.ms/mdi/sensor-deployment"
-            },
-            {
-              "text": "Learn more about Defender for Identity deployment",
-              "link": "https://aka.ms/DeployMDI"
-            },
-            {
-              "text": "Enable Okta integration ",
-              "link": "https://aka.ms/MdiOktaIntegrationDocs"
-            }
-          ]
-        },
-        {
-          "title": "Subscribe to Microsoft Defender for Cloud Apps and enable  Microsoft 365 connector",
-          "description": "To see data associated to this metric, enable at least one of the following application connectors: Microsoft 365",
-          "actions": [
-            {
-              "text": "Connect your SaaS apps",
-              "link": "https://aka.ms/xspm/SaaS_apps"
-            },
-            {
-              "text": "Get started with Defender for Cloud Apps",
-              "link": "https://aka.ms/xspm/defender_cloud_apps"
-            },
-            {
-              "text": "Learn more on connectors enablement",
-              "link": "https://aka.ms/connector_enablement"
-            }
-          ]
-        },
-        {
-          "title": "Deploy Microsoft Defender for Identity sensor and integrate PingOne",
-          "description": "To see data associated to this metric establish the API connection between your PingOne environment and Defender for Identity",
-          "actions": [
-            {
-              "text": "Learn more about Defender for Identity deployment",
-              "link": "https://aka.ms/DeployMDI"
-            },
-            {
-              "text": "Enable PingOne integration",
-              "link": "https://aka.ms/MdiPingOneIntegrationDocs"
             }
           ]
         },
@@ -15436,16 +15449,6 @@
           ]
         },
         {
-          "title": "Purchase Microsoft Entra P1 or P2",
-          "description": "To see associated data and leverage security controls purchase Microsoft Entra P1 or P2",
-          "actions": [
-            {
-              "text": "Learn more about Entra ID",
-              "link": "https://aka.ms/entra_id"
-            }
-          ]
-        },
-        {
           "title": "Deploy Microsoft Defender for Identity sensor and have purchased Microsoft Entra P1 or P2",
           "description": "To see data associated to this metric deploy Microsoft Defender for Identity sensor and purchased Microsoft Entra P1 or P2",
           "actions": [
@@ -15464,8 +15467,8 @@
           ]
         },
         {
-          "title": "Deploy Microsoft Defender for Identity sensor and and either purchase to Microsoft Entra P1 or P2",
-          "description": "To see data associated to this metric deploy Microsoft Defender for Identity senor and subscribe to Microsoft Entra ID Premium P2",
+          "title": "Deploy Microsoft Defender for Identity sensor and integrate Okta",
+          "description": "To see data associated to this metric establish the API connection between your Okta environment and Defender for Identity",
           "actions": [
             {
               "text": "Get started with Defender for Identity",
@@ -15476,8 +15479,40 @@
               "link": "https://aka.ms/DeployMDI"
             },
             {
-              "text": "Learn more about Entra ID",
-              "link": "https://aka.ms/entra_id"
+              "text": "Enable Okta integration ",
+              "link": "https://aka.ms/MdiOktaIntegrationDocs"
+            }
+          ]
+        },
+        {
+          "title": "Deploy Microsoft Defender for Identity sensor and integrate PingOne",
+          "description": "To see data associated to this metric establish the API connection between your PingOne environment and Defender for Identity",
+          "actions": [
+            {
+              "text": "Learn more about Defender for Identity deployment",
+              "link": "https://aka.ms/DeployMDI"
+            },
+            {
+              "text": "Enable PingOne integration",
+              "link": "https://aka.ms/MdiPingOneIntegrationDocs"
+            }
+          ]
+        },
+        {
+          "title": "Subscribe to Microsoft Defender for Cloud Apps and enable  Microsoft 365 connector",
+          "description": "To see data associated to this metric, enable at least one of the following application connectors: Microsoft 365",
+          "actions": [
+            {
+              "text": "Connect your SaaS apps",
+              "link": "https://aka.ms/xspm/SaaS_apps"
+            },
+            {
+              "text": "Get started with Defender for Cloud Apps",
+              "link": "https://aka.ms/xspm/defender_cloud_apps"
+            },
+            {
+              "text": "Learn more on connectors enablement",
+              "link": "https://aka.ms/connector_enablement"
             }
           ]
         }
@@ -15489,9 +15524,49 @@
       "dataHistory": [
         {
           "score": 0.374015,
-          "date": "2026-05-03T09:58:35.8647628Z",
+          "date": "2026-05-07T10:13:24.7427133Z",
           "initiativeId": "identity_security_v2",
-          "lastUpdate": "2026-05-03T07:50:58.1362459Z",
+          "lastUpdate": "2026-05-07T07:37:36.1381023Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.374015,
+          "date": "2026-05-06T22:11:33.47156Z",
+          "initiativeId": "identity_security_v2",
+          "lastUpdate": "2026-05-06T20:54:55.8709772Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.374015,
+          "date": "2026-05-05T22:09:26.3718584Z",
+          "initiativeId": "identity_security_v2",
+          "lastUpdate": "2026-05-05T19:04:51.0900314Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.374015,
+          "date": "2026-05-04T22:05:42.4644957Z",
+          "initiativeId": "identity_security_v2",
+          "lastUpdate": "2026-05-04T20:57:16.7537346Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.374015,
+          "date": "2026-05-03T23:01:33.7348987Z",
+          "initiativeId": "identity_security_v2",
+          "lastUpdate": "2026-05-03T20:45:59.8087874Z",
           "tenantId": "00000000-0000-0000-0000-000000000000",
           "scopingProperties": {
             "deviceGroupIds": []
@@ -15596,46 +15671,6 @@
           "scopingProperties": {
             "deviceGroupIds": []
           }
-        },
-        {
-          "score": 0.374612,
-          "date": "2026-04-22T22:07:05.7085865Z",
-          "initiativeId": "identity_security_v2",
-          "lastUpdate": "2026-04-22T20:38:13.3974338Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.374612,
-          "date": "2026-04-21T22:01:29.9277613Z",
-          "initiativeId": "identity_security_v2",
-          "lastUpdate": "2026-04-21T18:37:15.1582543Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.375507,
-          "date": "2026-04-20T22:57:30.0394538Z",
-          "initiativeId": "identity_security_v2",
-          "lastUpdate": "2026-04-20T16:10:59.6442474Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.375507,
-          "date": "2026-04-19T22:51:23.732081Z",
-          "initiativeId": "identity_security_v2",
-          "lastUpdate": "2026-04-19T16:54:04.3659169Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
         }
       ],
       "threatAnalyticsData": {
@@ -15662,10 +15697,10 @@
       "recommendationIds": [
         "Static_10001",
         "Static_10003",
-        "highly_vulnerable_site_devices",
         "Unprotected_OT_devices",
         "Static_10000",
-        "Static_10002"
+        "Static_10002",
+        "highly_vulnerable_site_devices"
       ],
       "recommendationsV2": {
         "network": [
@@ -15675,8 +15710,8 @@
           "Static_10002"
         ],
         "deviceMisconfiguration": [
-          "highly_vulnerable_site_devices",
-          "Unprotected_OT_devices"
+          "Unprotected_OT_devices",
+          "highly_vulnerable_site_devices"
         ]
       },
       "workloads": [
@@ -15748,49 +15783,75 @@
         "mss_missing_best_practices_ensure_effective_cross_env_protection"
       ],
       "activeMetricIds": [
-        "tvm_edr_in_block_mode",
-        "tvm_endpoints_with_up_to_date_av_signatures",
-        "mss_non_compliant_advanced_ransomware_controls",
         "tvm_endpoints_missing_essential_controls",
-        "tvm_endpoints_agent_communication_issues",
-        "tvm_endpoints_av_disabled",
-        "mss_non_compliant_optional_ransomware_controls",
-        "mss_mfa_set_for_administrators",
         "tvm_endpoints_with_tamper_protection_disabled",
-        "mss_missing_best_practices_ensure_effective_cross_env_protection"
+        "mss_non_compliant_optional_ransomware_controls",
+        "mss_missing_best_practices_ensure_effective_cross_env_protection",
+        "tvm_endpoints_av_disabled",
+        "mss_non_compliant_advanced_ransomware_controls",
+        "tvm_edr_in_block_mode",
+        "tvm_endpoints_agent_communication_issues",
+        "mss_mfa_set_for_administrators",
+        "tvm_endpoints_with_up_to_date_av_signatures"
       ],
       "tenantActiveMetricIds": [
-        "tvm_endpoints_missing_essential_controls",
+        "mss_non_compliant_advanced_ransomware_controls",
+        "mss_mfa_set_for_administrators",
+        "mss_missing_best_practices_ensure_effective_cross_env_protection",
+        "mss_non_compliant_optional_ransomware_controls",
         "tvm_edr_in_block_mode",
+        "tvm_endpoints_agent_communication_issues",
+        "tvm_endpoints_missing_essential_controls",
         "tvm_endpoints_with_tamper_protection_disabled",
         "tvm_endpoints_av_disabled",
-        "tvm_endpoints_with_up_to_date_av_signatures",
-        "tvm_endpoints_agent_communication_issues",
-        "mss_missing_best_practices_ensure_effective_cross_env_protection",
-        "mss_non_compliant_advanced_ransomware_controls",
-        "mss_non_compliant_optional_ransomware_controls",
-        "mss_mfa_set_for_administrators"
+        "tvm_endpoints_with_up_to_date_av_signatures"
       ],
       "recommendationIds": [
+        "scid_2012",
+        "scid_2014",
+        "scid_2016",
+        "scid_2508",
+        "scid_2509",
+        "scid_2510",
+        "scid_2515",
+        "scid_91",
+        "scid_96",
+        "scid_2070",
+        "scid_2003",
+        "scid_5092",
+        "00000000-0000-0000-0000-000000000000",
+        "scid_6094",
+        "scid_5094",
+        "scid_5002",
+        "scid_2001",
+        "scid_6001",
+        "scid_5001",
+        "scid_6090",
+        "scid_5090",
+        "mdo_atpprotection",
+        "scid_5007",
+        "scid_2013",
         "AATP_Sensor",
-        "AATP_EntraConnectComputersWithNoMdiSensorInstalled",
-        "AATP_AdcsComputersWithNoMdiSensorInstalled",
-        "AATP_AdfsComputersWithNoMdiSensorInstalled",
-        "scid_2004",
-        "00000000-0000-0000-0000-000000000000",
-        "00000000-0000-0000-0000-000000000000",
-        "scid_2011",
-        "scid_5095",
-        "scid_6095",
+        "AATP_HoneyToken",
+        "AATP_Vpn",
+        "AATP_ClearText",
+        "AATP_WeakCipher",
+        "AATP_KerberosDelegations",
+        "AATP_PrintSpooler",
+        "AATP_DormantAccounts",
+        "AATP_PwdLAPS",
+        "AATP_PathRisk",
+        "AATP_SIDHistory",
+        "AATP_UnsecureAccount",
+        "AATP_UnsecureDomain",
+        "scid_2010",
         "scid_3003",
         "BlockLegacyAuthentication",
         "scid_57",
         "scid_25",
         "scid_2080",
-        "AATP_PrintSpooler",
         "scid_68",
         "scid_72",
-        "AATP_ClearText",
         "MFARegistrationV2",
         "OneAdmin",
         "scid_3010",
@@ -15820,85 +15881,52 @@
         "scid_52",
         "scid_93",
         "scid_3002",
-        "AATP_PwdLAPS",
         "RoleOverlap",
         "scid_35",
-        "scid_2012",
-        "scid_2014",
-        "scid_2016",
-        "scid_2508",
-        "scid_2509",
-        "scid_2510",
-        "scid_2515",
-        "scid_91",
-        "scid_96",
-        "scid_2070",
+        "AATP_EntraConnectComputersWithNoMdiSensorInstalled",
+        "AATP_AdcsComputersWithNoMdiSensorInstalled",
+        "AATP_AdfsComputersWithNoMdiSensorInstalled",
+        "scid_2004",
         "scid_2002",
         "scid_6002",
         "00000000-0000-0000-0000-000000000000",
-        "scid_2010",
-        "scid_6094",
-        "scid_5094",
-        "scid_5002",
-        "scid_2001",
-        "scid_6001",
-        "scid_5001",
-        "scid_6090",
-        "scid_5090",
-        "mdo_atpprotection",
-        "scid_5007",
-        "scid_2013",
+        "00000000-0000-0000-0000-000000000000",
         "00000000-0000-0000-0000-000000000000",
         "AdminMFAV2",
         "aad_phishing_MFA_strength",
-        "scid_2003",
-        "scid_5092",
-        "AATP_HoneyToken",
-        "AATP_Vpn",
-        "AATP_WeakCipher",
-        "AATP_KerberosDelegations",
-        "AATP_DormantAccounts",
-        "AATP_PathRisk",
-        "AATP_SIDHistory",
-        "AATP_UnsecureAccount",
-        "AATP_UnsecureDomain",
+        "scid_2011",
+        "scid_5095",
+        "scid_6095",
         "00000000-0000-0000-0000-000000000000",
         "00000000-0000-0000-0000-000000000000",
         "00000000-0000-0000-0000-000000000000",
         "00000000-0000-0000-0000-000000000000"
       ],
       "recommendationsV2": {
-        "identity": [
-          "AATP_Sensor",
-          "AATP_EntraConnectComputersWithNoMdiSensorInstalled",
-          "AATP_AdcsComputersWithNoMdiSensorInstalled",
-          "AATP_AdfsComputersWithNoMdiSensorInstalled",
-          "BlockLegacyAuthentication",
-          "AATP_PrintSpooler",
-          "AATP_ClearText",
-          "MFARegistrationV2",
-          "OneAdmin",
-          "SigninRiskPolicy",
-          "UserRiskPolicy",
-          "AATP_PwdLAPS",
-          "RoleOverlap",
-          "AdminMFAV2",
-          "aad_phishing_MFA_strength",
-          "AATP_HoneyToken",
-          "AATP_Vpn",
-          "AATP_WeakCipher",
-          "AATP_KerberosDelegations",
-          "AATP_DormantAccounts",
-          "AATP_PathRisk",
-          "AATP_SIDHistory",
-          "AATP_UnsecureAccount",
-          "AATP_UnsecureDomain"
-        ],
         "deviceMisconfiguration": [
-          "scid_2004",
-          "scid_2011",
-          "scid_5095",
-          "scid_6095",
+          "scid_2012",
+          "scid_2014",
+          "scid_2016",
+          "scid_2508",
+          "scid_2509",
+          "scid_2510",
+          "scid_2515",
+          "scid_91",
+          "scid_96",
+          "scid_2070",
+          "scid_2003",
+          "scid_5092",
+          "scid_6094",
+          "scid_5094",
+          "scid_5002",
+          "scid_2001",
+          "scid_6001",
+          "scid_5001",
+          "scid_6090",
+          "scid_5090",
+          "scid_5007",
+          "scid_2013",
+          "scid_2010",
           "scid_3003",
           "scid_57",
           "scid_25",
@@ -15925,31 +15953,12 @@
           "scid_93",
           "scid_3002",
           "scid_35",
-          "scid_2012",
-          "scid_2014",
-          "scid_2016",
-          "scid_2508",
-          "scid_2509",
-          "scid_2510",
-          "scid_2515",
-          "scid_91",
-          "scid_96",
-          "scid_2070",
+          "scid_2004",
           "scid_2002",
           "scid_6002",
-          "scid_2010",
-          "scid_6094",
-          "scid_5094",
-          "scid_5002",
-          "scid_2001",
-          "scid_6001",
-          "scid_5001",
-          "scid_6090",
-          "scid_5090",
-          "scid_5007",
-          "scid_2013",
-          "scid_2003",
-          "scid_5092"
+          "scid_2011",
+          "scid_5095",
+          "scid_6095"
         ],
         "cloud": [
           "00000000-0000-0000-0000-000000000000",
@@ -15962,20 +15971,46 @@
           "00000000-0000-0000-0000-000000000000"
         ],
         "apps": [
+          "mdo_atpprotection",
           "mdo_safeattachments",
           "mdo_safedocuments",
           "mdo_commonattachmentsfilter",
           "mdo_zapmalware",
           "mdo_zapphish",
-          "McasFirewallLogUpload",
-          "mdo_atpprotection"
+          "McasFirewallLogUpload"
+        ],
+        "identity": [
+          "AATP_Sensor",
+          "AATP_HoneyToken",
+          "AATP_Vpn",
+          "AATP_ClearText",
+          "AATP_WeakCipher",
+          "AATP_KerberosDelegations",
+          "AATP_PrintSpooler",
+          "AATP_DormantAccounts",
+          "AATP_PwdLAPS",
+          "AATP_PathRisk",
+          "AATP_SIDHistory",
+          "AATP_UnsecureAccount",
+          "AATP_UnsecureDomain",
+          "BlockLegacyAuthentication",
+          "MFARegistrationV2",
+          "OneAdmin",
+          "SigninRiskPolicy",
+          "UserRiskPolicy",
+          "RoleOverlap",
+          "AATP_EntraConnectComputersWithNoMdiSensorInstalled",
+          "AATP_AdcsComputersWithNoMdiSensorInstalled",
+          "AATP_AdfsComputersWithNoMdiSensorInstalled",
+          "AdminMFAV2",
+          "aad_phishing_MFA_strength"
         ]
       },
       "workloads": [
-        "MDI",
         "MDE",
         "MDC",
         "MDO",
+        "MDI",
         "MDA",
         "AAD"
       ],
@@ -16006,10 +16041,50 @@
       "isFavorite": false,
       "dataHistory": [
         {
-          "score": 0.401223,
-          "date": "2026-05-03T09:58:11.3903502Z",
+          "score": 0.461228,
+          "date": "2026-05-07T10:12:56.3756405Z",
           "initiativeId": "ransomware_protection",
-          "lastUpdate": "2026-05-03T07:50:58.1109969Z",
+          "lastUpdate": "2026-05-07T07:37:36.0995837Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.461152,
+          "date": "2026-05-06T22:11:06.8573302Z",
+          "initiativeId": "ransomware_protection",
+          "lastUpdate": "2026-05-06T20:54:55.8445512Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.461152,
+          "date": "2026-05-05T22:09:00.2501026Z",
+          "initiativeId": "ransomware_protection",
+          "lastUpdate": "2026-05-05T19:04:51.0526237Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.461152,
+          "date": "2026-05-04T22:05:12.4399659Z",
+          "initiativeId": "ransomware_protection",
+          "lastUpdate": "2026-05-04T20:57:16.7288245Z",
+          "tenantId": "00000000-0000-0000-0000-000000000000",
+          "scopingProperties": {
+            "deviceGroupIds": []
+          }
+        },
+        {
+          "score": 0.414609,
+          "date": "2026-05-03T23:01:07.6620157Z",
+          "initiativeId": "ransomware_protection",
+          "lastUpdate": "2026-05-03T20:45:59.7833395Z",
           "tenantId": "00000000-0000-0000-0000-000000000000",
           "scopingProperties": {
             "deviceGroupIds": []
@@ -16114,46 +16189,6 @@
           "scopingProperties": {
             "deviceGroupIds": []
           }
-        },
-        {
-          "score": 0.414845,
-          "date": "2026-04-22T22:06:40.3881817Z",
-          "initiativeId": "ransomware_protection",
-          "lastUpdate": "2026-04-22T20:38:13.3722039Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.414845,
-          "date": "2026-04-21T22:01:02.9893498Z",
-          "initiativeId": "ransomware_protection",
-          "lastUpdate": "2026-04-21T18:37:15.1267566Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.414845,
-          "date": "2026-04-20T22:57:03.6598243Z",
-          "initiativeId": "ransomware_protection",
-          "lastUpdate": "2026-04-20T16:10:59.6105093Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
-        },
-        {
-          "score": 0.414845,
-          "date": "2026-04-19T22:50:55.2398639Z",
-          "initiativeId": "ransomware_protection",
-          "lastUpdate": "2026-04-19T16:54:04.3358599Z",
-          "tenantId": "00000000-0000-0000-0000-000000000000",
-          "scopingProperties": {
-            "deviceGroupIds": []
-          }
         }
       ],
       "threatAnalyticsData": {
@@ -16164,7 +16199,7 @@
         "slices": []
       },
       "supportGetAggregatedAssets": false,
-      "latestScore": 0.401223
+      "latestScore": 0.461228
     }
   ],
   "recordsCount": 12

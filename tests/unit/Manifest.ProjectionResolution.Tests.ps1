@@ -49,13 +49,15 @@ BeforeAll {
         function global:Get-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey) $null }
         function global:Add-AzTableRow       { param($Table, [string]$PartitionKey, [string]$RowKey, $Property, [switch]$UpdateExisting) }
     }
-    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1') -Force -ErrorAction Stop
-    # Pre-import Xdr.Common.Telemetry so Xdr.Sentinel.Ingest's RequiredModules
-    # pre-check resolves on Linux CI (where the modules dir is not on PSModulePath).
-    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Telemetry' 'Xdr.Common.Telemetry.psd1') -Force -ErrorAction Stop
-    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -ErrorAction Stop
-    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1') -Force -ErrorAction Stop
-    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -ErrorAction Stop
+    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1') -Force -Global -ErrorAction Stop
+    # Pre-import Xdr.Common.Telemetry + Xdr.Common.Manifest so Xdr.Sentinel.Ingest +
+    # Xdr.Defender.Client RequiredModules pre-checks resolve on Linux CI (where the
+    # modules dir is not on PSModulePath). -Global ensures visibility from RequiredModules.
+    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Telemetry' 'Xdr.Common.Telemetry.psd1') -Force -Global -ErrorAction Stop
+    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Manifest' 'Xdr.Common.Manifest.psd1') -Force -Global -ErrorAction Stop
+    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1') -Force -Global -ErrorAction Stop
+    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1') -Force -Global -ErrorAction Stop
+    Import-Module (Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1') -Force -Global -ErrorAction Stop
 
     # Hint syntax: optional `$tox:` prefix + JSONPath (bare-name | dot-path | array-syntax)
     # Cast prefixes (left side of ':'):
@@ -144,6 +146,14 @@ Describe 'Manifest.ProjectionResolution — dry-run extraction against fixture' 
         }
         if ($parsed -is [pscustomobject] -and $parsed.PSObject.Properties['__marker__']) {
             Set-ItResult -Skipped -Because "Fixture for $streamName is a 4xx marker (tenant-gated)"
+            return
+        }
+        # Section R+++ (2026-05-07): under all-live policy, tenant-gated streams
+        # may have raw fixtures with `_availability` diagnostic markers from the
+        # capture-time tenant-gated 4xx response. Skip dry-run on these — runtime
+        # SuccessKind tags them correctly per actual API response.
+        if ($parsed -is [pscustomobject] -and $parsed.PSObject.Properties['_availability']) {
+            Set-ItResult -Skipped -Because "Fixture for $streamName is a capture-time tenant-gated diagnostic marker (R+++ all-live runtime classification)"
             return
         }
 

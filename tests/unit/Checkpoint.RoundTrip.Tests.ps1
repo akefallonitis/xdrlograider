@@ -16,8 +16,12 @@
 #   - Param names are -StreamName (not -Stream) and -TableName (not -Table).
 
 BeforeAll {
-    $script:IngestModulePath = Join-Path $PSScriptRoot '..' '..' 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
-    Import-Module $script:IngestModulePath -Force -ErrorAction Stop
+    # Section R++.G (2026-05-07): -Global imports + Common.Telemetry pre-import
+    # so Mock -ModuleName works on Linux CI.
+    $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+    Import-Module (Join-Path $script:RepoRoot 'src/Modules/Xdr.Common.Telemetry/Xdr.Common.Telemetry.psd1') -Force -Global -ErrorAction Stop
+    $script:IngestModulePath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Sentinel.Ingest' 'Xdr.Sentinel.Ingest.psd1'
+    Import-Module $script:IngestModulePath -Force -Global -ErrorAction Stop
 }
 
 AfterAll {

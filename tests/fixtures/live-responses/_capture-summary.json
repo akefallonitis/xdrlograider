@@ -1,14 +1,14 @@
 {
-  "Stream": "MDE_PostureRecommendationsAggregated_CL",
-  "Tier": "XspmGraph",
+  "Stream": "MDE_TenantAllowBlock_CL",
+  "Tier": "Configuration",
   "Availability": "live",
   "Deferred": false,
   "Method": "GET",
-  "Path": "/apiproxy/mtp/posture/oversight/recommendations/aggregated",
-  "Status": "400",
+  "Path": "/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues",
+  "Status": "500",
   "RawPath": "",
   "IngestPath": "",
   "RawSizeBytes": 0,
   "IngestRowCount": 0,
-  "Notes": "Response status code does not indicate success: 400 (Bad Request)."
+  "Notes": "Response status code does not indicate success: 500 (Internal Server Error)."
 }

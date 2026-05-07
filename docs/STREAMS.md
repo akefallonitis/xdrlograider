@@ -1,8 +1,13 @@
 # Streams catalogue (v0.1.0 GA)
 
-**59 portal-only stream entries** (58 active + 1 deprecated) grouped into **5 cadence tiers**, all with documented path + method + body + headers verified against XDRInternals + nodoc OpenAPI spec catalogue + live-captured against a full-access admin account.
+**65 portal-only stream entries** (64 active + 1 deprecated) grouped into **5 cadence tiers**, all with documented path + method + body + headers verified against XDRInternals + nodoc OpenAPI spec catalogue + live-captured against a full-access admin account.
 
-v0.1.0 GA Phase 2 added **13 Tier A new streams** from the nodoc-catalog sweep (live-captured 2026-05-04): 11 in `XspmGraph` tier (Posture metrics + SecureScore per-category + Attack Surface analytical paths/chokepoints + XSPM Connectors + Asset Classification Schema + Posture Tenants/Initiatives/Security Events) and 2 in `Configuration` tier (Threat Analytics enriched + top threats).
+v0.1.0 GA Phase 2 (2026-05-04) added **13 Tier A streams** from the nodoc-catalog sweep: 11 in `XspmGraph` tier (Posture metrics + SecureScore per-category + Attack Surface analytical paths/chokepoints + XSPM Connectors + Asset Classification Schema + Posture Tenants/Initiatives/Security Events) and 2 in `Configuration` tier (Threat Analytics enriched + top threats).
+
+v0.1.0 GA Phase 1 (2026-05-07 — Section R++++++) added **6 new streams**:
+- **Architecture B**: `MDE_Machines_CL` (Endpoint Device Management — foundation for PerEntityFanout)
+- **G7**: `MDE_SecurityPolicies_CL` (Endpoint Configuration — POST endpoint returning ASR rules + AV settings + EDR + Firewall + Web Protection policy bodies per platform)
+- **G8 TVM expansion**: `MDE_VulnerableMachines_CL` + `MDE_VulnerabilityInventory_CL` + `MDE_SoftwareInventory_CL` + `MDE_RecommendationActions_CL`
 
 The portal-only audit DROPPED `MDE_SecureScoreBreakdown_CL` — publicly-API-covered by Microsoft Graph `/security/secureScores`; operators should use the official Graph Security data connector for that data. Deprecated streams are documented inline via the manifest `Availability='deprecated'` field with a Purpose note explaining the deprecation reason.
 
@@ -10,29 +15,30 @@ The source of truth is [`src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1
 
 ---
 
-## Cadence tiers
+## Cadence tiers (post-Section-R 4-function consolidation)
 
-The connector groups streams by **how often it polls them**, not by an arbitrary priority number. Each tier has a dedicated Function App timer:
+The connector groups streams by **how often it polls them**, not by an arbitrary priority number. Per Section R consolidation (2026-05-06), 5 separate timer functions were unified into a single dispatcher (`Xdr-Refresh`) which reads `XdrTierState` Storage table and starts orchestrations per-tier when due:
 
-| Tier | Cadence | Cron | Streams (active) | Timer function |
-|---|---|---|---|---|
-| `fast` | every 10 min | `0 */10 * * * *` | 2 | `Defender-ActionCenter-Refresh` |
-| `exposure` | hourly @ :25 | `0 25 * * * *` | 18 (7 baseline + 11 v0.1.0 GA Phase 2) | `Defender-XspmGraph-Refresh` |
-| `config` | every 6h @ :35 | `0 35 */6 * * *` | 16 (14 baseline + 2 v0.1.0 GA Phase 2 ThreatAnalytics) | `Defender-Configuration-Refresh` |
-| `inventory` | daily @ 02:00 UTC | `0 0 2 * * *` | 21 | `Defender-Inventory-Refresh` |
-| `maintenance` | weekly Sun @ 03:00 UTC | `0 0 3 * * 0` | 1 (+1 deprecated, excluded from poll) | `Defender-Maintenance-Refresh` |
+| Tier | Cadence (production) | Streams | Cron pattern (computed by Xdr-Refresh dispatcher) |
+|---|---|---|---|
+| `ActionCenter` | every 10 min | 2 (security events) | every 10 min |
+| `XspmGraph` | hourly | 18 (XSPM posture + attack surface) | every 60 min |
+| `Configuration` | every 6h | 16 (config-as-code surfaces) | every 6 hours |
+| `Inventory` | daily | 27 (per-device + per-tenant inventory; +6 Phase 1 additions) | every 24 hours |
+| `Maintenance` | weekly | 1 (+1 deprecated, excluded from poll) | every 7 days |
 
-Cadence reflects the data's actual change-rate. Action Center events flow continuously so the `fast` tier polls every 10 min; XSPM graph data churn-rate is well under 1h so the `exposure` tier matches the workbook hourly refresh; rule + RBAC + integration changes happen during weekday admin sessions so `config` polls every 6 hours; settings + identity + metadata are typically stable day-over-day so `inventory` is daily; data-export configuration only changes during architectural reviews so `maintenance` is weekly.
+Cadence reflects the data's actual change-rate. Action Center events flow continuously so `ActionCenter` polls every 10 min; XSPM graph data churn-rate is well under 1h so `XspmGraph` matches the workbook hourly refresh; rule + RBAC + integration changes happen during weekday admin sessions so `Configuration` polls every 6 hours; settings + identity + metadata + device inventory are typically stable day-over-day so `Inventory` is daily; data-export configuration only changes during architectural reviews so `Maintenance` is weekly.
 
-## Availability legend
+> **NOTE (Section R++ 2026-05-07)**: Compressed cadence (1h for Configuration/Inventory/Maintenance) is currently active for live troubleshooting. **MUST revert to production cadence (6h/24h/7d) before tag** per binding rule R++++++.10 #4.
 
-| Tag | Meaning | Zero-row expectation |
-|---|---|---|
-| `live` | Returns 200 with data on a typical tenant. | Non-zero every poll cycle where state exists. |
-| `tenant-gated` | Path + method + body correct; 4xx because tenant hasn't provisioned the feature (MDI sensors, MCAS, MTO, Intune connector, TVM add-on, etc). | Activates automatically when feature enabled. No code change needed. |
-| `deprecated` | Stream entry retained for one cycle so parsers / analytic rules can be cleanly removed in v0.2.0; the underlying portal endpoint has been renamed/retired by Microsoft. Excluded from active polling. | Always zero rows. Do NOT add new entries with this tag. |
+## Availability legend (post-Section-R++ all-live policy)
 
-A `tenant-gated` stream is **not a bug**. It's correct behaviour for a tenant without the gating feature.
+| Tag | Meaning |
+|---|---|
+| `live` | Path + method + body correct. Runtime `SuccessKind` (Section R++.A truth-signal) classifies actual response: `live` (200 with rows), `live-empty` (200 with 0 rows), `tenant-gated` (4xx warning — license/feature not provisioned), `error` (5xx investigate). Operator queries `XdrConnectorHealth_CL.Reason` to see per-stream classification. |
+| `deprecated` | Underlying portal endpoint has been renamed/retired by Microsoft. Filtered out by orchestrator — never polled. v0.2.0 may remove the manifest entry entirely. |
+
+A 4xx classified `tenant-gated` at runtime is **not a bug**. It's correct behaviour for a tenant without the gating feature. Section R++ replaced hardcoded `Availability='tenant-gated'` flags with runtime classification — the manifest is now all-`live` (except the 1 deprecated). The connector adapts dynamically to license changes without code edits.
 
 ---
 
@@ -93,9 +99,9 @@ Configuration / detection-rule tier — alert-pipeline rules, tenant policy, int
 | `MDE_UserPreferences_CL` | `/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference` | GET | live |
 | `MDE_CloudAppsConfig_CL` | `/apiproxy/mcas/cas/api/v1/settings` | GET | tenant-gated |
 
-## inventory (daily @ 02:00 UTC, 21 streams)
+## Inventory (daily @ 02:00 UTC, 27 streams)
 
-Inventory tier — endpoint config, MDI identity surfaces, tenant context, security baselines, MTO, license report, device timeline. Daily matches the typical change-rate of these surfaces; faster polling costs 429 budget without operator value.
+Inventory tier — endpoint config, MDI identity surfaces, tenant context, security baselines, MTO, license report, device timeline + Phase 1 additions: device inventory base + actual security policies + TVM expansion (4 streams). Daily matches the typical change-rate of these surfaces; faster polling costs 429 budget without operator value.
 
 | Stream | Path | Method | Availability |
 |---|---|---|---|
@@ -106,20 +112,26 @@ Inventory tier — endpoint config, MDI identity surfaces, tenant context, secur
 | `MDE_LiveResponseConfig_CL` | `/apiproxy/mtp/liveResponseApi/get_properties` | GET | live |
 | `MDE_AuthenticatedTelemetry_CL` | `/apiproxy/mtp/responseApiPortal/senseauth/allownonauthsense` | GET | live |
 | `MDE_PUAConfig_CL` | `/apiproxy/mtp/autoIr/ui/properties/` | GET | live |
-| `MDE_AntivirusPolicy_CL` | `/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters` | GET | tenant-gated |
-| `MDE_CustomCollection_CL` | `/apiproxy/mtp/mdeCustomCollection/rules` | GET | tenant-gated |
+| `MDE_AntivirusPolicy_CL` | `/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters?platform=Windows` | GET | live (filter facets — see SecurityPolicies for actual policy bodies) |
+| `MDE_CustomCollection_CL` | `/apiproxy/mtp/mdeCustomCollection/rules` | GET | live |
 | `MDE_TenantContext_CL` | `/apiproxy/mtp/sccManagement/mgmt/TenantContext?realTime=true` | GET | live |
-| `MDE_TenantWorkloadStatus_CL` | `/apiproxy/mtoapi/tenantGroups` | GET | tenant-gated |
+| `MDE_TenantWorkloadStatus_CL` | `/apiproxy/mtoapi/tenantGroups` | GET | live |
 | `MDE_SAClassification_CL` | `/apiproxy/radius/api/radius/serviceaccounts/classificationrule/getall` | GET | live |
 | `MDE_IdentityOnboarding_CL` | `/apiproxy/mtp/siamApi/domaincontrollers/list` | GET | live |
 | `MDE_IdentityServiceAccounts_CL` | `/apiproxy/mdi/identity/userapiservice/serviceAccounts` | POST | live |
-| `MDE_DCCoverage_CL` | `/apiproxy/aatp/api/sensors/domainControllerCoverage` | GET | tenant-gated |
-| `MDE_IdentityAlertThresholds_CL` | `/apiproxy/aatp/api/alertthresholds/withExpiry` | GET | tenant-gated |
-| `MDE_RemediationAccounts_CL` | `/apiproxy/mdi/identity/identitiesapiservice/remediationAccount` | GET | tenant-gated |
-| `MDE_SecurityBaselines_CL` | `/apiproxy/mtp/tvm/analytics/baseline/profiles?pageIndex=0&pageSize=25` | GET | tenant-gated |
-| `MDE_MtoTenants_CL` | `/apiproxy/mtoapi/tenants/TenantPicker` | GET | tenant-gated |
+| `MDE_DCCoverage_CL` | `/apiproxy/aatp/api/sensors/domainControllerCoverage` | GET | live |
+| `MDE_IdentityAlertThresholds_CL` | `/apiproxy/aatp/api/alertthresholds/withExpiry` | GET | live |
+| `MDE_RemediationAccounts_CL` | `/apiproxy/mdi/identity/identitiesapiservice/remediationAccount` | GET | live |
+| `MDE_SecurityBaselines_CL` | `/apiproxy/mtp/tvm/analytics/vulnerabilities/baseline` | GET | live (R+++++ path-drift fix 2026-05-07) |
+| `MDE_MtoTenants_CL` | `/apiproxy/mtoapi/tenants/TenantPicker` | GET | live |
 | `MDE_LicenseReport_CL` | `/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machines/skuReport` | GET | live |
-| `MDE_DeviceTimeline_CL` | `/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machinetimeline` | POST | tenant-gated |
+| `MDE_DeviceTimeline_CL` | `/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machinetimeline` | POST | live (legacy path; PerEntityFanout to nodoc canonical = Phase 2 Architecture A6) |
+| **`MDE_Machines_CL`** *(NEW Phase 1 Architecture B)* | `/apiproxy/mtp/ndr/machines?hideLowFidelityDevices=true&lookingBackIndays=30&pageIndex=1&pageSize=200&sortByField=riskscore&sortOrder=Descending` | GET | live |
+| **`MDE_SecurityPolicies_CL`** *(NEW Phase 1 G7)* | `/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies` | POST `{platform:'Windows'}` | live (Windows-only Phase 1; PerPlatformFanout = Phase 2 C2) |
+| **`MDE_VulnerableMachines_CL`** *(NEW Phase 1 G8)* | `/apiproxy/mtp/tvm/analytics/assets/topVulnerable` | GET | live |
+| **`MDE_VulnerabilityInventory_CL`** *(NEW Phase 1 G8)* | `/apiproxy/mtp/tvm/analytics/vulnerabilities` | GET | live |
+| **`MDE_SoftwareInventory_CL`** *(NEW Phase 1 G8)* | `/apiproxy/mtp/tvm/analytics/products` | GET | live |
+| **`MDE_RecommendationActions_CL`** *(NEW Phase 1 G8)* | `/apiproxy/mtp/tvm/remediation-tasks/remediationTasks` | GET | live |
 
 ## maintenance (weekly Sun @ 03:00 UTC, 1 active stream + 1 deprecated)
 

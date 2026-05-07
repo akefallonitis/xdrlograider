@@ -1,8 +1,8 @@
 # XdrLogRaider Wiring Matrix
 
-Generated: 2026-05-05 22:49:26 +01:00
+Generated: 2026-05-07 16:29:17 +01:00
 
-Total streams: 59  |  Full edges: 59  |  Missing/warning: 0
+Total streams: 65  |  Full edges: 65  |  Missing/warning: 0
 
 ## Edge legend
 
@@ -37,9 +37,10 @@ Total streams: 59  |  Full edges: 59  |  Missing/warning: 0
 | MDE_LiveResponseConfig_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_AuthenticatedTelemetry_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_PUAConfig_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_AntivirusPolicy_CL | Inventory | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_TenantAllowBlock_CL | Configuration | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_CustomCollection_CL | Inventory | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_AntivirusPolicy_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_SecurityPolicies_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_TenantAllowBlock_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_CustomCollection_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_DataExportSettings_CL | Maintenance | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ConnectedApps_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_TenantContext_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
@@ -57,20 +58,25 @@ Total streams: 59  |  Full edges: 59  |  Missing/warning: 0
 | MDE_XspmAttackPaths_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_XspmChokePoints_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_XspmTopTargets_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_SecurityBaselines_CL | Inventory | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_SecurityBaselines_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_VulnerableMachines_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_VulnerabilityInventory_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_SoftwareInventory_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_RecommendationActions_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityOnboarding_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityServiceAccounts_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_DCCoverage_CL | Inventory | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_IdentityAlertThresholds_CL | Inventory | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_RemediationAccounts_CL | Inventory | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_DCCoverage_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_IdentityAlertThresholds_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_RemediationAccounts_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ActionCenter_CL | ActionCenter | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ThreatAnalytics_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_UserPreferences_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_MtoTenants_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_LicenseReport_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_CloudAppsConfig_CL | Configuration | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_DeviceTimeline_CL | Inventory | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_MachineActions_CL | ActionCenter | tenant-gated | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_Machines_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_CloudAppsConfig_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_DeviceTimeline_CL | ActionCenter | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_MachineActions_CL | ActionCenter | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_AssetClassificationSchema_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_PostureInitiativesSummarized_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_PostureMetrics_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |

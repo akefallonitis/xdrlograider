@@ -148,12 +148,14 @@ Describe 'Analytic rules YAML schema compliance' {
             $_.type -eq 'Microsoft.OperationalInsights/workspaces/providers/metadata'
         })
         # v0.1.0 GA Phase 5.12: 6 ops analytic rules (XdrOps-* + RowVolumeSpike) + 1 ConnectorHealth workbook
-        # so total metadata back-links: 20 AnalyticsRule + 9 HuntingQuery + 8 Workbook + 4 Parser = 41
-        @($metadata).Count | Should -Be 41 -Because 'v0.1.0 GA Phase 5.12: 20 AnalyticsRule (14 detection + 6 XdrOps-*) + 9 HuntingQuery + 8 Workbook (7 + ConnectorHealth) + 4 Parser metadata back-links'
+        # Section R++++++ Phase 1 S (2026-05-07): added 3 hunting queries for new streams
+        # (Machines + SecurityPolicies + TVM cross-stream)
+        # Total metadata back-links: 20 AnalyticsRule + 12 HuntingQuery + 8 Workbook + 4 Parser = 44
+        @($metadata).Count | Should -Be 44 -Because 'v0.1.0 GA Phase 5.12 + R++++++ Phase 1 S: 20 AnalyticsRule (14 detection + 6 XdrOps-*) + 12 HuntingQuery (9 + 3 new for Phase 1 streams) + 8 Workbook (7 + ConnectorHealth) + 4 Parser metadata back-links'
 
         $byKind = $metadata | Group-Object { $_.properties.kind }
         ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 20  # 14 detection + 6 XdrOps-* (v0.1.0 GA Phase 5.12 added RowVolumeSpike)
-        ($byKind | Where-Object Name -eq 'HuntingQuery').Count  | Should -Be 9
+        ($byKind | Where-Object Name -eq 'HuntingQuery').Count  | Should -Be 12  # 9 + 3 new (R++++++ Phase 1 S: Machines + SecurityPolicies + TVM)
         ($byKind | Where-Object Name -eq 'Workbook').Count      | Should -Be 8   # 7 + ConnectorHealth (Phase F.1)
         ($byKind | Where-Object Name -eq 'Parser').Count        | Should -Be 4
 

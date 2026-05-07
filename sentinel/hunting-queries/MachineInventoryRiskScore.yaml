@@ -1,0 +1,24 @@
+id: a1b2c3d4-1111-4001-8001-000000000001
+name: MDE machine inventory by risk score
+description: |
+  Per-machine risk score + exposure from MDE_Machines_CL device inventory
+  (Phase 1 Architecture B). SOC drill-down by RiskScore desc.
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - DeviceInventory
+  - RiskScore
+  - DefenderXDR
+queryFrequency: 1d
+queryPeriod: 1d
+tactics:
+  - Discovery
+relevantTechniques:
+  - T1082
+query: |
+  Defender_EndpointDeviceManagement_CL
+  | where SourceName == 'MDE_Machines_CL'
+  | where TimeGenerated > ago(24h)
+  | summarize arg_max(TimeGenerated, *) by EntityId
+  | project ComputerDnsName, OsPlatform, OsVersion, HealthStatus, RiskScore, ExposureLevel, LastSeen, FirstSeen
+  | order by RiskScore desc

@@ -170,14 +170,18 @@ az keyvault update --name <kv> --default-action Deny
 
 The Function App's SAMI must already have `Key Vault Secrets User` (which the template assigns). Requires FA VNet integration to be enabled separately (not in the default template).
 
-## When the XSPM streams come back
+## Verifying XSPM streams (when license is present)
 
-`MDE_XspmChokePoints_CL` + `MDE_XspmTopTargets_CL` are currently `tenant-gated` with bodies that returned 400 on 2026-04-24 (regressed from 200 in v0.1.0 GA.1). When a future release ships corrected bodies:
+XSPM streams (`MDE_XspmChokePoints_CL`, `MDE_XspmTopTargets_CL`, etc.) require a Microsoft Security Exposure Management (XSPM / MSEM) license. Per R+++ all-live policy, manifest declares them `Availability='live'` and runtime SuccessKind classifies dynamically — `live-empty` if licensed-but-no-data-yet, `tenant-gated` if license is absent (returns 4xx).
 
-1. Redeploy the Function App with the new release tag.
-2. Confirm via:
+To verify XSPM streams are flowing in your tenant:
+
+1. Confirm license is provisioned (Defender XDR portal → Settings → MSEM).
+2. Query the consolidated workspace table filtered by SourceName (correct pattern — these are stream identifiers, not workspace tables):
    ```kql
-   MDE_XspmChokePoints_CL | where TimeGenerated > ago(24h) | count
-   MDE_XspmTopTargets_CL  | where TimeGenerated > ago(24h) | count
+   Defender_ExposureManagement_CL
+   | where SourceName in ('MDE_XspmChokePoints_CL', 'MDE_XspmTopTargets_CL')
+   | where TimeGenerated > ago(24h)
+   | summarize Rows = count() by SourceName
    ```
-3. Both should start receiving rows within one P3 cycle (1h).
+3. Both should start receiving rows within one XspmGraph tier cycle (1h).

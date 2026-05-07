@@ -173,13 +173,16 @@ If failed, see [RUNBOOK.md § Auth self-test failure](RUNBOOK.md#auth-self-test-
 Wait for the first P0 poll cycle, then:
 
 ```kql
-// Are P0 streams ingesting?
+// Are streams ingesting per tier? (Tier values: ActionCenter, XspmGraph, Configuration, Inventory, Maintenance)
 XdrConnectorHealth_CL
-| where Tier == 'P0' and TimeGenerated > ago(2h)
-| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by FunctionName
+| where TimeGenerated > ago(2h)
+| where Tier != 'Heartbeat'
+| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded), Rows = max(RowsIngested) by Tier
 
-// First rows of any P0 stream
-MDE_AdvancedFeatures_CL | take 1
+// First rows of a specific stream (correct pattern: query the consolidated category table, filter by SourceName)
+Defender_EndpointConfiguration_CL
+| where SourceName == 'MDE_AdvancedFeatures_CL'
+| take 1
 ```
 
 ## Step 8 — Enable workbooks + analytic rules

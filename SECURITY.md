@@ -38,9 +38,9 @@ This project follows these practices by design:
 
 | Version | Supported |
 |---------|-----------|
-| 1.x     | Yes       |
-| < 1.0   | No (pre-release) |
+| 0.1.x   | Yes (current GA series) |
+| < 0.1.0 | No (pre-release) |
 
 ## Security Updates
 
-Security updates are released as patch versions (`1.0.x`) and announced via GitHub Releases with the `security` tag.
+Security updates are released as patch versions (`0.1.x`) and announced via GitHub Releases with the `security` tag.

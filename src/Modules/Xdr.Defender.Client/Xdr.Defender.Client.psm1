@@ -53,5 +53,7 @@ Export-ModuleMember -Function @(
     'Invoke-TierPollWithHeartbeat',
     'Invoke-MDEPortalEndpoint',
     'ConvertTo-MDEIngestRow',
-    'Expand-MDEResponse'
+    'Expand-MDEResponse',
+    # Section R++.A: truth-signal side-channel for activity callers.
+    'Get-MDEEndpointLastResult'
 )

@@ -46,7 +46,12 @@ $tierStreams = @(
     Where-Object {
         $_ -is [System.Collections.IDictionary] -and
         $_.Contains('Tier') -and ([string]$_.Tier -eq [string]$tier) -and
-        (-not $_.Contains('Portal') -or [string]$_.Portal -eq [string]$portal)
+        (-not $_.Contains('Portal') -or [string]$_.Portal -eq [string]$portal) -and
+        # Section R++.A W2: skip Availability='deprecated' streams. They return
+        # 4xx by design (e.g. MDE_StreamingApiConfig_CL Returns 404 on modern
+        # tenants per manifest comment). Polling them wastes auth-call budget
+        # and adds noise to AppExceptions.
+        (-not $_.Contains('Availability') -or [string]$_.Availability -ne 'deprecated')
     }
 )
 Write-Information ("Xdr-PollOrchestrator: Portal='{0}' Tier='{1}' manifestCount={2} matchedStreams={3}" -f $portal, $tier, $manifestCount, $tierStreams.Count)

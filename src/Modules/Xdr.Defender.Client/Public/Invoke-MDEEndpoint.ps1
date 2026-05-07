@@ -65,7 +65,14 @@ function Invoke-MDEEndpoint {
         [string] $Stream,
 
         [datetime] $FromUtc,
-        [hashtable] $PathParams = @{}
+        [hashtable] $PathParams = @{},
+
+        # Section R++++++ Architecture C (2026-05-07): per-call body override.
+        # Used by PerPlatformFanout activity loop to pass body['platform']='Linux',
+        # 'Windows', 'macOS', 'iOS' across iterations of the same stream. Merged
+        # into the manifest-declared Body (keys in BodyOverride win on collision).
+        # Also usable for pagination loops (BodyOverride={pageIndex=2}, etc).
+        [hashtable] $BodyOverride = $null
     )
 
     $entry = (Get-XdrEndpointManifest -Portal Defender)[$Stream]
@@ -96,6 +103,18 @@ function Invoke-MDEEndpoint {
         if ($entry.ContainsKey('Body') -and $entry.Body) { $entry.Body } else { @{} }
     } else { $null }
 
+    # Section R++++++ Architecture C (2026-05-07): merge per-call BodyOverride into
+    # the manifest body (caller wins on collision). Used by PerPlatformFanout activity
+    # loop and pagination loops.
+    if ($null -ne $BodyOverride -and $BodyOverride.Count -gt 0) {
+        if ($null -eq $postBody) { $postBody = @{} }
+        # Clone the manifest body so we don't mutate the manifest hashtable across calls.
+        $merged = @{}
+        foreach ($k in $postBody.Keys) { $merged[$k] = $postBody[$k] }
+        foreach ($k in $BodyOverride.Keys) { $merged[$k] = $BodyOverride[$k] }
+        $postBody = $merged
+    }
+
     # --- Optional custom headers (e.g. XSPM requires x-tid + x-ms-scenario-name) ---
     # Supports template token {TenantId} → resolved from session's TenantId.
     $extraHeaders = @{}
@@ -109,8 +128,70 @@ function Invoke-MDEEndpoint {
         }
     }
 
-    # --- Call ---
+    # --- Call (with optional pagination loop per Section R++++++ Architecture F) ---
+    # Pagination semantics: when manifest declares Pagination = @{ Style='pageIndex';
+    # PageSize=200; MaxPages=50 }, fetch additional pages until: (a) page < pageSize
+    # (last page), (b) MaxPages reached, or (c) page returns 0 items / error. Aggregate
+    # all pages into a single $r.Data array compatible with the existing Expand flow.
+    # 429s within the loop are handled by Invoke-MDEPortalEndpoint's existing retry
+    # logic; per-page checkpoint is handled by the activity layer.
+    $pagination = if ($entry.ContainsKey('Pagination') -and $entry.Pagination) { $entry.Pagination } else { $null }
+
     $r = Invoke-MDEPortalEndpoint -Session $Session -Path $path -Method $httpMethod -Body $postBody -AdditionalHeaders $extraHeaders
+
+    if ($null -ne $pagination -and $null -ne $r -and $r.Success -and $null -ne $r.Data) {
+        $maxPages   = if ($pagination.ContainsKey('MaxPages'))  { [int]$pagination.MaxPages }  else { 50 }
+        $pageSize   = if ($pagination.ContainsKey('PageSize'))  { [int]$pagination.PageSize }  else { 200 }
+        $unwrapKey  = if ($entry.ContainsKey('UnwrapProperty')) { [string]$entry.UnwrapProperty } else { $null }
+
+        # Extract first-page items via the same UnwrapProperty rule the activity uses.
+        $firstPageItems = @()
+        if ($unwrapKey -and $r.Data.PSObject.Properties[$unwrapKey]) {
+            $firstPageItems = @($r.Data.$unwrapKey)
+        } elseif ($r.Data -is [array]) {
+            $firstPageItems = @($r.Data)
+        } else {
+            $firstPageItems = @($r.Data)
+        }
+        $aggregatedItems = @($firstPageItems)
+
+        # Continue paginating only if first page filled (likely more pages exist).
+        if ($firstPageItems.Count -ge $pageSize) {
+            for ($pageIndex = 2; $pageIndex -le $maxPages; $pageIndex++) {
+                $sep = if ($path.Contains('?')) { '&' } else { '?' }
+                $pagedPath = "${path}${sep}pageIndex=${pageIndex}&pageSize=${pageSize}"
+                $rPage = Invoke-MDEPortalEndpoint -Session $Session -Path $pagedPath -Method $httpMethod -Body $postBody -AdditionalHeaders $extraHeaders
+                if (-not $rPage -or -not $rPage.Success -or $null -eq $rPage.Data) { break }
+                $pageItems = @()
+                if ($unwrapKey -and $rPage.Data.PSObject.Properties[$unwrapKey]) {
+                    $pageItems = @($rPage.Data.$unwrapKey)
+                } elseif ($rPage.Data -is [array]) {
+                    $pageItems = @($rPage.Data)
+                } else {
+                    $pageItems = @($rPage.Data)
+                }
+                $aggregatedItems += $pageItems
+                if ($pageItems.Count -lt $pageSize) { break }  # last page
+            }
+        }
+
+        # Reconstruct $r.Data with aggregated items so the existing Expand flow sees
+        # the full result set under the same UnwrapProperty key.
+        if ($unwrapKey) {
+            $r = [pscustomobject]@{
+                Success    = $true
+                Data       = [pscustomobject]@{ $unwrapKey = $aggregatedItems }
+                HttpStatus = 200
+            }
+        } else {
+            $r = [pscustomobject]@{
+                Success    = $true
+                Data       = $aggregatedItems
+                HttpStatus = 200
+            }
+        }
+        Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' aggregated $($aggregatedItems.Count) items across pagination loop"
+    }
 
     # Iter 13.9 (C5): consolidate the early-exit gates. Three failure modes
     # all map to "return empty array, no error":
@@ -120,16 +201,40 @@ function Invoke-MDEEndpoint {
     # All three previously had separate guards; consolidating reduces the
     # surface area for strict-mode crashes if a future helper returns a
     # different shape.
+    # ----------------------------------------------------------------------
+    # Section R++.A — TRUTH-SIGNAL via module-scope side-channel.
+    # The legacy contract (return ,@() on any failure) is preserved so existing
+    # callers + tests don't break. Activity callers can now read the latest
+    # call's outcome via Get-MDEEndpointLastResult to distinguish:
+    #   live           — 200 with non-empty Data (rows returned)
+    #   live-empty     — 200 with null/empty Data (legitimate "no data this poll")
+    #   tenant-gated   — 401/403/404 (license-gated; expected on unlicensed tenant)
+    #   error          — 5xx, network failure, helper-side bug (REAL failure)
+    # Activity uses this to drive Set-XdrTierStateRow -Reason + connector-card UX.
+    # See R++.A in plan immutable-splashing-waffle.md.
+    # ----------------------------------------------------------------------
     if ($null -eq $r) {
+        Set-MDEEndpointLastResult -Stream $Stream -SuccessKind 'error' -HttpStatus 0 `
+            -ErrorText 'Invoke-MDEPortalEndpoint returned null (helper-side bug)'
         Write-Warning "Invoke-MDEEndpoint Stream='$Stream' failed: Invoke-MDEPortalEndpoint returned null (helper-side bug)"
         return ,@()
     }
     if (-not $r.Success) {
-        Write-Warning "Invoke-MDEEndpoint Stream='$Stream' failed: $($r.Error)"
+        # Classify by HTTP status when available. 401/403/404 = tenant-gated
+        # (license/scope absent). 5xx + network errors = real failure.
+        $status = 0
+        if ($null -ne $r.PSObject.Properties['HttpStatus']) { $status = [int]$r.HttpStatus }
+        elseif ($r.Error -match '\b(40[134])\b') { $status = [int]$matches[1] }
+        elseif ($r.Error -match '\b(5\d\d)\b')   { $status = [int]$matches[1] }
+        $kind = if ($status -in 401, 403, 404) { 'tenant-gated' } else { 'error' }
+        Set-MDEEndpointLastResult -Stream $Stream -SuccessKind $kind -HttpStatus $status -ErrorText $r.Error
+        Write-Warning "Invoke-MDEEndpoint Stream='$Stream' [$kind/$status]: $($r.Error)"
         return ,@()
     }
     if ($null -eq $r.Data) {
-        # 200 with empty body — observed on POST-only / scalar-response surfaces
+        # 200 with empty body — legitimate "no data" (e.g. tenant has no
+        # configured exclusions; not a failure, not gated).
+        Set-MDEEndpointLastResult -Stream $Stream -SuccessKind 'live-empty' -HttpStatus 200 -ErrorText ''
         Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' returned 200 with empty body — 0 rows"
         return ,@()
     }
@@ -219,6 +324,9 @@ function Invoke-MDEEndpoint {
             ConvertTo-MDEIngestRow -Stream $Stream -EntityId $entityId -Raw $entity -Extras $extras -ProjectionMap $projMap
         }
     )
-    Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' -> $($rows.Count) rows"
+    # Section R++.A: success path — distinguish live (rows) from live-empty (no rows).
+    $kind = if ($rows.Count -gt 0) { 'live' } else { 'live-empty' }
+    Set-MDEEndpointLastResult -Stream $Stream -SuccessKind $kind -HttpStatus 200 -ErrorText ''
+    Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' -> $($rows.Count) rows [$kind]"
     return ,$rows
 }

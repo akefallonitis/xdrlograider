@@ -13,8 +13,8 @@ requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal
     dataTypes:
       - XdrConnectorHealth_CL
-queryFrequency: 15m
-queryPeriod: 2h
+queryFrequency: 4h
+queryPeriod: P2D
 triggerOperator: gt
 triggerThreshold: 0
 tactics:
@@ -22,6 +22,13 @@ tactics:
   - Persistence
 relevantTechniques:
   - T1078
+# Section R++++++.4 F4 fix (2026-05-07T15:00): MDE_UnifiedRbacRoles_CL is
+# on Configuration tier (6h cadence in production). Old (15m freq / 2h
+# period) over-fired vs the parser's 7d window. Realigned freq=4h
+# (~36 firings per parser window) + period=P2D (catches recent additions
+# without scanning the full 7d range every check). Parser window 7d
+# kept — RBAC additions are rare enough that the wider lookback is
+# operator-friendly for retrospective context.
 query: |
   MDE_Drift_Configuration(7d, 1d)
   | where StreamName == "MDE_UnifiedRbacRoles_CL"

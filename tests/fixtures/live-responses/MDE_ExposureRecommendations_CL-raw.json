@@ -4,7 +4,7 @@
       "id": "IntegratedApps",
       "title": "Ensure user consent to apps accessing company data on their behalf is not allowed",
       "lastStateChange": "2026-03-17T00:00:00Z",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "CIS",
       "product": "AzureAD",
@@ -30,11 +30,11 @@
       "relatedMetricsIds": [
         "mss_missing_best_practices_sensitive_business_data_and_apps_protected",
         "mss_missing_bp_azure_active_directory_configured_securely",
-        "mss_bp_applications_using_oauth",
+        "mss_missing_bp_ensure_identities_are_accessing_resources_securely",
+        "mss_bp_protect_against_data_loss_saas_apps",
         "mss_missing_bp_azure_active_directory_configured_securely_bec",
         "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
-        "mss_bp_protect_against_data_loss_saas_apps",
-        "mss_missing_bp_ensure_identities_are_accessing_resources_securely",
+        "mss_bp_applications_using_oauth",
         "category_identity_secure_score"
       ],
       "relatedInitiativesIds": [
@@ -55,13 +55,13 @@
       "score": 4.0,
       "domainScoreImpact": 0.0,
       "mssScoreImpact": 0.0,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 100.0
     },
     {
       "id": "PWAgePolicyNew",
       "title": "Ensure the 'Password expiration policy' is set to 'Set passwords to never expire (recommended)'",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "CIS",
       "product": "AzureAD",
@@ -85,12 +85,12 @@
       "userImpact": "Moderate",
       "userAffected": "AllUsers",
       "relatedMetricsIds": [
-        "mss_bp_passwork_configuration_saas_applications",
         "mss_missing_best_practices_ensure_effective_security_m365_admin_center",
-        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender_bec",
-        "mss_missing_bp_ensure_effective_password_hygiene",
         "mss_missing_bp_azure_active_directory_configured_securely",
+        "mss_missing_bp_ensure_effective_password_hygiene",
         "mss_missing_bp_azure_active_directory_configured_securely_bec",
+        "mss_missing_best_practices_ensure_effective_security_settings_m365_defender_bec",
+        "mss_bp_passwork_configuration_saas_applications",
         "category_identity_secure_score"
       ],
       "relatedInitiativesIds": [
@@ -109,14 +109,14 @@
       "score": 8.0,
       "domainScoreImpact": 0.0,
       "mssScoreImpact": 0.0,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 100.0
     },
     {
       "id": "SelfServicePasswordReset",
       "title": "Ensure 'Self service password reset enabled' is set to 'All'",
       "lastStateChange": "2026-04-16T00:00:00Z",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "CIS",
       "product": "AzureAD",
@@ -131,13 +131,13 @@
       "userImpact": "Moderate",
       "userAffected": "AllUsers",
       "relatedMetricsIds": [
-        "mss_bp_passwork_configuration_saas_applications",
-        "mss_bp_password_configuration_saas_applications_bec",
-        "mss_missing_bp_ensure_effective_password_hygiene",
         "mss_missing_bp_azure_active_directory_configured_securely",
+        "mss_missing_bp_ensure_effective_password_hygiene",
+        "mss_bp_password_configuration_saas_applications_bec",
         "mss_missing_bp_azure_active_directory_configured_securely_bec",
         "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
         "mss_missing_best_practices_remote_hybrid_work_for_identities",
+        "mss_bp_passwork_configuration_saas_applications",
         "category_identity_secure_score"
       ],
       "relatedInitiativesIds": [
@@ -159,14 +159,14 @@
       "maxScore": 1.0,
       "score": 0.5,
       "domainScoreImpact": 0.007042253521126761,
-      "mssScoreImpact": 0.00038284839203675346,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "mssScoreImpact": 0.0003717472118959108,
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 50.0
     },
     {
       "id": "BlockLegacyAuthentication",
       "title": "Enable Conditional Access policies to block legacy authentication",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "CIS",
       "product": "AzureAD",
@@ -194,14 +194,14 @@
       "userImpact": "Moderate",
       "userAffected": "AllUsers",
       "relatedMetricsIds": [
-        "mss_users_allow_vulnerable_legacy_protocols",
-        "mss_non_compliant_advanced_ransomware_controls",
-        "mss_bp_authentication_saas_application",
         "mss_bp_controlling_access_saas_apps",
         "mss_missing_bp_azure_active_directory_configured_securely",
-        "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
-        "mss_missing_best_practices_remote_hybrid_work_for_identities",
         "mss_missing_bp_ensure_identities_are_accessing_resources_securely",
+        "mss_non_compliant_advanced_ransomware_controls",
+        "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
+        "mss_users_allow_vulnerable_legacy_protocols",
+        "mss_bp_authentication_saas_application",
+        "mss_missing_best_practices_remote_hybrid_work_for_identities",
         "category_identity_secure_score"
       ],
       "relatedInitiativesIds": [
@@ -240,13 +240,13 @@
       "score": 8.0,
       "domainScoreImpact": 0.0,
       "mssScoreImpact": 0.0,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 100.0
     },
     {
       "id": "MFARegistrationV2",
       "title": "Ensure multifactor authentication is enabled for all users",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "CIS",
       "product": "AzureAD",
@@ -282,9 +282,9 @@
       "userImpact": "High",
       "userAffected": "AllUsers",
       "relatedMetricsIds": [
-        "mss_users_set_mfa",
-        "mss_non_compliant_advanced_ransomware_controls",
         "mss_missing_bp_azure_active_directory_configured_securely",
+        "mss_non_compliant_advanced_ransomware_controls",
+        "mss_users_set_mfa",
         "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
         "mss_missing_best_practices_remote_hybrid_work_for_identities",
         "category_identity_secure_score"
@@ -312,13 +312,13 @@
       "score": 9.0,
       "domainScoreImpact": 0.0,
       "mssScoreImpact": 0.0,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 100.0
     },
     {
       "id": "AdminMFAV2",
       "title": "Ensure multifactor authentication is enabled for all users in administrative roles",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "CIS",
       "product": "AzureAD",
@@ -350,11 +350,11 @@
       "userImpact": "Low",
       "userAffected": "AllAdmins",
       "relatedMetricsIds": [
-        "mss_missing_best_practices_ensure_admin_accounts_secure",
-        "mss_bp_secure_privileged_access_saas_apps",
         "mss_missing_bp_azure_active_directory_configured_securely",
-        "mss_mfa_set_for_administrators",
+        "mss_bp_secure_privileged_access_saas_apps",
         "mss_missing_bp_azure_active_directory_configured_securely_bec",
+        "mss_mfa_set_for_administrators",
+        "mss_missing_best_practices_ensure_admin_accounts_secure",
         "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
         "category_identity_secure_score"
       ],
@@ -383,13 +383,13 @@
       "score": 10.0,
       "domainScoreImpact": 0.0,
       "mssScoreImpact": 0.0,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 100.0
     },
     {
       "id": "SigninRiskPolicy",
       "title": "Enable Microsoft Entra ID Identity Protection sign-in risk policies",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "CIS",
       "product": "AzureAD",
@@ -405,14 +405,14 @@
       "userAffected": "AllUsers",
       "relatedMetricsIds": [
         "mss_users_with_risk_based_access_control",
-        "mss_non_compliant_advanced_ransomware_controls",
-        "mss_missing_best_practices_ensure_admin_accounts_secure",
-        "mss_bp_authentication_saas_application",
         "mss_bp_controlling_access_saas_apps",
         "mss_missing_bp_azure_active_directory_configured_securely",
-        "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
-        "mss_missing_best_practices_remote_hybrid_work_for_identities",
         "mss_missing_bp_ensure_identities_are_accessing_resources_securely",
+        "mss_non_compliant_advanced_ransomware_controls",
+        "mss_missing_best_practices_ensure_admin_accounts_secure",
+        "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
+        "mss_bp_authentication_saas_application",
+        "mss_missing_best_practices_remote_hybrid_work_for_identities",
         "category_identity_secure_score"
       ],
       "relatedInitiativesIds": [
@@ -463,13 +463,13 @@
       "score": 7.0,
       "domainScoreImpact": 0.0,
       "mssScoreImpact": 0.0,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 100.0
     },
     {
       "id": "UserRiskPolicy",
       "title": "Enable Microsoft Entra ID Identity Protection user risk policies",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "CIS",
       "product": "AzureAD",
@@ -484,14 +484,14 @@
       "userImpact": "Moderate",
       "userAffected": "AllUsers",
       "relatedMetricsIds": [
-        "mss_users_without_risk_conditional_access_policy",
-        "mss_non_compliant_advanced_ransomware_controls",
-        "mss_missing_best_practices_ensure_admin_accounts_secure",
-        "mss_bp_authentication_saas_application",
         "mss_bp_controlling_access_saas_apps",
-        "mss_missing_bp_azure_active_directory_configured_securely",
         "mss_missing_bp_managing_identities_securely_against_ransomware",
+        "mss_missing_bp_azure_active_directory_configured_securely",
+        "mss_non_compliant_advanced_ransomware_controls",
+        "mss_users_without_risk_conditional_access_policy",
+        "mss_missing_best_practices_ensure_admin_accounts_secure",
         "mss_missing_best_practices_ensure_effective_security_settings_entra_admin_center",
+        "mss_bp_authentication_saas_application",
         "mss_missing_best_practices_remote_hybrid_work_for_identities",
         "category_identity_secure_score"
       ],
@@ -538,14 +538,14 @@
       "score": 7.0,
       "domainScoreImpact": 0.0,
       "mssScoreImpact": 0.0,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 100.0
     },
     {
       "id": "OneAdmin",
       "title": "Designate more than one global admin",
       "lastStateChange": "2026-03-17T00:00:00Z",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "CIS",
       "product": "AzureAD",
@@ -560,12 +560,12 @@
       "userImpact": "Low",
       "userAffected": "GlobalAdmins",
       "relatedMetricsIds": [
-        "mss_non_compliant_advanced_ransomware_controls",
-        "mss_missing_best_practices_ensure_admin_accounts_secure",
-        "mss_bp_secure_privileged_access_saas_apps",
         "mss_missing_best_practices_ensure_effective_security_m365_admin_center",
-        "mss_missing_bp_azure_active_directory_configured_securely",
         "mss_missing_bp_managing_identities_securely_against_ransomware",
+        "mss_missing_bp_azure_active_directory_configured_securely",
+        "mss_non_compliant_advanced_ransomware_controls",
+        "mss_bp_secure_privileged_access_saas_apps",
+        "mss_missing_best_practices_ensure_admin_accounts_secure",
         "category_identity_secure_score"
       ],
       "relatedInitiativesIds": [
@@ -585,19 +585,19 @@
       "score": 1.0,
       "domainScoreImpact": 0.0,
       "mssScoreImpact": 0.0,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 100.0
     },
     {
       "id": "RoleOverlap",
       "title": "Use least privileged administrative roles",
       "lastStateChange": "2026-04-01T00:00:00Z",
-      "lastStateUpdate": "2026-05-01T01:45:57Z",
+      "lastStateUpdate": "2026-05-06T01:47:49Z",
       "category": "identity",
       "source": "Microsoft",
       "product": "AzureAD",
       "description": "Ensure that your administrators can accomplish their work with the least amount of privilege assigned to their account. Assigning users roles like Password Administrator or Exchange Online Administrator, instead of Global Administrator, reduces the likelihood of a global administrative privileged account being breached.",
-      "implementationStatus": "You have 4 users with least privileged administrative roles.",
+      "implementationStatus": "You have 3 users with least privileged administrative roles.",
       "severity": "low",
       "remediation": "<ol><li>Identify the users in your organization with a persistent global administrator role assigned. Go to Microsoft Entra ID&gt; Roles and administrators and select the Global administrator role in the table. Identify the global admins you want to reassign to a different role. <a href=\"https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RolesAndAdministrators\">Go to Roles and administrators in Microsoft Entra ID</a>&nbsp;</li><li>Assign these users to roles where they can complete necessary tasks with the least amount of privilege required. For example, if a user is primarily responsible for Exchange Online administration, they should be assigned that role instead of global administrator. Be sure to have at least two global admins designated to allow for full access to the network if one of the accounts is locked out or compromised. <a href=\"https://docs.microsoft.com/azure/active-directory/roles/delegate-by-task\">Check out this overview of available limited administrative roles</a>&nbsp;</li><li>After these persistent global admins have been reassigned new roles, return to Roles and administrators and select the Global administrator role. Select the users that no longer need persistent access and then click Remove. <a href=\"https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RolesAndAdministrators\">Go to Roles and administrators in Microsoft Entra ID</a>&nbsp;</li><li>Emergency access accounts: If the only other global admin accounts your organization has set up are for \"break-glass\" scenarios, which are ineligible for role reassignment, we recommend that you set the status of this action to &ldquo;Risk accepted&rdquo;. <a href=\"https://docs.microsoft.com/azure/active-directory/roles/security-emergency-access\">Learn more about emergency access accounts</a>&nbsp;</li></ol>",
       "actionUrl": "https://go.microsoft.com/fwlink/?linkid=2095457",
@@ -628,12 +628,12 @@
       "userImpact": "Low",
       "userAffected": "GlobalAdmins",
       "relatedMetricsIds": [
-        "mss_non_compliant_advanced_ransomware_controls",
-        "mss_missing_best_practices_ensure_admin_accounts_secure",
-        "mss_bp_secure_privileged_access_saas_apps",
-        "mss_missing_bp_azure_active_directory_configured_securely",
         "mss_missing_bp_managing_identities_securely_against_ransomware",
+        "mss_missing_bp_azure_active_directory_configured_securely",
+        "mss_non_compliant_advanced_ransomware_controls",
+        "mss_bp_secure_privileged_access_saas_apps",
         "mss_missing_bp_azure_active_directory_configured_securely_bec",
+        "mss_missing_best_practices_ensure_admin_accounts_secure",
         "category_identity_secure_score"
       ],
       "relatedInitiativesIds": [
@@ -664,9 +664,9 @@
       "score": 1.0,
       "domainScoreImpact": 0.0,
       "mssScoreImpact": 0.0,
-      "lastSynced": "2026-05-01T01:45:57Z",
+      "lastSynced": "2026-05-06T01:47:49Z",
       "pointAchieved": 100.0
     }
   ],
-  "recordsCount": 472
+  "recordsCount": 476
 }

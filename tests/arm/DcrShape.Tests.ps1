@@ -98,8 +98,9 @@ Describe 'DcrShape.TransformKqlSourceName (Phase J.C.2-5: SourceName injected vi
 }
 
 Describe 'DcrShape.AllStreamsCovered' {
-    It 'union of streams across all DCRs equals 60 (59 data + 1 ops)' {
+    It 'union of streams across all DCRs equals 66 (65 data + 1 ops, post-Phase-1: B+G7+G8)' {
         # v0.1.0 GA Phase 2: 46 baseline + 13 Tier A new streams + 1 ops = 60
+        # Section R++++++ Phase 1: + Architecture B (Machines) + G7 (SecurityPolicies) + G8 (4 TVM) = 66
         $dcrs = $script:Arm.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' }
         $allStreams = @()
         foreach ($d in $dcrs) {
@@ -107,6 +108,6 @@ Describe 'DcrShape.AllStreamsCovered' {
                 $allStreams += $df.streams
             }
         }
-        ($allStreams | Sort-Object -Unique).Count | Should -Be 60
+        ($allStreams | Sort-Object -Unique).Count | Should -Be 66
     }
 }

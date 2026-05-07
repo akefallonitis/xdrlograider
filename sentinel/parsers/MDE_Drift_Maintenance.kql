@@ -38,11 +38,15 @@ let MDE_Drift_Maintenance = (lookback:timespan = 30d, window:timespan = 7d) {
     | where hash(tostring(TypedBag)) != hash(tostring(TypedBag1)) or isnull(TypedBag1)
     | extend CurrentFields  = bag_keys(TypedBag)
     | extend PreviousFields = iff(isnull(TypedBag1), dynamic([]), bag_keys(TypedBag1))
+    // Section R++.C B4 fix (2026-05-07): correct Added/Removed/Modified classification.
     | mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (
         extend
-            NewValue = tostring(TypedBag[tostring(field)]),
-            OldValue = tostring(iff(isnull(TypedBag1), '', TypedBag1[tostring(field)]))
-        | where NewValue != OldValue
+            FieldInCurrent  = set_has_element(CurrentFields,  tostring(field)),
+            FieldInPrevious = set_has_element(PreviousFields, tostring(field))
+        | extend
+            NewValue = iff(FieldInCurrent,  tostring(TypedBag[tostring(field)]),  ''),
+            OldValue = iff(FieldInPrevious, tostring(TypedBag1[tostring(field)]), '')
+        | where NewValue != OldValue or (FieldInCurrent != FieldInPrevious)
       )
     | project
         TimeGenerated,
@@ -53,6 +57,10 @@ let MDE_Drift_Maintenance = (lookback:timespan = 30d, window:timespan = 7d) {
         NewValue,
         SnapshotCurrent  = TimeGenerated,
         SnapshotPrevious = TimeGenerated1,
-        ChangeType       = iff(isnull(TypedBag1), "Added", iff(isnull(TypedBag[tostring(field)]), "Removed", "Modified"))
+        ChangeType       = case(
+            not(FieldInPrevious), "Added",
+            not(FieldInCurrent),  "Removed",
+            "Modified"
+        )
 };
 MDE_Drift_Maintenance

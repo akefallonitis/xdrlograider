@@ -1,0 +1,24 @@
+id: a1b2c3d4-1111-4002-8002-000000000002
+name: MDE security policies (ASR + AV + EDR + Firewall) per platform
+description: |
+  Intune endpoint security policy bodies (ASR + AV + EDR + Firewall + DiskEnc)
+  per platform from MDE_SecurityPolicies_CL (Phase 1 G7).
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - SecurityPolicies
+  - ASR
+  - DefenderXDR
+queryFrequency: 1d
+queryPeriod: 1d
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  Defender_EndpointConfiguration_CL
+  | where SourceName == 'MDE_SecurityPolicies_CL'
+  | where TimeGenerated > ago(24h)
+  | summarize arg_max(TimeGenerated, *) by EntityId
+  | project PolicyId, PolicyName, PolicyType, Platform, Status, RuleCount, LastModified, RawJson
+  | order by Platform asc, PolicyType asc

@@ -2,7 +2,12 @@
 
 > **Audience**: operators writing KQL against the custom Log Analytics tables this connector populates. This document is the per-stream column reference.
 >
-> **TL;DR**: every `MDE_*_CL` table has four guaranteed baseline columns (`TimeGenerated`, `SourceStream`, `EntityId`, `RawJson`). Most tables also expose a set of typed columns derived from a per-stream projection map — those typed columns are listed below. Unmapped fields stay reachable through `RawJson` for backward compatibility.
+> **Companion docs**:
+> - [`SCHEMA.md`](SCHEMA.md) — workspace table architecture (the 11 consolidated `Defender_<Category>_CL` tables) + the operator query pattern (`Defender_<Category>_CL | where SourceName == 'MDE_<Stream>_CL'`)
+> - [`STREAMS.md`](STREAMS.md) — narrative tier/cadence catalog
+> - [`tests/online/NodocCatalogSweep-V010Final.md`](../tests/online/NodocCatalogSweep-V010Final.md) — canonical 60-stream inclusion list
+>
+> **TL;DR**: rows from each `MDE_<Stream>_CL` stream identifier land in the consolidated `Defender_<Category>_CL` workspace table for their category. Every row carries four guaranteed baseline columns (`TimeGenerated`, `SourceName`, `EntityId`, `RawJson`). Most streams also expose typed columns derived from a per-stream projection map — those typed columns are listed below. Unmapped fields stay reachable through `RawJson`.
 
 This catalog complements [STREAMS.md](STREAMS.md) (which gives the higher-level per-stream summary, polling tier, and availability) by enumerating the typed columns operators can query directly without having to reach into `RawJson`. Use [STREAMS.md](STREAMS.md) when you want the bird's-eye view of "what does this connector ship and on what cadence"; use this document when you are writing or migrating a query.
 

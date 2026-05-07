@@ -63,7 +63,15 @@ function Set-XdrTierStateRow {
         [int] $RowsIngested = 0,
         [bool] $Success = $true,
         [string] $ErrorText = '',
-        [string] $OperationId = ''
+        [string] $OperationId = '',
+
+        # Section R++.A: truth-signal classification per Invoke-MDEEndpoint
+        # SuccessKind. Lets Connector-Heartbeat aggregator + connector-card
+        # query distinguish "tenant doesn't have feature" from "real failure"
+        # from "live but no rows this poll" from "live with rows".
+        [ValidateSet('live','live-empty','tenant-gated','error','')]
+        [string] $Reason = '',
+        [int] $HttpStatus = 0
     )
 
     $entity = @{
@@ -77,6 +85,8 @@ function Set-XdrTierStateRow {
         Success       = $Success
         ErrorText     = $ErrorText
         OperationId   = $OperationId
+        Reason        = $Reason
+        HttpStatus    = $HttpStatus
     }
 
     # Reuse the existing Invoke-XdrStorageTableEntity helper which handles SAMI auth.

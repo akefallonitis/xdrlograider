@@ -32,10 +32,15 @@ XdrLogRaider ships `deploy/compiled/mainTemplate.json` as the canonical, hand-au
 ```powershell
 git clone https://github.com/akefallonitis/xdrlograider
 cd xdrlograider
+pwsh tools/Install-GitHooks.ps1   # installs commit-msg + pre-commit hooks (BINDING per Section R)
 ./tests/Run-Tests.ps1 -Category unit
 ```
 
 All unit tests should pass. If not, open an issue with the failing output.
+
+> **Hooks installed by `Install-GitHooks.ps1`**:
+> - **commit-msg** — appends AI-attribution block when applicable
+> - **pre-commit** — runs `tools/Pre-Commit-Check.ps1` (chains pyramid + WiringAudit + Validate-ArmJson + Validate-Manifest + Audit-DcrSchema + PSScriptAnalyzer; runtime ~6-8 min). Identical gates as CI server-side; eliminates "passes locally / fails in CI" cycles.
 
 ## Local test loop
 
