@@ -46,7 +46,10 @@ BeforeAll {
         '/apiproxy/mtp/responseApiPortal/senseauth/allownonauthsense'                                      = 'XDRInternals:Get-XdrEndpointConfigurationAuthenticatedTelemetry.ps1'
         '/apiproxy/mtp/autoIr/ui/properties/'                                                              = 'XDRInternals:Get-XdrEndpointConfigurationPotentiallyUnwantedApplications.ps1'
         '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters?platform=Windows' = 'nodoc endpoint_configuration.yml:345-376 (Section R+++ 2026-05-07: platform query is REQUIRED — fixes 400 Bad Request; Architecture C PerPlatformFanout in v0.1.0 GA per plan R++++)'
-        '/apiproxy/mtp/papin/api/cloud/public/internal/indicators/filterValues'                            = 'Portal trace:tenant-allow-block (papin namespace; preview surface)'
+        # Section R++++++ F6 (2026-05-07T19:15Z): TenantAllowBlock path swap from
+        # /papin/.../filterValues (UI dropdown facets, returned 500 in lab) to
+        # canonical /responseApiPortal/ti/indicators per nodoc configuration.yml:1655.
+        '/apiproxy/mtp/responseApiPortal/ti/indicators'                                                    = 'nodoc:configuration.yml:1655 — Configuration.ListThreatIndicators (TABL custom threat indicators inventory)'
         '/apiproxy/mtp/mdeCustomCollection/rules'                                                          = 'XDRInternals:Get-/New-/Set-XdrEndpointConfigurationCustomCollectionRule.ps1 (pre-v0.1.0.8 corrected from /model)'
 
         # ---- P1 ----

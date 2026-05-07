@@ -102,6 +102,11 @@ Describe 'TierStateAggregate.StrictModeSafety — defensive null-guards + __sche
                         RowsIngested = 7
                         ErrorText    = ''
                         OperationId  = 'op-1'
+                        # Section R++++++ aggregator orphan filter requires Reason
+                        # col (Section R++.A truth-signal schema). Mock fixture
+                        # must include it to model post-R++.A rows.
+                        Reason       = 'live'
+                        HttpStatus   = 200
                     }
                     [pscustomobject]@{
                         PartitionKey = 'Defender|Inventory'
@@ -114,6 +119,8 @@ Describe 'TierStateAggregate.StrictModeSafety — defensive null-guards + __sche
                         RowsIngested = 13
                         ErrorText    = ''
                         OperationId  = 'op-2'
+                        Reason       = 'live'
+                        HttpStatus   = 200
                     }
                 )
             } else {
