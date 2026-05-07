@@ -134,7 +134,51 @@ function Project-EntityField {
         }
         '$json'       {
             if ($null -eq $value) { return $null }
-            try { return ($value | ConvertTo-Json -Depth 10 -Compress) } catch { return [string]$value }
+            # Section R++++++ Phase 1 fix (2026-05-07T18:30Z): preserve array
+            # shape against PowerShell's pipeline-unwrap quirk. Re-resolve the
+            # path against the SOURCE entity (which still has array context)
+            # to detect whether the field IS an array; if so, force -AsArray so
+            # the workspace dynamic col stores it as JSON array (drift queries
+            # against array_length() / mv-expand work). Without this, a
+            # ProjectionMap hint like `$json:GroupRules` against a 1-element
+            # array silently collapsed to scalar JSON.
+            try {
+                # Walk the SOURCE entity ourselves to detect array shape (Resolve-EntityPath's return value already lost array-ness via PowerShell
+                # function-return unwrap).
+                $rawValue = $Entity
+                $segments = ($path -split '\.')
+                $isArrayShape = $false
+                foreach ($seg in $segments) {
+                    if ($null -eq $rawValue) { break }
+                    $field = ($seg -replace '\[\d+\]|\[\*\]', '')
+                    if ([string]::IsNullOrWhiteSpace($field)) { continue }
+                    if ($rawValue -is [hashtable]) {
+                        $rawValue = if ($rawValue.ContainsKey($field)) { $rawValue[$field] } else { $null }
+                    } elseif ($rawValue -is [pscustomobject]) {
+                        $prop = $rawValue.PSObject.Properties[$field]
+                        if ($prop) {
+                            # Inspect property value type without unwrapping via $rawValue.$field
+                            $rawValue = $prop.Value
+                        } else { $rawValue = $null }
+                    } else {
+                        try { $rawValue = $rawValue.$field } catch { $rawValue = $null }
+                    }
+                    if ($null -ne $rawValue -and ($rawValue -is [array] -or $rawValue -is [System.Collections.IList] -or $rawValue.GetType().FullName -match 'Object\[\]')) {
+                        $isArrayShape = $true
+                    } else {
+                        $isArrayShape = $false
+                    }
+                }
+                # Only force -AsArray when the SOURCE was an array AND PowerShell
+                # has unwrapped it to scalar (1-element collapse). If $value is
+                # already an array (multi-element preserved), let ConvertTo-Json
+                # serialize naturally — adding -AsArray on a 2+ element array
+                # produces a double-wrapped `[[{...},{...}]]`.
+                if ($isArrayShape -and -not ($value -is [array] -or $value -is [System.Collections.IList])) {
+                    return ConvertTo-Json -InputObject $value -Depth 10 -Compress -AsArray
+                }
+                return ConvertTo-Json -InputObject $value -Depth 10 -Compress
+            } catch { return [string]$value }
         }
         default       { return [string]$value }
     }
