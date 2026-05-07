@@ -29,19 +29,18 @@ function Get-XdrTierCadenceMap {
     [OutputType([hashtable])]
     param()
 
-    # TROUBLESHOOTING TEMP (operator directive 2026-05-07): the slowest tiers
-    # (Inventory=24h, Maintenance=7d) make E2E verification impossibly slow
-    # during active production-readiness shake-out. Compressed cadences below
-    # let operators see end-to-end data flow within minutes instead of days.
-    # MUST REVERT to production cadence (24h / 7d) before v0.1.0 GA tag —
-    # current accelerated cadence will inflate row counts ~24x for Inventory
-    # and ~168x for Maintenance vs the SLI/SLO baseline + breach RowVolumeSpike
-    # cost-budget gates if left in place.
+    # PRODUCTION cadence (Section R++++++.4 F3 revert 2026-05-07):
+    # Compressed troubleshooting cadence (1h-everything) was used during
+    # iter-15→18 LIVE re-verify shake-out to surface end-to-end data flow
+    # within minutes. Production tag REQUIRES the canonical cadence below
+    # — compressed cadence inflates row counts ~24x (Inventory) / ~168x
+    # (Maintenance) vs SLI/SLO baseline and breaches RowVolumeSpike
+    # cost-budget gates.
     return @{
         ActionCenter  = [TimeSpan]::FromMinutes(10)
         XspmGraph     = [TimeSpan]::FromHours(1)
-        Configuration = [TimeSpan]::FromHours(1)   # TEMP was 6h
-        Inventory     = [TimeSpan]::FromHours(1)   # TEMP was 1d
-        Maintenance   = [TimeSpan]::FromHours(1)   # TEMP was 7d
+        Configuration = [TimeSpan]::FromHours(6)
+        Inventory     = [TimeSpan]::FromDays(1)
+        Maintenance   = [TimeSpan]::FromDays(7)
     }
 }

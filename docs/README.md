@@ -15,9 +15,9 @@ Welcome to XdrLogRaider docs (v0.1.0 GA). Each page targets a specific audience.
 
 ## For SOC / detection engineering
 
-- **[STREAMS.md](STREAMS.md)** — Catalogue of all 59 telemetry streams (58 active + 1 deprecated)
-- **[STREAMS-MATRIX.md](STREAMS-MATRIX.md)** — Per-stream operational matrix (manifest contract, DCR mapping, live verification)
+- **[STREAMS.md](STREAMS.md)** — Catalogue of all 65 telemetry streams (64 active + 1 deprecated; includes per-stream operational matrix appendix auto-derived from manifest)
 - **[SCHEMA-CATALOG.md](SCHEMA-CATALOG.md)** — Per-stream typed-column reference for KQL authors
+- **[SCHEMA.md](SCHEMA.md)** — KQL meta-format used by SCHEMA-CATALOG (see SCHEMA-CATALOG for per-stream typed cols)
 - **[OPERATOR-KQL-PACK.md](OPERATOR-KQL-PACK.md)** — Canned operator queries + snapshot vs drift pattern guide
 - **[WORKBOOKS.md](WORKBOOKS.md)** — What each workbook shows
 - **[DRIFT.md](DRIFT.md)** — KQL drift model, parsers, tuning

@@ -34,6 +34,26 @@ This project follows these practices by design:
 5. **Audit logging** — Key Vault access logs, Function App App Insights, Log Analytics diagnostic logs all enabled by default
 6. **CI secrets handling** — GitHub Actions live tests use federated identity credential (FIC), never stored secrets; CI on forks is offline-only
 
+## Service-account credential rotation (v0.1.0 GA — operator runbook)
+
+The Defender XDR portal service account is the **single security boundary** for the connector. SAMI handles all Azure plumbing (KV reads / Storage writes / DCE ingest) and is auto-managed by Azure (no rotation needed).
+
+For the SA itself:
+
+- **Cadence**: rotate the SA password manually only if compromise is suspected (e.g. `XdrOps-AuthChainFailure.yaml` analytic rule fires persistently). No proactive rotation cadence required for v0.1.0 GA.
+- **Procedure**:
+  1. Generate a new SA password in your Entra tenant (Entra ID → Users → service account → Reset password).
+  2. Re-run `pwsh tools/Initialize-XdrLogRaiderAuth.ps1` against your Key Vault to seed the new credential (the script wipes + writes the `mde-portal-password` secret, preserving prior versions for rollback).
+  3. Restart the Function App: Azure Portal → Function App → Stop → Start. Cold-start (~5 min) reads the new secret on first poll.
+  4. Verify auth chain via `XdrConnectorHealth_CL.AuthChainStatus` in the workspace OR App Insights `customEvents | where name == 'AuthChain.Completed'`.
+- **TOTP / Software Passkey rotation**: same pattern — regenerate in Entra, write to KV via Initialize-XdrLogRaiderAuth.ps1, restart FA.
+
+Pre-existing analytic rule `XdrOps-AuthChainFailure.yaml` (ships `enabled:false`) alerts operators on repeated auth-chain failures so they know when to investigate. Enable it via the Sentinel UI after operator review.
+
+## Manifest changes — Function App restart required
+
+Adding/removing/reconfiguring streams in `endpoints.manifest.psd1` requires a **Function App restart** — the manifest is loaded at module-import time (cold-start) and not hot-reloaded. After redeploying via `release.yml` (which uploads the new `function-app.zip` to `/releases/latest/download/`), Stop+Start the FA to force a fresh package fetch + manifest reload. No ARM redeploy needed for FA-package-only changes (per Section R++++++ live-override flow).
+
 ## Supported Versions
 
 | Version | Supported |

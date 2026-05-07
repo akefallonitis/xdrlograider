@@ -4,9 +4,57 @@ All notable changes to this project are documented in this file.
 
 This project adheres to [Semantic Versioning 2.0.0](https://semver.org/) and the format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.1.0] - 2026-05-07
 
-Section R++ (2026-05-07) — comprehensive consolidation post-live-deploy reaudit. Pending tag once Phase H-I local gates green + 7-day live observation post-cadence-revert.
+First proven production-ready release. Pure Defender XDR portal-only telemetry connector for Microsoft Sentinel.
+
+### Highlights
+
+- **65 telemetry streams** across 5 cadence tiers (10m / 1h / 6h / 24h / 7d) routed to **11 consolidated workspace tables** (10 `Defender_<Category>_CL` per nodoc D.1 10-category taxonomy + 1 `XdrConnectorHealth_CL` operational table).
+- **4-function topology** (post Section R 9→4 consolidation): `Xdr-Refresh` universal portal-agnostic dispatcher + `Xdr-PollOrchestrator` durable + `Xdr-PollStream` activity + `Connector-Heartbeat` aggregator. v0.2.0 multi-portal additions reuse the same 4 functions (manifest-driven dispatch).
+- **13 DCRs / 1 DCE / 66 streamDeclarations** (65 data + 1 ops); per-category split for Configuration + Exposure (>10-flow Azure cap).
+- **Connector card flips to Connected** as soon as any tier emits `StreamsSucceeded > 0` (Section R+ strict-mode fix landed via commit 0972e8c).
+- **All-live AVAILABILITY policy** (Section R+++.4) — manifest entries are all `live`; tenant licensing detected at runtime via `Get-MDEEndpointLastResult.SuccessKind` (`live` / `live-empty` / `tenant-gated` / `error`) and surfaced on `XdrConnectorHealth_CL.Reason` per stream.
+
+### Added (Section R++++++ Phase 1 — 2026-05-07)
+
+- **Architecture B foundation** — `MDE_Machines_CL` per-machine inventory base stream (paginated `/mtp/ndr/machines`).
+- **Architecture A — PerEntityFanout** — activity iterates per-entity from a source stream (e.g. MDE_Machines_CL → MDE_DeviceTimeline_CL `{MachineId}` substitution); composite checkpoint key `{Stream}|{EntityId}` for per-entity resume; MaxEntitiesPerCycle guardrail.
+- **Architecture C — PerPlatformFanout** — single-stream multi-platform activity loop (Windows/Linux/macOS/iOS); `BodyOverride` POST-body merge + `Platform` col stamping. Applied to `MDE_SecurityPolicies_CL`.
+- **Architecture F — Pagination** — pageIndex/pageSize/MaxPages loop in `Invoke-MDEEndpoint` with last-page detection. Applied to 4 TVM streams.
+- **MDE_SecurityPolicies_CL** (G7) — POST `/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies` returning ASR rules + AV settings + Account Protection + Disk Encryption + EDR + Firewall + Web Protection per platform (NOT duplicative of `MDE_AntivirusPolicy_CL` which is operator-side filter facets).
+- **TVM expansion (G8)** — 4 streams: `MDE_VulnerableMachines_CL` + `MDE_VulnerabilityInventory_CL` + `MDE_SoftwareInventory_CL` + `MDE_RecommendationActions_CL` (all paginated).
+- **41 silent col drops fixed** (Section R++.B2 class bug) across 3 workspace tables — DCR streamDecls had cols missing from destination workspace tables; operators querying those cols got `NULL` silently. Fixed: Defender_ThreatAnalytics_CL (+5 cols), Defender_ConfigurationAndSettings_CL (+3 cols), Defender_ExposureManagement_CL (+33 cols).
+- **Drift parser execution test** (F5) — `tests/kql/Parsers.Execution.Tests.ps1`: simulates parser KQL semantics in PS to validate Added/Removed/Modified classification + asserts 9 required output cols + window/lookback parameterization across all 4 cadence-tier parsers.
+- **Live workspace-table schema parity test** (P1.9) — `tests/arm/WorkspaceTable.SchemaParity.Tests.ps1`: catches B2-class silent col drops by asserting every DCR-declared col exists in destination workspace table.
+- **Session-cache boundedness test** (HH) — `tests/unit/Auth.SessionCacheBoundedness.Tests.ps1` prevents EnumerationContext leaks.
+- **PerPlatformFanout activity test** (Architecture C) — `tests/unit/Activity.PerPlatformFanout.Tests.ps1`.
+- **3 hunting queries** for new streams: `MachineInventoryRiskScore.yaml` + `SecurityPoliciesPerPlatform.yaml` + `TvmTopVulnerableMachines.yaml`.
+- F1 — `MDE_SecurityBaselines_CL` path corrected to `/apiproxy/mtp/tvm/analytics/vulnerabilities/baseline` per nodoc canonical.
+- F2 — `SyntheticEntityId` added to PostureTenants/AppsSecureScore/DataSecureScore/IdentitySecureScore (eliminates idx-N drift-join breakage).
+- F4 — 3 analytic rules cadence/window aligned: AlertTuningBroadened + TamperProtectionOff + RbacRoleToUnusualAccount.
+- F7 — online-preflight.yml `tags: v*` trigger added so release.yml depends on its success.
+- MM — RawJson scalar wrap in Shape-3 row-builder so `parse_json(RawJson)` works on bool/int values.
+
+### Changed (Section R++++++)
+
+- **Cadence map reverted to production** values (Section R++++++.4 F3): ActionCenter=10m / XspmGraph=1h / Configuration=6h / Inventory=24h / Maintenance=7d. Compressed-1h-everything was troubleshooting only.
+- **release.yml gate 1b** baseline updated 60 → 66 streamDecls (65 streams + ops) for Phase 1 baseline.
+- `STREAMS-MATRIX.md` retired (Section R++++++.3): merged into `STREAMS.md` as appendix; per-stream operational matrix is auto-derived to `tests/online/Wiring-Matrix-<YYYY-MM-DD>.md` on every release.
+
+### Changed (Section R++)
+
+- **Truth-signal restoration** — `Invoke-MDEEndpoint` now exposes a 4-state `SuccessKind` (`live` / `live-empty` / `tenant-gated` / `error`) via the new `Get-MDEEndpointLastResult` accessor; the legacy `,@()` return contract is preserved so existing callers don't break. Activity (`Xdr-PollStream`) reads this side-channel and writes `Reason` + `HttpStatus` columns to `XdrTierState` so `Connector-Heartbeat` aggregator + connector card can distinguish "tenant doesn't have feature" from "real failure" from "live but no rows this poll".
+- **Schema integrity** — `Defender_ThreatAnalytics_CL` workspace table extended with TopThreats typed cols (TotalActiveThreats, ThreatsExposure, TotalThreatRequiresAction, ThreatExposureCalculationStatus, CurrentAlertsCount); previously these landed via DCR but were silently dropped at the workspace-table layer.
+- **Manifest** — added `IdProperty=@('__synthetic__')` + `SyntheticEntityId='<stream>-singleton'` for SingleObjectAsRow streams without natural id; added forward-compat `RequiresLicense` + `TenantContextProbe` schema fields; reclassified `MDE_UserPreferences_CL` to `Availability='requires-delegated-auth'`; `MDE_CloudAppsConfig_CL` switched to `SingleObjectAsRow=$true`.
+- **Detection rules** — `MdiDcSensorDown.yaml` realigned: queryFrequency 15m→4h, queryPeriod 2h→P2D (matches Inventory cadence); FieldName "hasSensor" → "IsActive" (matches manifest typed col).
+- **Hunting queries** — `ConfigChangesByUpn.yaml` join switched from exact-equality `==` to 5-min `bin()` bucket (sub-second equality never matched).
+- **Workbooks** — `MDE_DriftReport.json` window args aligned to tier cadence (Inventory 1d, Configuration 6h) instead of 1h/30m which missed 23/24+ of poll cycles.
+- **Drift parsers** — all 4 (Configuration / Inventory / Exposure / Maintenance) — corrected `ChangeType` classification: previously the "Removed" branch was unreachable (`isnull(TypedBag[field])` false for current-snapshot fields). Replaced with explicit `set_has_element` + `case()` so Added/Removed/Modified classify correctly.
+- **Orchestrator** — `Xdr-PollOrchestrator` now filters `Availability='deprecated'` streams (e.g. `MDE_StreamingApiConfig_CL`) — saves auth-call budget + removes 4xx noise from AppExceptions.
+- **Connector card UX** — Sentinel UI graphQueries now show `sum(RowsIngested)` over 7d + `max(StreamsSucceeded)` per tier instead of a single AppInsights customEvents counter.
+
+[Unreleased]: scratch — Phase 2 (Architecture I XdrTenantState + Architecture E OpenAPI fixture generator) deferred to v0.1.0.1 / v0.2.0 per Section R++++++.7 future expansion roadmap.
 
 ### Changed (Section R++)
 

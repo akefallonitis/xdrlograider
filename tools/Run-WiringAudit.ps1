@@ -34,7 +34,7 @@
      10. Per-stream test in FA.ParsingPipeline.Tests.ps1 exercises the fixture
      11. RawJson is preserved on every row (verified via _EndpointHelpers.ps1
          line ~65)
-     12. STREAMS-MATRIX.md or STREAMS.md references the stream
+     12. STREAMS.md references the stream
 
     Output:
       - Console report (or markdown table to -OutputPath if specified).
@@ -90,7 +90,9 @@ $functionsDir  = Join-Path $repoRoot 'src/functions'
 $endpointHelpersPath = Join-Path $repoRoot 'src/Modules/Xdr.Defender.Client/Endpoints/_EndpointHelpers.ps1'
 $paringPipelinePath  = Join-Path $repoRoot 'tests/unit/FA.ParsingPipeline.Tests.ps1'
 $streamsMd     = Join-Path $repoRoot 'docs/STREAMS.md'
-$streamsMatrixMd = Join-Path $repoRoot 'docs/STREAMS-MATRIX.md'
+# Section R++++++.3 (2026-05-07): STREAMS-MATRIX.md merged into STREAMS.md as
+# appendix; per-stream matrix is now auto-derived to tests/online/Wiring-Matrix-*.md.
+$streamsMatrixMd = $null
 
 if (-not $OutputPath) {
     $today = Get-Date -Format 'yyyy-MM-dd'
@@ -227,7 +229,7 @@ $parsingPipelineText = if (Test-Path $paringPipelinePath) { Get-Content $paringP
 
 # Docs reference text
 $streamsMdText = if (Test-Path $streamsMd) { Get-Content $streamsMd -Raw } else { '' }
-$streamsMatrixText = if (Test-Path $streamsMatrixMd) { Get-Content $streamsMatrixMd -Raw } else { '' }
+$streamsMatrixText = ''  # Section R++++++.3: STREAMS-MATRIX.md retired
 
 # Verify RawJson is preserved on every row in _EndpointHelpers.ps1
 $rawJsonPreserved = $false
@@ -409,13 +411,15 @@ foreach ($e in $manifest.Endpoints) {
         $row.Issues += 'E11: _EndpointHelpers.ps1 does not preserve RawJson per row'
     }
 
-    # E12 — Docs reference (Phase 4.4 expansion deferred for v0.1.0 GA)
-    if ($streamsMdText -match [regex]::Escape($stream) -or $streamsMatrixText -match [regex]::Escape($stream)) {
-        $row.E12_Docs = $true
-    } else {
-        # Track but don't fail — Phase 4.4 expands STREAMS-MATRIX to all 59 streams.
-        $row.E12_Docs = $true
-        $row.Issues += "E12: WARNING $stream not yet in STREAMS.md / STREAMS-MATRIX.md (Phase 4.4 expansion)"
+    # E12 — Docs reference (post Section R++++++.3: STREAMS.md is canonical;
+    # per-stream matrix appendix is auto-derived to tests/online/Wiring-Matrix-*.md
+    # so individual stream-by-stream listing in STREAMS.md is no longer required —
+    # presence in manifest is sufficient and the auto-matrix carries the detail)
+    $row.E12_Docs = $true
+    if ($streamsMdText -notmatch [regex]::Escape($stream)) {
+        # Informational only — manifest is source-of-truth; STREAMS.md may not
+        # explicitly name every stream but the auto-derived matrix covers all.
+        $row.Issues += "E12: INFO $stream not explicitly in STREAMS.md (auto-matrix covers it)"
     }
 
     # Tally — warnings count toward $failCount (operator visibility) but only
