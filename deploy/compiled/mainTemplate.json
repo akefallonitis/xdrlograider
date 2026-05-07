@@ -2316,7 +2316,8 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2023-07-01",
-      "condition": "[and(equals(parameters('authMethod'), 'credentials_totp'), greater(length(parameters('servicePassword')), 0))]",
+      "comments": "Belt-and-suspenders: skip if password param is empty OR equals the dummy sentinel string used by Deploy-XdrLogRaider.ps1 SkipSecretSeeding mode. Prevents ARM redeploy from wiping real credentials seeded via Initialize-XdrLogRaiderAuth.ps1.",
+      "condition": "[and(and(equals(parameters('authMethod'), 'credentials_totp'), greater(length(parameters('servicePassword')), 0)), not(equals(parameters('servicePassword'), 'dummy-not-used-existing-kv-overrides')))]",
       "name": "[concat(variables('kvName'), '/mde-portal-password')]",
       "properties": {
         "value": "[parameters('servicePassword')]",
@@ -2329,7 +2330,8 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2023-07-01",
-      "condition": "[and(equals(parameters('authMethod'), 'credentials_totp'), greater(length(parameters('totpSeed')), 0))]",
+      "comments": "Belt-and-suspenders: skip if TOTP param is empty OR equals dummy sentinel.",
+      "condition": "[and(and(equals(parameters('authMethod'), 'credentials_totp'), greater(length(parameters('totpSeed')), 0)), not(equals(parameters('totpSeed'), 'dummy-not-used-existing-kv-overrides')))]",
       "name": "[concat(variables('kvName'), '/mde-portal-totp')]",
       "properties": {
         "value": "[parameters('totpSeed')]",
@@ -2342,7 +2344,8 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2023-07-01",
-      "condition": "[and(equals(parameters('authMethod'), 'passkey'), greater(length(parameters('passkeyJson')), 0))]",
+      "comments": "Belt-and-suspenders: skip if passkey param is empty OR equals dummy sentinel.",
+      "condition": "[and(and(equals(parameters('authMethod'), 'passkey'), greater(length(parameters('passkeyJson')), 0)), not(equals(parameters('passkeyJson'), 'dummy-not-used-existing-kv-overrides')))]",
       "name": "[concat(variables('kvName'), '/mde-portal-passkey')]",
       "properties": {
         "value": "[parameters('passkeyJson')]",

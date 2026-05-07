@@ -63,7 +63,19 @@ param(
     [string]   $ProjectPrefix = 'xdrlr',
     [string]   $Env           = 'prod',
     [string]   $DeploymentName,
-    [switch]   $WhatIfPreview
+    [switch]   $WhatIfPreview,
+    # CRITICAL: Re-deploy mode that does NOT touch KV secrets.
+    # The ARM template's KV secret resources are conditional on
+    # `length(parameters('servicePassword')) > 0` etc — empty SecureStrings
+    # cause those resources to be skipped, preserving any existing secrets
+    # already seeded via Initialize-XdrLogRaiderAuth.ps1.
+    # USE THIS for any redeploy where secrets are already populated.
+    [switch]   $SkipSecretSeeding,
+    # Manual override only. NEVER pass non-empty SecureStrings unless
+    # you intend to overwrite KV secrets.
+    [securestring] $ServicePassword,
+    [securestring] $TotpSeed,
+    [securestring] $PasskeyJson
 )
 
 $ErrorActionPreference = 'Stop'
@@ -134,6 +146,35 @@ $params = @{
     restrictPublicNetwork     = $false
     enableKeyVaultDiagnostics = $false
     githubRepo                = 'akefallonitis/xdrlograider'
+}
+
+# CRITICAL ARCHITECTURE (post-incident 2026-05-07T17:05Z): the ARM template's
+# KV secret resources are conditional on `length(parameters('servicePassword')) > 0`.
+# By default, this script passes EMPTY SecureStrings so those resources are
+# SKIPPED on redeploy — preserving any existing real credentials seeded via
+# Initialize-XdrLogRaiderAuth.ps1. This prevents the "ARM redeploy wiped my
+# auth secrets" failure mode that caused 65 stream auth failures during
+# Phase 1 live override.
+#
+# To deliberately seed/rotate secrets, pass them explicitly:
+#   pwsh tools/Deploy-XdrLogRaider.ps1 -ServicePassword (Read-Host -AsSecureString)
+# OR run Initialize-XdrLogRaiderAuth.ps1 separately AFTER the template lands.
+$emptySecure = New-Object System.Security.SecureString  # 0-length
+
+if ($SkipSecretSeeding -or $null -eq $ServicePassword) {
+    $params['servicePassword'] = $emptySecure
+} else {
+    $params['servicePassword'] = $ServicePassword
+}
+if ($SkipSecretSeeding -or $null -eq $TotpSeed) {
+    $params['totpSeed'] = $emptySecure
+} else {
+    $params['totpSeed'] = $TotpSeed
+}
+if ($SkipSecretSeeding -or $null -eq $PasskeyJson) {
+    $params['passkeyJson'] = $emptySecure
+} else {
+    $params['passkeyJson'] = $PasskeyJson
 }
 
 Write-Host "Deployment parameters:" -ForegroundColor Cyan
