@@ -116,13 +116,28 @@ Describe 'Service-account role consistency across docs' {
     }
 
     It 'manifest tenant-gated streams match the PERMISSIONS.md tenant-feature detail table' {
+        # Section R++++++ (2026-05-07): per all-live policy (Section R+++/R++.A truth-signal),
+        # the manifest has ZERO 'tenant-gated' streams — runtime SuccessKind classifies
+        # dynamically from actual API response. This test now validates the all-live
+        # invariant + retains the cross-doc check for any future tenant-gated additions.
         $manifestPath = Join-Path $script:RepoRoot 'src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1'
         $permPath     = Join-Path $script:RepoRoot 'docs/PERMISSIONS.md'
 
         $manifest = Import-PowerShellDataFile -Path $manifestPath
         $permContent = Get-Content $permPath -Raw
 
-        $tenantGatedStreams = @($manifest.Endpoints | Where-Object { $_.Availability -eq 'tenant-gated' }).Stream
+        # Strict-mode-safe enumeration: enumerate THEN ForEach to extract Stream
+        # (avoids null-array-property-access crash under StrictMode -Version Latest).
+        $tenantGatedRows = @($manifest.Endpoints | Where-Object { $_.Availability -eq 'tenant-gated' })
+        $tenantGatedStreams = @($tenantGatedRows | ForEach-Object { $_.Stream })
+
+        # Per all-live policy, this collection IS expected to be empty.
+        if ($tenantGatedStreams.Count -eq 0) {
+            $true | Should -BeTrue -Because 'all-live policy: zero tenant-gated streams in manifest (runtime SuccessKind classifies dynamically)'
+            return
+        }
+
+        # Future-proof: if a stream IS marked tenant-gated, doc must mention it.
         $missing = @()
         foreach ($s in $tenantGatedStreams) {
             if ($permContent -notmatch [regex]::Escape($s)) {

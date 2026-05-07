@@ -759,7 +759,10 @@
                     {
                       "name": "GroupRules",
                       "type": "dynamic"
-                    }
+                    },
+                    { "name": "AssetType", "type": "string" },
+                    { "name": "Properties", "type": "dynamic" },
+                    { "name": "PropertyCount", "type": "int" }
                   ]
                 }
               }
@@ -1312,7 +1315,40 @@
                     {
                       "name": "RuleDefinition",
                       "type": "dynamic"
-                    }
+                    },
+                    { "name": "AttackPathId", "type": "string" },
+                    { "name": "ChokepointEntityId", "type": "string" },
+                    { "name": "ChokepointId", "type": "string" },
+                    { "name": "ChokePointScore", "type": "real" },
+                    { "name": "CompletionPercentage", "type": "real" },
+                    { "name": "ConnectorId", "type": "string" },
+                    { "name": "ConnectorName", "type": "string" },
+                    { "name": "ConnectorType", "type": "string" },
+                    { "name": "CreatedTimestamp", "type": "datetime" },
+                    { "name": "DataCenter", "type": "string" },
+                    { "name": "EventId", "type": "string" },
+                    { "name": "EventTime", "type": "datetime" },
+                    { "name": "EventType", "type": "string" },
+                    { "name": "ExposedPathsCount", "type": "int" },
+                    { "name": "FeatureFlags", "type": "dynamic" },
+                    { "name": "GeoRegion", "type": "string" },
+                    { "name": "IsGlobal", "type": "boolean" },
+                    { "name": "LastSyncTime", "type": "datetime" },
+                    { "name": "LastUpdated", "type": "datetime" },
+                    { "name": "LatestCount", "type": "real" },
+                    { "name": "LatestTotal", "type": "real" },
+                    { "name": "LatestValue", "type": "real" },
+                    { "name": "MetricName", "type": "string" },
+                    { "name": "MpsDataCenter", "type": "string" },
+                    { "name": "MpsSliceId", "type": "int" },
+                    { "name": "OrgId", "type": "string" },
+                    { "name": "OversightSliceId", "type": "int" },
+                    { "name": "PathType", "type": "string" },
+                    { "name": "Properties", "type": "dynamic" },
+                    { "name": "SentimentType", "type": "string" },
+                    { "name": "SourceEntityId", "type": "string" },
+                    { "name": "TargetEntityId", "type": "string" },
+                    { "name": "Weight", "type": "real" }
                   ]
                 }
               }
@@ -1736,7 +1772,12 @@
                     {
                       "name": "IsTaVNext",
                       "type": "boolean"
-                    }
+                    },
+                    { "name": "DisplayName", "type": "string" },
+                    { "name": "ExposureScore", "type": "int" },
+                    { "name": "ExposureSeverity", "type": "string" },
+                    { "name": "ScaExposedDevices", "type": "int" },
+                    { "name": "VaExposedDevices", "type": "int" }
                   ]
                 }
               }
