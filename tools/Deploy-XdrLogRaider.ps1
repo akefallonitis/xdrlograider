@@ -93,8 +93,13 @@ if (-not $rg) {
 
 # Pull last successful deployment to fill any unspecified params
 if (-not $WorkspaceResourceId -or -not $ServiceAccountUpn) {
-    $lastDeploy = Get-AzResourceGroupDeployment -ResourceGroupName $ConnectorResourceGroup -ErrorAction SilentlyContinue |
-        Where-Object { $_.ProvisioningState -eq 'Succeeded' -and $_.Parameters.ContainsKey('existingWorkspaceId') } |
+    $allDeploys = @(Get-AzResourceGroupDeployment -ResourceGroupName $ConnectorResourceGroup -ErrorAction SilentlyContinue)
+    $lastDeploy = $allDeploys |
+        Where-Object {
+            $_.ProvisioningState -eq 'Succeeded' -and
+            $null -ne $_.Parameters -and
+            $_.Parameters.ContainsKey('existingWorkspaceId')
+        } |
         Sort-Object Timestamp -Descending |
         Select-Object -First 1
 

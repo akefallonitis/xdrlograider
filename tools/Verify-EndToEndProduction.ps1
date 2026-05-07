@@ -161,11 +161,14 @@ function Test-Wiring {
             -Detail '-WorkspaceCustomerId not supplied or -SkipKql set'
         return
     }
+    # Section R++++++ fix (2026-05-07): AppDependencies.Success is string in
+    # AppInsights schema, not bool — `not Success` raised BadRequest. Use
+    # explicit equality comparison instead.
     $depQuery = @'
 AppDependencies
 | where TimeGenerated > ago(1h)
 | extend Cat = case(Target has 'vault.azure.net','KV', Target has 'security.microsoft.com','Defender', Target has 'ingest.monitor.azure.com','DCE', Target has 'storage.azure.com' or Target has 'core.windows.net','Storage','Other')
-| summarize n=count(), succ=countif(Success), fail=countif(not Success), p95=percentile(DurationMs,95) by Cat, Target
+| summarize n=count(), succ=countif(Success == true), fail=countif(Success == false), p95=percentile(DurationMs,95) by Cat, Target
 | order by Cat, fail desc
 '@
     $r = Invoke-WorkspaceQuery -WorkspaceCustomerId $WorkspaceCustomerId -Query $depQuery
