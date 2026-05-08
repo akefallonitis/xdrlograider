@@ -91,6 +91,63 @@ try {
         }
     }
 
+    # Architecture I (Plan R++++++++++ 2026-05-08): refresh XdrTenantState daily.
+    # The cache is operator-visible context enrichment (WARNING-ONLY per Plan AMEND-1
+    # #5; never used to short-circuit polling). v0.1.0 GA inference: capability flags
+    # derived from XdrTierState SuccessKind observations (lightweight, no workspace
+    # query). v0.2.0 may upgrade to direct MDE_TenantContext_CL workspace query.
+    if ($config.StorageAccountName) {
+        try {
+            # Derive TenantId from SAMI Az context (no env var dependency).
+            $tenantId = $null
+            try {
+                $azCtx = Get-AzContext -ErrorAction SilentlyContinue
+                if ($azCtx -and $azCtx.Tenant) { $tenantId = [string]$azCtx.Tenant.Id }
+            } catch { Write-Warning "XdrTenantState: Get-AzContext failed: $($_.Exception.Message)" }
+            if ($tenantId) {
+                $cap = Get-XdrTenantStateCapability `
+                    -StorageAccountName $config.StorageAccountName `
+                    -TenantId           $tenantId
+                $stale = $true
+                if ($cap -and $cap.LastRefreshUtc) {
+                    $age = ([DateTime]::UtcNow) - ([DateTime]::Parse($cap.LastRefreshUtc))
+                    $stale = ($age.TotalHours -ge 23)
+                }
+                if ($stale) {
+                    # Infer capability flags from observed XdrTierState SuccessKind data.
+                    # Per AMEND-1 #5: WARNING-ONLY usage; never short-circuits polling.
+                    $isMdatpActive = $false
+                    $isXspmActive  = $false
+                    foreach ($row in $aggregateRows) {
+                        if ([int]$row.StreamsSucceeded -gt 0) {
+                            switch ($row.Tier) {
+                                'XspmGraph' { $isXspmActive  = $true }
+                                'Inventory' { $isMdatpActive = $true }
+                                default     {}
+                            }
+                        }
+                    }
+                    # MDI / OATP probed via specific stream names if XdrTierState is
+                    # queryable per-stream; v0.1.0 GA falls back to "unknown" for those
+                    # license types (LicenseTier='inferred'). v0.2.0 upgrades by reading
+                    # per-stream rows or directly querying MDE_TenantContext_CL.
+                    Set-XdrTenantStateCapability `
+                        -StorageAccountName $config.StorageAccountName `
+                        -TenantId           $tenantId `
+                        -IsMdiActive        $false `
+                        -IsMdatpActive      $isMdatpActive `
+                        -IsOatpActive       $false `
+                        -IsXspmActive       $isXspmActive `
+                        -LicenseTier        'inferred-from-tier-success' `
+                        -Region             ''
+                    Write-Information ("Connector-Heartbeat: refreshed XdrTenantState capability cache (mdatp={0} xspm={1})" -f $isMdatpActive, $isXspmActive)
+                }
+            }
+        } catch {
+            Write-Warning ("Connector-Heartbeat: XdrTenantState refresh failed: {0}" -f $_.Exception.Message)
+        }
+    }
+
     Write-Information ("Connector-Heartbeat complete: emitted 1 liveness + {0} per-tier aggregate rows" -f $aggregateRows.Count)
 } catch {
     Write-Error "Connector-Heartbeat failed: $_"

@@ -31,7 +31,13 @@
         # signal moves into XdrTierState Storage table. Activity writes; Heartbeat reads.
         'Get-XdrTierCadenceMap',
         'Set-XdrTierStateRow',
-        'Get-XdrTierStateAggregate'
+        'Get-XdrTierStateAggregate',
+        # Architecture I (Plan R++++++++++ 2026-05-08): tenant capability cache
+        # populated daily on Inventory cadence by Connector-Heartbeat from
+        # MDE_TenantContext_CL. WARNING-ONLY per Plan AMEND-1 #5 — never used to
+        # short-circuit polling, only to enrich operator-visible context.
+        'Set-XdrTenantStateCapability',
+        'Get-XdrTenantStateCapability'
         # Send-XdrAppInsights* helpers (Trace, CustomEvent, CustomMetric,
         # Exception, Dependency) moved to Xdr.Common.Telemetry per Phase J D'.22.
         # They remain available via the RequiredModules dependency chain.
