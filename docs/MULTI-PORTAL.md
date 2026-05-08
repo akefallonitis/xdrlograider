@@ -126,7 +126,7 @@ Add Entra portal endpoints to `endpoints.manifest.psd1`:
 
 ### 4. Per-portal `<Portal>_<Category>_CL` workspace tables
 
-After Phase J per-category table consolidation lands (v0.1.0):
+v0.1.0 GA per-category table consolidation:
 - v0.1.0 has 9 `Defender_<Category>_CL` tables
 - v0.2.0 adds 9× new tables per portal: `Entra_<Category>_CL`, `Purview_<Category>_CL`, `Intune_<Category>_CL`
 - Same canonical schema (12 system cols + per-category typed cols union)

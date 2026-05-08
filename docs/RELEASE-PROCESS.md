@@ -16,7 +16,7 @@ How v0.1.0 GA + future releases are cut.
 6. Squash-merge release branch → `main` (one cohesive commit)
 7. `release.yml` builds + signs artifacts on tag push
 8. Update FA `WEBSITE_RUN_FROM_PACKAGE` to new release URL + Stop/Start
-9. **Phase Q live verification** (Q.0-Q.11 + D'.33 per-resource depth + 1-week observation)
+9. **Live verification** (Verify-EndToEndProduction.ps1 covering 20 production-readiness signals + 1-week observation)
 10. **USER APPROVAL GATE** — wait for explicit approval before tagging
 11. Tag `vX.Y.Z` + write comprehensive CHANGELOG entry (FIRST WRITE — per user directive: no CHANGELOG entries until proven working)
 

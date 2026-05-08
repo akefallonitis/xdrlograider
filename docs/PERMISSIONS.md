@@ -54,7 +54,7 @@ Owner on the workspace RG implicitly grants both.
 ### Self-service enrolment (act AS the service account)
 
 1. Sign in to `https://mysignins.microsoft.com` **as the service account**
-2. Enrol a TOTP authenticator (see `docs/GETTING-AUTH-MATERIAL.md` Method 1) OR generate a software passkey (see `docs/BRING-YOUR-OWN-PASSKEY.md`)
+2. Enrol a TOTP authenticator (see `docs/GETTING-AUTH-MATERIAL.md` Method 1) OR generate a software passkey (see `docs/AUTH.md` "Bring your own passkey" section)
 3. Copy the Base32 TOTP secret (or passkey JSON) — this is what `Initialize-XdrLogRaiderAuth.ps1` uploads into Key Vault
 
 ## Runtime permissions (the Function App's own identity)

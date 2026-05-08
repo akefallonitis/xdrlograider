@@ -1344,7 +1344,11 @@
                     { "name": "SentimentType", "type": "string" },
                     { "name": "SourceEntityId", "type": "string" },
                     { "name": "TargetEntityId", "type": "string" },
-                    { "name": "Weight", "type": "real" }
+                    { "name": "Weight", "type": "real" },
+                    { "name": "Remediation", "type": "string" },
+                    { "name": "LastStateChange", "type": "datetime" },
+                    { "name": "MssScoreImpact", "type": "int" },
+                    { "name": "PointAchieved", "type": "int" }
                   ]
                 }
               }
@@ -4237,6 +4241,26 @@
               {
                 "name": "UserImpact",
                 "type": "string"
+              },
+              {
+                "name": "Description",
+                "type": "string"
+              },
+              {
+                "name": "Remediation",
+                "type": "string"
+              },
+              {
+                "name": "LastStateChange",
+                "type": "datetime"
+              },
+              {
+                "name": "MssScoreImpact",
+                "type": "int"
+              },
+              {
+                "name": "PointAchieved",
+                "type": "int"
               }
             ]
           },

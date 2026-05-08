@@ -949,19 +949,25 @@
             UnwrapProperty = 'results'
             # Fixture: { results: [{ id, title, lastStateChange, lastStateUpdate, category, source, product, severity, implementationCost, userImpact, userAffected, currentState, mssControlState, isDisabled, score, maxScore, lastSynced }] }.
             ProjectionMap = @{
-                RecommendationId  = '$tostring:id'
-                Title             = '$tostring:title'
-                Severity          = '$tostring:severity'
-                Status            = '$tostring:currentState'
-                Source            = '$tostring:source'
-                Product           = '$tostring:product'
-                Category          = '$tostring:category'
+                RecommendationId   = '$tostring:id'
+                Title              = '$tostring:title'
+                Severity           = '$tostring:severity'
+                Status             = '$tostring:currentState'
+                Source             = '$tostring:source'
+                Product            = '$tostring:product'
+                Category           = '$tostring:category'
                 ImplementationCost = '$tostring:implementationCost'
-                UserImpact        = '$tostring:userImpact'
-                IsDisabled        = '$tobool:isDisabled'
-                Score             = '$todouble:score'
-                MaxScore          = '$todouble:maxScore'
-                LastSyncedUtc     = '$todatetime:lastSynced'
+                UserImpact         = '$tostring:userImpact'
+                IsDisabled         = '$tobool:isDisabled'
+                Score              = '$todouble:score'
+                MaxScore           = '$todouble:maxScore'
+                LastSyncedUtc      = '$todatetime:lastSynced'
+                # E1 enrichment 2026-05-08 (Plan R++++++++.1 P3): 5 high-value typed cols
+                Description        = '$tostring:description'
+                Remediation        = '$tostring:remediation'
+                LastStateChange    = '$todatetime:lastStateChange'
+                MssScoreImpact     = '$toint:mssScoreImpact'
+                PointAchieved      = '$toint:pointAchieved'
             }
         }
 

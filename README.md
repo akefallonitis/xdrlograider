@@ -74,7 +74,7 @@ Full per-version deliverables in [docs/ROADMAP.md](docs/ROADMAP.md). Streams are
 - **[Permissions](docs/PERMISSIONS.md)** — consolidated setup + runtime + cross-RG reference
 - [Auth](docs/AUTH.md) — both methods explained, CA compatibility, rotation
 - [Getting Auth Material](docs/GETTING-AUTH-MATERIAL.md) — how to obtain TOTP / passkey / cookies
-- [Bring Your Own Passkey](docs/BRING-YOUR-OWN-PASSKEY.md) — generating a software passkey JSON
+- Software passkey generation guide is now in [AUTH.md](docs/AUTH.md#bring-your-own-passkey-software-passkey-json-schema)
 - [Streams](docs/STREAMS.md) — full catalogue of telemetry streams + per-stream tier + category
 - [Workbooks](docs/WORKBOOKS.md) — what each dashboard shows
 - [Drift](docs/DRIFT.md) — pure-KQL drift model explained

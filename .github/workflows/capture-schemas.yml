@@ -68,6 +68,21 @@ jobs:
           pwsh -NoProfile -File ./tools/Capture-EndpointSchemas.ps1 -StreamFilter '${{ inputs.stream_filter }}' @extra
           if ($LASTEXITCODE -ne 0) { throw "Capture failed (exit $LASTEXITCODE)" }
 
+      - name: Generate openapi-derived fixtures for streams without live capture
+        # Plan R++++++++.1 P4 wiring (2026-05-08): for any manifest stream that
+        # didn't get a live -raw.json (license-gated 4xx, transient capture
+        # failure, or new stream awaiting first capture), generate a stub from
+        # the corresponding nodoc OpenAPI spec so ProjectionMap dry-run tests
+        # can validate parser logic without live data.
+        shell: pwsh
+        run: |
+          if (Test-Path './.internal/nodoc-reference/specifications/nodoc-defender-xdr/specification') {
+              pwsh -NoProfile -File ./tools/Generate-FixtureFromOpenApi.ps1
+              if ($LASTEXITCODE -ne 0) { Write-Warning "OpenAPI fixture generator returned non-zero exit; continuing (non-blocking)" }
+          } else {
+              Write-Host "Skipping openapi-derived fixture generation: nodoc spec dir not present in repo (gitignored)."
+          }
+
       - name: Verify no PII leaks
         shell: pwsh
         run: |

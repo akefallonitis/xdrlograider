@@ -334,10 +334,10 @@ jobs:
           Write-Host "function-app.zip dry-run: shape valid (no forbidden paths; all required entries present)" -ForegroundColor Green
 
   coverage-gate:
-    # D'.20 v0.1.0 GA Phase 5.8: Pester code coverage >= 50% (intermediate gate;
-    # >=75% is the v0.1.0.1 target). Soft-fails for now (warning) — promote to
-    # hard-fail in v0.1.0.1 once instrumentation is verified across all modules.
-    name: Pester coverage gate (D'.20)
+    # Coverage gate: 50% soft-fail (v0.1.0 GA baseline); 75% hard-fail target
+    # for v0.1.0.1 patch (after P1 mock-based error-path tests land — see plan
+    # Section R++++++++.1 P1).
+    name: Pester coverage gate
     runs-on: ubuntu-latest
     needs: [unit-tests]
     steps:
@@ -368,7 +368,7 @@ jobs:
           } else { 0 }
           Write-Host "Coverage: $coverage% ($($result.CodeCoverage.NumberOfCommandsExecuted)/$($result.CodeCoverage.NumberOfCommandsAnalyzed))"
           if ($coverage -lt 50) {
-              Write-Host "::warning::Coverage $coverage% below 50% v0.1.0 GA Phase 5 gate — soft-fail (will become hard-fail in v0.1.0.1)" -ForegroundColor Yellow
+              Write-Host "::warning::Coverage $coverage% below 50% v0.1.0 GA baseline — soft-fail (75% hard-fail target in v0.1.0.1 after P1 error-path tests land)" -ForegroundColor Yellow
           } else {
               Write-Host "Coverage $coverage% meets 50% gate" -ForegroundColor Green
           }

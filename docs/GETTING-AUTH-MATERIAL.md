@@ -76,7 +76,7 @@ pwsh ./tests/Run-Tests.ps1 -Category local-online
 
 Use this if your tenant requires phishing-resistant MFA. More complex to set up.
 
-See [BRING-YOUR-OWN-PASSKEY.md](BRING-YOUR-OWN-PASSKEY.md) for full instructions — short version: use python-fido2 or XDRInternals to generate a software passkey, register it with Entra, export as JSON.
+See [AUTH.md](AUTH.md#bring-your-own-passkey-software-passkey-json-schema) for full instructions — short version: use python-fido2 or XDRInternals to generate a software passkey, register it with Entra, export as JSON.
 
 ## Method 3: Direct Cookies (testing only)
 

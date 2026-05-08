@@ -9,7 +9,7 @@ Welcome to XdrLogRaider docs (v0.1.0 GA). Each page targets a specific audience.
 - **[GETTING-AUTH-MATERIAL.md](GETTING-AUTH-MATERIAL.md)** — How to obtain a TOTP Base32 secret / passkey / cookies for the service account (read this BEFORE running `Initialize-XdrLogRaiderAuth.ps1`)
 - **[AUTH.md](AUTH.md)** — Auth methods, Conditional Access compatibility, rotation
 - **[UNATTENDED-AUTH.md](UNATTENDED-AUTH.md)** — How the connector authenticates without a human, at any worker/cold-start
-- **[BRING-YOUR-OWN-PASSKEY.md](BRING-YOUR-OWN-PASSKEY.md)** — How to generate a passkey JSON
+- Software passkey generation guide is now in [AUTH.md](AUTH.md#bring-your-own-passkey-software-passkey-json-schema)
 - **[POSTDEPLOY-PLAYBOOK.md](POSTDEPLOY-PLAYBOOK.md)** — Optional advanced post-deploy verification (the simple operator flow only needs the Sentinel Data Connectors blade going Connected — see [README.md step 3](../README.md#3-confirm-green))
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — Symptom → cause → fix
 
