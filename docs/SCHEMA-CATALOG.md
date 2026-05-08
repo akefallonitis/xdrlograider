@@ -1123,41 +1123,20 @@ MDE_ThreatAnalytics_CL
 | project Title, Severity, ReportType, Tags, LastUpdatedOn
 ```
 
-### `MDE_MachineActions_CL`
+### `MDE_MachineActions_CL` (REMOVED v0.1.0 GA F1 — 2026-05-08)
 
-- **Tier**: P6
-- **Category**: Action Center
-- **Availability**: tenant-gated (lifts to live once tenant has machine-action history)
-- **Description**: per-device action results (Live Response per-step script output + AIR linkage; richer than public MDE `/api/machineactions`).
+This stream was REMOVED in v0.1.0 GA decision F1. The legacy XDRInternals path returned 404; the canonical path `/mtp/actionCenter/actioncenterui/history-actions` is the same endpoint that `MDE_ActionCenter_CL` already polls successfully. All machine-action records (Live Response per-step output + AIR linkage) are present in `Defender_ActionCenter_CL.RawJson`.
 
-| Column | KQL type | Source path | Notes |
-|---|---|---|---|
-| `ActionId` | `string` | `actionId` | Action identifier. |
-| `ActionType` | `string` | `actionType` | Action class. |
-| `ActionStatus` | `string` | `status` | Status label. |
-| `MachineId` | `string` | `machineId` | Target device. |
-| `CreatedTime` | `datetime` | `creationTime` | Action creation. |
-| `CompletedTime` | `datetime` | `completionTime` | Action completion. |
-| `Operator` | `string` | `requestor` | Initiating UPN. |
-| `InvestigationId` | `string` | `investigationId` | Parent investigation. |
-| `ScriptOutput` | `dynamic` | `scriptOutputs` | Compact-JSON-cast per-step Live Response output (use `mv-expand` to iterate steps). |
-
-**Example**:
+**Operators**: Query machine actions via `Defender_ActionCenter_CL` filtering by `ActionType`:
 
 ```kql
-MDE_MachineActions_CL
+Defender_ActionCenter_CL
+| where SourceName == 'MDE_ActionCenter_CL'
 | where TimeGenerated > ago(7d)
-| where ActionType == 'LiveResponse'
-| project CreatedTime, Operator, MachineId, ActionStatus, ScriptOutput
-```
-
-To iterate per-step output:
-
-```kql
-MDE_MachineActions_CL
-| where TimeGenerated > ago(7d)
-| mv-expand step = ScriptOutput
-| project CreatedTime, Operator, MachineId, step
+| where ActionType in ('IsolateResponse', 'UnIsolateResponse', 'AntivirusScanResponse',
+                       'CollectInvestigationPackageResponse', 'LiveResponse')
+| extend ScriptOutput = parse_json(RawJson).scriptOutputs
+| project CreatedTime, Operator, MachineId, ActionStatus, ActionType, ScriptOutput
 ```
 
 ---

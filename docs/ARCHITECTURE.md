@@ -95,7 +95,7 @@ This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsight
 │  │                                                            │       │
 │  │  Timer functions (6 total, all timer-triggered):           │       │
 │  │    Connector-Heartbeat                                            │       │
-│  │    Defender-ActionCenter-Refresh         (ActionCenter + MachineActions)   │       │
+│  │    Defender-ActionCenter-Refresh         (ActionCenter + DeviceTimeline)   │       │
 │  │    Defender-XspmGraph-Refresh      (XSPM graph + Exposure snapshots) │       │
 │  │    Defender-Configuration-Refresh        (rules / RBAC / integrations)     │       │
 │  │    Defender-Inventory-Refresh     (settings / identity / metadata)  │       │

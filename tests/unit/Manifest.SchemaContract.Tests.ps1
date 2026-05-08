@@ -68,12 +68,11 @@ BeforeAll {
     )
 
     # Streams expected to carry HYBRID flag per portal-only audit.
-    # MachineActions: HYBRID per portal-only audit (public /api/machineactions covers metadata; portal exposes LR script output + AIR linkage).
+    # F1 2026-05-08: MachineActions REMOVED from manifest (overlaps with ActionCenter).
     $script:ExpectedHybridStreams = @(
         'MDE_RbacDeviceGroups_CL',
         'MDE_LicenseReport_CL',
-        'MDE_DataExportSettings_CL',
-        'MDE_MachineActions_CL'
+        'MDE_DataExportSettings_CL'
     )
 
     # Streams expected to carry UnwrapProperty (audited per live fixture shape).
@@ -286,25 +285,29 @@ Describe 'Manifest.ProjectionMap.Coverage' {
 
 Describe 'Manifest counts (v0.1.0 GA)' {
 
-    It 'manifest contains exactly 65 streams (46 baseline + 13 Tier A Phase 2 + 6 Phase 1: B Machines + G7 SecurityPolicies + G8 4 TVM)' {
-        # Baseline: 46 streams (44 + DeviceTimeline + MachineActions HYBRID).
+    It 'manifest contains exactly 64 streams (45 baseline + 13 Tier A Phase 2 + 6 Phase 1: B Machines + G7 SecurityPolicies + G8 4 TVM)' {
+        # Baseline: 45 streams (44 + DeviceTimeline). MachineActions REMOVED in
+        # v0.1.0 GA F1 decision (2026-05-08) — overlaps with MDE_ActionCenter_CL
+        # which already polls the canonical /mtp/actionCenter/actioncenterui/
+        # history-actions endpoint (10K+ rows live).
         # Phase 2 (2026-05-04) added 13 Tier A streams from nodoc catalog sweep.
         # Section R++++++ Phase 1 (2026-05-07T16:00) added 6 streams:
         # - Architecture B: MDE_Machines_CL (Endpoint Device Management foundation)
         # - G7: MDE_SecurityPolicies_CL (Endpoint Configuration POST endpoint - actual ASR/AV/EDR/Firewall policy bodies)
         # - G8 TVM expansion (4 streams): MDE_VulnerableMachines_CL + MDE_VulnerabilityInventory_CL + MDE_SoftwareInventory_CL + MDE_RecommendationActions_CL
-        $script:Manifest.Count | Should -Be 65
+        $script:Manifest.Count | Should -Be 64
     }
 
     It 'live + tenant-gated + deprecated counts add up' {
         # Section R++ AVAILABILITY POLICY (2026-05-07): all streams 'live' except
         # the 1 'deprecated' (StreamingApiConfig). Runtime SuccessKind dynamically
         # classifies tenant-gating per actual API response.
+        # F1 (2026-05-08): MachineActions REMOVED - 65 -> 64.
         $live        = [int]@($script:Manifest.Values | Where-Object { $_.Availability -eq 'live' }).Count
         $tenantGated = [int]@($script:Manifest.Values | Where-Object { $_.Availability -eq 'tenant-gated' }).Count
         $deprecated  = [int]@($script:Manifest.Values | Where-Object { $_.Availability -eq 'deprecated' }).Count
-        ($live + $tenantGated + $deprecated) | Should -Be 65
-        $live | Should -Be 64 -Because 'R++ all-live policy + Phase 1 6 new streams: 65 total - 1 deprecated = 64 live'
+        ($live + $tenantGated + $deprecated) | Should -Be 64
+        $live | Should -Be 63 -Because 'R++ all-live policy + Phase 1 6 new streams - F1 MachineActions removed: 64 total - 1 deprecated = 63 live'
         $tenantGated | Should -Be 0 -Because 'R++ all-live policy: tenant-gating detected dynamically by runtime SuccessKind'
         $deprecated | Should -Be 1 -Because 'MDE_StreamingApiConfig_CL is deprecated; v0.2.0 removes'
     }

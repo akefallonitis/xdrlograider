@@ -119,7 +119,7 @@ Describe 'Orchestrator.Determinism — behavioural replay check' {
             param($Task, [switch] $Any)
             return @(
                 @{ StreamName = 'MDE_ActionCenter_CL';    Tier = 'ActionCenter'; Portal = 'Defender'; Success = $true;  RowsIngested = 5; LatencyMs = 100; Error = $null }
-                @{ StreamName = 'MDE_MachineActions_CL';  Tier = 'ActionCenter'; Portal = 'Defender'; Success = $true;  RowsIngested = 5; LatencyMs = 100; Error = $null }
+                @{ StreamName = 'MDE_DeviceTimeline_CL';  Tier = 'ActionCenter'; Portal = 'Defender'; Success = $true;  RowsIngested = 5; LatencyMs = 100; Error = $null }
             )
         }
 

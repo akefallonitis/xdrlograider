@@ -93,7 +93,7 @@ BeforeAll {
         # ---- P6 ----
         '/apiproxy/mtp/threatAnalytics/outbreaks'                                                          = 'XDRInternals:Get-XdrThreatAnalytic.ps1'
         '/apiproxy/mtp/actionCenter/actioncenterui/history-actions'                                        = 'XDRInternals:Get-XdrActionsCenterHistory.ps1 (pre-v0.1.0.10 rolled back query-string after live audit returned 400; original param-less form is correct)'
-        '/apiproxy/mtp/responseApiPortal/machineactions'                                                   = 'XDRInternals:Get-XdrEndpointDeviceActionResult.ps1'
+        # F1 2026-05-08: MachineActions REMOVED (overlapped with ActionCenter canonical endpoint)
 
         # ---- P7 ----
         '/apiproxy/mtoapi/tenants/TenantPicker'                                                            = 'XDRInternals:Get-XdrMtoTenant.ps1 (mtoproxyurl:MTO header required)'

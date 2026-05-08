@@ -260,7 +260,7 @@ union MDE_*_CL
       Bytes = sum(_BilledSize)
   by Type
 | extend Tier = case(
-      Type in ("MDE_ActionCenter_CL", "MDE_MachineActions_CL"),                                                         "fast",
+      Type in ("MDE_ActionCenter_CL", "MDE_DeviceTimeline_CL"),                                                         "fast",
       Type in ("MDE_AssetRules_CL", "MDE_XspmInitiatives_CL", "MDE_ExposureSnapshots_CL",
                "MDE_ExposureRecommendations_CL", "MDE_XspmAttackPaths_CL", "MDE_XspmChokePoints_CL",
                "MDE_XspmTopTargets_CL"),                                                                                "exposure",
@@ -313,7 +313,7 @@ let allStreams = dynamic([
     "MDE_XspmChokePoints_CL", "MDE_XspmTopTargets_CL", "MDE_SecurityBaselines_CL",
     "MDE_IdentityOnboarding_CL", "MDE_IdentityServiceAccounts_CL", "MDE_DCCoverage_CL",
     "MDE_IdentityAlertThresholds_CL", "MDE_RemediationAccounts_CL", "MDE_ActionCenter_CL",
-    "MDE_MachineActions_CL", "MDE_ThreatAnalytics_CL", "MDE_UserPreferences_CL",
+    "MDE_DeviceTimeline_CL", "MDE_ThreatAnalytics_CL", "MDE_UserPreferences_CL",
     "MDE_MtoTenants_CL", "MDE_LicenseReport_CL", "MDE_CloudAppsConfig_CL"
 ]);
 let observed = toscalar(union MDE_*_CL | where TimeGenerated > ago(24h)

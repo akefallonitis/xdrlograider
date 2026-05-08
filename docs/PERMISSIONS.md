@@ -111,7 +111,7 @@ Ten streams ship with `Availability = 'tenant-gated'`. They return 4xx because t
 | `MDE_CustomCollection_CL` | MDE Custom Collection model surface licensed/provisioned (E5/P2) | 403 — feature surface not present even with Security Administrator |
 | `MDE_CloudAppsConfig_CL` | MCAS active in tenant + `/apiproxy/mcas/cas/api/v1/settings` proxy alive | 403 — proxy path likely retired; MCAS native API lives on `<tenant>.portal.cloudappsecurity.com` |
 | `MDE_DeviceTimeline_CL` | Tenant entitlement gated; surfaces when XDR Hunter unified timeline is provisioned (feature-flag dependent per tenant region + Defender license tier) | First-capture-pending — activates once a recent device timeline query is available |
-| `MDE_MachineActions_CL` | At least one machine action invoked in tenant (Live Response session, isolation, AV scan, etc.); hybrid surface — public `/api/machineactions` covers metadata, portal exposes per-step Live Response script output + AIR linkage not in public API | First-capture-pending — empty until a machine action is invoked |
+| ~~`MDE_MachineActions_CL`~~ | REMOVED v0.1.0 GA F1 (2026-05-08) — overlaps with `MDE_ActionCenter_CL` which polls the same canonical `/mtp/actionCenter/actioncenterui/history-actions` endpoint. Operators query `Defender_ActionCenter_CL` filtering `ActionType in ('IsolateResponse','UnIsolateResponse','AntivirusScanResponse','CollectInvestigationPackageResponse','LiveResponse*')` for machine-actions data. | (removed) |
 
 These activate **automatically** when the customer enables the corresponding feature — no manifest change, no redeploy. The connector keeps attempting them and surfaces the 4xx via heartbeat metadata.
 

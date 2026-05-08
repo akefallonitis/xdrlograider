@@ -1551,26 +1551,6 @@
     {
       "query": "Defender_EndpointDeviceManagement_CL | where SourceName == 'MDE_DeviceTimeline_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
       "description": "MDE_DeviceTimeline_CL - freshness gap (last seen)"
-    },
-    {
-      "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_MachineActions_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project-away SourceName, RawJson | take 50",
-      "description": "MDE_MachineActions_CL - latest snapshot per entity"
-    },
-    {
-      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_MachineActions_CL' | summarize Count = count() by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
-      "description": "MDE_MachineActions_CL - row count over last 7d"
-    },
-    {
-      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(7d) | where SourceName == 'MDE_MachineActions_CL' | summarize Entities = dcount(EntityId) by bin(TimeGenerated, 1d) | order by TimeGenerated asc",
-      "description": "MDE_MachineActions_CL - distinct entities per day"
-    },
-    {
-      "query": "Defender_ActionCenter_CL | where TimeGenerated > ago(24h) | where SourceName == 'MDE_MachineActions_CL' | extend Raw = parse_json(RawJson) | take 20",
-      "description": "MDE_MachineActions_CL - field-level diff (raw JSON inspection)"
-    },
-    {
-      "query": "Defender_ActionCenter_CL | where SourceName == 'MDE_MachineActions_CL' | summarize LastSeen = max(TimeGenerated) | extend AgeMinutes = datetime_diff('minute', now(), LastSeen)",
-      "description": "MDE_MachineActions_CL - freshness gap (last seen)"
     }
   ],
   "dataTypes": [

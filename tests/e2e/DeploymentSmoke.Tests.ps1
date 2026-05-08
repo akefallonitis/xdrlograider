@@ -144,7 +144,7 @@ Describe 'E2E — per-tier ingestion coverage' -Tag 'e2e', 'tier-coverage' {
     # Helper: count populated streams for a tier, asserted against the expected count.
     # Probes use the cadence-tier model (fast/exposure/config/inventory/maintenance).
     $tierProbes = @(
-        @{ Tier = 'ActionCenter';        Streams = @('MDE_ActionCenter_CL','MDE_MachineActions_CL')                                                       ; MinPopulated = 1 }
+        @{ Tier = 'ActionCenter';        Streams = @('MDE_ActionCenter_CL','MDE_DeviceTimeline_CL')                                                       ; MinPopulated = 1 }
         @{ Tier = 'XspmGraph';    Streams = @('MDE_ExposureSnapshots_CL','MDE_XspmInitiatives_CL','MDE_ExposureRecommendations_CL')                ; MinPopulated = 1 }
         @{ Tier = 'Configuration';      Streams = @('MDE_AlertServiceConfig_CL','MDE_SuppressionRules_CL','MDE_RbacDeviceGroups_CL','MDE_UnifiedRbacRoles_CL') ; MinPopulated = 2 }
         @{ Tier = 'Inventory';   Streams = @('MDE_AdvancedFeatures_CL','MDE_PUAConfig_CL','MDE_TenantContext_CL','MDE_IdentityOnboarding_CL')     ; MinPopulated = 2 }

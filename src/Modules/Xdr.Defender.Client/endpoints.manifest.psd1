@@ -1704,38 +1704,19 @@ AttackPathsV2
         # the per-step script-block stdout/stderr + AIR cross-link that the
         # operator's response audit needs. AuditScope = 'hybrid' documents
         # the public-API delta.
-        # Source: XDRInternals Get-XdrEndpointDeviceActionResult.ps1
-        @{
-            Stream = 'MDE_MachineActions_CL'
-            # Section R+++ nodoc canonical PENDING (2026-05-07): canonical path
-            # is /mtp/actionCenter/actioncenterui/history-actions per nodoc
-            # action_center.yml:2-66. Switching requires DCR streamDecl update +
-            # workspace table schema update + ProjectionMap canonical rewrite per
-            # ActionCenterItem schema (action_center.yml:425-459). Coordinated
-            # change DEFERRED to v0.1.0.1 (architectural, see plan R+++).
-            # v0.1.0 GA keeps legacy XDRInternals path; runtime SuccessKind
-            # (Section R++.A) tags the 404 correctly so heartbeat shows it.
-            Path = '/apiproxy/mtp/responseApiPortal/machineactions'
-            Tier = 'ActionCenter'
-            Filter = 'fromDate'
-            Category = 'Action Center'
-            CategoryId = 8  # nodoc-authoritative (Phase D.1)
-            Purpose = 'Per-device action results (Live Response per-step script output + AIR linkage; richer than public MDE /api/machineactions)'
-            IdProperty = @('actionId', 'ActionId', 'id', 'Id')
-            AuditScope = 'hybrid'
-            Availability = 'live'
-            ProjectionMap = @{
-                ActionId         = '$tostring:actionId'
-                ActionType       = '$tostring:actionType'
-                ActionStatus     = '$tostring:status'
-                MachineId        = '$tostring:machineId'
-                CreatedTime      = '$todatetime:creationTime'
-                CompletedTime    = '$todatetime:completionTime'
-                Operator         = '$tostring:requestor'
-                InvestigationId  = '$tostring:investigationId'
-                ScriptOutput     = '$json:scriptOutputs'
-            }
-        }
+        # F1 decision 2026-05-08 (v0.1.0 GA): MDE_MachineActions_CL REMOVED from
+        # manifest. Legacy XDRInternals path /apiproxy/mtp/responseApiPortal/
+        # machineactions returned 404. The canonical surface is the same
+        # /mtp/actionCenter/actioncenterui/history-actions endpoint that
+        # MDE_ActionCenter_CL already polls successfully (10K+ rows live).
+        # Action records (LR per-step output + AIR linkage) are in
+        # MDE_ActionCenter_CL.RawJson. Operators filter by ActionType:
+        #   Defender_ActionCenter_CL | where ActionType in (
+        #     'IsolateResponse', 'UnIsolateResponse', 'AntivirusScanResponse',
+        #     'CollectInvestigationPackageResponse', 'LiveResponse*', ...)
+        # No separate stream needed. Lab-tenant breakdown:
+        #   IsolateResponse: 692 / UnIsolateResponse: 692 /
+        #   AntivirusScanResponse: 1384 / CollectInvestigationPackageResponse: 7612
 
         # ====================================================================
         # Phase 2 (v0.1.0 GA) — 17 NEW Tier A streams from nodoc catalog sweep

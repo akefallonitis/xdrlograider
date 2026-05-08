@@ -154,12 +154,13 @@ BeforeAll {
 
 Describe 'Manifest / DCR / custom-tables consistency (Phase J.C.2-5: 47→10 consolidation)' {
 
-    It 'manifest contains exactly 65 streams (46 baseline + 13 Tier A Phase 2 + 6 Phase 1: B+G7+G8)' {
-        $script:ManifestStreams.Count | Should -Be 65
+    It 'manifest contains exactly 64 streams (45 baseline + 13 Tier A Phase 2 + 6 Phase 1: B+G7+G8 - F1 MachineActions removed)' {
+        $script:ManifestStreams.Count | Should -Be 64
     }
 
-    It 'DCR declares 65 source streams + 1 ops (XdrConnectorHealth_CL) = 66 total streamDeclarations' {
-        $script:DcrStreams.Count | Should -Be 66 -Because 'DCR keeps Custom-MDE_*_CL incoming streamDeclarations + 1 XdrConnectorHealth_CL ops'
+    It 'DCR declares 64 source streams + 1 ops (XdrConnectorHealth_CL) = 65 total streamDeclarations' {
+        # F1 2026-05-08: MachineActions REMOVED from DCR streamDecls (full removal, no backward-compat stubs).
+        $script:DcrStreams.Count | Should -Be 65 -Because 'DCR has 64 Custom-MDE_*_CL incoming streamDeclarations + 1 XdrConnectorHealth_CL ops'
     }
 
     It 'custom-tables declares 10 per-category Defender_*_CL + 1 XdrConnectorHealth_CL = 11 total' {
