@@ -141,13 +141,34 @@ try {
             $streamName, $sourceStream, $pathParamName, $maxEntities)
 
         # Step 1: get entity list by polling the source stream (single call to source).
+        # Phase 1A diagnostic logging (Section R++++++++++): expose source-poll
+        # behavior so 0-row failures are debuggable from AppTraces.
+        Write-Information ("Xdr-PollStream PerEntityFanout {0}: BEFORE source poll {1}" -f $streamName, $sourceStream)
         $sourceArgs = @{ Session = $session; Stream = $sourceStream }
         $sourceRows = @()
+        $sourceErr = $null
         try {
             $sourceRows = @(Invoke-MDEEndpoint @sourceArgs)
         } catch {
-            Write-Warning ("Xdr-PollStream PerEntityFanout {0}: source stream {1} poll failed: {2}" -f
-                $streamName, $sourceStream, $_.Exception.Message)
+            $sourceErr = $_.Exception.Message
+            Write-Warning ("Xdr-PollStream PerEntityFanout {0}: source stream {1} poll FAILED: {2}" -f
+                $streamName, $sourceStream, $sourceErr)
+        }
+        Write-Information ("Xdr-PollStream PerEntityFanout {0}: AFTER source poll {1} returned {2} rows (err={3})" -f
+            $streamName, $sourceStream, $sourceRows.Count, $(if ($sourceErr) { $sourceErr.Substring(0, [Math]::Min(80, $sourceErr.Length)) } else { 'none' }))
+
+        # Diagnostic: dump first-row property names so we can verify the entity field
+        # (e.g. 'machineId') is accessible on the row. Helps catch case-sensitivity
+        # or schema-mismatch issues that would silently produce 0 entities.
+        if ($sourceRows.Count -gt 0 -and $null -ne $sourceRows[0]) {
+            $propNames = ($sourceRows[0].PSObject.Properties | ForEach-Object { $_.Name }) -join ','
+            $sampleId = if ($sourceRows[0].PSObject.Properties[$entityIdField]) {
+                [string]($sourceRows[0].$entityIdField)
+            } elseif ($sourceRows[0].PSObject.Properties['EntityId']) {
+                [string]($sourceRows[0].EntityId)
+            } else { '<NEITHER>' }
+            Write-Information ("Xdr-PollStream PerEntityFanout {0}: first source row props=[{1}]; entityIdField={2} sample={3}" -f
+                $streamName, $propNames, $entityIdField, $sampleId)
         }
 
         # Step 2: extract distinct entity IDs from source rows; cap to MaxEntitiesPerCycle.
@@ -166,8 +187,8 @@ try {
         }
         $entityIds = @($entityIds | Select-Object -Unique | Select-Object -First $maxEntities)
 
-        Write-Information ("Xdr-PollStream PerEntityFanout {0}: iterating {1} entities (capped at {2})" -f
-            $streamName, $entityIds.Count, $maxEntities)
+        Write-Information ("Xdr-PollStream PerEntityFanout {0}: iterating {1} entities (capped at {2}) — sourceRowCount={3}" -f
+            $streamName, $entityIds.Count, $maxEntities, $sourceRows.Count)
 
         # Step 3: iterate entities, call per-entity, aggregate rows.
         $aggregated = @()
