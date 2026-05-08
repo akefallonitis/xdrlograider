@@ -278,7 +278,7 @@
         # the response is truncated to the default-page count.
         @{
             Stream = 'MDE_CustomDetections_CL'
-            Path = '/apiproxy/mtp/huntingService/rules/unified?pageIndex=1&pageSize=10000&sortOrder=Ascending&isUnifiedRulesListEnabled=true'
+            Path = '/apiproxy/mtp/huntingService/rules/unified?sortOrder=Ascending&isUnifiedRulesListEnabled=true'
             Tier = 'Configuration'
             Filter = 'fromDate'
             UnwrapProperty = 'Rules'
@@ -286,6 +286,17 @@
             CategoryId = 5  # nodoc-authoritative (Phase D.1)
             Purpose = 'Tenant-defined custom detection rules (KQL-driven scheduled hunts that mint alerts)'
             Availability = 'live'
+            # Section R++++++ Phase 1+ fix (2026-05-08): pagination + Filter='fromDate'
+            # chained. Activity reads checkpoint, adds ?fromDate={ISO}, paginates
+            # through all rules newer than checkpoint, writes new checkpoint=NOW.
+            # Previous hardcoded pageSize=10000 capped at 10K rules + missed any
+            # tenant with >10K rules. With proper pagination loop, large tenants
+            # capture full inventory.
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50
+            }
             # Fixture: empty (no rules in test tenant). Convention from unified-detections shape.
             ProjectionMap = @{
                 RuleId           = '$tostring:Id'
@@ -1557,12 +1568,22 @@ AttackPathsV2
         # ====================================================================
         @{
             Stream = 'MDE_Machines_CL'
-            Path = '/apiproxy/mtp/ndr/machines?hideLowFidelityDevices=true&lookingBackIndays=30&pageIndex=1&pageSize=200&sortByField=riskscore&sortOrder=Descending'
+            Path = '/apiproxy/mtp/ndr/machines?hideLowFidelityDevices=true&lookingBackIndays=30&sortByField=riskscore&sortOrder=Descending'
             Tier = 'Inventory'
             Category = 'Endpoint Device Management'
             CategoryId = 1  # nodoc-authoritative (Phase D.1)
             Purpose = 'Device inventory base — per-MachineId metadata for SOC drill-down + foundation for PerEntityFanout (Architecture A)'
             Availability = 'live'
+            # Section R++++++ Phase 1+ fix (2026-05-08): added Pagination so large
+            # tenants (>200 machines) capture full inventory. Previously path had
+            # pageIndex=1&pageSize=200 hardcoded; activity got first 200 + silently
+            # truncated. With Architecture F pagination loop, activity iterates
+            # pageIndex=1..MaxPages until empty page returned, aggregating rows.
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50    # 50 × 200 = 10K machines (tenant guardrail)
+            }
             # nodoc operationId EndpointDevices.List response shape includes:
             #   { items: [{ machineId, computerDnsName, osPlatform, osVersion,
             #               healthStatus, riskScore, exposureLevel, lastSeen,
