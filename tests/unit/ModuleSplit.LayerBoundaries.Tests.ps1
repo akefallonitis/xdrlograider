@@ -13,7 +13,7 @@
       L1 Xdr.Common.Telemetry     AppInsights helpers (SRE/dev surface)
       L1 Xdr.Sentinel.Ingest      portal-generic ingest (DCE/DCR + Storage Table)
       L2 Xdr.Defender.Auth        Defender-specific cookie exchange (sccauth + XSRF)
-      L3 Xdr.Defender.Client      Defender-portal manifest dispatcher (59 streams)
+      L3 Xdr.Defender.Client      Defender-portal manifest dispatcher (64 streams)
       L4 Xdr.Connector.Orchestrator  portal-routing dispatcher (Connect-XdrPortal etc.
                                       + Get-XdrConnectorHealth + Test-XdrConnectorConfig)
 

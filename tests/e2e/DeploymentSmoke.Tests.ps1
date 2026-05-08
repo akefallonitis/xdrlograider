@@ -213,7 +213,7 @@ Describe 'E2E — Sentinel content deployed' -Tag 'e2e', 'sentinel' {
     It 'hunting queries are registered' -Skip:(-not $script:RunE2E) {
         $saved = Get-AzOperationalInsightsSavedSearch -ResourceGroupName $script:Rg -WorkspaceName $script:Workspace -ErrorAction SilentlyContinue
         $hunting = $saved.Value | Where-Object { $_.Properties.Category -eq 'Hunting Queries' }
-        # v0.1.0-beta: 9 hunting queries shipped (AfterHoursDrift, ConfigChangesByUpn,
+        # v0.1.0-beta: 12 hunting queries shipped (AfterHoursDrift, ConfigChangesByUpn,
         # CustomDetectionContentAudit, ExclusionAdditionsPastQuarter,
         # LrSessionsWithoutJustification, MdiServiceAccountDrift, RbacEscalationEvents,
         # XspmChokepointDeltas, SilentBypassIndicators).

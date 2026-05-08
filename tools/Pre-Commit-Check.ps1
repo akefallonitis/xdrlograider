@@ -7,7 +7,7 @@
     Run before every git commit. Chains:
 
       1. Pyramid offline tests (tests/Run-Tests.ps1 -Category all-offline) — 1844 tests
-      2. WiringAudit (tools/Run-WiringAudit.ps1) — 12-edge × 59 streams
+      2. WiringAudit (tools/Run-WiringAudit.ps1) — 12-edge × 64 streams
       3. ARM JSON validation (tools/Validate-ArmJson.ps1) — cross-RG dependsOn + parameter usage
       4. Manifest validation (tools/Validate-Manifest.ps1) — schema + uniqueness gates
       5. DCR schema audit (tools/Audit-DcrSchema.ps1) — 4-layer schema integrity

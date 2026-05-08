@@ -54,8 +54,8 @@ The deploy creates resources in **two distinct scopes**:
 │     - 47 custom tables in the workspace (45 telemetry +       │
 │       XdrConnectorHealth_CL + App Insights customEvents)               │
 │     - Sentinel Data Connector UI card                         │
-│     - 6 KQL parsers + 6 workbooks + 14 analytic rules +       │
-│       9 hunting queries (via sentinelContent.json)           │
+│     - 4 KQL parsers + 8 workbooks + 20 analytic rules +       │
+│       12 hunting queries (via sentinelContent.json)           │
 └───────────────────────────────────────────────────────────────┘
 ```
 

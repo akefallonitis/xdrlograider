@@ -19,7 +19,7 @@ The connector uses two complementary KQL patterns. Operators choose based on **w
 
 ### Pattern A — Snapshot streams use `arg_max` for "current state"
 
-For streams that re-ingest **full state per poll** (~58 of 65 streams; everything except the 7 `Filter='fromDate'` delta streams), every poll deposits a fresh full snapshot. Operators querying "what's the current state?" use `arg_max` to retrieve the latest row per entity:
+For streams that re-ingest **full state per poll** (~58 of 63 live streams; everything except the 7 `Filter='fromDate'` delta streams), every poll deposits a fresh full snapshot. Operators querying "what's the current state?" use `arg_max` to retrieve the latest row per entity:
 
 ```kql
 Defender_ConfigurationAndSettings_CL

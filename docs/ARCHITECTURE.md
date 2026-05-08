@@ -18,7 +18,7 @@ The v0.1.0 GA architecture explicitly distinguishes three observability surfaces
 │   • 10 Defender_<Category>_CL tables (consolidated per nathanmcnulty 10-category taxonomy) │
 │   • 1 XdrConnectorHealth_CL ops table                                 │
 │   • 4 drift parsers (Configuration, Inventory, Exposure, Maintenance) │
-│   • 8 workbooks + 14 detection analytic rules + 9 hunting queries     │
+│   • 8 workbooks + 20 analytic rules + 12 hunting queries     │
 │   • 390 sample queries                                                │
 │   • Audience: SOC analysts, threat hunters, security engineers        │
 │   • SLO: row freshness within cadence × 2 (e.g., XSPM ≤ 2h)          │
@@ -86,7 +86,7 @@ This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsight
 │  │    └─ Connect-DefenderPortal / Invoke-DefenderPortalRequest│       │
 │  │                                                            │       │
 │  │  Modules/Xdr.Defender.Client       (L3 manifest dispatcher)│       │
-│  │    ├─ endpoints.manifest.psd1 (46 stream entries)          │       │
+│  │    ├─ endpoints.manifest.psd1 (64 stream entries)          │       │
 │  │    └─ Invoke-MDEEndpoint / Invoke-MDETierPoll              │       │
 │  │                                                            │       │
 │  │  Modules/Xdr.Connector.Orchestrator (L4 portal routing)    │       │
@@ -110,7 +110,7 @@ This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsight
 │                                                                        │
 │  ┌────────────────────────────────────────────────────────────┐       │
 │  │ DCE + DCR  (location = WORKSPACE region)                   │       │
-│  │   60 streams declared (7 DCRs) → routed to LA custom tables│       │
+│  │   65 streamDecls (13 DCRs) → routed to LA custom tables    │       │
 │  │   (46 data + MDE_Heartbeat operational)                    │       │
 │  └────────────────────────────────────────────────────────────┘       │
 └────────────────────────────────────────────────────────────────────────┘
@@ -174,7 +174,7 @@ This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsight
 ### Why Function App vs CCF
 CCF supports only OAuth2/APIKey/Basic/JWT auth. The Defender XDR portal uses cookie-based auth (sccauth + XSRF rotation every 4 min) with TOTP or FIDO2 assertion signing. CCF cannot express this chain. See `REFERENCES.md` → "Create a codeless connector".
 
-### Why 9 functions vs 55
+### Why 4 functions vs 65
 One function per stream = 55 cold starts, 55 App Insights streams, 55× the auth chain. One polymorphic function = single point of failure, hard to debug. Nine tier-batched functions balance isolation (per-tier) with cost (shared auth cookie, batched DCE POST).
 
 ### Why pure KQL drift

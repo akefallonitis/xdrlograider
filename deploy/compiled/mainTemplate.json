@@ -5,7 +5,7 @@
     "_generator": {
       "name": "Hand-authored ARM template — single source of truth. No Bicep, no auto-compile, no drift."
     },
-    "comments": "XdrLogRaider v0.1.0 GA — pure Defender connector. Requires an existing Sentinel-enabled Log Analytics workspace. Provisions 7 DCRs sharing 1 DCE for 60 stream declarations (59 portal-only data streams + 1 ops heartbeat) routed to 11 consolidated workspace tables (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL). Adds GenericUI Data Connector card with 390 sample queries + 8 workbooks + 20 analytic rules + 9 hunting queries. Operators bring their own KQL."
+    "comments": "XdrLogRaider v0.1.0 GA — pure Defender connector. Requires an existing Sentinel-enabled Log Analytics workspace. Provisions 13 DCRs sharing 1 DCE for 60 stream declarations (64 portal-only data streams + 1 ops heartbeat) routed to 11 consolidated workspace tables (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL). Adds GenericUI Data Connector card with 390 sample queries + 8 workbooks + 20 analytic rules + 12 hunting queries. Operators bring their own KQL."
   },
   "parameters": {
     "projectPrefix": {
@@ -2025,8 +2025,8 @@
                 "contentSchemaVersion": "3.0.0",
                 "displayName": "[variables('solutionName')]",
                 "publisherDisplayName": "[variables('solutionPublisher')]",
-                "description": "Microsoft Sentinel custom data connector — 59 Defender XDR portal-only telemetry streams (configuration, compliance, drift, exposure, governance, identity) consolidated into 11 Log Analytics tables (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL). Operators bring their own KQL parsers, rules, and workbooks. v0.1.0 GA. Source: https://github.com/akefallonitis/xdrlograider",
-                "descriptionHtml": "<p>Microsoft Sentinel custom data connector — <strong>59 Defender XDR portal-only telemetry streams</strong> (configuration, compliance, drift, exposure, governance, identity) consolidated into <strong>11 Log Analytics tables</strong> (10 <code>Defender_&lt;Category&gt;_CL</code> + 1 <code>XdrConnectorHealth_CL</code>). PowerShell 7.4 Function App + 7 DCRs sharing 1 DCE + Key Vault for SA credentials. Operators bring their own KQL.</p><p>v0.1.0 GA. Source: <a href=\"https://github.com/akefallonitis/xdrlograider\">github.com/akefallonitis/xdrlograider</a></p>",
+                "description": "Microsoft Sentinel custom data connector — 64 Defender XDR portal-only telemetry streams (configuration, compliance, drift, exposure, governance, identity) consolidated into 11 Log Analytics tables (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL). Operators bring their own KQL parsers, rules, and workbooks. v0.1.0 GA. Source: https://github.com/akefallonitis/xdrlograider",
+                "descriptionHtml": "<p>Microsoft Sentinel custom data connector — <strong>64 Defender XDR portal-only telemetry streams</strong> (configuration, compliance, drift, exposure, governance, identity) consolidated into <strong>11 Log Analytics tables</strong> (10 <code>Defender_&lt;Category&gt;_CL</code> + 1 <code>XdrConnectorHealth_CL</code>). PowerShell 7.4 Function App + 13 DCRs sharing 1 DCE + Key Vault for SA credentials. Operators bring their own KQL.</p><p>v0.1.0 GA. Source: <a href=\"https://github.com/akefallonitis/xdrlograider\">github.com/akefallonitis/xdrlograider</a></p>",
                 "contentKind": "Solution",
                 "contentProductId": "[concat(variables('solutionId'), '-sl-', parameters('solutionVersion'))]",
                 "id": "[concat(variables('solutionId'), '-sl-', parameters('solutionVersion'))]",

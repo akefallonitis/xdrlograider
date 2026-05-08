@@ -12,7 +12,7 @@ Production-grade unattended ingestion of Microsoft Defender XDR portal-only tele
 
 **Architecture**:
 
-- **59 portal-only data streams** + 1 operational heartbeat = 60 streams total, partitioned across **7 DCRs** (4×10 + 5(7) + 6(7) + 7(6) — Azure 10-flow cap respected) sharing 1 DCE.
+- **64 portal-only data streams** + 1 operational heartbeat = 60 streams total, partitioned across **13 DCRs** (4×10 + 5(7) + 6(7) + 7(6) — Azure 10-flow cap respected) sharing 1 DCE.
 - DCR `transformKql='source | extend SourceName='<Stream>''` injects per-stream identity into per-category tables (Microsoft Learn canonical pattern + SourceName-injection).
 - **5 cadence tiers** with dedicated timer functions: `fast` (10 min — 2 streams), `exposure` (1h — 18), `config` (6h — 16), `inventory` (daily — 21), `maintenance` (weekly — 1). Tenant-feature-gated streams (MDI / TVM / MCAS / Intune / MDO / Custom Collection) skip cleanly when the tenant feature isn't licensed.
 - **11 consolidated workspace tables**: 10 `Defender_<Category>_CL` per nathanmcnulty 10-category taxonomy + 1 `XdrConnectorHealth_CL` ops table.
@@ -30,7 +30,7 @@ Production-grade unattended ingestion of Microsoft Defender XDR portal-only tele
 
 - 8 workbooks (incl. ConnectorHealth with 9 panels: per-tier freshness, auth-chain failures, DLQ depth, freshness SLI, partial-success rate, service-account anomaly, per-stream workspace-side freshness).
 - 20 analytic rules (14 detection + 6 XdrOps incl. RowVolumeSpike cost-budget runtime gate). All ship `enabled: false` per Microsoft Sentinel Solution best practice.
-- 9 hunting queries.
+- 12 hunting queries.
 - 4 cadence-tier drift parsers.
 - 390 sample queries (every active stream has 5-query operator anchor).
 

@@ -4,7 +4,7 @@ function Get-DcrImmutableIdForStream {
         Resolves the per-stream DCR immutableId from the deploy-time map.
 
     .DESCRIPTION
-        60 streams partitioned across 7 DCRs (one DCE shared) — 4x10 + 5(7) + 6(7) + 7(6) — see
+        60 streams partitioned across 13 DCRs (one DCE shared) — 4x10 + 5(7) + 6(7) + 7(6) — see
         deploy/modules/dce-dcr.bicep for the partition rationale (Microsoft
         Learn data-collection-rule-structure: 1 dataFlow per stream with
         explicit outputStream + transformKql=source, capped at 10 dataFlows

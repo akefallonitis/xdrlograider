@@ -60,7 +60,7 @@ Expect `1097 passed, 0 failed, 17 skipped, ~60s`. What runs (v0.1.0-beta.1):
 **tests/kql/**
 - `Parsers.Tests.ps1` + `Parsers.Fixture.Tests.ps1` — parser structure + 9-column drift schema + tier coverage + 5 REMOVED streams not referenced
 - **`AnalyticRules.Tests.ps1`** (v1.0.2) — 70 assertions: every rule's query verifies manifest streams, parser calls, no REMOVED-stream refs, balanced parens
-- **`HuntingQueries.Tests.ps1`** (v1.0.2) — same invariants for 9 hunting queries
+- **`HuntingQueries.Tests.ps1`** (v1.0.2) — same invariants for 12 hunting queries
 - **`Workbooks.Tests.ps1`** (v1.0.2) — walks workbook JSON tree, verifies every `items[].content.query` string
 
 **tests/arm/**

@@ -111,7 +111,7 @@ pwsh ./tests/Run-Tests.ps1 -Category e2e
 - `parser functions / hunting queries / workbook` all deployed ✓
 
 **If per-tier test shows fewer populated streams than expected**:
-- **Expected baseline (v0.1.0 GA)**: ~50 of 65 streams populate immediately in a properly-licensed tenant. ~12 streams are license-gated (MDI, MCAS, TVM Premium, MDE Premium, MEM); they correctly return 4xx + runtime SuccessKind classifies as `tenant-gated` (visible on `XdrConnectorHealth_CL.Reason` per stream). License-gated streams populate when the tenant has the matching license.
+- **Expected baseline (v0.1.0 GA)**: ~50 of 63 live streams populate immediately in a properly-licensed tenant. ~12 streams are license-gated (MDI, MCAS, TVM Premium, MDE Premium, MEM); they correctly return 4xx + runtime SuccessKind classifies as `tenant-gated` (visible on `XdrConnectorHealth_CL.Reason` per stream). License-gated streams populate when the tenant has the matching license.
 - **To see per-stream classification**: `XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | summarize max(StreamsSucceeded) by Tier`
 - **To see error-classified streams** (real failures vs license-gated): query `XdrConnectorHealth_CL` for `Reason='error'` rows + correlate with `AppExceptions` for the underlying root cause.
 
