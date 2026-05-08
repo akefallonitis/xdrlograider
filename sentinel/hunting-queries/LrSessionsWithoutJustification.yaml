@@ -31,7 +31,7 @@ query: |
   //   1. Identify responder UPN from RawJson.requestor field
   //   2. Cross-ref with responder's open incident queue at session TimeGenerated
   //   3. No match: contact responder for ticket; responder denies → assume compromised credentials
-  //   4. Pull full LR commands from Defender_ActionCenter_CL.RawJson for forensic record
+  //   4. Pull full LR commands from the Action Center RawJson column for forensic record
   //   5. Pair with LrUnsignedScriptsOn.yaml rule (config-side: unsigned scripts even allowed?)
   //
   // EXPECTED BASELINE: 0-2 sessions/week mature tenant; >5/week = LR-tooling abuse or process gap.

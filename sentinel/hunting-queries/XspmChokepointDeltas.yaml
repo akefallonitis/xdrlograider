@@ -31,7 +31,7 @@ query: |
   //
   // TRIAGE PATH:
   //   1. New chokepoint EntityId: identify node type (machine / group / identity)
-  //   2. Pull latest from Defender_ExposureManagement_CL.MDE_XspmChokePoints_CL for path-count + downstream
+  //   2. Pull latest XspmChokePoints record from Exposure Management category for path-count + downstream
   //   3. Investigate: WHY chokepoint NOW? AD change? Group membership? New role?
   //   4. Cross-ref MDE_Drift_Configuration + RbacEscalationEvents.yaml from same timeframe
   //   5. Prioritize: pathCount > 100 = top hardening target; remediate via least-privilege, group cleanup

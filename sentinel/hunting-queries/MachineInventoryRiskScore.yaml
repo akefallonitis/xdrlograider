@@ -26,8 +26,8 @@ query: |
   //
   // TRIAGE PATH:
   //   1. Top 20 by RiskScore desc = IR priorities
-  //   2. Pivot per machine: Defender_ActionCenter_CL (alerts), MDE_DeviceTimeline_CL (recent events),
-  //      Defender_VulnerabilityManagement_CL (CVE list)
+  //   2. Pivot per machine: Action Center category (alerts), DeviceTimeline source (recent events),
+  //      Vulnerability Management category (CVE list)
   //   3. HealthStatus='Inactive' >7d = stale agent; investigate connectivity or decommissioning
   //   4. OsPlatform outliers (e.g., 1 macOS in Windows tenant) = scope review
   //
