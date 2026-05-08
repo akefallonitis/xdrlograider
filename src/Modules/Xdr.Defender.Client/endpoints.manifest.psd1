@@ -1424,6 +1424,13 @@ AttackPathsV2
             CategoryId = 8  # nodoc-authoritative (Phase D.1)
             Purpose = 'Action Center history — every cross-workload remediation action (block/quarantine/investigation) with operator + status'
             Availability = 'live'
+            # Pagination: nodoc action_center.yml documents pageIndex/pageSize support
+            # but operator directive "verify live, don't trust nodoc/openapi alone".
+            # PENDING live test: manually invoke with pageIndex=2 in production
+            # tenant + verify response differs from pageIndex=1 + no duplicates.
+            # If verified, add Pagination = @{ Style='pageIndex'; PageSize=50; MaxPages=100 }
+            # Currently relies on Filter='fromDate' + checkpoint to bound row count
+            # per poll cycle (delta semantics; no need to backfill all history).
             # Fixture: array of { InvestigationId, ActionId, StartTime, EndTime, ActionType, ActionDecision, DecidedBy, Comment, RelatedEntities, EntityType, EventTime, ActionStatus, ActionSource, Product, MachineId, ComputerName, UserPrincipalName, ActionAutomationType }.
             ProjectionMap = @{
                 ActionId         = '$tostring:ActionId'
