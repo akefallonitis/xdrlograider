@@ -2568,7 +2568,7 @@
               "la-destination"
             ],
             "outputStream": "Custom-Defender_ActionCenter_CL",
-            "transformKql": "source | extend SourceName = 'MDE_ActionCenter_CL'"
+            "transformKql": "source | extend SourceName = 'MDE_ActionCenter_CL', HostMdatpId = MachineId, HostFullName = ComputerName, AccountUPNSuffix = tostring(split(UserPrincipalName, '@')[1])"
           }
         ]
       }
@@ -4070,7 +4070,7 @@
               "la-destination"
             ],
             "outputStream": "Custom-Defender_EndpointDeviceManagement_CL",
-            "transformKql": "source | extend SourceName = 'MDE_DeviceTimeline_CL'"
+            "transformKql": "source | extend SourceName = 'MDE_DeviceTimeline_CL', HostMdatpId = MachineId"
           },
           {
             "streams": [
@@ -4090,7 +4090,7 @@
               "la-destination"
             ],
             "outputStream": "Custom-Defender_EndpointDeviceManagement_CL",
-            "transformKql": "source | extend SourceName = 'MDE_Machines_CL'"
+            "transformKql": "source | extend SourceName = 'MDE_Machines_CL', HostMdatpId = MachineId, HostFullName = ComputerDnsName, HostName = tostring(split(ComputerDnsName, '.')[0]), HostDnsDomain = tostring(strcat_array(array_slice(split(ComputerDnsName, '.'), 1, -1), '.')), HostOSFamily = OsPlatform"
           }
         ]
       }
