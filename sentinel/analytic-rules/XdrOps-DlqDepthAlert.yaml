@@ -18,17 +18,14 @@ relevantTechniques:
   - T1562
 query: |
   // DLQ depth metric is emitted by Pop-XdrIngestDlq on each poll cycle.
-  // Per-stream cardinality bounded by manifest stream count (47).
+  // AppMetrics schema: Sum/Min/Max/ItemCount (no `Value` column).
+  // Metric names canonical: xdr.dlq.depth, xdr.dlq.pop_count.
   AppMetrics
   | where TimeGenerated > ago(4h)
-  | where Name in ("xdr.ingest.dlq_depth", "xdr.ingest.dlq_oldest_age_seconds")
-  | summarize MaxValue = max(Value) by Name, bin(TimeGenerated, 1h)
-  | extend AlertReason = case(
-      Name == "xdr.ingest.dlq_depth"               and MaxValue > 100,    "DLQ depth >100 entries",
-      Name == "xdr.ingest.dlq_oldest_age_seconds"  and MaxValue > 7200,   "DLQ oldest entry >2h",
-      ""
-  )
-  | where AlertReason != ""
+  | where Name == "xdr.dlq.depth"
+  | summarize MaxValue = max(Max) by Name, bin(TimeGenerated, 1h)
+  | where MaxValue > 100
+  | extend AlertReason = strcat("DLQ depth ", MaxValue, " > 100 entries")
   | project TimeGenerated, Name, MaxValue, AlertReason
 entityMappings: []
 eventGroupingSettings:

@@ -29,11 +29,11 @@ query: |
   XdrConnectorHealth_CL
   | where TimeGenerated > ago(14d)
   | where isnotempty(Tier)
-  | summarize LastSeenUtc = max(TimeGenerated) by Portal, Tier
+  | summarize LastSeenUtc = max(TimeGenerated) by Tier
   | join kind=inner cadenceLimits on Tier
   | extend StaleMin = datetime_diff('minute', now(), LastSeenUtc)
   | where StaleMin > MaxStaleMin
-  | project Portal, Tier, LastSeenUtc, StaleMin, MaxStaleMin
+  | project Tier, LastSeenUtc, StaleMin, MaxStaleMin
 entityMappings: []
 eventGroupingSettings:
   aggregationKind: AlertPerResult

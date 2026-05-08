@@ -28,13 +28,13 @@ query: |
       | where TimeGenerated > ago(recentWindow)
       | where Name == "xdr.ingest.row_count_per_hour"
       | extend Stream = tostring(Properties.Stream)
-      | summarize RecentRows = sum(Value) by Stream;
+      | summarize RecentRows = sum(Sum) by Stream;
   let baseline =
       AppMetrics
       | where TimeGenerated between (ago(baselineWindow) .. ago(recentWindow))
       | where Name == "xdr.ingest.row_count_per_hour"
       | extend Stream = tostring(Properties.Stream)
-      | summarize BaselineRowsPerHour = avg(Value) by Stream;
+      | summarize BaselineRowsPerHour = avg(Sum) by Stream;
   recent
   | join kind=leftouter baseline on Stream
   | extend BaselineRowsPerHour = coalesce(BaselineRowsPerHour, 0.0)
