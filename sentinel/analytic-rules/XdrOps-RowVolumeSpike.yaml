@@ -1,32 +1,7 @@
 id: 7e8c9d2a-1b4f-4d3e-8a6c-9e2d4f5a6b7c
 name: "[XdrOps] Connector row-volume spike — cost-budget gate"
 description: |
-  **What it detects:** XdrLogRaider's ingest pipeline emits `xdr.ingest.row_count_per_hour` per stream. This rule fires when ANY stream's hourly row count exceeds 3× its 7-day rolling baseline — the classic "something changed and it's pumping more rows than expected" signal.
-
-  **Why this matters:** This is a cost-budget gate — Sentinel ingestion costs money per GB, and a runaway connector can blow through monthly budget in days. But it's ALSO a quality signal — sudden 3x volume usually means SOMETHING changed:
-
-    1. **Operator-driven schema explosion** — e.g., adding wildcard PathParams that fan out 100x without realizing
-    2. **Tenant-side breach scenario** — e.g., suddenly 10k device-control policy rows where there were 50 (mass policy push by attacker?)
-    3. **Connector regression** — deduplication broken; every row blasting twice
-    4. **ProjectionMap mis-configuration** — property-bag flatten on the wrong field producing N-fold multiplication
-    5. **Legitimate fleet onboarding** — new mass device enrollment doubling Inventory tier rows (4h suppression handles this)
-
-  **Triage path:**
-    1. Identify the spiking stream(s) from `Stream` field
-    2. Check `RecentRows` vs `BaselineRowsPerHour` magnitude — 3x or 30x?
-    3. Pull recent rows: `Defender_<Category>_CL | where SourceName == '<Stream>' | summarize count() by bin(TimeGenerated, 1h)` — confirm volume curve
-    4. Sample 10 recent rows: are they distinct entities, or duplicates? Duplicates = connector bug
-    5. If schema/dedup issue: investigate manifest ProjectionMap recent changes
-    6. If real volume increase: investigate tenant — was there a mass policy push, fleet onboarding, breach?
-    7. See `docs/RUNBOOK.md` "Row-volume spike" section
-
-  **Suppression:** 4h after first fire to prevent alert flood on legitimate onboarding events.
-
-  **Severity rationale:** Medium — cost impact is gradual; investigate within 24h.
-
-  **D'.49 in v0.1.0 GA plan: cost-budget runtime gate.**
-
-  **MITRE:** TA0040 Impact — T1565 Data Manipulation (when spike indicates attacker generating noise to obscure real signals).
+  ANY stream's hourly row count exceeds 3× its 7-day rolling baseline. Cost-budget gate (Sentinel ingestion per-GB; runaway connector can blow monthly budget in days) + quality signal. 3x volume means: operator schema explosion (wildcard PathParams fan out), tenant breach (mass policy push by attacker), connector regression (broken dedup), ProjectionMap mis-config (property-bag flatten N-fold multiplication), or legitimate fleet onboarding (4h suppression handles). Severity Medium — cost impact gradual; investigate within 24h. MITRE: TA0040 Impact — T1565 Data Manipulation. See KQL body + docs/RUNBOOK.md "Row-volume spike" for triage.
 severity: Medium
 enabled: false
 requiredDataConnectors:

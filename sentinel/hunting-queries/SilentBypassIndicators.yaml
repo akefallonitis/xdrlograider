@@ -1,24 +1,7 @@
 id: 0e8bf3c4-5d7c-4e9a-f2b4-8c7d0a5e3f12
 name: MDE silent bypass indicators
 description: |
-  **What it does:** Composite "attacker preparation" signal — counts days where BOTH a new suppression rule was added AND PUA (Potentially Unwanted Application) protection was disabled. Either action alone is normal admin activity; the combination on the same day is highly suspicious.
-
-  **When to run:** Daily SOC review, ad-hoc when ransomware/lateral-movement is suspected, post-incident retrospective for attacker dwell-time analysis.
-
-  **Why it matters:** Sophisticated attackers with admin credentials follow a predictable preparation playbook BEFORE running their payload: (1) add suppression rules to silence the alerts their tools will trigger, (2) disable PUA protection so their dual-use tools (PsExec, BloodHound, certutil-as-downloader) don't get blocked, (3) THEN drop the payload. This composite query catches the preparation phase — giving SOC time to respond before the payload runs.
-
-  **Triage path:**
-    1. For days flagged: identify the admin(s) who made BOTH changes (cross-reference `ConfigChangesByUpn.yaml`)
-    2. Pull `MDE_SuppressionRules_CL` recent additions: WHAT alert types were suppressed?
-    3. Pull `MDE_PUAConfig_CL` history: was the disable accompanied by a tunable timer or permanent?
-    4. Hunt for activity in the suppressed alert categories during the disable window: `DeviceEvents | where ActionType in (<suppressed-types>)`
-    5. If suspicious: re-enable PUA + remove suppression + isolate the admin's session + escalate to IR
-
-  **Expected baseline:** 0-1 days/quarter in mature tenants; 1+/week is a strong attack indicator.
-
-  **Tuning:** Adjust `7d` lookback for slower review cadence. Add other quieting signals: `MDE_AlertTuning_CL` broadening, `MDE_AdvancedFeatures_CL.tamperProtectionEnabled='false'`, `MDE_AntivirusPolicy_CL` exclusion additions on the same day.
-
-  **MITRE:** TA0005 Defense Evasion — T1562.001 Disable or Modify Tools (primary); T1562.006 Indicator Blocking; TA0040 Impact preparation phase.
+  Composite attacker-preparation signal — counts days where BOTH a new suppression rule added AND PUA protection disabled. Either alone is normal admin; combo on same day is highly suspicious. See KQL body for triage path + MITRE.
 author: Alex Kefallonitis
 version: 1.0.0
 tags:
@@ -34,4 +17,25 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
+  // === MDE silent bypass indicators ===
+  //
+  // WHAT: Composite signal — days where BOTH suppression rule added AND PUA protection disabled.
+  //       Either alone = normal admin; combination same day = highly suspicious.
+  // WHEN: Daily SOC review, ad-hoc on ransomware/lateral-movement suspicion, post-incident dwell-time analysis.
+  // WHY: Sophisticated attackers with admin credentials follow predictable preparation playbook:
+  //      (1) add suppression rules to silence tool-related alerts, (2) disable PUA so dual-use tools
+  //      (PsExec, BloodHound, certutil-as-downloader) don't get blocked, (3) drop payload.
+  //      This catches preparation phase BEFORE payload — giving SOC time to respond.
+  //
+  // TRIAGE PATH:
+  //   1. Days flagged: identify admin(s) who made BOTH changes (cross-ref ConfigChangesByUpn.yaml)
+  //   2. Pull MDE_SuppressionRules_CL recent additions — WHAT alert types suppressed?
+  //   3. Pull MDE_PUAConfig_CL history — disable with tunable timer or permanent?
+  //   4. Hunt activity in suppressed categories during disable window: DeviceEvents | where ActionType in (...)
+  //   5. Suspicious: re-enable PUA + remove suppression + isolate admin session + escalate to IR
+  //
+  // EXPECTED BASELINE: 0-1 days/quarter mature tenants; 1+/week = strong attack indicator.
+  // TUNING: Adjust 7d for slower review. Add other quieting signals: MDE_AlertTuning_CL broadening,
+  //         MDE_AdvancedFeatures_CL.tamperProtectionEnabled='false', MDE_AntivirusPolicy_CL exclusion adds same day.
+  // MITRE: TA0005 Defense Evasion — T1562.001 (primary); T1562.006 Indicator Blocking; TA0040 Impact prep.
   let drift = MDE_Drift_Configuration(7d, 1h); let suppressions = drift | where StreamName == "MDE_SuppressionRules_CL" and ChangeType == "Added"; let puaOff = drift | where StreamName == "MDE_PUAConfig_CL" and FieldName == "enabled" and NewValue == "false"; union suppressions, puaOff | summarize Events = count() by bin(TimeGenerated, 1d) | where Events >= 2

@@ -1,22 +1,7 @@
 id: 1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09
 name: MDE XSPM new attack path discovered
 description: |
-  **What it detects:** Defender XSPM identified a NEW attack path during simulation in the last 7 days — a route from an internet/email/identity entry point through some chain of intermediate hops. Fires on `ChangeType='Added'` from the Exposure drift parser.
-
-  **Why this matters:** Every new XSPM attack path indicates SOMETHING changed in your environment that opened new attacker progression possibilities. The path may not yet end at a Critical asset (use `XspmPathToCriticalAsset.yaml` for that), but new paths show shifting risk surface — group membership additions, new vulnerable software introduced, new firewall rules opening lateral movement, new identity permissions enabling cross-system impersonation. Without tracking new paths you miss the gradual erosion of your security posture.
-
-  **Triage path:**
-    1. For each new path: pull `MDE_XspmAttackPaths_CL` for the EntityId → review `steps`
-    2. Identify entry point + destination — even non-Critical destinations matter (lateral movement to mid-tier assets enables bigger pivots)
-    3. Investigate WHY the path appeared NOW: cross-reference with `MDE_Drift_Configuration` (RBAC/connectedApps changes), `RbacEscalationEvents`, `MDE_Drift_Inventory` (machine config drift)
-    4. Prioritize remediation by (a) ease of break (hop on the path that's easy to fix) + (b) reuse-impact (chokepoints break MANY paths simultaneously)
-    5. Document the root-cause change so future investigations can correlate
-
-  **Severity rationale:** Medium — escalate via `XspmPathToCriticalAsset` if the destination is Critical.
-
-  **License:** Requires XSPM (E5 + Security add-on). Stays dormant on unlicensed tenants.
-
-  **MITRE:** TA0043 Reconnaissance — T1595 Active Scanning (defender-side simulation).
+  Defender XSPM identified a NEW attack path in last 7d — route from internet/email/identity entry through chain of hops. Every new path = SOMETHING changed that opened new attacker progression (group memberships, new vulnerable software, firewall rules opening lateral movement, identity perms enabling impersonation). Without tracking deltas, you miss gradual posture erosion. Severity Medium — escalate via XspmPathToCriticalAsset if destination Critical. License: requires XSPM (E5 + Security add-on); dormant on unlicensed tenants. MITRE: TA0043 Reconnaissance — T1595 Active Scanning. See KQL body for triage path.
 severity: Medium
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

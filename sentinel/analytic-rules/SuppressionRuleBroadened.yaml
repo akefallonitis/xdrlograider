@@ -1,21 +1,7 @@
 id: f9d0b2c3-4e67-4f8b-a1c3-7d6e9b4f2a07
 name: MDE suppression rule broadened
 description: |
-  **What it detects:** A Defender alert-suppression rule had its `scope`, `conditions`, or `machineGroup` field MODIFIED — widening it from narrow targeting (specific account/machine) to broader targeting (any account, any machine, any device group).
-
-  **Why this matters:** Suppression rules legitimately silence known-noisy alerts (test machines, vendor scanners, security-tool false positives). But a rule that previously suppressed alerts only on a single dev machine being widened to suppress on "all production servers" is the textbook attacker move — silence the alerts that the upcoming payload will trigger across a broad scope. This is one of the highest-value attacker preparation signals available.
-
-  **Triage path:**
-    1. Identify the modified rule via `EntityId` — what alert types does it suppress?
-    2. Pull the current rule body from `MDE_SuppressionRules_CL` to see WHAT was widened (scope from "machine X" → "all machines"?)
-    3. Cross-reference `ConfigChangesByUpn` for the admin actor + ticket
-    4. If unauthorized: revert the suppression to its prior scope; isolate admin session; escalate to IR
-    5. Hunt for the alert types now suppressed during the widening window: `SecurityAlert | where AlertName has '<type>'`
-    6. Pair with `SilentBypassIndicators.yaml` hunt for combined "attacker preparing the ground" signals
-
-  **Severity rationale:** Medium — legitimate scope adjustments occur but every widening should be ticket-justified.
-
-  **MITRE:** TA0005 Defense Evasion — T1562.006 Indicator Blocking (PRIMARY).
+  Defender alert-suppression rule had `scope`, `conditions`, or `machineGroup` MODIFIED — narrow→broad widening. Suppression rules legitimately silence noisy alerts (test machines, vendor scanners, FPs); narrow-to-broad widening is the textbook attacker move (silence alerts the upcoming payload will trigger across broader scope). One of the highest-value attacker preparation signals. Severity Medium — legitimate scope adjustments occur but every widening needs ticket. MITRE: TA0005 Defense Evasion — T1562.006 Indicator Blocking (PRIMARY). See KQL body for triage path.
 severity: Medium
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

@@ -1,21 +1,7 @@
 id: b5f6d8e9-0a23-4b4d-c7e9-3f2a5d0b8c03
 name: MDE new data export destination
 description: |
-  **What it detects:** A new streaming/export destination was ADDED to Defender data-export settings — a fresh Event Hub, Azure Storage account, or Log Analytics workspace where Defender raw event telemetry will now be replicated.
-
-  **Why this matters:** Data export is the legitimate way SOCs send Defender telemetry to their SIEM, data lake, or partner systems. But the same mechanism is a data-exfiltration channel for attackers — add an attacker-controlled Event Hub OR Storage account with attacker-known credentials, and Defender's own pipeline starts shipping all your security telemetry to the attacker's infrastructure. This includes raw alerts, device events, identity events — i.e., everything an attacker needs to plan the next phase or evade detection.
-
-  **Triage path:**
-    1. Identify the new destination (`EntityId` + RawJson `destinationType`/`endpoint`/`workspaceId`)
-    2. Verify against your data-export approval process — every export should map to a documented use case + ticket
-    3. For NEW destinations: confirm the Azure subscription + tenant of the target — is it your tenant, or external?
-    4. If external/unknown: REMOVE the destination IMMEDIATELY; isolate any data already shipped (Event Hub retention)
-    5. Cross-reference `ConfigChangesByUpn` for the admin actor + ticket
-    6. If unauthorized: lock admin + escalate to IR with priority (active exfiltration channel)
-
-  **Severity rationale:** Medium baseline; escalate to High if destination is in unrelated/external Azure tenant.
-
-  **MITRE:** TA0010 Exfiltration — T1537 Transfer Data to Cloud Account (PRIMARY).
+  Detects new streaming/export destination ADDED to Defender data-export settings (Event Hub, Storage account, or Log Analytics workspace). Same mechanism legitimate SOCs use is also a data-exfiltration channel — attacker adds their own destination, Defender ships raw telemetry (alerts, device events, identity events) to attacker infrastructure. Severity Medium baseline; High if destination external Azure tenant. MITRE: TA0010 Exfiltration — T1537 Transfer Data to Cloud Account (PRIMARY). See KQL body for triage path.
 severity: Medium
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

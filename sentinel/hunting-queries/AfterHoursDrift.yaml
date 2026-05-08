@@ -1,24 +1,7 @@
 id: 9d7af2b3-4c6b-4d8f-e1a3-7b6c9f4d2e11
 name: MDE after-hours drift events
 description: |
-  **What it does:** Surfaces Defender XDR configuration + inventory + maintenance drift events that occurred outside 09:00-17:00 UTC or on weekends.
-
-  **When to run:** Daily as part of the SOC after-hours review pack. Particularly valuable on Mondays (covers the entire weekend) and after holidays.
-
-  **Why it matters:** Attackers who compromise admin credentials prefer to make stealth config changes off-hours to avoid the change-review window. Common adversary actions: disable EDR, add allow-list indicators (TABL), modify suppression rules, change AV exclusions, weaken alert tuning thresholds.
-
-  **Triage path:**
-    1. Filter to `ChangeType in ('Added','Modified')` for high-impact changes (Removed is often legitimate cleanup)
-    2. Pivot on `EntityId` + `FieldName` — note WHICH config item and WHAT field changed
-    3. Cross-reference with admin sign-in logs (SigninLogs) at the same `TimeGenerated` to identify the actor
-    4. Validate against approved change tickets in your ITSM/CR system
-    5. If unauthorized: revert the change, lock the admin account, escalate to incident response
-
-  **Expected baseline:** 0-5 events per week in mature tenants. Sustained >10/week suggests admin process drift or compromised account.
-
-  **Tuning:** Adjust `9` and `17` to your tenant's local business hours. Convert `TimeGenerated` to local timezone before comparison if your team isn't UTC-based.
-
-  **MITRE:** TA0005 Defense Evasion — T1562.001 Disable or Modify Tools (most common); T1556 Modify Authentication Process; T1098 Account Manipulation.
+  Defender XDR drift events outside 09:00-17:00 UTC or on weekends. Daily SOC after-hours review pack — attackers prefer off-hours stealth changes. See KQL body for triage path + MITRE.
 author: Alex Kefallonitis
 version: 1.1.0
 tags:
@@ -34,12 +17,26 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
-  // Note: workbook time-pickers can override the lookback/window via
-  // {TimeRange:value} — the underlying parsers are parameterized.
+  // === MDE after-hours drift events ===
   //
-  // Tenant-time-zone caveat: this query uses UTC. If your tenant operates in
-  // a non-UTC time zone, adjust 9/17 to your local business hours OR convert
-  // TimeGenerated to local TZ before the comparison.
+  // WHAT: Defender XDR config/inventory/maintenance drift outside 09:00-17:00 UTC or weekends.
+  // WHEN: Daily SOC after-hours review pack. Especially valuable Mondays (weekend coverage) + post-holiday.
+  // WHY: Attackers with admin credentials prefer off-hours stealth changes to avoid change-review windows.
+  //      Common adversary actions: disable EDR (T1562.001), add TABL allow-list indicators (T1562.006),
+  //      modify suppression rules, change AV exclusions, weaken alert tuning thresholds.
+  //
+  // TRIAGE PATH:
+  //   1. Filter to ChangeType in ('Added','Modified') — high-impact changes (Removed often legitimate cleanup)
+  //   2. Pivot on EntityId + FieldName — note WHICH config item + WHAT field changed
+  //   3. Cross-reference with admin SigninLogs at same TimeGenerated to identify the actor
+  //   4. Validate against approved change tickets in your ITSM/CR system
+  //   5. If unauthorized: revert + lock admin account + escalate to IR
+  //
+  // EXPECTED BASELINE: 0-5 events/week in mature tenants. Sustained >10/week = admin process drift or compromise.
+  // TUNING: Adjust 9/17 to local business hours. Convert TimeGenerated to local TZ if not UTC-based.
+  // MITRE: TA0005 Defense Evasion — T1562.001 (most common); T1556 Modify Authentication Process; T1098.
+  //
+  // Workbook time-pickers can override lookback/window via {TimeRange:value} — parsers are parameterized.
   union (MDE_Drift_Inventory(7d, 1d)), (MDE_Drift_Configuration(7d, 6h)), (MDE_Drift_Maintenance(30d, 7d))
   | extend HourOfDay = datetime_part("Hour", TimeGenerated)
   | extend DayOfWeek = dayofweek(TimeGenerated)

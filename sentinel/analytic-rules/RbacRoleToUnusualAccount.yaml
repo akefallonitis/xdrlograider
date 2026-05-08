@@ -1,21 +1,7 @@
 id: 0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08
 name: MDE RBAC role to unusual account
 description: |
-  **What it detects:** A new `principalId` or `principalName` was added to the Defender XDR Unified RBAC roles configuration — i.e., an account just gained Defender permissions it didn't have before. Specifically targets ChangeType='Added' on the principal field, NOT every role-definition tweak.
-
-  **Why this matters:** RBAC role assignments are the canonical privilege-escalation signal. An attacker with admin compromise will grant themselves OR a backdoor account Defender admin permissions to maintain SOC-tooling control across password rotations. Even legitimate role assignments need governance — sustained role-creep (everyone gains permissions, nobody loses them) creates audit findings and lateral-movement risk. This rule surfaces every role addition for review.
-
-  **Triage path:**
-    1. Confirm the `principalId` resolves to a known and sanctioned admin account
-    2. If unknown: cross-reference `SigninLogs` and recent privilege grants for related activity → likely compromise indicator
-    3. If sanctioned: suppress this principal for 30 days via the rule's suppression settings (or pair with `RbacEscalationEvents.yaml` hunt for cumulative tracking)
-    4. For ANY role granting `Security Administrator` or `Global Administrator`-equivalent permissions: treat as P1 if no ticket
-    5. Run quarterly: cumulative role-creep audit — list of users with most roles ever added
-    6. Cross-reference with `ConfigChangesByUpn` to identify the granting admin
-
-  **Severity rationale:** High — RBAC additions to Defender are infrequent in stable environments; every one needs justification.
-
-  **MITRE:** TA0004 Privilege Escalation — T1078 Valid Accounts (PRIMARY); TA0003 Persistence — T1098 Account Manipulation; T1136 Create Account.
+  New principalId/principalName added to Defender XDR Unified RBAC roles — account gained Defender permissions it didn't have. RBAC additions = canonical privilege-escalation signal. Attacker with admin compromise grants themselves or backdoor account Defender admin perms to maintain SOC-tooling control across password rotations. Severity High — RBAC additions infrequent in stable envs; every one needs justification. MITRE: TA0004 Privilege Escalation — T1078 (PRIMARY); TA0003 Persistence — T1098, T1136. See KQL body for triage path.
 severity: High
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

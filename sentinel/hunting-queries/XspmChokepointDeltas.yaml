@@ -1,24 +1,7 @@
 id: 5d3048b9-0c21-4d4f-e7a9-3b2c5f0d8e17
 name: MDE XSPM chokepoint deltas
 description: |
-  **What it does:** Surfaces nodes (machines, identities, groups, devices) NEWLY classified as XSPM (Microsoft Security Exposure Management) chokepoints over the last 30 days. Chokepoints are nodes that many attack paths to crown-jewel assets traverse — eliminating chokepoints disrupts multiple attack scenarios at once.
-
-  **When to run:** Monthly attack-surface-management review, quarterly executive risk reporting, post-IT-restructuring (M&A, role consolidations) when attack paths shift dramatically.
-
-  **Why it matters:** Microsoft's XSPM continuously simulates attack paths from internet/email entry points to crown-jewel assets. Some intermediate nodes appear on dozens of paths simultaneously — these "chokepoints" represent the highest-leverage hardening targets. A new chokepoint = something changed in your environment (a new account got over-privileged, a new system got placed in a sensitive AD location, a config change opened new lateral movement) that NOW concentrates attacker risk. SOCs that don't track chokepoint deltas miss the shifting attack surface.
-
-  **Triage path:**
-    1. For each new chokepoint (`EntityId`): identify what kind of node it is (machine / group / identity)
-    2. Pull latest record from `Defender_ExposureManagement_CL.MDE_XspmChokePoints_CL` for full path-count + downstream-asset list
-    3. Investigate: WHY did this node become a chokepoint NOW? AD change? Group membership? New role assignment?
-    4. Cross-reference with `MDE_Drift_Configuration` and `RbacEscalationEvents.yaml` from same timeframe
-    5. Prioritize: nodes with `pathCount > 100` are top hardening targets; remediate via least-privilege, group cleanup, or compensating controls
-
-  **Expected baseline:** 0-3 new chokepoints per month in stable environments; spikes correlate with org changes.
-
-  **Tuning:** Adjust `30d` for executive vs operational cadence. License-gated by XSPM (E5 with security add-on); zero rows in unlicensed tenants.
-
-  **MITRE:** TA0043 Reconnaissance — T1595 Active Scanning (defender-side reconnaissance); TA0008 Lateral Movement — T1021 Remote Services (chokepoints often correlate with lateral movement enablers).
+  Nodes (machines, identities, groups, devices) NEWLY classified as XSPM chokepoints over last 30d. Chokepoints sit on many attack paths to crown jewels — eliminating one disrupts multiple scenarios. Requires XSPM. See KQL body for triage path + MITRE.
 author: Alex Kefallonitis
 version: 1.0.0
 tags:
@@ -34,4 +17,27 @@ tactics:
 relevantTechniques:
   - T1595
 query: |
+  // === MDE XSPM chokepoint deltas ===
+  //
+  // WHAT: Nodes NEWLY classified as XSPM chokepoints over last 30d. Chokepoints sit on many attack paths
+  //       to crown jewels — eliminating chokepoints disrupts multiple attack scenarios at once.
+  // WHEN: Monthly attack-surface-management review, quarterly executive risk reporting,
+  //       post-IT-restructuring (M&A, role consolidations) when attack paths shift dramatically.
+  // WHY: XSPM continuously simulates attack paths from internet/email to crown-jewel assets. Some
+  //      intermediate nodes appear on dozens of paths — chokepoints = highest-leverage hardening targets.
+  //      New chokepoint = environment change (over-privileged account, sensitive AD placement, lateral
+  //      movement enabled) that NOW concentrates attacker risk. SOCs not tracking chokepoint deltas
+  //      miss the shifting attack surface.
+  //
+  // TRIAGE PATH:
+  //   1. New chokepoint EntityId: identify node type (machine / group / identity)
+  //   2. Pull latest from Defender_ExposureManagement_CL.MDE_XspmChokePoints_CL for path-count + downstream
+  //   3. Investigate: WHY chokepoint NOW? AD change? Group membership? New role?
+  //   4. Cross-ref MDE_Drift_Configuration + RbacEscalationEvents.yaml from same timeframe
+  //   5. Prioritize: pathCount > 100 = top hardening target; remediate via least-privilege, group cleanup
+  //
+  // EXPECTED BASELINE: 0-3 new chokepoints/month stable env; spikes correlate with org changes.
+  // TUNING: Adjust 30d for executive vs operational cadence.
+  // LICENSE: XSPM (E5 + security add-on). Zero rows in unlicensed tenants.
+  // MITRE: TA0043 Reconnaissance — T1595 (defender-side); TA0008 Lateral Movement — T1021 Remote Services.
   MDE_Drift_Exposure(30d, 1h) | where StreamName == "MDE_XspmChokePoints_CL" and ChangeType == "Added"

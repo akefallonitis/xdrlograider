@@ -1,24 +1,7 @@
 id: 3b1e26f7-8a0f-4b2d-c5e7-1f0a3d8b6c15
 name: MDE exclusion additions (past quarter)
 description: |
-  **What it does:** Returns every file/path/process exclusion ADDED to AV/EDR policy across the last 90 days. Filters drift events to `ChangeType='Added'` and `FieldName has "exclusion"`.
-
-  **When to run:** Monthly governance review, post-AV-tuning ticket validation, suspected persistence investigation, after any "we whitelisted that for compatibility" admin claim.
-
-  **Why it matters:** Exclusions are the #1 EDR-bypass technique abused by attackers with admin credentials. Adding `C:\ProgramData\<malware-folder>` to the AV exclusion list whitelists everything in that folder from scanning — the file gets dropped, executes, persists, and Defender literally never sees it. Equally common: adding `powershell.exe` as a process exclusion, or adding domain-wide path exclusions during ransomware staging. Each addition needs business justification AND a change ticket.
-
-  **Triage path:**
-    1. For each row: verify `EntityId` (the policy + scope) + `NewValue` (the path/hash/process) against your change-management ticket system
-    2. If unauthorized: investigate `Operator` (admin who made the change) — check `SigninLogs` for compromised session indicators
-    3. Remove the exclusion via Intune/MDE policy
-    4. Hunt for malicious files within the previously-excluded path: `DeviceFileEvents | where FolderPath has '<path>'`
-    5. Lock admin account; escalate to incident response if confirmed unauthorized
-
-  **Expected baseline:** 0-3 exclusion additions per quarter in a mature tenant. Legitimate use cases: developer workstations, vendor compatibility, performance-sensitive servers. Every addition should map to a ticket.
-
-  **Tuning:** Adjust `90d` lookback for SOX/HIPAA quarterly review (use `120d`) or weekly governance review (use `7d`).
-
-  **MITRE:** TA0005 Defense Evasion — T1562.001 Disable or Modify Tools (primary); TA0003 Persistence — T1546 Event Triggered Execution (when exclusion enables payload persistence).
+  Returns every file/path/process exclusion ADDED to AV/EDR policy across last 90 days. Exclusions are #1 EDR-bypass technique with admin compromise — every addition needs business justification + change ticket. See KQL body for triage path + MITRE.
 author: Alex Kefallonitis
 version: 1.1.0
 tags:
@@ -34,16 +17,27 @@ tactics:
 relevantTechniques:
   - T1562.001
 query: |
-  // Implementation: uses the drift parser MDE_Drift_Inventory with the
-  // ChangeType="Added" filter so it returns only NEW exclusions in the lookback
-  // window (rather than the full current exclusion list).
+  // === MDE exclusion additions (past quarter) ===
   //
-  // Operator response (suggested):
-  //   1. For each row: review the added exclusion path/hash + the Operator
-  //      (admin who made the change) + the time
-  //   2. Verify against your change-management ticket system
-  //   3. If unauthorized: investigate the admin's session for compromise +
-  //      remove the exclusion
+  // WHAT: Every file/path/process exclusion ADDED to AV/EDR policy in last 90 days.
+  // WHEN: Monthly governance review, post-AV-tuning ticket validation, persistence investigation,
+  //       after any "we whitelisted that for compatibility" admin claim.
+  // WHY: Exclusions are #1 EDR-bypass with admin credentials. Adding C:\ProgramData\<malware> to AV
+  //      exclusion list whitelists everything from scanning — file drops, executes, persists, never seen.
+  //      Equally common: powershell.exe process exclusion, domain-wide path exclusions during ransomware staging.
+  //      Each addition needs business justification AND change ticket.
+  //
+  // TRIAGE PATH:
+  //   1. Verify EntityId (policy+scope) + NewValue (path/hash/process) against change-management ticket system
+  //   2. Unauthorized: investigate Operator (admin) — check SigninLogs for compromised session
+  //   3. Remove exclusion via Intune/MDE policy
+  //   4. Hunt malicious files in previously-excluded path: DeviceFileEvents | where FolderPath has '<path>'
+  //   5. Lock admin account + escalate to IR if confirmed unauthorized
+  //
+  // EXPECTED BASELINE: 0-3 additions/quarter mature tenant. Legitimate: dev workstations, vendor compat, perf servers.
+  //                    Every addition should map to a ticket.
+  // TUNING: Adjust 90d for SOX/HIPAA quarterly (120d) or weekly governance (7d).
+  // MITRE: TA0005 Defense Evasion — T1562.001 (primary); TA0003 Persistence — T1546 (payload persistence).
   MDE_Drift_Inventory(90d, 1h)
   | where StreamName == "MDE_AntivirusPolicy_CL"
   | where ChangeType == "Added"

@@ -1,24 +1,7 @@
 id: a1b2c3d4-1111-4002-8002-000000000002
 name: MDE security policies (ASR + AV + EDR + Firewall) per platform
 description: |
-  **What it does:** Returns the latest snapshot of every Intune endpoint security policy across all 4 platforms (Windows / Linux / macOS / iOS) — including ASR rules, Antivirus settings, EDR config, Firewall rules, Disk Encryption (BitLocker/FileVault), Account Protection, and Web Protection. One row per policy with full body in RawJson.
-
-  **When to run:** Quarterly security-config governance review, before/after Intune policy migrations, audit response (CMMC, FedRAMP, ISO27001), drift investigations.
-
-  **Why it matters:** Intune endpoint security policies are the central "what protections are enforced where" inventory. Without periodic snapshots you can't (a) prove compliance for auditors, (b) detect policy weakening attacks where an attacker disables ASR rules or adds blanket exclusions, (c) compare your policy posture across platforms. The cross-platform fanout (Architecture C) ensures you see Windows + Linux + macOS + iOS together rather than 4 separate hunts.
-
-  **Triage path:**
-    1. Filter `where Platform == 'Linux'` (or other) — review per-platform posture
-    2. Filter `where PolicyType == 'AttackSurfaceReduction'` — verify all ASR rules are in `Enforce` mode (not just `Audit`)
-    3. Diff `RuleCount` against your security-baseline checklist — sudden drops = policy weakening
-    4. For each `RawJson` body: extract specific rules via `parse_json(RawJson).rules` for granular review
-    5. Pair with `MDE_Drift_Configuration` to detect *changes* across snapshots
-
-  **Expected baseline:** 5-30 policies per platform in mature tenants; varying by tenant scale. 0 policies = MDE/Intune integration gap; investigate immediately.
-
-  **Tuning:** Adjust `24h` to your Configuration cadence. Architecture C PerPlatformFanout iterates 4 platforms internally — if your tenant doesn't deploy a platform, those rows will be empty (not a bug).
-
-  **MITRE:** TA0005 Defense Evasion — T1562 Impair Defenses (govern); TA0007 Discovery — T1518 Software Discovery (policy enumeration).
+  Latest snapshot of every Intune endpoint security policy across 4 platforms (Windows/Linux/macOS/iOS) — ASR rules, AV, EDR, Firewall, Disk Encryption, Account Protection, Web Protection. See KQL body for triage path + MITRE.
 author: Alex Kefallonitis
 version: 1.0.0
 tags:
@@ -32,6 +15,29 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
+  // === MDE security policies (ASR + AV + EDR + Firewall) per platform ===
+  //
+  // WHAT: Latest snapshot of every Intune endpoint security policy across all 4 platforms
+  //       (Windows / Linux / macOS / iOS). Per policy: ASR rules + AV + EDR + Firewall + Disk Encryption +
+  //       Account Protection + Web Protection. Full body in RawJson.
+  // WHEN: Quarterly security-config governance review, pre/post Intune migration, audit response (CMMC,
+  //       FedRAMP, ISO27001), drift investigations.
+  // WHY: Intune endpoint security policies = central "what protections enforced where" inventory.
+  //      Without periodic snapshots: can't (a) prove compliance, (b) detect policy weakening (attacker
+  //      disables ASR rules), (c) compare posture across platforms.
+  //      Architecture C PerPlatformFanout — Windows + Linux + macOS + iOS in one hunt instead of 4.
+  //
+  // TRIAGE PATH:
+  //   1. Filter `where Platform == 'Linux'` (or other) — per-platform posture review
+  //   2. `where PolicyType == 'AttackSurfaceReduction'` — verify all ASR rules in Enforce mode (not Audit)
+  //   3. Diff RuleCount against security-baseline checklist — sudden drops = policy weakening
+  //   4. parse_json(RawJson).rules for granular per-rule review
+  //   5. Pair with MDE_Drift_Configuration to detect changes across snapshots
+  //
+  // EXPECTED BASELINE: 5-30 policies/platform mature tenants. 0 policies = MDE/Intune integration gap.
+  // TUNING: Adjust 24h to Configuration cadence. PerPlatformFanout iterates 4 platforms; missing platform
+  //         rows are empty (not a bug — tenant doesn't deploy that platform).
+  // MITRE: TA0005 Defense Evasion — T1562 Impair Defenses (govern); TA0007 Discovery — T1518.
   Defender_EndpointConfiguration_CL
   | where SourceName == 'MDE_SecurityPolicies_CL'
   | where TimeGenerated > ago(24h)

@@ -1,23 +1,7 @@
 id: 8c69e1f2-3b5a-4c7e-d0f2-6a5b8e3c1d10
 name: MDE config changes by UPN
 description: |
-  **What it does:** Correlates Defender XDR configuration / inventory / exposure drift events with AzureAD `AuditLogs` to attribute each drift to the admin UPN who triggered it. Drift parsers tell you *what* changed; this query tells you *who*.
-
-  **When to run:** Post-incident retrospective ("who broadened the suppression rule on April 28th?"), monthly change-control review, audit response, suspected admin compromise investigation.
-
-  **Why it matters:** Drift events alone aren't actionable — every config change has a responsible actor. Without UPN attribution you can't (a) hold owners accountable, (b) detect lateral movement through admin accounts, or (c) validate against change-management tickets.
-
-  **Triage path:**
-    1. Sort by `DriftEvents desc` — top UPNs are either prolific admins or compromised
-    2. For unknown UPNs (`unknown (no correlating audit)`): drift happened but no `AuditLogs` row matched → investigate as service-principal / API-direct change
-    3. For high-volume UPNs: cross-reference `Streams` + `Operations` against the admin's role + that day's change tickets
-    4. If suspicious: pivot to `SigninLogs` for that UPN — check unusual IP, device, or risk-state
-
-  **Expected baseline:** 2-5 admin UPNs accounting for 80%+ of drift; 10-20 distinct UPNs total in a healthy SOC tenant. Single UPN with >100 changes/week = either over-privileged or compromised.
-
-  **Implementation note:** Section R++.C B7 fix — joins on `bin(TimeGenerated, 5min)` not exact-second equality (sub-second granularity broke the original join, leaving every `ActorUpn` as "unknown").
-
-  **MITRE:** TA0005 Defense Evasion — T1562 Impair Defenses; TA0004 Privilege Escalation — T1078 Valid Accounts.
+  Correlates Defender XDR drift events with AuditLogs to attribute each config change to the admin UPN who triggered it. Drift parsers tell you WHAT changed; this query tells you WHO. See KQL body for triage path + baseline + MITRE.
 author: Alex Kefallonitis
 version: 1.0.0
 tags:
@@ -34,12 +18,27 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
-  // Section R++.C B7 fix: drift EntityIds and AuditLogs target identifiers
-  // are not reliable to join at the record level. Original implementation
-  // joined on $left.TimeGenerated == $right.AuditTime — exact-second equality
-  // never matches sub-second granularity → all ActorUpn defaulted to "unknown".
-  // Fix: bucket both sides by 5-minute bins (matches the pattern in
-  // MDE_ComplianceDashboard.json:76 recent-changes-table).
+  // === MDE config changes by UPN ===
+  //
+  // WHAT: Correlates Defender XDR drift with AuditLogs actor UPNs — attributes "who changed what".
+  // WHEN: Post-incident retrospective, monthly change-control review, audit response, admin compromise investigation.
+  // WHY: Drift alone isn't actionable — every config change has a responsible actor. UPN attribution enables
+  //      (a) accountability, (b) lateral-movement-through-admin-accounts detection, (c) ticket validation.
+  //
+  // TRIAGE PATH:
+  //   1. Sort by DriftEvents desc — top UPNs are prolific admins or compromised
+  //   2. Unknown UPNs ('unknown (no correlating audit)') = SP/API-direct changes; investigate
+  //   3. High-volume UPNs: cross-ref Streams + Operations against role + change tickets that day
+  //   4. Suspicious: pivot to SigninLogs for that UPN — check IP/device/risk-state anomalies
+  //
+  // EXPECTED BASELINE: 2-5 admin UPNs cover 80%+ drift; 10-20 distinct UPNs total in healthy tenant.
+  //                    Single UPN with >100 changes/week = over-privileged or compromised.
+  // MITRE: TA0005 Defense Evasion — T1562 Impair Defenses; TA0004 Privilege Escalation — T1078 Valid Accounts.
+  //
+  // Section R++.C B7 fix: drift EntityIds and AuditLogs target identifiers are not reliable
+  // to join at record level. Original implementation joined on $left.TimeGenerated == $right.AuditTime —
+  // exact-second equality never matches sub-second granularity → all ActorUpn defaulted to "unknown".
+  // Fix: bucket both sides by 5-minute bins (matches MDE_ComplianceDashboard.json:76 pattern).
   let drift = union
     (MDE_Drift_Inventory(7d, 1d)),
     (MDE_Drift_Configuration(7d, 6h)),

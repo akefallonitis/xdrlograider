@@ -1,26 +1,7 @@
 id: 6d1b7a3e-9f2c-4e8d-a7b1-3c4d5e6f7a8b
 name: "[XdrOps] Connector DLQ depth or age exceeds operator threshold"
 description: |
-  **What it detects:** XdrLogRaider's ingest dead-letter queue (Storage Table `xdrIngestDlq`) has either:
-    - Depth > 100 entries (sustained backpressure), OR
-    - Oldest entry > 2 hours (greater than 1 poll cycle for fast tier — replay isn't keeping up)
-
-  **Why this matters:** The DLQ is the connector's safety net — when DCE ingestion fails (5xx, 429, network), failed batches go here for replay rather than data loss. Healthy operation: DLQ stays near-empty as `Pop-XdrIngestDlq` drains it on every poll cycle. Sustained depth/age means: (a) DCE is having sustained issues (Microsoft-side incident), (b) the failed batches are too large for retry (split-batch logic working but slow), (c) auth issues are preventing replay, OR (d) DLQ replay logic broke (regression).
-
-  **Triage path:**
-    1. AppMetrics → `xdr.ingest.dlq_depth` + `xdr.ingest.dlq_oldest_age_seconds` — confirm trend
-    2. AppDependencies → DCE ingestion → check 5xx/429 rate to identify root failure mode
-    3. AppExceptions → look for `Send-ToLogAnalytics` failures with batch-size or auth context
-    4. If sustained: check Azure Service Health for DCE / Log Analytics regional incidents
-    5. If localized to one stream: investigate that stream's row size or schema
-    6. Manually drain via `Pop-XdrIngestDlq -Force` if needed (last resort)
-    7. See `docs/RUNBOOK.md` "DLQ backlog" section
-
-  **Auto-drain mechanism:** `Pop-XdrIngestDlq` runs at start of every Xdr-PollStream activity to retry stuck batches with TTL eviction. Most transient issues self-resolve.
-
-  **Severity rationale:** Medium — backpressure indicates degraded ingest, not lost data; data is preserved in DLQ.
-
-  **MITRE:** TA0005 Defense Evasion — T1562 Impair Defenses (DLQ buildup may indicate attacker overwhelming pipeline).
+  XdrLogRaider's ingest DLQ (Storage Table `xdrIngestDlq`) has Depth >100 entries (sustained backpressure) OR oldest entry >2h (replay isn't keeping up). DLQ = connector safety net for DCE ingestion failures (5xx, 429, network). Healthy: DLQ near-empty as `Pop-XdrIngestDlq` drains every poll cycle. Sustained depth/age = DCE sustained issues, batches too large for retry, auth blocking replay, or DLQ regression. Auto-drain runs every Xdr-PollStream with TTL eviction. Severity Medium — backpressure = degraded ingest, not data loss (DLQ preserves). MITRE: TA0005 Defense Evasion — T1562. See KQL body + docs/RUNBOOK.md "DLQ backlog" for triage.
 severity: Medium
 enabled: false
 requiredDataConnectors:

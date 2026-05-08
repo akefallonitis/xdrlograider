@@ -1,23 +1,7 @@
 id: 3d14f6a7-8c0b-4d2f-e5a7-1b0c3f8d6e0b
 name: MDE MDI DC sensor down
 description: |
-  **What it detects:** A Microsoft Defender for Identity (MDI) sensor on a domain controller stopped reporting — `MDE_DCCoverage_CL.IsActive` flipped from `True` to `False`. This is the canonical "identity threat detection blind spot" signal.
-
-  **Why this matters:** MDI sensors on domain controllers feed the AD-side detection layer (kerberoasting, golden ticket, DCSync, replication abuse, LDAP recon). When a sensor goes inactive, those detections silently disappear for the entity it was monitoring. Real causes: DC reboot, network partition, sensor service crash, or attacker action (stopping the sensor is a known credential-attacker tactic to mask DCSync/golden-ticket activity).
-
-  **Triage path:**
-    1. Identify the affected DC (`EntityId`) + offline timestamp
-    2. RDP/console to the DC and verify: `Get-Service AzureADConnectAuthenticationAgent` (or relevant MDI service); restart if stopped
-    3. Check Windows Event Log on DC for service crash / kill events around the timestamp
-    4. Hunt for credential-access activity in the offline window: `IdentityLogonEvents | where Timestamp > <offline-time>` — anomalous logons during MDI blind period
-    5. Verify other MDI sensors are still reporting — single-DC offline is operational; tenant-wide offline is attack
-    6. If suspicious DC service kill: image-acquire the DC + escalate to IR
-
-  **Severity rationale:** High — every minute of MDI blind time means undetected credential attacks could be in progress.
-
-  **License:** Requires Microsoft Defender for Identity. Tenant-gated in non-MDI tenants.
-
-  **MITRE:** TA0005 Defense Evasion — T1562 Impair Defenses (sensor disable); TA0006 Credential Access — T1003.006 OS Credential Dumping: DCSync (the attack typically masked).
+  MDI sensor on a domain controller stopped reporting (`MDE_DCCoverage_CL.IsActive` True→False). Canonical "identity threat detection blind spot" signal. MDI sensors feed AD-side detections (kerberoasting, golden ticket, DCSync, replication abuse, LDAP recon) — inactive sensor = those detections silently disappear. Causes: DC reboot, network partition, service crash, OR attacker action (sensor disable is known tactic to mask DCSync). Severity High — every minute of blind time = potential undetected credential attack. License: requires MDI. MITRE: TA0005 — T1562; TA0006 Credential Access — T1003.006 DCSync. See KQL body for triage path.
 severity: High
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

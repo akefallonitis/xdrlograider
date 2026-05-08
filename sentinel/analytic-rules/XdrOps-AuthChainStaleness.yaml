@@ -1,26 +1,7 @@
 id: 9c8a3f1e-2d5b-4a7c-8e9f-0b1d2c3a4b5d
 name: "[XdrOps] Connector auth chain staleness - silent hang detection"
 description: |
-  **What it detects:** XdrLogRaider's auth chain has stopped emitting `AuthChain.Completed` events for >30 minutes — a SILENT hang somewhere in the auth flow (Get-EntraEstsAuth, Get-DefenderSccauth, or session self-test). Heartbeat may still fire from `Connector-Heartbeat` (timer trigger), but actual data polls are dead.
-
-  **Why this matters:** This is the complement to `XdrOps-AuthChainFailure`:
-    - **Failure rule** catches NOISY failures (`AuthChain.AADSTSError` exceptions firing repeatedly) — visible problem
-    - **Staleness rule** catches SILENT failures (auth chain just stops responding mid-flow with no exception) — invisible problem
-  Silent hangs are typically caused by: (a) Microsoft auth service throttling without explicit 429, (b) HTTP timeout on portal selfTest, (c) FA host hung, (d) deadlock in PowerShell module load. Without this rule, the connector card might still show "Connected" (heartbeat alive) while no actual data polls succeed.
-
-  **Triage path:**
-    1. Check FA in Azure portal: is it Running? Are functions firing? (`Functions` blade)
-    2. Check AppInsights: are there AppRequests (function invocations) but no AppEvents (`AuthChain.Completed`)?
-    3. Restart FA: stop-then-start (NOT just restart — full power cycle clears stuck Durable orchestrations)
-    4. Try Connect-DefenderPortal locally with same SA credentials — does it succeed locally?
-    5. Check Microsoft Service Health for active auth-service incidents
-    6. If sustained: check `docs/RUNBOOK.md` "Auth chain hang" section
-
-  **Severity rationale:** High — silent connector death = SOC visibility loss without explicit alerting.
-
-  **Phase J D'.3 (2026-05-04).**
-
-  **MITRE:** TA0001 Initial Access — T1078 Valid Accounts (impacted authentication path).
+  XdrLogRaider's auth chain stopped emitting `AuthChain.Completed` events for >30min — SILENT hang in auth flow. Complement to XdrOps-AuthChainFailure (which catches NOISY failures); this catches SILENT death where auth stops mid-flow without exception. Heartbeat may still fire while data polls are dead. Causes: Microsoft auth throttling without 429, HTTP timeout on portal selfTest, FA host hung, PowerShell module load deadlock. Severity High — silent connector death = SOC visibility loss without explicit alerting. MITRE: TA0001 Initial Access — T1078. See KQL body + docs/RUNBOOK.md "Auth chain hang" section for triage.
 severity: High
 enabled: false
 requiredDataConnectors:

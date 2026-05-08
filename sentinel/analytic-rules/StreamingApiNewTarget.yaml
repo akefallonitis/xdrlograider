@@ -1,17 +1,17 @@
 id: 5f36b8c9-0e2d-4f4b-a7c9-3d2e5b0f8a0d
 name: MDE streaming API new target
 description: |
-  **What it detects:** A new Event Hub or Storage target was configured for Defender telemetry streaming. Semantic alias for `DataExportNewDestination` — fires on the same signal but kept under the "streaming API" name for operators searching by Microsoft's legacy nomenclature.
+  **What it detects:** New Event Hub or Storage target configured for Defender telemetry streaming. Semantic alias for `DataExportNewDestination` — same signal, kept under "streaming API" name for operators searching by Microsoft's legacy nomenclature.
 
-  **Why this matters:** Same data-exfiltration risk as `DataExportNewDestination` — see that rule for full triage path. Use whichever rule matches your operator vocabulary (both query the same drift signal).
+  **Why this matters:** Same data-exfiltration risk as DataExportNewDestination — see that rule for full triage path.
 
   **Triage path:**
-    1. See `DataExportNewDestination.yaml` triage path — identical
-    2. Coordinate alerts: if both rules fire on the same drift, treat as one incident not two
+    1. See DataExportNewDestination.yaml triage path — identical
+    2. Coordinate alerts: if both rules fire on same drift, treat as one incident not two
 
-  **Severity rationale:** Medium baseline; escalate to High if destination is external Azure tenant.
+  **Severity:** Medium baseline; High if destination external Azure tenant.
 
-  **REDIRECTED 2026-05-06:** the legacy `MDE_StreamingApiConfig_CL` endpoint is `Availability='deprecated'` (returns 404 on modern tenants — manifest line ~619). The canonical surface is `MDE_DataExportSettings_CL` (Maintenance tier). This rule kept as semantic alias.
+  **REDIRECTED 2026-05-06:** legacy `MDE_StreamingApiConfig_CL` is `Availability='deprecated'` (404 on modern tenants). Canonical surface = `MDE_DataExportSettings_CL` (Maintenance tier). Rule kept as semantic alias.
 
   **MITRE:** TA0010 Exfiltration — T1537 Transfer Data to Cloud Account (PRIMARY).
 severity: Medium

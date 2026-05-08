@@ -1,20 +1,7 @@
 id: 6a47c9d0-1f3e-4a5c-b8d0-4e3f6c1a9b0e
 name: MDE connected app new registration
 description: |
-  **What it detects:** A new third-party application was registered as a Defender XDR Connected App — granting it programmatic API access to alerts, devices, configurations, and IR actions.
-
-  **Why this matters:** Connected Apps are the API integration mechanism — legitimate uses include SIEM integrations (Sentinel, Splunk, QRadar), SOAR tools, MSSP partners, and customer-built automation. But every Connected App is a credential the attacker can steal AND a privileged token issued without per-action user consent. New registrations need scrutiny: WHO registered it, WHAT scopes does it have, WHY does it need them. Unsanctioned Connected Apps are a persistence mechanism (attacker-controlled API access surviving admin password rotations).
-
-  **Triage path:**
-    1. Identify the app (`EntityId`) + scopes granted (RawJson `permissions`/`scopes`)
-    2. Verify against your IT/Security app-registration approval process — should every Connected App have a ticket
-    3. If unknown: contact the registering admin (cross-ref `ConfigChangesByUpn`) — do they recognize it?
-    4. For unsanctioned apps: REVOKE the app's access (Defender XDR portal → Settings → Endpoints → API) + investigate registering admin's session for compromise
-    5. Audit all Connected Apps quarterly: prune unused, document required, rotate secrets/certificates
-
-  **Severity rationale:** Low — most are legitimate; escalate context to Medium if the app requests `Machine.ReadWrite.All` or `Alert.ReadWrite.All` (broadest scopes).
-
-  **MITRE:** TA0003 Persistence — T1098 Account Manipulation (apps function like backdoor accounts); T1136.003 Create Cloud Account.
+  Detects new third-party app registered as a Defender XDR Connected App — programmatic API access to alerts/devices/configurations/IR actions. Each is a stealable credential + privileged token. Unsanctioned apps = persistence mechanism. Severity Low baseline; Medium if Machine.ReadWrite.All or Alert.ReadWrite.All scope. MITRE: TA0003 Persistence — T1098 Account Manipulation; T1136.003 Create Cloud Account. See KQL body for triage path.
 severity: Low
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

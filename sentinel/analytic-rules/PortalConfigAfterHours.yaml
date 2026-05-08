@@ -1,23 +1,7 @@
 id: 7b58d0e1-2a4f-4b6d-c9e1-5f4a7d2b0c0f
 name: MDE portal config change outside business hours
 description: |
-  **What it detects:** Any Defender XDR tenant-configuration or inventory drift event recorded outside 09:00-17:00 UTC business hours. Catches changes made evenings, nights, weekends — when change-review boards aren't watching.
-
-  **Why this matters:** Attackers with admin credentials prefer off-hours config changes for stealth — fewer eyes on dashboards, longer window before someone notices, alert flood diluted by next-day operational signals. Legitimate after-hours changes happen (P1 incidents, scheduled maintenance, distributed teams), but they should always have a paired ticket. Unjustified after-hours changes are a strong attacker indicator.
-
-  **Triage path:**
-    1. Sort by `TimeGenerated desc` — review newest first
-    2. For each event: identify `StreamName` (what category) + `EntityId` (what entity) + `FieldName/NewValue` (what changed)
-    3. Cross-reference with `ConfigChangesByUpn` to identify the admin actor
-    4. Validate against on-call schedule + change-management tickets
-    5. If unauthorized: revert + lock account + escalate to IR
-    6. Pair with `AfterHoursDrift` hunting query for the broader picture
-
-  **Severity rationale:** Low — high false-positive volume in 24x7 SOC tenants; primarily useful as a context anchor for IR retrospective.
-
-  **Tuning:** Adjust `9` and `17` to your tenant's local business hours. If your operations are 24x7, this rule is less useful — disable it OR widen the threshold to weekends-only.
-
-  **MITRE:** TA0005 Defense Evasion — T1562 Impair Defenses (umbrella technique for off-hours admin abuse).
+  Any Defender XDR tenant-configuration or inventory drift event recorded outside 09:00-17:00 UTC business hours. Attackers prefer off-hours config changes for stealth — fewer eyes, longer notice window, alert flood diluted by next-day signals. Legitimate after-hours changes need paired ticket. Severity Low — high FP volume in 24x7 SOC tenants; primarily context anchor for IR retrospective. Tuning: adjust 9/17 to local business hours; 24x7 ops disable or widen to weekends-only. MITRE: TA0005 Defense Evasion — T1562. See KQL body for triage path.
 severity: Low
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:
