@@ -1,8 +1,8 @@
 # XdrLogRaider Wiring Matrix
 
-Generated: 2026-05-07 17:24:43 +01:00
+Generated: 2026-05-08 17:56:33 +01:00
 
-Total streams: 65  |  Full edges: 65  |  Missing/warning: 0
+Total streams: 64  |  Full edges: 64  |  Missing/warning: 0
 
 ## Edge legend
 
@@ -76,7 +76,6 @@ Total streams: 65  |  Full edges: 65  |  Missing/warning: 0
 | MDE_Machines_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_CloudAppsConfig_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_DeviceTimeline_CL | ActionCenter | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_MachineActions_CL | ActionCenter | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_AssetClassificationSchema_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_PostureInitiativesSummarized_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_PostureMetrics_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
