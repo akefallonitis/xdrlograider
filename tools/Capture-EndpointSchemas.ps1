@@ -57,7 +57,22 @@ param(
     [string] $OutDir,
     [switch] $IncludeDeferred,
     [string] $StreamFilter = '*',
-    [switch] $NoRedact
+    [switch] $NoRedact,
+
+    # Phase 0 extension (Section R++++++++++): live-test candidate endpoints
+    # NOT yet in the manifest. Each candidate is a hashtable matching the
+    # manifest entry shape:
+    #   @{ Stream='MDE_<X>_CL'; Path='/mtp/...'; Method='GET'|'POST';
+    #      Body=@{}; Headers=@{}; UnwrapProperty='...'; IdProperty=@(...);
+    #      ProjectionMap=@{...}; Tier='Configuration'; Availability='live' }
+    # Candidates are written to <OutDir>-candidates/ so they don't pollute
+    # the canonical manifest fixture set.
+    [hashtable[]] $CandidateEndpoints = @(),
+
+    # Phase 0 extension: skip manifest iteration entirely (only test candidates).
+    # Useful for rapid live-testing of new candidates without re-running the
+    # full 64-stream manifest sweep.
+    [switch] $CandidatesOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -188,8 +203,45 @@ function Invoke-Redact {
 $manifest = Get-XdrEndpointManifest -Portal Defender
 $entries  = @($manifest.Values)
 
+# Phase 0 extension (Section R++++++++++): inject candidate endpoints.
+# Each candidate is normalized to manifest-entry shape with IsCandidate=true
+# flag so the per-stream loop can route output to a candidates subdirectory.
+$candidateOutDir = $null
+if ($CandidateEndpoints.Count -gt 0) {
+    $candidateOutDir = "$OutDir-candidates"
+    New-Item -Path $candidateOutDir -ItemType Directory -Force | Out-Null
+    foreach ($cand in $CandidateEndpoints) {
+        if (-not $cand.ContainsKey('Stream') -or -not $cand.ContainsKey('Path')) {
+            Write-Warning "Skipping candidate without Stream + Path: $($cand | ConvertTo-Json -Compress)"
+            continue
+        }
+        # Synthesize manifest-shaped entry; defaults match common cases.
+        $synth = @{
+            Stream         = $cand.Stream
+            Path           = $cand.Path
+            Method         = if ($cand.ContainsKey('Method'))         { $cand.Method }         else { 'GET' }
+            Tier           = if ($cand.ContainsKey('Tier'))           { $cand.Tier }           else { 'Configuration' }
+            Category       = if ($cand.ContainsKey('Category'))       { $cand.Category }       else { 'Candidate' }
+            Availability   = if ($cand.ContainsKey('Availability'))   { $cand.Availability }   else { 'live' }
+            IsCandidate    = $true
+        }
+        if ($cand.ContainsKey('Body'))           { $synth['Body']           = $cand.Body }
+        if ($cand.ContainsKey('Headers'))        { $synth['Headers']        = $cand.Headers }
+        if ($cand.ContainsKey('UnwrapProperty')) { $synth['UnwrapProperty'] = $cand.UnwrapProperty }
+        if ($cand.ContainsKey('IdProperty'))     { $synth['IdProperty']     = $cand.IdProperty }
+        if ($cand.ContainsKey('ProjectionMap'))  { $synth['ProjectionMap']  = $cand.ProjectionMap }
+        if ($cand.ContainsKey('SingleObjectAsRow')) { $synth['SingleObjectAsRow'] = $cand.SingleObjectAsRow }
+        $entries = @($entries) + @($synth)
+    }
+    Write-Host "Phase 0: injected $($CandidateEndpoints.Count) candidate endpoint(s) for live-test"
+}
+if ($CandidatesOnly.IsPresent) {
+    $entries = @($entries | Where-Object { $_.ContainsKey('IsCandidate') -and $_.IsCandidate })
+    Write-Host "Phase 0: -CandidatesOnly active; manifest entries skipped ($($entries.Count) candidates remain)"
+}
+
 New-Item -Path $OutDir -ItemType Directory -Force | Out-Null
-Write-Host ("Manifest has {0} entries; filter='{1}'; include deferred={2}" -f $entries.Count, $StreamFilter, [bool]$IncludeDeferred)
+Write-Host ("Manifest+candidates has {0} entries; filter='{1}'; include deferred={2}" -f $entries.Count, $StreamFilter, [bool]$IncludeDeferred)
 Write-Host ""
 
 $summary = @()
@@ -202,6 +254,15 @@ foreach ($entry in ($entries | Sort-Object Tier, Stream)) {
     $method   = if ($entry.ContainsKey('Method') -and $entry.Method) { $entry.Method } else { 'GET' }
     $body     = if ($entry.ContainsKey('Body')   -and $entry.Body)   { $entry.Body }   else { $null }
     $deferred = [bool]($entry.ContainsKey('Deferred') -and $entry.Deferred)
+
+    # Phase 0 extension (Section R++++++++++): substitute {TenantId} in path
+    # using session's TenantId. This is NOT per-entity fanout (single tenant
+    # context), just a runtime template token like Headers already handle.
+    # Per-entity placeholders ({MachineId}, {UserId}, {OutbreakId}, etc.) still
+    # skip — those need PerEntityFanout (Architecture A).
+    if ($path -match '\{TenantId\}' -and $session.TenantId) {
+        $path = $path -replace '\{TenantId\}', [string]$session.TenantId
+    }
     $hasPlaceholder = $path -match '\{[^}]+\}'
     $availability = if ($entry.ContainsKey('Availability') -and $entry.Availability) { $entry.Availability } else { 'live' }
     # v0.1.0-beta.1: resolve Headers with {TenantId} template token.

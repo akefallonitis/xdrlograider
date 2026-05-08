@@ -1,0 +1,442 @@
+[
+  {
+    "Category": "configuration",
+    "Method": "POST",
+    "Path": "/mtp/sentinelOnboarding/sentinel/workspaces/eligibleForOnboarding",
+    "OpId": "Configuration.ListEligibleSentinelWorkspaces",
+    "Summary": "List eligible Sentinel workspaces",
+    "Covered": false
+  },
+  {
+    "Category": "configuration",
+    "Method": "POST",
+    "Path": "/mdc/views/inventory/assets",
+    "OpId": "Configuration.QueryCloudAssetInventory",
+    "Summary": "Query cloud asset inventory",
+    "Covered": false
+  },
+  {
+    "Category": "configuration",
+    "Method": "POST",
+    "Path": "/mdc/views/inventory/metrics",
+    "OpId": "Configuration.QueryCloudAssetInventoryMetrics",
+    "Summary": "Query cloud asset inventory metrics",
+    "Covered": false
+  },
+  {
+    "Category": "configuration",
+    "Method": "POST",
+    "Path": "/mdc/views/inventory/schema",
+    "OpId": "Configuration.GetCloudAssetInventorySchema",
+    "Summary": "Get cloud asset inventory schema",
+    "Covered": false
+  },
+  {
+    "Category": "configuration",
+    "Method": "POST",
+    "Path": "/mdc/views/overview/overviewMetrics",
+    "OpId": "Configuration.GetCloudOverviewMetrics",
+    "Summary": "Get cloud overview metrics",
+    "Covered": false
+  },
+  {
+    "Category": "configuration",
+    "Method": "POST",
+    "Path": "/mdc/views/inventory/ai-agents-v3/agents-current-count-by-platform-metrics",
+    "OpId": "Configuration.GetAiAgentCountsByPlatform",
+    "Summary": "Get AI agent counts by platform",
+    "Covered": false
+  },
+  {
+    "Category": "configuration",
+    "Method": "POST",
+    "Path": "/mdc/views/inventory/ai-agents-v3/agents-discovered-overtime",
+    "OpId": "Configuration.GetAiAgentsDiscoveredOverTime",
+    "Summary": "Get AI agents discovered over time",
+    "Covered": false
+  },
+  {
+    "Category": "configuration",
+    "Method": "POST",
+    "Path": "/mdc/views/inventory/ai-agents-v3/agents-requiring-attention-overtime-metrics",
+    "OpId": "Configuration.GetAiAgentsRequiringAttentionOverTime",
+    "Summary": "Get AI agents requiring attention over time",
+    "Covered": false
+  },
+  {
+    "Category": "endpoint_configuration",
+    "Method": "POST",
+    "Path": "/mtp/settings/GetAdvancedFeaturesSetting",
+    "OpId": "EndpointConfiguration.GetAdvancedFeatures",
+    "Summary": "Get advanced features settings",
+    "Covered": false
+  },
+  {
+    "Category": "endpoint_configuration",
+    "Method": "POST",
+    "Path": "/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies",
+    "OpId": "EndpointConfiguration.ListSecurityPolicies",
+    "Summary": "List endpoint security policies",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mtp/xspmatlas/attacksurface/query",
+    "OpId": "ExposureManagement.QueryAttackSurface",
+    "Summary": "Query attack surface graph",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mtp/xspm/attackpaths",
+    "OpId": "ExposureManagement.GetAttackPaths",
+    "Summary": "Get attack paths",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mtp/xspm/chokepoints",
+    "OpId": "ExposureManagement.GetChokePoints",
+    "Summary": "Get choke points",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mtp/xspm/topentrypoints",
+    "OpId": "ExposureManagement.GetTopEntryPoints",
+    "Summary": "Get top entry points",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mtp/xspm/toptargets",
+    "OpId": "ExposureManagement.GetTopTargets",
+    "Summary": "Get top targets",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mtp/xspm/hunting",
+    "OpId": "ExposureManagement.RunHuntingQuery",
+    "Summary": "Run XSPM hunting query",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/recommendations/items",
+    "OpId": "ExposureManagement.ListMdcRecommendationItems",
+    "Summary": "List MDC recommendation items",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/recommendations/recommendationsMetrics",
+    "OpId": "ExposureManagement.GetMdcRecommendationMetrics",
+    "Summary": "Get MDC recommendation metrics",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/recommendations/schema",
+    "OpId": "ExposureManagement.GetMdcRecommendationSchema",
+    "Summary": "Get MDC recommendations schema",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/vulnerabilities/allVulnerabilitiesPageItems",
+    "OpId": "ExposureManagement.ListMdcAllVulnerabilitiesPageItems",
+    "Summary": "List MDC all-vulnerabilities page items",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/vulnerabilities/getVulnerabilitiesOvertime",
+    "OpId": "ExposureManagement.GetMdcVulnerabilitiesOverTime",
+    "Summary": "Get MDC vulnerabilities over time",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/vulnerabilities/items",
+    "OpId": "ExposureManagement.ListMdcVulnerabilityItems",
+    "Summary": "List MDC vulnerability items",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/vulnerabilities/recommendationsByResourceType",
+    "OpId": "ExposureManagement.GetMdcRecommendationsByResourceType",
+    "Summary": "Get MDC recommendations by resource type",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/vulnerabilities/schema",
+    "OpId": "ExposureManagement.GetMdcVulnerabilitySchema",
+    "Summary": "Get MDC vulnerabilities schema",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/vulnerabilities/statisticsHeader",
+    "OpId": "ExposureManagement.GetMdcVulnerabilityStatisticsHeader",
+    "Summary": "Get MDC vulnerability statistics header",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/vulnerabilities/topCloudCVEsItems",
+    "OpId": "ExposureManagement.ListMdcTopCloudCvesItems",
+    "Summary": "List MDC top cloud CVE items",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/vulnerabilities/topCloudCVEsSchema",
+    "OpId": "ExposureManagement.GetMdcTopCloudCvesSchema",
+    "Summary": "Get MDC top cloud CVE schema",
+    "Covered": false
+  },
+  {
+    "Category": "exposure_management",
+    "Method": "POST",
+    "Path": "/mdc/views/vulnerabilities/vulnerabilitiesInsights",
+    "OpId": "ExposureManagement.GetMdcVulnerabilityInsights",
+    "Summary": "Get MDC vulnerability insights",
+    "Covered": false
+  },
+  {
+    "Category": "files",
+    "Method": "POST",
+    "Path": "/mtp/threatAnalyticsIndicators/stix/outbreaks/indicators/outbreaks/query",
+    "OpId": "Files.QueryThreatAnalyticsOutbreaks",
+    "Summary": "Query threat analytics outbreaks for file hash",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/identitiesapiservice/identity/entities",
+    "OpId": "Identity.ListEntities",
+    "Summary": "List identity entities",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/serviceaccount/entities",
+    "OpId": "Identity.ListServiceAccounts",
+    "Summary": "List service accounts",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/actions/byAccounts",
+    "OpId": "Identity.GetActionsByAccounts",
+    "Summary": "Get account actions",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/devices",
+    "OpId": "Identity.ListUserDevices",
+    "Summary": "List user devices",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/devices/count",
+    "OpId": "Identity.GetUserDevicesCount",
+    "Summary": "Get user devices count",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/identities",
+    "OpId": "Identity.ListIdentities",
+    "Summary": "List identities",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/identities/aggregatedData",
+    "OpId": "Identity.GetIdentitiesAggregatedData",
+    "Summary": "Get identities aggregated data",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/identities/count",
+    "OpId": "Identity.GetIdentitiesCount",
+    "Summary": "Get identities count",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/ispms",
+    "OpId": "Identity.GetIspmData",
+    "Summary": "Get identity ISPM data",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/pdProtection/entities",
+    "OpId": "Identity.ListPasswordProtectionEntities",
+    "Summary": "List password protection entities",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/serviceAccounts",
+    "OpId": "Identity.ListServiceAccountsV2",
+    "Summary": "List service accounts",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/serviceAccounts/filterOptions",
+    "OpId": "Identity.GetServiceAccountFilterOptions",
+    "Summary": "Get service account filter options",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/timeline/mtp",
+    "OpId": "Identity.GetUserMtpTimeline",
+    "Summary": "Get user cross-workload timeline",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/user/activityPeriod",
+    "OpId": "Identity.GetUserActivityPeriod",
+    "Summary": "Get user activity period",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/mdi/identity/userapiservice/users/IdentitiesStats",
+    "OpId": "Identity.GetIdentitiesStats",
+    "Summary": "Get identity stats",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/radius/api/radius/identities/accountsByUserId",
+    "OpId": "Identity.ListRadiusAccountsByUserId",
+    "Summary": "List Radius accounts by user ID",
+    "Covered": false
+  },
+  {
+    "Category": "identity",
+    "Method": "POST",
+    "Path": "/radius/api/radius/identities/accountsByUserIdCount",
+    "OpId": "Identity.GetRadiusAccountsByUserIdCount",
+    "Summary": "Get Radius accounts count by user ID",
+    "Covered": false
+  },
+  {
+    "Category": "multi_tenant",
+    "Method": "POST",
+    "Path": "/mtoapi/mdi/identity/userapiservice/identities",
+    "OpId": "MultiTenant.ListIdentities",
+    "Summary": "List MTO identities",
+    "Covered": false
+  },
+  {
+    "Category": "multi_tenant",
+    "Method": "POST",
+    "Path": "/mtoapi/mdi/identity/userapiservice/identities/aggregatedData",
+    "OpId": "MultiTenant.GetIdentitiesAggregatedData",
+    "Summary": "Get MTO identities aggregated data",
+    "Covered": false
+  },
+  {
+    "Category": "multi_tenant",
+    "Method": "POST",
+    "Path": "/mtoapi/mdi/identity/userapiservice/identities/count",
+    "OpId": "MultiTenant.GetIdentitiesCount",
+    "Summary": "Get MTO identities count",
+    "Covered": false
+  },
+  {
+    "Category": "portal_services",
+    "Method": "POST",
+    "Path": "/di/Aggregate/ThreatInstanceList",
+    "OpId": "PortalServices.AggregateThreatInstances",
+    "Summary": "Aggregate threat instances",
+    "Covered": false
+  },
+  {
+    "Category": "portal_services",
+    "Method": "POST",
+    "Path": "/di/Aggregate/ThreatProfileDetails",
+    "OpId": "PortalServices.AggregateThreatProfileDetails",
+    "Summary": "Aggregate threat profile details",
+    "Covered": false
+  },
+  {
+    "Category": "portal_services",
+    "Method": "POST",
+    "Path": "/di/Search/SubmissionDIESData",
+    "OpId": "PortalServices.SearchSubmissionDiesData",
+    "Summary": "Search report submission data",
+    "Covered": false
+  },
+  {
+    "Category": "portal_services",
+    "Method": "POST",
+    "Path": "/di/Search/SubmissionDIESDataAggregation",
+    "OpId": "PortalServices.AggregateSubmissionDiesData",
+    "Summary": "Aggregate report submission data",
+    "Covered": false
+  },
+  {
+    "Category": "secure_score",
+    "Method": "POST",
+    "Path": "/mdc/views/secureScore/cloudInitiativeMetrics",
+    "OpId": "SecureScore.GetCloudInitiativeMetrics",
+    "Summary": "Get cloud initiative secure score metrics",
+    "Covered": false
+  },
+  {
+    "Category": "sentinel_precision",
+    "Method": "POST",
+    "Path": "/apiproxy/arm/providers/Microsoft.ResourceGraph/resources",
+    "OpId": "SentinelPrecision.QueryResourceGraph",
+    "Summary": "Query Azure Resource Graph",
+    "Covered": false
+  }
+]
