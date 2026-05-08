@@ -5,7 +5,7 @@
     "_generator": {
       "name": "Hand-authored ARM template — single source of truth. No Bicep, no auto-compile, no drift."
     },
-    "comments": "XdrLogRaider v0.1.0 GA — pure Defender connector. Requires an existing Sentinel-enabled Log Analytics workspace. Provisions 13 DCRs sharing 1 DCE for 60 stream declarations (64 portal-only data streams + 1 ops heartbeat) routed to 11 consolidated workspace tables (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL). Adds GenericUI Data Connector card with 390 sample queries + 8 workbooks + 20 analytic rules + 12 hunting queries. Operators bring their own KQL."
+    "comments": "XdrLogRaider v0.1.0 GA — pure Defender connector. Requires an existing Sentinel-enabled Log Analytics workspace. Provisions 13 per-category DCRs sharing 1 DCE for 65 stream declarations (64 manifest streams [63 live + 1 deprecated] + 1 XdrConnectorHealth_CL ops). Routes to 11 consolidated workspace tables (10 Defender_<Category>_CL + 1 XdrConnectorHealth_CL). Adds GenericUI Data Connector card with 385 sample queries + 8 workbooks + 20 analytic rules + 12 hunting queries + 4 drift parsers. Operators bring their own KQL."
   },
   "parameters": {
     "projectPrefix": {
