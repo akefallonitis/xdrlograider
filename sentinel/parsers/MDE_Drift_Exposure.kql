@@ -22,7 +22,18 @@
 
 let MDE_Drift_Exposure = (lookback:timespan = 24h, window:timespan = 1h) {
     // Metadata + envelope columns excluded from field-level diff.
-    let metaCols = dynamic(['TimeGenerated', 'SourceStream', 'SourceName', 'EntityId', 'RawJson', 'Type', 'TenantId']);
+    // Architecture J.6 (2026-05-08): canonical Sentinel Entity Type cols are excluded from
+    // drift detection (treated as entity identifiers, not drift fields) but PRESERVED through
+    // to drift output for cross-table operator KQL filters.
+    let metaCols = dynamic([
+        'TimeGenerated', 'SourceStream', 'SourceName', 'EntityId', 'RawJson', 'Type', 'TenantId',
+        'HostMdatpId', 'HostFullName', 'HostName', 'HostDnsDomain', 'HostOSFamily', 'HostAadId',
+        'AccountName', 'AccountUPNSuffix', 'AccountObjectId', 'AccountSid',
+        'IpAddress', 'Url', 'DomainName',
+        'FileName', 'FileHashType', 'FileHashValue',
+        'CveId', 'OutbreakId', 'AlertId', 'PolicyId',
+        'MachineGroupId', 'MachineGroupName', 'PolicyType', 'Platform'
+    ]);
     let sources = union (Defender_ConfigurationAndSettings_CL | where SourceName in ('MDE_AssetClassificationSchema_CL')), (Defender_ExposureManagement_CL | where SourceName in ('MDE_AssetRules_CL', 'MDE_XspmInitiatives_CL', 'MDE_ExposureSnapshots_CL', 'MDE_ExposureRecommendations_CL', 'MDE_XspmAttackPaths_CL', 'MDE_XspmChokePoints_CL', 'MDE_XspmTopTargets_CL', 'MDE_PostureInitiativesSummarized_CL', 'MDE_PostureMetrics_CL', 'MDE_AppsSecureScore_CL', 'MDE_DataSecureScore_CL', 'MDE_IdentitySecureScore_CL', 'MDE_PostureSecurityEvents_CL', 'MDE_PostureTenants_CL', 'MDE_AttackSurfaceAttackPaths_CL', 'MDE_AttackSurfaceChokepoints_CL', 'MDE_XspmConnectors_CL'))
         | where TimeGenerated > ago(lookback);
     let current = sources
@@ -48,6 +59,34 @@ let MDE_Drift_Exposure = (lookback:timespan = 24h, window:timespan = 1h) {
             OldValue = iff(FieldInPrevious, tostring(TypedBag1[tostring(field)]), '')
         | where NewValue != OldValue or (FieldInCurrent != FieldInPrevious)
       )
+    // Architecture J.6: column_ifexists ensures canonical cols are in the schema
+    // before project, regardless of which Defender_*_CL tables this parser unions.
+    // Returns the existing value when the col is in the union schema, "" otherwise.
+    | extend
+        HostMdatpId      = tostring(column_ifexists("HostMdatpId", "")),
+        HostFullName     = tostring(column_ifexists("HostFullName", "")),
+        HostName         = tostring(column_ifexists("HostName", "")),
+        HostDnsDomain    = tostring(column_ifexists("HostDnsDomain", "")),
+        HostOSFamily     = tostring(column_ifexists("HostOSFamily", "")),
+        HostAadId        = tostring(column_ifexists("HostAadId", "")),
+        AccountName      = tostring(column_ifexists("AccountName", "")),
+        AccountUPNSuffix = tostring(column_ifexists("AccountUPNSuffix", "")),
+        AccountObjectId  = tostring(column_ifexists("AccountObjectId", "")),
+        AccountSid       = tostring(column_ifexists("AccountSid", "")),
+        IpAddress        = tostring(column_ifexists("IpAddress", "")),
+        Url              = tostring(column_ifexists("Url", "")),
+        DomainName       = tostring(column_ifexists("DomainName", "")),
+        FileName         = tostring(column_ifexists("FileName", "")),
+        FileHashType     = tostring(column_ifexists("FileHashType", "")),
+        FileHashValue    = tostring(column_ifexists("FileHashValue", "")),
+        CveId            = tostring(column_ifexists("CveId", "")),
+        OutbreakId       = tostring(column_ifexists("OutbreakId", "")),
+        AlertId          = tostring(column_ifexists("AlertId", "")),
+        PolicyId         = tostring(column_ifexists("PolicyId", "")),
+        MachineGroupId   = tostring(column_ifexists("MachineGroupId", "")),
+        MachineGroupName = tostring(column_ifexists("MachineGroupName", "")),
+        PolicyType       = tostring(column_ifexists("PolicyType", "")),
+        Platform         = tostring(column_ifexists("Platform", ""))
     | project
         TimeGenerated,
         StreamName       = SourceName,
@@ -61,6 +100,13 @@ let MDE_Drift_Exposure = (lookback:timespan = 24h, window:timespan = 1h) {
             not(FieldInPrevious), "Added",
             not(FieldInCurrent),  "Removed",
             "Modified"
-        )
+        ),
+        // Architecture J.6: canonical Sentinel Entity Type cols preserved for cross-table filters
+        HostMdatpId, HostFullName, HostName, HostDnsDomain, HostOSFamily, HostAadId,
+        AccountName, AccountUPNSuffix, AccountObjectId, AccountSid,
+        IpAddress, Url, DomainName,
+        FileName, FileHashType, FileHashValue,
+        CveId, OutbreakId, AlertId, PolicyId,
+        MachineGroupId, MachineGroupName, PolicyType, Platform
 };
 MDE_Drift_Exposure
