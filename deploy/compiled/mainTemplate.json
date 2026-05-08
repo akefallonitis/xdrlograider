@@ -3337,7 +3337,7 @@
               "la-destination"
             ],
             "outputStream": "Custom-Defender_ConfigurationAndSettings_CL",
-            "transformKql": "source | extend SourceName = 'MDE_RbacDeviceGroups_CL'"
+            "transformKql": "source | extend SourceName = 'MDE_RbacDeviceGroups_CL', MachineGroupId = GroupId"
           },
           {
             "streams": [
@@ -6242,7 +6242,7 @@
             "streams": [ "Custom-MDE_VulnerableMachines_CL" ],
             "destinations": [ "la-destination" ],
             "outputStream": "Custom-Defender_VulnerabilityManagement_CL",
-            "transformKql": "source | extend SourceName = 'MDE_VulnerableMachines_CL'"
+            "transformKql": "source | extend SourceName = 'MDE_VulnerableMachines_CL', HostOSFamily = OsPlatform"
           },
           {
             "streams": [ "Custom-MDE_VulnerabilityInventory_CL" ],
