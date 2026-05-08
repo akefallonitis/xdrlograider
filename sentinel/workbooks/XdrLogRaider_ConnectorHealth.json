@@ -113,9 +113,9 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "AppMetrics\n| where TimeGenerated {TimeRange}\n| where Name in ('xdr.dlq.depth', 'xdr.dlq.pop_count')\n| summarize MaxValue = max(Max) by Name, bin(TimeGenerated, 30m)\n| render timechart",
+        "query": "// B3 (Plan R+++++++++.2): DLQ telemetry - depth from Pop-XdrIngestDlq + pending_count from Connector-Heartbeat (current backlog snapshot)\nAppMetrics\n| where TimeGenerated {TimeRange}\n| where Name in ('xdr.dlq.depth', 'xdr.dlq.pop_count', 'xdr.dlq.pending_count')\n| summarize MaxValue = max(Max) by Name, bin(TimeGenerated, 30m)\n| render timechart",
         "size": 0,
-        "title": "DLQ depth and oldest-entry age over time",
+        "title": "DLQ depth + pending_count + pop rate over time (B3)",
         "queryType": 0,
         "resourceType": "microsoft.operationalinsights/workspaces"
       },

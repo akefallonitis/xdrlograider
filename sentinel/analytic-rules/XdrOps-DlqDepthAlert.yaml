@@ -17,15 +17,17 @@ tactics:
 relevantTechniques:
   - T1562
 query: |
-  // DLQ depth metric is emitted by Pop-XdrIngestDlq on each poll cycle.
+  // B3 (Plan R+++++++++.2 2026-05-08): DLQ depth telemetry from two sources:
+  //   - xdr.dlq.depth          — emitted by Pop-XdrIngestDlq per pop event (drain rate)
+  //   - xdr.dlq.pending_count  — emitted by Connector-Heartbeat per 5min (current backlog)
+  // Either metric exceeding threshold opens the alert; we union them for breadth.
   // AppMetrics schema: Sum/Min/Max/ItemCount (no `Value` column).
-  // Metric names canonical: xdr.dlq.depth, xdr.dlq.pop_count.
   AppMetrics
   | where TimeGenerated > ago(4h)
-  | where Name == "xdr.dlq.depth"
+  | where Name in ("xdr.dlq.depth", "xdr.dlq.pending_count")
   | summarize MaxValue = max(Max) by Name, bin(TimeGenerated, 1h)
   | where MaxValue > 100
-  | extend AlertReason = strcat("DLQ depth ", MaxValue, " > 100 entries")
+  | extend AlertReason = strcat(Name, " ", MaxValue, " > 100 entries")
   | project TimeGenerated, Name, MaxValue, AlertReason
 entityMappings: []
 eventGroupingSettings:

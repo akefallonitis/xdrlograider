@@ -311,6 +311,34 @@ function Invoke-DefenderPortalRequest {
                 }
 
                 $cacheKey = "$($Session.Upn)::$portalHost"
+
+                # B2 (Plan R+++++++++.2): auth circuit-breaker on 401-reauth-loop.
+                # If the same cacheKey has had >2 reauth failures within 5 minutes,
+                # fail fast + evict cache. Without this, FA loops with stale cached
+                # creds for 50min after a SA password rotation (silent staleness).
+                if (-not $script:AuthFailureWindow) { $script:AuthFailureWindow = @{} }
+                $now = [DateTime]::UtcNow
+                if (-not $script:AuthFailureWindow.ContainsKey($cacheKey)) {
+                    $script:AuthFailureWindow[$cacheKey] = New-Object System.Collections.Generic.List[DateTime]
+                }
+                # Prune entries older than 5min
+                $cutoff = $now.AddMinutes(-5)
+                $window = $script:AuthFailureWindow[$cacheKey]
+                while ($window.Count -gt 0 -and $window[0] -lt $cutoff) { $window.RemoveAt(0) }
+                if ($window.Count -ge 2) {
+                    # Circuit OPEN: evict cache + fail fast
+                    if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
+                        Send-XdrAppInsightsCustomEvent -EventName 'AuthChain.FailureCircuit' -OperationId $correlationId -Properties @{
+                            Path        = $Path
+                            CacheKey    = $cacheKey
+                            FailureCount = $window.Count
+                            WindowMin    = 5
+                        }
+                    }
+                    $script:SessionCache.Remove($cacheKey) | Out-Null
+                    throw "AuthChain.FailureCircuit OPEN — cacheKey=$cacheKey had $($window.Count) reauth failures in 5min. Cache evicted; SA credentials may need rotation. Operator action: rerun Initialize-XdrLogRaiderAuth.ps1."
+                }
+
                 if ($script:SessionCache.ContainsKey($cacheKey)) {
                     $cached = $script:SessionCache[$cacheKey]
                     $hasReauthInfo = $false
@@ -325,8 +353,12 @@ function Invoke-DefenderPortalRequest {
                         $Session.AcquiredUtc = $fresh.AcquiredUtc
                         try {
                             $resp = & $invoke $true
+                            # B2: zero failure window on success
+                            $script:AuthFailureWindow[$cacheKey].Clear()
                             break
                         } catch {
+                            # B2: increment failure window on reauth failure
+                            $script:AuthFailureWindow[$cacheKey].Add($now)
                             # v0.1.0-beta production-readiness polish: TrackException
                             # for the post-reauth-retry failure case so AI's
                             # exceptions table catches the auth-recovery dead-end
@@ -338,6 +370,7 @@ function Invoke-DefenderPortalRequest {
                                     -Properties @{
                                         Path   = $Path
                                         Phase  = 'portal-retry-after-reauth'
+                                        FailureWindowCount = $script:AuthFailureWindow[$cacheKey].Count
                                     }
                             }
                             throw "Retry after auto-refresh also failed: $($_.Exception.Message). Check that credentials are still valid."

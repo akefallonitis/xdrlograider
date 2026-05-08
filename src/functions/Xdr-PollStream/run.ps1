@@ -44,6 +44,20 @@ $config = [pscustomobject]@{
     ExpectedTenantId     = $env:TENANT_ID
 }
 
+# B1 (Plan R+++++++++.2): pre-activity config validation. If env vars are unset
+# (mis-deployed FA, stale ARM, manual env var deletion), Set-XdrTierStateRow + DCE
+# ingest fail silently; connector card flips Disconnected with no operator signal.
+# Throw before auth so AppInsights captures Phase='config-validation' for KQL alerts.
+$missingConfig = @()
+foreach ($k in 'KeyVaultUri','AuthSecretName','AuthMethod','DceEndpoint','DcrImmutableIdsJson','StorageAccountName','CheckpointTable','DlqTable','ExpectedTenantId') {
+    if ([string]::IsNullOrWhiteSpace($config.$k)) { $missingConfig += $k }
+}
+if ($missingConfig.Count -gt 0) {
+    $errMsg = "Config validation FAIL — missing env vars: $($missingConfig -join ', '). FA may be mis-deployed (ARM template + WEBSITE_RUN_FROM_PACKAGE update both required). Phase='config-validation'."
+    try { Send-XdrAppInsightsException -Message $errMsg -Properties @{ Phase = 'config-validation'; Stream = $streamName; Tier = $tier; OperationId = $opId; MissingVars = ($missingConfig -join ',') } } catch { }
+    throw $errMsg
+}
+
 $dlqDrained = 0
 $dlqEntries = @()
 

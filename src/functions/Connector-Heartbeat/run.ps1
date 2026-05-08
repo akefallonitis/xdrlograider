@@ -68,6 +68,28 @@ try {
         }
     }
 
+    # B3 (Plan R+++++++++.2): emit xdr.dlq.pending_count metric so the
+    # XdrOps-DlqDepthAlert analytic rule + ConnectorHealth workbook panel
+    # can detect silent DLQ accumulation (DCE flap, batch-too-large loop).
+    if ($config.StorageAccountName -and (Get-Command -Name Send-XdrAppInsightsCustomMetric -ErrorAction SilentlyContinue)) {
+        try {
+            $dlqCount = 0
+            try {
+                $sa = Get-AzStorageAccount -ResourceGroupName (Get-AzContext).Subscription.Id -Name $config.StorageAccountName -ErrorAction SilentlyContinue
+                if ($sa) {
+                    $tbl = (Get-AzStorageTable -Name ($env:XDR_INGEST_DLQ_TABLE_NAME ?? 'xdrIngestDlq') -Context $sa.Context -ErrorAction SilentlyContinue).CloudTable
+                    if ($tbl) {
+                        $rows = $tbl.ExecuteQuerySegmentedAsync([Microsoft.Azure.Cosmos.Table.TableQuery]::new(), $null).Result.Results
+                        $dlqCount = @($rows).Count
+                    }
+                }
+            } catch { Write-Warning "B3 DLQ count probe failed: $($_.Exception.Message)" }
+            Send-XdrAppInsightsCustomMetric -MetricName 'xdr.dlq.pending_count' -Value $dlqCount -Properties @{ FunctionName = 'Connector-Heartbeat' }
+        } catch {
+            Write-Warning ("Connector-Heartbeat: B3 DLQ metric emit failed: {0}" -f $_.Exception.Message)
+        }
+    }
+
     Write-Information ("Connector-Heartbeat complete: emitted 1 liveness + {0} per-tier aggregate rows" -f $aggregateRows.Count)
 } catch {
     Write-Error "Connector-Heartbeat failed: $_"

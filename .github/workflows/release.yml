@@ -81,16 +81,18 @@ jobs:
           }
           Write-Host "✓ Release-gate grep clean — 0 removed-stream refs in deploy/compiled + sentinel" -ForegroundColor Green
 
-      - name: Release-gate — DCR layout (13 per-category) + streamDecls = 66 + rules enabled:false + Data Connector 11 tables
+      - name: Release-gate — DCR layout (13 per-category) + streamDecls = 65 + rules enabled:false + Data Connector 11 tables
         shell: pwsh
         run: |
           # Release-gate quad (belt + suspenders on top of preflight):
           #   (1a) DCR count == 13 (one per consolidated workspace table; with
           #        semantic sub-domain split for Configuration and Exposure
           #        which exceed Azure's 10-flow cap)
-          #   (1b) DCR streamDeclarations.Count == 66 (65 streams + ops)
-          #        Phase 1 baseline (Section R++++++.1): 65 = 59 + 6 new
-          #        (Machines + SecurityPolicies + 4 TVM expansion)
+          #   (1b) DCR streamDeclarations.Count == 65 (64 streams + 1 ops)
+          #        Phase 1 baseline post-F1 (Section R+++++++++.1): 64 manifest
+          #        streams (63 live + 1 deprecated stub) + XdrConnectorHealth_CL
+          #        ops table = 65 streamDecls. F1 (2026-05-08) removed
+          #        MDE_MachineActions_CL end-to-end (66 -> 65).
           #   (2)  every analytic rule ships enabled:false
           #   (3)  Data Connector dataTypes.Count == 11
 
@@ -114,8 +116,8 @@ jobs:
                   $streamCount += ($dcr.properties.streamDeclarations.PSObject.Properties.Name).Count
               }
           }
-          if ($streamCount -ne 66) {
-              throw "Gate 1b FAIL: DCR streamDeclarations count = $streamCount (expected 66 = 65 streams + XdrConnectorHealth_CL operational; Phase 1 baseline includes 6 new streams: MDE_Machines_CL + MDE_SecurityPolicies_CL + 4 TVM expansion)"
+          if ($streamCount -ne 65) {
+              throw "Gate 1b FAIL: DCR streamDeclarations count = $streamCount (expected 65 = 64 manifest streams + XdrConnectorHealth_CL operational; F1 2026-05-08 removed MDE_MachineActions_CL: 66 -> 65)"
           }
           Write-Host "Gate 1b OK: DCR streamDeclarations.Count = $streamCount" -ForegroundColor Green
 
