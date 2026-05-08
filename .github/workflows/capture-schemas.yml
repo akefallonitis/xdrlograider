@@ -12,6 +12,21 @@ name: Capture Live Endpoint Schemas
 # accidental capture is possible from a misconfigured branch.
 
 on:
+  # Architecture E (Plan R++++++++++): nightly schema-drift detection + on-demand
+  # manual dispatch + on-manifest-change PR trigger. Runs OpenAPI fixture
+  # generator unconditionally (no live creds required for OpenAPI fallback).
+  schedule:
+    # 03:30 UTC nightly — catches portal-side schema drift; generates openapi-
+    # derived stubs for any new candidate streams added to manifest.
+    - cron: '30 3 * * *'
+
+  pull_request:
+    paths:
+      - 'src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1'
+      - 'tools/Capture-EndpointSchemas.ps1'
+      - 'tools/Generate-FixtureFromOpenApi.ps1'
+      - '.github/workflows/capture-schemas.yml'
+
   workflow_dispatch:
     inputs:
       stream_filter:
@@ -20,6 +35,14 @@ on:
         default: '*'
       include_deferred:
         description: 'Attempt deferred streams too (expected 4xx/5xx)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      skip_live_capture:
+        description: 'Skip live capture (only run OpenAPI fixture generation — useful when SP creds rotate)'
         required: false
         default: 'false'
         type: choice
@@ -60,12 +83,21 @@ jobs:
           XDRLR_TEST_XSRF_TOKEN=$env:CAPTURE_XSRF_TOKEN
           "@ | Out-File -FilePath $envFile -Encoding utf8
 
-      - name: Run capture
+      - name: Run capture (skip on cron / PR / when no creds / when skip_live_capture set)
+        # Live capture requires SP creds (CAPTURE_* secrets). Cron + PR runs may
+        # not have valid creds (lab tenant; rotation). Architecture E unconditionally
+        # runs the OpenAPI fixture generator step below — that step doesn't need
+        # live creds. So if live capture skipped, we still produce schema fixtures.
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_live_capture != 'true' && env.CAPTURE_UPN != '' }}
+        env:
+          CAPTURE_UPN: ${{ secrets.CAPTURE_UPN }}
         shell: pwsh
         run: |
           $extra = @()
           if ('${{ inputs.include_deferred }}' -eq 'true') { $extra += '-IncludeDeferred' }
-          pwsh -NoProfile -File ./tools/Capture-EndpointSchemas.ps1 -StreamFilter '${{ inputs.stream_filter }}' @extra
+          $streamFilter = '${{ inputs.stream_filter }}'
+          if (-not $streamFilter) { $streamFilter = '*' }
+          pwsh -NoProfile -File ./tools/Capture-EndpointSchemas.ps1 -StreamFilter $streamFilter @extra
           if ($LASTEXITCODE -ne 0) { throw "Capture failed (exit $LASTEXITCODE)" }
 
       - name: Generate openapi-derived fixtures for streams without live capture
