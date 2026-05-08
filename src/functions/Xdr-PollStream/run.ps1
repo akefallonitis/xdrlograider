@@ -148,7 +148,27 @@ try {
         $sourceRows = @()
         $sourceErr = $null
         try {
-            $sourceRows = @(Invoke-MDEEndpoint @sourceArgs)
+            $rawSource = Invoke-MDEEndpoint @sourceArgs
+            # Phase 1A-fix (Section R++++++++++ 2026-05-09): Phase 1A diagnostic
+            # revealed Invoke-MDEEndpoint returned 1 row whose own props were array-
+            # builtins ([Length,LongLength,Rank,SyncRoot,IsReadOnly,IsFixedSize,
+            # IsSynchronized,Count]). Root cause: array-wrapped-in-array preservation
+            # through @() — @($x) where $x is already a single-array preserves the
+            # nesting, so $sourceRows[0] became the wrapping array vs first row.
+            # Fix: detect the wrapped-array case + unwrap.
+            if ($null -eq $rawSource) {
+                $sourceRows = @()
+            } elseif ($rawSource -is [System.Collections.IList] -and $rawSource.Count -gt 0 -and
+                      ($rawSource[0] -isnot [System.Collections.IList])) {
+                # Already a flat array of row objects — normal case
+                $sourceRows = @($rawSource)
+            } elseif ($rawSource -is [System.Collections.IList] -and $rawSource.Count -eq 1 -and
+                      $rawSource[0] -is [System.Collections.IList]) {
+                # Array-wrapped-in-array — unwrap one level
+                $sourceRows = @($rawSource[0])
+            } else {
+                $sourceRows = @($rawSource)
+            }
         } catch {
             $sourceErr = $_.Exception.Message
             Write-Warning ("Xdr-PollStream PerEntityFanout {0}: source stream {1} poll FAILED: {2}" -f
