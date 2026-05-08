@@ -2088,8 +2088,8 @@
                   "id": "[variables('dataConnectorId')]",
                   "title": "XdrLogRaider — Defender XDR portal telemetry",
                   "publisher": "[variables('solutionPublisher')]",
-                  "descriptionMarkdown": "Polls Microsoft Defender XDR portal-only endpoints (Action Center, Configuration, Exposure Management, Identity, Threat Analytics, Vulnerability Management, etc.) and lands telemetry in **11 consolidated Log Analytics tables** (`Defender_<Category>_CL`).<br><br>Authentication: unattended TOTP or software passkey via the service account.<br><br>**See the XdrLogRaider solution in the Content Hub for the full set of workbooks, analytic rules, hunting queries, and sample queries.**<br><br>Reference: [github.com/akefallonitis/xdrlograider](https://github.com/akefallonitis/xdrlograider)",
-                  "graphQueriesTableName": "XdrConnectorHealth_CL",
+                  "descriptionMarkdown": "Polls Microsoft Defender XDR portal-only endpoints. Authentication: unattended TOTP or software passkey via the service account.<br><br>**See the XdrLogRaider solution in the Content Hub for the full set of workbooks, analytic rules, hunting queries, and sample queries.** Streams + tables landed are listed below under **Data types**.<br><br>Reference: [github.com/akefallonitis/xdrlograider](https://github.com/akefallonitis/xdrlograider)",
+                  "graphQueriesTableName": "Defender_ExposureManagement_CL",
                   "graphQueries": [
                     {
                       "metricName": "Rows ingested (last 7d)",
@@ -2109,16 +2109,32 @@
                   ],
                   "sampleQueries": [
                     {
+                      "description": "Connector health — per-tier last-hour summary",
+                      "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | where Tier != 'Heartbeat' | summarize StreamsSucceeded=max(StreamsSucceeded), RowsIngested=sum(RowsIngested) by Tier"
+                    },
+                    {
+                      "description": "Per-stream success classification (live | live-empty | tenant-gated | error)",
+                      "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | where Tier != 'Heartbeat' | extend Reason = column_ifexists('Reason', '') | summarize Streams=dcount(SourceName) by Reason | order by Streams desc"
+                    },
+                    {
+                      "description": "ASR rules + AV + EDR + Firewall policies per platform (Intune/MEM, portal-only)",
+                      "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_SecurityPolicies_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, Platform, RawJson"
+                    },
+                    {
+                      "description": "Tenant Allow-Block-List indicators (TABL, portal-only)",
+                      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_TenantAllowBlock_CL' | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, IndicatorType, AllowBlockAction, CreatedBy, CreatedTime"
+                    },
+                    {
+                      "description": "XSPM exposure recommendations — latest top 10 by impact",
+                      "query": "Defender_ExposureManagement_CL | where SourceName == 'MDE_ExposureRecommendations_CL' | summarize arg_max(TimeGenerated, *) by EntityId | top 10 by TimeGenerated desc | project TimeGenerated, EntityId, RawJson"
+                    },
+                    {
+                      "description": "Drift detection — recent Configuration changes (Added/Removed/Modified)",
+                      "query": "MDE_Drift_Configuration(6h, 1h) | summarize Events=count() by ChangeType, StreamName | order by Events desc"
+                    },
+                    {
                       "description": "Recent auth chain events (App Insights)",
                       "query": "customEvents | where name in ('AuthChain.AADSTSError', 'AuthChain.Completed') | order by timestamp desc | take 10"
-                    },
-                    {
-                      "description": "Connector health (Heartbeat last 1h)",
-                      "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | where StreamsSucceeded > 0 | order by TimeGenerated desc"
-                    },
-                    {
-                      "description": "Suppression rules modified in the last 24h",
-                      "query": "Defender_ConfigurationAndSettings_CL | where SourceName == 'MDE_SuppressionRules_CL' | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by EntityId | project TimeGenerated, EntityId, RawJson"
                     }
                   ],
                   "dataTypes": [
