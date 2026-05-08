@@ -23,7 +23,7 @@
       - Connect-DefenderPortal accepts -Method Passkey
       - Get-XdrAuthFromKeyVault returns the passkey shape from KV
       - Auth chain has a passkey-specific code branch
-      - Documentation (AUTH.md + BRING-YOUR-OWN-PASSKEY.md) describes the
+      - Documentation (AUTH.md "Bring your own passkey" section) describes the
         unattended workflow
 #>
 
@@ -91,12 +91,17 @@ Describe 'Passkey unattended auth method — contract lock (iter 13.9 P1; v0.1.0
         $authDoc | Should -Match '(?i)passkey' -Because 'AUTH.md must document the passkey method'
     }
 
-    It 'docs/BRING-YOUR-OWN-PASSKEY.md exists with workflow description' {
-        $passkeyDoc = Join-Path $script:RepoRoot 'docs' 'BRING-YOUR-OWN-PASSKEY.md'
-        Test-Path $passkeyDoc | Should -BeTrue -Because 'passkey-specific workflow doc must exist'
+    It 'docs/AUTH.md contains the "Bring your own passkey" workflow section' {
+        # v0.1.0.x C6 consolidation (2026-05-08): BRING-YOUR-OWN-PASSKEY.md merged
+        # into docs/AUTH.md as a section. This test was previously checking for
+        # the standalone file; now verifies the section exists in AUTH.md instead.
+        $authDoc = Join-Path $script:RepoRoot 'docs' 'AUTH.md'
+        Test-Path $authDoc | Should -BeTrue -Because 'consolidated auth doc must exist'
 
-        $content = Get-Content $passkeyDoc -Raw
-        $content.Length | Should -BeGreaterThan 200 -Because 'doc must contain real workflow content, not be a stub'
+        $content = Get-Content $authDoc -Raw
+        $content | Should -Match '(?i)Bring your own passkey' -Because 'AUTH.md must contain the passkey workflow section (post-consolidation)'
+        $content | Should -Match '(?i)Required JSON schema' -Because 'AUTH.md must document the passkey JSON schema'
+        $content.Length | Should -BeGreaterThan 1000 -Because 'AUTH.md must contain substantial passkey workflow content'
     }
 
     It 'Get-XdrAuthFromKeyVault returns a credential hashtable with passkey-shape fields' {
