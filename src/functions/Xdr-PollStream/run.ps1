@@ -54,7 +54,15 @@ foreach ($k in 'KeyVaultUri','AuthSecretName','AuthMethod','DceEndpoint','DcrImm
 }
 if ($missingConfig.Count -gt 0) {
     $errMsg = "Config validation FAIL — missing env vars: $($missingConfig -join ', '). FA may be mis-deployed (ARM template + WEBSITE_RUN_FROM_PACKAGE update both required). Phase='config-validation'."
-    try { Send-XdrAppInsightsException -Message $errMsg -Properties @{ Phase = 'config-validation'; Stream = $streamName; Tier = $tier; OperationId = $opId; MissingVars = ($missingConfig -join ',') } } catch { }
+    try {
+        Send-XdrAppInsightsTrace -Message $errMsg -SeverityLevel 'Error' -Properties @{
+            Phase       = 'config-validation'
+            Stream      = $streamName
+            Tier        = $tier
+            OperationId = $opId
+            MissingVars = ($missingConfig -join ',')
+        }
+    } catch { }
     throw $errMsg
 }
 

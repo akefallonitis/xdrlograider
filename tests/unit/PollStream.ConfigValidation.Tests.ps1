@@ -47,8 +47,10 @@ Describe 'Xdr-PollStream config-validation gate (B1 regression-locker)' {
         $authPos | Should -BeGreaterThan $throwPos -Because 'throw must precede auth chain (fail-fast pattern)'
     }
 
-    It 'emits AppInsights exception with Phase=config-validation' {
-        $script:RunPs1Content | Should -Match "Send-XdrAppInsightsException.*Phase\s*=\s*'config-validation'" -Because 'operator KQL alerts on Phase==config-validation must trigger; emit before throw'
+    It 'emits AppInsights trace with Phase=config-validation + SeverityLevel=Error' {
+        # Send-XdrAppInsightsException requires a real [System.Exception] -Exception param;
+        # use Send-XdrAppInsightsTrace -SeverityLevel Error for programmatic config-fail signal.
+        $script:RunPs1Content | Should -Match "(?ms)Send-XdrAppInsightsTrace.*?-SeverityLevel\s+'Error'.*?Phase\s*=\s*'config-validation'" -Because 'operator KQL alerts on customDimensions.Phase==config-validation must trigger; emit before throw'
     }
 
     It 'config-validation block does NOT call portal API or KV before throw' {

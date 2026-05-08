@@ -20,6 +20,13 @@ Set-StrictMode -Version Latest
 # Lifetime: ~50 min (sccauth ~1h with 10-min safety margin).
 $script:SessionCache = @{}
 
+# B2 (Plan R+++++++++.2) — auth circuit-breaker sliding-window state.
+# Keyed by "<upn>::<host>" (same shape as SessionCache). Each value is a
+# List[DateTime] of reauth-failure timestamps; entries older than 5min are
+# pruned per request. Circuit OPENS at >=2 failures within 5min.
+# Initialized at module load so Set-StrictMode doesn't trip on first read.
+$script:AuthFailureWindow = @{}
+
 # Module-scope counter surfaced to per-tier heartbeat via Get-XdrPortalRate429Count
 # / Reset-XdrPortalRate429Count. Initialized unconditionally — module reimport
 # resets the counter (which is what we want).
