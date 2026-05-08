@@ -1,9 +1,26 @@
 id: a1b2c3d4-1111-4003-8003-000000000003
 name: MDE TVM top vulnerable machines + inventory + remediation actions
 description: |
-  Cross-stream TVM hunt joining top-N CVE-exposed machines, vulnerability CVE
-  inventory, software inventory, and recommendation actions from Phase 1 G8 TVM
-  expansion. Returns prioritized remediation work-list. Requires TvmPremium.
+  **What it does:** Cross-stream TVM (Threat & Vulnerability Management) hunt — unions latest snapshots of top-vulnerable machines + active CVE inventory + software inventory + remediation tasks. One operator-friendly view of the entire TVM landscape, sortable by stream for prioritization.
+
+  **When to run:** Weekly patch-prioritization review, monthly compliance posture report, before security audits, post-major-CVE disclosure (Log4Shell, MOVEit, ProxyShell) for tenant impact assessment.
+
+  **Why it matters:** TVM data is split across 4 nodoc endpoints (top-vulnerable / vulns / software / recommendations) — each useful, but the SOC value is in the JOIN. "Show me the top-10 most-exposed machines + which CVEs they have + which software causes those CVEs + what remediation tasks are open for them" is the patch-management orchestration question — and it only works if you can stitch all 4 together. This query gives that unified view in a single hunt.
+
+  **Triage path:**
+    1. Filter `Stream='_topVulnerable' | top 10 by RiskScore` — these are your patch-priority machines
+    2. For each: pivot to `Stream='_vulnInventory' | where AssetCount has <count>` to identify their CVE list
+    3. Pivot to `Stream='_softwareInv'` to identify which products on those machines drive the CVEs
+    4. Pivot to `Stream='_recommendations'` to find existing remediation tasks (else create new ones)
+    5. Track the work-list in your patch-management platform; re-run weekly to measure remediation velocity
+
+  **Expected baseline:** Output volume scales with tenant; tenants with `Stream='_topVulnerable'` empty = TVM Premium not licensed (expected for E5 vs E5+TVM-Premium).
+
+  **Tuning:** Adjust `24h` to your Inventory cadence. Filter by OS platform if you only patch one platform at a time.
+
+  **License:** Requires Microsoft Defender for Endpoint Plan 2 + TVM Premium add-on. Without TVM Premium, the 4 streams are tenant-gated (zero rows).
+
+  **MITRE:** TA0007 Discovery — T1518 Software Discovery; T1082 System Information Discovery; TA0001 Initial Access — T1190 Exploit Public-Facing Application (vulnerability inventory feeds defender prioritization).
 author: Alex Kefallonitis
 version: 1.0.0
 tags:

@@ -1,20 +1,26 @@
 id: 6d1b7a3e-9f2c-4e8d-a7b1-3c4d5e6f7a8b
 name: "[XdrOps] Connector DLQ depth or age exceeds operator threshold"
 description: |
-  XdrLogRaider's ingest dead-letter queue (Storage Table xdrIngestDlq) has
-  rows that have been waiting too long OR queue depth exceeded operational
-  threshold, indicating sustained DCE 5xx/429 backpressure.
+  **What it detects:** XdrLogRaider's ingest dead-letter queue (Storage Table `xdrIngestDlq`) has either:
+    - Depth > 100 entries (sustained backpressure), OR
+    - Oldest entry > 2 hours (greater than 1 poll cycle for fast tier — replay isn't keeping up)
 
-  
-  Operator-enabled (ships disabled per Sentinel Solution best practice).
+  **Why this matters:** The DLQ is the connector's safety net — when DCE ingestion fails (5xx, 429, network), failed batches go here for replay rather than data loss. Healthy operation: DLQ stays near-empty as `Pop-XdrIngestDlq` drains it on every poll cycle. Sustained depth/age means: (a) DCE is having sustained issues (Microsoft-side incident), (b) the failed batches are too large for retry (split-batch logic working but slow), (c) auth issues are preventing replay, OR (d) DLQ replay logic broke (regression).
 
-  Thresholds (operator-tuneable in query):
-    - Depth >100 entries OR
-    - Oldest entry >2h (> 1 poll cycle for fast tier)
+  **Triage path:**
+    1. AppMetrics → `xdr.ingest.dlq_depth` + `xdr.ingest.dlq_oldest_age_seconds` — confirm trend
+    2. AppDependencies → DCE ingestion → check 5xx/429 rate to identify root failure mode
+    3. AppExceptions → look for `Send-ToLogAnalytics` failures with batch-size or auth context
+    4. If sustained: check Azure Service Health for DCE / Log Analytics regional incidents
+    5. If localized to one stream: investigate that stream's row size or schema
+    6. Manually drain via `Pop-XdrIngestDlq -Force` if needed (last resort)
+    7. See `docs/RUNBOOK.md` "DLQ backlog" section
 
-  Triage in docs/RUNBOOK.md "DLQ backlog" section.
-  Auto-drain: Pop-XdrIngestDlq runs at start of every Defender-*-Refresh poll
-  to retry stuck batches with TTL eviction.
+  **Auto-drain mechanism:** `Pop-XdrIngestDlq` runs at start of every Xdr-PollStream activity to retry stuck batches with TTL eviction. Most transient issues self-resolve.
+
+  **Severity rationale:** Medium — backpressure indicates degraded ingest, not lost data; data is preserved in DLQ.
+
+  **MITRE:** TA0005 Defense Evasion — T1562 Impair Defenses (DLQ buildup may indicate attacker overwhelming pipeline).
 severity: Medium
 enabled: false
 requiredDataConnectors:

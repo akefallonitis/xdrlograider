@@ -6,7 +6,7 @@
     {
       "name": "header",
       "content": {
-        "json": "# MDE Exposure Map\n\nXSPM attack paths, chokepoints, and exposure score trends."
+        "json": "# MDE Exposure Map\n\n**What this dashboard shows:** Microsoft Security Exposure Management (XSPM) intelligence — simulated attack paths from internet/email entry points to crown-jewel assets, network chokepoints (high-leverage hardening targets), and tenant exposure score trending over time.\n\n**Use cases:**\n- **CISO executive reporting**: monthly tenant exposure score trend + top remediation opportunities\n- **Hardening prioritization**: identify chokepoints that break MANY attack paths simultaneously\n- **Asset criticality review**: validate which assets are tagged Critical + verify XSPM treats them correctly\n- **Path-break validation**: simulate hardening actions before applying them; confirm path elimination\n\n**License:** Requires Microsoft Security Exposure Management (XSPM) — E5 + Security add-on. Empty data on unlicensed tenants.\n\n**Data sources:** `Defender_ExposureManagement_CL` (XSPM streams: AttackPaths, ChokePoints, TopTargets, etc.) — hourly cadence XspmGraph tier."
       },
       "type": 1
     },

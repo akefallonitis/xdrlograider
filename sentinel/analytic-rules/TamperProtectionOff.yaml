@@ -1,7 +1,20 @@
 id: d7b8f0a1-2c45-4d6f-e9a1-5b4c7f2d0e05
 name: MDE Tamper Protection disabled
 description: |
-  Defender Tamper Protection was disabled. This allows malicious tools to modify Defender settings directly.
+  **What it detects:** Microsoft Defender's Tamper Protection feature was disabled (`AdvancedFeatures.tamperProtection.Enabled` flipped to `false`). When ON, Tamper Protection prevents users (including admins via PowerShell + GPO) from disabling Defender, removing definitions, or modifying scan exclusions. When OFF, all those protections become bypassable.
+
+  **Why this matters:** Tamper Protection is Defender's "anti-attacker" feature — it prevents the most common EDR evasion (malware that disables Defender before running its payload). Disabling Tamper Protection is rarely justified outside very narrow troubleshooting windows. Sustained `Enabled=false` is one of the strongest "attacker prepared the ground" signals available.
+
+  **Triage path:**
+    1. Identify which AdvancedFeatures entity was changed (`EntityId`)
+    2. Verify against the change-management ticket — there should be one (and only one)
+    3. Re-enable Tamper Protection IMMEDIATELY (Defender for Endpoint → Settings → Advanced features) unless documented troubleshooting requires it OFF for a specific window
+    4. Hunt for activity that may have abused the window: `DeviceProcessEvents | where ActionType == 'AntimalwareEngineDisabled'` etc.
+    5. If no ticket: treat as P1 — likely indicator of attacker preparation; isolate machines + escalate to IR
+
+  **Severity rationale:** High — Tamper Protection is the EDR's last-line defense; disabling it is rarely benign.
+
+  **MITRE:** TA0005 Defense Evasion — T1562.001 Disable or Modify Tools (PRIMARY); T1562.012 Disable or Modify Linux Audit System (cross-platform context).
 severity: High
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

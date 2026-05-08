@@ -6,7 +6,7 @@
     {
       "name": "header",
       "content": {
-        "json": "# MDE Governance Scorecard\n\nRBAC, asset classification, and approval governance posture."
+        "json": "# MDE Governance Scorecard\n\n**What this dashboard shows:** Defender XDR governance posture — Unified RBAC role assignments, RBAC device groups, asset criticality classifications, asset rules, and admin approval workflows. Visualizes 'who can do what to whom' across the tenant.\n\n**Use cases:**\n- **Quarterly access review**: who has Defender admin permissions; who SHOULD?\n- **Role-creep detection**: trending of role additions over 90d/180d windows\n- **Asset classification audit**: which devices are tagged Critical; verify correctness\n- **Approval workflow validation**: pending approvals + admin-attested device groups\n- **Compliance evidence**: SOC2 / ISO27001 access-control evidence pack\n\n**Data sources:** `MDE_UnifiedRbacRoles_CL`, `MDE_RbacDeviceGroups_CL`, `MDE_AssetRules_CL`, `MDE_AssetClassificationSchema_CL` — Configuration + Inventory tiers.\n\n**Pair with:** `RbacEscalationEvents.yaml` hunting query for time-series role-addition tracking."
       },
       "type": 1
     },

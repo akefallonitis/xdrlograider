@@ -1,7 +1,23 @@
 id: 8c69e1f2-3b5a-4c7e-d0f2-6a5b8e3c1d10
 name: MDE config changes by UPN
 description: |
-  Correlate Defender XDR configuration drift with AuditLogs actor UPNs to surface "who changed what". Useful for post-incident retrospective and change-control reviews.
+  **What it does:** Correlates Defender XDR configuration / inventory / exposure drift events with AzureAD `AuditLogs` to attribute each drift to the admin UPN who triggered it. Drift parsers tell you *what* changed; this query tells you *who*.
+
+  **When to run:** Post-incident retrospective ("who broadened the suppression rule on April 28th?"), monthly change-control review, audit response, suspected admin compromise investigation.
+
+  **Why it matters:** Drift events alone aren't actionable — every config change has a responsible actor. Without UPN attribution you can't (a) hold owners accountable, (b) detect lateral movement through admin accounts, or (c) validate against change-management tickets.
+
+  **Triage path:**
+    1. Sort by `DriftEvents desc` — top UPNs are either prolific admins or compromised
+    2. For unknown UPNs (`unknown (no correlating audit)`): drift happened but no `AuditLogs` row matched → investigate as service-principal / API-direct change
+    3. For high-volume UPNs: cross-reference `Streams` + `Operations` against the admin's role + that day's change tickets
+    4. If suspicious: pivot to `SigninLogs` for that UPN — check unusual IP, device, or risk-state
+
+  **Expected baseline:** 2-5 admin UPNs accounting for 80%+ of drift; 10-20 distinct UPNs total in a healthy SOC tenant. Single UPN with >100 changes/week = either over-privileged or compromised.
+
+  **Implementation note:** Section R++.C B7 fix — joins on `bin(TimeGenerated, 5min)` not exact-second equality (sub-second granularity broke the original join, leaving every `ActorUpn` as "unknown").
+
+  **MITRE:** TA0005 Defense Evasion — T1562 Impair Defenses; TA0004 Privilege Escalation — T1078 Valid Accounts.
 author: Alex Kefallonitis
 version: 1.0.0
 tags:

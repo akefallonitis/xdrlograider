@@ -1,7 +1,24 @@
 id: 9d7af2b3-4c6b-4d8f-e1a3-7b6c9f4d2e11
 name: MDE after-hours drift events
 description: |
-  Compliance + pipeline drift events that occurred outside business hours (0900-1700 UTC) or on weekends. Attackers prefer making config changes off-hours to avoid review-window oversight.
+  **What it does:** Surfaces Defender XDR configuration + inventory + maintenance drift events that occurred outside 09:00-17:00 UTC or on weekends.
+
+  **When to run:** Daily as part of the SOC after-hours review pack. Particularly valuable on Mondays (covers the entire weekend) and after holidays.
+
+  **Why it matters:** Attackers who compromise admin credentials prefer to make stealth config changes off-hours to avoid the change-review window. Common adversary actions: disable EDR, add allow-list indicators (TABL), modify suppression rules, change AV exclusions, weaken alert tuning thresholds.
+
+  **Triage path:**
+    1. Filter to `ChangeType in ('Added','Modified')` for high-impact changes (Removed is often legitimate cleanup)
+    2. Pivot on `EntityId` + `FieldName` — note WHICH config item and WHAT field changed
+    3. Cross-reference with admin sign-in logs (SigninLogs) at the same `TimeGenerated` to identify the actor
+    4. Validate against approved change tickets in your ITSM/CR system
+    5. If unauthorized: revert the change, lock the admin account, escalate to incident response
+
+  **Expected baseline:** 0-5 events per week in mature tenants. Sustained >10/week suggests admin process drift or compromised account.
+
+  **Tuning:** Adjust `9` and `17` to your tenant's local business hours. Convert `TimeGenerated` to local timezone before comparison if your team isn't UTC-based.
+
+  **MITRE:** TA0005 Defense Evasion — T1562.001 Disable or Modify Tools (most common); T1556 Modify Authentication Process; T1098 Account Manipulation.
 author: Alex Kefallonitis
 version: 1.1.0
 tags:

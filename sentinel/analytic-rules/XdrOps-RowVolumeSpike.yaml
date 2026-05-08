@@ -1,26 +1,32 @@
 id: 7e8c9d2a-1b4f-4d3e-8a6c-9e2d4f5a6b7c
 name: "[XdrOps] Connector row-volume spike — cost-budget gate"
 description: |
-  XdrLogRaider's ingest pipeline emits `xdr.ingest.row_count_per_hour` per
-  stream. This rule detects when any stream's hourly row count exceeds
-  3× its 7-day rolling baseline — a cost-budget gate that catches:
+  **What it detects:** XdrLogRaider's ingest pipeline emits `xdr.ingest.row_count_per_hour` per stream. This rule fires when ANY stream's hourly row count exceeds 3× its 7-day rolling baseline — the classic "something changed and it's pumping more rows than expected" signal.
 
-    1. Operator-driven schema explosion (e.g., adding wildcard PathParams that
-       fan out 100x).
-    2. Tenant-side breach scenario (e.g., suddenly 10k device-control policy
-       rows where there were 50 — operator should investigate intent).
-    3. Connector regression that deduplicates incorrectly and blasts every
-       row twice.
-    4. ProjectionMap mis-configuration causing row multiplication
-       (e.g., property-bag flatten on the wrong field).
+  **Why this matters:** This is a cost-budget gate — Sentinel ingestion costs money per GB, and a runaway connector can blow through monthly budget in days. But it's ALSO a quality signal — sudden 3x volume usually means SOMETHING changed:
 
-  Suppresses for 4h after first fire to prevent alert flood when the spike
-  is legitimate (e.g., onboarding a new fleet).
+    1. **Operator-driven schema explosion** — e.g., adding wildcard PathParams that fan out 100x without realizing
+    2. **Tenant-side breach scenario** — e.g., suddenly 10k device-control policy rows where there were 50 (mass policy push by attacker?)
+    3. **Connector regression** — deduplication broken; every row blasting twice
+    4. **ProjectionMap mis-configuration** — property-bag flatten on the wrong field producing N-fold multiplication
+    5. **Legitimate fleet onboarding** — new mass device enrollment doubling Inventory tier rows (4h suppression handles this)
 
-  Operator-enabled (ships `enabled: false` per Sentinel Solution best practice).
-  D'.49 in v0.1.0 GA plan: cost-budget runtime gate.
+  **Triage path:**
+    1. Identify the spiking stream(s) from `Stream` field
+    2. Check `RecentRows` vs `BaselineRowsPerHour` magnitude — 3x or 30x?
+    3. Pull recent rows: `Defender_<Category>_CL | where SourceName == '<Stream>' | summarize count() by bin(TimeGenerated, 1h)` — confirm volume curve
+    4. Sample 10 recent rows: are they distinct entities, or duplicates? Duplicates = connector bug
+    5. If schema/dedup issue: investigate manifest ProjectionMap recent changes
+    6. If real volume increase: investigate tenant — was there a mass policy push, fleet onboarding, breach?
+    7. See `docs/RUNBOOK.md` "Row-volume spike" section
 
-  Triage in docs/RUNBOOK.md "Row-volume spike" section.
+  **Suppression:** 4h after first fire to prevent alert flood on legitimate onboarding events.
+
+  **Severity rationale:** Medium — cost impact is gradual; investigate within 24h.
+
+  **D'.49 in v0.1.0 GA plan: cost-budget runtime gate.**
+
+  **MITRE:** TA0040 Impact — T1565 Data Manipulation (when spike indicates attacker generating noise to obscure real signals).
 severity: Medium
 enabled: false
 requiredDataConnectors:

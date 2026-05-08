@@ -1,7 +1,24 @@
 id: 3b1e26f7-8a0f-4b2d-c5e7-1f0a3d8b6c15
 name: MDE exclusion additions (past quarter)
 description: |
-  File/path/process exclusions ADDED to AV/EDR policy in the last 90 days. Attackers abuse exclusions for persistence — adding a path that hosts their malware effectively whitelists it from Defender scanning.
+  **What it does:** Returns every file/path/process exclusion ADDED to AV/EDR policy across the last 90 days. Filters drift events to `ChangeType='Added'` and `FieldName has "exclusion"`.
+
+  **When to run:** Monthly governance review, post-AV-tuning ticket validation, suspected persistence investigation, after any "we whitelisted that for compatibility" admin claim.
+
+  **Why it matters:** Exclusions are the #1 EDR-bypass technique abused by attackers with admin credentials. Adding `C:\ProgramData\<malware-folder>` to the AV exclusion list whitelists everything in that folder from scanning — the file gets dropped, executes, persists, and Defender literally never sees it. Equally common: adding `powershell.exe` as a process exclusion, or adding domain-wide path exclusions during ransomware staging. Each addition needs business justification AND a change ticket.
+
+  **Triage path:**
+    1. For each row: verify `EntityId` (the policy + scope) + `NewValue` (the path/hash/process) against your change-management ticket system
+    2. If unauthorized: investigate `Operator` (admin who made the change) — check `SigninLogs` for compromised session indicators
+    3. Remove the exclusion via Intune/MDE policy
+    4. Hunt for malicious files within the previously-excluded path: `DeviceFileEvents | where FolderPath has '<path>'`
+    5. Lock admin account; escalate to incident response if confirmed unauthorized
+
+  **Expected baseline:** 0-3 exclusion additions per quarter in a mature tenant. Legitimate use cases: developer workstations, vendor compatibility, performance-sensitive servers. Every addition should map to a ticket.
+
+  **Tuning:** Adjust `90d` lookback for SOX/HIPAA quarterly review (use `120d`) or weekly governance review (use `7d`).
+
+  **MITRE:** TA0005 Defense Evasion — T1562.001 Disable or Modify Tools (primary); TA0003 Persistence — T1546 Event Triggered Execution (when exclusion enables payload persistence).
 author: Alex Kefallonitis
 version: 1.1.0
 tags:

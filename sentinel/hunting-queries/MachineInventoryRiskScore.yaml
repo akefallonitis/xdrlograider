@@ -1,8 +1,23 @@
 id: a1b2c3d4-1111-4001-8001-000000000001
 name: MDE machine inventory by risk score
 description: |
-  Per-machine risk score + exposure from MDE_Machines_CL device inventory
-  (Phase 1 Architecture B). SOC drill-down by RiskScore desc.
+  **What it does:** Returns the latest snapshot of every device in MDE_Machines_CL inventory sorted by RiskScore descending. One row per device with HealthStatus, ExposureLevel, OS info, and FirstSeen/LastSeen timestamps.
+
+  **When to run:** Daily SOC stand-up (top-N risk drill-down), weekly executive risk reporting, post-incident scope assessment, before patching campaigns.
+
+  **Why it matters:** RiskScore is Defender's per-device aggregate of active alerts + active investigations + recent suspicious activity. ExposureLevel is the TVM weakness rating. A machine with `RiskScore='High'` AND `ExposureLevel='High'` is the SOC's highest-priority response target — it has both active threats AND known unpatched vulnerabilities. This is the foundation stream for Architecture A PerEntityFanout (DeviceTimeline depends on this inventory).
+
+  **Triage path:**
+    1. Filter top 20 by `RiskScore desc` — these are your incident-response priorities
+    2. For each: pivot to `Defender_ActionCenter_CL` for active alerts, `MDE_DeviceTimeline_CL` for recent process/file/network events, `Defender_VulnerabilityManagement_CL` for CVE list
+    3. `HealthStatus='Inactive'` for >7 days = stale agent; investigate connectivity or device decommissioning
+    4. `OsPlatform` outlier (e.g., 1 macOS in a Windows tenant) = scope review
+
+  **Expected baseline:** 5-10% of fleet at `RiskScore='Medium'` or higher in active tenants; sustained `>20% High` indicates incident-in-progress.
+
+  **Tuning:** Adjust `24h` to your Inventory cadence if changed. Add `where Tags has 'critical-asset'` for crown-jewel-only views.
+
+  **MITRE:** TA0007 Discovery — T1082 System Information Discovery; T1018 Remote System Discovery (inventory enumeration is foundational SOC visibility).
 author: Alex Kefallonitis
 version: 1.0.0
 tags:

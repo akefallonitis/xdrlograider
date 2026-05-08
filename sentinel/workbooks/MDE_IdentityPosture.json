@@ -6,7 +6,7 @@
     {
       "name": "header",
       "content": {
-        "json": "# MDE Identity Posture\n\nMDI service account coverage, DC onboarding, alert threshold drift."
+        "json": "# MDE Identity Posture\n\n**What this dashboard shows:** Microsoft Defender for Identity (MDI) deployment posture — domain controller sensor coverage, service account inventory + classification, identity onboarding state, and alert-threshold drift tracking.\n\n**Use cases:**\n- **MDI deployment validation**: every DC has an active sensor (`IsActive=True`)\n- **Service account inventory**: track classified service accounts + their privilege levels\n- **Sensor health monitoring**: detect DC sensor offline events (silent identity-detection blind spots)\n- **Threshold drift**: alert thresholds being weakened over time = detection blind-spot accumulation\n- **MDI onboarding gaps**: identify DCs not yet sensored (incomplete coverage)\n\n**License:** Requires Microsoft Defender for Identity. Empty data on unlicensed tenants.\n\n**Data sources:** `MDE_DCCoverage_CL`, `MDE_IdentityServiceAccounts_CL`, `MDE_IdentityOnboarding_CL`, `MDE_IdentityAlertThresholds_CL`, `MDE_RemediationAccounts_CL` — Inventory tier.\n\n**Pair with:** `MdiDcSensorDown.yaml` analytic rule + `MdiServiceAccountDrift.yaml` hunting query."
       },
       "type": 1
     },

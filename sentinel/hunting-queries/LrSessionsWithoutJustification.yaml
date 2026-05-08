@@ -1,7 +1,24 @@
 id: 2a0d15e6-7f9e-4a1c-b4d6-0e9f2c7a5b14
 name: MDE Live Response sessions without justification
 description: |
-  Live Response sessions initiated without a paired incident or investigation.
+  **What it does:** Surfaces Defender Live Response sessions started in the last 7 days that have NO paired `investigationId` — i.e., the responder ran direct shell access without an open incident or AIR investigation linking the session to a justified ticket.
+
+  **When to run:** Weekly responder-activity audit, before/after personnel transitions, suspected LR-credential theft investigation.
+
+  **Why it matters:** Live Response gives `SYSTEM`-equivalent access to any device — running scripts, downloading files, killing processes. Every LR session should be tied to an active incident OR an AIR investigation OR a documented IR ticket. Sessions without that linkage indicate one of: (a) responder bypassing process (audit finding), (b) compromised LR credentials (active threat), or (c) test/dev work that should be documented separately.
+
+  **Triage path:**
+    1. For each row: identify the responder UPN from RawJson `requestor` field
+    2. Cross-reference with the responder's open incident queue at the session's `TimeGenerated`
+    3. If no match: contact responder for ticket reference; if responder denies the session → assume compromised credentials
+    4. Pull full LR commands from `Defender_ActionCenter_CL.RawJson` for forensic record
+    5. Pair with `LrUnsignedScriptsOn.yaml` analytic rule (config-side: are unsigned scripts even allowed?)
+
+  **Expected baseline:** 0-2 sessions/week in a mature tenant; >5/week = LR-tooling abuse or process gap.
+
+  **Tuning:** Increase `7d` to `30d` for monthly compliance review. Add `requestorOrganizationId` filter if your tenant has cross-tenant LR.
+
+  **MITRE:** TA0007 Discovery — T1059 Command and Scripting Interpreter; TA0009 Collection — T1213 Data from Information Repositories (when LR exfiltrates files).
 author: Alex Kefallonitis
 version: 1.0.0
 tags:

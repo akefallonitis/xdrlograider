@@ -1,7 +1,24 @@
 id: 4c2f37a8-9b10-4c3e-d6f8-2a1b4e9c7d16
 name: MDE RBAC escalation events
 description: |
-  Role assignments to accounts that previously had none.
+  **What it does:** Surfaces Defender XDR Unified RBAC role assignments ADDED in the last 30 days, joined with the current state of the role record. Returns who gained what permission on what date, with the latest role definition for context.
+
+  **When to run:** Weekly admin-access review, monthly compliance audit, post-IT-onboarding/offboarding validation, suspected privilege escalation investigation.
+
+  **Why it matters:** RBAC role additions are the canonical privilege-escalation signal — an attacker with admin compromise will grant themselves (or a backdoor account) Defender admin permissions to maintain control of the SOC tooling. Even legitimate role additions need governance: every promotion should map to a ticket and an owner. Sustained role-creep (everyone keeps gaining permissions, nobody loses them) creates audit findings AND lateral-movement risk.
+
+  **Triage path:**
+    1. For each row: identify the principal (`EntityId`) + role granted (`NewValue`) + admin who granted (correlate with `ConfigChangesByUpn.yaml`)
+    2. Verify against the access-management ticket (HR onboarding, role-change request, etc.)
+    3. If no ticket: contact the granted user — do they know? Then contact the granting admin — was this them?
+    4. For ANY role granting privileged permissions (e.g., `Security Administrator`, `Global Administrator`-equivalent): treat as P1 if no ticket
+    5. Run quarterly: cumulative role-creep audit — list of users with most roles ever added
+
+  **Expected baseline:** 1-5 role additions per week in active organizations; spike >10/day = mass-onboarding or attack.
+
+  **Tuning:** Adjust `30d` lookback for SOC audit cadence. Add `OnboardingType` filter to focus on emergency vs scheduled provisioning.
+
+  **MITRE:** TA0004 Privilege Escalation — T1078 Valid Accounts (most common); T1098 Account Manipulation; TA0003 Persistence — T1136 Create Account (when paired with new principal creation).
 author: Alex Kefallonitis
 version: 1.0.0
 tags:

@@ -6,7 +6,7 @@
     {
       "name": "header",
       "content": {
-        "json": "# MDE Drift Report\n\nAll configuration drift across P0/P1/P2/P5/P7 categories, unioned and enriched with AuditLogs attribution."
+        "json": "# MDE Drift Report\n\n**What this dashboard shows:** Unified configuration / inventory / exposure / maintenance drift — every change to Defender XDR tenant configuration, attributed to admin UPNs via AuditLogs cross-reference. The single pane of glass for 'what changed and who changed it' across all 4 cadence tiers.\n\n**Use cases:**\n- **Daily SOC review**: top changes overnight + after-hours drift\n- **Change-management audit**: validate every drift event against approved change tickets\n- **Compliance evidence**: SOC2 / ISO27001 / CMMC audit trail of configuration changes\n- **Incident retrospective**: timeline of admin actions during attack dwell window\n- **Admin governance**: identify role-creep, sustained config-creep, after-hours admin activity\n\n**Data sources:** All 4 drift parsers (MDE_Drift_Configuration / MDE_Drift_Inventory / MDE_Drift_Exposure / MDE_Drift_Maintenance) + AuditLogs join on 5-minute time bins.\n\n**Triage tip:** Filter `where ChangeType in ('Added','Modified')` for high-impact changes; 'Removed' is often legitimate cleanup."
       },
       "type": 1
     },

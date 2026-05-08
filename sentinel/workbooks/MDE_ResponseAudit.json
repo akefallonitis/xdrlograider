@@ -6,7 +6,7 @@
     {
       "name": "header",
       "content": {
-        "json": "# MDE Response Audit\n\nAction Center history with operators, comments, and time-to-action metrics."
+        "json": "# MDE Response Audit\n\n**What this dashboard shows:** Historical Action Center activity — every response action taken, by which operator, with what justification comment, and how quickly it was acted on. Time-to-action metrics surface SOC operational efficiency + SLA compliance.\n\n**Use cases:**\n- **SOC manager**: weekly responder-activity report; identify top performers + SLA gaps\n- **Compliance audit**: evidence of timely incident response (SOC2, ISO27001)\n- **IR retrospective**: detailed action timeline for post-incident reviews\n- **Operator coaching**: identify training opportunities (e.g., responders who skip justification comments)\n\n**Data sources:** `Defender_ActionCenter_CL` (MDE_ActionCenter_CL + MDE_MachineActions_CL) — historical 30-90d analysis recommended."
       },
       "type": 1
     },

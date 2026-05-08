@@ -1,7 +1,21 @@
 id: a4e5c7f8-9b12-4a3c-b6d8-2e1f4c9a7b02
 name: MDE Live Response unsigned scripts enabled
 description: |
-  The Defender Live Response unsigned-scripts policy was enabled tenant-wide. This allows arbitrary scripts to run on managed endpoints without code signing.
+  **What it detects:** The Defender Live Response `allowUnsignedScripts` policy was flipped to `true` tenant-wide — letting responders execute arbitrary unsigned PowerShell/bash on any managed endpoint via LR sessions.
+
+  **Why this matters:** Code signing is the last layer protecting Live Response from being weaponized. With unsigned-scripts ON, an attacker who steals LR credentials can drop arbitrary payloads (downloaders, ransomware, credential dumpers) on every device the responder has access to — without any code-signing review. Legitimate responders almost never need this; the workaround for unsigned scripts is to sign them in advance via your IR script library. Sustained `allowUnsignedScripts=true` is a strong "attacker establishing remote-code execution capability" signal.
+
+  **Triage path:**
+    1. Verify the change scope — tenant-wide or scoped (`EntityId`)
+    2. Cross-reference `ConfigChangesByUpn` for the admin actor + ticket
+    3. DISABLE the unsigned-scripts policy IMMEDIATELY unless documented IR exercise requires it ON
+    4. Hunt for LR sessions in the enabled window: `MDE_ActionCenter_CL | where Type has 'LiveResponse'` — what scripts did each session run?
+    5. If unauthorized: lock admin account + isolate target machines + escalate to IR
+    6. Pair with `LrSessionsWithoutJustification.yaml` hunt to detect actual LR session abuse
+
+  **Severity rationale:** High — combined with admin compromise, gives attacker SYSTEM-equivalent code execution across the fleet.
+
+  **MITRE:** TA0005 Defense Evasion — T1562.001 Disable or Modify Tools; TA0002 Execution — T1059 Command and Scripting Interpreter (LR is the execution layer).
 severity: High
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

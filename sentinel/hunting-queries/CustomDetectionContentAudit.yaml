@@ -1,7 +1,23 @@
 id: 7f526adb-2e43-4f6b-a9cb-5d4e7b2f0a19
 name: MDE custom detection content audit
 description: |
-  Full current text of all tenant custom detections — governance review artifact.
+  **What it does:** Returns the full current KQL text + schedule + enabled-state of every Defender XDR custom detection in the tenant. Governance/review artifact for compliance and detection-engineering audits.
+
+  **When to run:** Quarterly detection-engineering review, before/after a detection-content migration, compliance evidence (SOC2 / ISO27001), suspected detection-sabotage incident.
+
+  **Why it matters:** Custom detections are the SOC's "homegrown" detection layer — but they're high-value attacker targets. A compromised admin can disable a detection for 2 hours, run their payload, re-enable it; without periodic full-text snapshots, the modification is only visible if you happened to be running drift parsers at that exact window. This query gives you the *current truth* anchor.
+
+  **Triage path:**
+    1. Diff the output against your detection-content git repo (`Query` column) — detect drift from canonical
+    2. For each `Enabled='False'` row: validate against the change-management ticket that disabled it
+    3. For unfamiliar detection names: investigate the author + the date `arg_max` returned — possibly an attacker-planted detection used to mask their activity
+    4. Pair with `MdeCustomDetectionEdited.yaml` analytic rule to detect *changes* in addition to current state
+
+  **Expected baseline:** 10-50 active detections in a mature tenant; unexplained additions/removals are red flags.
+
+  **Tuning:** Adjust `30d` lookback if your CustomDetections cadence is heavier than 6h Configuration tier. Drop `arg_max` if you want full version history.
+
+  **MITRE:** TA0007 Discovery — T1082 System Information Discovery; TA0005 Defense Evasion — T1562 Impair Defenses (when used to detect tampering).
 author: Alex Kefallonitis
 version: 1.0.0
 tags:

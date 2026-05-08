@@ -1,17 +1,26 @@
 id: 7e2c8a4f-1b3d-4f5a-8c2d-9b6e3f0a1d4c
 name: "[XdrOps] Connector auth chain failure - elevated AADSTS exception rate"
 description: |
-  XdrLogRaider's portal authentication chain (TOTP / passkey / ESTS / sccauth /
-  XSRF-TOKEN exchange) is producing exceptions at elevated rate, indicating:
-   - service account credentials need rotation (rare; admin-managed per directive 39)
-   - TOTP seed mismatch
-   - Entra Conditional Access policy change blocking the SP
-   - portal API auth contract change
+  **What it detects:** XdrLogRaider's portal authentication chain (TOTP → passkey → ESTSAUTH → sccauth → XSRF-TOKEN exchange) is producing exceptions at elevated rate (`AuthChain.*` exception class, >3 in a 1h window).
 
-  Per directive 38 + B8 in .claude/plans/immutable-splashing-waffle.md.
-  Operator-enabled (ships disabled per Sentinel Solution best practice).
+  **Why this matters:** XdrLogRaider polls the Defender XDR portal via a service account — if auth fails, NO data flows from any of the 65 streams. Connector card flips Disconnected, drift detection stops, security telemetry pipeline goes dark. Sustained auth failures need rapid triage because they typically indicate one of:
+    - Service account credentials need rotation (rare; admin-managed)
+    - TOTP seed mismatch (clock drift on the FA host vs Microsoft auth server)
+    - Entra Conditional Access policy change blocking the service account
+    - Portal API auth contract change (Microsoft-side, requires connector update)
+    - Microsoft auth-service incident (transient; resolves within minutes)
 
-  Triage in docs/AUTH.md + docs/RUNBOOK.md "Auth chain failure" section.
+  **Triage path:**
+    1. Open AppInsights → Failures → AuthChain.* — identify the failing stage
+    2. `AuthChain.AADSTSError` = ESTSAUTH stage failed — check Entra sign-in logs for the service account; look for CA policy block or password expiry
+    3. `AuthChain.SccauthIssueFailed` = ESTSAUTH succeeded but sccauth exchange failed — likely portal contract change OR service account lacks Defender-Reader role
+    4. `AuthChain.PortalSelfTestFailed` = sccauth succeeded but session self-test failed — portal-internal issue; check Microsoft Service Health
+    5. Check KeyVault for credential expiry: TOTP seed + passkey both should be present; both shouldn't be older than rotation policy
+    6. If sustained: see `docs/RUNBOOK.md` "Auth chain failure" section
+
+  **Severity rationale:** High — connector outage = SOC visibility loss.
+
+  **MITRE:** TA0001 Initial Access — T1078 Valid Accounts (the service account is an Initial Access vector if compromised).
 severity: High
 enabled: false
 requiredDataConnectors:

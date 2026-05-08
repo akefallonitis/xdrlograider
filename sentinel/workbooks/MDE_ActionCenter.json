@@ -6,7 +6,7 @@
     {
       "name": "header",
       "content": {
-        "json": "# MDE Action Center\n\nPer-device unified timeline events plus per-action machine-action results (Live Response per-step output and AIR linkage)."
+        "json": "# MDE Action Center\n\n**What this dashboard shows:** Real-time view of Defender XDR Action Center events — automated investigations, response actions, Live Response sessions, and per-machine action results. The 10-minute polling cadence (ActionCenter tier) makes this the SOC's near-real-time signal for active response activity.\n\n**Use cases:**\n- **SOC analyst stand-up**: review incidents AIR is investigating + outstanding LR sessions\n- **IR responder**: track approved/pending actions across the fleet\n- **Detection engineer**: validate that AIR investigations triggered for expected alert patterns\n- **Audit response**: who ran what LR session, when, and on which machines\n\n**Data sources:** `Defender_ActionCenter_CL` (MDE_ActionCenter_CL + MDE_MachineActions_CL) — 10-minute cadence ActionCenter tier."
       },
       "type": 1
     },

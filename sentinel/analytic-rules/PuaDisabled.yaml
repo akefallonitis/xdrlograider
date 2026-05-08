@@ -1,7 +1,21 @@
 id: c6a7e9f0-1b34-4c5e-d8f0-4a3b6e1c9d04
 name: MDE PUA protection disabled
 description: |
-  Defender Potentially Unwanted Application protection was disabled tenant-wide.
+  **What it detects:** Microsoft Defender's Potentially Unwanted Application (PUA) protection was disabled tenant-wide — `MDE_PUAConfig_CL.enabled` flipped to `false`.
+
+  **Why this matters:** PUA protection blocks dual-use tools that legitimate IT admins occasionally need (PsExec, BloodHound, certutil, mimikatz educational variants) but that attackers use for lateral movement, credential dumping, and reconnaissance. Disabling PUA tenant-wide makes those tools execute silently. Sustained `enabled=false` is a strong "attacker preparing for hands-on-keyboard activity" signal. Selective per-machine PUA disabling is sometimes legitimate (research workstations); tenant-wide disabling is rarely justified.
+
+  **Triage path:**
+    1. Verify the change was tenant-wide vs scoped — check `EntityId` granularity
+    2. Cross-reference `ConfigChangesByUpn` for the admin actor + ticket
+    3. Re-enable PUA protection IMMEDIATELY unless documented research/testing requires it OFF
+    4. Hunt for PUA-class activity that may have abused the disable window: `DeviceProcessEvents | where InitiatingProcessFileName in ('PsExec.exe', 'mimikatz.exe', 'certutil.exe')` etc. with `Timestamp` covering the disabled window
+    5. If unauthorized: isolate machines + lock admin account + escalate to IR
+    6. Pair with `SilentBypassIndicators.yaml` hunt for combined preparation signals
+
+  **Severity rationale:** High — Tamper Protection + PUA Protection together form Defender's tier-2 defense; disabling either is rarely benign.
+
+  **MITRE:** TA0005 Defense Evasion — T1562.001 Disable or Modify Tools (PRIMARY).
 severity: High
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

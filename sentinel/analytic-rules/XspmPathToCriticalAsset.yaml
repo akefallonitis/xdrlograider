@@ -1,8 +1,23 @@
 id: 2c03e5f6-7b9a-4c1e-d4f6-0a9b2e7c5d0a
 name: MDE XSPM path to critical asset
 description: |
-  An attack path terminates at a device tagged Critical. Immediate remediation candidate.
-  Note: the Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmAttackPaths_CL' stream is opt-in. The rule is deployed but stays dormant until the stream is enabled in the connector configuration.
+  **What it detects:** A Microsoft XSPM (Security Exposure Management) attack-path simulation identified a route ending at a device tagged `Critical`. Defender continuously simulates attacker progressions from internet/email entry points through your environment; this rule fires when ANY simulated path now terminates at a crown-jewel asset.
+
+  **Why this matters:** Attack paths are theoretical (XSPM hasn't seen the attack happen — it's mapping how it COULD), but a path ending at a Critical asset means: (a) such an attack is feasible TODAY in your environment, (b) the attacker doesn't need privileged access to start it, and (c) the asset is reachable through some chain of compromises. Tagging assets `Critical` is your business call — once tagged, every new path to them is an immediate hardening priority. New paths can appear because of: new account permissions, new group memberships, new system placements, new firewall rules, vulnerable software introducing exploit chains.
+
+  **Triage path:**
+    1. For each row: pull the path from `Defender_ExposureManagement_CL.MDE_XspmAttackPaths_CL` → `RawJson.steps`
+    2. Identify the entry point (first node) + intermediate hops + critical destination (last node)
+    3. For each intermediate hop: WHY is it on this path? (over-privileged account, vulnerable software, weak group membership)
+    4. Pick a hop with the highest disruption-impact-per-effort ratio: harden it (least-privilege, patch, group cleanup)
+    5. Validate path break: re-simulate after change; the path should drop off if hardened correctly
+    6. Pair with `XspmChokepointDeltas.yaml` hunt — chokepoints often are the high-leverage hardening targets
+
+  **Severity rationale:** High — paths to Critical assets are by definition top-priority hardening candidates.
+
+  **License:** Requires Microsoft Security Exposure Management (XSPM) — E5 Security add-on. Stays dormant on unlicensed tenants.
+
+  **MITRE:** TA0043 Reconnaissance — T1595 Active Scanning (defender-side); TA0008 Lateral Movement — T1570 Lateral Tool Transfer (when paths involve tool transfer).
 severity: High
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

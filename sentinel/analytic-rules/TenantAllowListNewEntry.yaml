@@ -1,7 +1,21 @@
 id: e8c9a1b2-3d56-4e7a-f0b2-6c5d8a3e1f06
 name: MDE tenant allow-list new entry
 description: |
-  A new URL, IP, file hash, or sender was added to the Defender tenant allow-list, bypassing blocks.
+  **What it detects:** A new entry (URL, domain, IP, file hash, or sender) was ADDED to the Defender Tenant Allow/Block List (TABL). Allow-list additions tell Defender + MDO to bypass their normal threat-blocking on that indicator.
+
+  **Why this matters:** TABL is the most direct "let this past your defenses" mechanism in Defender. An attacker with admin credentials needs only to add their malware C2 domain to the allow-list, and every subsequent network call to that domain bypasses URL filtering. Adding a file hash to the allow-list lets that file run on every machine without scan. Even legitimate exclusions need scrutiny — a vendor "false positive" claim doesn't justify allow-listing without a ticket + risk acceptance.
+
+  **Triage path:**
+    1. Identify what type of indicator was added (`EntityId` + RawJson `indicatorType`)
+    2. For URLs/domains: WHOIS lookup + threat-intel reputation (URLhaus, AlienVault, MISP)
+    3. For file hashes: VirusTotal lookup + endpoint hunt: `DeviceFileEvents | where SHA256 == '<hash>'` — was this file already on machines?
+    4. For IPs: traffic analytics — was this IP communicated with by tenant devices in the last 30 days?
+    5. Cross-reference `ConfigChangesByUpn` for the admin who added it + their ticket
+    6. If unauthorized OR malicious: REMOVE the entry + isolate any machines that touched it + escalate to IR
+
+  **Severity rationale:** Medium baseline — escalate to High if the indicator has known-malicious reputation OR if it bypasses an active block from the same indicator type within last 7 days.
+
+  **MITRE:** TA0005 Defense Evasion — T1562 Impair Defenses (umbrella); TA0011 Command and Control — T1071 Application Layer Protocol (when allow-listed indicators are C2).
 severity: Medium
 enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
 requiredDataConnectors:

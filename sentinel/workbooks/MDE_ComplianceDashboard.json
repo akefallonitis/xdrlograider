@@ -4,7 +4,7 @@
     {
       "type": 1,
       "content": {
-        "json": "# MDE Compliance Dashboard\n\nCurrent state of Defender XDR tenant security configuration, with recent drift highlighted.\n\n**Data source**: P0 tenant-configuration streams polled hourly by the XdrLogRaider Function App."
+        "json": "# MDE Compliance Dashboard\n\n**What this dashboard shows:** Current state of Defender XDR tenant security configuration with recent drift highlighted. Maps tenant config to compliance baselines (CIS, NIST, ISO27001) and surfaces deviations.\n\n**Use cases:**\n- **Quarterly compliance review**: SOC2/ISO27001 evidence pack + auditor-friendly views\n- **CISO scorecard**: green/red posture indicators per category (RBAC, AV, ASR, EDR, Firewall)\n- **Tenant onboarding**: validate baseline compliance before go-live\n- **Drift accountability**: highlight what changed in last 24h/7d/30d for each category\n\n**Data sources:** All Configuration tier streams (`MDE_AlertTuning_CL`, `MDE_SuppressionRules_CL`, `MDE_TenantAllowBlock_CL`, `MDE_UnifiedRbacRoles_CL`, `MDE_AdvancedFeatures_CL`, etc.) + drift parser overlays.\n\n**Cadence:** 6h Configuration tier polls + recent-drift overlay from `MDE_Drift_Configuration`."
       },
       "name": "header"
     },
