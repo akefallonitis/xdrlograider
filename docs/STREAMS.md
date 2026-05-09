@@ -29,9 +29,9 @@ The connector groups streams by **how often it polls them**, not by an arbitrary
 
 Cadence reflects the data's actual change-rate. Action Center events flow continuously so `ActionCenter` polls every 10 min; XSPM graph data churn-rate is well under 1h so `XspmGraph` matches the workbook hourly refresh; rule + RBAC + integration changes happen during weekday admin sessions so `Configuration` polls every 6 hours; settings + identity + metadata + device inventory are typically stable day-over-day so `Inventory` is daily; data-export configuration only changes during architectural reviews so `Maintenance` is weekly.
 
-> **NOTE (Section R++ 2026-05-07)**: Compressed cadence (1h for Configuration/Inventory/Maintenance) is currently active for live troubleshooting. **MUST revert to production cadence (6h/24h/7d) before tag** per binding rule R++++++.10 #4.
+> **NOTE (v0.1.0 GA — production cadence active 2026-05-09)**: ActionCenter 10m / XspmGraph 1h / Configuration 6h / Inventory 24h / Maintenance 7d (per `src/Modules/Xdr.Sentinel.Ingest/Public/Get-XdrTierCadenceMap.ps1`). Compressed-cadence override (1h-everything) was used during Phase A audit window 2026-05-09T14:08-14:51 UTC and reverted before close-out per Plan AMEND-2 BINDING.
 
-## Availability legend (post-Section-R++ all-live policy)
+## Availability legend (all-live runtime classification policy)
 
 | Tag | Meaning |
 |---|---|
