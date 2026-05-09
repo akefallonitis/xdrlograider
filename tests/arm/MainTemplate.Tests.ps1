@@ -77,12 +77,35 @@ Describe 'mainTemplate.json — schema + structure' {
         }
     }
 
-    It 'sentinelContent nested deploy is unconditional (Sentinel content always deploys)' {
+    It 'declares deploySentinelContent bool parameter with defaultValue=true (Hot-Fix 2 — operator-selectable Sentinel content deploy)' {
+        $p = $script:MainTemplate.parameters.deploySentinelContent
+        $p | Should -Not -BeNullOrEmpty -Because 'deploySentinelContent parameter must exist for operator wizard toggle'
+        $p.type | Should -Be 'bool'
+        $p.defaultValue | Should -BeTrue -Because 'default behavior must be deploy-content-on (matches prior unconditional behavior)'
+    }
+
+    It 'sentinelContent-{suffix} nested deploy IS conditional on deploySentinelContent param (Hot-Fix 2)' {
         $sentinel = $script:MainTemplate.resources | Where-Object {
             $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'sentinelContent'
         } | Select-Object -First 1
         $sentinel | Should -Not -BeNullOrEmpty
-        $sentinel.PSObject.Properties['condition'] | Should -BeNullOrEmpty -Because 'Sentinel content always deploys post-architectural-simplification (no deploySentinelContent toggle)'
+        $sentinel.condition | Should -Be "[parameters('deploySentinelContent')]" -Because 'sentinelContent nested deploy must respect operator wizard toggle (regression-locker for Hot-Fix 2)'
+    }
+
+    It 'solution-{suffix} nested deploy STAYS unconditional (Solution metadata + Content Hub linkage always required)' {
+        $sol = $script:MainTemplate.resources | Where-Object {
+            $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'solution-'
+        } | Select-Object -First 1
+        $sol | Should -Not -BeNullOrEmpty
+        $sol.PSObject.Properties['condition'] | Should -BeNullOrEmpty -Because 'Solution metadata + Content Hub linkage required for Sentinel UI integration regardless of content deploy toggle'
+    }
+
+    It 'customTables-{suffix} nested deploy STAYS unconditional (DCRs depend on workspace tables)' {
+        $tables = $script:MainTemplate.resources | Where-Object {
+            $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'customTables'
+        } | Select-Object -First 1
+        $tables | Should -Not -BeNullOrEmpty
+        $tables.PSObject.Properties['condition'] | Should -BeNullOrEmpty -Because 'workspace tables required by DCRs regardless of content deploy toggle'
     }
 
     It 'creates KV secrets for auth method + UPN unconditionally' {

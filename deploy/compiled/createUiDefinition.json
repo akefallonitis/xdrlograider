@@ -269,6 +269,13 @@
             "defaultValue": true
           },
           {
+            "name": "deploySentinelContent",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Deploy Sentinel content (workbooks + analytic rules + hunting queries + parsers + Data Connector)",
+            "toolTip": "Deploys 8 workbooks, 21 analytic rules (ship enabled:false per Sentinel best practice), 12 hunting queries, 4 cadence-tier drift parsers, and Data Connector to your Sentinel workspace. Uncheck to deploy connector-only (install Sentinel content later via Solution Gallery / Content Hub). Solution package metadata + Content Hub linkage always deploys regardless.",
+            "defaultValue": true
+          },
+          {
             "name": "githubRepo",
             "type": "Microsoft.Common.TextBox",
             "label": "GitHub repo (owner/name)",
@@ -296,6 +303,7 @@
       "passkeyJson":           "[if(and(equals(steps('authSettings').authMethod, 'passkey'), equals(steps('authSettings').uploadSecretsNow, 'wizard')), steps('authSettings').passkeyJson, '')]",
       "restrictPublicNetwork":   "[steps('advanced').restrictPublicNetwork]",
       "enableKeyVaultDiagnostics":"[steps('advanced').enableKeyVaultDiagnostics]",
+      "deploySentinelContent":   "[steps('advanced').deploySentinelContent]",
       "githubRepo":              "[steps('advanced').githubRepo]"
     }
   }

@@ -108,6 +108,13 @@
       "metadata": {
         "description": "Passkey JSON blob (passkey method). Optional."
       }
+    },
+    "deploySentinelContent": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy Sentinel content (8 workbooks + 21 analytic rules + 12 hunting queries + 4 cadence-tier drift parsers + Data Connector). Default: true. Uncheck to deploy connector-only; install Sentinel content separately via Solution Gallery / Content Hub later. Solution package metadata + Content Hub linkage ALWAYS deploys regardless of this toggle."
+      }
     }
   },
   "variables": {
@@ -2856,6 +2863,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "[concat('sentinelContent-', variables('suffix'))]",
+      "condition": "[parameters('deploySentinelContent')]",
       "subscriptionId": "[variables('workspaceSubscriptionId')]",
       "resourceGroup": "[variables('workspaceResourceGroup')]",
       "dependsOn": [
