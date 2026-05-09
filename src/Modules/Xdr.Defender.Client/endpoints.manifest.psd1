@@ -1195,13 +1195,21 @@ AttackPathsV2
             Purpose = 'CVE inventory — list of vulnerabilities affecting tenant assets with severity + prevalence'
             Availability = 'live'
             UnwrapProperty = 'results'
-            IdProperty = @('cveId', 'CveId', 'id', 'Id')
+            IdProperty = @('id', 'Id', 'cveId', 'CveId')
+            # 2026-05-09 ProjectionMap drift fix per live fixture diff:
+            #   cveId          -> id            (live field name)
+            #   publishedDate  -> publishedOn   (live field name)
+            #   assetsAffected -> numOfImpactedAssets (live field name)
+            #   ProductName stays mapped from productName (legacy/aspirational; always null
+            #   in current live API which only exposes productIds[] array). Additive-only
+            #   schema rule: do not drop col; operators see ProductName=null until upstream
+            #   API restores scalar field.
             ProjectionMap = @{
-                CveId          = '$tostring:cveId'
+                CveId          = '$tostring:id'
                 Severity       = '$tostring:severity'
                 CvssV3         = '$todouble:cvssV3'
-                PublishedDate  = '$todatetime:publishedDate'
-                AssetCount     = '$toint:assetsAffected'
+                PublishedDate  = '$todatetime:publishedOn'
+                AssetCount     = '$toint:numOfImpactedAssets'
                 Description    = '$tostring:description'
                 ProductName    = '$tostring:productName'
             }

@@ -29,31 +29,11 @@ function Get-XdrTierCadenceMap {
     [OutputType([hashtable])]
     param()
 
-    # *** AMEND-9 COMPRESSED-CADENCE AUDIT (2026-05-09) — TEMPORARY OVERRIDE ***
-    # Per Plan AMEND-2 + user directive 2026-05-09: compressed 1h-everything
-    # cadence for Configuration/Inventory/Maintenance lets all 5 tiers fire
-    # within ~1-1.5h so operator can audit ALL: streams + tables + schemas +
-    # parsers + checkpoints + states + pagination + drift parsers + workbook
-    # panels + analytic rules end-to-end without waiting 7-day Maintenance.
-    #
-    # Matches XdrRefresh.TierDispatch.Tests.ps1 Section R++ compressed branch.
-    #
-    # *** MUST REVERT BEFORE v0.1.0 GA TAG (Plan AMEND-2 BINDING) ***
-    # Production cadences inline below (commented). Single revert commit:
-    #   revert(observation): restore production cadence map per Plan AMEND-2
     return @{
         ActionCenter  = [TimeSpan]::FromMinutes(10)
         XspmGraph     = [TimeSpan]::FromHours(1)
-        Configuration = [TimeSpan]::FromHours(1)
-        Inventory     = [TimeSpan]::FromHours(1)
-        Maintenance   = [TimeSpan]::FromHours(1)
+        Configuration = [TimeSpan]::FromHours(6)
+        Inventory     = [TimeSpan]::FromDays(1)
+        Maintenance   = [TimeSpan]::FromDays(7)
     }
-    # PRODUCTION cadence (REVERT TO THIS BEFORE v0.1.0 GA TAG):
-    # return @{
-    #     ActionCenter  = [TimeSpan]::FromMinutes(10)
-    #     XspmGraph     = [TimeSpan]::FromHours(1)
-    #     Configuration = [TimeSpan]::FromHours(6)
-    #     Inventory     = [TimeSpan]::FromDays(1)
-    #     Maintenance   = [TimeSpan]::FromDays(7)
-    # }
 }
