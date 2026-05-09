@@ -85,14 +85,14 @@ Describe 'Manifest.ProjectionMap.Populated' {
         }
     }
 
-    It 'all 69 non-deprecated streams have populated ProjectionMap (v0.1.0 GA F1 + Phase 2 batches 1-6: 70 - 1 deprecated = 69 live)' {
+    It 'all 70 non-deprecated streams have populated ProjectionMap (v0.1.0 GA F1 + Phase 2 batches 1-7: 71 - 1 deprecated = 70 live)' {
         $populated = 0
         foreach ($stream in $script:Manifest.Keys) {
             $entry = $script:Manifest[$stream]
             if ($entry.Availability -eq 'deprecated') { continue }
             if ($entry.ProjectionMap -and @($entry.ProjectionMap.Keys).Count -ge 3) { $populated++ }
         }
-        $populated | Should -Be 69 -Because 'every non-deprecated stream populates ProjectionMap for typed-column ingest (70 - 1 deprecated; Phase 2 batches 1-6 with Extensions added 2026-05-09)'
+        $populated | Should -Be 70 -Because 'every non-deprecated stream populates ProjectionMap for typed-column ingest (71 - 1 deprecated; Phase 2 batches 1-7 with AssetCountByExposure added 2026-05-09)'
     }
 }
 

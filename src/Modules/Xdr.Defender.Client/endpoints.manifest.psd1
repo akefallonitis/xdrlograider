@@ -1327,6 +1327,34 @@ AttackPathsV2
         }
 
         # ----------------------------------------------------------------------
+        # Phase 2 batch 7 (Plan R++++++++++ Tier A 2026-05-09): MDE_VulnerabilityAssetCountByExposure_CL
+        # — TVM device distribution by exposure level (Low/Medium/High/Critical).
+        # Per nodoc vulnerability_management.yml VulnerabilityManagement.GetAssetCountByExposureLevel.
+        # Array of objects {exposureLevel, assetCount}.
+        # TvmPremium license required.
+        # Operator value: SOC at-a-glance device exposure distribution for executive
+        # dashboards + risk-prioritization (which exposure tier dominates fleet).
+        # ----------------------------------------------------------------------
+        @{
+            Stream = 'MDE_VulnerabilityAssetCountByExposure_CL'
+            Path = '/apiproxy/mtp/tvm/analytics/assets/countByExposureLevel'
+            Tier = 'Inventory'
+            IdProperty = @('exposureLevel', 'ExposureLevel', 'Id', 'id')
+            Category = 'Vulnerability Management (TVM)'
+            CategoryId = 3
+            Purpose = 'TVM device distribution by exposure level - SOC dashboard fleet exposure tier breakdown for risk-prioritization'
+            Availability = 'live'
+            RequiresLicense    = @('TvmPremium')
+            TenantContextProbe = 'IsMdatpActive'
+            ProjectionMap = @{
+                ExposureLevel  = '$tostring:exposureLevel'
+                AssetCount     = '$toint:assetCount'
+                CaptureTime    = '$todatetime:captureTime'
+                ReportPeriod   = '$tostring:reportPeriod'
+            }
+        }
+
+        # ----------------------------------------------------------------------
         # Phase 2 batch 6 (Plan R++++++++++ Tier A 2026-05-09): MDE_VulnerabilityExtensions_CL
         # — TVM browser extension inventory across endpoint devices (shadow-IT detection).
         # Per nodoc vulnerability_management.yml VulnerabilityManagement.ListExtensions.

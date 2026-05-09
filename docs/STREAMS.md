@@ -55,6 +55,7 @@ Action Center events — operator-visible response actions and Live Response per
 | `MDE_VulnerabilityCertificates_CL` | `/apiproxy/mtp/tvm/analytics/certificates?pageIndex=0&pageSize=200` | GET | live (TvmPremium-licensed; paginated) |
 | `MDE_VulnerabilitySummary_CL` | `/apiproxy/mtp/tvm/analytics/vulnerabilities/summary` | GET | live (TvmPremium-licensed) |
 | `MDE_VulnerabilityExtensions_CL` | `/apiproxy/mtp/tvm/analytics/extensions?pageIndex=0&pageSize=200` | GET | live (TvmPremium-licensed; paginated) |
+| `MDE_VulnerabilityAssetCountByExposure_CL` | `/apiproxy/mtp/tvm/analytics/assets/countByExposureLevel` | GET | live (TvmPremium-licensed) |
 
 ## exposure (hourly @ :25, 18 streams)
 

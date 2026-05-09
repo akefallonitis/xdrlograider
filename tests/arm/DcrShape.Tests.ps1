@@ -110,6 +110,6 @@ Describe 'DcrShape.AllStreamsCovered' {
                 $allStreams += $df.streams
             }
         }
-        ($allStreams | Sort-Object -Unique).Count | Should -Be 71
+        ($allStreams | Sort-Object -Unique).Count | Should -Be 72
     }
 }

@@ -285,7 +285,7 @@ Describe 'Manifest.ProjectionMap.Coverage' {
 
 Describe 'Manifest counts (v0.1.0 GA)' {
 
-    It 'manifest contains exactly 70 streams (45 baseline + 13 Tier A Phase 2 + 6 Phase 1 + 6 Phase 2 Tier A batches)' {
+    It 'manifest contains exactly 71 streams (45 baseline + 13 Tier A Phase 2 + 6 Phase 1 + 7 Phase 2 Tier A batches)' {
         # Baseline: 45 streams (44 + DeviceTimeline). MachineActions REMOVED in
         # v0.1.0 GA F1 decision (2026-05-08) — overlaps with MDE_ActionCenter_CL
         # which already polls the canonical /mtp/actionCenter/actioncenterui/
@@ -296,7 +296,7 @@ Describe 'Manifest counts (v0.1.0 GA)' {
         # - G7: MDE_SecurityPolicies_CL (Endpoint Configuration POST endpoint - actual ASR/AV/EDR/Firewall policy bodies)
         # - G8 TVM expansion (4 streams): MDE_VulnerableMachines_CL + MDE_VulnerabilityInventory_CL + MDE_SoftwareInventory_CL + MDE_RecommendationActions_CL
         # Phase 2 batch 1 (2026-05-09 R++++++++++): MDE_PendingActions_CL — Action Center category Tier A.
-        $script:Manifest.Count | Should -Be 70
+        $script:Manifest.Count | Should -Be 71
     }
 
     It 'live + tenant-gated + deprecated counts add up' {
@@ -308,8 +308,8 @@ Describe 'Manifest counts (v0.1.0 GA)' {
         $live        = [int]@($script:Manifest.Values | Where-Object { $_.Availability -eq 'live' }).Count
         $tenantGated = [int]@($script:Manifest.Values | Where-Object { $_.Availability -eq 'tenant-gated' }).Count
         $deprecated  = [int]@($script:Manifest.Values | Where-Object { $_.Availability -eq 'deprecated' }).Count
-        ($live + $tenantGated + $deprecated) | Should -Be 70
-        $live | Should -Be 69 -Because 'R++ all-live policy + Phase 1 6 new streams + Phase 2 batches 1-6: 70 total - 1 deprecated = 69 live'
+        ($live + $tenantGated + $deprecated) | Should -Be 71
+        $live | Should -Be 70 -Because 'R++ all-live policy + Phase 1 6 new streams + Phase 2 batches 1-7: 71 total - 1 deprecated = 70 live'
         $tenantGated | Should -Be 0 -Because 'R++ all-live policy: tenant-gating detected dynamically by runtime SuccessKind'
         $deprecated | Should -Be 1 -Because 'MDE_StreamingApiConfig_CL is deprecated; v0.2.0 removes'
     }
