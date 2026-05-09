@@ -1327,6 +1327,38 @@ AttackPathsV2
         }
 
         # ----------------------------------------------------------------------
+        # Phase 2 batch 5 (Plan R++++++++++ Tier A 2026-05-09): MDE_VulnerabilitySummary_CL
+        # — TVM aggregate severity/exposure counts across the organization.
+        # Per nodoc vulnerability_management.yml VulnerabilityManagement.GetSummary.
+        # Single-object response (severity counts + exposure level breakdown).
+        # TvmPremium license required.
+        # Operator value: SOC at-a-glance vulnerability posture (high/medium/low/critical
+        # counts) for executive dashboards + trending.
+        # ----------------------------------------------------------------------
+        @{
+            Stream = 'MDE_VulnerabilitySummary_CL'
+            Path = '/apiproxy/mtp/tvm/analytics/vulnerabilities/summary'
+            Tier = 'Inventory'
+            Category = 'Vulnerability Management (TVM)'
+            CategoryId = 3
+            Purpose = 'TVM aggregate severity/exposure counts - SOC at-a-glance vulnerability posture for executive dashboards + trending'
+            Availability = 'live'
+            RequiresLicense    = @('TvmPremium')
+            TenantContextProbe = 'IsMdatpActive'
+            SingleObjectAsRow  = $true
+            SyntheticEntityId  = 'tvm-vulnerability-summary-singleton'
+            ProjectionMap = @{
+                CriticalCount    = '$toint:critical'
+                HighCount        = '$toint:high'
+                MediumCount      = '$toint:medium'
+                LowCount         = '$toint:low'
+                TotalCount       = '$toint:total'
+                ExposureScore    = '$todouble:exposureScore'
+                CaptureTime      = '$todatetime:captureTime'
+            }
+        }
+
+        # ----------------------------------------------------------------------
         # Phase 2 batch 4 (Plan R++++++++++ Tier A 2026-05-09): MDE_VulnerabilityCertificates_CL
         # — TVM certificate inventory: per-cert metadata across endpoint devices
         # incl. expiration status + cryptographic algorithm + affected-device count.
