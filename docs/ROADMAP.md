@@ -12,7 +12,7 @@ Production-grade unattended ingestion of Microsoft Defender XDR portal-only tele
 
 **Architecture**:
 
-- **59 portal-only data streams** + 1 operational heartbeat = 60 streams total, partitioned across **7 DCRs** (4×10 + 5(7) + 6(7) + 7(6) — Azure 10-flow cap respected) sharing 1 DCE.
+- **64 portal-only data streams** (63 live + 1 deprecated) + 1 operational ops table (XdrConnectorHealth_CL) = 65 streamDecls total, partitioned across **13 DCRs** (per-category split — Azure 10-flow cap respected per DCR) sharing 1 DCE.
 - DCR `transformKql='source | extend SourceName='<Stream>''` injects per-stream identity into per-category tables (Microsoft Learn canonical pattern + SourceName-injection).
 - **5 cadence tiers** with dedicated timer functions: `fast` (10 min — 2 streams), `exposure` (1h — 18), `config` (6h — 16), `inventory` (daily — 21), `maintenance` (weekly — 1). Tenant-feature-gated streams (MDI / TVM / MCAS / Intune / MDO / Custom Collection) skip cleanly when the tenant feature isn't licensed.
 - **11 consolidated workspace tables**: 10 `Defender_<Category>_CL` per nathanmcnulty 10-category taxonomy + 1 `XdrConnectorHealth_CL` ops table.
@@ -20,7 +20,7 @@ Production-grade unattended ingestion of Microsoft Defender XDR portal-only tele
 - Drift detection via 4 cadence-tier KQL parsers (`MDE_Drift_Configuration` / `MDE_Drift_Inventory` / `MDE_Drift_Exposure` / `MDE_Drift_Maintenance`) using `mv-apply set_union(CurrentFields, PreviousFields)` field-level diff.
 - **7 PowerShell modules**: L1 Common (Auth + Manifest + Telemetry) + L1 Sentinel.Ingest + L2 Defender.Auth + L3 Defender.Client + L4 Connector.Orchestrator. Pure Defender connector — no multi-portal stubs in v0.1.0.
 - **4 Function App functions** (post Section R consolidation): Xdr-Refresh (universal portal-agnostic dispatcher; 1-min timer reading XdrTierState __schedule__ rows) + Xdr-PollOrchestrator (Durable orchestration; per-tier fan-out) + Xdr-PollStream (Durable activity; per-stream auth/poll/ingest with PerEntityFanout / PerPlatformFanout / Pagination support) + Connector-Heartbeat (5-min timer; aggregates XdrTierState into XdrConnectorHealth_CL).
-- Manifest-driven dispatch: 1 `Invoke-MDEEndpoint` for all 65 streams (no per-stream handlers).
+- Manifest-driven dispatch: 1 `Invoke-MDEEndpoint` for all 63 live streams (no per-stream handlers).
 - Auth: Credentials+TOTP + Software Passkey (MFA-enforced unattended) + DirectCookies (test/diagnostic).
 - KV TTL cache (60min default) for credential reuse; cache-eviction telemetry to AppInsights.
 - DLQ (`xdrIngestDlq`) + checkpoint table (`connectorCheckpoints`) on shared Storage Account, SAMI-accessed.
@@ -29,10 +29,10 @@ Production-grade unattended ingestion of Microsoft Defender XDR portal-only tele
 **Sentinel content**:
 
 - 8 workbooks (incl. ConnectorHealth with 9 panels: per-tier freshness, auth-chain failures, DLQ depth, freshness SLI, partial-success rate, service-account anomaly, per-stream workspace-side freshness).
-- 20 analytic rules (14 detection + 6 XdrOps incl. RowVolumeSpike cost-budget runtime gate). All ship `enabled: false` per Microsoft Sentinel Solution best practice.
-- 9 hunting queries.
+- 21 analytic rules (14 detection + 7 XdrOps incl. RowVolumeSpike cost-budget runtime gate + StreamWentDry per-stream stale alert + AuthChainStaleness). All ship `enabled: false` per Microsoft Sentinel Solution best practice.
+- 12 hunting queries.
 - 4 cadence-tier drift parsers.
-- 390 sample queries (every active stream has 5-query operator anchor).
+- 320+ sample queries (every active stream has 5-query operator anchor; 5 × 64 = 320).
 
 **Supply chain**:
 

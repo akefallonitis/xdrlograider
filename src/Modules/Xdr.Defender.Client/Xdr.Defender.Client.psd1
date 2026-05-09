@@ -7,7 +7,7 @@
     Author                = 'Alex Kefallonitis'
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
-    Description           = 'L3 Defender-portal manifest dispatcher. Per-stream Invoke-MDEEndpoint backed by the endpoints.manifest.psd1 catalogue (65 streams across 5 cadence tiers: ActionCenter / XspmGraph / Configuration / Inventory / Maintenance, all read-only). Builds on the L2 Xdr.Defender.Auth cookie-exchange layer.'
+    Description           = 'L3 Defender-portal manifest dispatcher. Per-stream Invoke-MDEEndpoint backed by the endpoints.manifest.psd1 catalogue (64 streams; 63 live + 1 deprecated; across 5 cadence tiers: ActionCenter 10m / XspmGraph 1h / Configuration 6h / Inventory 24h / Maintenance 7d, all read-only). Builds on the L2 Xdr.Defender.Auth cookie-exchange layer.'
     RequiredModules       = @('Xdr.Defender.Auth', 'Xdr.Common.Manifest')
     # Public surface: single dispatcher + truth-signal accessor + 3 underlying
     # helpers exported for v0.2.0 multi-portal extensibility (Entra/Purview/

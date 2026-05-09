@@ -287,8 +287,8 @@ function Invoke-MDETierPoll {
             $rows = Invoke-MDEEndpoint @invokeArgs
             if ($rows -and $rows.Count -gt 0) {
                 # Resolve the per-stream DCR immutableId from the deploy-time
-                # map (DCR_IMMUTABLE_IDS_JSON env var). 60 streams are
-                # partitioned across 7 DCRs sharing a single DCE — the FA
+                # map (DCR_IMMUTABLE_IDS_JSON env var). 65 streamDecls are
+                # partitioned across 13 DCRs sharing a single DCE — the FA
                 # dispatches each stream to the matching DCR at ingest.
                 $dcrId = Get-DcrImmutableIdForStream -StreamName $stream
                 # v0.1.0 GA first publish: pass DLQ storage account so
