@@ -1,34 +1,15 @@
 id: 4e7c2f8a-1b9d-4e5f-8c3a-7d2b9f4e1c6a
 name: "[XdrOps] Per-stream went dry - SourceName silent beyond expected cadence"
 description: |
-  AMEND-9 Phase A.3 (2026-05-09): per-stream stale detector that complements the
-  tier-level XdrOps-ConnectorStaleStream rule. Detects when a SPECIFIC stream
-  (SourceName) goes silent within a tier that's still flowing — the regression
-  pattern observed 2026-05-08T18:44 when MDE_MtoTenants_CL / MDE_AlertTuning_CL /
-  MDE_IdentityServiceAccounts_CL went dry while their Configuration tier kept
-  heartbeating. Live evidence: 4 streams (incl. MDE_ActionCenter_CL 42h prior)
-  stopped ingesting due to upstream Defender portal API response shape drift +
-  fixed manifest UnwrapProperty assumption. Connector self-healed via
-  Ingest.UnwrapAutoDiscovered event in v0.1.0.1; this rule is the watchdog.
-
-  Algorithm: for every SourceName that ingested >100 rows in the prior 7d
-  baseline (proves it's a flowing stream), compare LastSeenUtc vs tier-cadence
-  threshold (2x cadence per nathanmcnulty taxonomy). Fires when StaleMin
-  exceeds threshold. Severity Medium; raise to High if ≥3 streams dry within
-  same 1h window (correlated regression class — same upstream API drift event).
-
-  MITRE: TA0005 Defense Evasion — T1562 (Impair Defenses: Disable or Modify
-  Tools — adversary could induce silent telemetry gap).
-
-  Operator triage: docs/RUNBOOK.md "Stream dry — investigate" procedure.
-  Common root causes (2026-05-09 evidence):
-   1. Upstream Defender portal API shape drift → check AppEvents for
-      Ingest.UnwrapAutoDiscovered or Ingest.BoundaryMarker events
-   2. Service account license loss → check XdrTierState row for SuccessKind=tenant-gated
-   3. Stream-specific 4xx → check Invoke-DefenderPortalRequest 401/403/404 trace
-   4. UnwrapProperty manifest drift → run tools/Capture-EndpointSchemas.ps1 -StreamFilter
+  Per-stream stale detector complementing tier-level XdrOps-ConnectorStaleStream.
+  Detects SourceName silent within still-flowing tier — regression pattern
+  2026-05-08T18:44. Algorithm: streams with Baseline7d>=100 rows compared vs
+  tier-cadence threshold (2x cadence). Severity Medium. MITRE TA0005 T1562.
+  Triage in docs/RUNBOOK.md "Stream dry"; common causes: upstream API shape
+  drift (Ingest.UnwrapAutoDiscovered fires) / SA license loss / 4xx /
+  UnwrapProperty drift (run tools/Capture-EndpointSchemas.ps1 -StreamFilter).
 severity: Medium
-enabled: true
+enabled: false
 requiredDataConnectors:
   - connectorId: XdrLogRaiderInternal
     dataTypes:
