@@ -1,0 +1,112 @@
+// SYNOPSIS:
+//   Computes drift across the Maintenance tier — field-level diff between current
+//   and previous snapshots. Sources from Defender_<Category>_CL tables with
+//   SourceName filter
+//
+//
+// PARAMETERS:
+//   lookback - ISO 8601 duration, default 30d. How far back to look for the "previous" snapshot.
+//   window   - ISO 8601 duration, default 7d. Matches the Maintenance-tier poll cadence.
+//
+// INVOCATION:
+//   MDE_Drift_Maintenance(30d, 7d) | where StreamName == 'MDE_<Stream>_CL'
+//   MDE_Drift_Maintenance()    // applies defaults
+//
+// NOTES:
+//   - (2026-05-04): rewritten to source from Defender_<Category>_CL
+//     tables with SourceName filter. Drift logic preserved from v0.1.0 GA.
+//   - Drift is computed over the per-stream typed columns (DCR-projected at
+//     ingest); RawJson is preserved as a fallback. The parser never re-parses RawJson.
+//   - Output schema: TimeGenerated, StreamName, EntityId, FieldName, OldValue,
+//     NewValue, SnapshotCurrent, SnapshotPrevious, ChangeType.
+
+let MDE_Drift_Maintenance = (lookback:timespan = 30d, window:timespan = 7d) {
+    // Metadata + envelope columns excluded from field-level diff.
+    // Architecture J.6 (2026-05-08): canonical Sentinel Entity Type cols are excluded from
+    // drift detection (treated as entity identifiers, not drift fields) but PRESERVED through
+    // to drift output for cross-table operator KQL filters.
+    let metaCols = dynamic([
+        'TimeGenerated', 'SourceStream', 'SourceName', 'EntityId', 'RawJson', 'Type', 'TenantId',
+        'HostMdatpId', 'HostFullName', 'HostName', 'HostDnsDomain', 'HostOSFamily', 'HostAadId',
+        'AccountName', 'AccountUPNSuffix', 'AccountObjectId', 'AccountSid',
+        'IpAddress', 'Url', 'DomainName',
+        'FileName', 'FileHashType', 'FileHashValue',
+        'CveId', 'OutbreakId', 'AlertId', 'PolicyId',
+        'MachineGroupId', 'MachineGroupName', 'PolicyType', 'Platform'
+    ]);
+    let sources = Defender_StreamingApi_CL | where SourceName in ('MDE_DataExportSettings_CL')
+        | where TimeGenerated > ago(lookback);
+    let current = sources
+        | where TimeGenerated > ago(window)
+        | summarize arg_max(TimeGenerated, *) by SourceName, EntityId
+        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);
+    let previous = sources
+        | where TimeGenerated between (ago(lookback) .. ago(window))
+        | summarize arg_max(TimeGenerated, *) by SourceName, EntityId
+        | extend TypedBag = bag_remove_keys(pack_all(), metaCols);
+    current
+    | join kind=leftouter previous on SourceName, EntityId
+    | where hash(tostring(TypedBag)) != hash(tostring(TypedBag1)) or isnull(TypedBag1)
+    | extend CurrentFields  = bag_keys(TypedBag)
+    | extend PreviousFields = iff(isnull(TypedBag1), dynamic([]), bag_keys(TypedBag1))
+    // Section R++.C B4 fix (2026-05-07): correct Added/Removed/Modified classification.
+    | mv-apply field = set_union(CurrentFields, PreviousFields) to typeof(string) on (
+        extend
+            FieldInCurrent  = set_has_element(CurrentFields,  tostring(field)),
+            FieldInPrevious = set_has_element(PreviousFields, tostring(field))
+        | extend
+            NewValue = iff(FieldInCurrent,  tostring(TypedBag[tostring(field)]),  ''),
+            OldValue = iff(FieldInPrevious, tostring(TypedBag1[tostring(field)]), '')
+        | where NewValue != OldValue or (FieldInCurrent != FieldInPrevious)
+      )
+    // Architecture J.6: column_ifexists ensures canonical cols are in the schema
+    // before project, regardless of which Defender_*_CL tables this parser unions.
+    // Returns the existing value when the col is in the union schema, "" otherwise.
+    | extend
+        HostMdatpId      = tostring(column_ifexists("HostMdatpId", "")),
+        HostFullName     = tostring(column_ifexists("HostFullName", "")),
+        HostName         = tostring(column_ifexists("HostName", "")),
+        HostDnsDomain    = tostring(column_ifexists("HostDnsDomain", "")),
+        HostOSFamily     = tostring(column_ifexists("HostOSFamily", "")),
+        HostAadId        = tostring(column_ifexists("HostAadId", "")),
+        AccountName      = tostring(column_ifexists("AccountName", "")),
+        AccountUPNSuffix = tostring(column_ifexists("AccountUPNSuffix", "")),
+        AccountObjectId  = tostring(column_ifexists("AccountObjectId", "")),
+        AccountSid       = tostring(column_ifexists("AccountSid", "")),
+        IpAddress        = tostring(column_ifexists("IpAddress", "")),
+        Url              = tostring(column_ifexists("Url", "")),
+        DomainName       = tostring(column_ifexists("DomainName", "")),
+        FileName         = tostring(column_ifexists("FileName", "")),
+        FileHashType     = tostring(column_ifexists("FileHashType", "")),
+        FileHashValue    = tostring(column_ifexists("FileHashValue", "")),
+        CveId            = tostring(column_ifexists("CveId", "")),
+        OutbreakId       = tostring(column_ifexists("OutbreakId", "")),
+        AlertId          = tostring(column_ifexists("AlertId", "")),
+        PolicyId         = tostring(column_ifexists("PolicyId", "")),
+        MachineGroupId   = tostring(column_ifexists("MachineGroupId", "")),
+        MachineGroupName = tostring(column_ifexists("MachineGroupName", "")),
+        PolicyType       = tostring(column_ifexists("PolicyType", "")),
+        Platform         = tostring(column_ifexists("Platform", ""))
+    | project
+        TimeGenerated,
+        StreamName       = SourceName,
+        EntityId,
+        FieldName        = tostring(field),
+        OldValue,
+        NewValue,
+        SnapshotCurrent  = TimeGenerated,
+        SnapshotPrevious = TimeGenerated1,
+        ChangeType       = case(
+            not(FieldInPrevious), "Added",
+            not(FieldInCurrent),  "Removed",
+            "Modified"
+        ),
+        // Architecture J.6: canonical Sentinel Entity Type cols preserved for cross-table filters
+        HostMdatpId, HostFullName, HostName, HostDnsDomain, HostOSFamily, HostAadId,
+        AccountName, AccountUPNSuffix, AccountObjectId, AccountSid,
+        IpAddress, Url, DomainName,
+        FileName, FileHashType, FileHashValue,
+        CveId, OutbreakId, AlertId, PolicyId,
+        MachineGroupId, MachineGroupName, PolicyType, Platform
+};
+MDE_Drift_Maintenance

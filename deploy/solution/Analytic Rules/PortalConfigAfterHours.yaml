@@ -1,0 +1,25 @@
+id: 7b58d0e1-2a4f-4b6d-c9e1-5f4a7d2b0c0f
+name: MDE portal config change outside business hours
+description: |
+  Any Defender XDR tenant-configuration or inventory drift event recorded outside 09:00-17:00 UTC business hours. Attackers prefer off-hours config changes for stealth — fewer eyes, longer notice window, alert flood diluted by next-day signals. Legitimate after-hours changes need paired ticket. Severity Low — high FP volume in 24x7 SOC tenants; primarily context anchor for IR retrospective. Tuning: adjust 9/17 to local business hours; 24x7 ops disable or widen to weekends-only. MITRE: TA0005 Defense Evasion — T1562. See KQL body for triage path.
+severity: Low
+enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - XdrConnectorHealth_CL
+queryFrequency: 15m
+queryPeriod: 2h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  union (MDE_Drift_Configuration(2h, 15m)), (MDE_Drift_Inventory(2h, 15m)) | extend HourOfDay = datetime_part("Hour", TimeGenerated) | where HourOfDay < 9 or HourOfDay >= 17
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: SingleAlert
+suppressionEnabled: false
+suppressionDuration: PT5H

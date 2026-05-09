@@ -114,18 +114,6 @@ Operator-facing connector card UX + production-deploy hardening surfaced via liv
 
 [Unreleased]: scratch — Phase 2 (Architecture I XdrTenantState + Architecture E OpenAPI fixture generator) deferred to v0.1.0.1 / v0.2.0 per Section R++++++.7 future expansion roadmap.
 
-### Changed (Section R++)
-
-- **Truth-signal restoration** — `Invoke-MDEEndpoint` now exposes a 4-state `SuccessKind` (`live` / `live-empty` / `tenant-gated` / `error`) via the new `Get-MDEEndpointLastResult` accessor; the legacy `,@()` return contract is preserved so existing callers don't break. Activity (`Xdr-PollStream`) reads this side-channel and writes `Reason` + `HttpStatus` columns to `XdrTierState` so `Connector-Heartbeat` aggregator + connector card can distinguish "tenant doesn't have feature" from "real failure" from "live but no rows this poll".
-- **Schema integrity** — `Defender_ThreatAnalytics_CL` workspace table extended with TopThreats typed cols (TotalActiveThreats, ThreatsExposure, TotalThreatRequiresAction, ThreatExposureCalculationStatus, CurrentAlertsCount); previously these landed via DCR but were silently dropped at the workspace-table layer.
-- **Manifest** — added `IdProperty=@('__synthetic__')` + `SyntheticEntityId='<stream>-singleton'` for SingleObjectAsRow streams without natural id (`MDE_ThreatAnalyticsTopThreats_CL`, `MDE_UserPreferences_CL`, `MDE_CloudAppsConfig_CL`); added `IdProperty` for `MDE_DCCoverage_CL` + `MDE_RemediationAccounts_CL`; added forward-compat `RequiresLicense` + `TenantContextProbe` schema fields; reclassified `MDE_UserPreferences_CL` to `Availability='requires-delegated-auth'`; `MDE_CloudAppsConfig_CL` switched to `SingleObjectAsRow=$true`.
-- **Detection rules** — `MdiDcSensorDown.yaml` realigned: queryFrequency 15m→4h, queryPeriod 2h→P2D (matches Inventory cadence); FieldName "hasSensor" → "IsActive" (matches manifest typed col).
-- **Hunting queries** — `ConfigChangesByUpn.yaml` join switched from exact-equality `==` to 5-min `bin()` bucket (sub-second equality never matched).
-- **Workbooks** — `MDE_DriftReport.json` window args aligned to tier cadence (Inventory 1d, Configuration 6h) instead of 1h/30m which missed 23/24+ of poll cycles.
-- **Drift parsers** — all 4 (Configuration / Inventory / Exposure / Maintenance) — corrected `ChangeType` classification: previously the "Removed" branch was unreachable (`isnull(TypedBag[field])` false for current-snapshot fields). Replaced with explicit `set_has_element` + `case()` so Added/Removed/Modified classify correctly.
-- **Orchestrator** — `Xdr-PollOrchestrator` now filters `Availability='deprecated'` streams (e.g. `MDE_StreamingApiConfig_CL`) — saves auth-call budget + removes 4xx noise from AppExceptions.
-- **Connector card UX** — Sentinel UI graphQueries now show `sum(RowsIngested)` over 7d + `max(StreamsSucceeded)` per tier instead of a single AppInsights customEvents counter (the prior chart label "21" was misread as "21 rows landed").
-
 ### Added
 
 - New module export `Get-MDEEndpointLastResult` (truth-signal accessor).

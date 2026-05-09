@@ -1,0 +1,71 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDE_DriftReport",
+  "items": [
+    {
+      "name": "header",
+      "content": {
+        "json": "# MDE Drift Report\n\n**What this dashboard shows:** Unified configuration / inventory / exposure / maintenance drift — every change to Defender XDR tenant configuration, attributed to admin UPNs via AuditLogs cross-reference. The single pane of glass for 'what changed and who changed it' across all 4 cadence tiers.\n\n**Use cases:**\n- **Daily SOC review**: top changes overnight + after-hours drift\n- **Change-management audit**: validate every drift event against approved change tickets\n- **Compliance evidence**: SOC2 / ISO27001 / CMMC audit trail of configuration changes\n- **Incident retrospective**: timeline of admin actions during attack dwell window\n- **Admin governance**: identify role-creep, sustained config-creep, after-hours admin activity\n\n**Data sources:** All 4 drift parsers (MDE_Drift_Configuration / MDE_Drift_Inventory / MDE_Drift_Exposure / MDE_Drift_Maintenance) + AuditLogs join on 5-minute time bins.\n\n**Triage tip:** Filter `where ChangeType in ('Added','Modified')` for high-impact changes; 'Removed' is often legitimate cleanup."
+      },
+      "type": 1
+    },
+    {
+      "name": "parameters",
+      "content": {
+        "parameters": [
+          {
+            "value": { "durationMs": 604800000 },
+            "id": "tr",
+            "name": "TimeRange",
+            "version": "KqlParameterItem/1.0",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          }
+        ],
+        "queryType": 0,
+        "style": "pills",
+        "version": "KqlParameterItem/1.0"
+      },
+      "type": 9
+    },
+    {
+      "name": "panel-1",
+      "content": {
+        "queryType": 0,
+        "title": "Drift events over time, by category",
+        "size": 0,
+        "query": "// Section R++.C B8 fix (2026-05-07): window arg must match tier cadence.\n// Inventory cadence=1d, Configuration cadence=6h. Original 1h/30m windows missed 23/24+ of poll cycles.\nunion\n  (MDE_Drift_Inventory(7d, 1d) | extend Category = \"Endpoint Config\"),\n  (MDE_Drift_Configuration(7d, 6h) | extend Category = \"Detection Pipeline\"),\n  (MDE_Drift_Configuration(7d, 6h) | extend Category = \"Governance\"),\n  (MDE_Drift_Inventory(7d, 1d) | extend Category = \"Identity\"),\n  (MDE_Drift_Configuration(7d, 6h) | extend Category = \"Metadata\")\n| summarize Changes = count() by Category, bin(TimeGenerated, 6h)\n| render timechart",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    },
+    {
+      "name": "panel-2",
+      "content": {
+        "queryType": 0,
+        "title": "Recent drift events (all categories)",
+        "size": 0,
+        "query": "// Section R++.C B8 fix (2026-05-07): window aligned to tier cadence.\nunion\n  (MDE_Drift_Inventory(7d, 1d)),\n  (MDE_Drift_Configuration(7d, 6h))\n| project TimeGenerated, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType\n| order by TimeGenerated desc\n| take 100",
+        "version": "KqlItem/1.0"
+      },
+      "type": 3
+    }
+  ],
+  "version": "Notebook/1.0"
+}

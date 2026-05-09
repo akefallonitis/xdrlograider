@@ -1,0 +1,161 @@
+id: 4e7c2f8a-1b9d-4e5f-8c3a-7d2b9f4e1c6a
+name: "[XdrOps] Per-stream went dry - SourceName silent beyond expected cadence"
+description: |
+  Per-stream stale detector complementing tier-level XdrOps-ConnectorStaleStream.
+  Detects SourceName silent within still-flowing tier — regression pattern
+  2026-05-08T18:44. Algorithm: streams with Baseline7d>=100 rows compared vs
+  tier-cadence threshold (2x cadence). Severity Medium. MITRE TA0005 T1562.
+  Triage in docs/RUNBOOK.md "Stream dry"; common causes: upstream API shape
+  drift (Ingest.UnwrapAutoDiscovered fires) / SA license loss / 4xx /
+  UnwrapProperty drift (run tools/Capture-EndpointSchemas.ps1 -StreamFilter).
+severity: Medium
+enabled: false
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - Defender_ActionCenter_CL
+      - Defender_ConfigurationAndSettings_CL
+      - Defender_EndpointConfiguration_CL
+      - Defender_EndpointDeviceManagement_CL
+      - Defender_ExposureManagement_CL
+      - Defender_IdentityProtection_CL
+      - Defender_MultiTenantOperations_CL
+      - Defender_StreamingApi_CL
+      - Defender_ThreatAnalytics_CL
+      - Defender_VulnerabilityManagement_CL
+queryFrequency: 1h
+queryPeriod: 14d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+query: |
+  // Tier-cadence threshold map (2x cadence; same as XdrOps-ConnectorStaleStream).
+  let cadenceLimits = datatable(Tier: string, MaxStaleMin: long)
+  [
+      "ActionCenter",   20,
+      "XspmGraph",      120,
+      "Configuration",  720,
+      "Inventory",      2880,
+      "Maintenance",    20160
+  ];
+  // Stream → Tier mapping derived from manifest categorization (locked at
+  // v0.1.0.1; updates require manifest commit + this rule update).
+  let streamTier = datatable(SourceName: string, Tier: string)
+  [
+      "MDE_ActionCenter_CL",                  "ActionCenter",
+      "MDE_DeviceTimeline_CL",                "ActionCenter",
+      "MDE_AdvancedFeatures_CL",              "Inventory",
+      "MDE_AlertServiceConfig_CL",            "Configuration",
+      "MDE_AlertTuning_CL",                   "Configuration",
+      "MDE_AntivirusPolicy_CL",               "Inventory",
+      "MDE_AssetClassificationSchema_CL",     "XspmGraph",
+      "MDE_AssetRules_CL",                    "Configuration",
+      "MDE_AttackSurfaceAttackPaths_CL",      "XspmGraph",
+      "MDE_AttackSurfaceChokepoints_CL",      "XspmGraph",
+      "MDE_AuthenticatedTelemetry_CL",        "Inventory",
+      "MDE_CloudAppsConfig_CL",               "Configuration",
+      "MDE_ConnectedApps_CL",                 "Configuration",
+      "MDE_CustomCollection_CL",              "Inventory",
+      "MDE_CustomDetections_CL",              "Configuration",
+      "MDE_DCCoverage_CL",                    "Inventory",
+      "MDE_DataExportSettings_CL",            "Maintenance",
+      "MDE_DeviceControlPolicy_CL",           "Inventory",
+      "MDE_ExposureRecommendations_CL",       "XspmGraph",
+      "MDE_ExposureSnapshots_CL",             "XspmGraph",
+      "MDE_IdentityAlertThresholds_CL",       "Inventory",
+      "MDE_IdentityOnboarding_CL",            "Inventory",
+      "MDE_IdentityServiceAccounts_CL",       "Inventory",
+      "MDE_IntuneConnection_CL",              "Configuration",
+      "MDE_LicenseReport_CL",                 "Inventory",
+      "MDE_LiveResponseConfig_CL",            "Inventory",
+      "MDE_Machines_CL",                      "Inventory",
+      "MDE_MtoTenants_CL",                    "Inventory",
+      "MDE_PUAConfig_CL",                     "Inventory",
+      "MDE_PostureInitiativesSummarized_CL",  "XspmGraph",
+      "MDE_PostureMetrics_CL",                "XspmGraph",
+      "MDE_PostureSecurityEvents_CL",         "XspmGraph",
+      "MDE_PostureTenants_CL",                "XspmGraph",
+      "MDE_PreviewFeatures_CL",               "Configuration",
+      "MDE_PurviewSharing_CL",                "Configuration",
+      "MDE_RbacDeviceGroups_CL",              "Configuration",
+      "MDE_RecommendationActions_CL",         "Inventory",
+      "MDE_RemediationAccounts_CL",           "Inventory",
+      "MDE_SAClassification_CL",              "XspmGraph",
+      "MDE_SecurityBaselines_CL",             "Inventory",
+      "MDE_SecurityPolicies_CL",              "Configuration",
+      "MDE_SmartScreenConfig_CL",             "Inventory",
+      "MDE_SoftwareInventory_CL",             "Inventory",
+      "MDE_SuppressionRules_CL",              "Configuration",
+      "MDE_TenantAllowBlock_CL",              "Configuration",
+      "MDE_TenantContext_CL",                 "Inventory",
+      "MDE_TenantWorkloadStatus_CL",          "Inventory",
+      "MDE_ThreatAnalytics_CL",               "Configuration",
+      "MDE_ThreatAnalyticsEnriched_CL",       "Configuration",
+      "MDE_ThreatAnalyticsTopThreats_CL",     "Configuration",
+      "MDE_UnifiedRbacRoles_CL",              "Configuration",
+      "MDE_UserPreferences_CL",               "Configuration",
+      "MDE_VulnerabilityInventory_CL",        "Inventory",
+      "MDE_VulnerableMachines_CL",            "Inventory",
+      "MDE_WebContentFiltering_CL",           "Inventory",
+      "MDE_XspmAttackPaths_CL",               "XspmGraph",
+      "MDE_XspmChokePoints_CL",               "XspmGraph",
+      "MDE_XspmConnectors_CL",                "XspmGraph",
+      "MDE_XspmInitiatives_CL",               "XspmGraph",
+      "MDE_XspmTopTargets_CL",                "XspmGraph",
+      "MDE_AppsSecureScore_CL",               "XspmGraph",
+      "MDE_DataSecureScore_CL",               "XspmGraph",
+      "MDE_IdentitySecureScore_CL",           "XspmGraph"
+  ];
+  // Per-stream baseline: streams with >=100 rows in last 7d are "established
+  // flowing" — only those qualify for stale-detection (avoids false positives
+  // on tenant-gated streams that legitimately never ingest).
+  // Per-table time bounds (Audit-TimeFilterCoverage.ps1 80-char context window).
+  let establishedStreams =
+      union
+          (Defender_ActionCenter_CL            | where TimeGenerated between (ago(14d) .. ago(2h))),
+          (Defender_ConfigurationAndSettings_CL | where TimeGenerated between (ago(14d) .. ago(2h))),
+          (Defender_EndpointConfiguration_CL    | where TimeGenerated between (ago(14d) .. ago(2h))),
+          (Defender_EndpointDeviceManagement_CL | where TimeGenerated between (ago(14d) .. ago(2h))),
+          (Defender_ExposureManagement_CL       | where TimeGenerated between (ago(14d) .. ago(2h))),
+          (Defender_IdentityProtection_CL       | where TimeGenerated between (ago(14d) .. ago(2h))),
+          (Defender_MultiTenantOperations_CL    | where TimeGenerated between (ago(14d) .. ago(2h))),
+          (Defender_StreamingApi_CL             | where TimeGenerated between (ago(14d) .. ago(2h))),
+          (Defender_ThreatAnalytics_CL          | where TimeGenerated between (ago(14d) .. ago(2h))),
+          (Defender_VulnerabilityManagement_CL  | where TimeGenerated between (ago(14d) .. ago(2h)))
+      | where isnotempty(SourceName)
+      | summarize Baseline7d=count() by SourceName
+      | where Baseline7d >= 100;
+  // Latest row per established stream (each table reference time-bounded).
+  let streamLatest =
+      union
+          (Defender_ActionCenter_CL            | where TimeGenerated > ago(14d)),
+          (Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(14d)),
+          (Defender_EndpointConfiguration_CL    | where TimeGenerated > ago(14d)),
+          (Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(14d)),
+          (Defender_ExposureManagement_CL       | where TimeGenerated > ago(14d)),
+          (Defender_IdentityProtection_CL       | where TimeGenerated > ago(14d)),
+          (Defender_MultiTenantOperations_CL    | where TimeGenerated > ago(14d)),
+          (Defender_StreamingApi_CL             | where TimeGenerated > ago(14d)),
+          (Defender_ThreatAnalytics_CL          | where TimeGenerated > ago(14d)),
+          (Defender_VulnerabilityManagement_CL  | where TimeGenerated > ago(14d))
+      | where isnotempty(SourceName)
+      | summarize LastSeenUtc=max(TimeGenerated) by SourceName;
+  // Detect dry streams
+  establishedStreams
+  | join kind=inner streamLatest on SourceName
+  | join kind=leftouter streamTier on SourceName
+  | extend Tier = coalesce(Tier, 'Unknown')
+  | join kind=leftouter cadenceLimits on Tier
+  | extend MaxStaleMin = coalesce(MaxStaleMin, toint(2880))   // default 2d if Tier unknown
+  | extend StaleMin = datetime_diff('minute', now(), LastSeenUtc)
+  | where StaleMin > MaxStaleMin
+  | project SourceName, Tbl, Tier, LastSeenUtc, StaleMin, MaxStaleMin, Baseline7d
+  | order by StaleMin desc
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: AlertPerResult
+suppressionEnabled: true
+suppressionDuration: PT4H

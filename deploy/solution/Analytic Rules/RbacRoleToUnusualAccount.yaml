@@ -1,0 +1,36 @@
+id: 0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08
+name: MDE RBAC role to unusual account
+description: |
+  New principalId/principalName added to Defender XDR Unified RBAC roles — account gained Defender permissions it didn't have. RBAC additions = canonical privilege-escalation signal. Attacker with admin compromise grants themselves or backdoor account Defender admin perms to maintain SOC-tooling control across password rotations. Severity High — RBAC additions infrequent in stable envs; every one needs justification. MITRE: TA0004 Privilege Escalation — T1078 (PRIMARY); TA0003 Persistence — T1098, T1136. See KQL body for triage path.
+severity: High
+enabled: false  # Sentinel Solution best practice — customer enables per-rule after reviewing query + threshold
+requiredDataConnectors:
+  - connectorId: XdrLogRaiderInternal
+    dataTypes:
+      - XdrConnectorHealth_CL
+queryFrequency: 4h
+queryPeriod: P2D
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - PrivilegeEscalation
+  - Persistence
+relevantTechniques:
+  - T1078
+# Section R++++++.4 F4 fix (2026-05-07T15:00): MDE_UnifiedRbacRoles_CL is
+# on Configuration tier (6h cadence in production). Old (15m freq / 2h
+# period) over-fired vs the parser's 7d window. Realigned freq=4h
+# (~36 firings per parser window) + period=P2D (catches recent additions
+# without scanning the full 7d range every check). Parser window 7d
+# kept — RBAC additions are rare enough that the wider lookback is
+# operator-friendly for retrospective context.
+query: |
+  MDE_Drift_Configuration(7d, 1d)
+  | where StreamName == "MDE_UnifiedRbacRoles_CL"
+  | where ChangeType == "Added"
+  | where FieldName == "principalId" or FieldName == "principalName"
+entityMappings: []
+eventGroupingSettings:
+  aggregationKind: SingleAlert
+suppressionEnabled: false
+suppressionDuration: PT5H

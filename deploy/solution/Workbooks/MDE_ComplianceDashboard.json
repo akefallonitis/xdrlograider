@@ -1,0 +1,88 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# MDE Compliance Dashboard\n\n**What this dashboard shows:** Current state of Defender XDR tenant security configuration with recent drift highlighted. Maps tenant config to compliance baselines (CIS, NIST, ISO27001) and surfaces deviations.\n\n**Use cases:**\n- **Quarterly compliance review**: SOC2/ISO27001 evidence pack + auditor-friendly views\n- **CISO scorecard**: green/red posture indicators per category (RBAC, AV, ASR, EDR, Firewall)\n- **Tenant onboarding**: validate baseline compliance before go-live\n- **Drift accountability**: highlight what changed in last 24h/7d/30d for each category\n\n**Data sources:** All Configuration tier streams (`MDE_AlertTuning_CL`, `MDE_SuppressionRules_CL`, `MDE_TenantAllowBlock_CL`, `MDE_UnifiedRbacRoles_CL`, `MDE_AdvancedFeatures_CL`, etc.) + drift parser overlays.\n\n**Cadence:** 6h Configuration tier polls + recent-drift overlay from `MDE_Drift_Configuration`."
+      },
+      "name": "header"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "timerange-param",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "value": { "durationMs": 604800000 },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 3600000 },
+                { "durationMs": 86400000 },
+                { "durationMs": 604800000 },
+                { "durationMs": 2592000000 }
+              ]
+            }
+          }
+        ],
+        "style": "pills",
+        "queryType": 0
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "XdrConnectorHealth_CL\n| where TimeGenerated > ago(1h)\n| where Tier in ('ActionCenter','XspmGraph','Configuration','Inventory','Maintenance')\n| summarize LastSeen = max(TimeGenerated), Streams = max(StreamsSucceeded) by Tier\n| extend Status = iff(LastSeen > ago(30m), 'Healthy', 'Stale')",
+        "size": 0,
+        "title": "Connector health (last hour)",
+        "queryType": 0,
+        "visualization": "table"
+      },
+      "name": "health-panel"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MDE_Drift_Inventory(7d, 1h)\n| summarize Changes = count() by StreamName, bin(TimeGenerated, 1h)\n| render timechart",
+        "size": 0,
+        "title": "P0 drift events",
+        "queryType": 0
+      },
+      "name": "drift-timechart"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "Defender_EndpointConfiguration_CL | where SourceName == 'MDE_LiveResponseConfig_CL'\n| summarize arg_max(TimeGenerated, *) by FeatureName\n| project FeatureName, IsEnabled, TimeGenerated\n| order by FeatureName asc",
+        "size": 0,
+        "title": "Live Response config",
+        "queryType": 0,
+        "visualization": "table"
+      },
+      "name": "lr-table"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let drift = MDE_Drift_Inventory(7d, 1h)\n    | extend DriftTime = TimeGenerated, DriftBin = bin(TimeGenerated, 5min);\nlet audits = AuditLogs\n    | where TimeGenerated {TimeRange}\n    | project AuditTime = TimeGenerated, OperationName, InitiatedByUpn = tostring(InitiatedBy.user.userPrincipalName), AuditBin = bin(TimeGenerated, 5min);\ndrift\n| join kind=leftouter audits on $left.DriftBin == $right.AuditBin\n| where isnull(AuditTime) or (AuditTime between ((DriftTime - 5min) .. (DriftTime + 5min)))\n| extend DeltaSec = iff(isnull(AuditTime), int(null), abs(datetime_diff('second', AuditTime, DriftTime)))\n| summarize arg_min(DeltaSec, OperationName, InitiatedByUpn, AuditTime) by DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType\n| project TimeGenerated = DriftTime, StreamName, EntityId, FieldName, OldValue, NewValue, ChangeType, OperationName, InitiatedByUpn\n| order by TimeGenerated desc",
+        "size": 0,
+        "title": "Recent changes with attribution",
+        "queryType": 0,
+        "visualization": "table"
+      },
+      "name": "recent-changes-table"
+    }
+  ],
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-MDEComplianceDashboard",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

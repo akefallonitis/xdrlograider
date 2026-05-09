@@ -1,0 +1,62 @@
+id: a1b2c3d4-1111-4003-8003-000000000003
+name: MDE TVM top vulnerable machines + inventory + remediation actions
+description: |
+  Cross-stream TVM hunt — unions latest snapshots of top-vulnerable machines + active CVE inventory + software inventory + remediation tasks. Single operator view of entire TVM landscape. Requires TvmPremium. See KQL body for triage path + MITRE.
+author: Alex Kefallonitis
+version: 1.0.0
+tags:
+  - TVM
+  - Vulnerabilities
+  - Remediation
+  - DefenderXDR
+queryFrequency: 1d
+queryPeriod: 1d
+tactics:
+  - Discovery
+relevantTechniques:
+  - T1082
+  - T1518
+query: |
+  // === MDE TVM top vulnerable machines + inventory + remediation actions ===
+  //
+  // WHAT: Cross-stream TVM hunt — unions latest snapshots of top-vulnerable machines + active CVE inventory
+  //       + software inventory + remediation tasks. Sortable by stream for prioritization.
+  // WHEN: Weekly patch-prioritization, monthly compliance posture report, pre-security-audit,
+  //       post-major-CVE disclosure (Log4Shell, MOVEit, ProxyShell) tenant impact assessment.
+  // WHY: TVM data split across 4 nodoc endpoints (top-vulnerable / vulns / software / recommendations).
+  //      SOC value is in the JOIN: "top-10 exposed machines + CVE list + software driver + remediation tasks"
+  //      is the patch-management orchestration question. Single hunt instead of 4.
+  //
+  // TRIAGE PATH:
+  //   1. Filter `Stream='_topVulnerable' | top 10 by RiskScore` = patch-priority machines
+  //   2. Pivot to `Stream='_vulnInventory'` to identify their CVE list
+  //   3. Pivot to `Stream='_softwareInv'` to identify CVE-driving products
+  //   4. Pivot to `Stream='_recommendations'` for existing remediation tasks (or create new)
+  //   5. Track in patch-management platform; re-run weekly to measure remediation velocity
+  //
+  // EXPECTED BASELINE: Volume scales with tenant. _topVulnerable empty = TVM Premium not licensed.
+  // TUNING: Adjust 24h to Inventory cadence. Filter by OS platform if patching by platform.
+  // LICENSE: Requires MDE Plan 2 + TVM Premium add-on. Without it, 4 streams are tenant-gated (zero rows).
+  // MITRE: TA0007 Discovery — T1518 Software Discovery; T1082; TA0001 — T1190 (vuln inventory feeds priority).
+  let _topVulnerable = Defender_VulnerabilityManagement_CL
+      | where SourceName == 'MDE_VulnerableMachines_CL'
+      | where TimeGenerated > ago(24h)
+      | summarize arg_max(TimeGenerated, *) by AssetId
+      | project AssetId, MachineName, CveCount, CriticalCveCount, ExposureScore, RiskScore, OsPlatform;
+  let _vulnInventory = Defender_VulnerabilityManagement_CL
+      | where SourceName == 'MDE_VulnerabilityInventory_CL'
+      | where TimeGenerated > ago(24h)
+      | summarize arg_max(TimeGenerated, *) by CveId
+      | project CveId, Severity, CvssV3, AssetCount, ProductName;
+  let _softwareInv = Defender_VulnerabilityManagement_CL
+      | where SourceName == 'MDE_SoftwareInventory_CL'
+      | where TimeGenerated > ago(24h)
+      | summarize arg_max(TimeGenerated, *) by ProductId
+      | project ProductId, ProductName, Vendor, AssetCount, VulnerabilityCount, WeaknessCount;
+  let _recommendations = Defender_VulnerabilityManagement_CL
+      | where SourceName == 'MDE_RecommendationActions_CL'
+      | where TimeGenerated > ago(24h)
+      | summarize arg_max(TimeGenerated, *) by RemediationTaskId
+      | project RemediationTaskId, Title, Status, Priority, AssetCount, CreatedDate, DueDate;
+  union withsource=Stream _topVulnerable, _vulnInventory, _softwareInv, _recommendations
+  | order by Stream asc
