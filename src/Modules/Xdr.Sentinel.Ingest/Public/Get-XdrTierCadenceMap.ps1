@@ -29,18 +29,31 @@ function Get-XdrTierCadenceMap {
     [OutputType([hashtable])]
     param()
 
-    # PRODUCTION cadence (Section R++++++.4 F3 revert 2026-05-07):
-    # Compressed troubleshooting cadence (1h-everything) was used during
-    # iter-15→18 LIVE re-verify shake-out to surface end-to-end data flow
-    # within minutes. Production tag REQUIRES the canonical cadence below
-    # — compressed cadence inflates row counts ~24x (Inventory) / ~168x
-    # (Maintenance) vs SLI/SLO baseline and breaches RowVolumeSpike
-    # cost-budget gates.
+    # *** AMEND-9 COMPRESSED-CADENCE AUDIT (2026-05-09) — TEMPORARY OVERRIDE ***
+    # Per Plan AMEND-2 + user directive 2026-05-09: compressed 1h-everything
+    # cadence for Configuration/Inventory/Maintenance lets all 5 tiers fire
+    # within ~1-1.5h so operator can audit ALL: streams + tables + schemas +
+    # parsers + checkpoints + states + pagination + drift parsers + workbook
+    # panels + analytic rules end-to-end without waiting 7-day Maintenance.
+    #
+    # Matches XdrRefresh.TierDispatch.Tests.ps1 Section R++ compressed branch.
+    #
+    # *** MUST REVERT BEFORE v0.1.0 GA TAG (Plan AMEND-2 BINDING) ***
+    # Production cadences inline below (commented). Single revert commit:
+    #   revert(observation): restore production cadence map per Plan AMEND-2
     return @{
         ActionCenter  = [TimeSpan]::FromMinutes(10)
         XspmGraph     = [TimeSpan]::FromHours(1)
-        Configuration = [TimeSpan]::FromHours(6)
-        Inventory     = [TimeSpan]::FromDays(1)
-        Maintenance   = [TimeSpan]::FromDays(7)
+        Configuration = [TimeSpan]::FromHours(1)
+        Inventory     = [TimeSpan]::FromHours(1)
+        Maintenance   = [TimeSpan]::FromHours(1)
     }
+    # PRODUCTION cadence (REVERT TO THIS BEFORE v0.1.0 GA TAG):
+    # return @{
+    #     ActionCenter  = [TimeSpan]::FromMinutes(10)
+    #     XspmGraph     = [TimeSpan]::FromHours(1)
+    #     Configuration = [TimeSpan]::FromHours(6)
+    #     Inventory     = [TimeSpan]::FromDays(1)
+    #     Maintenance   = [TimeSpan]::FromDays(7)
+    # }
 }
