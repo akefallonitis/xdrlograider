@@ -88,9 +88,11 @@ jobs:
           #   (1a) DCR count == 13 (one per consolidated workspace table; with
           #        semantic sub-domain split for Configuration and Exposure
           #        which exceed Azure's 10-flow cap)
-          #   (1b) DCR streamDeclarations.Count == 66 (65 streams + ops)
-          #        Phase 1 baseline (Section R++++++.1): 65 = 59 + 6 new
-          #        (Machines + SecurityPolicies + 4 TVM expansion)
+          #   (1b) DCR streamDeclarations.Count == 65 (64 data streams + 1 ops)
+          #        v0.1.0 GA tag (commit 68526f5): F1 removed MDE_MachineActions_CL.
+          #        Result: 64 data streams + 1 system XdrConnectorHealth_CL = 65.
+          #        AMEND-9 Phase A.5 (2026-05-09): pre-existing off-by-one bug
+          #        was 66; corrected to 65 to match actual ARM template state.
           #   (2)  every analytic rule ships enabled:false
           #   (3)  Data Connector dataTypes.Count == 11
 
@@ -114,8 +116,8 @@ jobs:
                   $streamCount += ($dcr.properties.streamDeclarations.PSObject.Properties.Name).Count
               }
           }
-          if ($streamCount -ne 66) {
-              throw "Gate 1b FAIL: DCR streamDeclarations count = $streamCount (expected 66 = 65 streams + XdrConnectorHealth_CL operational; Phase 1 baseline includes 6 new streams: MDE_Machines_CL + MDE_SecurityPolicies_CL + 4 TVM expansion)"
+          if ($streamCount -ne 65) {
+              throw "Gate 1b FAIL: DCR streamDeclarations count = $streamCount (expected 65 = 64 data streams + 1 XdrConnectorHealth_CL ops; v0.1.0 GA tag F1 removed MDE_MachineActions_CL)"
           }
           Write-Host "Gate 1b OK: DCR streamDeclarations.Count = $streamCount" -ForegroundColor Green
 
