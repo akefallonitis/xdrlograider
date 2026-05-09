@@ -1327,6 +1327,45 @@ AttackPathsV2
         }
 
         # ----------------------------------------------------------------------
+        # Phase 2 batch 4 (Plan R++++++++++ Tier A 2026-05-09): MDE_VulnerabilityCertificates_CL
+        # — TVM certificate inventory: per-cert metadata across endpoint devices
+        # incl. expiration status + cryptographic algorithm + affected-device count.
+        # Per nodoc vulnerability_management.yml VulnerabilityManagement.ListCertificates.
+        # TvmPremium license required (lab returned 400 - all-live policy + runtime
+        # SuccessKind classifies dynamically per actual customer).
+        # Operator value: certificate expiration inventory for compliance/audit;
+        # distinct from existing TVM streams (focus on cert lifecycle vs vulnerability CVEs).
+        # ----------------------------------------------------------------------
+        @{
+            Stream = 'MDE_VulnerabilityCertificates_CL'
+            Path = '/apiproxy/mtp/tvm/analytics/certificates?pageIndex=0&pageSize=200'
+            Tier = 'Inventory'
+            UnwrapProperty = 'data'
+            IdProperty = @('certificateId', 'thumbprint', 'Id', 'id')
+            Category = 'Vulnerability Management (TVM)'
+            CategoryId = 3
+            Purpose = 'TVM certificate inventory - per-cert metadata + expiration status + cryptographic algorithm + affected-device count for compliance/audit'
+            Availability = 'live'
+            RequiresLicense    = @('TvmPremium')
+            TenantContextProbe = 'IsMdatpActive'
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50
+            }
+            ProjectionMap = @{
+                CertificateId        = '$tostring:certificateId'
+                Subject              = '$tostring:subject'
+                Issuer               = '$tostring:issuer'
+                Thumbprint           = '$tostring:thumbprint'
+                ExpirationDate       = '$todatetime:expirationDate'
+                AlgorithmName        = '$tostring:algorithmName'
+                AffectedDevicesCount = '$toint:affectedDevicesCount'
+                IsExpired            = '$tobool:isExpired'
+            }
+        }
+
+        # ----------------------------------------------------------------------
         # Phase 2 batch 3 (Plan R++++++++++ Tier A 2026-05-09): MDE_IdentityLateralMovementPaths_CL
         # — MDI risky lateral-movement-path prevalence delta. Counts newly-surfaced
         # risky-LMP findings since previous poll. Same {Count, IsCountExceeded}

@@ -519,8 +519,9 @@ Describe 'DCR — Azure service-quota gates' {
         # Phase 2 batch 1 (2026-05-09): MDE_PendingActions_CL added to actioncenter DCR (1 -> 2)
         # Phase 2 batch 2 (2026-05-09): MDE_IdentityDormantAccounts_CL added to identity DCR (6 -> 7)
         # Phase 2 batch 3 (2026-05-09): MDE_IdentityLateralMovementPaths_CL added to identity DCR (7 -> 8)
-        $sortedCounts | Should -Be @(1, 2, 2, 3, 3, 3, 5, 6, 7, 8, 8, 10, 10) -Because 'per-category DCR distribution post-F1 + Phase 2 batches 1-3'
-        @($allStreams | Sort-Object -Unique).Count | Should -Be 68 -Because 'every declared stream must appear in exactly one dataFlow (67 data + 1 ops = 68; Phase 2 batches 1-3)'
+        # Phase 2 batch 4 (2026-05-09): MDE_VulnerabilityCertificates_CL added to vuln-mgmt DCR (5 -> 6)
+        $sortedCounts | Should -Be @(1, 2, 2, 3, 3, 3, 6, 6, 7, 8, 8, 10, 10) -Because 'per-category DCR distribution post-F1 + Phase 2 batches 1-4'
+        @($allStreams | Sort-Object -Unique).Count | Should -Be 69 -Because 'every declared stream must appear in exactly one dataFlow (68 data + 1 ops = 69; Phase 2 batches 1-4)'
     }
 
     It 'no dataFlow combines multiple streams with a transformKql (Microsoft DCR rule)' {

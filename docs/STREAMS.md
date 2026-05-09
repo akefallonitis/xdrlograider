@@ -52,6 +52,7 @@ Action Center events — operator-visible response actions and Live Response per
 | `MDE_PendingActions_CL` | `/apiproxy/mtp/actionCenter/actioncenterui/pending-actions` | GET | live |
 | `MDE_IdentityDormantAccounts_CL` | `/apiproxy/aatp/api/ispmReports/DormantEntities/newEntryCount` | GET | live (MDI-licensed) |
 | `MDE_IdentityLateralMovementPaths_CL` | `/apiproxy/aatp/api/ispmReports/RiskyLateralMovementPath/newEntryCount` | GET | live (MDI-licensed) |
+| `MDE_VulnerabilityCertificates_CL` | `/apiproxy/mtp/tvm/analytics/certificates?pageIndex=0&pageSize=200` | GET | live (TvmPremium-licensed; paginated) |
 
 ## exposure (hourly @ :25, 18 streams)
 

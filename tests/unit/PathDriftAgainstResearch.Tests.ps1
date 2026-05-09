@@ -96,6 +96,7 @@ BeforeAll {
         '/apiproxy/mtp/actionCenter/actioncenterui/pending-actions'                                        = 'nodoc:action_center.yml ActionCenter.GetPending operationId (Phase 2 batch 1 2026-05-09 R++++++++++; live-tested 200 OK in lab Phase 0)'
         '/apiproxy/aatp/api/ispmReports/DormantEntities/newEntryCount'                                     = 'nodoc:identity.yml Identity.GetDormantEntitiesNewEntryCount operationId (Phase 2 batch 2 2026-05-09 R++++++++++; MDI-licensed; lab returned 404 expected)'
         '/apiproxy/aatp/api/ispmReports/RiskyLateralMovementPath/newEntryCount'                            = 'nodoc:identity.yml Identity.GetRiskyLateralMovementPathNewEntryCount operationId (Phase 2 batch 3 2026-05-09 R++++++++++; MDI-licensed; lab returned 404 expected; XSPM-class attack-path intelligence)'
+        '/apiproxy/mtp/tvm/analytics/certificates?pageIndex=0&pageSize=200'                                = 'nodoc:vulnerability_management.yml VulnerabilityManagement.ListCertificates operationId (Phase 2 batch 4 2026-05-09 R++++++++++; TvmPremium-licensed; paginated; lab returned 400 expected)'
         # F1 2026-05-08: MachineActions REMOVED (overlapped with ActionCenter canonical endpoint)
 
         # ---- P7 ----
