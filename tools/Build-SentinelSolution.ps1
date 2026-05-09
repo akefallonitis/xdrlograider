@@ -111,7 +111,7 @@ $solutionInput = [ordered]@{
     Name        = $solutionName
     Author      = 'Alex Kefallonitis'
     Logo        = '<img src="Images/Logo.svg" width="75px" height="75px">'
-    Description = 'XdrLogRaider ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance) that is NOT exposed by public Graph Security / Defender XDR / MDE public APIs. 45 streams across 7 compliance tiers; drift detection via pure KQL; 6 workbooks, 14 analytic rules (ship disabled), 9 hunting queries.'
+    Description = 'XdrLogRaider ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance) that is NOT exposed by public Graph Security / Defender XDR / MDE public APIs. 64 streams (63 live + 1 deprecated) across 5 cadence tiers (10m/1h/6h/24h/7d); drift detection via pure KQL; 8 workbooks, 21 analytic rules (14 detection + 7 XdrOps; all ship disabled), 12 hunting queries, 4 cadence-tier parsers.'
     Workbooks   = @(Get-ChildItem -Path (Join-Path $stagingDir 'Workbooks') -Filter *.json | ForEach-Object { "Workbooks/$($_.Name)" })
     AnalyticalRules = @(Get-ChildItem -Path (Join-Path $stagingDir 'Analytic Rules') -Filter *.yaml | ForEach-Object { "Analytic Rules/$($_.Name)" })
     HuntingQueries  = @(Get-ChildItem -Path (Join-Path $stagingDir 'Hunting Queries') -Filter *.yaml | ForEach-Object { "Hunting Queries/$($_.Name)" })
@@ -154,9 +154,9 @@ $releaseNotes = @"
 ## XdrLogRaider v$Version
 
 ### Highlights
-- 55 Defender XDR portal-only telemetry streams
+- 64 Defender XDR portal-only telemetry streams (63 live + 1 deprecated)
 - Two unattended auto-refreshing auth methods: Credentials+TOTP, Software Passkey
-- 6 KQL drift parsers, 6 workbooks, 15 analytic rules, 10 hunting queries
+- 4 KQL drift parsers, 8 workbooks, 21 analytic rules (14 detection + 7 XdrOps), 12 hunting queries
 - Full documentation + 3-OS CI
 - MIT licensed; community-maintained
 

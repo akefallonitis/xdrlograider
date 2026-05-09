@@ -117,7 +117,7 @@ foreach ($suffix in $dcrLayout.Keys) {
 }
 $totalStreams = ($dcrLayout.Values | ForEach-Object { $_.Streams.Count } | Measure-Object -Sum).Sum
 Write-Host ("  Total: {0} DCRs, {1} streams" -f $dcrLayout.Keys.Count, $totalStreams) -ForegroundColor Cyan
-if ($totalStreams -ne 60) { throw "Expected 60 streamDecls (59 + ops). Got $totalStreams." }
+if ($totalStreams -ne 65) { throw "Expected 65 streamDecls (64 manifest + 1 XdrConnectorHealth_CL ops). Got $totalStreams." }
 
 # Build stream -> new DCR-suffix map
 $streamToDcr = @{}
