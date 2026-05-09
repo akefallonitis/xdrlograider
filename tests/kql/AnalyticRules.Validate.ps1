@@ -6,9 +6,9 @@ BeforeAll {
 }
 
 Describe 'Analytic rules — file presence' {
-    It 'ships exactly 14 analytic rule YAML files (v0.1.0-beta)' {
+    It 'ships exactly 21 analytic rule YAML files (v0.1.0 GA: 14 detection + 7 XdrOps)' {
         $files = Get-ChildItem -Path $script:RulesDir -Filter '*.yaml'
-        $files.Count | Should -Be 14
+        $files.Count | Should -Be 21
     }
 
     It 'includes core drift-detection rules' {
@@ -54,9 +54,9 @@ Describe 'Analytic rules — YAML schema (Sentinel Solutions compatible)' {
 }
 
 Describe 'Hunting queries — file presence' {
-    It 'ships exactly 9 hunting query YAML files (v0.1.0-beta)' {
+    It 'ships exactly 12 hunting query YAML files (v0.1.0 GA)' {
         $files = Get-ChildItem -Path $script:HuntingDir -Filter '*.yaml'
-        $files.Count | Should -Be 9
+        $files.Count | Should -Be 12
     }
 }
 
