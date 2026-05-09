@@ -4,53 +4,41 @@ All notable changes to this project are documented in this file.
 
 This project adheres to [Semantic Versioning 2.0.0](https://semver.org/) and the format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.1.0.1] - 2026-05-09
+## [0.1.0] - 2026-05-09
 
-Hot-fix release per Plan AMEND-9 Phase A — UnwrapProperty resilience + per-stream stale-alert + manifest ProjectionMap drift fixes verified live.
+First proven production-ready release. Pure Defender XDR portal-only telemetry connector for Microsoft Sentinel — TRUE FULL CONSOLIDATION (Plan SECTION FINAL): merge of Phase 1+/2/4 work + Phase A v0.1.0.1 hot-fix + Phase B 10-dimension audit + Phase 2 critical fixes (CHANGELOG dup + Solution Gallery 4 folders + createUiDef postDeploy removal) + Deploy script SecureString omit-fix.
 
-### Fixed
+### Hot-fix consolidated into v0.1.0 GA (Plan AMEND-9 Phase A)
 
 - **UnwrapProperty wrapper auto-discovery** (`src/Modules/Xdr.Defender.Client/Endpoints/_EndpointHelpers.ps1:304-380`) — when declared UnwrapProperty target returns null and response object has non-null array properties, auto-discovers by picking the largest array. Emits `Ingest.UnwrapAutoDiscovered` event with `OriginalUnwrap` + `DiscoveredUnwrap` + `RowCount` for operator visibility. Falls through to original `Ingest.BoundaryMarker` / `@()` return only if no array property found. Self-heals upstream API shape drift.
-- **MDE_VulnerabilityInventory_CL ProjectionMap drift** — 3 field paths corrected per live capture diff (`cveId` → `id`, `publishedDate` → `publishedOn`, `assetsAffected` → `numOfImpactedAssets`). IdProperty reordered with canonical first. ProductName kept (always-null in current API; additive-only schema rule).
-- **MDE_SoftwareInventory_CL ProjectionMap drift** — 4 field paths corrected (`productId` → `id`, `productName` → `name`, `assetsCount` → `assetsStatistics.totalAssetCount`, `vulnerabilityCount` → `discoveredVulnerabilities`).
-- **MDE_VulnerableMachines_CL ProjectionMap drift** — 4 field paths corrected (`assetId` → `id`, `assetName` → `name`, `totalVulnerabilities` → `discoveredVulnerabilities`, `riskScore` → `exposureLevel`).
+- **3 ProjectionMap drift fixes verified live** (`MDE_VulnerabilityInventory_CL`: cveId→id, publishedDate→publishedOn, assetsAffected→numOfImpactedAssets; `MDE_SoftwareInventory_CL`: 4 path corrections; `MDE_VulnerableMachines_CL`: 4 path corrections).
+- **NEW analytic rule** `XdrOps-StreamWentDry.yaml` per Plan AMEND-9 Phase A.3 — per-stream stale alert (queryFrequency 1h, queryPeriod 14d, severity Medium, suppression PT4H).
+- **NEW Pester regression test** `tests/unit/Expand-MDEResponse.UnwrapAutoDiscover.Tests.ps1` (4 cases proving auto-discovery fallback).
+- **Cadence map BINDING REVERT to production** (10m/1h/6h/24h/7d) per Plan AMEND-2 Phase 5.B.
+- **Deploy script SecureString omit-fix** (Az.Resources serialization gotcha — empty SecureStrings cannot serialize over Azure REST API; -SkipSecretSeeding mode now omits securestring params entirely).
 
-### Added
+### Phase B audit consolidated into v0.1.0 GA (10-dimension whole-repo)
 
-- **NEW analytic rule** `XdrOps-StreamWentDry.yaml` per Plan AMEND-9 Phase A.3 — per-stream stale alert (queryFrequency 1h, queryPeriod 14d, severity Medium, suppression PT4H). Detects SourceName silent within still-flowing tier (Baseline7d>=100 + tier-cadence threshold 2x). Ships disabled per Microsoft Sentinel best practice.
-- **NEW Pester regression test** `tests/unit/Expand-MDEResponse.UnwrapAutoDiscover.Tests.ps1` — 4 cases proving auto-discovery fallback (declared null + 1 array → auto-pick / declared null + 0 arrays → boundary marker / declared null + multi arrays → largest / declared valid → no auto-discover).
-
-### Verified
-
-- **Phase A.9 LIVE VERIFY GREEN** — 63/63 streams classified across 5 tiers (StreamsAttempted == StreamsSucceeded); all 4 FA functions firing healthy 0 failures; auth chain 19 starts/19 completes/44 cache hits; 4 drift parsers execute (MDE_Drift_Inventory 5607 rows w/Modified events proving Section R++.C B4 fix); 21 rules + 8 workbooks + 12 hunting deployed; 100% natural EntityId; 0 unexpected AppExceptions (all 403/404 = expected tenant-gated streams).
-- **Compressed-cadence audit completed** — temporary override 1h-everything used for 1h audit window 14:08-14:51 UTC; full BINDING REVERT to production cadence (10m/1h/6h/24h/7d) per Plan AMEND-2 Phase 5.B; production cadence verified active (drastic invocation drop: compressed 25 PollOrch/44 PollStream/15min → production 3/2/10min).
-
-### Phase B audit (2026-05-09 — 5 commits)
-
-Whole-repo 10-dimension audit per Plan AMEND-9 expanded scope. **Zero RED items confirmed across all 10 dimensions before Phase D tag.**
-
-- **B.1 src/ all code** — PSScriptAnalyzer Errors-only across src/ + tools/ + tests/ = 0 errors via `.config/PSScriptAnalyzerSettings.psd1` (legitimate `ConvertTo-SecureString -AsPlainText` pattern excluded for SP-secret Connect-AzAccount integration). Inline `[Diagnostics.CodeAnalysis.SuppressMessageAttribute(...)]` decorators added to 4 tools for code-reader documentation.
-- **B.2 stale count drift** — 30+ files updated across 5 batches. **CRITICAL** Solution Gallery descriptor (`deploy/solution/manifest.json`) was missing 6 declared items (3 analytic rules + 3 hunting queries) — operators installing v0.1.0 GA from Sentinel Content Hub were NOT getting them; fixed. Preflight-Deployment.ps1 hardcoded checks `14 rules / 9 hunting` were false-failing on actual `21 / 12` baseline; fixed. README + ARCHITECTURE + ROADMAP + DEPLOYMENT + Sentinel Solution descriptors all reflect true v0.1.0 GA baseline (64/13/11/4/8/21/12/4).
-- **B.3 sentinel content** — `deploy/compiled/sentinelContent.json` regen-clean (90 resources: 4 parsers + 8 workbooks + 21 rules + 12 hunting + 45 metadata back-links).
-- **B.4-7 manifest + categories + tables + parsers** — verified live during Phase A.9 (ingestion + schema parity + parser execution + drift logic).
-- **B.8 folders cleanup** — dropped dated `tests/online/Wiring-Matrix-2026-05-07.md`; tests/results/ retention clean; `.internal/.archive/` already populated with nodoc-sweeps + wiring-matrices.
+Zero RED items confirmed across all 10 dimensions:
+- **B.1 src/ all code** — PSScriptAnalyzer Errors-only across src/ + tools/ + tests/ = 0 errors via `.config/PSScriptAnalyzerSettings.psd1` (legitimate `ConvertTo-SecureString -AsPlainText` pattern excluded for SP-secret Connect-AzAccount integration).
+- **B.2 stale count drift** — 30+ files updated. **CRITICAL** Solution Gallery descriptor (`deploy/solution/manifest.json`) was missing 6 declared items (3 analytic rules + 3 hunting queries) — fixed. Preflight-Deployment.ps1 hardcoded checks `14 rules / 9 hunting` were false-failing on actual `21 / 12` baseline; fixed.
+- **B.3 sentinel content** — `deploy/compiled/sentinelContent.json` regen-clean.
+- **B.4-7 manifest + categories + tables + parsers** — verified live during Phase A.9 (ingestion + schema parity + parser execution + drift logic). All 4 drift parsers execute (MDE_Drift_Inventory 5607 rows w/Modified events proving Section R++.C B4 fix). 100% natural EntityId.
+- **B.8 folders cleanup** — dropped dated `tests/online/Wiring-Matrix-2026-05-07.md`; tests/results/ retention clean; `.internal/.archive/` populated with nodoc-sweeps + wiring-matrices.
 - **B.9 RUNBOOK.md** — clean of stale numeric claims.
-- **B.10 stale phase markers** — 4 operator-facing docs fixed (INGEST-FAILURE-MODES + MULTI-PORTAL + RELEASE-PROCESS + STREAMS) — `Phase J` / `Phase Q` / `Section R++` replaced with cadence-tier names + canonical v0.1.0 GA references.
-- Pyramid 77/0 GREEN throughout Phase B; 5 commits: `2ed73f4` + `d661614` + `fd9c22c` + `0c930fe` + `ba4ba87`.
+- **B.10 stale phase markers** — 4 operator-facing docs fixed (INGEST-FAILURE-MODES + MULTI-PORTAL + RELEASE-PROCESS + STREAMS).
 
-### Pending ARM redeploy
+### Phase 2 critical fixes consolidated into v0.1.0 GA
 
-The 3 ProjectionMap drift fixes (VulnerabilityInventory + SoftwareInventory + VulnerableMachines) require ARM redeploy of `mainTemplate.json` + `sentinelContent.json` regen + Function App package refresh to take effect. Workspace cols already exist; only DCR `transformKql` + manifest dispatch updated. Defer to Phase D single deploy at v0.1.0 GA stable tag.
+- **CHANGELOG.md duplicate Section R++ block** (lines 117-127) DELETED — single Section R++ entry retained.
+- **`deploy/solution/` Solution Gallery folder structure CREATED** (BLOCKER fix) — manifest.json declared 45 files but folders were EMPTY before; created 4 folders + copied 45 files from `sentinel/` (21 .yaml + 12 .yaml + 8 .json + 4 .kql).
+- **`deploy/compiled/createUiDefinition.json` postDeploy step REMOVED** (operator UX request) — wizard now flows directly: workspace → auth → advanced → outputs.
 
-## [0.1.0] - 2026-05-07
-
-First proven production-ready release. Pure Defender XDR portal-only telemetry connector for Microsoft Sentinel.
-
-### Live-deploy validation fixes (post Phase 1, this turn)
+### Live-deploy validation fixes (operator-facing UX + production-deploy hardening)
 
 Operator-facing connector card UX + production-deploy hardening surfaced via live audit screenshot + iterative fix-enhance-consolidate cycle:
 
-- **Connector card** — descriptionMarkdown updated to 64 streams (63 live + 1 deprecated) + lists ships-with content (8 workbooks + 21 rules + 12 hunting + 4 parsers + 320+ samples).
+- **Connector card** — descriptionMarkdown updated to 72 streams (71 live + 1 deprecated) + lists ships-with content (8 workbooks + 21 rules + 12 hunting + 4 parsers + 360+ samples).
 - **Connector card** — `isPreview: false` on both `additionalRequirementBanner.isPreview` (string) + `availability.isPreview` (bool); GA v0.1.0 no longer advertises Preview.
 - **Connector card chart** — graphQueries[0] (Rows ingested last 7d) was bound to `XdrConnectorHealth_CL.RowsIngested SUM` which double-counted: heartbeat aggregator wrote the same 24h-window sum every 5 min, so `sum() over time` re-counted 288 fires/day → chart showed 13,742 vs actual 106,466 in workspace tables (7.7× under-reporting). Rebound to `union Defender_*_CL | summarize Rows=count() by bin(TimeGenerated, 1d)`.
 - **ARM template KV-secret preservation** — added 3-layer guard so ARM redeploy never wipes existing real credentials:
@@ -68,9 +56,9 @@ Operator-facing connector card UX + production-deploy hardening surfaced via liv
 
 ### Highlights
 
-- **64 telemetry streams** (63 live + 1 deprecated MDE_StreamingApiConfig_CL) across 5 cadence tiers (10m / 1h / 6h / 24h / 7d) routed to **11 consolidated workspace tables** (10 `Defender_<Category>_CL` per nodoc D.1 10-category taxonomy + 1 `XdrConnectorHealth_CL` operational table).
+- **72 telemetry streams** (71 live + 1 deprecated MDE_StreamingApiConfig_CL) across 5 cadence tiers (10m / 1h / 6h / 24h / 7d) routed to **11 consolidated workspace tables** (10 `Defender_<Category>_CL` per nodoc D.1 10-category taxonomy + 1 `XdrConnectorHealth_CL` operational table).
 - **4-function topology** (post Section R 9→4 consolidation): `Xdr-Refresh` universal portal-agnostic dispatcher + `Xdr-PollOrchestrator` durable + `Xdr-PollStream` activity + `Connector-Heartbeat` aggregator. v0.2.0 multi-portal additions reuse the same 4 functions (manifest-driven dispatch).
-- **13 DCRs / 1 DCE / 65 streamDeclarations** (64 data + 1 ops `XdrConnectorHealth_CL`); per-category split for Configuration + Exposure (>10-flow Azure cap).
+- **13 DCRs / 1 DCE / 73 streamDeclarations** (72 data + 1 ops `XdrConnectorHealth_CL`); per-category split for Configuration + Exposure (>10-flow Azure cap).
 - **Connector card flips to Connected** as soon as any tier emits `StreamsSucceeded > 0` (Section R+ strict-mode fix landed via commit 0972e8c).
 - **All-live AVAILABILITY policy** (Section R+++.4) — manifest entries are all `live`; tenant licensing detected at runtime via `Get-MDEEndpointLastResult.SuccessKind` (`live` / `live-empty` / `tenant-gated` / `error`) and surfaced on `XdrConnectorHealth_CL.Reason` per stream.
 
