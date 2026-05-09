@@ -110,6 +110,7 @@ BeforeAll {
     # SP login. Convert the secret in-place — never write it to a file or echo.
     # `WarningAction SilentlyContinue` suppresses the "subscription set" banner
     # which Az emits even on success.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Integration test: SP secret from env var required to be SecureString for Connect-AzAccount.')]
     $secret = ConvertTo-SecureString -String $env:AZURE_CLIENT_SECRET -AsPlainText -Force
     $cred   = [System.Management.Automation.PSCredential]::new($env:AZURE_CLIENT_ID, $secret)
 
