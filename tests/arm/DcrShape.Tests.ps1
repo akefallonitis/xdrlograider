@@ -98,10 +98,11 @@ Describe 'DcrShape.TransformKqlSourceName (Phase J.C.2-5: SourceName injected vi
 }
 
 Describe 'DcrShape.AllStreamsCovered' {
-    It 'union of streams across all DCRs equals 65 (64 data + 1 ops, post-F1 MachineActions removal)' {
+    It 'union of streams across all DCRs equals 66 (65 data + 1 ops, post-F1 MachineActions removal + Phase 2 batch 1 PendingActions)' {
         # v0.1.0 GA Phase 2: 45 baseline + 13 Tier A new streams + 1 ops = 59
         # Section R++++++ Phase 1: + Architecture B (Machines) + G7 (SecurityPolicies) + G8 (4 TVM) = 65
         # F1 2026-05-08: MachineActions REMOVED (overlaps with ActionCenter canonical endpoint)
+        # Phase 2 batch 1 (2026-05-09 R++++++++++): MDE_PendingActions_CL added (Action Center Tier A)
         $dcrs = $script:Arm.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' }
         $allStreams = @()
         foreach ($d in $dcrs) {
@@ -109,6 +110,6 @@ Describe 'DcrShape.AllStreamsCovered' {
                 $allStreams += $df.streams
             }
         }
-        ($allStreams | Sort-Object -Unique).Count | Should -Be 65
+        ($allStreams | Sort-Object -Unique).Count | Should -Be 66
     }
 }

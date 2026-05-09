@@ -122,8 +122,8 @@ Describe 'Manifest Availability schema (declarative contract)' {
         # Section R++ AVAILABILITY POLICY baseline (2026-05-07):
         # All streams declare 'live'. Runtime SuccessKind classifies tenant-gating
         # + license issues dynamically per actual API response.
-        @{ Description = 'total endpoints (45 baseline + 13 Tier A Phase 2 + 6 Phase 1: B+G7+G8 - F1 MachineActions removed)'; ExpectedCount = 64; Filter = { $true } }
-        @{ Description = 'live endpoints (R++ all-live policy - F1 MachineActions removed)'; ExpectedCount = 63; Filter = { $args[0].Availability -eq 'live' } }
+        @{ Description = 'total endpoints (45 baseline + 13 Tier A Phase 2 + 6 Phase 1: B+G7+G8 - F1 MachineActions removed + 1 Phase 2 batch 1: PendingActions)'; ExpectedCount = 65; Filter = { $true } }
+        @{ Description = 'live endpoints (R++ all-live policy + Phase 2 batch 1 PendingActions: 65 - 1 deprecated = 64)'; ExpectedCount = 64; Filter = { $args[0].Availability -eq 'live' } }
         @{ Description = 'role-gated endpoints (retired category)';       ExpectedCount = 0;  Filter = { $args[0].Availability -eq 'role-gated' } }
         @{ Description = 'tenant-gated endpoints (R++ all reverted to live)'; ExpectedCount = 0; Filter = { $args[0].Availability -eq 'tenant-gated' } }
         @{ Description = 'deprecated endpoints (StreamingApiConfig path collision)'; ExpectedCount = 1; Filter = { $args[0].Availability -eq 'deprecated' } }

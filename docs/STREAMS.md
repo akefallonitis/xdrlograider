@@ -49,6 +49,7 @@ Action Center events — operator-visible response actions and Live Response per
 | Stream | Path | Method | Availability |
 |---|---|---|---|
 | `MDE_ActionCenter_CL` | `/apiproxy/mtp/actionCenter/actioncenterui/history-actions` | GET | live |
+| `MDE_PendingActions_CL` | `/apiproxy/mtp/actionCenter/actioncenterui/pending-actions` | GET | live |
 
 ## exposure (hourly @ :25, 18 streams)
 

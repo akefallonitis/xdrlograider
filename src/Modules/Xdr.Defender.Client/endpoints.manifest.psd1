@@ -1457,6 +1457,43 @@ AttackPathsV2
                 EntityType       = '$tostring:EntityType'
             }
         }
+        # ----------------------------------------------------------------------
+        # Phase 2 Tier A (Plan R++++++++++ 2026-05-09): MDE_PendingActions_CL
+        # — pending Action Center actions awaiting approval/execution. Live-tested
+        # 200 OK in lab tenant Phase 0 (`tools/Capture-EndpointSchemas.ps1` ran
+        # 2026-05-08 against test tenant — 0 rows returned at capture time but path
+        # confirmed valid; schema from nodoc action_center.yml ActionCenterItem).
+        # Operator value: AIR/LR action queue backlog visibility — distinct from
+        # MDE_ActionCenter_CL which captures completed history actions.
+        # ----------------------------------------------------------------------
+        @{
+            Stream = 'MDE_PendingActions_CL'
+            Path = '/apiproxy/mtp/actionCenter/actioncenterui/pending-actions'
+            Tier = 'ActionCenter'
+            # UnwrapProperty='Results' matches the actual lab live-tested response shape
+            # `{Count: N, Results: [...]}` — same pattern as MDE_ActionCenter_CL history-actions.
+            # nodoc action_center.yml declares `actions` but real API returns `Results` (nodoc
+            # is research-grade, not authoritative; live shape wins per AMEND-1 #1).
+            UnwrapProperty = 'Results'
+            IdProperty = @('actionId', 'ActionId', 'Id', 'id')
+            Category = 'Action Center'
+            CategoryId = 8
+            Purpose = 'AIR/LR action queue backlog — pending response actions awaiting operator approval (block/quarantine/investigation queue depth + age)'
+            Availability = 'live'
+            # Schema: ActionCenterItem per nodoc action_center.yml ActionCenter.GetPending response
+            # (allOf: PaginatedListResponse + { actions: [ActionCenterItem] }).
+            ProjectionMap = @{
+                ActionId            = '$tostring:actionId'
+                ActionType          = '$tostring:actionType'
+                Status              = '$tostring:status'
+                EntityType          = '$tostring:entityType'
+                EntityName          = '$tostring:entityName'
+                InvestigationId     = '$tostring:investigationId'
+                CreatedBy           = '$tostring:createdBy'
+                CreatedDateTime     = '$todatetime:createdDateTime'
+                CompletedDateTime   = '$todatetime:completedDateTime'
+            }
+        }
         @{
             Stream = 'MDE_ThreatAnalytics_CL'
             Path = '/apiproxy/mtp/threatAnalytics/outbreaks'

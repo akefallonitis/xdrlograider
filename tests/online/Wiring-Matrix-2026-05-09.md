@@ -1,8 +1,8 @@
 # XdrLogRaider Wiring Matrix
 
-Generated: 2026-05-09 00:22:59 +01:00
+Generated: 2026-05-09 02:14:41 +01:00
 
-Total streams: 64  |  Full edges: 64  |  Missing/warning: 0
+Total streams: 65  |  Full edges: 64  |  Missing/warning: 1
 
 ## Edge legend
 
@@ -69,6 +69,7 @@ Total streams: 64  |  Full edges: 64  |  Missing/warning: 0
 | MDE_IdentityAlertThresholds_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_RemediationAccounts_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ActionCenter_CL | ActionCenter | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_PendingActions_CL | ActionCenter | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ThreatAnalytics_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_UserPreferences_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_MtoTenants_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
@@ -89,3 +90,9 @@ Total streams: 64  |  Full edges: 64  |  Missing/warning: 0
 | MDE_XspmConnectors_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ThreatAnalyticsEnriched_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ThreatAnalyticsTopThreats_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+
+## Issues (all warnings + errors)
+
+### MDE_PendingActions_CL [Tier=ActionCenter Avail=live]
+  - E8: WARNING no Sentinel content references MDE_PendingActions_CL (incremental — non-blocking)
+

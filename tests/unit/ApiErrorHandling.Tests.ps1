@@ -205,15 +205,16 @@ Describe 'API error handling — Invoke-MDETierPoll (per-stream isolation)' {
             Mock Get-CheckpointTimestamp { $null }
 
             $result = Invoke-MDETierPoll -Session $Sess -Tier 'ActionCenter' -Config $Cfg
-            # ActionCenter tier has 2 streams (F1 2026-05-08, post-MachineActions removal):
-            #   MDE_ActionCenter_CL + MDE_DeviceTimeline_CL
+            # ActionCenter tier has 3 streams (Phase 2 batch 1 2026-05-09, post-PendingActions add):
+            #   MDE_ActionCenter_CL + MDE_DeviceTimeline_CL + MDE_PendingActions_CL
             # (DeviceTimeline promoted from Inventory 24h to ActionCenter 10m for
             # security-event near-real-time detection per operator directive.
-            # MachineActions removed - overlaps with ActionCenter canonical endpoint.)
-            $result.StreamsAttempted | Should -Be 2
-            $result.StreamsSucceeded | Should -Be 1  -Because '1 failure (ActionCenter) + 1 success (DeviceTimeline)'
+            # MachineActions removed - overlaps with ActionCenter canonical endpoint.
+            # PendingActions added Phase 2 batch 1 - AIR/LR action queue backlog visibility.)
+            $result.StreamsAttempted | Should -Be 3
+            $result.StreamsSucceeded | Should -Be 2  -Because '1 failure (ActionCenter) + 2 success (DeviceTimeline + PendingActions)'
             $result.Errors['MDE_ActionCenter_CL'] | Should -Be 'boom'
-            $script:invoked.Count | Should -Be 2 -Because 'All streams in ActionCenter tier should have been tried even after one fails'
+            $script:invoked.Count | Should -Be 3 -Because 'All streams in ActionCenter tier should have been tried even after one fails'
         }
     }
 
