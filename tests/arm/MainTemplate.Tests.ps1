@@ -108,6 +108,71 @@ Describe 'mainTemplate.json — schema + structure' {
         $tables.PSObject.Properties['condition'] | Should -BeNullOrEmpty -Because 'workspace tables required by DCRs regardless of content deploy toggle'
     }
 
+    It 'every DCR transformKql uses ONLY DCR-supported KQL functions (Hot-Fix 3 regression-locker — array_slice etc. banned)' {
+        # DCR transformations support a LIMITED subset of KQL.
+        # Banned scalar functions: array_slice, prev, next, max_of, min_of, percentile, percentile_array,
+        #                          row_number, row_window_session, pack_dictionary, pack_array, pack_all,
+        #                          series_decompose, series_outliers, hash_combine
+        # Banned operators: summarize, top, sort, take, limit, distinct, count, mv-apply, mv-expand,
+        #                   union, join, lookup, render, evaluate, externaldata, range, serialize,
+        #                   partition, materialize, make-series, cluster, database, find, search, getschema, invoke
+        # Per https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-transformations-kql
+
+        $bannedFunctions = @(
+            'array_slice', 'prev', 'next', 'max_of', 'min_of',
+            'row_number', 'row_window_session',
+            'percentile_array',
+            'pack_dictionary', 'pack_array', 'pack_all',
+            'series_decompose', 'series_outliers', 'hash_combine'
+        )
+        $bannedOperators = @(
+            'summarize', 'top', 'sort', 'take', 'limit', 'distinct',
+            'mv-apply', 'mv-expand', 'union', 'join', 'lookup',
+            'render', 'evaluate', 'externaldata', 'serialize', 'partition',
+            'materialize', 'make-series', 'find', 'search', 'getschema', 'invoke'
+        )
+
+        # Find ALL transformKql expressions
+        $transforms = New-Object System.Collections.ArrayList
+        function Find-Transforms {
+            param($obj)
+            if ($null -eq $obj) { return }
+            if ($obj -is [array] -or $obj -is [System.Collections.IList]) {
+                foreach ($item in $obj) { Find-Transforms $item }
+            } elseif ($obj -is [PSCustomObject]) {
+                if ($obj.PSObject.Properties.Name -contains 'transformKql') {
+                    $stream = if ($obj.PSObject.Properties.Name -contains 'streams' -and $obj.streams) { $obj.streams[0] } else { '?' }
+                    [void]$transforms.Add([PSCustomObject]@{ Stream = $stream; Kql = $obj.transformKql })
+                }
+                foreach ($p in $obj.PSObject.Properties) { Find-Transforms $p.Value }
+            }
+        }
+        Find-Transforms $script:MainTemplate
+
+        $transforms.Count | Should -BeGreaterThan 0 -Because 'mainTemplate.json must contain at least 1 DCR transformKql expression'
+
+        $violations = @()
+        foreach ($t in $transforms) {
+            foreach ($banned in $bannedFunctions) {
+                if ($t.Kql -match "\b$banned\b") {
+                    $violations += "[$($t.Stream)] uses banned function '$banned'"
+                }
+            }
+            foreach ($banned in $bannedOperators) {
+                # Operator usage: preceded by | or at start of expression
+                if ($t.Kql -match "\|\s*$banned\b" -or $t.Kql -match "^\s*$banned\b") {
+                    $violations += "[$($t.Stream)] uses banned operator '$banned'"
+                }
+            }
+        }
+
+        $violations | Should -BeNullOrEmpty -Because (
+            'DCR transformKql must only use the DCR-supported KQL subset. Banned tokens found: ' +
+            ($violations -join '; ') +
+            '. See https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-transformations-kql for the supported function list.'
+        )
+    }
+
     It 'creates KV secrets for auth method + UPN unconditionally' {
         $secrets = @($script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.KeyVault/vaults/secrets' })
         $secretNames = $secrets | ForEach-Object { $_.name }
