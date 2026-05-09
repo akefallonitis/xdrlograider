@@ -94,6 +94,7 @@ BeforeAll {
         '/apiproxy/mtp/threatAnalytics/outbreaks'                                                          = 'XDRInternals:Get-XdrThreatAnalytic.ps1'
         '/apiproxy/mtp/actionCenter/actioncenterui/history-actions'                                        = 'XDRInternals:Get-XdrActionsCenterHistory.ps1 (pre-v0.1.0.10 rolled back query-string after live audit returned 400; original param-less form is correct)'
         '/apiproxy/mtp/actionCenter/actioncenterui/pending-actions'                                        = 'nodoc:action_center.yml ActionCenter.GetPending operationId (Phase 2 batch 1 2026-05-09 R++++++++++; live-tested 200 OK in lab Phase 0)'
+        '/apiproxy/aatp/api/ispmReports/DormantEntities/newEntryCount'                                     = 'nodoc:identity.yml Identity.GetDormantEntitiesNewEntryCount operationId (Phase 2 batch 2 2026-05-09 R++++++++++; MDI-licensed; lab returned 404 expected)'
         # F1 2026-05-08: MachineActions REMOVED (overlapped with ActionCenter canonical endpoint)
 
         # ---- P7 ----

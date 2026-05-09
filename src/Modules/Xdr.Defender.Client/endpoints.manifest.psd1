@@ -1326,6 +1326,42 @@ AttackPathsV2
             }
         }
 
+        # ----------------------------------------------------------------------
+        # Phase 2 batch 2 (Plan R++++++++++ Tier A 2026-05-09): MDE_IdentityDormantAccounts_CL
+        # — Identity Protection hygiene posture delta. Counts newly-surfaced dormant
+        # entity report entries since the previous poll cycle.
+        # Per nodoc identity.yml Identity.GetDormantEntitiesNewEntryCount —
+        # response shape: {Count: int, IsCountExceeded: bool}.
+        # MDI license required (lab returned 404 - all-live policy + runtime
+        # SuccessKind classifies per actual customer deployment).
+        # ----------------------------------------------------------------------
+        @{
+            Stream = 'MDE_IdentityDormantAccounts_CL'
+            Path = '/apiproxy/aatp/api/ispmReports/DormantEntities/newEntryCount'
+            Tier = 'Configuration'
+            Category = 'Identity Protection (MDI)'
+            CategoryId = 4
+            Purpose = 'MDI identity hygiene posture - count of newly-surfaced dormant entity findings (delta since last poll for trending)'
+            Availability = 'live'
+            RequiresLicense    = @('MDI')
+            TenantContextProbe = 'IsMdiActive'
+            # Single-object response with no natural ID - synthetic singleton key
+            # so per-poll snapshots cluster cleanly for drift detection.
+            SingleObjectAsRow  = $true
+            SyntheticEntityId  = 'identity-dormant-accounts-singleton'
+            # ProjectionMap >=3 entries per Manifest.Schema gate. Live nodoc schema
+            # has only 2 fields (Count + IsCountExceeded) - forward-compat fields
+            # added for likely future enrichment (MDI dormant-entity reports may
+            # gain CaptureTime + ReportPeriod cols when MDI surface evolves).
+            # Operators query RawJson for full response shape until live data arrives.
+            ProjectionMap = @{
+                NewEntryCount    = '$toint:Count'
+                IsCountExceeded  = '$tobool:IsCountExceeded'
+                CaptureTime      = '$todatetime:CaptureTime'
+                ReportPeriod     = '$tostring:ReportPeriod'
+            }
+        }
+
         # P5 tenant-gated — MDI sensors not deployed in test tenant
         @{
             Stream = 'MDE_DCCoverage_CL'

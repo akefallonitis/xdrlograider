@@ -154,14 +154,15 @@ BeforeAll {
 
 Describe 'Manifest / DCR / custom-tables consistency (Phase J.C.2-5: 47→10 consolidation)' {
 
-    It 'manifest contains exactly 65 streams (45 baseline + 13 Tier A Phase 2 + 6 Phase 1: B+G7+G8 - F1 MachineActions removed + 1 Phase 2 Tier A: PendingActions)' {
-        $script:ManifestStreams.Count | Should -Be 65
+    It 'manifest contains exactly 66 streams (45 baseline + 13 Tier A Phase 2 + 6 Phase 1 - F1 + 2 Phase 2 Tier A batches: PendingActions + IdentityDormantAccounts)' {
+        $script:ManifestStreams.Count | Should -Be 66
     }
 
-    It 'DCR declares 65 source streams + 1 ops (XdrConnectorHealth_CL) = 66 total streamDeclarations' {
-        # F1 2026-05-08: MachineActions REMOVED from DCR streamDecls (full removal, no backward-compat stubs).
-        # Phase 2 batch 1 2026-05-09: MDE_PendingActions_CL added (Action Center category Tier A).
-        $script:DcrStreams.Count | Should -Be 66 -Because 'DCR has 65 Custom-MDE_*_CL incoming streamDeclarations + 1 XdrConnectorHealth_CL ops'
+    It 'DCR declares 66 source streams + 1 ops (XdrConnectorHealth_CL) = 67 total streamDeclarations' {
+        # F1 2026-05-08: MachineActions REMOVED from DCR streamDecls.
+        # Phase 2 batch 1 2026-05-09: MDE_PendingActions_CL added (Action Center).
+        # Phase 2 batch 2 2026-05-09: MDE_IdentityDormantAccounts_CL added (Identity Protection).
+        $script:DcrStreams.Count | Should -Be 67 -Because 'DCR has 66 Custom-MDE_*_CL incoming streamDeclarations + 1 XdrConnectorHealth_CL ops'
     }
 
     It 'custom-tables declares 10 per-category Defender_*_CL + 1 XdrConnectorHealth_CL = 11 total' {

@@ -34,7 +34,7 @@ let MDE_Drift_Configuration = (lookback:timespan = 7d, window:timespan = 6h) {
         'CveId', 'OutbreakId', 'AlertId', 'PolicyId',
         'MachineGroupId', 'MachineGroupName', 'PolicyType', 'Platform'
     ]);
-    let sources = union (Defender_ConfigurationAndSettings_CL | where SourceName in ('MDE_PreviewFeatures_CL', 'MDE_AlertServiceConfig_CL', 'MDE_AlertTuning_CL', 'MDE_SuppressionRules_CL', 'MDE_CustomDetections_CL', 'MDE_TenantAllowBlock_CL', 'MDE_ConnectedApps_CL', 'MDE_IntuneConnection_CL', 'MDE_PurviewSharing_CL', 'MDE_RbacDeviceGroups_CL', 'MDE_UnifiedRbacRoles_CL', 'MDE_UserPreferences_CL', 'MDE_CloudAppsConfig_CL')), (Defender_ThreatAnalytics_CL | where SourceName in ('MDE_ThreatAnalytics_CL', 'MDE_ThreatAnalyticsEnriched_CL', 'MDE_ThreatAnalyticsTopThreats_CL'))
+    let sources = union (Defender_ConfigurationAndSettings_CL | where SourceName in ('MDE_PreviewFeatures_CL', 'MDE_AlertServiceConfig_CL', 'MDE_AlertTuning_CL', 'MDE_SuppressionRules_CL', 'MDE_CustomDetections_CL', 'MDE_TenantAllowBlock_CL', 'MDE_ConnectedApps_CL', 'MDE_IntuneConnection_CL', 'MDE_PurviewSharing_CL', 'MDE_RbacDeviceGroups_CL', 'MDE_UnifiedRbacRoles_CL', 'MDE_UserPreferences_CL', 'MDE_CloudAppsConfig_CL')), (Defender_IdentityProtection_CL | where SourceName in ('MDE_IdentityDormantAccounts_CL')), (Defender_ThreatAnalytics_CL | where SourceName in ('MDE_ThreatAnalytics_CL', 'MDE_ThreatAnalyticsEnriched_CL', 'MDE_ThreatAnalyticsTopThreats_CL'))
         | where TimeGenerated > ago(lookback);
     let current = sources
         | where TimeGenerated > ago(window)
