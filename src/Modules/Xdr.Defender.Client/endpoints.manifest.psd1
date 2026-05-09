@@ -1327,6 +1327,36 @@ AttackPathsV2
         }
 
         # ----------------------------------------------------------------------
+        # Phase 2 batch 3 (Plan R++++++++++ Tier A 2026-05-09): MDE_IdentityLateralMovementPaths_CL
+        # — MDI risky lateral-movement-path prevalence delta. Counts newly-surfaced
+        # risky-LMP findings since previous poll. Same {Count, IsCountExceeded}
+        # response shape as IdentityDormantAccounts.
+        # XspmGraph tier (1h cadence) - attack-path intelligence is XSPM-class
+        # operator-value (high-value chokepoints + lateral-movement risk trending).
+        # MDI license required (lab returned 404 - all-live policy).
+        # Per nodoc identity.yml Identity.GetRiskyLateralMovementPathNewEntryCount.
+        # ----------------------------------------------------------------------
+        @{
+            Stream = 'MDE_IdentityLateralMovementPaths_CL'
+            Path = '/apiproxy/aatp/api/ispmReports/RiskyLateralMovementPath/newEntryCount'
+            Tier = 'XspmGraph'
+            Category = 'Identity Protection (MDI)'
+            CategoryId = 4
+            Purpose = 'MDI risky lateral-movement-path prevalence delta - XSPM-class attack-path trending for SOC chokepoint analysis'
+            Availability = 'live'
+            RequiresLicense    = @('MDI')
+            TenantContextProbe = 'IsMdiActive'
+            SingleObjectAsRow  = $true
+            SyntheticEntityId  = 'identity-lmp-singleton'
+            ProjectionMap = @{
+                NewEntryCount    = '$toint:Count'
+                IsCountExceeded  = '$tobool:IsCountExceeded'
+                CaptureTime      = '$todatetime:CaptureTime'
+                ReportPeriod     = '$tostring:ReportPeriod'
+            }
+        }
+
+        # ----------------------------------------------------------------------
         # Phase 2 batch 2 (Plan R++++++++++ Tier A 2026-05-09): MDE_IdentityDormantAccounts_CL
         # — Identity Protection hygiene posture delta. Counts newly-surfaced dormant
         # entity report entries since the previous poll cycle.

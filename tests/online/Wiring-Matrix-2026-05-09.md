@@ -1,8 +1,8 @@
 # XdrLogRaider Wiring Matrix
 
-Generated: 2026-05-09 02:19:44 +01:00
+Generated: 2026-05-09 03:51:28 +01:00
 
-Total streams: 65  |  Full edges: 64  |  Missing/warning: 1
+Total streams: 66  |  Full edges: 64  |  Missing/warning: 2
 
 ## Edge legend
 
@@ -65,6 +65,7 @@ Total streams: 65  |  Full edges: 64  |  Missing/warning: 1
 | MDE_RecommendationActions_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityOnboarding_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityServiceAccounts_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_IdentityDormantAccounts_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_DCCoverage_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityAlertThresholds_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_RemediationAccounts_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
@@ -92,6 +93,9 @@ Total streams: 65  |  Full edges: 64  |  Missing/warning: 1
 | MDE_ThreatAnalyticsTopThreats_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 
 ## Issues (all warnings + errors)
+
+### MDE_IdentityDormantAccounts_CL [Tier=Configuration Avail=live]
+  - E8: WARNING no Sentinel content references MDE_IdentityDormantAccounts_CL (incremental — non-blocking)
 
 ### MDE_PendingActions_CL [Tier=ActionCenter Avail=live]
   - E8: WARNING no Sentinel content references MDE_PendingActions_CL (incremental — non-blocking)
