@@ -1013,6 +1013,34 @@
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
       "apiVersion": "2023-11-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '4e7c2f8a-1b9d-4e5f-8c3a-7d2b9f4e1c6a')]",
+      "kind": "Scheduled",
+      "properties": {
+        "displayName": "[XdrOps] Per-stream went dry - SourceName silent beyond expected cadence",
+        "description": "AMEND-9 Phase A.3 (2026-05-09): per-stream stale detector that complements the\ntier-level XdrOps-ConnectorStaleStream rule. Detects when a SPECIFIC stream\n(SourceName) goes silent within a tier that's still flowing — the regression\npattern observed 2026-05-08T18:44 when MDE_MtoTenants_CL / MDE_AlertTuning_CL /\nMDE_IdentityServiceAccounts_CL went dry while their Configuration tier kept\nheartbeating. Live evidence: 4 streams (incl. MDE_ActionCenter_CL 42h prior)\nstopped ingesting due to upstream Defender portal API response shape drift +\nfixed manifest UnwrapProperty assumption. Connector self-healed via\nIngest.UnwrapAutoDiscovered event in v0.1.0.1; this rule is the watchdog.\n\nAlgorithm: for every SourceName that ingested >100 rows in the prior 7d\nbaseline (proves it's a flowing stream), compare LastSeenUtc vs tier-cadence\nthreshold (2x cadence per nathanmcnulty taxonomy). Fires when StaleMin\nexceeds threshold. Severity Medium; raise to High if ≥3 streams dry within\nsame 1h window (correlated regression class — same upstream API drift event).\n\nMITRE: TA0005 Defense Evasion — T1562 (Impair Defenses: Disable or Modify\nTools — adversary could induce silent telemetry gap).\n\nOperator triage: docs/RUNBOOK.md \"Stream dry — investigate\" procedure.\nCommon root causes (2026-05-09 evidence):\n1. Upstream Defender portal API shape drift → check AppEvents for\nIngest.UnwrapAutoDiscovered or Ingest.BoundaryMarker events\n2. Service account license loss → check XdrTierState row for SuccessKind=tenant-gated\n3. Stream-specific 4xx → check Invoke-DefenderPortalRequest 401/403/404 trace\n4. UnwrapProperty manifest drift → run tools/Capture-EndpointSchemas.ps1 -StreamFilter",
+        "severity": "Medium",
+        "enabled": false,
+        "query": "// Tier-cadence threshold map (2x cadence; same as XdrOps-ConnectorStaleStream).\nlet cadenceLimits = datatable(Tier: string, MaxStaleMin: long)\n[\n\"ActionCenter\",   20,\n\"XspmGraph\",      120,\n\"Configuration\",  720,\n\"Inventory\",      2880,\n\"Maintenance\",    20160\n];\n// Stream → Tier mapping derived from manifest categorization (locked at\n// v0.1.0.1; updates require manifest commit + this rule update).\nlet streamTier = datatable(SourceName: string, Tier: string)\n[\n\"MDE_ActionCenter_CL\",                  \"ActionCenter\",\n\"MDE_DeviceTimeline_CL\",                \"ActionCenter\",\n\"MDE_AdvancedFeatures_CL\",              \"Inventory\",\n\"MDE_AlertServiceConfig_CL\",            \"Configuration\",\n\"MDE_AlertTuning_CL\",                   \"Configuration\",\n\"MDE_AntivirusPolicy_CL\",               \"Inventory\",\n\"MDE_AssetClassificationSchema_CL\",     \"XspmGraph\",\n\"MDE_AssetRules_CL\",                    \"Configuration\",\n\"MDE_AttackSurfaceAttackPaths_CL\",      \"XspmGraph\",\n\"MDE_AttackSurfaceChokepoints_CL\",      \"XspmGraph\",\n\"MDE_AuthenticatedTelemetry_CL\",        \"Inventory\",\n\"MDE_CloudAppsConfig_CL\",               \"Configuration\",\n\"MDE_ConnectedApps_CL\",                 \"Configuration\",\n\"MDE_CustomCollection_CL\",              \"Inventory\",\n\"MDE_CustomDetections_CL\",              \"Configuration\",\n\"MDE_DCCoverage_CL\",                    \"Inventory\",\n\"MDE_DataExportSettings_CL\",            \"Maintenance\",\n\"MDE_DeviceControlPolicy_CL\",           \"Inventory\",\n\"MDE_ExposureRecommendations_CL\",       \"XspmGraph\",\n\"MDE_ExposureSnapshots_CL\",             \"XspmGraph\",\n\"MDE_IdentityAlertThresholds_CL\",       \"Inventory\",\n\"MDE_IdentityOnboarding_CL\",            \"Inventory\",\n\"MDE_IdentityServiceAccounts_CL\",       \"Inventory\",\n\"MDE_IntuneConnection_CL\",              \"Configuration\",\n\"MDE_LicenseReport_CL\",                 \"Inventory\",\n\"MDE_LiveResponseConfig_CL\",            \"Inventory\",\n\"MDE_Machines_CL\",                      \"Inventory\",\n\"MDE_MtoTenants_CL\",                    \"Inventory\",\n\"MDE_PUAConfig_CL\",                     \"Inventory\",\n\"MDE_PostureInitiativesSummarized_CL\",  \"XspmGraph\",\n\"MDE_PostureMetrics_CL\",                \"XspmGraph\",\n\"MDE_PostureSecurityEvents_CL\",         \"XspmGraph\",\n\"MDE_PostureTenants_CL\",                \"XspmGraph\",\n\"MDE_PreviewFeatures_CL\",               \"Configuration\",\n\"MDE_PurviewSharing_CL\",                \"Configuration\",\n\"MDE_RbacDeviceGroups_CL\",              \"Configuration\",\n\"MDE_RecommendationActions_CL\",         \"Inventory\",\n\"MDE_RemediationAccounts_CL\",           \"Inventory\",\n\"MDE_SAClassification_CL\",              \"XspmGraph\",\n\"MDE_SecurityBaselines_CL\",             \"Inventory\",\n\"MDE_SecurityPolicies_CL\",              \"Configuration\",\n\"MDE_SmartScreenConfig_CL\",             \"Inventory\",\n\"MDE_SoftwareInventory_CL\",             \"Inventory\",\n\"MDE_SuppressionRules_CL\",              \"Configuration\",\n\"MDE_TenantAllowBlock_CL\",              \"Configuration\",\n\"MDE_TenantContext_CL\",                 \"Inventory\",\n\"MDE_TenantWorkloadStatus_CL\",          \"Inventory\",\n\"MDE_ThreatAnalytics_CL\",               \"Configuration\",\n\"MDE_ThreatAnalyticsEnriched_CL\",       \"Configuration\",\n\"MDE_ThreatAnalyticsTopThreats_CL\",     \"Configuration\",\n\"MDE_UnifiedRbacRoles_CL\",              \"Configuration\",\n\"MDE_UserPreferences_CL\",               \"Configuration\",\n\"MDE_VulnerabilityInventory_CL\",        \"Inventory\",\n\"MDE_VulnerableMachines_CL\",            \"Inventory\",\n\"MDE_WebContentFiltering_CL\",           \"Inventory\",\n\"MDE_XspmAttackPaths_CL\",               \"XspmGraph\",\n\"MDE_XspmChokePoints_CL\",               \"XspmGraph\",\n\"MDE_XspmConnectors_CL\",                \"XspmGraph\",\n\"MDE_XspmInitiatives_CL\",               \"XspmGraph\",\n\"MDE_XspmTopTargets_CL\",                \"XspmGraph\",\n\"MDE_AppsSecureScore_CL\",               \"XspmGraph\",\n\"MDE_DataSecureScore_CL\",               \"XspmGraph\",\n\"MDE_IdentitySecureScore_CL\",           \"XspmGraph\"\n];\n// Per-stream baseline: streams with >=100 rows in last 7d are \"established\n// flowing\" — only those qualify for stale-detection (avoids false positives\n// on tenant-gated streams that legitimately never ingest).\n// Per-table time bounds (Audit-TimeFilterCoverage.ps1 80-char context window).\nlet establishedStreams =\nunion\n(Defender_ActionCenter_CL            | where TimeGenerated between (ago(14d) .. ago(2h))),\n(Defender_ConfigurationAndSettings_CL | where TimeGenerated between (ago(14d) .. ago(2h))),\n(Defender_EndpointConfiguration_CL    | where TimeGenerated between (ago(14d) .. ago(2h))),\n(Defender_EndpointDeviceManagement_CL | where TimeGenerated between (ago(14d) .. ago(2h))),\n(Defender_ExposureManagement_CL       | where TimeGenerated between (ago(14d) .. ago(2h))),\n(Defender_IdentityProtection_CL       | where TimeGenerated between (ago(14d) .. ago(2h))),\n(Defender_MultiTenantOperations_CL    | where TimeGenerated between (ago(14d) .. ago(2h))),\n(Defender_StreamingApi_CL             | where TimeGenerated between (ago(14d) .. ago(2h))),\n(Defender_ThreatAnalytics_CL          | where TimeGenerated between (ago(14d) .. ago(2h))),\n(Defender_VulnerabilityManagement_CL  | where TimeGenerated between (ago(14d) .. ago(2h)))\n| where isnotempty(SourceName)\n| summarize Baseline7d=count() by SourceName\n| where Baseline7d >= 100;\n// Latest row per established stream (each table reference time-bounded).\nlet streamLatest =\nunion\n(Defender_ActionCenter_CL            | where TimeGenerated > ago(14d)),\n(Defender_ConfigurationAndSettings_CL | where TimeGenerated > ago(14d)),\n(Defender_EndpointConfiguration_CL    | where TimeGenerated > ago(14d)),\n(Defender_EndpointDeviceManagement_CL | where TimeGenerated > ago(14d)),\n(Defender_ExposureManagement_CL       | where TimeGenerated > ago(14d)),\n(Defender_IdentityProtection_CL       | where TimeGenerated > ago(14d)),\n(Defender_MultiTenantOperations_CL    | where TimeGenerated > ago(14d)),\n(Defender_StreamingApi_CL             | where TimeGenerated > ago(14d)),\n(Defender_ThreatAnalytics_CL          | where TimeGenerated > ago(14d)),\n(Defender_VulnerabilityManagement_CL  | where TimeGenerated > ago(14d))\n| where isnotempty(SourceName)\n| summarize LastSeenUtc=max(TimeGenerated) by SourceName;\n// Detect dry streams\nestablishedStreams\n| join kind=inner streamLatest on SourceName\n| join kind=leftouter streamTier on SourceName\n| extend Tier = coalesce(Tier, 'Unknown')\n| join kind=leftouter cadenceLimits on Tier\n| extend MaxStaleMin = coalesce(MaxStaleMin, toint(2880))   // default 2d if Tier unknown\n| extend StaleMin = datetime_diff('minute', now(), LastSeenUtc)\n| where StaleMin > MaxStaleMin\n| project SourceName, Tbl, Tier, LastSeenUtc, StaleMin, MaxStaleMin, Baseline7d\n| order by StaleMin desc",
+        "queryFrequency": "PT30M",
+        "queryPeriod": "P14D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "techniques": [
+          "T1562"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-11-01",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09')]",
       "kind": "Scheduled",
       "properties": {
@@ -1827,6 +1855,24 @@
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
       "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-4e7c2f8a-1b9d-4e5f-8c3a-7d2b9f4e1c6a')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '4e7c2f8a-1b9d-4e5f-8c3a-7d2b9f4e1c6a')]",
+        "contentId": "4e7c2f8a-1b9d-4e5f-8c3a-7d2b9f4e1c6a",
+        "kind": "AnalyticsRule",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/alertRules', parameters('workspaceName'), 'Microsoft.SecurityInsights', '4e7c2f8a-1b9d-4e5f-8c3a-7d2b9f4e1c6a')]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/AnalyticsRule-1bf2d4e5-6a89-4b0d-c3e5-9f8a1d6b4c09')]",
       "location": "[parameters('location')]",
       "properties": {
@@ -1872,7 +1918,7 @@
     },
     "rulesCount": {
       "type": "int",
-      "value": 20
+      "value": 21
     },
     "huntingQueriesCount": {
       "type": "int",

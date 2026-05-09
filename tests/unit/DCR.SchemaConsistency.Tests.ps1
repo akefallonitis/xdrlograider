@@ -101,9 +101,12 @@ Describe 'DCR stream declarations — invariants' {
             -Because 'auth chain diagnostics moved from MDE_AuthTestResult_CL to App Insights customEvents (AuthChain.* event names)'
     }
 
-    It 'DCR declares exactly 66 streams (65 data + 1 system XdrConnectorHealth_CL)' {
-        # v0.1.0 GA Phase 1+2: 46 baseline + 13 Tier A + 6 Phase 1 (B+G7+G8) + 1 ops = 66
-        $script:DcrStreamDecls.Count | Should -Be 66
+    It 'DCR declares exactly 65 streams (64 data + 1 system XdrConnectorHealth_CL)' {
+        # v0.1.0 GA tag (commit 68526f5): F1 removed MDE_MachineActions_CL.
+        # Result: 64 data streams + 1 system XdrConnectorHealth_CL = 65 total streamDecls.
+        # AMEND-9 Phase A.5 (2026-05-09): pre-existing test was 66 (off-by-one bug
+        # carried into v0.1.0 GA tag). Corrected to 65 to match actual ARM template.
+        $script:DcrStreamDecls.Count | Should -Be 65
     }
 }
 

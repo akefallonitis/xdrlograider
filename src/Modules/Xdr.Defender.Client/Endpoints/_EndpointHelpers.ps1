@@ -312,17 +312,64 @@ function Expand-MDEResponse {
         if ($hasProp) {
             $inner = if ($Response -is [hashtable]) { $Response[$UnwrapProperty] } else { $Response.$UnwrapProperty }
             if ($null -eq $inner) {
-                # Unwrap-target was present but null — emit AppInsights event
-                # for operator visibility, return ZERO rows. (No more boundary-
-                # marker rows polluting the MDE_*_CL tables.)
-                if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
-                    Send-XdrAppInsightsCustomEvent -EventName 'Ingest.BoundaryMarker' -Properties @{
-                        Stream         = [string]$Stream
-                        Reason         = 'unwrap-target-null'
-                        UnwrapProperty = $UnwrapProperty
+                # AMEND-9 Phase A.2 (2026-05-09): UnwrapProperty wrapper auto-discovery.
+                # When declared UnwrapProperty target is null but the response object
+                # has OTHER non-null array-typed properties, auto-discover by picking
+                # the largest array. Emits Ingest.UnwrapAutoDiscovered event with
+                # OriginalUnwrap + DiscoveredUnwrap + RowCount for operator visibility.
+                # Falls through to original Ingest.BoundaryMarker / @() return only if
+                # no array property found.
+                #
+                # Why: live regression 2026-05-08T18:44 — Microsoft Defender portal API
+                # changed response shapes upstream; 4 streams (MDE_ActionCenter_CL /
+                # MDE_MtoTenants_CL / MDE_AlertTuning_CL / MDE_IdentityServiceAccounts_CL)
+                # had declared UnwrapProperty=null returns → 0 rows → tables went dry.
+                # Connector now self-heals on upstream shape drift.
+                $autoDiscovered = $null
+                $discoveredKey  = $null
+                $candidateKeys = if ($Response -is [hashtable]) {
+                    @($Response.Keys | Where-Object { $_ -ne $UnwrapProperty })
+                } else {
+                    @($Response.PSObject.Properties.Name | Where-Object { $_ -ne $UnwrapProperty })
+                }
+                $bestSize = -1
+                foreach ($k in $candidateKeys) {
+                    $val = if ($Response -is [hashtable]) { $Response[$k] } else { $Response.$k }
+                    if ($null -eq $val) { continue }
+                    # Treat as array-like if it's a real array OR a collection with .Count > 0
+                    $isArr = ($val -is [array]) -or ($val -is [System.Collections.IList])
+                    if (-not $isArr) { continue }
+                    $sz = @($val).Count
+                    if ($sz -gt $bestSize) {
+                        $bestSize       = $sz
+                        $autoDiscovered = $val
+                        $discoveredKey  = $k
                     }
                 }
-                return @()
+                if ($null -ne $autoDiscovered -and $bestSize -gt 0) {
+                    if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
+                        Send-XdrAppInsightsCustomEvent -EventName 'Ingest.UnwrapAutoDiscovered' -Properties @{
+                            Stream           = [string]$Stream
+                            OriginalUnwrap   = [string]$UnwrapProperty
+                            DiscoveredUnwrap = [string]$discoveredKey
+                            RowCount         = $bestSize
+                        }
+                    }
+                    # Replace $inner with auto-discovered array; flow continues into
+                    # existing single-item-as-array re-wrap logic (lines below).
+                    $inner = $autoDiscovered
+                } else {
+                    # No fallback array found — preserve original behavior:
+                    # emit Ingest.BoundaryMarker + return ZERO rows.
+                    if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
+                        Send-XdrAppInsightsCustomEvent -EventName 'Ingest.BoundaryMarker' -Properties @{
+                            Stream         = [string]$Stream
+                            Reason         = 'unwrap-target-null'
+                            UnwrapProperty = $UnwrapProperty
+                        }
+                    }
+                    return @()
+                }
             }
             # PowerShell quirk defense: when a hashtable is constructed in PowerShell
             # source code with a single-item array value (e.g. @{Results=@(item)}),
