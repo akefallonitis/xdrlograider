@@ -18,8 +18,9 @@ The v0.1.0 GA architecture explicitly distinguishes three observability surfaces
 │   • 10 Defender_<Category>_CL tables (consolidated per nathanmcnulty 10-category taxonomy) │
 │   • 1 XdrConnectorHealth_CL ops table                                 │
 │   • 4 drift parsers (Configuration, Inventory, Exposure, Maintenance) │
-│   • 8 workbooks + 20 analytic rules + 12 hunting queries     │
-│   • 390 sample queries                                                │
+│   • 8 workbooks + 21 analytic rules (14 detection + 7 XdrOps) + 12   │
+│     hunting queries                                                   │
+│   • 320+ sample queries (5 per active stream × 64)                    │
 │   • Audience: SOC analysts, threat hunters, security engineers        │
 │   • SLO: row freshness within cadence × 2 (e.g., XSPM ≤ 2h)          │
 └──────────────────────────────────────────────────────────────────────┘
@@ -86,7 +87,7 @@ This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsight
 │  │    └─ Connect-DefenderPortal / Invoke-DefenderPortalRequest│       │
 │  │                                                            │       │
 │  │  Modules/Xdr.Defender.Client       (L3 manifest dispatcher)│       │
-│  │    ├─ endpoints.manifest.psd1 (64 stream entries)          │       │
+│  │    ├─ endpoints.manifest.psd1 (46 stream entries)          │       │
 │  │    └─ Invoke-MDEEndpoint / Invoke-MDETierPoll              │       │
 │  │                                                            │       │
 │  │  Modules/Xdr.Connector.Orchestrator (L4 portal routing)    │       │
@@ -110,8 +111,8 @@ This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsight
 │                                                                        │
 │  ┌────────────────────────────────────────────────────────────┐       │
 │  │ DCE + DCR  (location = WORKSPACE region)                   │       │
-│  │   65 streamDecls (13 DCRs) → routed to LA custom tables    │       │
-│  │   (46 data + MDE_Heartbeat operational)                    │       │
+│  │   65 streamDecls (13 DCRs) → routed to 11 LA custom tables │       │
+│  │   (64 manifest streams + 1 ops XdrConnectorHealth_CL)      │       │
 │  └────────────────────────────────────────────────────────────┘       │
 └────────────────────────────────────────────────────────────────────────┘
                                    │
@@ -174,8 +175,8 @@ This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsight
 ### Why Function App vs CCF
 CCF supports only OAuth2/APIKey/Basic/JWT auth. The Defender XDR portal uses cookie-based auth (sccauth + XSRF rotation every 4 min) with TOTP or FIDO2 assertion signing. CCF cannot express this chain. See `REFERENCES.md` → "Create a codeless connector".
 
-### Why 4 functions vs 65
-One function per stream = 55 cold starts, 55 App Insights streams, 55× the auth chain. One polymorphic function = single point of failure, hard to debug. Nine tier-batched functions balance isolation (per-tier) with cost (shared auth cookie, batched DCE POST).
+### Why 4 functions vs 64
+One function per stream = 64 cold starts, 64 App Insights streams, 64× the auth chain. One polymorphic function = single point of failure, hard to debug. **Four-function topology** (Section R consolidation) balances isolation with cost: Xdr-Refresh (universal portal-agnostic dispatcher, every 1 min) reads XdrTierState __schedule__ rows and dispatches DUE tiers; Xdr-PollOrchestrator (Durable orchestrator) fans out per-stream activities; Xdr-PollStream (Durable activity) polls 1 stream + ingests + checkpoints; Connector-Heartbeat (every 5 min) aggregates XdrTierState rows into XdrConnectorHealth_CL. Multi-portal forward-compat: v0.2.0+ adds Entra/Purview/Intune by adding manifest entries — the 4 functions stay 4.
 
 ### Why pure KQL drift
 Connector stays stateless (no diff code, no previous-snapshot storage). Drift logic tunable without redeploy. Each workbook/rule can optimize its query for its data shape. Trade-off: query-time compute instead of ingest-time compute — acceptable for low-volume config data.

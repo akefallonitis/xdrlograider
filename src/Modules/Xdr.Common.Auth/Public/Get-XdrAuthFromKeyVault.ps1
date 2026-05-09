@@ -22,7 +22,7 @@ function Get-XdrAuthFromKeyVault {
         v0.1.0 GA first publish — TTL CACHE (production-readiness gate):
           Pre-fix: secrets fetched on every call. KV throttles tenant-wide
           at 2,000 ops/10 sec/vault, and a tier-poll could read 3 secrets
-          per stream × 64 streams = 177 reads/cycle. The 2026-04-30
+          per stream × 64 streams = 192 reads/cycle. The 2026-04-30
           ballpit-tenant load-test caught us at 800+ KV reads/min during
           tier transitions.
 

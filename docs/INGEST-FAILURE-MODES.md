@@ -1,6 +1,6 @@
 # Ingest failure modes — operator runbook
 
-> Operator-facing classification of every error/exception class
+> v0.1.0 GA — Operator-facing classification of every error/exception class
 > the connector emits to App Insights, with triage steps + recommended action.
 
 XdrLogRaider's auth chain + ingest pipeline emit structured exceptions to

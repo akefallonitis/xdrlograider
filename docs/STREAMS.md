@@ -4,7 +4,7 @@
 
 v0.1.0 GA Phase 2 (2026-05-04) added **13 Tier A streams** from the nodoc-catalog sweep: 11 in `XspmGraph` tier (Posture metrics + SecureScore per-category + Attack Surface analytical paths/chokepoints + XSPM Connectors + Asset Classification Schema + Posture Tenants/Initiatives/Security Events) and 2 in `Configuration` tier (Threat Analytics enriched + top threats).
 
-v0.1.0 GA (2026-05-07) added **6 new streams**:
+v0.1.0 GA Phase 1 (2026-05-07 — Section R++++++) added **6 new streams**:
 - **Architecture B**: `MDE_Machines_CL` (Endpoint Device Management — foundation for PerEntityFanout)
 - **G7**: `MDE_SecurityPolicies_CL` (Endpoint Configuration — POST endpoint returning ASR rules + AV settings + EDR + Firewall + Web Protection policy bodies per platform)
 - **G8 TVM expansion**: `MDE_VulnerableMachines_CL` + `MDE_VulnerabilityInventory_CL` + `MDE_SoftwareInventory_CL` + `MDE_RecommendationActions_CL`
@@ -29,16 +29,16 @@ The connector groups streams by **how often it polls them**, not by an arbitrary
 
 Cadence reflects the data's actual change-rate. Action Center events flow continuously so `ActionCenter` polls every 10 min; XSPM graph data churn-rate is well under 1h so `XspmGraph` matches the workbook hourly refresh; rule + RBAC + integration changes happen during weekday admin sessions so `Configuration` polls every 6 hours; settings + identity + metadata + device inventory are typically stable day-over-day so `Inventory` is daily; data-export configuration only changes during architectural reviews so `Maintenance` is weekly.
 
-> **Production cadence** (v0.1.0 GA): ActionCenter 10m / XspmGraph 1h / Configuration 6h / Inventory 24h / Maintenance 7d.
+> **NOTE (v0.1.0 GA — production cadence active 2026-05-09)**: ActionCenter 10m / XspmGraph 1h / Configuration 6h / Inventory 24h / Maintenance 7d (per `src/Modules/Xdr.Sentinel.Ingest/Public/Get-XdrTierCadenceMap.ps1`). Compressed-cadence override (1h-everything) was used during Phase A audit window 2026-05-09T14:08-14:51 UTC and reverted before close-out per Plan AMEND-2 BINDING.
 
-## Availability legend (post-Section-R++ all-live policy)
+## Availability legend (all-live runtime classification policy)
 
 | Tag | Meaning |
 |---|---|
-| `live` | Path + method + body correct. Runtime `SuccessKind` truth-signal classifies actual response: `live` (200 with rows), `live-empty` (200 with 0 rows), `tenant-gated` (4xx warning — license/feature not provisioned), `error` (5xx investigate). Operator queries `XdrConnectorHealth_CL.Reason` to see per-stream classification. |
+| `live` | Path + method + body correct. Runtime `SuccessKind` (Section R++.A truth-signal) classifies actual response: `live` (200 with rows), `live-empty` (200 with 0 rows), `tenant-gated` (4xx warning — license/feature not provisioned), `error` (5xx investigate). Operator queries `XdrConnectorHealth_CL.Reason` to see per-stream classification. |
 | `deprecated` | Underlying portal endpoint has been renamed/retired by Microsoft. Filtered out by orchestrator — never polled. v0.2.0 may remove the manifest entry entirely. |
 
-A 4xx classified `tenant-gated` at runtime is **not a bug**. It's correct behaviour for a tenant without the gating feature. The connector replaced hardcoded `Availability='tenant-gated'` flags with runtime classification — the manifest is now all-`live` (except the 1 deprecated). The connector adapts dynamically to license changes without code edits.
+A 4xx classified `tenant-gated` at runtime is **not a bug**. It's correct behaviour for a tenant without the gating feature. Section R++ replaced hardcoded `Availability='tenant-gated'` flags with runtime classification — the manifest is now all-`live` (except the 1 deprecated). The connector adapts dynamically to license changes without code edits.
 
 ---
 
@@ -49,14 +49,6 @@ Action Center events — operator-visible response actions and Live Response per
 | Stream | Path | Method | Availability |
 |---|---|---|---|
 | `MDE_ActionCenter_CL` | `/apiproxy/mtp/actionCenter/actioncenterui/history-actions` | GET | live |
-| `MDE_PendingActions_CL` | `/apiproxy/mtp/actionCenter/actioncenterui/pending-actions` | GET | live |
-| `MDE_IdentityDormantAccounts_CL` | `/apiproxy/aatp/api/ispmReports/DormantEntities/newEntryCount` | GET | live (MDI-licensed) |
-| `MDE_IdentityLateralMovementPaths_CL` | `/apiproxy/aatp/api/ispmReports/RiskyLateralMovementPath/newEntryCount` | GET | live (MDI-licensed) |
-| `MDE_VulnerabilityCertificates_CL` | `/apiproxy/mtp/tvm/analytics/certificates?pageIndex=0&pageSize=200` | GET | live (TvmPremium-licensed; paginated) |
-| `MDE_VulnerabilitySummary_CL` | `/apiproxy/mtp/tvm/analytics/vulnerabilities/summary` | GET | live (TvmPremium-licensed) |
-| `MDE_VulnerabilityExtensions_CL` | `/apiproxy/mtp/tvm/analytics/extensions?pageIndex=0&pageSize=200` | GET | live (TvmPremium-licensed; paginated) |
-| `MDE_VulnerabilityAssetCountByExposure_CL` | `/apiproxy/mtp/tvm/analytics/assets/countByExposureLevel` | GET | live (TvmPremium-licensed) |
-| `MDE_VulnerabilityAdvisories_CL` | `/apiproxy/mtp/tvm/analytics/advisories?pageIndex=0&pageSize=200` | GET | live (TvmPremium-licensed; paginated) |
 
 ## exposure (hourly @ :25, 18 streams)
 
@@ -129,7 +121,7 @@ Inventory tier — endpoint config, MDI identity surfaces, tenant context, secur
 | `MDE_DCCoverage_CL` | `/apiproxy/aatp/api/sensors/domainControllerCoverage` | GET | live |
 | `MDE_IdentityAlertThresholds_CL` | `/apiproxy/aatp/api/alertthresholds/withExpiry` | GET | live |
 | `MDE_RemediationAccounts_CL` | `/apiproxy/mdi/identity/identitiesapiservice/remediationAccount` | GET | live |
-| `MDE_SecurityBaselines_CL` | `/apiproxy/mtp/tvm/analytics/vulnerabilities/baseline` | GET | live |
+| `MDE_SecurityBaselines_CL` | `/apiproxy/mtp/tvm/analytics/vulnerabilities/baseline` | GET | live (R+++++ path-drift fix 2026-05-07) |
 | `MDE_MtoTenants_CL` | `/apiproxy/mtoapi/tenants/TenantPicker` | GET | live |
 | `MDE_LicenseReport_CL` | `/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machines/skuReport` | GET | live |
 | `MDE_DeviceTimeline_CL` | `/apiproxy/mtp/k8sMachineApi/ine/machineapiservice/machinetimeline` | POST | live (legacy path; PerEntityFanout to nodoc canonical = Phase 2 Architecture A6) |
@@ -190,7 +182,7 @@ The Sentinel data connector card uses the second query for its IsConnected gate 
 
 Plus 1 operational table (`XdrConnectorHealth_CL`) routed through DCR = **66 streamDeclarations** total.
 
-**All-live policy**: every active manifest entry is `Availability='live'`. Tenant licensing is detected at runtime via `Get-MDEEndpointLastResult.SuccessKind` (live | live-empty | tenant-gated | error) and surfaced on `XdrConnectorHealth_CL.Reason` per stream — operators correlate per-stream reasons with their licensing.
+**All-live policy** (Section R+++.4 + R++++++.10 #6): every active manifest entry is `Availability='live'`. Tenant licensing is detected at runtime via `Get-MDEEndpointLastResult.SuccessKind` (live | live-empty | tenant-gated | error) and surfaced on `XdrConnectorHealth_CL.Reason` per stream — operators correlate per-stream reasons with their licensing.
 
 ## Live fixture coverage
 
@@ -213,4 +205,4 @@ $m = Import-PowerShellDataFile src/Modules/Xdr.Defender.Client/endpoints.manifes
 $m.Endpoints | Where-Object Stream -eq 'MDE_Machines_CL' | Format-List *
 ```
 
-For v0.2.0 stream + multi-portal expansion, see `docs/ROADMAP.md` and `docs/V0.2.0-PORTAL-CATALOGUE.md`.
+For Phase 2+ stream additions (per Section R++++++.7 v0.1.0.1 / v0.2.0 roadmap), see `docs/ROADMAP.md`.

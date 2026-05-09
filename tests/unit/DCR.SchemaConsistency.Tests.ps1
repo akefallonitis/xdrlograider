@@ -102,10 +102,10 @@ Describe 'DCR stream declarations — invariants' {
     }
 
     It 'DCR declares exactly 73 streams (72 data + 1 system XdrConnectorHealth_CL)' {
-        # v0.1.0 GA F1 (2026-05-08): MachineActions removed. 45 baseline + 13 Tier A + 6 Phase 1 (B+G7+G8) + 1 ops = 65
-        # Phase 2 batch 1 (2026-05-09): MDE_PendingActions_CL added (Action Center) - 65 -> 66
-        # Phase 2 batch 2 (2026-05-09): MDE_IdentityDormantAccounts_CL added (Identity Protection MDI) - 66 -> 67
-        # Phase 2 batch 3 (2026-05-09): MDE_IdentityLateralMovementPaths_CL added (Identity Protection XSPM-class) - 67 -> 68
+        # Plan SECTION FINAL consolidated v0.1.0 GA (2026-05-09):
+        # 64 baseline (post-F1 removal of MDE_MachineActions_CL) + 8 Phase 2 batches (1-8)
+        # = 72 manifest streams (71 live + 1 deprecated MDE_StreamingApiConfig_CL)
+        # + XdrConnectorHealth_CL operational table = 73 total streamDecls.
         $script:DcrStreamDecls.Count | Should -Be 73
     }
 }

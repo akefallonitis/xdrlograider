@@ -12,9 +12,9 @@ Production-grade unattended ingestion of Microsoft Defender XDR portal-only tele
 
 **Architecture**:
 
-- **64 portal-only manifest streams** (63 live + 1 deprecated `MDE_StreamingApiConfig_CL`) + 1 `XdrConnectorHealth_CL` ops table = 65 DCR streamDeclarations, partitioned across **13 per-category DCRs** (semantic split for Configuration + Exposure where stream count exceeds Azure's 10-flow cap) sharing 1 DCE.
+- **64 portal-only data streams** (63 live + 1 deprecated) + 1 operational ops table (XdrConnectorHealth_CL) = 65 streamDecls total, partitioned across **13 DCRs** (per-category split — Azure 10-flow cap respected per DCR) sharing 1 DCE.
 - DCR `transformKql='source | extend SourceName='<Stream>''` injects per-stream identity into per-category tables (Microsoft Learn canonical pattern + SourceName-injection).
-- **5 cadence tiers** dispatched by `Xdr-Refresh` timer: `ActionCenter` (10 min — 2 streams), `XspmGraph` (1h — 18), `Configuration` (6h — 16), `Inventory` (daily — 25), `Maintenance` (weekly — 2). Tenant-feature-gated streams (MDI / TVM / MCAS / Intune / MDO / Custom Collection) classified at runtime via SuccessKind side-channel — manifest stays universally `live`.
+- **5 cadence tiers** with dedicated timer functions: `fast` (10 min — 2 streams), `exposure` (1h — 18), `config` (6h — 16), `inventory` (daily — 21), `maintenance` (weekly — 1). Tenant-feature-gated streams (MDI / TVM / MCAS / Intune / MDO / Custom Collection) skip cleanly when the tenant feature isn't licensed.
 - **11 consolidated workspace tables**: 10 `Defender_<Category>_CL` per nathanmcnulty 10-category taxonomy + 1 `XdrConnectorHealth_CL` ops table.
 - Per-stream typed columns at ingest via DCR `ProjectionMap`; `RawJson` preserved on every row for forensic queries.
 - Drift detection via 4 cadence-tier KQL parsers (`MDE_Drift_Configuration` / `MDE_Drift_Inventory` / `MDE_Drift_Exposure` / `MDE_Drift_Maintenance`) using `mv-apply set_union(CurrentFields, PreviousFields)` field-level diff.
@@ -29,10 +29,10 @@ Production-grade unattended ingestion of Microsoft Defender XDR portal-only tele
 **Sentinel content**:
 
 - 8 workbooks (incl. ConnectorHealth with 9 panels: per-tier freshness, auth-chain failures, DLQ depth, freshness SLI, partial-success rate, service-account anomaly, per-stream workspace-side freshness).
-- 20 analytic rules (14 detection + 6 XdrOps incl. RowVolumeSpike cost-budget runtime gate). All ship `enabled: false` per Microsoft Sentinel Solution best practice.
+- 21 analytic rules (14 detection + 7 XdrOps incl. RowVolumeSpike cost-budget runtime gate + StreamWentDry per-stream stale alert + AuthChainStaleness). All ship `enabled: false` per Microsoft Sentinel Solution best practice.
 - 12 hunting queries.
 - 4 cadence-tier drift parsers.
-- 390 sample queries (every active stream has 5-query operator anchor).
+- 320+ sample queries (every active stream has 5-query operator anchor; 5 × 64 = 320).
 
 **Supply chain**:
 
@@ -80,7 +80,7 @@ Refactored the 7 bucket-fill DCRs (DCR-1 through DCR-7, sequential 10-flow bucke
   | `xdrlr-dcr-vulnerability-mgmt` | `Defender_VulnerabilityManagement_CL` | 1 |
   | `xdrlr-dcr-ops` | `XdrConnectorHealth_CL` | 1 |
 
-  Total: 13 DCRs (was 7), 65 streamDecls (64 manifest streams + 1 ops; was 60 pre-Phase-1; F1 2026-05-08 net 65 post-MachineActions removal).
+  Total: 13 DCRs (was 7), 60 streamDecls (unchanged).
 
 - **Build script** (`tools/Build-DcrSection.ps1`) emits the DCR section + `DCR_IMMUTABLE_IDS_JSON` env-var construction + RBAC role-assignments deterministically from the manifest. ARM template stays hand-authored everywhere except this auto-regen window.
 - **CI gate** updated: `SchemaConsistency.Tests.ps1` already enforces type consistency; bucket-fill cap tightens from 7 categories per DCR to 1.
@@ -98,7 +98,7 @@ Refactored the 7 bucket-fill DCRs (DCR-1 through DCR-7, sequential 10-flow bucke
 - **`tools/Audit-DcrSchema.ps1`** — operator-runnable audit (mirror of `tests/arm/SchemaConsistency.Tests.ps1`) so they can verify schema integrity locally before deploying without invoking Pester.
 - **`tools/Verify-CosignArtifacts.ps1`** — one-command Sigstore-cosign verify-blob over all 6 release artifacts; today operators copy/paste 6 separate commands.
 - **Per-table data dictionary** in `docs/SCHEMA.md` — for each `Defender_<Category>_CL` table, list every column (typed + RawJson) with its source stream, type, and example. Closes the "which stream contributes which column" knowledge gap.
-- **Sample-query refresh** — 5 queries per stream × 63 live streams ≈ 315 sample queries in `XdrLogRaider_DataConnector.json` need automated regen (`tools/Build-SampleQueries.ps1`) when columns are renamed. Today renames require manual sample-query updates.
+- **Sample-query refresh** — 5 queries per stream × 65 streams = 325 sample queries in `XdrLogRaider_DataConnector.json` need automated regen (`tools/Build-SampleQueries.ps1`) when columns are renamed. Today renames require manual sample-query updates.
 - **CI: ARM-TTK** — adopt the official Microsoft ARM Template Test Toolkit alongside the existing `Validate-ArmJson.ps1`. Catches Marketplace-grade issues (apiVersion drift, idempotency, parameter coverage) before the v1.0.0 certification window.
 - **CI: Deploy what-if with role-assignments** — grant the GitHub Actions SP `User Access Administrator` so what-if runs the full 32+15-role-assignment template and not the stripped 32-resource subset.
 - **Per-tenant column documentation** — list "which streams populate which columns" in the workbook's hover text, so operators don't have to read `docs/SCHEMA.md`.

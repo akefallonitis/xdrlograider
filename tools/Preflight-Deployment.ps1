@@ -201,14 +201,14 @@ try {
         Add-Check -Section '5-Hub' -Name 'Data Connector lists all 46 tables' -Status Fail -Detail "dataTypes.Count = $tableCount (expected 46 = 45 active data + 1 Heartbeat; deprecated stream excluded)"
     }
 
-    # 5b — All 20 analytic rules have enabled: false
+    # 5b — All 21 analytic rules have enabled: false (14 detection + 7 XdrOps per v0.1.0 GA)
     $rulesDir = Join-Path $repoRoot 'sentinel' 'analytic-rules'
     $rules = Get-ChildItem -Path $rulesDir -Filter '*.yaml'
     $missingEnabled = $rules | Where-Object { -not ((Get-Content $_.FullName -Raw) -match '(?m)^enabled:\s*false') }
-    if ($rules.Count -eq 14 -and $missingEnabled.Count -eq 0) {
-        Add-Check -Section '5-Hub' -Name 'All 14 rules ship enabled:false' -Status Pass -Detail '14/14'
+    if ($rules.Count -eq 21 -and $missingEnabled.Count -eq 0) {
+        Add-Check -Section '5-Hub' -Name 'All 21 rules ship enabled:false' -Status Pass -Detail '21/21'
     } else {
-        Add-Check -Section '5-Hub' -Name 'All 14 rules ship enabled:false' -Status Fail -Detail "rules=$($rules.Count) missing-enabled=$($missingEnabled.Count)"
+        Add-Check -Section '5-Hub' -Name 'All 21 rules ship enabled:false' -Status Fail -Detail "rules=$($rules.Count) missing-enabled=$($missingEnabled.Count)"
     }
 
     # 5c — All 12 hunting queries have author/version/tags metadata
@@ -218,8 +218,8 @@ try {
         $c = Get-Content $_.FullName -Raw
         -not ($c -match '(?m)^author:' -and $c -match '(?m)^version:' -and $c -match '(?m)^tags:')
     }
-    if ($hunts.Count -eq 9 -and $missingMeta.Count -eq 0) {
-        Add-Check -Section '5-Hub' -Name 'All 12 hunting queries have metadata' -Status Pass -Detail '9/9'
+    if ($hunts.Count -eq 12 -and $missingMeta.Count -eq 0) {
+        Add-Check -Section '5-Hub' -Name 'All 12 hunting queries have metadata' -Status Pass -Detail '12/12'
     } else {
         Add-Check -Section '5-Hub' -Name 'All 12 hunting queries have metadata' -Status Fail -Detail "hunts=$($hunts.Count) missing-meta=$($missingMeta.Count)"
     }

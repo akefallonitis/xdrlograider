@@ -3,11 +3,11 @@
   "Name": "XdrLogRaider",
   "Author": "Alex Kefallonitis",
   "Logo": "<img src=\"https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/deploy/solution/Images/Logo.svg\" width=\"75px\" height=\"75px\">",
-  "Description": "**XdrLogRaider v0.1.0 GA** is a Microsoft Sentinel Solution that ingests **Defender XDR portal-only telemetry** — tenant security configuration, compliance posture, drift events, XSPM exposure, RBAC governance, and identity coverage — that is **not exposed by public Graph Security, Defender XDR, or MDE public APIs**.\n\nThe solution deploys a PowerShell 7.4 Azure Function App that authenticates as a dedicated service account (via Credentials+TOTP or Software Passkey) and polls Defender portal endpoints across **10 functional categories — 59 telemetry streams** — ingesting results into **11 consolidated Log Analytics tables** (10 `Defender_<Category>_CL` per category + 1 `XdrConnectorHealth_CL` ops table) in your Log Analytics workspace. Drift detection is computed in pure KQL via 4 cadence-tier parsers, feeding 8 workbooks and 20 analytic rules (14 detection + 6 XdrOps incl. RowVolumeSpike cost-budget gate).",
+  "Description": "**XdrLogRaider v0.1.0 GA** is a Microsoft Sentinel Solution that ingests **Defender XDR portal-only telemetry** — tenant security configuration, compliance posture, drift events, XSPM exposure, RBAC governance, and identity coverage — that is **not exposed by public Graph Security, Defender XDR, or MDE public APIs**.\n\nThe solution deploys a PowerShell 7.4 Azure Function App that authenticates as a dedicated service account (via Credentials+TOTP or Software Passkey) and polls Defender portal endpoints across **10 functional categories — 64 telemetry streams (63 live + 1 deprecated)** — ingesting results into **11 consolidated Log Analytics tables** (10 `Defender_<Category>_CL` per category + 1 `XdrConnectorHealth_CL` ops table) in your Log Analytics workspace. Drift detection is computed in pure KQL via 4 cadence-tier parsers, feeding 8 workbooks and 21 analytic rules (14 detection + 7 XdrOps incl. RowVolumeSpike cost-budget gate + StreamWentDry per-stream stale alert).",
   "WorkbookBladeDescription": "8 workbooks for security configuration compliance, drift tracking, RBAC governance, exposure mapping, identity posture, response audit, action center, and connector-health observability.",
-  "AnalyticalRuleBladeDescription": "20 scheduled analytic rules — 20 analytic rules for configuration drift and high-risk changes (Live Response policy relaxation, new data-export destinations, RBAC role assignments to unusual accounts, XSPM attack-path creation, tamper-protection disablement, MDI sensor down, etc.) plus 6 XdrOps rules (auth-chain failure, stream staleness, DLQ depth/age, row-volume spike cost-budget gate, service-account anomalous sign-in). All ship `enabled: false` per Microsoft Sentinel best practice.",
-  "HuntingQueryBladeDescription": "9 ad-hoc hunting queries for analyst-driven drift exploration, historical configuration investigation, and after-hours change attribution.",
-  "DataConnectorsBladeDescription": "One data connector — XdrLogRaider — that authenticates to the Defender XDR portal using session cookies (sccauth + XSRF rotation) and publishes to 11 consolidated Log Analytics tables across 64 streams. v0.1.0 GA.",
+  "AnalyticalRuleBladeDescription": "21 scheduled analytic rules — 14 detection rules for configuration drift and high-risk changes (Live Response policy relaxation, new data-export destinations, RBAC role assignments to unusual accounts, XSPM attack-path creation, tamper-protection disablement, MDI sensor down, etc.) plus 7 XdrOps rules (auth-chain failure + auth-chain staleness, stream staleness + per-stream went-dry alert, DLQ depth/age, row-volume spike cost-budget gate, service-account anomalous sign-in). All ship `enabled: false` per Microsoft Sentinel best practice.",
+  "HuntingQueryBladeDescription": "12 ad-hoc hunting queries for analyst-driven drift exploration, historical configuration investigation, after-hours change attribution, machine inventory by risk score, security policies per platform, and TVM top vulnerable machines.",
+  "DataConnectorsBladeDescription": "One data connector — XdrLogRaider — that authenticates to the Defender XDR portal using session cookies (sccauth + XSRF rotation) and publishes to 11 consolidated Log Analytics tables across 72 streams (71 live + 1 deprecated). v0.1.0 GA.",
   "WorkbookDescription": [
     "MDE Action Center",
     "MDE Compliance Dashboard",
@@ -43,10 +43,13 @@
     "Analytic Rules/TenantAllowListNewEntry.yaml",
     "Analytic Rules/XspmNewAttackPath.yaml",
     "Analytic Rules/XspmPathToCriticalAsset.yaml",
-    "Analytic Rules/XdrOps-ConnectorStaleStream.yaml",
     "Analytic Rules/XdrOps-AuthChainFailure.yaml",
+    "Analytic Rules/XdrOps-AuthChainStaleness.yaml",
+    "Analytic Rules/XdrOps-ConnectorStaleStream.yaml",
     "Analytic Rules/XdrOps-DlqDepthAlert.yaml",
-    "Analytic Rules/XdrOps-ServiceAccountAnomalousSignIn.yaml"
+    "Analytic Rules/XdrOps-RowVolumeSpike.yaml",
+    "Analytic Rules/XdrOps-ServiceAccountAnomalousSignIn.yaml",
+    "Analytic Rules/XdrOps-StreamWentDry.yaml"
   ],
   "HuntingQueries": [
     "Hunting Queries/AfterHoursDrift.yaml",
@@ -54,9 +57,12 @@
     "Hunting Queries/CustomDetectionContentAudit.yaml",
     "Hunting Queries/ExclusionAdditionsPastQuarter.yaml",
     "Hunting Queries/LrSessionsWithoutJustification.yaml",
+    "Hunting Queries/MachineInventoryRiskScore.yaml",
     "Hunting Queries/MdiServiceAccountDrift.yaml",
     "Hunting Queries/RbacEscalationEvents.yaml",
+    "Hunting Queries/SecurityPoliciesPerPlatform.yaml",
     "Hunting Queries/SilentBypassIndicators.yaml",
+    "Hunting Queries/TvmTopVulnerableMachines.yaml",
     "Hunting Queries/XspmChokepointDeltas.yaml"
   ],
   "Parsers": [

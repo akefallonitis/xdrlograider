@@ -2,7 +2,7 @@
 
 **A Microsoft Sentinel custom data connector that ingests Microsoft Defender XDR portal-only telemetry — configuration, compliance, drift, exposure, governance — that public Microsoft APIs (Graph Security, Microsoft 365 Defender, MDE) don't expose.**
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fv0.1.0%2Fdeploy%2Fcompiled%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fv0.1.0%2Fdeploy%2Fcompiled%2FcreateUiDefinition.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fv0.1.0.3%2Fdeploy%2Fcompiled%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fakefallonitis%2Fxdrlograider%2Fv0.1.0.3%2Fdeploy%2Fcompiled%2FcreateUiDefinition.json)
 [![CI](https://github.com/akefallonitis/xdrlograider/actions/workflows/ci.yml/badge.svg)](https://github.com/akefallonitis/xdrlograider/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -13,10 +13,10 @@
 | Scope | Microsoft Defender XDR portal (`security.microsoft.com`) — telemetry streams across 10 functional categories (Endpoint Device Management, Endpoint Configuration, Vulnerability Management, Identity Protection, Configuration & Settings, Exposure Management, Threat Analytics, Action Center, Multi-Tenant Operations, Streaming API). Every stream documented + live-captured. Some streams activate only when the tenant provisions the underlying feature (MDI / TVM / MCAS / Intune / MDO / Custom Collection). |
 | Prerequisite | **Existing Sentinel-enabled Log Analytics workspace** (any RG / subscription in the same tenant). This template does NOT create a workspace. |
 | Deployment | One-click **Deploy to Azure** (button above) + one `./tools/Initialize-XdrLogRaiderAuth.ps1` run post-deploy. Cross-RG / cross-region workspace supported. |
-| Content | 8 workbooks · 20 analytic rules (14 detection + 6 XdrOps incl. RowVolumeSpike cost-budget gate) · 12 hunting queries · 4 KQL drift parsers + 11 consolidated LA tables (10 `Defender_<Category>_CL` + 1 `XdrConnectorHealth_CL`) · 390 sample queries (5 per active stream) — all auto-deployed via nested ARM. Every parser / rule / query / workbook column reference verified against live fixtures in CI. |
+| Content | 8 workbooks · 21 analytic rules (14 detection + 7 XdrOps incl. RowVolumeSpike cost-budget gate + StreamWentDry per-stream stale alert) · 12 hunting queries · 4 KQL drift parsers + 11 consolidated LA tables (10 `Defender_<Category>_CL` + 1 `XdrConnectorHealth_CL`) · 320+ sample queries (5 per active stream × 64) — all auto-deployed via nested ARM. Every parser / rule / query / workbook column reference verified against live fixtures in CI. |
 | License | MIT |
 
-XdrLogRaider ingests the tenant-configuration surface that Microsoft's first-party APIs don't expose: suppression rule changes, exclusion list changes, data export destination adds, Live Response policy relaxations, XSPM attack paths + chokepoints + top targets + asset classification schema, posture metrics + secure-score per-category, attack-surface analytical paths/chokepoints, threat-analytics enriched outbreaks + top threats, MDI identity service accounts, Action Center approval history, and more. **Drift happens on the KQL side** (pure query-time) — 4 cadence-tier parsers (`MDE_Drift_Configuration` / `MDE_Drift_Inventory` / `MDE_Drift_Exposure` / `MDE_Drift_Maintenance`) feed 8 workbooks and 20 analytic rules. `RawJson` is preserved on every row for forensic queries; typed columns are projected at ingest via DCR. Every endpoint response shape is captured as a live fixture in `tests/fixtures/live-responses/` and all parsers + rules + queries + workbooks are verified against those fixtures in CI (1357+ unit tests across 67 files, 72.51% coverage, plus 12-edge wiring audit per stream).
+XdrLogRaider ingests the tenant-configuration surface that Microsoft's first-party APIs don't expose: suppression rule changes, exclusion list changes, data export destination adds, Live Response policy relaxations, XSPM attack paths + chokepoints + top targets + asset classification schema, posture metrics + secure-score per-category, attack-surface analytical paths/chokepoints, threat-analytics enriched outbreaks + top threats, MDI identity service accounts, Action Center approval history, and more. **Drift happens on the KQL side** (pure query-time) — 4 cadence-tier parsers (`MDE_Drift_Configuration` / `MDE_Drift_Inventory` / `MDE_Drift_Exposure` / `MDE_Drift_Maintenance`) feed 8 workbooks and 21 analytic rules. `RawJson` is preserved on every row for forensic queries; typed columns are projected at ingest via DCR. Every endpoint response shape is captured as a live fixture in `tests/fixtures/live-responses/` and all parsers + rules + queries + workbooks are verified against those fixtures in CI (2000+ unit tests across 107 files, plus 12-edge wiring audit per stream).
 
 ## Quick start
 
@@ -32,7 +32,7 @@ XdrLogRaider ingests the tenant-configuration surface that Microsoft's first-par
 The button opens an Azure Portal wizard that:
 - Asks for the workspace resource ID + workspace region (required), service account UPN, auth method, project prefix
 - Provisions Function App + Plan + Key Vault + Storage + DCE + DCR + App Insights in your target RG
-- Adds 11 custom tables (10 `Defender_<Category>_CL` consolidated category tables + 1 `XdrConnectorHealth_CL` ops table) + a Sentinel Data Connector UI card with 390 sample queries + 4 drift parsers / 8 workbooks / 20 analytic rules / 12 hunting queries to your existing workspace (via cross-RG nested deployments — no manual Sentinel-content install)
+- Adds 11 custom tables (10 `Defender_<Category>_CL` consolidated category tables + 1 `XdrConnectorHealth_CL` ops table) + a Sentinel Data Connector UI card with 320+ sample queries + 4 drift parsers / 8 workbooks / 21 analytic rules / 12 hunting queries to your existing workspace (via cross-RG nested deployments — no manual Sentinel-content install)
 - Outputs `keyVaultName`, `dceEndpoint`, `dcrImmutableId`, and the exact `postDeployCommand` for step 2
 
 > **Private repository note:** the Deploy button uses `raw.githubusercontent.com` URLs and requires the repo to be public for Azure Portal to fetch the templates. For private-repo deployment: use Azure Portal → **Deploy a custom template** → **Load template from file** with the JSONs in `deploy/compiled/` (or from the GitHub Release assets).
@@ -49,27 +49,17 @@ See [docs/GETTING-AUTH-MATERIAL.md](docs/GETTING-AUTH-MATERIAL.md) for how to ob
 
 ### 3. Confirm green
 
-Open **Microsoft Sentinel → Data connectors** in your workspace and find the **XdrLogRaider** card. Within **10–15 minutes** of step 2, **Status** flips to **Connected** — that's it. The card reads `XdrConnectorHealth_CL` via the connector's `connectivityCriteria` IsConnectedQuery (gates on `StreamsSucceeded > 0 AND RowsIngested > 0`), so any successful first poll with actual data flow lights it up. The 5-min `Connector-Heartbeat` rows are excluded from the criteria — earliest "Connected" comes after the first non-heartbeat tier completes (ActionCenter at 10 min).
+Open **Microsoft Sentinel → Data connectors** in your workspace and find the **XdrLogRaider** card. Within 5–10 minutes of step 2, **Status** flips to **Connected** — that's it. The card reads `XdrConnectorHealth_CL` via the connector's `connectivityCriteria` IsConnectedQuery (gates on `StreamsSucceeded > 0 AND RowsIngested > 0`), so any successful first poll with actual data flow lights it up.
 
-If it stays Disconnected past 20 minutes, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+If it stays Disconnected past 15 minutes, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
-### Production cadence tiers
-
-| Tier | Cadence | Streams | Examples |
-|---|---|---|---|
-| **ActionCenter** | 10 min | 2 | Action Center events, DeviceTimeline |
-| **XspmGraph** | 1 hour | 18 | XSPM attack paths, exposure recommendations, posture metrics |
-| **Configuration** | 6 hours | 16 | Suppression rules, alert tuning, RBAC, integrations |
-| **Inventory** | 24 hours | 26 | Machines, AdvancedFeatures, AntivirusPolicy, identity, TVM |
-| **Maintenance** | 7 days | 1 | DataExportSettings (rare-change retention surface) |
-
-See [docs/STREAMS.md](docs/STREAMS.md) for the full per-stream breakdown.
+Production polling timers fire on their cadence: `fast` (10 min) ingests Action Center events first; `inventory` (daily 02:00 UTC) ingests the long-tail settings + identity + metadata streams. See [docs/STREAMS.md](docs/STREAMS.md) for the full per-tier breakdown.
 
 ## Roadmap
 
 | Version | Focus | Highlights |
 |---|---|---|
-| **v0.1.0 GA** ← *current* | Pure Defender connector | 64 portal-only streams · 11 consolidated LA tables · **13 per-category DCRs** (semantic split for oversized cats: `xdrlr-dcr-actioncenter`, `xdrlr-dcr-config-alerts-detection`, `xdrlr-dcr-config-platform-rbac`, `xdrlr-dcr-exposure-attack-surface`, `xdrlr-dcr-exposure-posture-score`, etc.) · 1 DCE · 8 workbooks · 20 analytic rules · 4 cadence-tier drift parsers · 4 schema-consistency CI gates · cosign-signed release artifacts · `tools/Audit-DcrSchema.ps1` + `tools/Build-DcrSection.ps1` + `tools/Verify-CosignArtifacts.ps1` |
+| **v0.1.0 GA** ← *current* | Pure Defender connector | 59 portal-only streams · 11 consolidated LA tables · **13 per-category DCRs** (semantic split for oversized cats: `xdrlr-dcr-actioncenter`, `xdrlr-dcr-config-alerts-detection`, `xdrlr-dcr-config-platform-rbac`, `xdrlr-dcr-exposure-attack-surface`, `xdrlr-dcr-exposure-posture-score`, etc.) · 1 DCE · 8 workbooks · 20 analytic rules · 4 cadence-tier drift parsers · 4 schema-consistency CI gates · cosign-signed release artifacts · `tools/Audit-DcrSchema.ps1` + `tools/Build-DcrSection.ps1` + `tools/Verify-CosignArtifacts.ps1` |
 | **v0.1.0.1** | Tooling polish | `tools/Build-SampleQueries.ps1` auto-regen for sample queries · CI: ARM-TTK adoption · per-column workbook hover-text · Pester parallelism · manifest hot-load caching |
 | **v0.2.0** | Multi-portal expansion + FA multi-tenancy | Adds `Xdr.Entra.*` + `Xdr.Purview.*` + `Xdr.Intune.*` modules · `Entra_<Category>_CL` / `Purview_<Category>_CL` / `Intune_<Category>_CL` per-portal tables · per-tenant secret namespacing in KV (one FA polls many tenants) · coverage gate raised to ≥75% |
 | **v1.0.0** | Marketplace certification | Azure Marketplace + Microsoft Sentinel Solution Gallery certified listing · default `restrictPublicNetwork=true` baseline · private-endpoint hardening · dedicated SKU support · enterprise-grade tenant onboarding wizard |
@@ -84,7 +74,7 @@ Full per-version deliverables in [docs/ROADMAP.md](docs/ROADMAP.md). Streams are
 - **[Permissions](docs/PERMISSIONS.md)** — consolidated setup + runtime + cross-RG reference
 - [Auth](docs/AUTH.md) — both methods explained, CA compatibility, rotation
 - [Getting Auth Material](docs/GETTING-AUTH-MATERIAL.md) — how to obtain TOTP / passkey / cookies
-- Software passkey generation guide is now in [AUTH.md](docs/AUTH.md#bring-your-own-passkey-software-passkey-json-schema)
+- [Bring Your Own Passkey](docs/BRING-YOUR-OWN-PASSKEY.md) — generating a software passkey JSON
 - [Streams](docs/STREAMS.md) — full catalogue of telemetry streams + per-stream tier + category
 - [Workbooks](docs/WORKBOOKS.md) — what each dashboard shows
 - [Drift](docs/DRIFT.md) — pure-KQL drift model explained

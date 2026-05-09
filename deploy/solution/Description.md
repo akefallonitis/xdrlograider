@@ -11,8 +11,8 @@ custom detections, RBAC device groups, XSPM attack paths, posture metrics,
 secure-score per-category, attack-surface analytical paths, threat-analytics
 enriched outbreaks, MDI service accounts) — now queryable in KQL.
 
-**v0.1.0 GA** ships **64 streams** (46 baseline + 13 Tier A nodoc-catalog
-additions, all live-captured) across **11 consolidated workspace tables**
+**v0.1.0 GA** ships **64 streams** (63 live + 1 deprecated; nodoc-catalog
+additions all live-captured) across **11 consolidated workspace tables**
 (10 `Defender_<Category>_CL` per category + 1 `XdrConnectorHealth_CL` ops
 table). Pure Defender connector; multi-portal expansion + Function App
 multi-tenancy reintroduced in v0.2.0.

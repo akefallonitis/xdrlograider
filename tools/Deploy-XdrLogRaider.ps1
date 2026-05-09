@@ -159,23 +159,24 @@ $params = @{
 # To deliberately seed/rotate secrets, pass them explicitly:
 #   pwsh tools/Deploy-XdrLogRaider.ps1 -ServicePassword (Read-Host -AsSecureString)
 # OR run Initialize-XdrLogRaiderAuth.ps1 separately AFTER the template lands.
-$emptySecure = New-Object System.Security.SecureString  # 0-length
-
-if ($SkipSecretSeeding -or $null -eq $ServicePassword) {
-    $params['servicePassword'] = $emptySecure
-} else {
-    $params['servicePassword'] = $ServicePassword
+# SecureString serialization gotcha (Az.Resources): when -SkipSecretSeeding is set,
+# we OMIT the securestring params entirely from $params hashtable. ARM template
+# parameters have `defaultValue: ""` so omitted params get empty string default.
+# The mainTemplate.json KV secret resources are conditional on
+# `length(parameters('servicePassword')) > 0` so they stay skipped, preserving any
+# existing operator-seeded KV secrets via Initialize-XdrLogRaiderAuth.ps1.
+#
+# Why omit (not pass empty SecureString or sentinel): Az.Resources cannot serialize
+# 0-length SecureStrings, and sentinel-string-as-SecureString trips the same
+# serialization code path. Omission lets ARM use the parameter defaultValue.
+if (-not $SkipSecretSeeding) {
+    if ($null -ne $ServicePassword) { $params['servicePassword'] = $ServicePassword }
+    if ($null -ne $TotpSeed)        { $params['totpSeed']        = $TotpSeed }
+    if ($null -ne $PasskeyJson)     { $params['passkeyJson']     = $PasskeyJson }
 }
-if ($SkipSecretSeeding -or $null -eq $TotpSeed) {
-    $params['totpSeed'] = $emptySecure
-} else {
-    $params['totpSeed'] = $TotpSeed
-}
-if ($SkipSecretSeeding -or $null -eq $PasskeyJson) {
-    $params['passkeyJson'] = $emptySecure
-} else {
-    $params['passkeyJson'] = $PasskeyJson
-}
+# When -SkipSecretSeeding: all 3 securestring params are omitted -> ARM defaultValue ""
+# applied -> length() > 0 condition false -> KV secret resources skipped -> existing
+# KV secrets preserved.
 
 Write-Host "Deployment parameters:" -ForegroundColor Cyan
 $params.GetEnumerator() | Sort-Object Name | ForEach-Object {

@@ -29,13 +29,6 @@ function Get-XdrTierCadenceMap {
     [OutputType([hashtable])]
     param()
 
-    # PRODUCTION cadence (Section R++++++.4 F3 revert 2026-05-07):
-    # Compressed troubleshooting cadence (1h-everything) was used during
-    # iter-15→18 LIVE re-verify shake-out to surface end-to-end data flow
-    # within minutes. Production tag REQUIRES the canonical cadence below
-    # — compressed cadence inflates row counts ~24x (Inventory) / ~168x
-    # (Maintenance) vs SLI/SLO baseline and breaches RowVolumeSpike
-    # cost-budget gates.
     return @{
         ActionCenter  = [TimeSpan]::FromMinutes(10)
         XspmGraph     = [TimeSpan]::FromHours(1)

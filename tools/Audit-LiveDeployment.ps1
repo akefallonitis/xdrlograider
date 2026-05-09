@@ -74,6 +74,9 @@ foreach ($mod in 'Az.Accounts','Az.OperationalInsights','Az.Monitor','Az.Applica
     }
     Import-Module $mod -ErrorAction SilentlyContinue
 }
+# Operator-tool: SP secret read from .env file (already plaintext on disk); convert to SecureString for Connect-AzAccount.
+# No real security improvement from avoiding -AsPlainText here since secret was plaintext in source.
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Operator tool: SP secret from .env file required to be SecureString for Connect-AzAccount.')]
 $secure = ConvertTo-SecureString $env_['AZURE_CLIENT_SECRET'] -AsPlainText -Force
 $cred   = [pscredential]::new($env_['AZURE_CLIENT_ID'], $secure)
 Connect-AzAccount -ServicePrincipal -TenantId $env_['AZURE_TENANT_ID'] -Credential $cred -SubscriptionId $env_['XDRLR_SUBSCRIPTION_ID'] -WarningAction SilentlyContinue | Out-Null

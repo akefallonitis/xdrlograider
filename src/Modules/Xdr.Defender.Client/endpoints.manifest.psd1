@@ -1169,14 +1169,20 @@ AttackPathsV2
             Purpose = 'Top-N CVE-exposed machines (TVM analytics — most-exposed devices ranked by exposure score)'
             Availability = 'live'
             UnwrapProperty = 'results'
-            IdProperty = @('assetId', 'AssetId', 'id', 'Id')
+            IdProperty = @('id', 'Id', 'assetId', 'AssetId')
+            # 2026-05-09 ProjectionMap drift fix per live fixture diff (Phase B audit):
+            #   assetId               -> id                   (live field name)
+            #   assetName             -> name                 (live field name)
+            #   totalVulnerabilities  -> discoveredVulnerabilities (live field name)
+            #   riskScore             -> exposureLevel        (live: 'High'/'Medium'/'Low' classification)
+            #   CriticalCveCount kept (no live equivalent - additive-only schema rule).
             ProjectionMap = @{
-                AssetId          = '$tostring:assetId'
-                MachineName      = '$tostring:assetName'
-                CveCount         = '$toint:totalVulnerabilities'
+                AssetId          = '$tostring:id'
+                MachineName      = '$tostring:name'
+                CveCount         = '$toint:discoveredVulnerabilities'
                 CriticalCveCount = '$toint:criticalVulnerabilities'
                 ExposureScore    = '$todouble:exposureScore'
-                RiskScore        = '$tostring:riskScore'
+                RiskScore        = '$tostring:exposureLevel'
                 OsPlatform       = '$tostring:osPlatform'
             }
         }
@@ -1201,13 +1207,21 @@ AttackPathsV2
             Purpose = 'CVE inventory — list of vulnerabilities affecting tenant assets with severity + prevalence'
             Availability = 'live'
             UnwrapProperty = 'results'
-            IdProperty = @('cveId', 'CveId', 'id', 'Id')
+            IdProperty = @('id', 'Id', 'cveId', 'CveId')
+            # 2026-05-09 ProjectionMap drift fix per live fixture diff:
+            #   cveId          -> id            (live field name)
+            #   publishedDate  -> publishedOn   (live field name)
+            #   assetsAffected -> numOfImpactedAssets (live field name)
+            #   ProductName stays mapped from productName (legacy/aspirational; always null
+            #   in current live API which only exposes productIds[] array). Additive-only
+            #   schema rule: do not drop col; operators see ProductName=null until upstream
+            #   API restores scalar field.
             ProjectionMap = @{
-                CveId          = '$tostring:cveId'
+                CveId          = '$tostring:id'
                 Severity       = '$tostring:severity'
                 CvssV3         = '$todouble:cvssV3'
-                PublishedDate  = '$todatetime:publishedDate'
-                AssetCount     = '$toint:assetsAffected'
+                PublishedDate  = '$todatetime:publishedOn'
+                AssetCount     = '$toint:numOfImpactedAssets'
                 Description    = '$tostring:description'
                 ProductName    = '$tostring:productName'
             }
@@ -1233,13 +1247,19 @@ AttackPathsV2
             Purpose = 'Software product inventory — installed software across tenant with vendor + vulnerability counts'
             Availability = 'live'
             UnwrapProperty = 'results'
-            IdProperty = @('productId', 'ProductId', 'id', 'Id')
+            IdProperty = @('id', 'Id', 'productId', 'ProductId')
+            # 2026-05-09 ProjectionMap drift fix per live fixture diff (Phase B audit):
+            #   productId          -> id                              (live field name)
+            #   productName        -> name                            (live field name)
+            #   assetsCount        -> assetsStatistics.totalAssetCount (live nested path)
+            #   vulnerabilityCount -> discoveredVulnerabilities        (live field name)
+            #   WeaknessCount kept (always-null in current API; additive-only schema rule).
             ProjectionMap = @{
-                ProductId           = '$tostring:productId'
-                ProductName         = '$tostring:productName'
+                ProductId           = '$tostring:id'
+                ProductName         = '$tostring:name'
                 Vendor              = '$tostring:vendor'
-                AssetCount          = '$toint:assetsCount'
-                VulnerabilityCount  = '$toint:vulnerabilityCount'
+                AssetCount          = '$toint:assetsStatistics.totalAssetCount'
+                VulnerabilityCount  = '$toint:discoveredVulnerabilities'
                 WeaknessCount       = '$toint:weaknessCount'
             }
         }

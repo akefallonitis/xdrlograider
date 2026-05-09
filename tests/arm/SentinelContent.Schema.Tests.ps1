@@ -134,14 +134,14 @@ Describe 'Analytic rules YAML schema compliance' {
         }
     }
 
-    It 'compiled sentinelContent.json has 34 per-content metadata back-links to the XdrLogRaider Solution' {
-        # One metadata resource per content item — 14 alertRules, 9 hunting
-        # savedSearches, 7 workbooks (incl. MDE_ActionCenter for Action Center +
-        # Device Timeline + Machine Actions surfaces), 4 parser savedSearches
-        # (one per cadence tier with snapshot semantics; the fast tier carries
-        # events not snapshots so has no parser) = 34. Without these
-        # back-links, deployed content shows as "not from a solution" in
-        # Sentinel UI even though the Solution package exists.
+    It 'compiled sentinelContent.json has 45 per-content metadata back-links to the XdrLogRaider Solution' {
+        # One metadata resource per content item — 21 alertRules (14 detection +
+        # 7 XdrOps), 12 hunting savedSearches, 8 workbooks (incl. ConnectorHealth +
+        # MDE_ActionCenter), 4 parser savedSearches (one per cadence tier with
+        # snapshot semantics; the ActionCenter tier carries events not snapshots
+        # so has no parser) = 45. Without these back-links, deployed content
+        # shows as "not from a solution" in Sentinel UI even though the Solution
+        # package exists.
         $compiledPath = Join-Path $script:RepoRoot 'deploy' 'compiled' 'sentinelContent.json'
         $compiled = Get-Content $compiledPath -Raw | ConvertFrom-Json
         $metadata = @($compiled.resources | Where-Object {
@@ -149,12 +149,12 @@ Describe 'Analytic rules YAML schema compliance' {
         })
         # v0.1.0 GA Phase 5.12: 6 ops analytic rules (XdrOps-* + RowVolumeSpike) + 1 ConnectorHealth workbook
         # Section R++++++ Phase 1 S (2026-05-07): added 3 hunting queries for new streams
-        # (Machines + SecurityPolicies + TVM cross-stream)
-        # Total metadata back-links: 20 AnalyticsRule + 12 HuntingQuery + 8 Workbook + 4 Parser = 44
-        @($metadata).Count | Should -Be 44 -Because 'v0.1.0 GA Phase 5.12 + R++++++ Phase 1 S: 20 AnalyticsRule (14 detection + 6 XdrOps-*) + 12 HuntingQuery (9 + 3 new for Phase 1 streams) + 8 Workbook (7 + ConnectorHealth) + 4 Parser metadata back-links'
+        # AMEND-9 Phase A.3 (2026-05-09): added XdrOps-StreamWentDry rule (per-stream stale alert)
+        # Total metadata back-links: 21 AnalyticsRule + 12 HuntingQuery + 8 Workbook + 4 Parser = 45
+        @($metadata).Count | Should -Be 45 -Because 'v0.1.0 GA + AMEND-9 A.3: 21 AnalyticsRule (14 detection + 7 XdrOps-* incl StreamWentDry) + 12 HuntingQuery + 8 Workbook + 4 Parser metadata back-links'
 
         $byKind = $metadata | Group-Object { $_.properties.kind }
-        ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 20  # 14 detection + 6 XdrOps-* (v0.1.0 GA Phase 5.12 added RowVolumeSpike)
+        ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 21  # 14 detection + 7 XdrOps-* (AMEND-9 A.3 added StreamWentDry)
         ($byKind | Where-Object Name -eq 'HuntingQuery').Count  | Should -Be 12  # 9 + 3 new (R++++++ Phase 1 S: Machines + SecurityPolicies + TVM)
         ($byKind | Where-Object Name -eq 'Workbook').Count      | Should -Be 8   # 7 + ConnectorHealth (Phase F.1)
         ($byKind | Where-Object Name -eq 'Parser').Count        | Should -Be 4
@@ -260,8 +260,8 @@ Describe 'Hunting queries YAML schema compliance' {
         $script:HuntFiles = Get-ChildItem -Path $script:HuntingDir -Filter '*.yaml'
     }
 
-    It 'ships at least 9 hunting query YAML files' {
-        @($script:HuntFiles).Count | Should -BeGreaterOrEqual 9
+    It 'ships at least 12 hunting query YAML files' {
+        @($script:HuntFiles).Count | Should -BeGreaterOrEqual 12
     }
 
     It 'every hunting query has id, name, description, query, tactics, author, version, tags' {

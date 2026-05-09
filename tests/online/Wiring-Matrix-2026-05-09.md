@@ -1,8 +1,8 @@
 # XdrLogRaider Wiring Matrix
 
-Generated: 2026-05-09 10:55:23 +01:00
+Generated: 2026-05-09 15:45:54 +01:00
 
-Total streams: 72  |  Full edges: 64  |  Missing/warning: 8
+Total streams: 64  |  Full edges: 64  |  Missing/warning: 0
 
 ## Edge legend
 
@@ -65,18 +65,10 @@ Total streams: 72  |  Full edges: 64  |  Missing/warning: 8
 | MDE_RecommendationActions_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityOnboarding_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityServiceAccounts_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_VulnerabilityAdvisories_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_VulnerabilityAssetCountByExposure_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_VulnerabilityExtensions_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_VulnerabilitySummary_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_VulnerabilityCertificates_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_IdentityLateralMovementPaths_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_IdentityDormantAccounts_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_DCCoverage_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityAlertThresholds_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_RemediationAccounts_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ActionCenter_CL | ActionCenter | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| MDE_PendingActions_CL | ActionCenter | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ThreatAnalytics_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_UserPreferences_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_MtoTenants_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
@@ -97,30 +89,3 @@ Total streams: 72  |  Full edges: 64  |  Missing/warning: 8
 | MDE_XspmConnectors_CL | XspmGraph | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ThreatAnalyticsEnriched_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_ThreatAnalyticsTopThreats_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-
-## Issues (all warnings + errors)
-
-### MDE_VulnerabilityAdvisories_CL [Tier=Inventory Avail=live]
-  - E8: WARNING no Sentinel content references MDE_VulnerabilityAdvisories_CL (incremental — non-blocking)
-
-### MDE_VulnerabilityAssetCountByExposure_CL [Tier=Inventory Avail=live]
-  - E8: WARNING no Sentinel content references MDE_VulnerabilityAssetCountByExposure_CL (incremental — non-blocking)
-
-### MDE_VulnerabilityExtensions_CL [Tier=Inventory Avail=live]
-  - E8: WARNING no Sentinel content references MDE_VulnerabilityExtensions_CL (incremental — non-blocking)
-
-### MDE_VulnerabilitySummary_CL [Tier=Inventory Avail=live]
-  - E8: WARNING no Sentinel content references MDE_VulnerabilitySummary_CL (incremental — non-blocking)
-
-### MDE_VulnerabilityCertificates_CL [Tier=Inventory Avail=live]
-  - E8: WARNING no Sentinel content references MDE_VulnerabilityCertificates_CL (incremental — non-blocking)
-
-### MDE_IdentityLateralMovementPaths_CL [Tier=XspmGraph Avail=live]
-  - E8: WARNING no Sentinel content references MDE_IdentityLateralMovementPaths_CL (incremental — non-blocking)
-
-### MDE_IdentityDormantAccounts_CL [Tier=Configuration Avail=live]
-  - E8: WARNING no Sentinel content references MDE_IdentityDormantAccounts_CL (incremental — non-blocking)
-
-### MDE_PendingActions_CL [Tier=ActionCenter Avail=live]
-  - E8: WARNING no Sentinel content references MDE_PendingActions_CL (incremental — non-blocking)
-
