@@ -1327,6 +1327,44 @@ AttackPathsV2
         }
 
         # ----------------------------------------------------------------------
+        # Phase 2 batch 8 (Plan R++++++++++ Tier A 2026-05-09): MDE_VulnerabilityAdvisories_CL
+        # — TVM security advisories feed relevant to detected software/vulns.
+        # Per nodoc vulnerability_management.yml VulnerabilityManagement.ListAdvisories.
+        # Paginated GET (PaginatedListResponse + data: [advisory items]).
+        # TvmPremium license required.
+        # Operator value: SOC awareness of new vendor advisories affecting fleet
+        # (proactive patch prioritization vs reactive CVE scanning).
+        # ----------------------------------------------------------------------
+        @{
+            Stream = 'MDE_VulnerabilityAdvisories_CL'
+            Path = '/apiproxy/mtp/tvm/analytics/advisories?pageIndex=0&pageSize=200'
+            Tier = 'Inventory'
+            UnwrapProperty = 'data'
+            IdProperty = @('advisoryId', 'Id', 'id')
+            Category = 'Vulnerability Management (TVM)'
+            CategoryId = 3
+            Purpose = 'TVM security advisories feed - SOC awareness of new vendor advisories for proactive patch prioritization'
+            Availability = 'live'
+            RequiresLicense    = @('TvmPremium')
+            TenantContextProbe = 'IsMdatpActive'
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50
+            }
+            ProjectionMap = @{
+                AdvisoryId           = '$tostring:advisoryId'
+                Title                = '$tostring:title'
+                Severity             = '$tostring:severity'
+                Vendor               = '$tostring:vendor'
+                Product              = '$tostring:product'
+                PublishedDate        = '$todatetime:publishedDate'
+                AffectedDevicesCount = '$toint:affectedDevicesCount'
+                Url                  = '$tostring:url'
+            }
+        }
+
+        # ----------------------------------------------------------------------
         # Phase 2 batch 7 (Plan R++++++++++ Tier A 2026-05-09): MDE_VulnerabilityAssetCountByExposure_CL
         # — TVM device distribution by exposure level (Low/Medium/High/Critical).
         # Per nodoc vulnerability_management.yml VulnerabilityManagement.GetAssetCountByExposureLevel.

@@ -1,8 +1,8 @@
 # XdrLogRaider Wiring Matrix
 
-Generated: 2026-05-09 06:56:49 +01:00
+Generated: 2026-05-09 07:42:54 +01:00
 
-Total streams: 70  |  Full edges: 64  |  Missing/warning: 6
+Total streams: 71  |  Full edges: 64  |  Missing/warning: 7
 
 ## Edge legend
 
@@ -65,6 +65,7 @@ Total streams: 70  |  Full edges: 64  |  Missing/warning: 6
 | MDE_RecommendationActions_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityOnboarding_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_IdentityServiceAccounts_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| MDE_VulnerabilityAssetCountByExposure_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_VulnerabilityExtensions_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_VulnerabilitySummary_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | MDE_VulnerabilityCertificates_CL | Inventory | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
@@ -97,6 +98,9 @@ Total streams: 70  |  Full edges: 64  |  Missing/warning: 6
 | MDE_ThreatAnalyticsTopThreats_CL | Configuration | live | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 
 ## Issues (all warnings + errors)
+
+### MDE_VulnerabilityAssetCountByExposure_CL [Tier=Inventory Avail=live]
+  - E8: WARNING no Sentinel content references MDE_VulnerabilityAssetCountByExposure_CL (incremental — non-blocking)
 
 ### MDE_VulnerabilityExtensions_CL [Tier=Inventory Avail=live]
   - E8: WARNING no Sentinel content references MDE_VulnerabilityExtensions_CL (incremental — non-blocking)

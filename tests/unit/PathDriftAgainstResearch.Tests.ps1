@@ -100,6 +100,7 @@ BeforeAll {
         '/apiproxy/mtp/tvm/analytics/vulnerabilities/summary'                                              = 'nodoc:vulnerability_management.yml VulnerabilityManagement.GetSummary operationId (Phase 2 batch 5 2026-05-09 R++++++++++; TvmPremium-licensed; SOC at-a-glance vulnerability posture; lab returned 400 expected)'
         '/apiproxy/mtp/tvm/analytics/extensions?pageIndex=0&pageSize=200'                                  = 'nodoc:vulnerability_management.yml VulnerabilityManagement.ListExtensions operationId (Phase 2 batch 6 2026-05-09 R++++++++++; TvmPremium-licensed; paginated; shadow-IT browser extension inventory)'
         '/apiproxy/mtp/tvm/analytics/assets/countByExposureLevel'                                          = 'nodoc:vulnerability_management.yml VulnerabilityManagement.GetAssetCountByExposureLevel operationId (Phase 2 batch 7 2026-05-09 R++++++++++; TvmPremium-licensed; SOC dashboard fleet exposure tier breakdown)'
+        '/apiproxy/mtp/tvm/analytics/advisories?pageIndex=0&pageSize=200'                                  = 'nodoc:vulnerability_management.yml VulnerabilityManagement.ListAdvisories operationId (Phase 2 batch 8 2026-05-09 R++++++++++; TvmPremium-licensed; paginated; SOC awareness of new vendor advisories)'
         # F1 2026-05-08: MachineActions REMOVED (overlapped with ActionCenter canonical endpoint)
 
         # ---- P7 ----

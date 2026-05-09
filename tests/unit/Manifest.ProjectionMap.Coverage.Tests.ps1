@@ -35,12 +35,14 @@ BeforeAll {
     $script:RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
     $script:ManifestPath = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'endpoints.manifest.psd1'
     $script:ClientPsd1   = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Client' 'Xdr.Defender.Client.psd1'
-    $script:CommonAuthPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
-    $script:DefAuthPsd1    = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
+    $script:CommonAuthPsd1     = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Auth' 'Xdr.Common.Auth.psd1'
+    $script:CommonManifestPsd1 = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Common.Manifest' 'Xdr.Common.Manifest.psd1'
+    $script:DefAuthPsd1        = Join-Path $script:RepoRoot 'src' 'Modules' 'Xdr.Defender.Auth' 'Xdr.Defender.Auth.psd1'
 
-    Import-Module $script:CommonAuthPsd1 -Force -ErrorAction Stop
-    Import-Module $script:DefAuthPsd1    -Force -ErrorAction Stop
-    Import-Module $script:ClientPsd1     -Force -ErrorAction Stop
+    Import-Module $script:CommonAuthPsd1     -Force -ErrorAction Stop
+    Import-Module $script:CommonManifestPsd1 -Force -ErrorAction Stop
+    Import-Module $script:DefAuthPsd1        -Force -ErrorAction Stop
+    Import-Module $script:ClientPsd1         -Force -ErrorAction Stop
 
     $script:Manifest = Get-XdrEndpointManifest -Portal Defender -Force
 
@@ -85,14 +87,14 @@ Describe 'Manifest.ProjectionMap.Populated' {
         }
     }
 
-    It 'all 70 non-deprecated streams have populated ProjectionMap (v0.1.0 GA F1 + Phase 2 batches 1-7: 71 - 1 deprecated = 70 live)' {
+    It 'all 71 non-deprecated streams have populated ProjectionMap (v0.1.0 GA F1 + Phase 2 batches 1-8: 72 - 1 deprecated = 71 live)' {
         $populated = 0
         foreach ($stream in $script:Manifest.Keys) {
             $entry = $script:Manifest[$stream]
             if ($entry.Availability -eq 'deprecated') { continue }
             if ($entry.ProjectionMap -and @($entry.ProjectionMap.Keys).Count -ge 3) { $populated++ }
         }
-        $populated | Should -Be 70 -Because 'every non-deprecated stream populates ProjectionMap for typed-column ingest (71 - 1 deprecated; Phase 2 batches 1-7 with AssetCountByExposure added 2026-05-09)'
+        $populated | Should -Be 71 -Because 'every non-deprecated stream populates ProjectionMap for typed-column ingest (72 - 1 deprecated; Phase 2 batches 1-8 with VulnerabilityAdvisories added 2026-05-09)'
     }
 }
 
