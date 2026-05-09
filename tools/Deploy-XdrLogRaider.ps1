@@ -159,7 +159,12 @@ $params = @{
 # To deliberately seed/rotate secrets, pass them explicitly:
 #   pwsh tools/Deploy-XdrLogRaider.ps1 -ServicePassword (Read-Host -AsSecureString)
 # OR run Initialize-XdrLogRaiderAuth.ps1 separately AFTER the template lands.
-$emptySecure = New-Object System.Security.SecureString  # 0-length
+# Empty SecureString does NOT serialize over Azure REST API (.NET serializer rejects 0-length).
+# Use sentinel string 'dummy-not-used-existing-kv-overrides' which mainTemplate.json's belt-and-
+# suspenders condition explicitly rejects (see CHANGELOG L21 BINDING) — KV secret resources
+# remain skipped, preserving operator-seeded values.
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Sentinel string explicitly rejected by ARM template condition; not a real secret.')]
+$emptySecure = ConvertTo-SecureString 'dummy-not-used-existing-kv-overrides' -AsPlainText -Force
 
 if ($SkipSecretSeeding -or $null -eq $ServicePassword) {
     $params['servicePassword'] = $emptySecure
