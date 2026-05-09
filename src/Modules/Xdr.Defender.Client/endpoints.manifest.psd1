@@ -1327,6 +1327,43 @@ AttackPathsV2
         }
 
         # ----------------------------------------------------------------------
+        # Phase 2 batch 6 (Plan R++++++++++ Tier A 2026-05-09): MDE_VulnerabilityExtensions_CL
+        # — TVM browser extension inventory across endpoint devices (shadow-IT detection).
+        # Per nodoc vulnerability_management.yml VulnerabilityManagement.ListExtensions.
+        # Paginated GET (PaginatedListResponse + data: [extension items]).
+        # TvmPremium license required.
+        # Operator value: shadow-IT detection - which browser extensions across the fleet
+        # may pose data-exfiltration / supply-chain risk.
+        # ----------------------------------------------------------------------
+        @{
+            Stream = 'MDE_VulnerabilityExtensions_CL'
+            Path = '/apiproxy/mtp/tvm/analytics/extensions?pageIndex=0&pageSize=200'
+            Tier = 'Inventory'
+            UnwrapProperty = 'data'
+            IdProperty = @('extensionId', 'Id', 'id')
+            Category = 'Vulnerability Management (TVM)'
+            CategoryId = 3
+            Purpose = 'TVM browser extension inventory - shadow-IT detection across endpoint devices for data-exfiltration / supply-chain risk audit'
+            Availability = 'live'
+            RequiresLicense    = @('TvmPremium')
+            TenantContextProbe = 'IsMdatpActive'
+            Pagination = @{
+                Style    = 'pageIndex'
+                PageSize = 200
+                MaxPages = 50
+            }
+            ProjectionMap = @{
+                ExtensionId          = '$tostring:extensionId'
+                Name                 = '$tostring:name'
+                Version              = '$tostring:version'
+                Browser              = '$tostring:browser'
+                Publisher            = '$tostring:publisher'
+                AffectedDevicesCount = '$toint:affectedDevicesCount'
+                IsManaged            = '$tobool:isManaged'
+            }
+        }
+
+        # ----------------------------------------------------------------------
         # Phase 2 batch 5 (Plan R++++++++++ Tier A 2026-05-09): MDE_VulnerabilitySummary_CL
         # — TVM aggregate severity/exposure counts across the organization.
         # Per nodoc vulnerability_management.yml VulnerabilityManagement.GetSummary.

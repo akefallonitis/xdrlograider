@@ -521,8 +521,9 @@ Describe 'DCR — Azure service-quota gates' {
         # Phase 2 batch 3 (2026-05-09): MDE_IdentityLateralMovementPaths_CL added to identity DCR (7 -> 8)
         # Phase 2 batch 4 (2026-05-09): MDE_VulnerabilityCertificates_CL added to vuln-mgmt DCR (5 -> 6)
         # Phase 2 batch 5 (2026-05-09): MDE_VulnerabilitySummary_CL added to vuln-mgmt DCR (6 -> 7)
-        $sortedCounts | Should -Be @(1, 2, 2, 3, 3, 3, 6, 7, 7, 8, 8, 10, 10) -Because 'per-category DCR distribution post-F1 + Phase 2 batches 1-5'
-        @($allStreams | Sort-Object -Unique).Count | Should -Be 70 -Because 'every declared stream must appear in exactly one dataFlow (69 data + 1 ops = 70; Phase 2 batches 1-5)'
+        # Phase 2 batch 6 (2026-05-09): MDE_VulnerabilityExtensions_CL added to vuln-mgmt DCR (7 -> 8)
+        $sortedCounts | Should -Be @(1, 2, 2, 3, 3, 3, 6, 7, 8, 8, 8, 10, 10) -Because 'per-category DCR distribution post-F1 + Phase 2 batches 1-6 (config-alerts:6 / config-platform:8 / endpoint-config:10 / endpoint-device:3 / exposure-attack:10 / exposure-posture:7 / identity:8 / multitenant:3 / streaming-api:2 / threat-analytics:3 / vuln-mgmt:8 / actioncenter:2 / ops:1)'
+        @($allStreams | Sort-Object -Unique).Count | Should -Be 71 -Because 'every declared stream must appear in exactly one dataFlow (70 data + 1 ops = 71; Phase 2 batches 1-6)'
     }
 
     It 'no dataFlow combines multiple streams with a transformKql (Microsoft DCR rule)' {

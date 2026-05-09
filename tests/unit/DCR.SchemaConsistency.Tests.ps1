@@ -101,12 +101,12 @@ Describe 'DCR stream declarations — invariants' {
             -Because 'auth chain diagnostics moved from MDE_AuthTestResult_CL to App Insights customEvents (AuthChain.* event names)'
     }
 
-    It 'DCR declares exactly 70 streams (69 data + 1 system XdrConnectorHealth_CL)' {
+    It 'DCR declares exactly 71 streams (70 data + 1 system XdrConnectorHealth_CL)' {
         # v0.1.0 GA F1 (2026-05-08): MachineActions removed. 45 baseline + 13 Tier A + 6 Phase 1 (B+G7+G8) + 1 ops = 65
         # Phase 2 batch 1 (2026-05-09): MDE_PendingActions_CL added (Action Center) - 65 -> 66
         # Phase 2 batch 2 (2026-05-09): MDE_IdentityDormantAccounts_CL added (Identity Protection MDI) - 66 -> 67
         # Phase 2 batch 3 (2026-05-09): MDE_IdentityLateralMovementPaths_CL added (Identity Protection XSPM-class) - 67 -> 68
-        $script:DcrStreamDecls.Count | Should -Be 70
+        $script:DcrStreamDecls.Count | Should -Be 71
     }
 }
 
