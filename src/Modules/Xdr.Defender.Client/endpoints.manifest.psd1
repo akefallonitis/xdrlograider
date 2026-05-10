@@ -710,6 +710,19 @@
                 IsItpActive      = '$tobool:IsItpActive'
                 IsMdcActive      = '$tobool:IsMdcActive'
                 IsAadIpActive    = '$tobool:IsAadIpActive'
+                # HOT-FIX 11b (2026-05-10): operator-actionable tenant state cols.
+                AccountMode      = '$toint:AccountMode'
+                IsSuspended      = '$tobool:IsSuspended'
+                IsDeleted        = '$tobool:IsDeleted'
+                IsMdatpLicenseExpired = '$tobool:IsMdatpLicenseExpired'
+                IsMtpEligible    = '$tobool:IsMtpEligible'
+                HasMachineGroups = '$tobool:HasMachineGroups'
+                IsMapgActive     = '$tobool:IsMapgActive'
+                IsDlpActive      = '$tobool:IsDlpActive'
+                IsIrmActive      = '$tobool:IsIrmActive'
+                ActiveMtpWorkloads = '$tostring:ActiveMtpWorkloads'
+                # Preserve full Features tree for forensic capability flag lookup
+                Features         = '$json:Features'
             }
         }
 
@@ -832,6 +845,14 @@
                 RuleCount             = '$toint:GroupRules.length'
                 # Section R++++++ O1 expansion (2026-05-07): full rule bodies for RBAC drift queries.
                 GroupRules            = '$json:GroupRules'
+                # HOT-FIX 11b (2026-05-10): RBAC drift cols.
+                AadGroupNames         = '$tostring:AadGroupNames'
+                AssignedRoleIds       = '$tostring:AssignedRoleIds'
+                CreatedByUpn          = '$tostring:CreatedByUpn'
+                LastUpdatedByUpn      = '$tostring:LastUpdatedByUpn'
+                # Architecture J canonical entity aliases for cross-table joins
+                MachineGroupId        = '$tostring:MachineGroupId'
+                MachineGroupName      = '$tostring:Name'
             }
         }
         # pre-v0.1.0.9 (B3): nodoc-cited path; verified live 2026-04-28.
@@ -1327,9 +1348,23 @@ AttackPathsV2
                 Title             = '$tostring:title'
                 Status            = '$tostring:status'
                 Priority          = '$tostring:priority'
-                AssetCount         = '$toint:targetAssets'
+                AssetCount        = '$toint:targetAssets'
                 CreatedDate       = '$todatetime:createdOn'
                 DueDate           = '$todatetime:dueOn'
+                # HOT-FIX 11b (2026-05-10): operator-actionable remediation cols
+                Description       = '$tostring:description'
+                Category          = '$tostring:category'
+                RemediationType   = '$tostring:remediationType'
+                ProductId         = '$tostring:productId'
+                ProductName       = '$tostring:productName'
+                VendorId          = '$tostring:vendorId'
+                CompletionRate    = '$todouble:completionRate'
+                AssignedToEmail   = '$tostring:assignedToEmail'
+                NotesCount        = '$toint:notesCount'
+                AssociatedCveIds  = '$tostring:associatedCveIds'
+                # Architecture J canonical entity aliases
+                AccountName       = '$tostring:assignedToEmail'
+                CveId             = '$tostring:associatedCveIds'
             }
         }
 
@@ -1380,6 +1415,18 @@ AttackPathsV2
                 IsActive     = '$tobool:IsActive'
                 LastSeenUtc  = '$todatetime:LastSeen'
                 Risk         = '$tostring:RiskLevel'
+                # HOT-FIX 11b (2026-05-10): MDI service account drilldown cols.
+                AccountObjectId   = '$tostring:ObjectGuid'
+                DisplayName       = '$tostring:DisplayName'
+                ServicePrincipalNames = '$tostring:ServicePrincipalNames'
+                IsPrivileged      = '$tobool:IsPrivileged'
+                IsHoneytoken      = '$tobool:IsHoneytoken'
+                AlertCount        = '$toint:AlertCount'
+                FirstSeenUtc      = '$todatetime:FirstSeen'
+                ClassificationLabel = '$tostring:ClassificationLabel'
+                # Architecture J canonical entity aliases
+                AccountUPNSuffix  = '$tostring:Upn'
+                AccountName       = '$tostring:DisplayName'
             }
         }
 
