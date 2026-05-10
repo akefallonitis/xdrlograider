@@ -37,8 +37,8 @@ Describe 'Sentinel analytic rules — ship-disabled doctrine (iter 13.9 S2)' {
         )
     }
 
-    It 'every rule yaml has at least 14 rules in the directory (drift detector)' {
+    It 'every rule yaml has at least 21 rules in the directory (drift detector)' {
         $files = @(Get-ChildItem -Path $script:RulesDir -Filter '*.yaml' -File)
-        $files.Count | Should -BeGreaterOrEqual 14 -Because 'baseline rule count must not regress'
+        $files.Count | Should -BeGreaterOrEqual 21 -Because 'baseline rule count must not regress (14 detection + 7 XdrOps = 21)'
     }
 }

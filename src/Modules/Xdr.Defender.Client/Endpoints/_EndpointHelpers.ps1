@@ -82,7 +82,7 @@ function ConvertTo-MDEIngestRow {
         # projection-context object that wraps the entity + exposes EntityId
         # so JSONPath hints like `$tostring:EntityId` resolve. The original
         # $Raw is still used for RawJson serialization above.
-        # pre-v0.1.0.4 defense: edge-case entities (empty pscustomobject, hashtable
+        # Hot-Fix 12 defense: edge-case entities (empty pscustomobject, hashtable
         # with one null-valued property, etc) must NOT crash the cloner under
         # Set-StrictMode -Version Latest. Wrap each access in try/catch +
         # explicit null guards.
