@@ -1723,7 +1723,15 @@
                     {
                       "name": "PolicyId",
                       "type": "string"
-                    }
+                    },
+                    {"name": "LastStateUpdate", "type": "datetime"},
+                    {"name": "ImplementationStatus", "type": "string"},
+                    {"name": "ActionUrl", "type": "string"},
+                    {"name": "RemediationImpact", "type": "string"},
+                    {"name": "UserAffected", "type": "string"},
+                    {"name": "CurrentState", "type": "string"},
+                    {"name": "MssControlState", "type": "string"},
+                    {"name": "Url", "type": "string"}
                   ]
                 }
               }
@@ -1890,15 +1898,7 @@
                     {
                       "name": "ReportPeriod",
                       "type": "string"
-                    },
-                    {"name": "LastStateUpdate", "type": "datetime"},
-                    {"name": "ImplementationStatus", "type": "string"},
-                    {"name": "ActionUrl", "type": "string"},
-                    {"name": "RemediationImpact", "type": "string"},
-                    {"name": "UserAffected", "type": "string"},
-                    {"name": "CurrentState", "type": "string"},
-                    {"name": "MssControlState", "type": "string"},
-                    {"name": "Url", "type": "string"}
+                    }
                   ]
                 }
               }
