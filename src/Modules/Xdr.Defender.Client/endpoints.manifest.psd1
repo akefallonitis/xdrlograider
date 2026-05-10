@@ -461,30 +461,34 @@
             # Live capture shows actual shape is `{ category: { antivirus:[],
             # edr:[], firewall:[], asr:[], diskEncryption:[] }, technologies:
             # ['mdm','mdm,microsoftSense'] }` (operator-side filter FACETS,
-            # NOT policy bodies). Existing ProjectionMap cols (FilterName,
-            # FilterValue, Platform, Scope, IsEnabled) DO NOT MAP to this
-            # shape — they project to null. ProjectionResolution test fails
-            # for this stream. Proper fix requires coordinated changes:
-            #   (a) Update ProjectionMap to match actual shape
-            #   (b) Update DCR streamDecl input cols in mainTemplate.json
-            #   (c) Update Defender_EndpointConfiguration_CL workspace table
-            #       cols + transformKql in mainTemplate.json
-            # Tracked as O1 work item in plan R++++++ (5-stream ProjectionMap
-            # canonical rewrites). Actual policy bodies (ASR rules + AV
-            # settings + EDR config) are Phase 1 G7 MDE_SecurityPolicies_CL.
+            # NOT policy bodies). Operators wanting actual policy bodies
+            # should query MDE_SecurityPolicies_CL (G7).
+            #
+            # HOT-FIX 10 (2026-05-10): ProjectionMap aligned to filter facet
+            # category shape (per-category counts of filter values). Each row
+            # represents one category facet with category name + value count
+            # + technologies. Singleton response shape (per platform) so
+            # SingleObjectAsRow=true with synthetic id 'av-filter-{platform}'.
             Path = '/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters?platform=Windows'
             Tier = 'Inventory'
             Category = 'Endpoint Configuration'
             CategoryId = 2  # nodoc-authoritative (Phase D.1)
-            Purpose = 'MEM-bridged antivirus policy filter facets (Intune + Configuration Manager scope)'
+            Purpose = 'MEM-bridged endpoint security policy filter FACETS (per-category counts: antivirus/edr/firewall/asr/diskEncryption); operators query MDE_SecurityPolicies_CL for actual policy bodies'
             Availability = 'live'
-            # Fixture: tenant-gated (no live data). Convention: AV policy filter facets.
+            SingleObjectAsRow = $true
+            SyntheticEntityId = 'av-filter-windows'
             ProjectionMap = @{
-                FilterName    = '$tostring:Name'
-                FilterValue   = '$tostring:Value'
-                Platform      = '$tostring:Platform'
-                Scope         = '$tostring:Scope'
-                IsEnabled     = '$tobool:IsEnabled'
+                AntivirusFilterCount        = '$toint:category.antivirus.length'
+                EdrFilterCount              = '$toint:category.edr.length'
+                FirewallFilterCount         = '$toint:category.firewall.length'
+                AsrFilterCount              = '$toint:category.asr.length'
+                DiskEncryptionFilterCount   = '$toint:category.diskEncryption.length'
+                AccountProtectionFilterCount= '$toint:category.accountProtection.length'
+                WebProtectionFilterCount    = '$toint:category.webProtection.length'
+                Technologies                = '$tostring:technologies'
+                Platform                    = 'Windows'
+                # Preserve full facet tree for forensic drilldown
+                CategoryFilters             = '$json:category'
             }
         }
 
@@ -516,18 +520,35 @@
             Availability = 'live'
             # nodoc canonical: endpoint_configuration.yml POST /securityPolicies
             # body { platform: 'Windows'|'Linux'|'macOS'|'iOS' }
-            # Response wraps an array of policy objects. Best-guess shape:
-            # { policies: [{ id, name, type, settings, ruleCount, lastModified }] }
+            # Response is an Intune endpoint security policy collection.
+            # HOT-FIX 9 (2026-05-10): ProjectionMap rewritten to match Intune
+            # endpoint security policy schema (deviceManagement/configurationPolicies).
+            # PRIOR: speculative cols (name/type/status/ruleCount) projected to NULL
+            # because actual response uses Intune-canonical names (displayName/
+            # templateReference/settingCount). Operators saw 0% typed col coverage.
+            # NEW: aligned to Intune schema covering ASR rules + AV + Account
+            # Protection + Disk Encryption + EDR + Firewall + Web Protection
+            # (templateFamily col distinguishes the policy category).
             UnwrapProperty = 'policies'
             IdProperty = @('id', 'Id', 'policyId')
             ProjectionMap = @{
-                PolicyId       = '$tostring:id'
-                PolicyName     = '$tostring:name'
-                PolicyType     = '$tostring:type'
-                Platform       = '$tostring:platform'
-                Status         = '$tostring:status'
-                RuleCount      = '$toint:ruleCount'
-                LastModified   = '$todatetime:lastModified'
+                PolicyId             = '$tostring:id'
+                PolicyName           = '$tostring:displayName'
+                PolicyDescription    = '$tostring:description'
+                Platform             = '$tostring:platforms'
+                Technologies         = '$tostring:technologies'
+                TemplateId           = '$tostring:templateReference.templateId'
+                TemplateName         = '$tostring:templateReference.templateDisplayName'
+                TemplateVersion      = '$tostring:templateReference.templateDisplayVersion'
+                TemplateFamily       = '$tostring:templateReference.templateFamily'
+                SettingCount         = '$toint:settingCount'
+                IsAssigned           = '$tobool:isAssigned'
+                CreationSource       = '$tostring:creationSource'
+                CreatedDateTime      = '$todatetime:createdDateTime'
+                LastModifiedDateTime = '$todatetime:lastModifiedDateTime'
+                RoleScopeTagIds      = '$tostring:roleScopeTagIds'
+                AssignmentCount      = '$toint:assignmentCount'
+                Settings             = '$json:settings'
             }
         }
 
@@ -900,6 +921,9 @@
             # { results: [{ id, name, description, targetValue, metricIds[], activeMetricIds[],
             #   recommendationIds[], programs[], isFavorite, dataHistory }] }
             UnwrapProperty = 'results'
+            # HOT-FIX 12 (2026-05-10): IdProperty added (was missing → idx-N synthetic
+            # EntityId broke drift-join queries). XSPM initiatives have a stable `id` field.
+            IdProperty = @('id', 'Id', 'initiativeId')
             ProjectionMap = @{
                 InitiativeId      = '$tostring:id'
                 Name              = '$tostring:name'
@@ -922,6 +946,9 @@
             # Live response shape (captured 2026-05-03 via XDR_DEBUG_RESPONSE_CAPTURE):
             # { results: [], recordsCount: 0 } — empty when no recent posture updates.
             UnwrapProperty = 'results'
+            # HOT-FIX 12 (2026-05-10): IdProperty added (was missing → idx-N synthetic
+            # EntityId broke drift-join queries). XSPM snapshots have a stable `id` field.
+            IdProperty = @('id', 'Id', 'snapshotId', 'metricId')
             ProjectionMap = @{
                 SnapshotId    = '$tostring:id'
                 MetricId      = '$tostring:metricId'
@@ -968,6 +995,16 @@
                 LastStateChange    = '$todatetime:lastStateChange'
                 MssScoreImpact     = '$toint:mssScoreImpact'
                 PointAchieved      = '$toint:pointAchieved'
+                # HOT-FIX 11 (2026-05-10): Architecture J ROI expansion — operator-actionable cols.
+                LastStateUpdate    = '$todatetime:lastStateUpdate'
+                ImplementationStatus = '$tostring:implementationStatus'
+                ActionUrl          = '$tostring:actionUrl'
+                RemediationImpact  = '$tostring:remediationImpact'
+                UserAffected       = '$tostring:userAffected'
+                CurrentState       = '$tostring:currentState'
+                MssControlState    = '$tostring:mssControlState'
+                # Architecture J: Url canonical Sentinel entity for cross-table correlation
+                Url                = '$tostring:actionUrl'
             }
         }
 
@@ -1901,16 +1938,91 @@ AttackPathsV2
             # IdProperty per nodoc machine identifier convention.
             UnwrapProperty = 'items'
             IdProperty = @('machineId', 'MachineId', 'id', 'Id')
+            # HOT-FIX 11 (2026-05-10): Architecture J ROI expansion. Live response
+            # carries ~50 fields; prior ProjectionMap captured only 9. Expanded to
+            # 30+ high-value cols + canonical Sentinel Entity Type cols (HostMdatpId,
+            # HostFullName, HostAadId, IpAddress, MachineGroupId/Name) for cross-table
+            # correlation. Rich device drilldown enables operator KQL like
+            # `Defender_VulnerabilityManagement_CL | join Defender_EndpointDeviceManagement_CL on HostMdatpId | where ExposureLevel == 'High'`.
             ProjectionMap = @{
-                MachineId        = '$tostring:machineId'
-                ComputerDnsName  = '$tostring:computerDnsName'
-                OsPlatform       = '$tostring:osPlatform'
-                OsVersion        = '$tostring:osVersion'
-                HealthStatus     = '$tostring:healthStatus'
-                RiskScore        = '$tostring:riskScore'
-                ExposureLevel    = '$tostring:exposureLevel'
-                LastSeen         = '$todatetime:lastSeen'
-                FirstSeen        = '$todatetime:firstSeen'
+                # Core device identity
+                MachineId            = '$tostring:machineId'
+                ComputerDnsName      = '$tostring:computerDnsName'
+                ComputerNetBIOSName  = '$tostring:computerNetBIOSName'
+                MachineGuid          = '$tostring:machineGuid'
+                AadDeviceId          = '$tostring:aadDeviceId'
+                SenseMachineId       = '$tostring:senseMachineId'
+                WcdMachineId         = '$tostring:wcdMachineId'
+                # OS + platform
+                OsPlatform           = '$tostring:osPlatform'
+                OsVersion            = '$tostring:osVersion'
+                OsVersionFriendlyName= '$tostring:osVersionFriendlyName'
+                OsBuild              = '$toint:osBuild'
+                # Risk + exposure scoring
+                HealthStatus         = '$tostring:healthStatus'
+                RiskScore            = '$tostring:riskScore'
+                ExposureLevel        = '$tostring:exposureLevel'
+                ExposureScore        = '$tostring:exposureScore'
+                SecurityScore        = '$tostring:securityScore'
+                CriticalityLevel     = '$tostring:criticalityLevel'
+                AssetValue           = '$tostring:assetValue'
+                DynamicAssetValue    = '$tostring:dynamicAssetValue'
+                # Vulnerability posture
+                VulnerabilitySeverityLevel = '$tostring:vulnerabilitySeverityLevel'
+                VulnerabilityAgeLevel      = '$tostring:vulnerabilityAgeLevel'
+                ExploitLevel               = '$tostring:exploitLevel'
+                # Network identity (canonical Sentinel IP entity)
+                LastIpAddress        = '$tostring:lastIpAddress'
+                LastExternalIpAddress= '$tostring:lastExternalIpAddress'
+                LastIpV6Address      = '$tostring:lastIpV6Address'
+                LastMacAddress       = '$tostring:lastMacAddress'
+                # Device classification
+                DeviceCategory       = '$tostring:deviceCategory'
+                DeviceType           = '$tostring:deviceType'
+                DeviceSubtype        = '$tostring:deviceSubtype'
+                # Time bounds
+                FirstSeen            = '$todatetime:firstSeen'
+                LastSeen             = '$todatetime:lastSeen'
+                # Domain + AAD join
+                Domain               = '$tostring:domain'
+                IsAadJoined          = '$tobool:isAadJoined'
+                # Management state
+                IsManagedByMdatp     = '$tobool:isManagedByMdatp'
+                ManagedBy            = '$tostring:managedBy'
+                ManagedByStatus      = '$tostring:managedByStatus'
+                OnboardingStatus     = '$tostring:onboardingStatus'
+                # Isolation + exclusion
+                IsolationState       = '$tostring:isolationState'
+                ExclusionState       = '$tostring:exclusionState'
+                IsExcluded           = '$tobool:isExcluded'
+                # Internet exposure
+                IsInternetFacing     = '$tobool:isInternetFacing'
+                InternetFacingReason = '$tostring:internetFacingReason'
+                # RBAC + grouping (canonical Sentinel MachineGroup entity)
+                RbacGroupId          = '$toint:rbacGroupId'
+                MachineGroup         = '$tostring:machineGroup'
+                MachineTags          = '$tostring:machineTags'
+                # Hardware
+                SystemManufacturer   = '$tostring:systemManufacturer'
+                SystemProductName    = '$tostring:systemProductName'
+                # Sensor metadata
+                SensorSite           = '$tostring:sensorSite'
+                SensorSiteDisplayName= '$tostring:sensorSiteDisplayName'
+                SensorType           = '$tostring:sensorType'
+                SensorZone           = '$tostring:sensorZone'
+                # Cloud resource attribution (canonical Sentinel AzureResource entity)
+                ResourceId           = '$tostring:cloudResourceDetails.ResourceId'
+                CloudPlatforms       = '$tostring:cloudResourceDetails.CloudPlatforms'
+                VmId                 = '$tostring:cloudResourceDetails.VmId'
+                SubscriptionId       = '$tostring:cloudResourceDetails.SubscriptionId'
+                # Architecture J canonical Sentinel Entity Type aliases
+                HostMdatpId          = '$tostring:machineId'
+                HostFullName         = '$tostring:computerDnsName'
+                HostAadId            = '$tostring:aadDeviceId'
+                HostOSFamily         = '$tostring:osPlatform'
+                IpAddress            = '$tostring:lastIpAddress'
+                MachineGroupId       = '$toint:rbacGroupId'
+                MachineGroupName     = '$tostring:machineGroup'
             }
         }
 
@@ -2297,6 +2409,20 @@ AttackPathsV2
                 ImpactedEntitiesCount  = '$json:ImpactedEntitiesCount'
                 AlertsCount            = '$json:AlertsCount'
                 IsTaVNext              = '$tobool:IsTaVNext'
+                # HOT-FIX 11 (2026-05-10): Architecture J ROI — flatten nested entity counts
+                # into typed cols so SOC analysts query directly without parse_json.
+                ImpactedDevicesCount   = '$toint:ImpactedEntitiesCount.ImpactedDevicesCount'
+                ImpactedMailboxesCount = '$toint:ImpactedEntitiesCount.ImpactedMailboxesCount'
+                ImpactedUsersCount     = '$toint:ImpactedEntitiesCount.ImpactedUsersCount'
+                ImpactedCloudAppsCount = '$toint:ImpactedEntitiesCount.ImpactedCloudAppsCount'
+                ImpactedCloudResourcesCount = '$toint:ImpactedEntitiesCount.ImpactedCloudResourcesCount'
+                ActiveAlertsCount      = '$toint:AlertsCount.ActiveAlertsCount'
+                ResolvedAlertsCount    = '$toint:AlertsCount.ResolvedAlertsCount'
+                UserStateOutbreakId    = '$tostring:UserState.OutbreakId'
+                UserStateLastVisitTime = '$todatetime:UserState.LastVisitTime'
+                UserStateIsFavorite    = '$tobool:UserState.IsFavorite'
+                ExposedDevices         = '$toint:ExposedDevices'
+                AllCvesAreNotSupported = '$tobool:AllCvesAreNotSupported'
             }
         }
         @{

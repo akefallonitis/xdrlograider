@@ -2676,17 +2676,17 @@
                     {
                       "metricName": "Rows ingested (last 7d)",
                       "legend": "Total rows landed",
-                      "baseQuery": "union Defender_ActionCenter_CL, Defender_ConfigurationAndSettings_CL, Defender_EndpointConfiguration_CL, Defender_EndpointDeviceManagement_CL, Defender_ExposureManagement_CL, Defender_IdentityProtection_CL, Defender_MultiTenantOperations_CL, Defender_StreamingApi_CL, Defender_ThreatAnalytics_CL, Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(7d) | summarize Rows=count() by bin(TimeGenerated, 1d)"
+                      "baseQuery": "union Defender_ActionCenter_CL, Defender_ConfigurationAndSettings_CL, Defender_EndpointConfiguration_CL, Defender_EndpointDeviceManagement_CL, Defender_ExposureManagement_CL, Defender_IdentityProtection_CL, Defender_MultiTenantOperations_CL, Defender_StreamingApi_CL, Defender_ThreatAnalytics_CL, Defender_VulnerabilityManagement_CL | where TimeGenerated > ago(7d) | summarize Rows=count()"
                     },
                     {
                       "metricName": "Streams succeeded (last 24h)",
                       "legend": "Streams Succeeded",
-                      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | where Tier != 'Heartbeat' | summarize StreamsSucceeded=max(StreamsSucceeded) by bin(TimeGenerated, 1h), Tier"
+                      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | where Tier != 'Heartbeat' | summarize StreamsSucceeded=max(StreamsSucceeded)"
                     },
                     {
                       "metricName": "Heartbeat (last 24h)",
                       "legend": "XdrLogRaider heartbeats",
-                      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | where Tier == 'Heartbeat' | summarize Heartbeats=count() by bin(TimeGenerated, 1h)"
+                      "baseQuery": "XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | where Tier == 'Heartbeat' | summarize Heartbeats=count()"
                     }
                   ],
                   "sampleQueries": [

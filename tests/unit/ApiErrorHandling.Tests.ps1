@@ -333,13 +333,18 @@ Describe 'API error handling — Send-ToLogAnalytics (retry + backoff)' {
         }
     }
 
-    It 'row >= MaxBatchBytes is skipped with a warning (not thrown)' {
+    It 'Hot-Fix 7 (2026-05-10): row >= MaxBatchBytes is TRUNCATED per-field (not skipped)' {
+        # PRIOR BEHAVIOUR: oversized rows were SKIPPED with a warning, causing silent data loss
+        # on streams like MDE_AssetRules_CL where individual rows hit 1.4MB (RuleDefinition+kqlQuery).
+        # NEW BEHAVIOUR: Compress-OversizedRow truncates the largest field(s) to 8KB each
+        # (with [TRUNCATED:N] prefix) and ingests the row instead.
         InModuleScope Xdr.Sentinel.Ingest {
             Mock Get-MonitorIngestionToken { 'fake-token' }
             Mock Start-Sleep { }
             Mock Invoke-WebRequest { @{ StatusCode = 204 } }
+            Mock Send-XdrAppInsightsCustomEvent { } -Verifiable
 
-            $bigRow  = [pscustomobject]@{ payload = 'x' * 2000000 }   # 2 MB
+            $bigRow  = [pscustomobject]@{ payload = 'x' * 2000000 }   # 2 MB → triggers truncation
             $tinyRow = [pscustomobject]@{ foo = 'bar' }
 
             $result = Send-ToLogAnalytics `
@@ -349,8 +354,26 @@ Describe 'API error handling — Send-ToLogAnalytics (retry + backoff)' {
                 -Rows @($bigRow, $tinyRow) `
                 -WarningVariable warnings 3>$null
 
-            $result.RowsSent | Should -Be 1 -Because 'big row was skipped, tiny row was sent'
-            ($warnings -join ' ') | Should -Match 'Row exceeds' -Because 'Warning must surface the oversize row'
+            $result.RowsSent | Should -Be 2 -Because 'big row is TRUNCATED+ingested, tiny row sent unchanged'
+            # Truncation event should have fired (per-field truncate telemetry)
+            Should -Invoke Send-XdrAppInsightsCustomEvent -ParameterFilter { $EventName -eq 'Ingest.RowTruncated' } -Times 1 -Exactly
+        }
+    }
+
+    It 'Hot-Fix 7 (2026-05-10): Compress-OversizedRow truncates largest field first' {
+        InModuleScope Xdr.Sentinel.Ingest {
+            $row = [pscustomobject]@{
+                SmallField    = 'x' * 100
+                MediumField   = 'y' * 5000
+                MassiveField  = 'z' * 1500000  # 1.5 MB
+                OtherField    = 42
+            }
+            $compressed = Compress-OversizedRow -Row $row -TargetBytes 900KB -FieldTruncBytes 8KB -StreamName 'Custom-MDE_Test_CL'
+            $compressed | Should -Not -BeNullOrEmpty
+            $compressed.MassiveField | Should -Match '^\[TRUNCATED:\d+\]'
+            $compressed.SmallField   | Should -Be ('x' * 100) -Because 'small fields preserved verbatim'
+            $compressed.OtherField   | Should -Be 42         -Because 'non-string fields preserved if not oversized'
+            ($compressed | ConvertTo-Json -Depth 20 -Compress).Length | Should -BeLessThan 900KB
         }
     }
 
