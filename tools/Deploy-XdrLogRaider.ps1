@@ -71,6 +71,14 @@ param(
     # already seeded via Initialize-XdrLogRaiderAuth.ps1.
     # USE THIS for any redeploy where secrets are already populated.
     [switch]   $SkipSecretSeeding,
+    # SP-friendly redeploy: skip the 15 role assignment resources (KV Secrets User
+    # + Storage Table Data Contributor + 13 MMP per DCR for FA SAMI). Required
+    # when the deploying principal is Contributor (not Owner) — Microsoft.Authorization
+    # /roleAssignments/write needs User Access Administrator. Role assignments
+    # already exist on initial Owner-deployed RG and are idempotent, so SP-driven
+    # incremental redeploys can safely skip them. Sets ARM parameter
+    # deployRoleAssignments=$false; ARM condition skips all 15 resources.
+    [switch]   $SkipRoleAssignments,
     # Manual override only. NEVER pass non-empty SecureStrings unless
     # you intend to overwrite KV secrets.
     [securestring] $ServicePassword,
@@ -146,6 +154,7 @@ $params = @{
     restrictPublicNetwork     = $false
     enableKeyVaultDiagnostics = $false
     githubRepo                = 'akefallonitis/xdrlograider'
+    deployRoleAssignments     = (-not $SkipRoleAssignments)
 }
 
 # CRITICAL ARCHITECTURE (post-incident 2026-05-07T17:05Z): the ARM template's
