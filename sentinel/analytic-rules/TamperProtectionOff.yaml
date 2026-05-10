@@ -1,4 +1,4 @@
-id: d7b8f0a1-2c45-4d6f-e9a1-5b4c7f2d0e05
+id: b717e5a0-a85f-4cb6-a5f0-659f56b78ae1
 name: MDE Tamper Protection disabled
 description: |
   Defender Tamper Protection disabled (`AdvancedFeatures.tamperProtection.Enabled` flipped to `false`). When ON, Tamper Protection prevents users (including admins via PowerShell/GPO) from disabling Defender, removing definitions, or modifying exclusions. Disabling = "anti-attacker" defense weakened; rarely justified outside narrow troubleshooting windows. Sustained `Enabled=false` = one of strongest "attacker prepared the ground" signals. Severity High — EDR's last-line defense; disabling rarely benign. MITRE: TA0005 Defense Evasion — T1562.001 (PRIMARY); T1562.012 cross-platform. See KQL body for triage path.

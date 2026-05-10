@@ -1,4 +1,4 @@
-id: 7e8c9d2a-1b4f-4d3e-8a6c-9e2d4f5a6b7c
+id: 3effaf4a-d884-4a17-9530-d4a8b4080eac
 name: "[XdrOps] Connector row-volume spike — cost-budget gate"
 description: |
   ANY stream's hourly row count exceeds 3× its 7-day rolling baseline. Cost-budget gate (Sentinel ingestion per-GB; runaway connector can blow monthly budget in days) + quality signal. 3x volume means: operator schema explosion (wildcard PathParams fan out), tenant breach (mass policy push by attacker), connector regression (broken dedup), ProjectionMap mis-config (property-bag flatten N-fold multiplication), or legitimate fleet onboarding (4h suppression handles). Severity Medium — cost impact gradual; investigate within 24h. MITRE: TA0040 Impact — T1565 Data Manipulation. See KQL body + docs/RUNBOOK.md "Row-volume spike" for triage.

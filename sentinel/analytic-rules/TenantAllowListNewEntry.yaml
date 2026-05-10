@@ -1,4 +1,4 @@
-id: e8c9a1b2-3d56-4e7a-f0b2-6c5d8a3e1f06
+id: 4a6cc79a-3700-4910-bcea-9dce7b51053f
 name: MDE tenant allow-list new entry
 description: |
   New entry (URL, domain, IP, file hash, sender) ADDED to Defender Tenant Allow/Block List (TABL) — bypasses normal threat-blocking. Most direct "let this past your defenses" mechanism. Attacker adds C2 domain → every network call bypasses URL filtering; adds file hash → file runs without scan. Even legitimate exclusions need scrutiny — vendor "false positive" claim doesn't justify without ticket + risk acceptance. Severity Medium baseline; High if known-malicious rep OR bypasses active block last 7d. MITRE: TA0005 Defense Evasion — T1562; TA0011 C2 — T1071 (when allow-listed = C2). See KQL body for triage path.

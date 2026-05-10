@@ -1,4 +1,4 @@
-id: a4e5c7f8-9b12-4a3c-b6d8-2e1f4c9a7b02
+id: 0ba672c9-171e-48f8-8c8a-bf6d0c926f70
 name: MDE Live Response unsigned scripts enabled
 description: |
   Defender Live Response `allowUnsignedScripts` flipped to `true` tenant-wide — responders can run arbitrary unsigned PS/bash on any managed endpoint via LR sessions. Code signing is the last layer protecting LR from weaponization; sustained ON = strong "attacker establishing RCE capability" signal. Legitimate responders rarely need this (workaround: pre-sign scripts in IR library). Severity High — admin compromise + this = SYSTEM-equivalent code execution fleet-wide. MITRE: TA0005 Defense Evasion — T1562.001; TA0002 Execution — T1059. See KQL body for triage path.

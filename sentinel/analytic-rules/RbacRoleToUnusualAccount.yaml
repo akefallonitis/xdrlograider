@@ -1,4 +1,4 @@
-id: 0ae1c3d4-5f78-4a9c-b2d4-8e7f0c5a3b08
+id: 8a175b24-541e-475b-85ff-e667d426bcca
 name: MDE RBAC role to unusual account
 description: |
   New principalId/principalName added to Defender XDR Unified RBAC roles — account gained Defender permissions it didn't have. RBAC additions = canonical privilege-escalation signal. Attacker with admin compromise grants themselves or backdoor account Defender admin perms to maintain SOC-tooling control across password rotations. Severity High — RBAC additions infrequent in stable envs; every one needs justification. MITRE: TA0004 Privilege Escalation — T1078 (PRIMARY); TA0003 Persistence — T1098, T1136. See KQL body for triage path.

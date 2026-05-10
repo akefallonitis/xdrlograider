@@ -1,4 +1,4 @@
-id: 7e2c8a4f-1b3d-4f5a-8c2d-9b6e3f0a1d4c
+id: 0c106d96-4d83-4e92-8dbf-ef2d3e41107d
 name: "[XdrOps] Connector auth chain failure - elevated AADSTS exception rate"
 description: |
   XdrLogRaider's portal auth chain (TOTP → passkey → ESTSAUTH → sccauth → XSRF-TOKEN) producing `AuthChain.*` exceptions at elevated rate (>3 in 1h window). Auth failure = NO data flows from 65 streams; connector card flips Disconnected, telemetry pipeline goes dark. Causes: SA credential rotation needed, TOTP seed clock drift, Entra CA policy block, portal contract change, or Microsoft auth-service incident. Severity High — connector outage = SOC visibility loss. MITRE: TA0001 Initial Access — T1078 Valid Accounts. See KQL body + docs/RUNBOOK.md "Auth chain failure" section for triage.

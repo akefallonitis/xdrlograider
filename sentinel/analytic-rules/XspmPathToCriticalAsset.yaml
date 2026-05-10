@@ -1,4 +1,4 @@
-id: 2c03e5f6-7b9a-4c1e-d4f6-0a9b2e7c5d0a
+id: 2c5701fb-00c8-407c-86d8-f65d62c4b8a1
 name: MDE XSPM path to critical asset
 description: |
   XSPM attack-path simulation identified a route ending at a device tagged `Critical`. Defender continuously simulates attacker progressions; this fires when ANY path now terminates at a crown-jewel asset. Path ending at Critical means attack is feasible TODAY, attacker doesn't need privileged access to start, asset reachable through some chain of compromises. Severity High — paths to Critical assets = top-priority hardening candidates. License: requires XSPM (E5 + Security add-on); dormant on unlicensed tenants. MITRE: TA0043 Reconnaissance — T1595; TA0008 Lateral Movement — T1570. See KQL body for triage path.
