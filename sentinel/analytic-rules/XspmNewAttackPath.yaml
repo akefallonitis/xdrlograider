@@ -18,7 +18,22 @@ relevantTechniques:
   - T1595
 query: |
   MDE_Drift_Exposure(7d, 1h) | where StreamName == "MDE_XspmAttackPaths_CL" | where ChangeType == "Added"
-entityMappings: []
+# Hot-Fix 20 (2026-05-10): populate entityMappings from canonical Sentinel Entity
+# Type cols (Architecture J output preserved through drift parser per J.6).
+# Without these, Sentinel investigation graph cannot pivot from alert -> entity.
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: AccountUPNSuffix
+      - identifier: Name
+        columnName: AccountName
+  - entityType: Host
+    fieldMappings:
+      - identifier: HostName
+        columnName: HostFullName
+      - identifier: NetBiosName
+        columnName: HostName
 eventGroupingSettings:
   aggregationKind: SingleAlert
 suppressionEnabled: false

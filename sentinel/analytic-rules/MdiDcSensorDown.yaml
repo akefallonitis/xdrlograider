@@ -25,7 +25,22 @@ relevantTechniques:
 #    Drift parser emits typed-col names. Fixed to filter on IsActive.
 query: |
   MDE_Drift_Inventory(2d, 1d) | where StreamName == "MDE_DCCoverage_CL" | where FieldName == "IsActive" and OldValue == "True" and NewValue == "False"
-entityMappings: []
+# Hot-Fix 20 (2026-05-10): populate entityMappings from canonical Sentinel Entity
+# Type cols (Architecture J output preserved through drift parser per J.6).
+# Without these, Sentinel investigation graph cannot pivot from alert -> entity.
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: AccountUPNSuffix
+      - identifier: Name
+        columnName: AccountName
+  - entityType: Host
+    fieldMappings:
+      - identifier: HostName
+        columnName: HostFullName
+      - identifier: NetBiosName
+        columnName: HostName
 eventGroupingSettings:
   aggregationKind: SingleAlert
 suppressionEnabled: false

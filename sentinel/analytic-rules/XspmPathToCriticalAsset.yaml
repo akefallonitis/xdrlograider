@@ -20,7 +20,22 @@ relevantTechniques:
   - T1570
 query: |
   Defender_ExposureManagement_CL | where SourceName == 'MDE_XspmAttackPaths_CL' | summarize arg_max(TimeGenerated, *) by EntityId | extend TargetCriticality = tostring(parse_json(RawJson).targetCriticality) | where TargetCriticality == "Critical" | where TimeGenerated > ago(1h)
-entityMappings: []
+# Hot-Fix 20 (2026-05-10): populate entityMappings from canonical Sentinel Entity
+# Type cols (Architecture J output preserved through drift parser per J.6).
+# Without these, Sentinel investigation graph cannot pivot from alert -> entity.
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: AccountUPNSuffix
+      - identifier: Name
+        columnName: AccountName
+  - entityType: Host
+    fieldMappings:
+      - identifier: HostName
+        columnName: HostFullName
+      - identifier: NetBiosName
+        columnName: HostName
 eventGroupingSettings:
   aggregationKind: SingleAlert
 suppressionEnabled: false
