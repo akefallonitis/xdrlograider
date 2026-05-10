@@ -155,6 +155,11 @@ $params = @{
     enableKeyVaultDiagnostics = $false
     githubRepo                = 'akefallonitis/xdrlograider'
     deployRoleAssignments     = (-not $SkipRoleAssignments)
+    # SP-friendly: explicit URL for sentinelContent.json (since this script uses
+    # -TemplateFile, deployment().properties.templateLink is null and the relative-URI
+    # default in mainTemplate.json fails). Points at GitHub Releases /latest/download/
+    # which always resolves to the current Latest release.
+    sentinelContentTemplateUri = 'https://github.com/akefallonitis/xdrlograider/releases/latest/download/sentinelContent.json'
 }
 
 # CRITICAL ARCHITECTURE (post-incident 2026-05-07T17:05Z): the ARM template's

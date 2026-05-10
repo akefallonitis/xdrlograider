@@ -41,7 +41,7 @@
             "type": 2,
             "isRequired": false,
             "multiSelect": true,
-            "value": ["all"],
+            "value": ["value::all"],
             "typeSettings": {
               "showDefault": false,
               "additionalResourceOptions": ["value::all"]
@@ -56,7 +56,7 @@
             "type": 2,
             "isRequired": false,
             "multiSelect": true,
-            "value": ["all"],
+            "value": ["value::all"],
             "typeSettings": {
               "showDefault": false,
               "additionalResourceOptions": ["value::all"]
@@ -89,7 +89,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "Defender_EndpointDeviceManagement_CL\n| where TimeGenerated {TimeRange}\n| where SourceName == 'MDE_Machines_CL'\n| where ('all' in ({Platform}) or OsPlatform in ({Platform}))\n| where ('all' in ({ExposureLevel}) or ExposureLevel in ({ExposureLevel}))\n| where '{DeviceFilter}' == '' or HostFullName has '{DeviceFilter}' or HostMdatpId has '{DeviceFilter}'\n| summarize arg_max(TimeGenerated, *) by HostMdatpId\n| project\n    HostFullName,\n    OsPlatform,\n    OsVersionFriendlyName,\n    HealthStatus,\n    RiskScore,\n    ExposureLevel,\n    ExposureScore,\n    VulnerabilitySeverityLevel,\n    ExploitLevel,\n    LastSeen,\n    IsManagedByMdatp,\n    OnboardingStatus,\n    IsolationState,\n    LastIpAddress,\n    Domain,\n    HostMdatpId\n| top 50 by ExposureScore desc nulls last",
+        "query": "Defender_EndpointDeviceManagement_CL\n| where TimeGenerated {TimeRange}\n| where SourceName == 'MDE_Machines_CL'\n| where ('*' in~ ({Platform}) or OsPlatform in~ ({Platform}))\n| where ('*' in~ ({ExposureLevel}) or ExposureLevel in~ ({ExposureLevel}))\n| where '{DeviceFilter}' == '' or HostFullName has '{DeviceFilter}' or HostMdatpId has '{DeviceFilter}'\n| summarize arg_max(TimeGenerated, *) by HostMdatpId\n| project\n    HostFullName,\n    OsPlatform,\n    OsVersionFriendlyName,\n    HealthStatus,\n    RiskScore,\n    ExposureLevel,\n    ExposureScore,\n    VulnerabilitySeverityLevel,\n    ExploitLevel,\n    LastSeen,\n    IsManagedByMdatp,\n    OnboardingStatus,\n    IsolationState,\n    LastIpAddress,\n    Domain,\n    HostMdatpId\n| top 50 by ExposureScore desc nulls last",
         "size": 0,
         "title": "Top 50 devices — risk + exposure posture (selectable filters: Platform / ExposureLevel / DeviceFilter)",
         "queryType": 0,
@@ -115,7 +115,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "let devices = Defender_EndpointDeviceManagement_CL\n    | where TimeGenerated {TimeRange}\n    | where SourceName == 'MDE_Machines_CL'\n    | where ('all' in ({Platform}) or OsPlatform in ({Platform}))\n    | where '{DeviceFilter}' == '' or HostFullName has '{DeviceFilter}' or HostMdatpId has '{DeviceFilter}'\n    | summarize arg_max(TimeGenerated, *) by HostMdatpId\n    | project HostMdatpId, HostFullName, OsPlatform, ExposureLevel;\nlet cves = Defender_VulnerabilityManagement_CL\n    | where TimeGenerated {TimeRange}\n    | where SourceName in ('MDE_VulnerableMachines_CL', 'MDE_VulnerabilityInventory_CL')\n    | summarize CveCount = dcount(CveId), CveList = make_set(CveId, 50) by HostMdatpId;\ndevices\n| join kind=leftouter cves on HostMdatpId\n| project HostFullName, OsPlatform, ExposureLevel, CveCount, CveList, HostMdatpId\n| where CveCount > 0\n| top 50 by CveCount desc",
+        "query": "let devices = Defender_EndpointDeviceManagement_CL\n    | where TimeGenerated {TimeRange}\n    | where SourceName == 'MDE_Machines_CL'\n    | where ('*' in~ ({Platform}) or OsPlatform in~ ({Platform}))\n    | where '{DeviceFilter}' == '' or HostFullName has '{DeviceFilter}' or HostMdatpId has '{DeviceFilter}'\n    | summarize arg_max(TimeGenerated, *) by HostMdatpId\n    | project HostMdatpId, HostFullName, OsPlatform, ExposureLevel;\nlet cves = Defender_VulnerabilityManagement_CL\n    | where TimeGenerated {TimeRange}\n    | where SourceName in ('MDE_VulnerableMachines_CL', 'MDE_VulnerabilityInventory_CL')\n    | summarize CveCount = dcount(CveId), CveList = make_set(CveId, 50) by HostMdatpId;\ndevices\n| join kind=leftouter cves on HostMdatpId\n| project HostFullName, OsPlatform, ExposureLevel, CveCount, CveList, HostMdatpId\n| where CveCount > 0\n| top 50 by CveCount desc",
         "size": 0,
         "title": "Devices with CVEs (cross-table join HostMdatpId)",
         "queryType": 0,
@@ -135,7 +135,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "Defender_EndpointConfiguration_CL\n| where TimeGenerated {TimeRange}\n| where SourceName == 'MDE_SecurityPolicies_CL'\n| where ('all' in ({Platform}) or Platform in ({Platform}))\n| summarize arg_max(TimeGenerated, *) by EntityId\n| extend PolicyCategory = case(\n    TemplateFamily contains 'Antivirus', 'Antivirus',\n    TemplateFamily contains 'AttackSurface', 'ASR Rules',\n    TemplateFamily contains 'Firewall', 'Firewall',\n    TemplateFamily contains 'EndpointDetection', 'EDR',\n    TemplateFamily contains 'AccountProtection', 'Account Protection',\n    TemplateFamily contains 'DiskEncryption', 'Disk Encryption',\n    TemplateFamily contains 'WebProtection', 'Web Protection',\n    'Other'\n)\n| summarize\n    PolicyCount = count(),\n    AssignedCount = countif(IsAssigned == true),\n    LastModified = max(LastModifiedDateTime),\n    SettingCountTotal = sum(SettingCount)\n    by Platform, PolicyCategory\n| order by Platform asc, PolicyCount desc",
+        "query": "Defender_EndpointConfiguration_CL\n| where TimeGenerated {TimeRange}\n| where SourceName == 'MDE_SecurityPolicies_CL'\n| where ('*' in~ ({Platform}) or Platform in~ ({Platform}))\n| summarize arg_max(TimeGenerated, *) by EntityId\n| extend PolicyCategory = case(\n    TemplateFamily contains 'Antivirus', 'Antivirus',\n    TemplateFamily contains 'AttackSurface', 'ASR Rules',\n    TemplateFamily contains 'Firewall', 'Firewall',\n    TemplateFamily contains 'EndpointDetection', 'EDR',\n    TemplateFamily contains 'AccountProtection', 'Account Protection',\n    TemplateFamily contains 'DiskEncryption', 'Disk Encryption',\n    TemplateFamily contains 'WebProtection', 'Web Protection',\n    'Other'\n)\n| summarize\n    PolicyCount = count(),\n    AssignedCount = countif(IsAssigned == true),\n    LastModified = max(LastModifiedDateTime),\n    SettingCountTotal = sum(SettingCount)\n    by Platform, PolicyCategory\n| order by Platform asc, PolicyCount desc",
         "size": 0,
         "title": "Endpoint security policies — Platform x Category breakdown",
         "queryType": 0,

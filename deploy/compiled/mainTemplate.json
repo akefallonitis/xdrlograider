@@ -122,6 +122,13 @@
       "metadata": {
         "description": "Deploy 15 role assignments (KV Secrets User + Storage Table Data Contributor + 13 Monitoring Metrics Publisher per DCR for the FA's SAMI). Default: true (initial deploy by Owner). Set FALSE for SP-driven incremental redeploys: role assignments already exist and are idempotent, but ARM validation requires Microsoft.Authorization/roleAssignments/write permission (User Access Administrator) which Contributor SP lacks. Setting false skips re-validation while keeping existing role assignments intact. Used by Deploy-XdrLogRaider.ps1 -SkipRoleAssignments."
       }
+    },
+    "sentinelContentTemplateUri": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URI of sentinelContent.json nested template. EMPTY (default) = relative-URI mode for Deploy-to-Azure URL deploys (uri(deployment().properties.templateLink.uri, 'sentinelContent.json')). Set explicitly for TemplateFile-based deploys (e.g. https://github.com/akefallonitis/xdrlograider/releases/latest/download/sentinelContent.json) since deployment().properties.templateLink is null when -TemplateFile is used. Resolves the 5th source bug surfaced by SP-driven canonical Deploy-XdrLogRaider.ps1 redeploys."
+      }
     }
   },
   "variables": {
@@ -3004,7 +3011,7 @@
         },
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, 'sentinelContent.json')]",
+          "uri": "[if(empty(parameters('sentinelContentTemplateUri')), uri(deployment().properties.templateLink.uri, 'sentinelContent.json'), parameters('sentinelContentTemplateUri'))]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
