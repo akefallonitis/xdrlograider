@@ -1090,6 +1090,28 @@
                       "name": "LastModified",
                       "type": "datetime"
                     },
+                    {"name": "PolicyDescription", "type": "string"},
+                    {"name": "Technologies", "type": "string"},
+                    {"name": "TemplateId", "type": "string"},
+                    {"name": "TemplateName", "type": "string"},
+                    {"name": "TemplateVersion", "type": "string"},
+                    {"name": "TemplateFamily", "type": "string"},
+                    {"name": "SettingCount", "type": "int"},
+                    {"name": "IsAssigned", "type": "boolean"},
+                    {"name": "CreationSource", "type": "string"},
+                    {"name": "CreatedDateTime", "type": "datetime"},
+                    {"name": "LastModifiedDateTime", "type": "datetime"},
+                    {"name": "RoleScopeTagIds", "type": "string"},
+                    {"name": "AssignmentCount", "type": "int"},
+                    {"name": "Settings", "type": "dynamic"},
+                    {"name": "AntivirusFilterCount", "type": "int"},
+                    {"name": "EdrFilterCount", "type": "int"},
+                    {"name": "FirewallFilterCount", "type": "int"},
+                    {"name": "AsrFilterCount", "type": "int"},
+                    {"name": "DiskEncryptionFilterCount", "type": "int"},
+                    {"name": "AccountProtectionFilterCount", "type": "int"},
+                    {"name": "WebProtectionFilterCount", "type": "int"},
+                    {"name": "CategoryFilters", "type": "dynamic"},
                     {
                       "name": "HostMdatpId",
                       "type": "string"
@@ -1217,6 +1239,52 @@
                       "name": "FirstSeen",
                       "type": "datetime"
                     },
+                    {"name": "ComputerNetBIOSName", "type": "string"},
+                    {"name": "MachineGuid", "type": "string"},
+                    {"name": "AadDeviceId", "type": "string"},
+                    {"name": "SenseMachineId", "type": "string"},
+                    {"name": "WcdMachineId", "type": "string"},
+                    {"name": "OsVersionFriendlyName", "type": "string"},
+                    {"name": "OsBuild", "type": "int"},
+                    {"name": "ExposureScore", "type": "string"},
+                    {"name": "SecurityScore", "type": "string"},
+                    {"name": "CriticalityLevel", "type": "string"},
+                    {"name": "AssetValue", "type": "string"},
+                    {"name": "DynamicAssetValue", "type": "string"},
+                    {"name": "VulnerabilitySeverityLevel", "type": "string"},
+                    {"name": "VulnerabilityAgeLevel", "type": "string"},
+                    {"name": "ExploitLevel", "type": "string"},
+                    {"name": "LastIpAddress", "type": "string"},
+                    {"name": "LastExternalIpAddress", "type": "string"},
+                    {"name": "LastIpV6Address", "type": "string"},
+                    {"name": "LastMacAddress", "type": "string"},
+                    {"name": "DeviceCategory", "type": "string"},
+                    {"name": "DeviceType", "type": "string"},
+                    {"name": "DeviceSubtype", "type": "string"},
+                    {"name": "Domain", "type": "string"},
+                    {"name": "IsAadJoined", "type": "boolean"},
+                    {"name": "IsManagedByMdatp", "type": "boolean"},
+                    {"name": "ManagedBy", "type": "string"},
+                    {"name": "ManagedByStatus", "type": "string"},
+                    {"name": "OnboardingStatus", "type": "string"},
+                    {"name": "IsolationState", "type": "string"},
+                    {"name": "ExclusionState", "type": "string"},
+                    {"name": "IsExcluded", "type": "boolean"},
+                    {"name": "IsInternetFacing", "type": "boolean"},
+                    {"name": "InternetFacingReason", "type": "string"},
+                    {"name": "RbacGroupId", "type": "int"},
+                    {"name": "MachineGroup", "type": "string"},
+                    {"name": "MachineTags", "type": "string"},
+                    {"name": "SystemManufacturer", "type": "string"},
+                    {"name": "SystemProductName", "type": "string"},
+                    {"name": "SensorSite", "type": "string"},
+                    {"name": "SensorSiteDisplayName", "type": "string"},
+                    {"name": "SensorType", "type": "string"},
+                    {"name": "SensorZone", "type": "string"},
+                    {"name": "ResourceId", "type": "string"},
+                    {"name": "CloudPlatforms", "type": "string"},
+                    {"name": "VmId", "type": "string"},
+                    {"name": "SubscriptionId", "type": "string"},
                     {
                       "name": "HostMdatpId",
                       "type": "string"
@@ -1822,7 +1890,15 @@
                     {
                       "name": "ReportPeriod",
                       "type": "string"
-                    }
+                    },
+                    {"name": "LastStateUpdate", "type": "datetime"},
+                    {"name": "ImplementationStatus", "type": "string"},
+                    {"name": "ActionUrl", "type": "string"},
+                    {"name": "RemediationImpact", "type": "string"},
+                    {"name": "UserAffected", "type": "string"},
+                    {"name": "CurrentState", "type": "string"},
+                    {"name": "MssControlState", "type": "string"},
+                    {"name": "Url", "type": "string"}
                   ]
                 }
               }
@@ -2192,6 +2268,18 @@
                       "name": "VaExposedDevices",
                       "type": "int"
                     },
+                    {"name": "ImpactedDevicesCount", "type": "int"},
+                    {"name": "ImpactedMailboxesCount", "type": "int"},
+                    {"name": "ImpactedUsersCount", "type": "int"},
+                    {"name": "ImpactedCloudAppsCount", "type": "int"},
+                    {"name": "ImpactedCloudResourcesCount", "type": "int"},
+                    {"name": "ActiveAlertsCount", "type": "int"},
+                    {"name": "ResolvedAlertsCount", "type": "int"},
+                    {"name": "UserStateOutbreakId", "type": "string"},
+                    {"name": "UserStateLastVisitTime", "type": "datetime"},
+                    {"name": "UserStateIsFavorite", "type": "boolean"},
+                    {"name": "ExposedDevices", "type": "int"},
+                    {"name": "AllCvesAreNotSupported", "type": "boolean"},
                     {
                       "name": "HostMdatpId",
                       "type": "string"
@@ -3991,42 +4079,20 @@
           },
           "Custom-MDE_AntivirusPolicy_CL": {
             "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "SourceStream",
-                "type": "string"
-              },
-              {
-                "name": "EntityId",
-                "type": "string"
-              },
-              {
-                "name": "RawJson",
-                "type": "dynamic"
-              },
-              {
-                "name": "FilterName",
-                "type": "string"
-              },
-              {
-                "name": "FilterValue",
-                "type": "string"
-              },
-              {
-                "name": "IsEnabled",
-                "type": "boolean"
-              },
-              {
-                "name": "Platform",
-                "type": "string"
-              },
-              {
-                "name": "Scope",
-                "type": "string"
-              }
+              {"name": "TimeGenerated", "type": "datetime"},
+              {"name": "SourceStream", "type": "string"},
+              {"name": "EntityId", "type": "string"},
+              {"name": "RawJson", "type": "dynamic"},
+              {"name": "AntivirusFilterCount", "type": "int"},
+              {"name": "EdrFilterCount", "type": "int"},
+              {"name": "FirewallFilterCount", "type": "int"},
+              {"name": "AsrFilterCount", "type": "int"},
+              {"name": "DiskEncryptionFilterCount", "type": "int"},
+              {"name": "AccountProtectionFilterCount", "type": "int"},
+              {"name": "WebProtectionFilterCount", "type": "int"},
+              {"name": "Technologies", "type": "string"},
+              {"name": "Platform", "type": "string"},
+              {"name": "CategoryFilters", "type": "dynamic"}
             ]
           },
           "Custom-MDE_AuthenticatedTelemetry_CL": {
@@ -4299,50 +4365,27 @@
           },
           "Custom-MDE_SecurityPolicies_CL": {
             "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "SourceStream",
-                "type": "string"
-              },
-              {
-                "name": "EntityId",
-                "type": "string"
-              },
-              {
-                "name": "RawJson",
-                "type": "dynamic"
-              },
-              {
-                "name": "PolicyId",
-                "type": "string"
-              },
-              {
-                "name": "PolicyName",
-                "type": "string"
-              },
-              {
-                "name": "PolicyType",
-                "type": "string"
-              },
-              {
-                "name": "Platform",
-                "type": "string"
-              },
-              {
-                "name": "Status",
-                "type": "string"
-              },
-              {
-                "name": "RuleCount",
-                "type": "int"
-              },
-              {
-                "name": "LastModified",
-                "type": "datetime"
-              }
+              {"name": "TimeGenerated", "type": "datetime"},
+              {"name": "SourceStream", "type": "string"},
+              {"name": "EntityId", "type": "string"},
+              {"name": "RawJson", "type": "dynamic"},
+              {"name": "PolicyId", "type": "string"},
+              {"name": "PolicyName", "type": "string"},
+              {"name": "PolicyDescription", "type": "string"},
+              {"name": "Platform", "type": "string"},
+              {"name": "Technologies", "type": "string"},
+              {"name": "TemplateId", "type": "string"},
+              {"name": "TemplateName", "type": "string"},
+              {"name": "TemplateVersion", "type": "string"},
+              {"name": "TemplateFamily", "type": "string"},
+              {"name": "SettingCount", "type": "int"},
+              {"name": "IsAssigned", "type": "boolean"},
+              {"name": "CreationSource", "type": "string"},
+              {"name": "CreatedDateTime", "type": "datetime"},
+              {"name": "LastModifiedDateTime", "type": "datetime"},
+              {"name": "RoleScopeTagIds", "type": "string"},
+              {"name": "AssignmentCount", "type": "int"},
+              {"name": "Settings", "type": "dynamic"}
             ]
           },
           "Custom-MDE_WebContentFiltering_CL": {
@@ -4601,58 +4644,72 @@
           },
           "Custom-MDE_Machines_CL": {
             "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "SourceStream",
-                "type": "string"
-              },
-              {
-                "name": "EntityId",
-                "type": "string"
-              },
-              {
-                "name": "RawJson",
-                "type": "dynamic"
-              },
-              {
-                "name": "MachineId",
-                "type": "string"
-              },
-              {
-                "name": "ComputerDnsName",
-                "type": "string"
-              },
-              {
-                "name": "OsPlatform",
-                "type": "string"
-              },
-              {
-                "name": "OsVersion",
-                "type": "string"
-              },
-              {
-                "name": "HealthStatus",
-                "type": "string"
-              },
-              {
-                "name": "RiskScore",
-                "type": "string"
-              },
-              {
-                "name": "ExposureLevel",
-                "type": "string"
-              },
-              {
-                "name": "LastSeen",
-                "type": "datetime"
-              },
-              {
-                "name": "FirstSeen",
-                "type": "datetime"
-              }
+              {"name": "TimeGenerated", "type": "datetime"},
+              {"name": "SourceStream", "type": "string"},
+              {"name": "EntityId", "type": "string"},
+              {"name": "RawJson", "type": "dynamic"},
+              {"name": "MachineId", "type": "string"},
+              {"name": "ComputerDnsName", "type": "string"},
+              {"name": "ComputerNetBIOSName", "type": "string"},
+              {"name": "MachineGuid", "type": "string"},
+              {"name": "AadDeviceId", "type": "string"},
+              {"name": "SenseMachineId", "type": "string"},
+              {"name": "WcdMachineId", "type": "string"},
+              {"name": "OsPlatform", "type": "string"},
+              {"name": "OsVersion", "type": "string"},
+              {"name": "OsVersionFriendlyName", "type": "string"},
+              {"name": "OsBuild", "type": "int"},
+              {"name": "HealthStatus", "type": "string"},
+              {"name": "RiskScore", "type": "string"},
+              {"name": "ExposureLevel", "type": "string"},
+              {"name": "ExposureScore", "type": "string"},
+              {"name": "SecurityScore", "type": "string"},
+              {"name": "CriticalityLevel", "type": "string"},
+              {"name": "AssetValue", "type": "string"},
+              {"name": "DynamicAssetValue", "type": "string"},
+              {"name": "VulnerabilitySeverityLevel", "type": "string"},
+              {"name": "VulnerabilityAgeLevel", "type": "string"},
+              {"name": "ExploitLevel", "type": "string"},
+              {"name": "LastIpAddress", "type": "string"},
+              {"name": "LastExternalIpAddress", "type": "string"},
+              {"name": "LastIpV6Address", "type": "string"},
+              {"name": "LastMacAddress", "type": "string"},
+              {"name": "DeviceCategory", "type": "string"},
+              {"name": "DeviceType", "type": "string"},
+              {"name": "DeviceSubtype", "type": "string"},
+              {"name": "FirstSeen", "type": "datetime"},
+              {"name": "LastSeen", "type": "datetime"},
+              {"name": "Domain", "type": "string"},
+              {"name": "IsAadJoined", "type": "boolean"},
+              {"name": "IsManagedByMdatp", "type": "boolean"},
+              {"name": "ManagedBy", "type": "string"},
+              {"name": "ManagedByStatus", "type": "string"},
+              {"name": "OnboardingStatus", "type": "string"},
+              {"name": "IsolationState", "type": "string"},
+              {"name": "ExclusionState", "type": "string"},
+              {"name": "IsExcluded", "type": "boolean"},
+              {"name": "IsInternetFacing", "type": "boolean"},
+              {"name": "InternetFacingReason", "type": "string"},
+              {"name": "RbacGroupId", "type": "int"},
+              {"name": "MachineGroup", "type": "string"},
+              {"name": "MachineTags", "type": "string"},
+              {"name": "SystemManufacturer", "type": "string"},
+              {"name": "SystemProductName", "type": "string"},
+              {"name": "SensorSite", "type": "string"},
+              {"name": "SensorSiteDisplayName", "type": "string"},
+              {"name": "SensorType", "type": "string"},
+              {"name": "SensorZone", "type": "string"},
+              {"name": "ResourceId", "type": "string"},
+              {"name": "CloudPlatforms", "type": "string"},
+              {"name": "VmId", "type": "string"},
+              {"name": "SubscriptionId", "type": "string"},
+              {"name": "HostMdatpId", "type": "string"},
+              {"name": "HostFullName", "type": "string"},
+              {"name": "HostAadId", "type": "string"},
+              {"name": "HostOSFamily", "type": "string"},
+              {"name": "IpAddress", "type": "string"},
+              {"name": "MachineGroupId", "type": "string"},
+              {"name": "MachineGroupName", "type": "string"}
             ]
           }
         },
@@ -4948,7 +5005,15 @@
               {
                 "name": "PointAchieved",
                 "type": "int"
-              }
+              },
+              {"name": "LastStateUpdate", "type": "datetime"},
+              {"name": "ImplementationStatus", "type": "string"},
+              {"name": "ActionUrl", "type": "string"},
+              {"name": "RemediationImpact", "type": "string"},
+              {"name": "UserAffected", "type": "string"},
+              {"name": "CurrentState", "type": "string"},
+              {"name": "MssControlState", "type": "string"},
+              {"name": "Url", "type": "string"}
             ]
           },
           "Custom-MDE_ExposureSnapshots_CL": {
@@ -6706,7 +6771,19 @@
               {
                 "name": "IsTaVNext",
                 "type": "boolean"
-              }
+              },
+              {"name": "ImpactedDevicesCount", "type": "int"},
+              {"name": "ImpactedMailboxesCount", "type": "int"},
+              {"name": "ImpactedUsersCount", "type": "int"},
+              {"name": "ImpactedCloudAppsCount", "type": "int"},
+              {"name": "ImpactedCloudResourcesCount", "type": "int"},
+              {"name": "ActiveAlertsCount", "type": "int"},
+              {"name": "ResolvedAlertsCount", "type": "int"},
+              {"name": "UserStateOutbreakId", "type": "string"},
+              {"name": "UserStateLastVisitTime", "type": "datetime"},
+              {"name": "UserStateIsFavorite", "type": "boolean"},
+              {"name": "ExposedDevices", "type": "int"},
+              {"name": "AllCvesAreNotSupported", "type": "boolean"}
             ]
           },
           "Custom-MDE_ThreatAnalyticsTopThreats_CL": {

@@ -2021,7 +2021,7 @@ AttackPathsV2
                 HostAadId            = '$tostring:aadDeviceId'
                 HostOSFamily         = '$tostring:osPlatform'
                 IpAddress            = '$tostring:lastIpAddress'
-                MachineGroupId       = '$toint:rbacGroupId'
+                MachineGroupId       = '$tostring:rbacGroupId'
                 MachineGroupName     = '$tostring:machineGroup'
             }
         }
