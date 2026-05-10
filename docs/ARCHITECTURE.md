@@ -18,11 +18,15 @@ The v0.1.0 GA architecture explicitly distinguishes three observability surfaces
 │   • 10 Defender_<Category>_CL tables (consolidated per nathanmcnulty 10-category taxonomy) │
 │   • 1 XdrConnectorHealth_CL ops table                                 │
 │   • 4 drift parsers (Configuration, Inventory, Exposure, Maintenance) │
-│   • 8 workbooks + 21 analytic rules (14 detection + 7 XdrOps) + 12   │
-│     hunting queries                                                   │
-│   • 320+ sample queries (5 per active stream × 64)                    │
+│   • 10 workbooks (incl. MDE_DeviceInventory_Unified Hot-Fix 14 +      │
+│     XdrLogRaider_ConnectorOps Hot-Fix 17) + 21 analytic rules         │
+│     (14 detection + 7 XdrOps) + 12 hunting queries                    │
+│   • 360+ sample queries (5 per active stream × 71 + cross-stream)     │
+│   • Architecture J canonical Sentinel Entity Type cols (HostMdatpId,  │
+│     HostFullName, HostAadId, AccountUPNSuffix, IpAddress, CveId, etc.)│
+│     for cross-table join + Sentinel investigation graph drilldown.    │
 │   • Audience: SOC analysts, threat hunters, security engineers        │
-│   • SLO: row freshness within cadence × 2 (e.g., XSPM ≤ 2h)          │
+│   • SLO: row freshness within cadence × 2 (e.g., XSPM ≤ 2h)           │
 └──────────────────────────────────────────────────────────────────────┘
                             ▲
                             │ XdrOps-* analytic rules read AppInsights
@@ -87,20 +91,28 @@ This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsight
 │  │    └─ Connect-DefenderPortal / Invoke-DefenderPortalRequest│       │
 │  │                                                            │       │
 │  │  Modules/Xdr.Defender.Client       (L3 manifest dispatcher)│       │
-│  │    ├─ endpoints.manifest.psd1 (46 stream entries)          │       │
+│  │    ├─ endpoints.manifest.psd1 (72 stream entries: 71 live  │       │
+│  │    │   + 1 deprecated)                                     │       │
 │  │    └─ Invoke-MDEEndpoint / Invoke-MDETierPoll              │       │
 │  │                                                            │       │
 │  │  Modules/Xdr.Connector.Orchestrator (L4 portal routing)    │       │
 │  │    └─ Connect-XdrPortal / Invoke-XdrTierPoll               │       │
 │  │       (forward-scalable to multi-portal in v0.2.0+)        │       │
 │  │                                                            │       │
-│  │  Timer functions (6 total, all timer-triggered):           │       │
-│  │    Connector-Heartbeat                                            │       │
-│  │    Defender-ActionCenter-Refresh         (ActionCenter + DeviceTimeline)   │       │
-│  │    Defender-XspmGraph-Refresh      (XSPM graph + Exposure snapshots) │       │
-│  │    Defender-Configuration-Refresh        (rules / RBAC / integrations)     │       │
-│  │    Defender-Inventory-Refresh     (settings / identity / metadata)  │       │
-│  │    Defender-Maintenance-Refresh   (DataExportSettings — rare-change)│       │
+│  │  Function App functions (4 total, post Section R           │       │
+│  │  consolidation — 9→4 reduction):                           │       │
+│  │    Xdr-Refresh           (timer 1m — universal portal-     │       │
+│  │                           agnostic dispatcher; reads       │       │
+│  │                           XdrTierState; starts orchestrn.) │       │
+│  │    Xdr-PollOrchestrator  (durable orchestrator; per-tier   │       │
+│  │                           fan-out via Wait-DurableTask)    │       │
+│  │    Xdr-PollStream        (durable activity; auth + portal  │       │
+│  │                           API + DCE ingest + Hot-Fix 7     │       │
+│  │                           per-field row truncation; per-   │       │
+│  │                           stream PerEntityFanout / PerPlat-│       │
+│  │                           formFanout / Pagination support) │       │
+│  │    Connector-Heartbeat   (timer 5m — XdrTierState aggregate│       │
+│  │                           into XdrConnectorHealth_CL)      │       │
 │  └────────────────────────────────────────────────────────────┘       │
 │                                                                        │
 │  ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────────┐ │

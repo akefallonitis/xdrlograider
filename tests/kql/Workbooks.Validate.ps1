@@ -5,19 +5,23 @@ BeforeAll {
 }
 
 Describe 'Workbooks — file presence' {
-    It 'ships exactly 6 workbook .json files' {
+    It 'ships exactly 10 workbook .json files (Hot-Fix 14+17: DeviceInventory_Unified + ConnectorOps)' {
         $files = Get-ChildItem -Path $script:WorkbooksDir -Filter '*.json'
-        $files.Count | Should -Be 6
+        $files.Count | Should -Be 10
     }
 
-    It 'includes all 6 named workbooks' {
+    It 'includes all 10 named workbooks' {
         $expected = @(
+            'MDE_ActionCenter.json',
             'MDE_ComplianceDashboard.json',
+            'MDE_DeviceInventory_Unified.json',
             'MDE_DriftReport.json',
-            'MDE_GovernanceScorecard.json',
             'MDE_ExposureMap.json',
+            'MDE_GovernanceScorecard.json',
             'MDE_IdentityPosture.json',
-            'MDE_ResponseAudit.json'
+            'MDE_ResponseAudit.json',
+            'XdrLogRaider_ConnectorHealth.json',
+            'XdrLogRaider_ConnectorOps.json'
         )
         foreach ($name in $expected) {
             Test-Path (Join-Path $script:WorkbooksDir $name) | Should -BeTrue

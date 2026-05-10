@@ -54,7 +54,7 @@ The deploy creates resources in **two distinct scopes**:
 │     - 11 consolidated custom tables (10 Defender_<Cat>_CL +   │
 │       XdrConnectorHealth_CL ops table)                        │
 │     - Sentinel Data Connector UI card                         │
-│     - 4 KQL parsers + 8 workbooks + 21 analytic rules +       │
+│     - 4 KQL parsers + 10 workbooks + 21 analytic rules +      │
 │       12 hunting queries (via sentinelContent.json)           │
 └───────────────────────────────────────────────────────────────┘
 ```

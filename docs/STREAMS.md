@@ -1,6 +1,8 @@
 # Streams catalogue (v0.1.0 GA)
 
-**65 portal-only stream entries** (64 active + 1 deprecated) grouped into **5 cadence tiers**, all with documented path + method + body + headers verified against XDRInternals + nodoc OpenAPI spec catalogue + live-captured against a full-access admin account.
+**72 portal-only stream entries** (71 active + 1 deprecated) grouped into **5 cadence tiers**, all with documented path + method + body + headers verified against XDRInternals + nodoc OpenAPI spec catalogue + live-captured against a full-access admin account.
+
+> **Verification (2026-05-10)**: `tools/Validate-Manifest.ps1` confirms 72 entries clean. `src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1` is the canonical source of truth — when this doc and the manifest disagree, the manifest wins.
 
 v0.1.0 GA Phase 2 (2026-05-04) added **13 Tier A streams** from the nodoc-catalog sweep: 11 in `XspmGraph` tier (Posture metrics + SecureScore per-category + Attack Surface analytical paths/chokepoints + XSPM Connectors + Asset Classification Schema + Posture Tenants/Initiatives/Security Events) and 2 in `Configuration` tier (Threat Analytics enriched + top threats).
 
@@ -8,6 +10,8 @@ v0.1.0 GA Phase 1 (2026-05-07 — Section R++++++) added **6 new streams**:
 - **Architecture B**: `MDE_Machines_CL` (Endpoint Device Management — foundation for PerEntityFanout)
 - **G7**: `MDE_SecurityPolicies_CL` (Endpoint Configuration — POST endpoint returning ASR rules + AV settings + EDR + Firewall + Web Protection policy bodies per platform)
 - **G8 TVM expansion**: `MDE_VulnerableMachines_CL` + `MDE_VulnerabilityInventory_CL` + `MDE_SoftwareInventory_CL` + `MDE_RecommendationActions_CL`
+
+v0.1.0 GA Phase 2 batches 1-8 (2026-05-09) added **8 new streams** (Identity dormant accounts + Identity LMP + Vuln cert/summary/extensions/asset-count + Vuln advisories + PendingActions): manifest baseline 64 → 72.
 
 The portal-only audit DROPPED `MDE_SecureScoreBreakdown_CL` — publicly-API-covered by Microsoft Graph `/security/secureScores`; operators should use the official Graph Security data connector for that data. Deprecated streams are documented inline via the manifest `Availability='deprecated'` field with a Purpose note explaining the deprecation reason.
 

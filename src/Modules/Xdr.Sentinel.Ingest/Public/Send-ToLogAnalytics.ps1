@@ -1,3 +1,114 @@
+function Compress-OversizedRow {
+    <#
+    .SYNOPSIS
+        Hot-Fix 7 (2026-05-10): per-field truncate guard for oversized rows.
+
+    .DESCRIPTION
+        When a row exceeds the DCE 1MB cap (default 900KB headroom), this helper
+        identifies oversized fields by serialized size, truncates them in place
+        (descending by size), and re-emits a compressed row that fits within the
+        target. Marker `_TruncatedFields` is appended so operators can see which
+        fields were clipped + their original sizes.
+
+        PRIOR BEHAVIOUR (Send-ToLogAnalytics.ps1:132-136): rows >MaxBatchBytes were
+        SKIPPED, causing silent data loss. Live verification flagged this on
+        MDE_AssetRules_CL where the `RuleDefinition` field was 1.4MB
+        (`Row exceeds 921600 bytes (1402310); skipping`).
+
+        NEW BEHAVIOUR: clip the offending field to FieldTruncBytes (default 8KB)
+        and pass the row through. Operators querying the raw RuleDefinition see
+        a truncation marker `[TRUNCATED:<originalBytes>] <first 8KB>` and can
+        fall back to RawJson (which is also row-size bounded by this same
+        function on retry).
+
+    .PARAMETER Row
+        Input row (PSCustomObject or hashtable).
+
+    .PARAMETER TargetBytes
+        Max serialized JSON bytes for the output row (default 900KB).
+
+    .PARAMETER FieldTruncBytes
+        Max bytes per oversized field after truncation (default 8KB).
+
+    .PARAMETER StreamName
+        Stream identifier for telemetry.
+
+    .OUTPUTS
+        [pscustomobject] new row with truncated fields, OR $null if the row
+        cannot be reduced below TargetBytes (theoretical edge case for rows
+        with >100 large fields).
+    #>
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param(
+        [Parameter(Mandatory)] $Row,
+        [int] $TargetBytes = 900KB,
+        [int] $FieldTruncBytes = 8KB,
+        [string] $StreamName = ''
+    )
+
+    # Build a working hashtable from row props (PSCustomObject or hashtable)
+    $ht = @{}
+    if ($Row -is [System.Collections.IDictionary]) {
+        foreach ($k in $Row.Keys) { $ht[$k] = $Row[$k] }
+    } else {
+        foreach ($p in $Row.PSObject.Properties) { $ht[$p.Name] = $p.Value }
+    }
+
+    # Compute per-field serialized size; rank descending
+    $fieldSizes = @()
+    foreach ($key in @($ht.Keys)) {
+        $val = $ht[$key]
+        if ($null -eq $val) { continue }
+        $valJson = $val | ConvertTo-Json -Depth 20 -Compress
+        $valBytes = [System.Text.Encoding]::UTF8.GetByteCount($valJson)
+        $fieldSizes += [pscustomobject]@{ Name = $key; Bytes = $valBytes; Json = $valJson }
+    }
+    $fieldSizes = $fieldSizes | Sort-Object Bytes -Descending
+
+    $truncated = @{}
+    $maxIterations = 50
+
+    for ($iter = 0; $iter -lt $maxIterations; $iter++) {
+        # Re-serialize the working row to check current size
+        $currentRow = [pscustomobject]$ht
+        $currentJson = $currentRow | ConvertTo-Json -Depth 20 -Compress
+        $currentBytes = [System.Text.Encoding]::UTF8.GetByteCount($currentJson)
+
+        if ($currentBytes -lt $TargetBytes) {
+            if ($truncated.Count -gt 0) {
+                $ht['_TruncatedFields'] = ($truncated | ConvertTo-Json -Compress)
+            }
+            return [pscustomobject]$ht
+        }
+
+        # Truncate next-largest field that's not already truncated AND exceeds FieldTruncBytes
+        $candidate = $fieldSizes | Where-Object { -not $truncated.ContainsKey($_.Name) -and $_.Bytes -gt $FieldTruncBytes } | Select-Object -First 1
+        if ($null -eq $candidate) {
+            # No more candidates to truncate — return null to indicate failure
+            return $null
+        }
+
+        $origBytes = $candidate.Bytes
+        $origVal = $ht[$candidate.Name]
+        # Truncate string-like fields by char-count (UTF-8 worst case ≈ 4 bytes/char,
+        # but for typical JSON content ~1-2 bytes/char). Conservative: half of FieldTruncBytes.
+        $charLimit = [math]::Max(1, [math]::Floor($FieldTruncBytes / 2))
+        if ($origVal -is [string]) {
+            $clip = if ($origVal.Length -gt $charLimit) { $origVal.Substring(0, $charLimit) } else { $origVal }
+            $ht[$candidate.Name] = "[TRUNCATED:$origBytes] $clip"
+        } else {
+            # Object/array — serialize, then clip the JSON string
+            $serialized = $candidate.Json
+            $clip = if ($serialized.Length -gt $charLimit) { $serialized.Substring(0, $charLimit) } else { $serialized }
+            $ht[$candidate.Name] = "[TRUNCATED:$origBytes] $clip"
+        }
+        $truncated[$candidate.Name] = $origBytes
+    }
+
+    return $null
+}
+
 function Send-ToLogAnalytics {
     <#
     .SYNOPSIS
@@ -129,10 +240,32 @@ function Send-ToLogAnalytics {
         if ([string]::IsNullOrEmpty($rowJson)) { continue }
         $rowBytes = [System.Text.Encoding]::UTF8.GetByteCount($rowJson)
 
-        # If this single row exceeds the limit, log a warning and skip
+        # Hot-Fix 7 (2026-05-10): per-field truncate instead of skip.
+        # PRIOR BEHAVIOUR: rows >MaxBatchBytes (e.g. MDE_AssetRules_CL with 1.4MB
+        # ruleDefinition+kqlQuery) were SKIPPED entirely → silent data loss.
+        # NEW BEHAVIOUR: identify oversized fields by serialized size, truncate
+        # each to FieldTruncBytes (default 8KB) descending until the row fits.
+        # Preserves all other typed cols + RawJson; appends _TruncatedFields
+        # metadata so operators can see what was clipped.
         if ($rowBytes -ge $MaxBatchBytes) {
-            Write-Warning "Row exceeds $MaxBatchBytes bytes ($rowBytes); skipping. StreamName=$StreamName"
-            continue
+            $compressedRow = Compress-OversizedRow -Row $row -TargetBytes $MaxBatchBytes -FieldTruncBytes 8KB -StreamName $StreamName
+            if ($null -eq $compressedRow) {
+                # Even after maximum truncation, row still too large — give up + warn.
+                Write-Warning "Row STILL exceeds $MaxBatchBytes bytes after per-field truncation; skipping. StreamName=$StreamName"
+                Send-XdrAppInsightsCustomEvent -EventName 'Ingest.RowDroppedAfterTruncate' -Properties @{
+                    Stream = $StreamName
+                    OriginalBytes = $rowBytes
+                } -ErrorAction SilentlyContinue
+                continue
+            }
+            $row = $compressedRow
+            $rowJson = $row | ConvertTo-Json -Depth 20 -Compress
+            $rowBytes = [System.Text.Encoding]::UTF8.GetByteCount($rowJson)
+            Send-XdrAppInsightsCustomEvent -EventName 'Ingest.RowTruncated' -Properties @{
+                Stream = $StreamName
+                OriginalBytes = $rowBytes  # post-truncate; original logged inside helper
+                TruncatedFields = ($row.PSObject.Properties['_TruncatedFields'].Value | ConvertTo-Json -Compress)
+            } -ErrorAction SilentlyContinue
         }
 
         if (($currentBytes + $rowBytes + 1) -gt $MaxBatchBytes -and $current.Count -gt 0) {

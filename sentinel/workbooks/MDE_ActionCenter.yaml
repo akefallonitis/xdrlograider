@@ -1,0 +1,29 @@
+# MDE — Action Center workbook (Sentinel Solution Hub sidecar metadata).
+#
+# Per-incident response dashboard for Microsoft Defender XDR Action Center
+# events — Live Response sessions, Machine Actions (Isolate/Unisolate/Collect-
+# InvestigationPackage/AntivirusScan), AIR (Automated Investigation & Response)
+# investigation lifecycle.
+#
+# 3 panels:
+#   1. Action Center summary by status (bar chart)
+#   2. Per-device timeline events (table, last 200)
+#   3. Machine actions detail with Live Response output and AIR linkage
+
+name: MDE — Action Center
+description: |
+  Per-incident response dashboard for Microsoft Defender XDR Action Center
+  events. Surfaces operator response actions (Isolate / Unisolate / CollectInvestigationPackage
+  / AntivirusScan), Live Response per-session output, and AIR (Automated
+  Investigation & Response) investigation lifecycle.
+
+  Use cases: IR triage, time-to-action SLO, operator activity audit, AIR
+  investigation review.
+
+  Companion workbooks: MDE_ResponseAudit (audit-focused), MDE_DeviceInventory_Unified
+  (per-device drilldown via canonical entity cols), XdrLogRaider_ConnectorHealth
+  (connector telemetry).
+templateRelativePath: MDE_ActionCenter.json
+subtitle: IR + SOC analyst dashboard
+provider: Community
+support: Community

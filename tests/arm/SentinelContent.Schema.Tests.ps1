@@ -134,14 +134,13 @@ Describe 'Analytic rules YAML schema compliance' {
         }
     }
 
-    It 'compiled sentinelContent.json has 45 per-content metadata back-links to the XdrLogRaider Solution' {
+    It 'compiled sentinelContent.json has 47 per-content metadata back-links to the XdrLogRaider Solution' {
         # One metadata resource per content item — 21 alertRules (14 detection +
-        # 7 XdrOps), 12 hunting savedSearches, 8 workbooks (incl. ConnectorHealth +
-        # MDE_ActionCenter), 4 parser savedSearches (one per cadence tier with
-        # snapshot semantics; the ActionCenter tier carries events not snapshots
-        # so has no parser) = 45. Without these back-links, deployed content
-        # shows as "not from a solution" in Sentinel UI even though the Solution
-        # package exists.
+        # 7 XdrOps), 12 hunting savedSearches, 10 workbooks (incl. ConnectorHealth +
+        # MDE_ActionCenter + MDE_DeviceInventory_Unified [Hot-Fix 14] +
+        # XdrLogRaider_ConnectorOps [Hot-Fix 17]), 4 parser savedSearches = 47.
+        # Without these back-links, deployed content shows as "not from a solution"
+        # in Sentinel UI even though the Solution package exists.
         $compiledPath = Join-Path $script:RepoRoot 'deploy' 'compiled' 'sentinelContent.json'
         $compiled = Get-Content $compiledPath -Raw | ConvertFrom-Json
         $metadata = @($compiled.resources | Where-Object {
@@ -150,13 +149,15 @@ Describe 'Analytic rules YAML schema compliance' {
         # v0.1.0 GA Phase 5.12: 6 ops analytic rules (XdrOps-* + RowVolumeSpike) + 1 ConnectorHealth workbook
         # Section R++++++ Phase 1 S (2026-05-07): added 3 hunting queries for new streams
         # AMEND-9 Phase A.3 (2026-05-09): added XdrOps-StreamWentDry rule (per-stream stale alert)
-        # Total metadata back-links: 21 AnalyticsRule + 12 HuntingQuery + 8 Workbook + 4 Parser = 45
-        @($metadata).Count | Should -Be 45 -Because 'v0.1.0 GA + AMEND-9 A.3: 21 AnalyticsRule (14 detection + 7 XdrOps-* incl StreamWentDry) + 12 HuntingQuery + 8 Workbook + 4 Parser metadata back-links'
+        # HOT-FIX 14 (2026-05-10): added MDE_DeviceInventory_Unified workbook (per-device drilldown)
+        # HOT-FIX 17 (2026-05-10): added XdrLogRaider_ConnectorOps workbook (operator throughput + reliability dashboard)
+        # Total metadata back-links: 21 AnalyticsRule + 12 HuntingQuery + 10 Workbook + 4 Parser = 47
+        @($metadata).Count | Should -Be 47 -Because 'Hot-Fix 14+17: 21 AnalyticsRule + 12 HuntingQuery + 10 Workbook (incl DeviceInventory_Unified + ConnectorOps) + 4 Parser metadata back-links'
 
         $byKind = $metadata | Group-Object { $_.properties.kind }
         ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 21  # 14 detection + 7 XdrOps-* (AMEND-9 A.3 added StreamWentDry)
         ($byKind | Where-Object Name -eq 'HuntingQuery').Count  | Should -Be 12  # 9 + 3 new (R++++++ Phase 1 S: Machines + SecurityPolicies + TVM)
-        ($byKind | Where-Object Name -eq 'Workbook').Count      | Should -Be 8   # 7 + ConnectorHealth (Phase F.1)
+        ($byKind | Where-Object Name -eq 'Workbook').Count      | Should -Be 10  # 9 + Hot-Fix 17 ConnectorOps (operator dashboard)
         ($byKind | Where-Object Name -eq 'Parser').Count        | Should -Be 4
 
         # Every metadata back-link must reference the canonical Solution

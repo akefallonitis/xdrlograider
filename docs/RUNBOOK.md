@@ -106,6 +106,141 @@ Until fixed, **no data flows** — the auth-selftest gate is intentional (see `d
 5. Re-run `Initialize-XdrLogRaiderAuth.ps1`
 6. Review `MDE_Drift_Configuration` + `MDE_Drift_Inventory` for the period of compromise — look for policy / RBAC / settings changes made by the compromised account
 
+### FA cold-start nudge (Y1 Linux Consumption — 503 hangs > 15 min)
+
+**Symptom**: Function App is up but no functions firing post-deploy; portal shows the FA as Running but `AppRequests` shows zero invocations for `Xdr-Refresh` / `Connector-Heartbeat` past their cadence; Sentinel connector card stays "Disconnected".
+
+**Root cause**: Y1 Linux Consumption Plan + WEBSITE_RUN_FROM_PACKAGE = 1 + the function-app.zip URL is hitting GitHub's 302 redirect on `/releases/latest/download/` instead of a direct release-asset URL — the FA's package fetcher hangs on the redirect.
+
+**Fix path**:
+
+1. Identify the actual release-asset URL:
+   ```powershell
+   gh release view v0.1.0 --json assets -q '.assets[] | select(.name=="function-app.zip") | .url'
+   # Returns: https://github.com/akefallonitis/xdrlograider/releases/download/v0.1.0/function-app.zip
+   ```
+2. Update FA appSettings:
+   ```powershell
+   az functionapp config appsettings set --name <fn-app> --resource-group <rg> \
+     --settings WEBSITE_RUN_FROM_PACKAGE='https://github.com/akefallonitis/xdrlograider/releases/download/v0.1.0/function-app.zip'
+   ```
+3. Stop + Start the Function App (full restart — `Restart-AzFunctionApp` is insufficient):
+   ```powershell
+   Stop-AzWebApp -ResourceGroupName <rg> -Name <fn-app>
+   Start-AzWebApp -ResourceGroupName <rg> -Name <fn-app>
+   ```
+4. Wait ≤10 min for cold-start completion. Verify via:
+   ```kql
+   AppRequests | where TimeGenerated > ago(15m) | where Name == 'Xdr-Refresh' | take 5
+   ```
+
+### DLQ replay (drain queued failures)
+
+**Symptom**: `XdrConnectorHealth_CL.DlqDepth > 5` for ≥1 hour, OR analytic rule `XdrOps-DlqDepthAlert` fires.
+
+**Root cause**: terminal DCE failures (429-storm or 5xx-exhaustion) spooled rows to the dead-letter Storage table `xdrIngestDlq` (per-stream queues). Replay happens automatically on the next poll cycle for that stream — but if the underlying transient cause persists, depth grows.
+
+**Diagnose**:
+
+```powershell
+# Get DLQ depth + age per stream
+$ctx = New-AzStorageContext -StorageAccountName <sa-name> -UseConnectedAccount
+$rows = Get-AzStorageTableRowAll -table (Get-AzStorageTable -Context $ctx -Name xdrIngestDlq).CloudTable
+$rows | Group-Object PartitionKey | Select Name, Count, @{n='OldestUtc';e={($_.Group | Sort EnqueuedUtc | Select -First 1).EnqueuedUtc}}
+```
+
+**Force replay** (if next poll cycle is too far out):
+
+1. Manually invoke `Pop-XdrIngestDlq` for the affected stream (runs in `Xdr-PollStream` activity context — call it via Function App console `func host run` or trigger an out-of-band orchestration via `Start-NewOrchestration`).
+2. Or trigger immediate poll: bump the cadence override env var to fire the tier early, then revert.
+3. If replay continues to fail with the same error class: Microsoft platform issue — file `portal_endpoint_broken` issue.
+
+**TTL eviction**: rows older than 7 days are auto-evicted by `Pop-XdrIngestDlq`. Operators don't need to manually purge.
+
+### B2 auth circuit-breaker reset
+
+**Symptom**: `AppExceptions` shows `AuthChain.FailureCircuit` events. The connector entered a fail-fast state after >2 consecutive sign-in failures within 5 min — it stops trying for the cache-TTL window (default 5 min back-off + 50 min normal cache) so a stale credential doesn't re-attempt 50× and burn the lockout counter.
+
+**Diagnose**:
+
+```kql
+AppExceptions
+| where TimeGenerated > ago(1h)
+| where ProblemId contains 'AuthChain.FailureCircuit' or Properties contains 'AuthChain.FailureCircuit'
+| project TimeGenerated, ProblemId, Properties
+| order by TimeGenerated desc
+```
+
+**Reset path**:
+
+1. **Identify root auth failure** first (see "Auth chain failure" procedure above) — the circuit-breaker is a SYMPTOM of underlying auth issue, not the cause.
+2. After fixing the underlying auth (password reset, TOTP regen, passkey re-issue, CA exclusion), force a credential cache eviction:
+   - Easiest: Stop+Start the Function App (clears module-scope cache including `$script:AuthFailureCount`)
+   - Or: wait the natural cache TTL (default 60 min normal, 5 min on failure circuit)
+3. Verify successful sign-in:
+   ```kql
+   AppEvents | where Name == 'AuthChain.Completed' and TimeGenerated > ago(15m) | take 5
+   ```
+
+### Stuck Durable orchestration recovery
+
+**Symptom**: an `Xdr-PollOrchestrator` instance has been Running > 30 min (way past tier cadence); `XdrOps-OrchestrationStuck` rule fires (if enabled); subsequent orchestrations for the same Portal+Tier are queued behind it.
+
+**Diagnose**:
+
+```powershell
+# Connect to Storage account, query Durable Task Hub
+$ctx = New-AzStorageContext -StorageAccountName <sa-name> -UseConnectedAccount
+$instances = Get-AzStorageTableRowAll -table (Get-AzStorageTable -Context $ctx -Name 'XdrLogRaiderInstances').CloudTable
+$instances | Where-Object { $_.RuntimeStatus -eq 'Running' } |
+    Sort-Object CreatedTime |
+    Select InstanceId, Name, CreatedTime, LastUpdatedTime, RuntimeStatus
+```
+
+**Force-terminate stuck instance**:
+
+```powershell
+# Use the Durable Functions HTTP admin API
+$admin = Get-AzWebAppPublishingProfile -Name <fn-app> -ResourceGroupName <rg> -Format WebDeploy
+$key = (az functionapp keys list --resource-group <rg> --name <fn-app> --query systemKeys.durabletask_extension -o tsv)
+Invoke-RestMethod -Method Post -Uri "https://<fn-app>.azurewebsites.net/runtime/webhooks/durabletask/instances/<InstanceId>/terminate?reason=stuck-recovery&taskHub=XdrLogRaiderHub&code=$key"
+```
+
+**Identify orchestration leak root cause**:
+
+1. Look at the `Xdr-PollStream` activity inputs for the stuck instance — was it the same stream over and over? Likely candidate: an activity that throws AND the orchestrator's `try/catch` doesn't bubble up properly.
+2. Check `AppExceptions` for the stuck instance's `OperationId` — typically the activity throws into a void that the orchestrator can't observe.
+3. File a `bug_report` issue with the InstanceId + activity name + exception.
+
+### DCE flap diagnosis (ingest 5xx spikes)
+
+**Symptom**: `XdrConnectorHealth_CL.RowsIngested` drops to zero for one or more streams while `StreamsAttempted > 0` (the activity ran and got rows but ingest failed); `AppDependencies` shows `ingest.monitor.azure.com` 5xx clusters; analytic rule `XdrOps-RowVolumeSpike` may fire on the recovery surge.
+
+**Diagnose**:
+
+```kql
+// DCE 5xx pattern — last 6h, per-host
+AppDependencies
+| where TimeGenerated > ago(6h)
+| where Target has 'ingest.monitor.azure.com'
+| where ResultCode startswith '5'
+| summarize FailCount=count(), Hosts=make_set(Target) by ResultCode, bin(TimeGenerated, 5m)
+| order by TimeGenerated desc
+```
+
+**Likely causes (ranked)**:
+
+1. **DCE region outage** (rare; check Azure Service Health for region) — wait it out; data spools to DLQ; replay happens on next poll cycle.
+2. **DCR throttling** — single DCR exceeded its 10-flow cap. Verify via `Audit-DcrSchema.ps1`. Resolution: split the DCR (per `tools/Build-DcrSection.ps1` redistribute logic).
+3. **DCE endpoint URL stale in FA appSettings** — happens after ARM redeploy if the DCE was recreated with a new immutable ID. Verify the appSettings `DCE_ENDPOINT` matches the current DCE resource ID.
+4. **Authentication regression** — SAMI token expired/refresh failed. Check `AppExceptions` for `Get-MonitorIngestionToken` errors.
+
+**Mitigation**:
+
+1. If DCE outage: confirm via Azure portal Service Health; wait + verify DLQ replay drains depth back to baseline.
+2. If DCR throttle: the connector handles this gracefully via DLQ — depth grows then drains as the DCE recovers. If depth continues to grow > 1h, consider increasing DCR row-batch size limits (carefully — `MaxBatchBytes=900KB` per Hot-Fix 7 design) or splitting hot streams to a dedicated DCR.
+3. If FA appSettings stale: re-run ARM redeploy or manually update via `az functionapp config appsettings set`.
+
 ## App Insights structured-logging KQL
 
 The connector emits Microsoft-best-practices structured logging to App Insights.

@@ -23,8 +23,8 @@ Every row written by the connector carries the same baseline columns:
 |---|---|---|
 | `TimeGenerated` | `datetime` | When the row was ingested (the `TimeGenerated` cast in DCR `transformKql`). |
 | `SourceStream` | `string` | The stream name (e.g. `MDE_AdvancedFeatures_CL`). Lets a single workspace differentiate cross-stream `union` results. |
-| `EntityId` | `string` | The per-row primary identifier extracted by the response-expander (rule ID, action ID, machine ID, AAD principal ID, or — for property-bag-shaped responses — the wrapper key name). |
-| `RawJson` | `dynamic` | The full response object for that row preserved verbatim. Always present; existing queries that extract fields with `parse_json(RawJson).fieldName` keep working unchanged. |
+| `EntityId` | `string` | The per-row primary identifier extracted by the response-expander (rule ID, action ID, machine ID, AAD principal ID, or — for property-bag-shaped responses — the wrapper key name). **Note (Hot-Fix 12, 2026-05-10):** TVM streams (`MDE_VulnerableMachines_CL`, `MDE_VulnerabilityInventory_CL`, etc.) use the term `AssetId` in their typed cols — `AssetId == EntityId` for those rows; both fields are populated and queryable. The `EntityId` baseline name is canonical across all 64 streams; the `AssetId` typed col is a TVM-domain alias for operator readability. |
+| `RawJson` | `dynamic` | The full response object for that row preserved verbatim. Always present; existing queries that extract fields with `parse_json(RawJson).fieldName` keep working unchanged. **Note:** `RawJson` is a forensic FAILOVER and debug/troubleshoot field — not the primary query target. Every operator-valuable field SHOULD be promoted to a typed column via `ProjectionMap`. If you find yourself reaching for `parse_json(RawJson)` in a query, file a follow-up to add the field as a typed col. |
 
 On top of those four, each stream contributes a per-stream **projection map** that flattens commonly-needed fields into their own typed columns. The projection map is declared in the connector's endpoint manifest and is what powers the typed-column ingest. Three benefits:
 
