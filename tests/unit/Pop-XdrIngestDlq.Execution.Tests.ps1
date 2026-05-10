@@ -281,13 +281,10 @@ Describe 'Pop-XdrIngestDlq.Execution — TTL expiration' {
         Mock -ModuleName Xdr.Sentinel.Ingest Remove-XdrIngestDlqEntry        { }
     }
 
-    It 'Expired entry (ExpiresUtc < now) auto-deletes + emits Ingest.DlqExpired' -Skip {
-        # Skipped: ConvertTo-Json -> ConvertFrom-Json round-trip on ExpiresUtc
-        # auto-converts to [datetime] in PS 7.x; locale-specific [string] cast
-        # interacts with [datetime]::Parse in ways that cause this in-process
-        # test to bypass the TTL skip. Production runtime path is fine
-        # (real Azure Tables returns ExpiresUtc as ISO string, not converted).
-        # Follow-up to reproduce + assert via a different fixture shape.
+    It 'Expired entry (ExpiresUtc < now) auto-deletes + emits Ingest.DlqExpired' {
+        # Production code now handles both [string] and [datetime] for ExpiresUtc
+        # (ConvertFrom-Json auto-coerces ISO-8601 to [datetime] in PS 7.x).
+        # Both paths use InvariantCulture + RoundtripKind to keep UTC semantics.
         $expiredUtc = ([datetime]::UtcNow.AddDays(-1)).ToString('o')
         $body = @{
             value = @(

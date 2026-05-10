@@ -457,9 +457,9 @@ if ($failCount -gt 0) {
     }
 }
 
-# Hard failures = anything that isn't a WARNING
+# Hard failures = anything that isn't a WARNING or INFO (E12 emits INFO; E1-E11 emit WARNING/missing)
 $hardFailures = @($results | Where-Object {
-    $_.Issues | Where-Object { $_ -notmatch '^E\d+: WARNING' }
+    $_.Issues | Where-Object { $_ -notmatch '^E\d+: (WARNING|INFO)' }
 })
 
 if (-not $DryRun) {

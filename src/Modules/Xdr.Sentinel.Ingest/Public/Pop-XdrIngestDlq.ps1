@@ -244,7 +244,22 @@ function Pop-XdrIngestDlq {
         # documented in the prior CHANGELOG.
         if ($e.PSObject.Properties['ExpiresUtc'] -and $e.ExpiresUtc) {
             $expiresUtc = $null
-            try { $expiresUtc = [datetime]::Parse([string]$e.ExpiresUtc).ToUniversalTime() } catch {}
+            # Defensive: ConvertFrom-Json in PS 7.x auto-coerces ISO-8601 strings
+            # to [datetime] objects (locale-sensitive). Real Azure Tables returns
+            # ExpiresUtc as ISO string, but the in-process JSON round-trip
+            # via Invoke-WebRequest -> ConvertFrom-Json produces [datetime].
+            # Handle both shapes to keep UTC semantics correct.
+            try {
+                if ($e.ExpiresUtc -is [datetime]) {
+                    $expiresUtc = ([datetime]$e.ExpiresUtc).ToUniversalTime()
+                } else {
+                    $expiresUtc = [datetime]::Parse(
+                        [string]$e.ExpiresUtc,
+                        [System.Globalization.CultureInfo]::InvariantCulture,
+                        [System.Globalization.DateTimeStyles]::RoundtripKind
+                    ).ToUniversalTime()
+                }
+            } catch {}
             if ($expiresUtc -and $expiresUtc -lt $now) {
                 # Expired — emit Ingest.DlqExpired exception + delete + skip
                 if (Get-Command -Name Send-XdrAppInsightsException -ErrorAction SilentlyContinue) {

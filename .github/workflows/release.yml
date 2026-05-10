@@ -398,7 +398,9 @@ jobs:
 
       - name: Sign release artefacts (Sigstore-cosign keyless)
         shell: bash
-        continue-on-error: true  # signing is supply-chain-hardening; release proceeds unsigned if cosign fails
+        # GA-grade: signing is supply-chain integrity pillar. Release MUST fail
+        # if any artefact cannot be signed. Per audit 2026-05-10 — was previously
+        # continue-on-error: true which silently shipped unsigned artefacts.
         env:
           COSIGN_EXPERIMENTAL: "1"
         run: |
@@ -412,21 +414,30 @@ jobs:
               if [[ -f "$artifact" ]]; then
                   echo "Signing $artifact..."
                   cosign sign-blob --yes --bundle "$artifact.bundle" "$artifact" > "$artifact.sig" || {
-                      echo "::warning::cosign sign-blob failed for $artifact — continuing unsigned"
-                      continue
+                      echo "::error::cosign sign-blob FAILED for $artifact — release aborts"
+                      exit 1
                   }
                   echo "  ✓ $artifact.sig + $artifact.bundle written"
               else
-                  echo "  - $artifact missing; skipping"
+                  echo "::error::required artefact $artifact missing"
+                  exit 1
               fi
           done
           # Solution zip uses glob; sign whichever version was produced
+          solzip_count=0
           for solzip in ./xdrlograider-solution-*.zip; do
               if [[ -f "$solzip" ]]; then
-                  cosign sign-blob --yes --bundle "$solzip.bundle" "$solzip" > "$solzip.sig" || \
-                      echo "::warning::cosign sign-blob failed for $solzip"
+                  solzip_count=$((solzip_count + 1))
+                  cosign sign-blob --yes --bundle "$solzip.bundle" "$solzip" > "$solzip.sig" || {
+                      echo "::error::cosign sign-blob FAILED for $solzip"
+                      exit 1
+                  }
               fi
           done
+          if [[ $solzip_count -eq 0 ]]; then
+              echo "::error::no xdrlograider-solution-*.zip found to sign"
+              exit 1
+          fi
 
       - name: Guarantee SBOM file exists (fallback stub)
         shell: pwsh
