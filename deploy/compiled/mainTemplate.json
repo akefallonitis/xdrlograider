@@ -866,7 +866,13 @@
                     {
                       "name": "PolicyId",
                       "type": "string"
-                    }
+                    },
+                    {"name": "AssignedRoleIds", "type": "string"},
+                    {"name": "CreatedByUpn", "type": "string"},
+                    {"name": "AadGroupNames", "type": "string"},
+                    {"name": "MachineGroupId", "type": "string"},
+                    {"name": "LastUpdatedByUpn", "type": "string"},
+                    {"name": "MachineGroupName", "type": "string"}
                   ]
                 }
               }
@@ -1898,7 +1904,14 @@
                     {
                       "name": "ReportPeriod",
                       "type": "string"
-                    }
+                    },
+                    {"name": "AlertCount", "type": "int"},
+                    {"name": "ServicePrincipalNames", "type": "string"},
+                    {"name": "FirstSeenUtc", "type": "datetime"},
+                    {"name": "IsHoneytoken", "type": "boolean"},
+                    {"name": "IsPrivileged", "type": "boolean"},
+                    {"name": "DisplayName", "type": "string"},
+                    {"name": "ClassificationLabel", "type": "string"}
                   ]
                 }
               }
@@ -2049,7 +2062,18 @@
                     {
                       "name": "PolicyId",
                       "type": "string"
-                    }
+                    },
+                    {"name": "AccountMode", "type": "int"},
+                    {"name": "IsSuspended", "type": "boolean"},
+                    {"name": "IsDeleted", "type": "boolean"},
+                    {"name": "IsMdatpLicenseExpired", "type": "boolean"},
+                    {"name": "IsMtpEligible", "type": "boolean"},
+                    {"name": "HasMachineGroups", "type": "boolean"},
+                    {"name": "IsMapgActive", "type": "boolean"},
+                    {"name": "IsDlpActive", "type": "boolean"},
+                    {"name": "IsIrmActive", "type": "boolean"},
+                    {"name": "ActiveMtpWorkloads", "type": "string"},
+                    {"name": "Features", "type": "dynamic"}
                   ]
                 }
               }
@@ -2618,7 +2642,18 @@
                     {
                       "name": "Url",
                       "type": "string"
-                    }
+                    },
+                    {"name": "Description", "type": "string"},
+                    {"name": "Category", "type": "string"},
+                    {"name": "RemediationType", "type": "string"},
+                    {"name": "ProductId", "type": "string"},
+                    {"name": "ProductName", "type": "string"},
+                    {"name": "VendorId", "type": "string"},
+                    {"name": "CompletionRate", "type": "real"},
+                    {"name": "AssignedToEmail", "type": "string"},
+                    {"name": "NotesCount", "type": "int"},
+                    {"name": "AssociatedCveIds", "type": "string"},
+                    {"name": "AccountName", "type": "string"}
                   ]
                 }
               }
@@ -3832,7 +3867,13 @@
               {
                 "name": "GroupRules",
                 "type": "dynamic"
-              }
+              },
+              {"name": "AadGroupNames", "type": "string"},
+              {"name": "AssignedRoleIds", "type": "string"},
+              {"name": "CreatedByUpn", "type": "string"},
+              {"name": "LastUpdatedByUpn", "type": "string"},
+              {"name": "MachineGroupId", "type": "string"},
+              {"name": "MachineGroupName", "type": "string"}
             ]
           },
           "Custom-MDE_UnifiedRbacRoles_CL": {
@@ -6056,50 +6097,27 @@
           },
           "Custom-MDE_IdentityServiceAccounts_CL": {
             "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "SourceStream",
-                "type": "string"
-              },
-              {
-                "name": "EntityId",
-                "type": "string"
-              },
-              {
-                "name": "RawJson",
-                "type": "dynamic"
-              },
-              {
-                "name": "AccountSid",
-                "type": "string"
-              },
-              {
-                "name": "AccountType",
-                "type": "string"
-              },
-              {
-                "name": "AccountUpn",
-                "type": "string"
-              },
-              {
-                "name": "Domain",
-                "type": "string"
-              },
-              {
-                "name": "IsActive",
-                "type": "boolean"
-              },
-              {
-                "name": "LastSeenUtc",
-                "type": "datetime"
-              },
-              {
-                "name": "Risk",
-                "type": "string"
-              }
+              {"name": "TimeGenerated", "type": "datetime"},
+              {"name": "SourceStream", "type": "string"},
+              {"name": "EntityId", "type": "string"},
+              {"name": "RawJson", "type": "dynamic"},
+              {"name": "AccountSid", "type": "string"},
+              {"name": "AccountType", "type": "string"},
+              {"name": "AccountUpn", "type": "string"},
+              {"name": "Domain", "type": "string"},
+              {"name": "IsActive", "type": "boolean"},
+              {"name": "LastSeenUtc", "type": "datetime"},
+              {"name": "Risk", "type": "string"},
+              {"name": "AccountObjectId", "type": "string"},
+              {"name": "DisplayName", "type": "string"},
+              {"name": "ServicePrincipalNames", "type": "string"},
+              {"name": "IsPrivileged", "type": "boolean"},
+              {"name": "IsHoneytoken", "type": "boolean"},
+              {"name": "AlertCount", "type": "int"},
+              {"name": "FirstSeenUtc", "type": "datetime"},
+              {"name": "ClassificationLabel", "type": "string"},
+              {"name": "AccountUPNSuffix", "type": "string"},
+              {"name": "AccountName", "type": "string"}
             ]
           },
           "Custom-MDE_RemediationAccounts_CL": {
@@ -6409,7 +6427,18 @@
               {
                 "name": "TenantName",
                 "type": "string"
-              }
+              },
+              {"name": "AccountMode", "type": "int"},
+              {"name": "IsSuspended", "type": "boolean"},
+              {"name": "IsDeleted", "type": "boolean"},
+              {"name": "IsMdatpLicenseExpired", "type": "boolean"},
+              {"name": "IsMtpEligible", "type": "boolean"},
+              {"name": "HasMachineGroups", "type": "boolean"},
+              {"name": "IsMapgActive", "type": "boolean"},
+              {"name": "IsDlpActive", "type": "boolean"},
+              {"name": "IsIrmActive", "type": "boolean"},
+              {"name": "ActiveMtpWorkloads", "type": "string"},
+              {"name": "Features", "type": "dynamic"}
             ]
           },
           "Custom-MDE_TenantWorkloadStatus_CL": {
@@ -7324,50 +7353,29 @@
           },
           "Custom-MDE_RecommendationActions_CL": {
             "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "SourceStream",
-                "type": "string"
-              },
-              {
-                "name": "EntityId",
-                "type": "string"
-              },
-              {
-                "name": "RawJson",
-                "type": "dynamic"
-              },
-              {
-                "name": "RemediationTaskId",
-                "type": "string"
-              },
-              {
-                "name": "Title",
-                "type": "string"
-              },
-              {
-                "name": "Status",
-                "type": "string"
-              },
-              {
-                "name": "Priority",
-                "type": "string"
-              },
-              {
-                "name": "AssetCount",
-                "type": "int"
-              },
-              {
-                "name": "CreatedDate",
-                "type": "datetime"
-              },
-              {
-                "name": "DueDate",
-                "type": "datetime"
-              }
+              {"name": "TimeGenerated", "type": "datetime"},
+              {"name": "SourceStream", "type": "string"},
+              {"name": "EntityId", "type": "string"},
+              {"name": "RawJson", "type": "dynamic"},
+              {"name": "RemediationTaskId", "type": "string"},
+              {"name": "Title", "type": "string"},
+              {"name": "Status", "type": "string"},
+              {"name": "Priority", "type": "string"},
+              {"name": "AssetCount", "type": "int"},
+              {"name": "CreatedDate", "type": "datetime"},
+              {"name": "DueDate", "type": "datetime"},
+              {"name": "Description", "type": "string"},
+              {"name": "Category", "type": "string"},
+              {"name": "RemediationType", "type": "string"},
+              {"name": "ProductId", "type": "string"},
+              {"name": "ProductName", "type": "string"},
+              {"name": "VendorId", "type": "string"},
+              {"name": "CompletionRate", "type": "real"},
+              {"name": "AssignedToEmail", "type": "string"},
+              {"name": "NotesCount", "type": "int"},
+              {"name": "AssociatedCveIds", "type": "string"},
+              {"name": "AccountName", "type": "string"},
+              {"name": "CveId", "type": "string"}
             ]
           }
         },
