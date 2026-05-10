@@ -1,0 +1,215 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# XdrLogRaider — Connector Ops Dashboard\n\n**What this dashboard shows:** Operator-facing operations view focused on connector throughput + reliability + cost trends. Complements `XdrLogRaider_ConnectorHealth` (binary health checks) with VELOCITY + DEPTH + RATE telemetry SOC operators need for capacity planning + incident triage.\n\n**Use cases:**\n- **Capacity planning**: ingestion velocity per stream + per category + per cadence tier; baseline drift + spike detection\n- **DLQ triage**: depth + age + per-stream replay status; identify backed-up streams before SLA breach\n- **Auth chain reliability**: retry storms + AADSTS error class breakdown + circuit-breaker telemetry\n- **Stream health velocity**: row-rate trending per SourceName; identify gradually-dying streams BEFORE they go fully dry\n- **Rate-limit detection**: 429 storms by host with Retry-After distribution\n- **Cold-start tracking**: Function App restart cadence + first-row latency\n- **Cost optimization**: row volume per stream-tier; identify streams violating cost-budget\n\n**Panels:**\n1. Ingestion velocity per category — last 24h time-series (rows/min)\n2. DLQ depth + oldest-entry age trending\n3. Auth chain failure breakdown (AADSTS code histogram + retry distribution)\n4. Stream-level health velocity matrix (rows/hour delta vs prior-period baseline)\n5. Rate-limit (429) storm chart per host\n6. Function App invocation success rate (Xdr-Refresh + Xdr-PollOrchestrator + Xdr-PollStream + Connector-Heartbeat)\n7. Per-stream Hot-Fix 7 truncation events (Ingest.RowTruncated)\n8. Cost-budget gate trip events (XdrOps-RowVolumeSpike)\n\n**Data sources:** `AppRequests` + `AppDependencies` + `AppExceptions` + `AppEvents` + `AppMetrics` + `XdrConnectorHealth_CL` + 10 `Defender_<Category>_CL` workspace tables.\n\n**Hot-Fix 17 NEW (2026-05-10)**: created to address operator pain point — connector observability beyond binary 'Connected/Disconnected'. References Hot-Fix 7 truncation telemetry, Hot-Fix 6 single-value graphQuery, Hot-Fix 8 storage 409 suppression, Hot-Fix 5 drift parser cardinality."
+      },
+      "name": "title"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "11111111-aaaa-1111-aaaa-111111111111",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Time range",
+            "type": 4,
+            "isRequired": true,
+            "value": {"durationMs": 86400000},
+            "typeSettings": {
+              "selectableValues": [
+                {"durationMs": 3600000},
+                {"durationMs": 14400000},
+                {"durationMs": 86400000},
+                {"durationMs": 604800000}
+              ]
+            }
+          },
+          {
+            "id": "22222222-aaaa-2222-aaaa-222222222222",
+            "version": "KqlParameterItem/1.0",
+            "name": "Category",
+            "label": "Category filter",
+            "type": 2,
+            "isRequired": false,
+            "multiSelect": true,
+            "value": ["all"],
+            "typeSettings": {
+              "showDefault": false,
+              "additionalResourceOptions": ["value::all"]
+            },
+            "jsonData": "[{\"value\":\"ActionCenter\",\"label\":\"ActionCenter (10m)\"},{\"value\":\"XspmGraph\",\"label\":\"XspmGraph (1h)\"},{\"value\":\"Configuration\",\"label\":\"Configuration (6h)\"},{\"value\":\"Inventory\",\"label\":\"Inventory (24h)\"},{\"value\":\"Maintenance\",\"label\":\"Maintenance (7d)\"}]"
+          }
+        ],
+        "style": "above",
+        "queryType": 0
+      },
+      "name": "params"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## 1. Ingestion velocity per category — last 24h time-series"
+      },
+      "name": "section1"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union\n    (Defender_ActionCenter_CL              | extend Category='ActionCenter'),\n    (Defender_ConfigurationAndSettings_CL  | extend Category='ConfigurationAndSettings'),\n    (Defender_EndpointConfiguration_CL     | extend Category='EndpointConfiguration'),\n    (Defender_EndpointDeviceManagement_CL  | extend Category='EndpointDeviceManagement'),\n    (Defender_ExposureManagement_CL        | extend Category='ExposureManagement'),\n    (Defender_IdentityProtection_CL        | extend Category='IdentityProtection'),\n    (Defender_MultiTenantOperations_CL     | extend Category='MultiTenantOperations'),\n    (Defender_StreamingApi_CL              | extend Category='StreamingApi'),\n    (Defender_ThreatAnalytics_CL           | extend Category='ThreatAnalytics'),\n    (Defender_VulnerabilityManagement_CL   | extend Category='VulnerabilityManagement')\n| where TimeGenerated {TimeRange}\n| summarize Rows = count() by bin(TimeGenerated, 15m), Category\n| render timechart",
+        "size": 0,
+        "title": "Ingestion velocity per category (rows/15min)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "velocity"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## 2. DLQ depth + oldest-entry age trending"
+      },
+      "name": "section2"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where TimeGenerated {TimeRange}\n| where Name in ('xdr.dlq.depth', 'xdr.dlq.oldest_age_minutes')\n| summarize Value = max(Sum) by bin(TimeGenerated, 5m), Name\n| render timechart",
+        "size": 0,
+        "title": "DLQ depth + oldest-entry age (5min bins)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "dlq"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## 3. Auth chain failure breakdown (AADSTS code histogram)"
+      },
+      "name": "section3"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppExceptions\n| where TimeGenerated {TimeRange}\n| where Properties contains 'AuthChain' or ProblemId contains 'AADSTS' or Message contains 'AADSTS'\n| extend AADSTSCode = tostring(Properties.AADSTSCode)\n| extend Stage = tostring(Properties.Stage)\n| summarize FailureCount = count(), Streams = make_set(tostring(Properties.Stream), 30) by AADSTSCode, Stage\n| order by FailureCount desc",
+        "size": 0,
+        "title": "Auth chain failures (AADSTS code x Stage breakdown)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "auth-failures"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## 4. Stream-level health velocity matrix"
+      },
+      "name": "section4"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let now_count = union\n    Defender_ActionCenter_CL, Defender_ConfigurationAndSettings_CL,\n    Defender_EndpointConfiguration_CL, Defender_EndpointDeviceManagement_CL,\n    Defender_ExposureManagement_CL, Defender_IdentityProtection_CL,\n    Defender_MultiTenantOperations_CL, Defender_StreamingApi_CL,\n    Defender_ThreatAnalytics_CL, Defender_VulnerabilityManagement_CL\n    | where TimeGenerated > ago(24h)\n    | summarize NowRows = count() by SourceName;\nlet prev_count = union\n    Defender_ActionCenter_CL, Defender_ConfigurationAndSettings_CL,\n    Defender_EndpointConfiguration_CL, Defender_EndpointDeviceManagement_CL,\n    Defender_ExposureManagement_CL, Defender_IdentityProtection_CL,\n    Defender_MultiTenantOperations_CL, Defender_StreamingApi_CL,\n    Defender_ThreatAnalytics_CL, Defender_VulnerabilityManagement_CL\n    | where TimeGenerated between (ago(48h) .. ago(24h))\n    | summarize PrevRows = count() by SourceName;\nnow_count\n| join kind=fullouter prev_count on SourceName\n| extend Stream = coalesce(SourceName, SourceName1)\n| extend NowRows = coalesce(NowRows, 0)\n| extend PrevRows = coalesce(PrevRows, 0)\n| extend DeltaPct = case(\n    PrevRows == 0 and NowRows > 0, 100.0,\n    PrevRows == 0 and NowRows == 0, 0.0,\n    round((NowRows - PrevRows) * 100.0 / PrevRows, 1))\n| extend Trend = case(\n    DeltaPct > 200, '🔥 Spike',\n    DeltaPct > 20, '📈 Up',\n    DeltaPct < -50, '⚠️ Drop',\n    DeltaPct < -20, '📉 Down',\n    'Stable')\n| project Stream, NowRows, PrevRows, DeltaPct, Trend\n| order by abs(DeltaPct) desc",
+        "size": 0,
+        "title": "Stream health velocity (24h current vs prior-24h baseline)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "velocity-matrix"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## 5. Rate-limit (429) storms per host"
+      },
+      "name": "section5"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppDependencies\n| where TimeGenerated {TimeRange}\n| where ResultCode == '429'\n| extend Host = tostring(split(Target, '/')[2])\n| summarize Count429 = count(), AvgRetryAfter = avg(toint(tostring(Properties.RetryAfter))) by bin(TimeGenerated, 30m), Host\n| render timechart",
+        "size": 0,
+        "title": "429 storms per host (30min bins)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "rate-limits"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## 6. Function App invocation success rate"
+      },
+      "name": "section6"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppRequests\n| where TimeGenerated {TimeRange}\n| where Name in ('Xdr-Refresh', 'Xdr-PollOrchestrator', 'Xdr-PollStream', 'Connector-Heartbeat')\n| summarize\n    Total = count(),\n    Succ = countif(Success),\n    Fail = countif(!Success),\n    P50_ms = percentile(DurationMs, 50),\n    P95_ms = percentile(DurationMs, 95),\n    P99_ms = percentile(DurationMs, 99)\n    by Name\n| extend SuccessRate = round(Succ * 100.0 / Total, 2)\n| order by Name asc",
+        "size": 0,
+        "title": "FA invocation health (success rate + latency percentiles)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "fa-health"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## 7. Per-stream Hot-Fix 7 truncation events"
+      },
+      "name": "section7"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppEvents\n| where TimeGenerated {TimeRange}\n| where Name == 'Ingest.RowTruncated'\n| extend Stream = tostring(Properties.Stream)\n| extend OriginalBytes = toint(Properties.OriginalBytes)\n| summarize\n    TruncationEvents = count(),\n    AvgOriginalBytes = avg(OriginalBytes),\n    MaxOriginalBytes = max(OriginalBytes)\n    by Stream\n| order by TruncationEvents desc",
+        "size": 0,
+        "title": "Hot-Fix 7 row-size truncation events per stream (was: silent skip + data loss)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "truncations"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## 8. Cost-budget gate trip events"
+      },
+      "name": "section8"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppEvents\n| where TimeGenerated {TimeRange}\n| where Name in ('Ingest.RowDroppedAfterTruncate', 'Stream.RowVolumeSpike', 'Stream.CostBudgetTrip')\n| extend Stream = tostring(Properties.Stream)\n| summarize Events = count() by bin(TimeGenerated, 1h), Name, Stream\n| order by TimeGenerated desc",
+        "size": 0,
+        "title": "Cost-budget gate trips (RowVolumeSpike + RowDroppedAfterTruncate + CostBudgetTrip)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "cost-trips"
+    }
+  ],
+  "fallbackResourceIds": ["[parameters('workspaceResourceId')]"],
+  "fromTemplateId": "sentinel-XdrLogRaider-XdrLogRaider_ConnectorOps",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

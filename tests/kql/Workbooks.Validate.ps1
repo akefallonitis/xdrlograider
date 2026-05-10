@@ -5,12 +5,12 @@ BeforeAll {
 }
 
 Describe 'Workbooks — file presence' {
-    It 'ships exactly 9 workbook .json files (Hot-Fix 14: added MDE_DeviceInventory_Unified)' {
+    It 'ships exactly 10 workbook .json files (Hot-Fix 14+17: DeviceInventory_Unified + ConnectorOps)' {
         $files = Get-ChildItem -Path $script:WorkbooksDir -Filter '*.json'
-        $files.Count | Should -Be 9
+        $files.Count | Should -Be 10
     }
 
-    It 'includes all 9 named workbooks' {
+    It 'includes all 10 named workbooks' {
         $expected = @(
             'MDE_ActionCenter.json',
             'MDE_ComplianceDashboard.json',
@@ -20,7 +20,8 @@ Describe 'Workbooks — file presence' {
             'MDE_GovernanceScorecard.json',
             'MDE_IdentityPosture.json',
             'MDE_ResponseAudit.json',
-            'XdrLogRaider_ConnectorHealth.json'
+            'XdrLogRaider_ConnectorHealth.json',
+            'XdrLogRaider_ConnectorOps.json'
         )
         foreach ($name in $expected) {
             Test-Path (Join-Path $script:WorkbooksDir $name) | Should -BeTrue
