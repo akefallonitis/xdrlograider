@@ -30,4 +30,3 @@ No streams removed. Baseline release.
 
 - [`docs/STREAMS.md`](STREAMS.md) — current 72-stream catalogue (71 live + 1 deprecated)
 - [`CHANGELOG.md`](../CHANGELOG.md) — per-release announcement log
-- [`docs/ROADMAP.md`](ROADMAP.md) — what's planned for upcoming releases

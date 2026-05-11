@@ -14,7 +14,7 @@ XdrLogRaider ships `deploy/compiled/mainTemplate.json` as the canonical, hand-au
 ## Quick links
 
 - [Good first issues](https://github.com/akefallonitis/xdrlograider/labels/good%20first%20issue) — curated starter tasks
-- [Roadmap](docs/ROADMAP.md) — v1.1+ features open for contribution
+- [README — per-version table](README.md#-roadmap) — v0.2.0+ scope at a glance
 - [References](docs/REFERENCES.md) — background reading before diving in
 - [Architecture](docs/ARCHITECTURE.md) — high-level component overview
 

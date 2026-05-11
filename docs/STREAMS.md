@@ -13,7 +13,7 @@ v0.1.0 GA Phase 1 (2026-05-07 — Section R++++++) added **6 new streams**:
 
 v0.1.0 GA Phase 2 batches 1-8 (2026-05-09) added **8 new streams** (Identity dormant accounts + Identity LMP + Vuln cert/summary/extensions/asset-count + Vuln advisories + PendingActions): manifest baseline 64 → 72.
 
-The portal-only audit DROPPED `MDE_SecureScoreBreakdown_CL` — publicly-API-covered by Microsoft Graph `/security/secureScores`; operators should use the official Graph Security data connector for that data. Deprecated streams are documented inline via the manifest `Availability='deprecated'` field with a Purpose note explaining the deprecation reason.
+**Scope boundary (v0.1.0 GA design decision)**: `MDE_SecureScoreBreakdown_CL` is NOT in scope — Microsoft Graph `/security/secureScores` already exposes this data publicly; operators use the official Graph Security data connector for it. XdrLogRaider only ingests Defender XDR portal-internal telemetry that public APIs do not surface. Deprecated streams (e.g. `MDE_StreamingApiConfig_CL`) are kept in the manifest with `Availability='deprecated'` and a Purpose note so operators can correlate historical rows.
 
 The source of truth is [`src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1`](../src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1). Live-response fixtures live under `tests/fixtures/live-responses/`.
 
@@ -209,4 +209,4 @@ $m = Import-PowerShellDataFile src/Modules/Xdr.Defender.Client/endpoints.manifes
 $m.Endpoints | Where-Object Stream -eq 'MDE_Machines_CL' | Format-List *
 ```
 
-For Phase 2+ stream additions (per Section R++++++.7 v0.1.0.1 / v0.2.0 roadmap), see `docs/ROADMAP.md`.
+Post-v0.1.0 stream additions are tracked internally; the manifest at `src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1` is always the source of truth.

@@ -2,7 +2,7 @@
 
 Full walk-through from nothing to a working XdrLogRaider deployment.
 
-> **Scope** of this template: it deploys the **connector** (Function App + KV + Storage + DCE + DCR + App Insights + Sentinel content) and adds **47 custom tables + a Data Connector UI card** to your **existing** Sentinel workspace via cross-RG nested deployments. It does **NOT** create or modify your workspace itself.
+> **Scope** of this template: it deploys the **connector** (Function App + KV + Storage + DCE + DCR + App Insights + Sentinel content) and adds **11 consolidated workspace tables** (10 `Defender_<Category>_CL` per-nodoc-category + 1 `XdrConnectorHealth_CL` ops table) **+ a Data Connector UI card** to your **existing** Sentinel workspace via cross-RG nested deployments. It does **NOT** create or modify your workspace itself.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ Full walk-through from nothing to a working XdrLogRaider deployment.
 | What you need | Where | Why |
 |---|---|---|
 | **Contributor** (or Owner) on the target RG | Azure subscription | Deploys connector resources (FA/KV/Storage/DCE/DCR/AI) + role assignments |
-| **Log Analytics Contributor** (or Contributor) on the workspace RG | Workspace subscription | Creates the 47 custom tables + Data Connector UI card as workspace sub-resources (cross-RG supported) |
+| **Log Analytics Contributor** (or Contributor) on the workspace RG | Workspace subscription | Creates the 11 consolidated workspace tables + Data Connector UI card as workspace sub-resources (cross-RG supported) |
 | **User Administrator** | Entra ID | Creates the read-only service account |
 | **Privileged Role Administrator** | Entra ID | Grants `Security Reader` + `Defender XDR Analyst` to the service account |
 | **Key Vault Secrets Officer** (inherited from Contributor/Owner) | The deployed KV | Upload auth secrets via `Initialize-XdrLogRaiderAuth.ps1` |

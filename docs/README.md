@@ -9,20 +9,19 @@ Welcome to XdrLogRaider docs (v0.1.0 GA). Each page targets a specific audience.
 - **[GETTING-AUTH-MATERIAL.md](GETTING-AUTH-MATERIAL.md)** — How to obtain a TOTP Base32 secret / passkey / cookies for the service account (read this BEFORE running `Initialize-XdrLogRaiderAuth.ps1`)
 - **[AUTH.md](AUTH.md)** — Auth methods, Conditional Access compatibility, rotation
 - **[UNATTENDED-AUTH.md](UNATTENDED-AUTH.md)** — How the connector authenticates without a human, at any worker/cold-start
-- Software passkey generation guide is now in [AUTH.md](AUTH.md#bring-your-own-passkey-software-passkey-json-schema)
+- Software passkey generation guide is in [AUTH.md](AUTH.md#bring-your-own-passkey-software-passkey-json-schema)
 - **[POSTDEPLOY-PLAYBOOK.md](POSTDEPLOY-PLAYBOOK.md)** — Optional advanced post-deploy verification (the simple operator flow only needs the Sentinel Data Connectors blade going Connected — see [README.md step 3](../README.md#3-confirm-green))
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — Symptom → cause → fix
 
 ## For SOC / detection engineering
 
-- **[STREAMS.md](STREAMS.md)** — Catalogue of all 65 telemetry streams (64 active + 1 deprecated; includes per-stream operational matrix appendix auto-derived from manifest)
+- **[STREAMS.md](STREAMS.md)** — Catalogue of all 72 telemetry streams (71 active + 1 deprecated; includes per-stream operational matrix appendix auto-derived from manifest)
 - **[SCHEMA-CATALOG.md](SCHEMA-CATALOG.md)** — Per-stream typed-column reference for KQL authors
 - **[SCHEMA.md](SCHEMA.md)** — KQL meta-format used by SCHEMA-CATALOG (see SCHEMA-CATALOG for per-stream typed cols)
 - **[OPERATOR-KQL-PACK.md](OPERATOR-KQL-PACK.md)** — Canned operator queries + snapshot vs drift pattern guide
 - **[WORKBOOKS.md](WORKBOOKS.md)** — What each workbook shows
 - **[DRIFT.md](DRIFT.md)** — KQL drift model, parsers, tuning
-- **[ANALYTIC-RULES.md](ANALYTIC-RULES.md)** — Each rule: purpose, query, tuning
-- **[ANALYTIC-RULES-VETTING.md](ANALYTIC-RULES-VETTING.md)** — Pre-enable vetting + tuning narratives per rule
+- **[ANALYTIC-RULES.md](ANALYTIC-RULES.md)** — Each rule: purpose, query, tuning, pre-enable vetting checklist
 - **[HUNTING-QUERIES.md](HUNTING-QUERIES.md)** — Analyst-facing query catalogue
 
 ## For operators
@@ -39,13 +38,16 @@ Welcome to XdrLogRaider docs (v0.1.0 GA). Each page targets a specific audience.
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Component overview, diagrams, data flow, separation-of-concerns (operator workspace vs SRE AppInsights vs XdrOps bridge rules)
 - **[PORTAL-COOKIE-CATALOG.md](PORTAL-COOKIE-CATALOG.md)** — Per-portal cookie + OIDC-callback reference for adding a new portal in v0.2.0+
 - **[../CONTRIBUTING.md](../CONTRIBUTING.md)** — Dev setup, coding standards, PR flow, SemVer, conventional-commits
+- **[CONTRIBUTOR-ONBOARDING.md](CONTRIBUTOR-ONBOARDING.md)** — 1-day ramp-up walkthrough for new contributors
 - **[TESTING.md](TESTING.md)** — The four-quadrant test model (offline / local-online / e2e / 1-week observation) + how to run each
 - **[RELEASE-PROCESS.md](RELEASE-PROCESS.md)** — How releases are cut + cosign + SBOM
 - **[SENTINEL-SOLUTION-SUBMISSION.md](SENTINEL-SOLUTION-SUBMISSION.md)** — How to submit this connector to the Azure-Sentinel/Solutions/ Content Hub
-- **[MULTI-PORTAL.md](MULTI-PORTAL.md)** — v0.2.0+ Entra/Purview/Intune expansion plan
 - **[HOSTING-PLANS.md](HOSTING-PLANS.md)** — Linux Y1 Consumption baseline + premium-tier upgrade path
+- **[ENDPOINTS.md](ENDPOINTS.md)** — Per-stream endpoint reference
+- **[FIXTURES.md](FIXTURES.md)** — Test fixture inventory (live-responses + openapi-derived)
 - **[REFERENCES.md](REFERENCES.md)** — Every source cited, with context
-- **[ROADMAP.md](ROADMAP.md)** — v0.2.0+ features
+
+> **v0.2.0+ roadmap, multi-portal expansion, multi-tenant FA design, and Marketplace submission checklist** are tracked internally under `.internal/.archive/v020-planning/` until that work is scheduled. They are not part of the v0.1.0 GA operator/contributor surface.
 
 ## Reading order for a new contributor
 

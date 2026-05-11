@@ -33,6 +33,6 @@ full Managed Identity for content-share mount).
 
 ## Roadmap
 
-v0.2.0 reintroduces `hostingPlan` as a 3-tier enum (`consumption-y1` / `flex-fc1` / `premium-ep1`)
+v0.2.0 will reintroduce `hostingPlan` as a 3-tier enum (`consumption-y1` / `flex-fc1` / `premium-ep1`)
 with full `functionAppConfig` wiring, multi-plan ARM what-if matrix in CI, and per-plan
-operator decision aid. See [ROADMAP.md](ROADMAP.md#v020--multi-portal-expansion--new-streams).
+operator decision aid. (v0.2.0 planning artifacts live in `.internal/.archive/v020-planning/`.)

@@ -12,20 +12,15 @@ name: Capture Live Endpoint Schemas
 # accidental capture is possible from a misconfigured branch.
 
 on:
-  # Architecture E (Plan R++++++++++): nightly schema-drift detection + on-demand
-  # manual dispatch + on-manifest-change PR trigger. Runs OpenAPI fixture
-  # generator unconditionally (no live creds required for OpenAPI fallback).
-  schedule:
-    # 03:30 UTC nightly — catches portal-side schema drift; generates openapi-
-    # derived stubs for any new candidate streams added to manifest.
-    - cron: '30 3 * * *'
-
-  pull_request:
-    paths:
-      - 'src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1'
-      - 'tools/Capture-EndpointSchemas.ps1'
-      - 'tools/Generate-FixtureFromOpenApi.ps1'
-      - '.github/workflows/capture-schemas.yml'
+  # v0.1.0 GA: manual-dispatch only. The nightly cron was disabled to remove
+  # email noise from the missing CAPTURE_UPN secret (operator hasn't provisioned
+  # it). The PR-on-manifest-change trigger was also disabled — it failed for
+  # the same reason and gave no useful signal without the live capture creds.
+  # Operators wire CAPTURE_UPN / CAPTURE_AUTH_METHOD / CAPTURE_PASSWORD /
+  # CAPTURE_TOTP_SECRET (or CAPTURE_SCCAUTH+CAPTURE_XSRF_TOKEN, or a Software
+  # Passkey JSON) into repo Secrets and run this workflow manually when they
+  # actually want a fresh capture. The OpenAPI fixture generator fallback runs
+  # without live creds inside Capture-EndpointSchemas.ps1 itself.
 
   workflow_dispatch:
     inputs:

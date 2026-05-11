@@ -65,7 +65,7 @@ Production polling timers fire on their cadence: `fast` (10 min) ingests Action 
 | **v1.0.0** | Marketplace certification | Azure Marketplace + Microsoft Sentinel Solution Gallery certified listing · default `restrictPublicNetwork=true` baseline · private-endpoint hardening · dedicated SKU support · enterprise-grade tenant onboarding wizard |
 | **v1.x** | Hardening + telemetry depth | 100% functional coverage on every public function · mutation testing · per-stream cost-budget enforcement · DLQ exponential backoff with circuit-breaker · custom workspace tiers per category |
 
-Full per-version deliverables in [docs/ROADMAP.md](docs/ROADMAP.md). Streams are not marked as removed without [docs/STREAMS-REMOVED.md](docs/STREAMS-REMOVED.md) history. New streams get added to the manifest with live-captured fixtures and full 12-edge wiring before they ship.
+Streams are not marked as removed without [docs/STREAMS-REMOVED.md](docs/STREAMS-REMOVED.md) history. New streams get added to the manifest with live-captured fixtures and full 12-edge wiring before they ship. Detailed v0.2.0+ roadmap, multi-portal expansion plan, multi-tenant design, and Marketplace submission checklist are tracked internally under `.internal/.archive/v020-planning/` until that work is scheduled.
 
 ## Documentation
 
@@ -81,7 +81,7 @@ Full per-version deliverables in [docs/ROADMAP.md](docs/ROADMAP.md). Streams are
 - [Runbook](docs/RUNBOOK.md) — daily ops, incidents, rotation
 - [Troubleshooting](docs/TROUBLESHOOTING.md) — symptom → fix
 - [References](docs/REFERENCES.md) — all sources cited
-- **[Roadmap](docs/ROADMAP.md)** — what's next: v0.2.0 multi-portal + multi-tenancy, v1.0.0 Marketplace certification, v1.x hardening
+- See the per-version table above for what's next: v0.2.0 multi-portal + multi-tenancy, v1.0.0 Marketplace certification, v1.x hardening
 
 ## Contributing
 

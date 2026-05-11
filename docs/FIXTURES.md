@@ -124,16 +124,9 @@ MDE_Drift_Configuration({TimeRange:value}, 6h)
 | where ChangeType == 'Modified'
 ```
 
-## Cross-portal catalogues — `tests/online/` (v0.2.0+ research; ~2,037 ops audited)
+## Cross-portal catalogues (v0.2.0+ research)
 
-| File | Portals covered | Path count |
-|---|---|---|
-| [`CrossPortalCatalog-Defender-Entra.md`](../tests/online/CrossPortalCatalog-Defender-Entra.md) | Defender XDR + Entra IAM + B2C/IdGov/IGA/PIM | ~880 |
-| [`CrossPortalCatalog-Purview-M365.md`](../tests/online/CrossPortalCatalog-Purview-M365.md) | Purview + M365 Admin + M365 Apps × 3 | ~404 |
-| [`CrossPortalCatalog-Intune-PowerPlatform.md`](../tests/online/CrossPortalCatalog-Intune-PowerPlatform.md) | Intune Autopatch + Intune Portal + Power Platform | ~542 |
-| [`CrossPortalCatalog-Comms-SecCopilot.md`](../tests/online/CrossPortalCatalog-Comms-SecCopilot.md) | Exchange Beta + SharePoint Admin + Teams Admin + Viva Engage + Security Copilot | ~211 |
-
-Each catalog file documents per-portal: nodoc spec path · operation count · operator-value subset · auth chain notes · v0.2.0 phase mapping. Reference for v0.2.0+ multi-portal expansion.
+~2,037 operations audited across 20 portal nodoc spec dirs (Defender + Entra + Purview + M365 Admin + Intune + Power Platform + Comms + Security Copilot). Reference material is tracked internally under `.internal/.archive/nodoc-sweeps/CrossPortalCatalog-*.md` until v0.2.0 multi-portal work begins; out of v0.1.0 GA operator scope.
 
 ## Other tests/online/ artifacts
 

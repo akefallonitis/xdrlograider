@@ -123,8 +123,8 @@ This separation is the v0.1.0 GA architectural deliverable for D'.17 (AppInsight
 │                                                                        │
 │  ┌────────────────────────────────────────────────────────────┐       │
 │  │ DCE + DCR  (location = WORKSPACE region)                   │       │
-│  │   65 streamDecls (13 DCRs) → routed to 11 LA custom tables │       │
-│  │   (64 manifest streams + 1 ops XdrConnectorHealth_CL)      │       │
+│  │   73 streamDecls (13 DCRs) → routed to 11 LA custom tables │       │
+│  │   (72 manifest streams + 1 ops XdrConnectorHealth_CL)      │       │
 │  └────────────────────────────────────────────────────────────┘       │
 └────────────────────────────────────────────────────────────────────────┘
                                    │

@@ -4,9 +4,17 @@ All notable changes to this project are documented in this file.
 
 This project adheres to [Semantic Versioning 2.0.0](https://semver.org/) and the format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.1.0] - 2026-05-10
+## [0.1.0] - 2026-05-11
 
 First proven production-ready release. Pure Defender XDR portal-only telemetry connector for Microsoft Sentinel — CONSOLIDATED v0.1.0 GA (single canonical tag) covering ALL of:
+
+### v0.1.0 GA repo hygiene polish (2026-05-11 final consolidation commit)
+
+- `.github/workflows/capture-schemas.yml` — nightly cron + on-manifest-change PR trigger removed; workflow is `workflow_dispatch`-only. The nightly fired every day with an unconfigured `CAPTURE_UPN` secret and produced email noise without operator action; manual dispatch is the right shape for v0.1.0 GA. Documented secrets in the workflow header.
+- `docs/ROADMAP.md`, `docs/MULTI-PORTAL.md`, `docs/V020-MULTI-PORTAL-ROADMAP.md`, `docs/V020-MULTI-TENANT-DESIGN.md`, `docs/V020-MARKETPLACE-PR-CHECKLIST.md`, `docs/V010X-PATCH-BACKLOG.md` — moved to `.internal/.archive/{roadmap,v020-planning,patch-backlog}/`. These were internal planning artifacts for v0.2.0+ work that confused operators on a v0.1.0 GA release surface. The per-version table in `README.md` retains the high-level roadmap pointer for users.
+- `docs/README.md` — index refreshed: removed dead links to the archived docs; bumped stream count to 72 (was stale 65); added explicit links to `CONTRIBUTOR-ONBOARDING.md` + `ENDPOINTS.md` + `FIXTURES.md` (existed but unreferenced); added explicit note that v0.2.0 planning lives in `.internal/.archive/`.
+- `docs/STREAMS.md` — scope-boundary wording refreshed (`MDE_SecureScoreBreakdown_CL` paragraph reframed from "audit dropped" to "design decision"); tail Phase 2 reference re-pointed at the canonical manifest path.
+- `docs/STREAMS-REMOVED.md`, `docs/HOSTING-PLANS.md`, `README.md`, `CONTRIBUTING.md` — cross-references to archived docs replaced with in-repo pointers or removed cleanly.
 
 - **Section R / R+ / R++** — 9→4 function consolidation, truth-signal `SuccessKind` side-channel, schema-integrity DCR↔workspace parity, drift-parser `Removed` branch fix, connector-card UX rebind, Architecture J canonical Sentinel Entity Type cols.
 - **Section R++++++ Phase 1** — Architecture A PerEntityFanout + B `MDE_Machines_CL` inventory base + C PerPlatformFanout + F Pagination + I XdrTenantState + J Schema Unification.

@@ -189,6 +189,6 @@ Streams with `idx-N` synthetic fallback are bugs (drift-join breaks); fixed in P
 - Live capture tool: [`tools/Capture-EndpointSchemas.ps1`](../tools/Capture-EndpointSchemas.ps1)
 - Live fixtures: [`tests/fixtures/live-responses/`](../tests/fixtures/live-responses/)
 - Capture summary: [`tests/fixtures/live-responses/_capture-summary.json`](../tests/fixtures/live-responses/_capture-summary.json)
-- Cross-portal catalogues (v0.2.0+): [`tests/online/CrossPortalCatalog-*.md`](../tests/online/)
+- Cross-portal catalogues (v0.2.0+): archived under `.internal/.archive/nodoc-sweeps/` (out of v0.1.0 GA scope)
 - nodoc reference: `.internal/nodoc-reference/specifications/nodoc-defender-xdr/specification/` (10 categories)
 - XDRInternals reference: [Get-XdrInternal cmdlet library](https://github.com/MSCloudInternals/MSCloudInternals)
