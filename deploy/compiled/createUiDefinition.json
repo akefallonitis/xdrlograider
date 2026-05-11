@@ -264,9 +264,9 @@
           {
             "name": "enableKeyVaultDiagnostics",
             "type": "Microsoft.Common.CheckBox",
-            "label": "Key Vault audit logging",
-            "toolTip": "Send Key Vault audit logs to the Sentinel workspace for credential-access forensics.",
-            "defaultValue": true
+            "label": "Key Vault audit logging (off by default — v0.1.0 GA App-Insights-only architecture)",
+            "toolTip": "Send Key Vault audit logs to the Sentinel workspace for credential-access forensics. Default OFF: v0.1.0 GA relies on AppInsights for connector ops telemetry; KV audit creates extra workspace ingest cost without operator value unless compliance explicitly requires KV audit trails. Set true ONLY when compliance dictates.",
+            "defaultValue": false
           },
           {
             "name": "deploySentinelContent",
