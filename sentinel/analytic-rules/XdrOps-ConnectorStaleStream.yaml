@@ -1,4 +1,4 @@
-id: 73367cca-e074-4536-b076-84fdcdeba21e
+id: 443bbdf0-85ad-4ea6-8036-a5ee034cba66
 name: "[XdrOps] Connector tier stale - no ingest beyond expected cadence"
 description: |
   XdrLogRaider tier has not written `XdrConnectorHealth_CL` rows for >2x expected cadence — entire dispatch chain (Xdr-Refresh → orchestrator → activity → heartbeat) has stopped for that tier. Each tier (ActionCenter/XspmGraph/Configuration/Inventory/Maintenance/Heartbeat) = logical group of streams polled together; tier silent = ALL streams dark. Thresholds (2x cadence): ActionCenter >20m | XspmGraph >2h | Configuration >12h | Inventory >2d | Maintenance >2w | Heartbeat >10m. Severity Medium — cadence-specific data loss; High if multiple tiers stale. MITRE: TA0005 Defense Evasion — T1562. See KQL body + docs/RUNBOOK.md "Tier stale" for triage.
