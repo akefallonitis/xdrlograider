@@ -163,7 +163,7 @@ Don't force entity columns that don't exist in the API response. A stream's `Pro
 
 Per-stream classification:
 - **Primary entity stream** (e.g., `MDE_Machines_CL` is centrally about Host) → populate Host fields fully
-- **Drilldown stream** (Tier B PerEntityFanout, e.g., `MDE_VulnerabilityAssetVulnerabilities_CL`) → populate BOTH source entity (`HostMdatpId`) AND drilled-into entity (`CveId`)
+- **Drilldown stream** (Tier B PerEntityFanout — *v0.2.0 planned*, example: `MDE_VulnerabilityAssetVulnerabilities_CL` not yet in v0.1.0 manifest) → would populate BOTH source entity (`HostMdatpId`) AND drilled-into entity (`CveId`). Today, v0.1.0 GA uses single-call streams per asset (e.g., `MDE_VulnerableMachines_CL` returns the device-CVE aggregate directly).
 - **Aggregate stream** (e.g., `MDE_VulnerabilityCertificates_CL` per-cert may have machine-count rollup) → populate the indexed entity if present
 - **Pure config stream** (e.g., `MDE_AdvancedFeatures_CL` is tenant-level singleton) → no canonical entity cols populated; just `EntityId='advanced-features-singleton'`
 

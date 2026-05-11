@@ -61,11 +61,14 @@ MDE_Drift_Inventory(24h, 1h)
 ```
 
 ### In an analytic rule (ASR downgrade)
+
+ASR rules ship as part of the Intune endpoint security policy bodies in `MDE_SecurityPolicies_CL`. Drift on the ASR rule mode (Block / Audit / Off) shows up under the `attackSurfaceReductionRules` configuration setting inside that stream's drift output.
+
 ```kql
-MDE_Drift_Inventory(2h, 15m)
-| where StreamName == "MDE_AsrRulesConfig_CL"
-| where FieldName == "mode"
-| where OldValue == "Block" and NewValue in ("Audit", "Off")
+MDE_Drift_Configuration(2h, 15m)
+| where StreamName == "MDE_SecurityPolicies_CL"
+| where FieldName has "attackSurfaceReductionRules"
+| where OldValue contains "Block" and NewValue !contains "Block"
 ```
 
 ### Cross-category drift with audit-log attribution
