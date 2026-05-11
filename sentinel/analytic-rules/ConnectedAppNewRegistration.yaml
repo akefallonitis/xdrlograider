@@ -1,4 +1,4 @@
-id: d170d6a6-8087-4957-a2f5-057bb2a0e4b4
+id: 1cf62c3f-9ce0-41bf-8838-6d4cb19b0699
 name: MDE connected app new registration
 description: |
   Detects new third-party app registered as a Defender XDR Connected App — programmatic API access to alerts/devices/configurations/IR actions. Each is a stealable credential + privileged token. Unsanctioned apps = persistence mechanism. Severity Low baseline; Medium if Machine.ReadWrite.All or Alert.ReadWrite.All scope. MITRE: TA0003 Persistence — T1098 Account Manipulation; T1136.003 Create Cloud Account. See KQL body for triage path.

@@ -8,6 +8,33 @@ This project adheres to [Semantic Versioning 2.0.0](https://semver.org/) and the
 
 First proven production-ready release. Pure Defender XDR portal-only telemetry connector for Microsoft Sentinel — CONSOLIDATED v0.1.0 GA (single canonical tag) covering ALL of:
 
+### v0.1.0 GA mid-cycle: deploy resilience + repo governance (2026-05-11 — consolidated PR)
+
+**One consolidated PR** delivering everything needed for production-ready PR / contributor / collaborator flow + deploy resilience. Replaces the 3 separate PRs (#6 revert, #7 docs, #8 retry) that were closed in favour of this single coherent change.
+
+**Deploy resilience**:
+- `tools/Deploy-XdrLogRaider.ps1` wraps `New-AzResourceGroupDeployment` in an exponential-backoff retry loop (12 attempts, ~60-min total budget capped at 600s per wait + 0-30s jitter) that activates only on Sentinel analytic-rule soft-delete grace error signatures (`recently deleted` / `allow some time before re-using` / `Conflict` + `rule with id`). Non-grace failures fail-fast. Each retry uses a unique deployment name suffix.
+- Revert of `f6cb05e` (GUID rotation) — wrong fix for Sentinel soft-delete grace; right layer is deploy-time retry, not source-side GUID churn (which created 33-file churn per cleanup cycle). Mechanical `git revert`.
+- `docs/TROUBLESHOOTING.md` — new operator-facing section for the Conflict / `recently deleted` pattern. CLI path auto-retries; Deploy-to-Azure URL path → operator clicks Redeploy after 30 min OR switches to CLI. Explicitly warns against rotating rule GUIDs as a workaround.
+
+**Docs hygiene**:
+- `docs/DRIFT.md` — replaced removed-stream KQL example (`MDE_AsrRulesConfig_CL`) with current `MDE_SecurityPolicies_CL` query (ASR rules ship via Intune endpoint-security-policy bodies covered by PerPlatformFanout).
+- `docs/SCHEMAS.md` — tagged `MDE_VulnerabilityAssetVulnerabilities_CL` example as v0.2.0-planned + clarified the v0.1.0 alternative (`MDE_VulnerableMachines_CL` single-call aggregate).
+
+**Repo governance** (PR / contributor / collaborator flow):
+- `.github/CODEOWNERS` — NEW: routes review requests; catch-all to `@akefallonitis`.
+- `.github/pull_request_template.md` — NEW: Why / What / Testing / Breaking / Linked issues + reviewer checklist.
+- `.github/workflows/dependabot-auto-merge.yml` — NEW: enables auto-merge on Dependabot PRs bumping patch/minor versions after required checks pass. Major bumps require manual review (workflow comments explaining).
+- `CONTRIBUTING.md` — refreshed Pull request flow: required status checks now include `Pester coverage gate` + `Sentinel-content recompile gate (D'.18)`; squash-only merge; dependabot auto-merge behaviour; tag protection on `v*`.
+
+**Repo settings** (applied via `gh api`, not in source):
+- `allow_auto_merge=true` + `delete_branch_on_merge=true` + `allow_squash_merge=true` + `allow_merge_commit=false` + `allow_rebase_merge=false`
+- `squash_merge_commit_title=PR_TITLE` + `squash_merge_commit_message=PR_BODY` — clean linear history; squash commit = PR title.
+- Branch protection on `main`: required reviews=1 + required checks adds `Pester coverage gate` + `Sentinel-content recompile gate (D'.18)` (in addition to the existing 5: gitleaks / PSScriptAnalyzer / Unit tests / Static validate / Summary); `required_conversation_resolution=true`; `required_linear_history=true`.
+- Tag protection: `v*` tags protected; only `release.yml` workflow path creates production release tags.
+
+**Dependabot PR #5** (already merged before this PR): CI action SHA pin bumps — `actions/checkout@v4.3.1 → v6.0.2`, `actions/upload-artifact@v4.6.2 → v7.0.1`, `azure/login` rehash. All 6 workflow files refreshed.
+
 ### v0.1.0 GA repo hygiene polish (2026-05-11 final consolidation commit)
 
 - `.github/workflows/capture-schemas.yml` — nightly cron + on-manifest-change PR trigger removed; workflow is `workflow_dispatch`-only. The nightly fired every day with an unconfigured `CAPTURE_UPN` secret and produced email noise without operator action; manual dispatch is the right shape for v0.1.0 GA. Documented secrets in the workflow header.

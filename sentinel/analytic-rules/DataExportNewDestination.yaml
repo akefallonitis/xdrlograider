@@ -1,4 +1,4 @@
-id: 421fd74e-bcd3-45c9-bcae-b9f7f93d6fe2
+id: 74df254d-b7f8-48e9-9af1-3d5741d49395
 name: MDE new data export destination
 description: |
   Detects new streaming/export destination ADDED to Defender data-export settings (Event Hub, Storage account, or Log Analytics workspace). Same mechanism legitimate SOCs use is also a data-exfiltration channel — attacker adds their own destination, Defender ships raw telemetry (alerts, device events, identity events) to attacker infrastructure. Severity Medium baseline; High if destination external Azure tenant. MITRE: TA0010 Exfiltration — T1537 Transfer Data to Cloud Account (PRIMARY). See KQL body for triage path.

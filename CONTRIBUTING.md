@@ -118,15 +118,34 @@ Follow this checklist when proposing a new `MDE_*_CL` stream:
 
 ## Pull request flow
 
-1. Fork and branch — `feature/my-change`, `fix/bug-name`, `docs/updates`
+1. Fork (external) OR branch (collaborator) — `feature/my-change`, `fix/bug-name`, `docs/updates`, `revert/<sha>`
 2. Make changes following coding standards above
-3. Run `./tests/Run-Tests.ps1 -Category all-offline` locally — must pass
-4. Run `./tools/Run-WiringAudit.ps1` if you touched manifest, ARM, or sentinel/ — must exit 0
-5. Commit with conventional-commit-style message (`feat:`, `fix:`, `docs:`, `test:`, `chore:`)
-6. Open PR using the template — fill in every section
-7. CI must pass on all 3 OS (8 jobs: secret-scan / lint / unit-tests / static-validate / deploy-whatif / auto-recompile-gate / auto-rezip-gate / coverage-gate)
-8. One approving review required
-9. Squash-merge preferred; rebase-merge OK for multi-commit features
+3. Run `./tools/Pre-Commit-Check.ps1` locally (chains: pyramid + WiringAudit + ARM JSON + Validate-Manifest + Audit-DcrSchema + PSScriptAnalyzer) — must exit 0
+4. Commit with conventional-commit-style message (`feat:` / `fix:` / `docs:` / `test:` / `chore:` / `refactor:` / `revert:`)
+5. Push branch + open PR; PR template (`.github/pull_request_template.md`) auto-populates — fill in every section
+6. **CODEOWNERS** review request fires automatically (see `.github/CODEOWNERS`)
+7. **CI must pass all required status checks** before merge:
+   - `gitleaks` (secret scan)
+   - `PSScriptAnalyzer` (lint)
+   - `Unit tests (ubuntu-latest)` (Pester pyramid)
+   - `Static validate` (ARM + manifest + Sentinel content + workbook + analytic rule + hunting + parser schemas)
+   - `Summary` (composite green-light gate)
+   - `Pester coverage gate` (≥75% line coverage)
+   - `Sentinel-content recompile gate (D'.18)` (no drift between sentinel/* sources and deploy/compiled/sentinelContent.json)
+   - Plus informational gates: ARM-TTK, workbook/hunting/rule/createUiDefinition JSON schemas, Deploy what-if, Function App package dry-run gate (D'.19)
+8. **At least 1 approving review** required (configured via branch protection `required_approving_review_count=1`)
+9. **Squash merge** is the only enabled merge method (clean linear history; PR title becomes the squash commit subject)
+10. Branches auto-delete on merge (`delete_branch_on_merge=true`)
+
+### Dependabot auto-merge
+
+`.github/workflows/dependabot-auto-merge.yml` automatically enables auto-merge on Dependabot PRs that bump **patch or minor** versions, after all required checks pass. **Major** bumps are NEVER auto-merged — a maintainer reviews them manually (the workflow comments on major PRs explaining why).
+
+Dependabot configuration in `.github/dependabot.yml` groups all GitHub Actions updates into a single weekly PR (Mondays 09:00 UTC).
+
+### Tag protection
+
+Tags matching `v*` are protected from direct push. The `release.yml` workflow is the only path that should create production release tags (operator approves the tag at release time).
 
 ## SemVer
 

@@ -26,7 +26,18 @@ Symptom → cause → fix for common issues.
 
 ### ARM deployment fails at Key Vault step
 **Cause**: soft-deleted Key Vault with the same name exists in the subscription.
-**Fix**: `az keyvault purge --name <name> --location <region>` then redeploy.
+**Fix**: `az keyvault purge --name <name> --location <region>` then redeploy. If purge-protection is enabled the KV name is held 7 days minimum — use a different `projectPrefix` on the wizard (e.g. `xdrlr2`) to side-step.
+
+### ARM deployment fails on `sentinelContent` step with `Conflict` / `The rule with id 'xxx' was recently deleted`
+**Cause**: known Microsoft Sentinel API behavior. When an analytic rule is deleted, its GUID enters a ~30-min soft-delete grace window during which the same GUID cannot be recreated. If you ran `Cleanup-PriorDeployment.ps1` then immediately tried to redeploy, the connector's 21 rule GUIDs are still in grace.
+
+**Fix (two paths)**:
+* **CLI redeploy** (`tools/Deploy-XdrLogRaider.ps1`) — has built-in retry-on-conflict with exponential backoff (12 attempts, ~60-min total budget). Re-run the same command; it will wait out the grace window automatically.
+* **Deploy-to-Azure URL** (Azure Portal wizard) — Portal does NOT auto-retry. Either:
+  1. Wait ~30 min after the cleanup, then click **Redeploy** on the failed deployment in Portal → Resource Group → Deployments → (failed one) → Redeploy. ARM is idempotent; it will pick up where it failed.
+  2. OR use the CLI path instead (clone the repo, run `pwsh tools/Deploy-XdrLogRaider.ps1 -SkipSecretSeeding`).
+
+**Don't** regenerate rule GUIDs in source as a workaround — Microsoft's grace is by design and will recur every cleanup cycle. Retry is the correct response.
 
 ### Function App times out during first run
 **Cause**: module dependencies installing from `requirements.psd1` on cold start (legacy behavior from older builds). v0.1.0 GA ships pre-bundled modules under `Modules/` so this should NOT happen.
