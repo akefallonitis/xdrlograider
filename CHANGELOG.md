@@ -8,6 +8,13 @@ This project adheres to [Semantic Versioning 2.0.0](https://semver.org/) and the
 
 First proven production-ready release. Pure Defender XDR portal-only telemetry connector for Microsoft Sentinel — CONSOLIDATED v0.1.0 GA (single canonical tag) covering ALL of:
 
+### v0.1.0 GA mid-cycle polish (2026-05-11 — PRs 5, 6, 7, 8 + dependabot)
+
+- **PR 2 (Deploy retry-on-conflict)**: `tools/Deploy-XdrLogRaider.ps1` now wraps the `New-AzResourceGroupDeployment` call in an exponential-backoff retry loop (12 attempts, ~60-min total budget) that activates only when ARM returns a 409 Conflict matching the Sentinel analytic-rule soft-delete grace signature (`recently deleted` / `allow some time before re-using` / `Conflict` + `rule with id`). Non-soft-delete failures fail-fast (no retry). Each attempt uses a unique deployment name suffix so ARM creates a fresh deployment record. `docs/TROUBLESHOOTING.md` got an operator-facing section explaining the grace window for both the CLI path (auto-retry) and the Deploy-to-Azure URL wizard path (manual Redeploy click in Portal after 30 min) — explicitly warns against the wrong-fix pattern of rotating rule GUIDs in source.
+- **PR 1 (Revert f6cb05e)**: rolled back the GUID-rotation commit that tried to side-step the soft-delete grace by churning 33 YAMLs every cleanup cycle. Replaced with the deploy-side retry above (which is the right architectural layer).
+- **PR 3 (Docs stale-ref cleanup)**: `docs/DRIFT.md` ASR-downgrade KQL example was using `MDE_AsrRulesConfig_CL` which doesn't exist in v0.1.0 manifest (ASR rules live in `MDE_SecurityPolicies_CL` Intune endpoint-security-policy bodies via PerPlatformFanout) — rewrote to query the correct stream. `docs/SCHEMAS.md` drilldown-stream example referencing `MDE_VulnerabilityAssetVulnerabilities_CL` (a v0.2.0 PerEntityFanout pattern not yet in manifest) — tagged as "v0.2.0 planned" and noted v0.1.0 GA uses `MDE_VulnerableMachines_CL` aggregate stream for the same use-case.
+- **Dependabot PR #5**: CI action SHA pin bumps merged. `actions/checkout@v4.3.1 → v6.0.2`, `actions/upload-artifact@v4.6.2 → v7.0.1`, `azure/login` rehash. All 6 workflow files refreshed; 10 required CI checks PASS on the merged commit.
+
 ### v0.1.0 GA repo hygiene polish (2026-05-11 final consolidation commit)
 
 - `.github/workflows/capture-schemas.yml` — nightly cron + on-manifest-change PR trigger removed; workflow is `workflow_dispatch`-only. The nightly fired every day with an unconfigured `CAPTURE_UPN` secret and produced email noise without operator action; manual dispatch is the right shape for v0.1.0 GA. Documented secrets in the workflow header.
