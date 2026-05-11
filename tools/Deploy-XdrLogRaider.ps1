@@ -219,12 +219,61 @@ if (-not $PSCmdlet.ShouldProcess($ConnectorResourceGroup, "Deploy XdrLogRaider v
 
 Write-Host "Starting deployment '$DeploymentName' (this takes 5-10 min)..." -ForegroundColor Cyan
 $start = Get-Date
-$result = New-AzResourceGroupDeployment `
-    -ResourceGroupName $ConnectorResourceGroup `
-    -Name $DeploymentName `
-    -TemplateFile $tplPath `
-    -TemplateParameterObject $params `
-    -ErrorAction Stop
+
+# Retry-on-conflict loop for Sentinel analytic-rule soft-delete grace (Microsoft API behavior).
+#
+# When operator cleans up + redeploys within ~30 min, Sentinel's alertRules
+# endpoint returns 409 Conflict with "The rule with id 'X' was recently deleted.
+# You need to allow some time before re-using the same id." The right fix is to
+# treat that error as transient and retry with backoff — NOT to rotate GUIDs in
+# source (which created 33-file churn per cleanup cycle in earlier iterations).
+#
+# Up to 12 attempts × exponential backoff (capped at 600s per wait + jitter).
+# Total wait budget ~60 min, covers the typical 30-min grace window + headroom.
+$maxRetryAttempts = 12
+$attempt = 0
+$result = $null
+while ($true) {
+    $attempt++
+    $tryName = if ($attempt -eq 1) { $DeploymentName } else { "$DeploymentName-try$attempt" }
+    try {
+        $result = New-AzResourceGroupDeployment `
+            -ResourceGroupName $ConnectorResourceGroup `
+            -Name $tryName `
+            -TemplateFile $tplPath `
+            -TemplateParameterObject $params `
+            -ErrorAction Stop
+        if ($attempt -gt 1) {
+            Write-Host ("  ✓ Deployment succeeded on attempt {0} of {1}" -f $attempt, $maxRetryAttempts) -ForegroundColor Green
+        }
+        break
+    } catch {
+        $errMsg = $_.Exception.Message
+        # Match Sentinel analytic-rule soft-delete grace signatures.
+        # Microsoft's API returns this 409 Conflict on rule GUIDs recently deleted.
+        $isSoftDeleteGrace = ($errMsg -match 'recently deleted') -or `
+                             ($errMsg -match 'allow some time before re-using') -or `
+                             (($errMsg -match 'Conflict') -and ($errMsg -match 'rule with id'))
+        if (-not $isSoftDeleteGrace) {
+            Write-Host ""
+            Write-Host "Deployment failed with a non-retriable error:" -ForegroundColor Red
+            Write-Host $errMsg -ForegroundColor Red
+            throw
+        }
+        if ($attempt -ge $maxRetryAttempts) {
+            throw "Sentinel soft-delete grace did not clear after $maxRetryAttempts attempts (~60 min). Last error: $errMsg"
+        }
+        # Exponential backoff: 60s, 120s, 240s, 480s, then cap at 600s. Add 0-30s jitter to avoid thundering herd.
+        $baseWait = [Math]::Min([Math]::Pow(2, $attempt) * 30, 600)
+        $waitSec = [int]($baseWait + (Get-Random -Minimum 0 -Maximum 30))
+        Write-Host ""
+        Write-Host ("  ⚠ Sentinel analytic-rule soft-delete grace conflict detected (attempt {0}/{1})." -f $attempt, $maxRetryAttempts) -ForegroundColor Yellow
+        Write-Host ("    Microsoft Sentinel holds deleted rule GUIDs in a ~30-min grace period.") -ForegroundColor Yellow
+        Write-Host ("    Waiting {0}s before retry..." -f $waitSec) -ForegroundColor Yellow
+        Start-Sleep -Seconds $waitSec
+    }
+}
+
 $elapsed = (Get-Date) - $start
 
 Write-Host ""
