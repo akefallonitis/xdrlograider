@@ -1,4 +1,4 @@
-id: 4224ffe4-71ee-4782-8318-5dee699ba5a7
+id: 8d153170-db62-48ea-a694-72831e1c09f9
 name: MDE PUA protection disabled
 description: |
   Defender PUA (Potentially Unwanted Application) protection disabled tenant-wide (`MDE_PUAConfig_CL.enabled` flipped to `false`). PUA blocks dual-use tools (PsExec, BloodHound, certutil, mimikatz variants) attackers use for lateral movement, credential dumping, recon. Tenant-wide disable = those tools execute silently — strong "attacker preparing hands-on-keyboard activity" signal. Severity High — disabling tier-2 EDR defense rarely benign. MITRE: TA0005 Defense Evasion — T1562.001 (PRIMARY). See KQL body for triage path.

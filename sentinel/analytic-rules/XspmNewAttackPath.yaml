@@ -1,4 +1,4 @@
-id: 24de8cc1-190a-457d-9f36-d7c1462e8efb
+id: 90e64415-3d42-42a3-a160-58dbd9deea40
 name: MDE XSPM new attack path discovered
 description: |
   Defender XSPM identified a NEW attack path in last 7d — route from internet/email/identity entry through chain of hops. Every new path = SOMETHING changed that opened new attacker progression (group memberships, new vulnerable software, firewall rules opening lateral movement, identity perms enabling impersonation). Without tracking deltas, you miss gradual posture erosion. Severity Medium — escalate via XspmPathToCriticalAsset if destination Critical. License: requires XSPM (E5 + Security add-on); dormant on unlicensed tenants. MITRE: TA0043 Reconnaissance — T1595 Active Scanning. See KQL body for triage path.

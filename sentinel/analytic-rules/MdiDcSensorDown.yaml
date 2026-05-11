@@ -1,4 +1,4 @@
-id: eeb31220-1331-41e2-beb9-bd0e12f068ad
+id: b51c604a-469d-431e-93d3-17bf728cfc28
 name: MDE MDI DC sensor down
 description: |
   MDI sensor on a domain controller stopped reporting (`MDE_DCCoverage_CL.IsActive` True→False). Canonical "identity threat detection blind spot" signal. MDI sensors feed AD-side detections (kerberoasting, golden ticket, DCSync, replication abuse, LDAP recon) — inactive sensor = those detections silently disappear. Causes: DC reboot, network partition, service crash, OR attacker action (sensor disable is known tactic to mask DCSync). Severity High — every minute of blind time = potential undetected credential attack. License: requires MDI. MITRE: TA0005 — T1562; TA0006 Credential Access — T1003.006 DCSync. See KQL body for triage path.

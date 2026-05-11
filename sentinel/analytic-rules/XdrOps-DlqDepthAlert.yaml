@@ -1,4 +1,4 @@
-id: c7b6ae0a-5381-44b7-b73d-fe64df500f5e
+id: 6fe89fd0-7552-4c28-81f4-ce976c79de03
 name: "[XdrOps] Connector DLQ depth or age exceeds operator threshold"
 description: |
   XdrLogRaider's ingest DLQ (Storage Table `xdrIngestDlq`) has Depth >100 entries (sustained backpressure) OR oldest entry >2h (replay isn't keeping up). DLQ = connector safety net for DCE ingestion failures (5xx, 429, network). Healthy: DLQ near-empty as `Pop-XdrIngestDlq` drains every poll cycle. Sustained depth/age = DCE sustained issues, batches too large for retry, auth blocking replay, or DLQ regression. Auto-drain runs every Xdr-PollStream with TTL eviction. Severity Medium — backpressure = degraded ingest, not data loss (DLQ preserves). MITRE: TA0005 Defense Evasion — T1562. See KQL body + docs/RUNBOOK.md "DLQ backlog" for triage.

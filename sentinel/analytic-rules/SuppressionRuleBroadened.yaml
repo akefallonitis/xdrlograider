@@ -1,4 +1,4 @@
-id: f9fddde5-abce-4931-a5aa-08a1e8e38ce8
+id: 1193a026-3e3f-45ab-9646-d3c562d7c964
 name: MDE suppression rule broadened
 description: |
   Defender alert-suppression rule had `scope`, `conditions`, or `machineGroup` MODIFIED — narrow→broad widening. Suppression rules legitimately silence noisy alerts (test machines, vendor scanners, FPs); narrow-to-broad widening is the textbook attacker move (silence alerts the upcoming payload will trigger across broader scope). One of the highest-value attacker preparation signals. Severity Medium — legitimate scope adjustments occur but every widening needs ticket. MITRE: TA0005 Defense Evasion — T1562.006 Indicator Blocking (PRIMARY). See KQL body for triage path.
