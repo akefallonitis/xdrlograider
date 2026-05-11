@@ -33,10 +33,10 @@ Describe 'ColdStart.Benchmark — Y1 Linux Consumption 60s timeout budget' {
     # Timing tests run only on Linux. Windows local dev has 3-5x slower
     # PowerShell module-import overhead than Linux Y1 Consumption (the actual
     # production target). The cold-start budget targets the Linux runtime,
-    # not Windows dev machines.
-    $script:IsLinux = $PSVersionTable.Platform -eq 'Unix' -and -not $IsMacOS
+    # not Windows dev machines. $IsLinux is a PowerShell automatic variable
+    # (true on Linux, false on Windows/macOS) — usable at Pester discovery time.
 
-    It 'profile.ps1 + 7 module imports complete in <30s (leaves 30s for first poll under 60s Y1 budget)' -Skip:(-not $script:IsLinux) {
+    It 'profile.ps1 + 7 module imports complete in <30s (leaves 30s for first poll under 60s Y1 budget)' -Skip:(-not $IsLinux) {
         $sw = [System.Diagnostics.Stopwatch]::StartNew()
 
         # Set PSModulePath so modules resolve like in FA runtime
@@ -60,7 +60,7 @@ Describe 'ColdStart.Benchmark — Y1 Linux Consumption 60s timeout budget' {
         $elapsed | Should -BeLessOrEqual $script:ColdStartBudgetMs -Because "profile + 7 module imports must complete in $($script:ColdStartBudgetMs)ms (Y1 60s cold-start budget; 30s leaves room for first poll)"
     }
 
-    It 'each module imports in <5s (no individual outlier)' -Skip:(-not $script:IsLinux) {
+    It 'each module imports in <5s (no individual outlier)' -Skip:(-not $IsLinux) {
         $env:PSModulePath = "$script:ModulesDir$([IO.Path]::PathSeparator)$($env:PSModulePath)"
         $modules = 'Xdr.Common.Auth','Xdr.Common.Telemetry','Xdr.Common.Manifest','Xdr.Sentinel.Ingest','Xdr.Defender.Auth','Xdr.Defender.Client','Xdr.Connector.Orchestrator'
         $slowModules = @()
