@@ -171,8 +171,11 @@ try {
 } catch { Record-Signal 'S5' 'ALL customEvents' $false "Query failed: $_" @() }
 
 # === S6. Heartbeat tier coverage ===
+# Fix 2026-05-12: XdrConnectorHealth_CL is a DCR-managed custom table — typed cols
+# do NOT carry _s suffix (that was the legacy custom-table dynamic-schema convention).
+# Use canonical FunctionName / Tier / StreamsAttempted / StreamsSucceeded / RowsIngested.
 try {
-    $q = "XdrConnectorHealth_CL | summarize maxAttempted=max(toint(StreamsAttempted)), maxSucceeded=max(toint(StreamsSucceeded)), maxRows=max(toint(RowsIngested)) by FunctionName=tostring(FunctionName_s), Tier=tostring(Tier_s) | order by FunctionName"
+    $q = "XdrConnectorHealth_CL | summarize maxAttempted=max(toint(StreamsAttempted)), maxSucceeded=max(toint(StreamsSucceeded)), maxRows=max(toint(RowsIngested)) by FunctionName=tostring(FunctionName), Tier=tostring(Tier) | order by FunctionName, Tier"
     $r = Invoke-LogsQuery -Query $q -Target Workspace
     $rows = if ($r.Results) { $r.Results } else { @() }
     $maxRowsAcrossTiers = ($rows | ForEach-Object { [int]$_.maxRows } | Measure-Object -Maximum).Maximum
@@ -203,14 +206,20 @@ try {
     Record-Signal 'S9' 'DCE ingest dependencies' (@($rows).Count -ge 1) "DCE-call rows=$(@($rows).Count)" $rows
 } catch { Record-Signal 'S9' 'DCE ingest dependencies' $false "Query failed: $_" @() }
 
-# === S10. KV secret fetches ===
+# === S10. KV secret fetches (via AuthChain events — Az.KeyVault module uses an
+# HTTP client that isn't App Insights-instrumented, so AppDependencies misses
+# vault.azure.net calls. Better signal: AuthChain.Started + AuthChain.CacheHit
+# events from our own telemetry confirm auth IS retrieving creds successfully.)
 try {
-    $q = "AppDependencies | where Target has 'vault.azure.net' | summarize n=count(), succ=countif(Success), fail=countif(not(Success))"
+    $q = "AppEvents | where Name in ('AuthChain.Started','AuthChain.CacheHit','AuthChain.Completed','AuthChain.CacheEvict') | summarize n=count() by Name"
     $r = Invoke-LogsQuery -Query $q -Target Workspace
     $rows = if ($r.Results) { $r.Results } else { @() }
-    $callCount = if (@($rows).Count -gt 0) { [int]$rows[0].n } else { 0 }
-    Record-Signal 'S10' 'KV secret fetches' ($callCount -gt 0) "KV-call count=$callCount" $rows
-} catch { Record-Signal 'S10' 'KV secret fetches' $false "Query failed: $_" @() }
+    $authEventCount = ($rows | ForEach-Object { [int]$_.n } | Measure-Object -Sum).Sum
+    $detail = if (@($rows).Count -eq 0) { 'NO AuthChain events' } else {
+        ($rows | ForEach-Object { "$($_.Name)=$($_.n)" }) -join ' '
+    }
+    Record-Signal 'S10' 'Auth chain (KV-backed credentials)' ($authEventCount -gt 0) "events=$authEventCount  $detail" $rows
+} catch { Record-Signal 'S10' 'Auth chain (KV-backed credentials)' $false "Query failed: $_" @() }
 
 # === S11. Defender portal API calls ===
 try {

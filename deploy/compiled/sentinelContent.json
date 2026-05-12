@@ -39,6 +39,268 @@
   },
   "resources": [
     {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Solution-XdrLogRaider')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "contentId": "XdrLogRaider",
+        "contentKind": "Solution",
+        "kind": "Solution",
+        "displayName": "XdrLogRaider - Defender XDR portal telemetry",
+        "version": "[variables('solutionVersion')]",
+        "source": "[variables('solutionSource')]",
+        "author": "[variables('solutionAuthor')]",
+        "support": "[variables('solutionSupport')]",
+        "dependencies": {
+          "operator": "AND",
+          "criteria": [
+            {
+              "kind": "DataConnector",
+              "contentId": "XdrLogRaiderInternal",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Parser",
+              "contentId": "MDE_Drift_Configuration",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Parser",
+              "contentId": "MDE_Drift_Exposure",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Parser",
+              "contentId": "MDE_Drift_Inventory",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Parser",
+              "contentId": "MDE_Drift_Maintenance",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "AfterHoursDrift",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "ConfigChangesByUpn",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "CustomDetectionContentAudit",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "ExclusionAdditionsPastQuarter",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "LrSessionsWithoutJustification",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "MachineInventoryRiskScore",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "MdiServiceAccountDrift",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "RbacEscalationEvents",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "SecurityPoliciesPerPlatform",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "SilentBypassIndicators",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "TvmTopVulnerableMachines",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "XspmChokepointDeltas",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "MDE_ActionCenter",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "MDE_ComplianceDashboard",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "MDE_DeviceInventory_Unified",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "MDE_DriftReport",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "MDE_ExposureMap",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "MDE_GovernanceScorecard",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "MDE_IdentityPosture",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "MDE_ResponseAudit",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "XdrLogRaider_ConnectorHealth",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "XdrLogRaider_ConnectorOps",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "f3d2618e-5eb7-4520-b033-103e1bed3504",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "1cf62c3f-9ce0-41bf-8838-6d4cb19b0699",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "74df254d-b7f8-48e9-9af1-3d5741d49395",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "0ba672c9-171e-48f8-8c8a-bf6d0c926f70",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "eeb31220-1331-41e2-beb9-bd0e12f068ad",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "aa3fb0f1-0ece-47f6-b1e0-ab142715231b",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "4224ffe4-71ee-4782-8318-5dee699ba5a7",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "8a175b24-541e-475b-85ff-e667d426bcca",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "e61632c8-64fb-4afc-8d67-7f3d3785262c",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "f9fddde5-abce-4931-a5aa-08a1e8e38ce8",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "b717e5a0-a85f-4cb6-a5f0-659f56b78ae1",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "4a6cc79a-3700-4910-bcea-9dce7b51053f",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "0c106d96-4d83-4e92-8dbf-ef2d3e41107d",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "653d465a-e1e8-46fb-8013-2cbc1d5a84e3",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "443bbdf0-85ad-4ea6-8036-a5ee034cba66",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "c7b6ae0a-5381-44b7-b73d-fe64df500f5e",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "3effaf4a-d884-4a17-9530-d4a8b4080eac",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "85d9b533-0350-4f56-a132-6d78392e779e",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "89d1dff9-454f-481f-9f5b-8b6bb042a3bb",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "24de8cc1-190a-457d-9f36-d7c1462e8efb",
+              "version": "0.1.0"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "2c5701fb-00c8-407c-86d8-f65d62c4b8a1",
+              "version": "0.1.0"
+            }
+          ]
+        }
+      }
+    },
+    {
       "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
       "apiVersion": "2020-08-01",
       "name": "[concat(parameters('workspaceName'), '/', 'MDE_Drift_Configuration')]",
