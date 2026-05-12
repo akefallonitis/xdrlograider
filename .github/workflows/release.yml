@@ -238,14 +238,37 @@ jobs:
           # Az.Storage 7.5.0 retained: still useful for blob/queue ops and
           # for the test scaffolding that creates SDK-style contexts. No
           # runtime dependency on its table cmdlets.
+          # CRITICAL: Az.Accounts MUST be at least 5.4.0 because:
+          #   - Az.KeyVault 6.4.3 has RequiredModules = @{Az.Accounts >= 5.4.0}
+          #   - Az.Storage 7.5.0  has RequiredModules = @{Az.Accounts >= 5.4.0}
+          # If we pin Az.Accounts to a lower version (e.g. 5.3.4), Save-Module
+          # pulls both: the pinned 5.3.4 AND the transitive 5.4.0. Result: two
+          # Az.Accounts version folders side-by-side, PowerShell Import-Module
+          # cannot disambiguate, cold-start crashes the Functions host (503).
+          # Live-reproduced 2026-05-12: FA "Running" but /admin/host/status 503,
+          # FunctionExecutionCount=0 last 24h, 0 invocations since cold-start.
           $azModules = @(
-              @{ Name = 'Az.Accounts';  RequiredVersion = '5.3.4' }
+              @{ Name = 'Az.Accounts';  RequiredVersion = '5.4.0' }
               @{ Name = 'Az.KeyVault';  RequiredVersion = '6.4.3' }
               @{ Name = 'Az.Storage';   RequiredVersion = '7.5.0' }
           )
           foreach ($m in $azModules) {
               Save-Module -Name $m.Name -RequiredVersion $m.RequiredVersion -Path $modulesDir -Repository PSGallery -Force
-              Write-Host "  ✓ $($m.Name) saved (= $($m.RequiredVersion))" -ForegroundColor Green
+              Write-Host "  V $($m.Name) saved (= $($m.RequiredVersion))" -ForegroundColor Green
+          }
+
+          # === GUARD: detect multi-version drift ===
+          # Catches the cold-start-crash class above if a future module bump
+          # reintroduces transitive-vs-explicit version mismatch.
+          $azModuleDirs = Get-ChildItem -Path $modulesDir -Directory -Filter 'Az.*' -ErrorAction SilentlyContinue
+          foreach ($modDir in $azModuleDirs) {
+              $versionDirs = @(Get-ChildItem -Path $modDir.FullName -Directory -ErrorAction SilentlyContinue)
+              if ($versionDirs.Count -gt 1) {
+                  $list = ($versionDirs | ForEach-Object { $_.Name }) -join ', '
+                  throw ("Bundled $($modDir.Name) has multiple versions ($list). " +
+                         "PowerShell Import-Module cannot disambiguate, causing FA host 503. " +
+                         "Pin all Az.* modules to compatible versions or add explicit cleanup.")
+              }
           }
 
           # === PRUNE: remove docs/help/samples from Az modules (size optimization) ===

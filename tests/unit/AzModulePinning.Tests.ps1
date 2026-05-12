@@ -29,7 +29,14 @@ BeforeAll {
     $script:ReleaseYmlContent = Get-Content $script:ReleaseYmlPath -Raw
 
     $script:RequiredModules = @{
-        'Az.Accounts'  = '5.3.4'
+        # Az.Accounts MUST be >= 5.4.0 because Az.KeyVault 6.4.3 + Az.Storage 7.5.0
+        # both declare Az.Accounts >= 5.4.0 as a RequiredModules transitive dep.
+        # Pinning to anything < 5.4.0 makes Save-Module bundle BOTH the pinned
+        # version AND the transitive 5.4.0 side-by-side. Result: FA cold-start
+        # 503 because Import-Module Xdr.Common.Auth cannot disambiguate.
+        # Live-reproduced 2026-05-12: FA Running but /admin/host/status 503,
+        # FunctionExecutionCount = 0 last 24h.
+        'Az.Accounts'  = '5.4.0'
         'Az.KeyVault'  = '6.4.3'
         'Az.Storage'   = '7.5.0'  # Retained for blob/queue ops; not table
     }
