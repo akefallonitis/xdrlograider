@@ -24,7 +24,7 @@
     "solutionSource": {
       "kind": "Solution",
       "name": "XdrLogRaider",
-      "sourceId": "community.xdrlograider"
+      "sourceId": "XdrLogRaider"
     },
     "solutionAuthor": {
       "name": "Alex Kefallonitis",
@@ -44,7 +44,7 @@
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Solution-XdrLogRaider')]",
       "location": "[parameters('location')]",
       "properties": {
-        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+        "parentId": "XdrLogRaider",
         "contentId": "XdrLogRaider",
         "contentKind": "Solution",
         "kind": "Solution",
