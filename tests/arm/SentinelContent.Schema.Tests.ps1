@@ -151,14 +151,18 @@ Describe 'Analytic rules YAML schema compliance' {
         # AMEND-9 Phase A.3 (2026-05-09): added XdrOps-StreamWentDry rule (per-stream stale alert)
         # HOT-FIX 14 (2026-05-10): added MDE_DeviceInventory_Unified workbook (per-device drilldown)
         # HOT-FIX 17 (2026-05-10): added XdrLogRaider_ConnectorOps workbook (operator throughput + reliability dashboard)
-        # Total metadata back-links: 21 AnalyticsRule + 12 HuntingQuery + 10 Workbook + 4 Parser = 47
-        @($metadata).Count | Should -Be 47 -Because 'Hot-Fix 14+17: 21 AnalyticsRule + 12 HuntingQuery + 10 Workbook (incl DeviceInventory_Unified + ConnectorOps) + 4 Parser metadata back-links'
+        # POST-DEPLOY (2026-05-12): added 1 Solution kind metadata record at resources[0] with
+        # dependencies.criteria listing all 47 content items. Sentinel UI uses this to
+        # group items under the connector card and populate Workbooks/Rules counts.
+        # Total: 21 AnalyticsRule + 12 HuntingQuery + 10 Workbook + 4 Parser + 1 Solution = 48
+        @($metadata).Count | Should -Be 48 -Because '21 AnalyticsRule + 12 HuntingQuery + 10 Workbook + 4 Parser content back-links + 1 Solution kind for Content Hub linkage'
 
         $byKind = $metadata | Group-Object { $_.properties.kind }
         ($byKind | Where-Object Name -eq 'AnalyticsRule').Count | Should -Be 21  # 14 detection + 7 XdrOps-* (AMEND-9 A.3 added StreamWentDry)
         ($byKind | Where-Object Name -eq 'HuntingQuery').Count  | Should -Be 12  # 9 + 3 new (R++++++ Phase 1 S: Machines + SecurityPolicies + TVM)
         ($byKind | Where-Object Name -eq 'Workbook').Count      | Should -Be 10  # 9 + Hot-Fix 17 ConnectorOps (operator dashboard)
         ($byKind | Where-Object Name -eq 'Parser').Count        | Should -Be 4
+        ($byKind | Where-Object Name -eq 'Solution').Count      | Should -Be 1   # POST-DEPLOY 2026-05-12: Content Hub linkage parent
 
         # Every metadata back-link must reference the canonical Solution
         foreach ($m in $metadata) {
@@ -197,12 +201,17 @@ Describe 'Analytic rules YAML schema compliance' {
             'HuntingQuery'  = @('savedSearches')
             'Parser'        = @('savedSearches')
             'Workbook'      = @('workbooks')
+            # POST-DEPLOY 2026-05-12: Solution kind has self-referential parentId
+            # (parentId == contentId per Sentinel Solutions schema). No content resource
+            # to validate against; skip the type-fragment check below.
+            'Solution'      = $null
         }
 
         foreach ($m in $metadata) {
             $kind = $m.properties.kind
+            if ($kind -eq 'Solution') { continue }  # Solution is its own parent; no content resource backing
             $expectedTypeFragments = $expectedTypes[$kind]
-            $expectedTypeFragments | Should -Not -BeNullOrEmpty -Because "metadata kind '$kind' is not one of AnalyticsRule/HuntingQuery/Parser/Workbook"
+            $expectedTypeFragments | Should -Not -BeNullOrEmpty -Because "metadata kind '$kind' is not one of AnalyticsRule/HuntingQuery/Parser/Workbook/Solution"
 
             $parentId = $m.properties.parentId
             $parentId | Should -Not -BeNullOrEmpty -Because "metadata '$($m.name)' has empty parentId"

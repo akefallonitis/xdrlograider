@@ -76,27 +76,34 @@ Describe 'XdrRefresh.TierDispatch — cadence map' {
         $map = Get-XdrTierCadenceMap
         $map.Keys | Sort-Object | Should -Be @('ActionCenter','Configuration','Inventory','Maintenance','XspmGraph') -Because '5 v0.1.0 GA cadence tiers'
 
-        # Section R++ TROUBLESHOOTING (2026-05-07): Configuration/Inventory/Maintenance
-        # are temporarily compressed to 1h so operators can see end-to-end data flow
-        # within minutes instead of days during active production-readiness shake-out.
-        # MUST REVERT before v0.1.0 GA tag — see Get-XdrTierCadenceMap.ps1 comment block.
-        # Test allows EITHER production OR compressed cadence so this test passes
-        # under both states. When Phase R++.K reverts, the production assertions
-        # become the only valid path again.
+        # Cadence mode detection — 3 acceptable states:
+        #   PRODUCTION:               ActionCenter=10m / XspmGraph=1h / Configuration=6h / Inventory=1d / Maintenance=7d
+        #   COMPRESSED-TROUBLESHOOT:  all 5 tiers = 1h  (Section R++ audit, 2026-05-07)
+        #   COMPRESSED-AUDIT-5M:      all 5 tiers = 5m  (2026-05-12 post-deploy audit; Plan AMEND-2 BINDING revert)
+        # Test allows ANY of the 3; revert to production happens via final commit before tag.
         $isProductionCadence = ($map['Configuration'] -eq ([TimeSpan]::FromHours(6)))
-        $isCompressedCadence = ($map['Configuration'] -eq ([TimeSpan]::FromHours(1)))
-        ($isProductionCadence -or $isCompressedCadence) | Should -BeTrue -Because 'Configuration cadence must be 6h (production) or 1h (compressed-troubleshooting per Section R++)'
+        $isCompressed1h      = ($map['Configuration'] -eq ([TimeSpan]::FromHours(1)))
+        $isCompressed5m      = ($map['Configuration'] -eq ([TimeSpan]::FromMinutes(5)))
+        ($isProductionCadence -or $isCompressed1h -or $isCompressed5m) | Should -BeTrue -Because 'Configuration cadence must be 6h (production) / 1h (Section R++ troubleshooting) / 5m (post-deploy audit cycle)'
 
-        $map['ActionCenter']  | Should -Be ([TimeSpan]::FromMinutes(10)) -Because 'ActionCenter cadence = 10 min (security events; never compressed)'
-        $map['XspmGraph']     | Should -Be ([TimeSpan]::FromHours(1))    -Because 'XspmGraph cadence = 1 hour (already 1h in production)'
         if ($isProductionCadence) {
+            $map['ActionCenter']  | Should -Be ([TimeSpan]::FromMinutes(10)) -Because 'ActionCenter cadence = 10 min (production)'
+            $map['XspmGraph']     | Should -Be ([TimeSpan]::FromHours(1))    -Because 'XspmGraph cadence = 1 hour (production)'
             $map['Configuration'] | Should -Be ([TimeSpan]::FromHours(6))    -Because 'Configuration cadence = 6 hours (production)'
             $map['Inventory']     | Should -Be ([TimeSpan]::FromDays(1))     -Because 'Inventory cadence = 1 day (production)'
             $map['Maintenance']   | Should -Be ([TimeSpan]::FromDays(7))     -Because 'Maintenance cadence = 7 days (production)'
+        } elseif ($isCompressed1h) {
+            $map['ActionCenter']  | Should -Be ([TimeSpan]::FromMinutes(10)) -Because 'ActionCenter cadence = 10 min (preserved in 1h compression)'
+            $map['XspmGraph']     | Should -Be ([TimeSpan]::FromHours(1))    -Because 'XspmGraph cadence = 1 hour'
+            $map['Configuration'] | Should -Be ([TimeSpan]::FromHours(1))    -Because 'Configuration cadence compressed to 1h (Section R++ troubleshooting)'
+            $map['Inventory']     | Should -Be ([TimeSpan]::FromHours(1))    -Because 'Inventory cadence compressed to 1h (Section R++ troubleshooting)'
+            $map['Maintenance']   | Should -Be ([TimeSpan]::FromHours(1))    -Because 'Maintenance cadence compressed to 1h (Section R++ troubleshooting)'
         } else {
-            $map['Configuration'] | Should -Be ([TimeSpan]::FromHours(1)) -Because 'Configuration cadence compressed to 1h (Section R++ troubleshooting)'
-            $map['Inventory']     | Should -Be ([TimeSpan]::FromHours(1)) -Because 'Inventory cadence compressed to 1h (Section R++ troubleshooting)'
-            $map['Maintenance']   | Should -Be ([TimeSpan]::FromHours(1)) -Because 'Maintenance cadence compressed to 1h (Section R++ troubleshooting)'
+            # Compressed 5-min audit cycle (2026-05-12): all tiers fire within 1-2 cycles
+            # for full per-stream visibility. REVERT to production values before tag.
+            foreach ($tier in @('ActionCenter','XspmGraph','Configuration','Inventory','Maintenance')) {
+                $map[$tier] | Should -Be ([TimeSpan]::FromMinutes(5)) -Because "$tier cadence compressed to 5min (post-deploy audit cycle 2026-05-12)"
+            }
         }
     }
 }
