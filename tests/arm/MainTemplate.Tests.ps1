@@ -28,9 +28,20 @@ Describe 'mainTemplate.json invariants' {
 
     It 'declares the required parameters' {
         $params = ($script:T.parameters | Get-Member -MemberType NoteProperty).Name
-        foreach ($p in @('projectPrefix','env','location','existingWorkspaceId','workspaceLocation','serviceAccountUpn','authMethod','planSku','retentionInDays','githubRepo','releaseTag','deployRoleAssignments')) {
+        foreach ($p in @('projectPrefix','env','location','existingWorkspaceId','workspaceLocation','serviceAccountUpn','authMethod','planSku','retentionInDays','githubRepo','releaseTag','deployRoleAssignments','deploySentinelContent','sentinelContentTemplateUri')) {
             $params | Should -Contain $p
         }
+    }
+
+    It 'nested deployment for sentinelContent.json is wired (registers data connector card in operator workspace)' {
+        $nested = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'sentinelContent' })
+        $nested.Count | Should -Be 1
+        $nested[0].condition | Should -Match "parameters\('deploySentinelContent'\)"
+        $nested[0].properties.templateLink.uri | Should -Match "sentinelContentTemplateUri"
+        $nested[0].properties.templateLink.uri | Should -Match "sentinelContent\.json"
+        # Targets the workspace's subscription + resource group (not the connector RG)
+        $nested[0].subscriptionId | Should -Match 'workspaceSubscriptionId'
+        $nested[0].resourceGroup  | Should -Match 'workspaceResourceGroup'
     }
 
     It 'defaults planSku to Y1 (Linux Consumption — cost-optimal) with EP1+ opt-in' {

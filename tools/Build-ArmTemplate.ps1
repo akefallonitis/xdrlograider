@@ -119,6 +119,16 @@ $parameters = [ordered]@{
         defaultValue = $true
         metadata     = [ordered]@{ description = 'Deploy 3 role assignments to the FA SAMI (KV Secrets User on Key Vault, Storage Table Data Contributor on Storage, RG-scoped Monitoring Metrics Publisher). Default: true (initial deploy by Owner / User Access Administrator). Set FALSE when the deploying identity has only Contributor (cannot create role assignments) — operator then runs `az role assignment create` manually for the 3 grants after deploy succeeds.' }
     }
+    deploySentinelContent = [ordered]@{
+        type         = 'bool'
+        defaultValue = $true
+        metadata     = [ordered]@{ description = 'Deploy the Sentinel V2 content package (data connector card + 19 dataTypes) to the operator''s workspace so the connector appears in the Sentinel Content Hub Installed Solutions list. Default: true. Set false to deploy only the Function App + DCRs + Key Vault without registering the Sentinel solution.' }
+    }
+    sentinelContentTemplateUri = [ordered]@{
+        type         = 'string'
+        defaultValue = ''
+        metadata     = [ordered]@{ description = 'URI of sentinelContent.json nested template. EMPTY (default) = relative-URI mode for Deploy-to-Azure URL deploys (resolved via uri(deployment().properties.templateLink.uri, ...)). Set explicitly to an absolute URL like https://github.com/akefallonitis/xdrlograider/releases/latest/download/sentinelContent.json for TemplateFile-based deploys where templateLink is null.' }
+    }
     servicePassword = [ordered]@{
         type         = 'securestring'
         defaultValue = ''
@@ -576,6 +586,45 @@ $resources.Add([ordered]@{
         roleDefinitionId = "[resourceId('Microsoft.Authorization/roleDefinitions', variables('monitoringMetricsPublisherRoleId'))]"
         principalId      = $samiPrincipalId
         principalType    = 'ServicePrincipal'
+    }
+})
+
+# -----------------------------------------------------------------------------
+# Nested deployment: sentinelContent.json (v2 dataConnector card + contentPackage)
+# Registers the XdrLogRaider solution in the operator's Sentinel Content Hub
+# Installed Solutions list and provisions the data connector card. Without
+# this nested deployment, Deploy-to-Azure only creates the FA + DCRs + KV
+# and the connector card never appears in Sentinel UI.
+#
+# templateLink.uri resolution:
+#   - Deploy-to-Azure URL deploys: templateLink.uri is set by Azure Portal to
+#     the raw mainTemplate.json URL; we resolve sentinelContent.json relative
+#     to it (uri(deployment().properties.templateLink.uri, 'sentinelContent.json')).
+#   - az deployment group create --template-file: templateLink is null, so
+#     the operator must pass sentinelContentTemplateUri explicitly (e.g. the
+#     raw GitHub URL from a release).
+# Pattern ported from the v1 pilot (production-proven across many tenants).
+# -----------------------------------------------------------------------------
+$resources.Add([ordered]@{
+    type           = 'Microsoft.Resources/deployments'
+    apiVersion     = '2024-03-01'
+    name           = "[concat('sentinelContent-', variables('suffix'))]"
+    condition      = "[parameters('deploySentinelContent')]"
+    subscriptionId = "[variables('workspaceSubscriptionId')]"
+    resourceGroup  = "[variables('workspaceResourceGroup')]"
+    dependsOn      = @(
+        "[concat('customTables-', variables('suffix'))]"
+    )
+    properties = [ordered]@{
+        expressionEvaluationOptions = [ordered]@{ scope = 'inner' }
+        mode = 'Incremental'
+        templateLink = [ordered]@{
+            uri            = "[if(empty(parameters('sentinelContentTemplateUri')), uri(deployment().properties.templateLink.uri, 'sentinelContent.json'), parameters('sentinelContentTemplateUri'))]"
+            contentVersion = '1.0.0.0'
+        }
+        parameters = [ordered]@{
+            workspaceName = [ordered]@{ value = "[variables('workspaceName')]" }
+        }
     }
 })
 
