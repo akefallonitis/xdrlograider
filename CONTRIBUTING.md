@@ -108,6 +108,44 @@ Single job runs `tests/arm/SentinelContent.MinimalLock.Tests.ps1` which locks th
 
 The `Deploy to Azure` button in [README](README.md) always points at `main`'s `mainTemplate.json` + `createUiDefinition.json` and uses `releaseTag=latest` by default — operators get the most recent published release.
 
+## Coverage — why 24%?
+
+The Pester suite covers **business-logic invariants** (165 tests) but is well short of 50% line coverage. Per plan §1.E, this is intentional for v0.1.0:
+
+- The uncovered lines are mostly HTTP orchestration paths (`Get-EntraEstsAuth`, `Complete-CredentialsFlow` / `Complete-PasskeyFlow` / `Complete-TotpMfa`, `Invoke-XdrStorageTableEntity` which uses `System.Net.Http.HttpClient` directly, `Send-ToLogAnalytics` retry mechanics). Exercising these requires either live integration tests (forbidden by Rule 18 — no live online testing in CI) or invasive `HttpClient` mocking (high effort, low value).
+- HTTP paths ARE covered against real endpoints by operator-local `Probe-Auth-Local.ps1` (TOTP + Passkey + TenantContext + Custom Collection live probes via `.env.local`) and post-deploy `Verify-Deploy.ps1` (14-phase markdown report).
+- The hard-fail gate at 20% catches regressions that strip out tested code paths; it's a regression guard, not a quality target.
+
+Coverage uplift roadmap:
+- v0.1.x — Add Pester tests for the circuit-breaker state machine (3-error → open → 30-min cooldown → half-open) once the enforcement code lands. Should bring coverage to ~30%.
+- v0.3.0 — Sentinel content phase will add tests over the new analytic-rule / hunting-query / workbook code; ~40-45%.
+- v0.5.0 — `HttpClient` mocking harness for the auth + DCE paths; ~60%.
+
+## Function App auto-update from new releases
+
+The ARM template's `releaseTag` parameter defaults to `latest`. With that value, `WEBSITE_RUN_FROM_PACKAGE` resolves to `https://github.com/<repo>/releases/latest/download/function-app.zip`, which GitHub serves as a 302 redirect to the most-recent published release.
+
+**This is NOT a true auto-update**:
+- The Function App fetches the package on cold start (or `Restart`)
+- A running FA won't notice a new release until it restarts
+- Even on restart, the FA caches the package in `/home/data/SitePackages/` — restart-on-fail behaviour can serve the old cached zip
+
+Operator workflow to pick up a new release:
+
+```powershell
+# Option A — restart triggers a fresh package fetch
+az functionapp restart --name <funcName> --resource-group <rg>
+
+# Option B — explicit redeploy with an explicit tag (recommended for production
+# rollouts; gives the operator a single point of attribution + rollback)
+az deployment group create --resource-group <rg> `
+  --template-file deploy/mainTemplate.json `
+  --parameters @deploy/parameters.json `
+  --parameters releaseTag=v0.1.1 ...
+```
+
+For automated rollouts: an operator-controlled GitHub Actions workflow can listen for repository releases and trigger `az functionapp restart` via a federated-credential SP. Not bundled here because it requires per-tenant Entra setup.
+
 ## Sentinel Content Hub submission (deferred)
 
 `deploy/sentinelContent.json` is the ARM `dataConnector` definition deployed on the operator's workspace. It is **not** a Content Hub catalog listing. Catalog inclusion is a separate maintainer workflow:

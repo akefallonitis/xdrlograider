@@ -119,6 +119,23 @@ jobs:
           Copy-Item deploy/parameters.json         dist/
           Copy-Item deploy/sentinelContent.json    dist/
 
+      - name: Package Sentinel Solution (Microsoft Content Hub input format)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # deploy/solution/ is the input folder layout Microsoft's
+          # createSolutionV3.ps1 expects for Sentinel Content Hub submissions
+          # (SolutionMetadata.json + Description.md + Data Connectors/ + empty
+          # Analytic Rules/ Hunting Queries/ Parsers/ Workbooks/ Images/ for
+          # v0.3.0 content fill-in). Operators submitting this to the public
+          # Content Hub catalog drop this zip into Azure/Azure-Sentinel/
+          # Solutions/XdrLogRaider/. For self-hosted Deploy-to-Azure, the
+          # already-staged sentinelContent.json + mainTemplate.json are what
+          # operators consume — this zip is forward-compat for v0.4.0
+          # Content Hub PR.
+          Compress-Archive -Path deploy/solution/* -DestinationPath dist/XdrLogRaider-Solution.zip -CompressionLevel Optimal
+          Write-Host "XdrLogRaider-Solution.zip: $([math]::Round((Get-Item dist/XdrLogRaider-Solution.zip).Length / 1KB, 1)) KB"
+
       - name: SBOM (SPDX)
         uses: anchore/sbom-action@v0
         continue-on-error: true
@@ -134,7 +151,7 @@ jobs:
           COSIGN_EXPERIMENTAL: 'true'
         run: |
           set -euo pipefail
-          for f in dist/function-app.zip dist/mainTemplate.json dist/createUiDefinition.json dist/sentinelContent.json; do
+          for f in dist/function-app.zip dist/mainTemplate.json dist/createUiDefinition.json dist/sentinelContent.json dist/XdrLogRaider-Solution.zip; do
             [[ -f "$f" ]] && cosign sign-blob --yes --output-signature "$f.sig" --output-certificate "$f.cert" "$f"
           done
           [[ -f dist/sbom.spdx.json ]] && cosign sign-blob --yes --output-signature dist/sbom.spdx.json.sig --output-certificate dist/sbom.spdx.json.cert dist/sbom.spdx.json || true
@@ -166,6 +183,9 @@ jobs:
             dist/sentinelContent.json
             dist/sentinelContent.json.sig
             dist/sentinelContent.json.cert
+            dist/XdrLogRaider-Solution.zip
+            dist/XdrLogRaider-Solution.zip.sig
+            dist/XdrLogRaider-Solution.zip.cert
             dist/parameters.json
             dist/sbom.spdx.json
             dist/sbom.spdx.json.sig

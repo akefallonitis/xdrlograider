@@ -1,0 +1,35 @@
+{
+  "id": "XdrLogRaiderDataConnector",
+  "title": "XdrLogRaider — Defender XDR portal-only telemetry",
+  "publisher": "Community / Alex Kefallonitis",
+  "descriptionMarkdown": "Polls 493 read endpoints across 18 in-scope nodoc sub-areas of `security.microsoft.com` apiproxy (the surface Microsoft does NOT publish a public API for) and ingests results into 18 `Defender_<Sub>_CL` workspace tables plus 1 `XdrConnectorHealth_CL` operational table via DCE/DCR Logs Ingestion. Auth via sccauth + XSRF cookie chain (Entra TOTP or Passkey, unattended).",
+  "graphQueries": [
+    { "metricName": "Total rows received", "legend": "Defender XDR portal-only telemetry", "baseQuery": "union withsource=Table Defender_*_CL" }
+  ],
+  "sampleQueries": [
+    { "description": "All Defender XDR portal data — last 24h volume by table", "query": "union withsource=Table Defender_*_CL\n| where TimeGenerated > ago(24h)\n| summarize count() by Table" },
+    { "description": "Connector liveness — last 1h heartbeat rows", "query": "XdrConnectorHealth_CL\n| where TimeGenerated > ago(1h)\n| order by TimeGenerated desc" },
+    { "description": "Per-endpoint success-kind classifier — last 24h", "query": "union Defender_*_CL\n| where TimeGenerated > ago(24h)\n| summarize count() by Endpoint, SuccessKind" }
+  ],
+  "dataTypes": [
+    { "name": "Defender_ActionCenter_CL", "lastDataReceivedQuery": "Defender_ActionCenter_CL | summarize Time = max(TimeGenerated)" },
+    { "name": "XdrConnectorHealth_CL", "lastDataReceivedQuery": "XdrConnectorHealth_CL | summarize Time = max(TimeGenerated)" }
+  ],
+  "connectivityCriteria": [ { "type": "IsConnectedQuery", "value": [ "XdrConnectorHealth_CL | where TimeGenerated > ago(15m) | take 1" ] } ],
+  "availability": { "status": 1, "isPreview": false },
+  "permissions": {
+    "resourceProvider": [
+      { "provider": "Microsoft.OperationalInsights/workspaces", "permissionsDisplayText": "read and write permissions are required on the workspace.", "providerDisplayName": "Workspace", "scope": "Workspace", "requiredPermissions": { "read": true, "write": true, "delete": true } }
+    ],
+    "customs": [
+      { "name": "Microsoft Sentinel-enabled workspace", "description": "Sentinel must be enabled on the destination Log Analytics workspace." },
+      { "name": "Service account for Defender portal sign-in", "description": "Read-only Entra account that can sign into security.microsoft.com. TOTP or FIDO2 passkey configured." },
+      { "name": "Owner or User Access Administrator on the target resource group", "description": "Required to create the 3 SAMI role assignments at deploy time. Operators with Contributor only can set deployRoleAssignments=false and grant the roles manually after deploy." }
+    ]
+  },
+  "instructionSteps": [
+    { "title": "1. Click Deploy to Azure", "description": "Use the Deploy to Azure button in the GitHub README. The wizard prompts for the workspace, service account, auth method, and Function App plan SKU. Defaults to Y1 Linux Consumption (cost-optimal)." },
+    { "title": "2. Upload secrets to Key Vault", "description": "If you skipped the inline credentials, run `az keyvault secret set` for `defender-upn`, `defender-password`, `defender-totp` (or `defender-passkey`), `defender-auth-method` against the deployed Key Vault." },
+    { "title": "3. Verify the deploy", "description": "Run `pwsh ./tools/Verify-Deploy.ps1 -ResourceGroup <rg>` — emits a 14-phase markdown report. After the first ConnectorHeartbeat (within 10 min), this card flips to Connected." }
+  ]
+}
