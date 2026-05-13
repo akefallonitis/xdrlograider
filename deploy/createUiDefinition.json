@@ -188,7 +188,6 @@
       "location":             "[location()]",
       "projectPrefix":        "[basics('projectPrefix')]",
       "env":                  "[basics('env')]",
-      "connectorLocation":    "[location()]",
       "existingWorkspaceId":  "[steps('workspaceStep').existingWorkspaceId.id]",
       "workspaceLocation":    "[steps('workspaceStep').existingWorkspaceId.location]",
       "serviceAccountUpn":    "[steps('authStep').serviceAccountUpn]",

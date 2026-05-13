@@ -28,7 +28,7 @@ Describe 'mainTemplate.json invariants' {
 
     It 'declares the required parameters' {
         $params = ($script:T.parameters | Get-Member -MemberType NoteProperty).Name
-        foreach ($p in @('projectPrefix','env','connectorLocation','existingWorkspaceId','workspaceLocation','serviceAccountUpn','authMethod','planSku','retentionInDays','githubRepo','releaseTag','deployRoleAssignments')) {
+        foreach ($p in @('projectPrefix','env','location','existingWorkspaceId','workspaceLocation','serviceAccountUpn','authMethod','planSku','retentionInDays','githubRepo','releaseTag','deployRoleAssignments')) {
             $params | Should -Contain $p
         }
     }

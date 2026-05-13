@@ -29,7 +29,7 @@
         "description": "Environment tag."
       }
     },
-    "connectorLocation": {
+    "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
       "metadata": {
@@ -165,7 +165,7 @@
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2023-05-01",
       "name": "[variables('stName')]",
-      "location": "[parameters('connectorLocation')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('commonTag')]",
       "sku": {
         "name": "Standard_LRS"
@@ -223,7 +223,7 @@
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2023-07-01",
       "name": "[variables('kvName')]",
-      "location": "[parameters('connectorLocation')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('commonTag')]",
       "properties": {
         "tenantId": "[subscription().tenantId]",
@@ -297,7 +297,7 @@
       "type": "Microsoft.Insights/components",
       "apiVersion": "2020-02-02",
       "name": "[variables('aiName')]",
-      "location": "[parameters('connectorLocation')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('commonTag')]",
       "kind": "web",
       "properties": {
@@ -310,7 +310,7 @@
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2023-12-01",
       "name": "[variables('planName')]",
-      "location": "[parameters('connectorLocation')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('commonTag')]",
       "sku": "[if(equals(parameters('planSku'), 'Y1'), createObject('name', 'Y1', 'tier', 'Dynamic'), createObject('name', parameters('planSku'), 'tier', 'ElasticPremium'))]",
       "kind": "[if(equals(parameters('planSku'), 'Y1'), 'functionapp', 'linux')]",
@@ -2937,7 +2937,7 @@
       "type": "Microsoft.Web/sites",
       "apiVersion": "2023-12-01",
       "name": "[variables('funcName')]",
-      "location": "[parameters('connectorLocation')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('commonTag')]",
       "kind": "functionapp,linux",
       "identity": {

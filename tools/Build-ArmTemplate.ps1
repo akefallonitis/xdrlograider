@@ -66,7 +66,7 @@ $parameters = [ordered]@{
         allowedValues = @('dev','staging','prod')
         metadata     = [ordered]@{ description = 'Environment tag.' }
     }
-    connectorLocation = [ordered]@{
+    location = [ordered]@{
         type         = 'string'
         defaultValue = '[resourceGroup().location]'
         metadata     = [ordered]@{ description = 'Region for connector resources (Function App, Key Vault, Storage, Application Insights).' }
@@ -177,7 +177,7 @@ $resources.Add([ordered]@{
     type       = 'Microsoft.Storage/storageAccounts'
     apiVersion = '2023-05-01'
     name       = "[variables('stName')]"
-    location   = "[parameters('connectorLocation')]"
+    location   = "[parameters('location')]"
     tags       = "[variables('commonTag')]"
     sku        = [ordered]@{ name = 'Standard_LRS' }
     kind       = 'StorageV2'
@@ -214,7 +214,7 @@ $resources.Add([ordered]@{
     type       = 'Microsoft.KeyVault/vaults'
     apiVersion = '2023-07-01'
     name       = "[variables('kvName')]"
-    location   = "[parameters('connectorLocation')]"
+    location   = "[parameters('location')]"
     tags       = "[variables('commonTag')]"
     properties = [ordered]@{
         tenantId               = "[subscription().tenantId]"
@@ -255,7 +255,7 @@ $resources.Add([ordered]@{
     type       = 'Microsoft.Insights/components'
     apiVersion = '2020-02-02'
     name       = "[variables('aiName')]"
-    location   = "[parameters('connectorLocation')]"
+    location   = "[parameters('location')]"
     tags       = "[variables('commonTag')]"
     kind       = 'web'
     properties = [ordered]@{
@@ -269,7 +269,7 @@ $resources.Add([ordered]@{
     type       = 'Microsoft.Web/serverfarms'
     apiVersion = '2023-12-01'
     name       = "[variables('planName')]"
-    location   = "[parameters('connectorLocation')]"
+    location   = "[parameters('location')]"
     tags       = "[variables('commonTag')]"
     # Y1 (Consumption): sku.tier='Dynamic' kind='functionapp' reserved=true (Linux variant).
     # EP1+ (ElasticPremium): sku.tier='ElasticPremium' kind='linux' reserved=true + maximumElasticWorkerCount.
@@ -496,7 +496,7 @@ $resources.Add([ordered]@{
     type       = 'Microsoft.Web/sites'
     apiVersion = '2023-12-01'
     name       = "[variables('funcName')]"
-    location   = "[parameters('connectorLocation')]"
+    location   = "[parameters('location')]"
     tags       = "[variables('commonTag')]"
     kind       = 'functionapp,linux'
     identity   = [ordered]@{ type = 'SystemAssigned' }
