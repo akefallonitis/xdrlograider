@@ -1,0 +1,31 @@
+# gitleaks v8 config — allowlists false positives only.
+# Detection rules inherit from gitleaks defaults (extend = default).
+title = "xdrlograider gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist false positives: public-knowledge Azure built-in role definition GUIDs and Microsoft public client IDs."
+
+# Allowlist by regex — Azure built-in role GUIDs (well-known, published in
+# Microsoft Azure RBAC documentation; not secrets).
+regexes = [
+  # Key Vault Secrets User
+  '''4633458b-17de-408a-b874-0445c86b69e6''',
+  # Storage Table Data Contributor
+  '''0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3''',
+  # Monitoring Metrics Publisher
+  '''3913510d-42f4-4e42-8a64-420c390055eb''',
+  # Microsoft public client ID used by Defender portal apiproxy (documented).
+  '''80ccca67-54bd-44ab-8625-4b79c4dc7775''',
+]
+
+# Allowlist paths — Phase 0 reference captures contain real Microsoft response
+# shapes. Tokens or sensitive values were redacted before commit (see
+# `_redaction_note` keys in live.json files), but other reference data may
+# still trip generic-api-key or high-entropy heuristics. Defender + manifest +
+# deploy paths are scanned normally; reference research data is allowlisted.
+paths = [
+  '''references/_phase0_archive/''',
+]

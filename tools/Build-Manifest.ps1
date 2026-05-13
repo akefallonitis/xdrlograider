@@ -157,7 +157,11 @@ function ConvertTo-PsdLiteral {
 $ReferencesRoot = (Resolve-Path $ReferencesRoot).Path
 Write-Verbose "Reading metadata from $ReferencesRoot"
 
-$metaFiles = Get-ChildItem -Path $ReferencesRoot -Recurse -Filter 'metadata.json' -File
+# Sort by FullName for cross-OS determinism. Without an explicit sort, Linux
+# (CI runner) and Windows (developer machine) emit manifest entries in different
+# orders — auto-regenerate-gate then fails because the committed manifest does
+# not match the freshly-regenerated one.
+$metaFiles = Get-ChildItem -Path $ReferencesRoot -Recurse -Filter 'metadata.json' -File | Sort-Object -Property FullName
 $entries   = New-Object System.Collections.Generic.List[object]
 $skipped   = 0
 
