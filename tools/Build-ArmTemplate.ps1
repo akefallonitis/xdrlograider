@@ -448,11 +448,11 @@ foreach ($f in $dcrFiles) {
 }
 
 $faAppSettings = [ordered]@{
-    AzureWebJobsStorage                      = "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2023-05-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+    AzureWebJobsStorage                      = "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
     # WEBSITE_CONTENTAZUREFILECONNECTIONSTRING + WEBSITE_CONTENTSHARE are required
     # for Y1 (Linux Consumption) — the runtime stores the package metadata in an
     # Azure Files share. EP1+ ignore these (harmless to keep, simplifies SKU switch).
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2023-05-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
     WEBSITE_CONTENTSHARE                     = "[toLower(variables('funcName'))]"
     FUNCTIONS_EXTENSION_VERSION              = '~4'
     FUNCTIONS_WORKER_RUNTIME                 = 'powershell'
@@ -465,7 +465,7 @@ $faAppSettings = [ordered]@{
     CONNECTOR_BUILD_ID                       = "[variables('connectorBuildId')]"
     AUTH_METHOD                              = "[parameters('authMethod')]"
     SERVICE_ACCOUNT_UPN                      = "[parameters('serviceAccountUpn')]"
-    KEY_VAULT_URI                            = "[reference(resourceId('Microsoft.KeyVault/vaults', variables('kvName')), '2023-07-01').vaultUri]"
+    KEY_VAULT_URI                            = "[reference(resourceId('Microsoft.KeyVault/vaults', variables('kvName')), '2024-11-01').vaultUri]"
     AUTH_SECRET_NAME                         = 'defender'
     DCE_ENDPOINT                             = "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]"
     DCR_IMMUTABLE_IDS_JSON                   = $dcrIdsExpr
