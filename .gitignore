@@ -27,9 +27,29 @@ Thumbs.db
 *.sig
 *.cert
 
-# Phase 0 forward-compat captures excluded for v0.1.0 because some path
-# components exceed Windows MAX_PATH (260 chars). Re-add in v0.2.0 when the
-# Power Platform onboarding lands (Phase 0 nodoc capture script will be
-# constrained to <240 chars per path component). Other portal dirs under
-# references/ are fine.
+# Phase 0 capture data — NEVER commit these. They contain operator runtime
+# evidence (HTTP responses with real tenant IDs, UPNs, IPs, OAuth tokens,
+# JWTs, machineIds, etc.). Re-captured locally on demand; never public.
+references/**/live.json
+references/**/_AUTH_RESEARCH.json
+references/**/_PORTAL.json
+
+# Non-Defender portal captures are v0.2.0+ research data — re-capture under
+# proper PII scrub when those portals land. v0.1.0 only ships Defender.
+references/entra-*/
+references/exchange/
+references/intune-*/
+references/m365-*/
+references/purview/
+references/purview-portal/
+references/security-copilot/
+references/sharepoint/
+references/teams/
+references/viva/
 references/power-platform/
+
+# Stale Phase 0 working artifacts; PHASE_0.md + _phase0_archive/ are canonical.
+references/_FULL_CATALOGUE.md
+references/_AUTH_INDEX.md
+references/_CATALOGUE_INDEX.md
+references/_LIVE_AUDIT_REPORT.md

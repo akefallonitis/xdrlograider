@@ -21,11 +21,10 @@ regexes = [
   '''80ccca67-54bd-44ab-8625-4b79c4dc7775''',
 ]
 
-# Allowlist paths — Phase 0 reference captures contain real Microsoft response
-# shapes. Tokens or sensitive values were redacted before commit (see
-# `_redaction_note` keys in live.json files), but other reference data may
-# still trip generic-api-key or high-entropy heuristics. Defender + manifest +
-# deploy paths are scanned normally; reference research data is allowlisted.
+# Allowlist paths — Phase 0 archive contains historical Phase 0 planning docs
+# (markdown only, no captures). The full set of capture data (live.json,
+# _AUTH_RESEARCH.json, _PORTAL.json) is .gitignore-excluded so it cannot reach
+# this scan. Defender metadata.json + nodoc.yml are scanned normally.
 paths = [
   '''references/_phase0_archive/''',
 ]
