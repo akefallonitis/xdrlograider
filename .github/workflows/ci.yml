@@ -79,7 +79,7 @@ jobs:
           # these types and will keep doing so until Microsoft ships a newer stable;
           # deployment behaviour is unaffected. Operator can re-bump api versions
           # when Microsoft publishes the next stable.
-          $r1 = Test-AzTemplate -TemplatePath deploy/ -Skip CreateUIDefinition,solution,'apiVersions Should Be Recent'
+          $r1 = Test-AzTemplate -TemplatePath deploy/ -Skip CreateUIDefinition,solution,'apiVersions Should Be Recent','apiVersions Should Be Recent In Reference Functions'
           $fail1 = $r1 | Where-Object { -not $_.Passed }
           if ($fail1) {
             $fail1 | Format-Table -AutoSize
