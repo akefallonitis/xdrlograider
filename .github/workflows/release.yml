@@ -14,6 +14,20 @@ name: release
 on:
   push:
     tags: [ 'v*' ]
+  # Manual release from the GitHub Actions UI. Maintainer goes to
+  # Actions → release → Run workflow → enters version (e.g. v0.1.1) →
+  # workflow creates the tag at the chosen ref + builds + signs + publishes.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release tag (must match v*; e.g. v0.1.1)'
+        required: true
+        type: string
+      ref:
+        description: 'Git ref to tag (default: main)'
+        required: false
+        default: 'main'
+        type: string
 
 permissions:
   contents: write
@@ -25,17 +39,29 @@ jobs:
     name: Build + cosign-sign + publish
     runs-on: ubuntu-latest
     # CI gates already ran on every push to main; tags fire only on commits
-    # that already passed CI (main is the tag target). The reusable-workflow
-    # call pattern was removed because `uses: ./.github/workflows/ci.yml`
-    # was causing startup_failure on the runner.
+    # that already passed CI (main is the tag target).
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ inputs.ref || github.ref }}
 
-      - name: Resolve version from tag
+      - name: Resolve version + create tag on manual dispatch
         id: ver
-        run: echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG="${{ inputs.version }}"
+            [[ "$TAG" =~ ^v ]] || { echo "::error::version must start with 'v' (got: $TAG)"; exit 1; }
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git tag -a "$TAG" -m "$TAG"
+            git push origin "$TAG"
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Install Az modules into bundle layout
         shell: pwsh

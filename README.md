@@ -82,13 +82,19 @@ tools/                                 Build-* generators · Validate-* gates ·
 .github/workflows/                     ci.yml (offline gates) · release.yml (cosign keyless OIDC) · validate-solution.yml
 ```
 
-## CI / release
+## Releases
 
-| Pipeline | Trigger | What it does |
-|---|---|---|
-| `ci.yml` | Every push + PR | Secret scan (gitleaks) · PSScriptAnalyzer · Pester all-offline (165 tests · 24.11% coverage · 20% gate) · ARM-TTK lint · Generated artifacts up-to-date · Sentinel Content Hub compliance |
-| `release.yml` | Tag push matching `v*` | Builds `function-app.zip` (with pinned Az.Accounts 5.4.0 / Az.KeyVault 6.4.3 / Az.Storage 7.5.0), generates SBOM, signs everything with **cosign keyless OIDC** (Sigstore Fulcio + Rekor — zero operator setup), publishes a GitHub Release with `function-app.zip` + `mainTemplate.json` + `createUiDefinition.json` + `sentinelContent.json` + `.sig` + `.cert` signatures |
-| `validate-solution.yml` | PR touching `deploy/sentinelContent.json` or `deploy/solution/` | Sentinel V2 dataConnector schema compliance gate |
+Pre-built signed artifacts are on the **[Releases](https://github.com/akefallonitis/xdrlograider/releases)** page. Each release includes `function-app.zip`, `mainTemplate.json`, `createUiDefinition.json`, `parameters.json`, `sentinelContent.json`, and an SPDX SBOM — every file accompanied by a Sigstore cosign signature (`.sig`) and ephemeral cert (`.cert`).
+
+Verify any artifact:
+
+```bash
+cosign verify-blob --certificate <file>.cert --signature <file>.sig <file>
+```
+
+## Sentinel Content Hub
+
+The shipped `deploy/sentinelContent.json` is a Sentinel V2 `Microsoft.SecurityInsights/dataConnectors` ARM template — it provisions the connector card in the operator's workspace after `Deploy to Azure`. It is **not** a Content Hub gallery listing; that requires a separate PR to [`Azure/Azure-Sentinel/Solutions/`](https://github.com/Azure/Azure-Sentinel/tree/master/Solutions) by the maintainer and is on the v0.4.0 roadmap.
 
 ## Forward-compat (v0.2.0+)
 
