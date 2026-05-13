@@ -16,6 +16,7 @@
         "type": "Microsoft.Common.TextBox",
         "label": "Project prefix",
         "defaultValue": "xdrlr",
+        "toolTip": "3-12 character prefix used in every resource name (FA, KV, Storage, AI, DCE, DCRs). Lowercase alphanumeric, starts with a letter.",
         "constraints": {
           "required": true,
           "regex": "^[a-z][a-z0-9]{2,11}$",
@@ -27,6 +28,7 @@
         "type": "Microsoft.Common.DropDown",
         "label": "Environment tag",
         "defaultValue": "prod",
+        "toolTip": "Environment label applied as a resource tag and used in resource-name suffix differentiation when deploying multiple instances per subscription.",
         "constraints": {
           "allowedValues": [
             { "label": "dev",     "value": "dev" },
@@ -53,6 +55,7 @@
             "name": "existingWorkspaceId",
             "type": "Microsoft.Solutions.ResourceSelector",
             "label": "Log Analytics workspace",
+            "toolTip": "Existing Log Analytics workspace that will receive ingested rows via the DCE/DCR ingestion endpoint. Must already have Microsoft Sentinel enabled.",
             "resourceType": "Microsoft.OperationalInsights/workspaces",
             "options": { "filter": { "subscription": "onBasics", "location": "all" } }
           }
@@ -97,6 +100,7 @@
                 "name": "servicePassword",
                 "type": "Microsoft.Common.PasswordBox",
                 "label": { "password": "Service account password", "confirmPassword": "Confirm password" },
+                "toolTip": "Optional — uploads the password to Key Vault at deploy time. Leave blank to upload later via `az keyvault secret set`.",
                 "constraints": { "required": false },
                 "options": { "hideConfirmation": false }
               },
@@ -104,6 +108,7 @@
                 "name": "totpSeed",
                 "type": "Microsoft.Common.PasswordBox",
                 "label": { "password": "TOTP Base32 seed", "confirmPassword": "Confirm TOTP" },
+                "toolTip": "Optional Base32-encoded TOTP secret from MS Authenticator enrollment (e.g. JBSWY3DPEHPK3PXP). Leave blank to upload later.",
                 "constraints": { "required": false },
                 "options": { "hideConfirmation": false }
               }
@@ -119,6 +124,7 @@
                 "name": "passkeyJson",
                 "type": "Microsoft.Common.PasswordBox",
                 "label": { "password": "Passkey JSON blob", "confirmPassword": "Confirm passkey" },
+                "toolTip": "Optional FIDO2 passkey JSON blob: {upn, rpId, credentialId, privateKey}. Leave blank to upload later.",
                 "constraints": { "required": false },
                 "options": { "hideConfirmation": false }
               }
@@ -161,6 +167,7 @@
             "type": "Microsoft.Common.TextBox",
             "label": "GitHub repo (owner/name)",
             "defaultValue": "akefallonitis/xdrlograider",
+            "toolTip": "GitHub repo hosting the Function App release. WEBSITE_RUN_FROM_PACKAGE resolves to https://github.com/<owner>/<name>/releases/<releaseTag>/download/function-app.zip.",
             "constraints": {
               "required": true,
               "regex": "^[^/]+/[^/]+$",
@@ -172,6 +179,7 @@
             "type": "Microsoft.Common.TextBox",
             "label": "Release tag (or ‘latest’)",
             "defaultValue": "latest",
+            "toolTip": "GitHub release tag whose function-app.zip the FA loads via WEBSITE_RUN_FROM_PACKAGE. Use 'latest' to track the most-recent release, or pin a SemVer tag like v0.1.0.",
             "constraints": {
               "required": true,
               "regex": "^(latest|v[0-9]+\\.[0-9]+\\.[0-9]+(-[A-Za-z0-9.-]+)?)$",
