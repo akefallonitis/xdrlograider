@@ -72,24 +72,33 @@ jobs:
           # ARM-TTK
           git clone --depth=1 https://github.com/Azure/arm-ttk.git /tmp/arm-ttk
           Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
-          # v0.1.0: ARM-TTK runs as warning-only (Write-Warning, not throw). Lint
-          # findings are surfaced in CI logs but do not block. Substantive deploy
-          # correctness is gated by Validate-ArmJson + Pester arm/ tests + Secret
-          # scan + Generated artifacts up-to-date (all hard-fail). ARM-TTK lint
-          # cleanup tracked separately for v0.1.x — open issues per finding to make
-          # progress visible without blocking the v0.1.0 release.
-          $r1 = Test-AzTemplate -TemplatePath deploy/ -Skip CreateUIDefinition,solution,'apiVersions Should Be Recent','apiVersions Should Be Recent In Reference Functions'
-          $fail1 = $r1 | Where-Object { -not $_.Passed }
-          if ($fail1) {
-            $fail1 | Format-Table -AutoSize
-            Write-Warning "ARM-TTK: $($fail1.Count) lint finding(s) on mainTemplate (non-blocking for v0.1.0)."
+          # v0.1.0: ARM-TTK runs as warning-only (lint findings surfaced in CI logs
+          # but do not block). Substantive deploy correctness is gated by
+          # Validate-ArmJson + Pester arm/ + Secret scan + Generated artifacts —
+          # all hard-fail. ARM-TTK iterative cleanup tracked for v0.1.x.
+          #
+          # Wrapped in try/catch with ErrorAction Continue so Test-AzTemplate's
+          # internal Write-Error calls (one per failing test) do NOT trip the
+          # outer $ErrorActionPreference='Stop' contract.
+          try {
+            $r1 = Test-AzTemplate -TemplatePath deploy/ -Skip CreateUIDefinition,solution,'apiVersions Should Be Recent','apiVersions Should Be Recent In Reference Functions' -ErrorAction Continue 2>$null
+            $fail1 = $r1 | Where-Object { -not $_.Passed }
+            if ($fail1) {
+              $fail1 | Format-Table -AutoSize
+              Write-Warning "ARM-TTK: $($fail1.Count) lint finding(s) on mainTemplate (non-blocking for v0.1.0)."
+            }
+          } catch {
+            Write-Warning "ARM-TTK mainTemplate run aborted: $($_.Exception.Message)"
           }
-          # Lint createUiDefinition.json — separate run (different TTK rule set)
-          $r2 = Test-AzTemplate -TemplatePath deploy/createUiDefinition.json -Test 'CreateUIDefinition'
-          $fail2 = $r2 | Where-Object { -not $_.Passed }
-          if ($fail2) {
-            $fail2 | Format-Table -AutoSize
-            Write-Warning "ARM-TTK: $($fail2.Count) lint finding(s) on createUiDefinition (non-blocking for v0.1.0)."
+          try {
+            $r2 = Test-AzTemplate -TemplatePath deploy/createUiDefinition.json -Test 'CreateUIDefinition' -ErrorAction Continue 2>$null
+            $fail2 = $r2 | Where-Object { -not $_.Passed }
+            if ($fail2) {
+              $fail2 | Format-Table -AutoSize
+              Write-Warning "ARM-TTK: $($fail2.Count) lint finding(s) on createUiDefinition (non-blocking for v0.1.0)."
+            }
+          } catch {
+            Write-Warning "ARM-TTK createUiDefinition run aborted: $($_.Exception.Message)"
           }
           # Custom validators
           pwsh ./tools/Validate-ArmJson.ps1
