@@ -172,7 +172,11 @@
             "type": "Microsoft.Common.TextBox",
             "label": "Release tag (or ‘latest’)",
             "defaultValue": "latest",
-            "constraints": { "required": true }
+            "constraints": {
+              "required": true,
+              "regex": "^(latest|v[0-9]+\\.[0-9]+\\.[0-9]+(-[A-Za-z0-9.-]+)?)$",
+              "validationMessage": "Use 'latest' or a SemVer tag like 'v0.1.0' or 'v0.1.0-rc.1'."
+            }
           },
           {
             "name": "deployRoleAssignments",
