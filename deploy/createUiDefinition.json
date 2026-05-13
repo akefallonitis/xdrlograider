@@ -98,14 +98,14 @@
                 "type": "Microsoft.Common.PasswordBox",
                 "label": { "password": "Service account password", "confirmPassword": "Confirm password" },
                 "constraints": { "required": false },
-                "options": { "hideConfirmation": true }
+                "options": { "hideConfirmation": false }
               },
               {
                 "name": "totpSeed",
                 "type": "Microsoft.Common.PasswordBox",
                 "label": { "password": "TOTP Base32 seed", "confirmPassword": "Confirm TOTP" },
                 "constraints": { "required": false },
-                "options": { "hideConfirmation": true }
+                "options": { "hideConfirmation": false }
               }
             ]
           },
@@ -120,7 +120,7 @@
                 "type": "Microsoft.Common.PasswordBox",
                 "label": { "password": "Passkey JSON blob", "confirmPassword": "Confirm passkey" },
                 "constraints": { "required": false },
-                "options": { "hideConfirmation": true }
+                "options": { "hideConfirmation": false }
               }
             ]
           }
