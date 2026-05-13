@@ -50,12 +50,17 @@ jobs:
           foreach ($m in $azModules) {
             Save-Module -Name $m.Name -RequiredVersion $m.Version -Path src/Modules/.az -Force
           }
-          # Flatten to Modules root (Az.Accounts/<ver>/... → Az.Accounts/...)
+          # Flatten to Modules root (Az.Accounts/<ver>/... → Az.Accounts/...).
+          # Create destination dir explicitly before Copy-Item -Recurse, otherwise
+          # PowerShell can interpret a non-existent target as a leaf-name target
+          # and throw "Container cannot be copied onto existing leaf item."
           Get-ChildItem src/Modules/.az -Directory | ForEach-Object {
             $modDir = $_
             $verDir = Get-ChildItem $modDir.FullName -Directory | Select-Object -First 1
             if ($verDir) {
-              Copy-Item -Path (Join-Path $verDir.FullName '*') -Destination "src/Modules/$($modDir.Name)/" -Recurse -Force
+              $dest = "src/Modules/$($modDir.Name)"
+              New-Item -ItemType Directory -Path $dest -Force | Out-Null
+              Copy-Item -Path (Join-Path $verDir.FullName '*') -Destination $dest -Recurse -Force
             }
           }
           Remove-Item src/Modules/.az -Recurse -Force
