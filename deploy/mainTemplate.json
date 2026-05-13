@@ -163,7 +163,7 @@
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2024-01-01",
+      "apiVersion": "2025-01-01",
       "name": "[variables('stName')]",
       "location": "[parameters('location')]",
       "tags": "[variables('commonTag')]",
@@ -180,7 +180,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices",
-      "apiVersion": "2024-01-01",
+      "apiVersion": "2025-01-01",
       "name": "[concat(variables('stName'), '/default')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('stName'))]"
@@ -189,7 +189,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
-      "apiVersion": "2024-01-01",
+      "apiVersion": "2025-01-01",
       "name": "[concat(variables('stName'), '/default/', 'connectorCheckpoints')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
@@ -197,7 +197,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
-      "apiVersion": "2024-01-01",
+      "apiVersion": "2025-01-01",
       "name": "[concat(variables('stName'), '/default/', 'xdrIngestDlq')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
@@ -205,7 +205,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
-      "apiVersion": "2024-01-01",
+      "apiVersion": "2025-01-01",
       "name": "[concat(variables('stName'), '/default/', 'XdrTierState')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
@@ -213,7 +213,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
-      "apiVersion": "2024-01-01",
+      "apiVersion": "2025-01-01",
       "name": "[concat(variables('stName'), '/default/', 'XdrTenantState')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
@@ -2952,11 +2952,11 @@
           "appSettings": [
             {
               "name": "AzureWebJobsStorage",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2025-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
             },
             {
               "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2025-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
             },
             {
               "name": "WEBSITE_CONTENTSHARE",

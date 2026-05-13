@@ -175,7 +175,7 @@ $resources = New-Object System.Collections.Generic.List[object]
 
 $resources.Add([ordered]@{
     type       = 'Microsoft.Storage/storageAccounts'
-    apiVersion = '2024-01-01'
+    apiVersion = '2025-01-01'
     name       = "[variables('stName')]"
     location   = "[parameters('location')]"
     tags       = "[variables('commonTag')]"
@@ -191,7 +191,7 @@ $resources.Add([ordered]@{
 
 $tableServices = [ordered]@{
     type       = 'Microsoft.Storage/storageAccounts/tableServices'
-    apiVersion = '2024-01-01'
+    apiVersion = '2025-01-01'
     name       = "[concat(variables('stName'), '/default')]"
     dependsOn  = @("[resourceId('Microsoft.Storage/storageAccounts', variables('stName'))]")
     properties = @{}
@@ -201,7 +201,7 @@ $resources.Add($tableServices)
 foreach ($tbl in @('connectorCheckpoints','xdrIngestDlq','XdrTierState','XdrTenantState')) {
     $resources.Add([ordered]@{
         type       = 'Microsoft.Storage/storageAccounts/tableServices/tables'
-        apiVersion = '2024-01-01'
+        apiVersion = '2025-01-01'
         name       = "[concat(variables('stName'), '/default/', '$tbl')]"
         dependsOn  = @("[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]")
     })
@@ -448,11 +448,11 @@ foreach ($f in $dcrFiles) {
 }
 
 $faAppSettings = [ordered]@{
-    AzureWebJobsStorage                      = "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+    AzureWebJobsStorage                      = "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2025-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
     # WEBSITE_CONTENTAZUREFILECONNECTIONSTRING + WEBSITE_CONTENTSHARE are required
     # for Y1 (Linux Consumption) — the runtime stores the package metadata in an
     # Azure Files share. EP1+ ignore these (harmless to keep, simplifies SKU switch).
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('stName')), '2025-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
     WEBSITE_CONTENTSHARE                     = "[toLower(variables('funcName'))]"
     FUNCTIONS_EXTENSION_VERSION              = '~4'
     FUNCTIONS_WORKER_RUNTIME                 = 'powershell'
