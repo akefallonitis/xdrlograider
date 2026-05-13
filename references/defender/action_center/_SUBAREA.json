@@ -1,0 +1,283 @@
+{
+  "subArea": "action_center",
+  "suggestedCadence": "10min",
+  "endpointCount": 11,
+  "endpoints": [
+    {
+      "slug": "ExportHistory",
+      "operationId": "ActionCenter.ExportHistory",
+      "path": "/mtp/actionCenter/actioncenterui/history-actions/export",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "pageIndex1Based",
+      "timeFilterSupported": true,
+      "timeFilterParam": "fromDate",
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "Pagination=pageIndex1Based — index starts at 1",
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=fromDate/endParam=toDate",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetCase",
+      "operationId": "ActionCenter.GetCase",
+      "path": "/mtp/CaseManagement/be/cases/{CaseId}",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/CaseManagement/be/cases/{CaseId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetHistory",
+      "operationId": "ActionCenter.GetHistory",
+      "path": "/mtp/actionCenter/actioncenterui/history-actions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "pageIndex0Based",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 30,
+      "v1Stream": "MDE_ActionCenter_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Investigation.Id",
+        "Action.Id",
+        "Time.Generated",
+        "Software.Name",
+        "Host.MdatpId"
+      ],
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "Pagination=pageIndex0Based — index starts at 0 (some MS endpoints reject 0; verify per endpoint)",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)",
+        "LiveProbe=live (30 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetHistoryFilters",
+      "operationId": "ActionCenter.GetHistoryFilters",
+      "path": "/mtp/actionCenter/actioncenterui/history-actions/filters",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Investigation.Id",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetPending",
+      "operationId": "ActionCenter.GetPending",
+      "path": "/mtp/actionCenter/actioncenterui/pending-actions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "pageIndex0Based",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": "MDE_PendingActions_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "Pagination=pageIndex0Based — index starts at 0 (some MS endpoints reject 0; verify per endpoint)",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "GetPendingFilters",
+      "operationId": "ActionCenter.GetPendingFilters",
+      "path": "/mtp/actionCenter/actioncenterui/pending-actions/filters",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Investigation.Id",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetPendingSummary",
+      "operationId": "ActionCenter.GetPendingSummary",
+      "path": "/mtp/actionCenter/actioncenterui/pending-actions/pending-actions-summary",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "GetTileSummary",
+      "operationId": "ActionCenter.GetTileSummary",
+      "path": "/mtp/actionCenter/actioncenterui/tile",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "ListAutomationRules",
+      "operationId": "ActionCenter.ListAutomationRules",
+      "path": "/mtp/automation/internal/automation/{TenantId}/automationRules",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/automation/internal/automation/{TenantId}/automationRules' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "ListCaseActivities",
+      "operationId": "ActionCenter.ListCaseActivities",
+      "path": "/mtp/CaseManagement/be/cases/{CaseId}/activities",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/CaseManagement/be/cases/{CaseId}/activities' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "ListCaseAttachments",
+      "operationId": "ActionCenter.ListCaseAttachments",
+      "path": "/mtp/CaseManagement/be/attachments",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "10min",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    }
+  ],
+  "cntLive": 5,
+  "cntLiveEmpty": 2,
+  "cntError": 1,
+  "cntNoLive": 3,
+  "cntWithTimeFilter": 1,
+  "cntWithPagination": 3,
+  "entitiesAvailable": [
+    "Action.Id",
+    "Host.MdatpId",
+    "Investigation.Id",
+    "Software.Name",
+    "Tenant.Id",
+    "Time.Generated"
+  ],
+  "paginationStyles": [
+    "pageIndex0Based",
+    "pageIndex1Based"
+  ],
+  "valueProp": "Audit trail of auto-IR responses + pending operator approvals — compliance answer to \"who approved what response when\""
+}

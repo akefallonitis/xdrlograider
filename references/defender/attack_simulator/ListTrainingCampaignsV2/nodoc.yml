@@ -1,0 +1,26 @@
+  /astgws/AttackSimulator/api/v1/trainingCampaignsV2:
+    get:
+      summary: List training campaigns
+      description: >-
+        Retrieve the training campaign records displayed by the Attack
+        Simulator campaigns view.
+      operationId: AttackSimulator.ListTrainingCampaignsV2
+      tags: [AttackSimulator]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - attack simulator training campaign
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

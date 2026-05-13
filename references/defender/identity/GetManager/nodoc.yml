@@ -1,0 +1,37 @@
+  /mdi/identity/userapiservice/manager:
+    get:
+      summary: Get user manager
+      description: >-
+        Retrieve the manager relationship for the selected Entra identity.
+      operationId: Identity.GetManager
+      tags: [Identity]
+      parameters:
+        - name: managerAd
+          in: query
+          allowEmptyValue: true
+          description: Empty query flag requesting the Active Directory manager projection.
+          schema:
+            type: boolean
+        - name: userAad
+          in: query
+          required: true
+          description: The Microsoft Entra object ID for the selected user.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - manager relationship data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

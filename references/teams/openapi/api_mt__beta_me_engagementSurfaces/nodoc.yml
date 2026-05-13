@@ -1,0 +1,19 @@
+  /api/mt//beta/me/engagementSurfaces:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get admin engagement surface state
+      description: |
+        Returns coaching, guide, and engagement state consumed by the Teams admin shell. The portal
+        requested this path with an empty partition slot, yielding the observed double slash in the URL.
+      responses:
+        '200':
+          description: Engagement state payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsEngagementSurfacesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

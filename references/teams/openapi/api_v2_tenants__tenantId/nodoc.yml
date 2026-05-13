@@ -1,0 +1,26 @@
+  /api/v2/tenants/{tenantId}:
+    servers:
+      - url: https://admin.devicemgmt.teams.microsoft.com
+        description: Teams device management data host
+    get:
+      tags: [TeamsDeviceManagement]
+      summary: Get Teams device management tenant metadata
+      description: |
+        Tenant metadata route observed from Teams devices pages. The retained capture returned
+        `404 Not Found`, which suggests the route family is live but not available for the current tenant
+        or license state.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Device management tenant metadata payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # collabinsights.teams.cloud.microsoft/amer/api

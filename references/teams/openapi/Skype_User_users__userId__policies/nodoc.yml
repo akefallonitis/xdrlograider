@@ -1,0 +1,20 @@
+  /Skype.User/users/{userId}/policies:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsUserPolicies]
+      summary: Get Teams user policy assignments
+      description: |
+        Per-user policy payload observed while opening `Manage users` policy detail pages.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User policy assignment payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

@@ -1,0 +1,30 @@
+  /mtp/CaseManagement/be/cases/{CaseId}:
+    get:
+      summary: Get case details
+      description: >-
+        Retrieve the full case record shown by the Defender case management detail view.
+      operationId: ActionCenter.GetCase
+      tags: [Action Center]
+      parameters:
+        - name: CaseId
+          in: path
+          required: true
+          description: The Defender case identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - case details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,18 @@
+  /Teams.VoiceApps/shared-call-queue-history:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsVoiceApps]
+      summary: Get shared call queue history
+      description: |
+        Shared call queue history route observed from Teams voice app detail pages.
+      responses:
+        '200':
+          description: Shared call queue history payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

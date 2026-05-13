@@ -1,0 +1,21 @@
+  /api/v1/mta/rule:
+    servers:
+      - url: https://uswest2.monitoringplatform.teams.microsoft.com
+        description: Regional Teams monitoring platform host
+    get:
+      tags: [RegionalMonitoring]
+      summary: List Teams monitoring rules
+      description: |
+        Regional monitoring rule inventory observed after the portal resolved the tenant monitoring
+        cluster.
+      responses:
+        '200':
+          description: Monitoring rule inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # config.teams.microsoft.com/config/v1

@@ -1,0 +1,45 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "application_sso",
+  "slug": "FederatedSsoDefaultClaimsV2.Get",
+  "operationId": "Application.FederatedSsoDefaultClaimsV2.Get",
+  "path": "/ApplicationSso/FederatedSsoDefaultClaimsV2",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Application Federated SSO default claims (V2)",
+  "sourceFile": "application_sso.yml",
+  "capturedUtc": "2026-05-12T15:13:11.846901Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

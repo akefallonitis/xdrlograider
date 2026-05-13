@@ -1,0 +1,154 @@
+{
+  "subArea": "request_approvals",
+  "suggestedCadence": "unknown",
+  "endpointCount": 6,
+  "endpoints": [
+    {
+      "slug": "BusinessFlows.Get",
+      "operationId": "RequestApprovalsV2.BusinessFlows.Get",
+      "path": "/RequestApprovals/V2/BusinessFlows",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "offsetLimit",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "Pagination=offsetLimit — accumulate offset by pageSize",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "PolicyTemplate.Create",
+      "operationId": "RequestApprovalsV2.PolicyTemplate.Create",
+      "path": "/RequestApprovals/V2/PolicyTemplates",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "PolicyTemplate.Update",
+      "operationId": "RequestApprovalsV2.PolicyTemplate.Update",
+      "path": "/RequestApprovals/V2/PolicyTemplates/{templateId}",
+      "methods": [
+        "patch",
+        "delete"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "PathTemplate — '/RequestApprovals/V2/PolicyTemplates/{templateId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "Request.Block",
+      "operationId": "RequestApprovalsV2.Request.Block",
+      "path": "/RequestApprovals/V2/Requests/{requestId}/block/{0}",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "PathTemplate — '/RequestApprovals/V2/Requests/{requestId}/block/{0}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "Request.Deny",
+      "operationId": "RequestApprovalsV2.Request.Deny",
+      "path": "/RequestApprovals/V2/Requests/{requestId}/deny",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "PathTemplate — '/RequestApprovals/V2/Requests/{requestId}/deny' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "Request.List",
+      "operationId": "RequestApprovalsV2.Request.List",
+      "path": "/RequestApprovals/V2/Requests",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "offsetLimit",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "Pagination=offsetLimit — accumulate offset by pageSize",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 0,
+  "cntNoLive": 6,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 2,
+  "entitiesAvailable": [
+    "Software.Version"
+  ],
+  "paginationStyles": [
+    "offsetLimit"
+  ],
+  "valueProp": "PIM activation request inventory"
+}

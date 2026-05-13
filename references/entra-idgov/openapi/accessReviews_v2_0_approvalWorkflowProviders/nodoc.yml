@@ -1,0 +1,19 @@
+  /accessReviews/v2.0/approvalWorkflowProviders:
+    get:
+      tags: [Providers]
+      summary: List approval workflow providers
+      description: |
+        Retrieves all registered approval workflow providers. Each provider
+        handles a specific type of access review or approval workflow.
+      responses:
+        '200':
+          description: List of approval workflow providers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object

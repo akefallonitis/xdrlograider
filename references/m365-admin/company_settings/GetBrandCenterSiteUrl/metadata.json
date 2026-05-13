@@ -1,0 +1,90 @@
+{
+  "portal": "m365-admin",
+  "subArea": "company_settings",
+  "slug": "GetBrandCenterSiteUrl",
+  "operationId": "CompanySettings.GetBrandCenterSiteUrl",
+  "path": "/_api/GroupSiteManager/GetValidSiteUrlFromAlias",
+  "methods": [
+    "get"
+  ],
+  "summary": "Resolve Brand Center site URL",
+  "sourceFile": "company_settings.yml",
+  "capturedUtc": "2026-05-12T15:13:25.3380184Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "alias",
+      "In": "query",
+      "Type": "string",
+      "Default": "'''BrandGuide'''",
+      "Description": "The SharePoint alias literal to resolve. Brand Center currently uses `'BrandGuide'`."
+    },
+    {
+      "Name": "managedPath",
+      "In": "query",
+      "Type": "string",
+      "Default": "'''sites'''",
+      "Description": "The managed path literal used for the Brand Center site. Brand Center currently uses `'sites'`."
+    },
+    {
+      "Name": "brand-center-site-url",
+      "In": "",
+      "Type": "",
+      "Default": "",
+      "Description": ""
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "request-shape-error",
+  "lastHttpStatus": 400,
+  "lastDiagnostic": "{\"odata.error\":{\"code\":\"-2147467261, System.ArgumentNullException\",\"message\":{\"lang\":\"en-US\",\"value\":\"Value cannot be null.\\r\\nParameter name: alias\"}}}",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The SharePoint alias literal to resolve. Brand Center currently uses `",
+      "type": "string",
+      "name": "alias"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The managed path literal used for the Brand Center site. Brand Center currently uses `",
+      "type": "string",
+      "name": "managedPath"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Url.Path"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,52 @@
+  /mtp/responseApiPortal/apps/all:
+    get:
+      summary: List connected apps
+      description: >-
+        Retrieve the connected application registrations and monthly activity counters
+        shown on the Defender portal's connected apps experience.
+      operationId: Configuration.ListConnectedApps
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Id:
+                      type: string
+                    DisplayName:
+                      type: string
+                    Enabled:
+                      type: boolean
+                    LatestConnectivity:
+                      type: string
+                      format: date-time
+                    ApplicationSettingsLink:
+                      type: string
+                      nullable: true
+                    MonthlyStatistics:
+                      type: array
+                      items:
+                        type: integer
+                    ImageBase64:
+                      type: string
+                      nullable: true
+                    ImageType:
+                      type: string
+                      nullable: true
+                    ImageUrl:
+                      type: string
+                      nullable: true
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

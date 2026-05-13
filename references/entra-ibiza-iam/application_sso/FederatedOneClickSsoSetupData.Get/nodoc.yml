@@ -1,0 +1,15 @@
+  /ApplicationSso/{spId}/GetFederatedOneClickSsoSetupData:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+    get:
+      summary: Get Application SSO federated one clieck SSO setup data
+      description: >-
+        Get Application SSO federated one clieck SSO setup data by service principal ID
+      operationId: ApplicationSso.FederatedOneClickSsoSetupData.Get
+      tags: [Application SSO]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

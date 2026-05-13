@@ -1,0 +1,27 @@
+  /config/v1/Skype/{version}:
+    servers:
+      - url: https://config.teams.microsoft.com
+        description: Teams config service
+    get:
+      tags: [TeamsConfig]
+      summary: Get Skype and virtual visits config payload
+      description: |
+        Config service read used by Teams virtual visits surfaces for the `MicrosoftTeamsVVM` workload.
+      parameters:
+        - $ref: '#/components/parameters/Version'
+        - $ref: '#/components/parameters/AgentsSkype'
+        - $ref: '#/components/parameters/TenantIdUpperQuery'
+        - $ref: '#/components/parameters/AudienceGroup'
+        - $ref: '#/components/parameters/Debug'
+        - $ref: '#/components/parameters/Environment'
+      responses:
+        '200':
+          description: Config payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsConfigResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ehrconnectorsvc.teams.microsoft.com/api

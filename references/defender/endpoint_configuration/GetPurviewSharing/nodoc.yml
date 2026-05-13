@@ -1,0 +1,26 @@
+  /mtp/deviceManagement/configuration/PurviewSharing:
+    get:
+      summary: Get Purview sharing configuration
+      description: >-
+        Retrieve the Microsoft Purview data sharing configuration for Defender for Endpoint.
+      operationId: EndpointConfiguration.GetPurviewSharing
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    description: Whether Purview sharing is enabled.
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

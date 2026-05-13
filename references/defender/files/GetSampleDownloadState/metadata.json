@@ -1,0 +1,103 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "GetSampleDownloadState",
+  "operationId": "Files.GetSampleDownloadState",
+  "path": "/mtp/responseApiPortal/sampledownloadrequest/state",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get file collect or download state",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:06.1481141Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "Sha",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "SHA-1 or SHA-256 of the file."
+    },
+    {
+      "Name": "CheckPrevalence",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Whether to perform the more expensive availability check."
+    },
+    {
+      "Name": "tenantIds",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional multi-tenant context."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "SHA-1 or SHA-256 of the file.",
+      "type": "string",
+      "name": "Sha"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "Whether to perform the more expensive availability check.",
+      "type": "boolean",
+      "name": "CheckPrevalence"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional multi-tenant context.",
+      "type": "string",
+      "name": "tenantIds"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "weekly"
+}

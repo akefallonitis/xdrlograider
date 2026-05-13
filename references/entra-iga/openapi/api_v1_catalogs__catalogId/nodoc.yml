@@ -1,0 +1,14 @@
+  /api/v1/catalogs/{catalogId}:
+    get:
+      tags: [Entitlement Management]
+      summary: Get a specific catalog
+      parameters:
+        - name: catalogId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Catalog details

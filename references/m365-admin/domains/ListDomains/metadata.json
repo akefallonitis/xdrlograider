@@ -1,0 +1,99 @@
+{
+  "portal": "m365-admin",
+  "subArea": "domains",
+  "slug": "ListDomains",
+  "operationId": "Domains.ListDomains",
+  "path": "/admin/api/Domains/List",
+  "methods": [
+    "get"
+  ],
+  "summary": "List domains",
+  "sourceFile": "domains.yml",
+  "capturedUtc": "2026-05-12T15:13:25.5065691Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "filter",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional domain filter expression."
+    },
+    {
+      "Name": "searchText",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional search text applied by the Domains grid."
+    },
+    {
+      "Name": "computeDomainRegistrationData",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Whether registration metadata should be included in the response."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 403,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional domain filter expression.",
+      "type": "string",
+      "name": "filter"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional search text applied by the Domains grid.",
+      "type": "string",
+      "name": "searchText"
+    },
+    {
+      "in": "query",
+      "default": "true",
+      "required": false,
+      "description": "Whether registration metadata should be included in the response.",
+      "type": "boolean",
+      "name": "computeDomainRegistrationData"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Name",
+    "Url.Domain"
+  ],
+  "cadenceSuggestion": "daily"
+}

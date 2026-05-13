@@ -1,0 +1,103 @@
+{
+  "portal": "purview",
+  "subArea": "platform_services",
+  "slug": "getIrisSelection",
+  "operationId": "getIrisSelection",
+  "path": "/iris/v4/api/selection",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get IRIS promotional/feature selection",
+  "sourceFile": "platform_services.yml",
+  "capturedUtc": "2026-05-12T15:11:07.4209428Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "placement",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The placement context for the selection."
+    },
+    {
+      "Name": "locale",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The locale for localized content."
+    },
+    {
+      "Name": "country",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The country code for regional content."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The placement context for the selection.",
+      "type": "string",
+      "name": "placement"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The locale for localized content.",
+      "type": "string",
+      "name": "locale"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The country code for regional content.",
+      "type": "string",
+      "name": "country"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

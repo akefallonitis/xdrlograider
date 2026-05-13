@@ -1,0 +1,50 @@
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference:
+    get:
+      summary: Get user preferences
+      description: >-
+        Retrieve the current user's preferences for the Defender XDR portal.
+      operationId: PortalServices.GetUserPreferences
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/UserPreferenceBlobResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    patch:
+      summary: Update user preference
+      description: >-
+        Update a specific user preference setting in the Defender XDR portal.
+      operationId: PortalServices.UpdateUserPreference
+      tags: [Portal Services]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - user preference update data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - updated user preference
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

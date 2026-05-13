@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/governance/metadata:
+    get:
+      summary: Get governance metadata
+      description: >-
+        Retrieve metadata for the governance endpoint including filter definitions. Discovered on Governance Log page.
+      operationId: CloudApps.GetGovernanceMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

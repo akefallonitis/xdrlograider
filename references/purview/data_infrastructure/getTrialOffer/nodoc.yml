@@ -1,0 +1,31 @@
+  /di/Find/TrialOffer:
+    get:
+      operationId: getTrialOffer
+      summary: Get available trial offers
+      description: >-
+        Retrieve available trial offers for the tenant from the Data Infrastructure service.
+        Used to determine which Purview features are available for trial.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ProtectionCompliancePolicyResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

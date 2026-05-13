@@ -1,0 +1,37 @@
+  /aedmcc/ediscovery/v1/setViewState:
+    post:
+      operationId: setEdiscoveryViewState
+      summary: Set eDiscovery view state
+      description: >-
+        Save the current view state for eDiscovery. Persists the user's UI state
+        for a specific case so it can be restored in future sessions.
+      tags: [eDiscovery]
+      parameters:
+        - name: caseId
+          in: query
+          required: false
+          description: The unique identifier of the eDiscovery case.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

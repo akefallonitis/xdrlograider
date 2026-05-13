@@ -1,0 +1,31 @@
+  /radius/api/radius/identities/getDefenderRiskKillChain:
+    get:
+      summary: Get Defender risk kill chain
+      description: >-
+        Retrieve the Defender risk kill-chain projection for the selected
+        identity.
+      operationId: Identity.GetRadiusDefenderRiskKillChain
+      tags: [Identity]
+      parameters:
+        - name: identityId
+          in: query
+          required: true
+          description: The Defender identity identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - risk kill chain data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

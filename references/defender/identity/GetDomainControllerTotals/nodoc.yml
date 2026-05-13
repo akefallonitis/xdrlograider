@@ -1,0 +1,32 @@
+  /mtp/siamApi/domaincontrollers/totals:
+    get:
+      summary: Get SIAM domain controller totals
+      description: >-
+        Retrieve the managed and unmanaged domain-controller totals surfaced by the
+        identity attachment experience.
+      operationId: Identity.GetDomainControllerTotals
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isPartOfDcsMitigation:
+                    type: boolean
+                  isAdminSetIntent:
+                    type: boolean
+                  managedDcsCount:
+                    type: integer
+                  unManagedDcsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

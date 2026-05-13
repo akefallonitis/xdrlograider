@@ -1,0 +1,22 @@
+  /api/mt/part/{partition}/beta/admin/apps/{catalogAppId}/appAccessRequests:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get app-specific Teams app access requests
+      description: |
+        App detail route observed from `Teams apps > Manage apps` pages while drilling into individual
+        app detail records.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+        - $ref: '#/components/parameters/CatalogAppId'
+      responses:
+        '200':
+          description: App-specific access request collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

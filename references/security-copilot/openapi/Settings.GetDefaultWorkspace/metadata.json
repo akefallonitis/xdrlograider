@@ -1,0 +1,49 @@
+{
+  "portal": "security-copilot",
+  "subArea": "openapi",
+  "slug": "Settings.GetDefaultWorkspace",
+  "operationId": "SecurityCopilotPortal.Settings.GetDefaultWorkspace",
+  "path": "/settings/datashare/defaultWorkspace",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get default workspace preference",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:24.0573599Z",
+  "pagination": {
+    "defaults": {},
+    "tokenParam": null,
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "supported": false,
+    "endParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "CookieHost": "securitycopilot.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775",
+    "Status": "auth-research-needed",
+    "Method": "Get-EntraEstsAuth — $Config missing required fields; need different bootstrap"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "write",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 404,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,54 @@
+  /cpm/v1.0/ApplicationUserContext:
+    get:
+      operationId: getApplicationUserContext
+      summary: Get application user context
+      description: >-
+        Retrieve the application user context for Compliance Manager.
+        Returns information about the current user's permissions and access level.
+      tags: [ComplianceManager]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ComplianceApplicationUserContext
+              example:
+                userInfo:
+                  id: 00000000-0000-0000-0000-000000000000
+                  userPrincipalName: ''
+                  anonymousId: anon-00000000000000000000000000000000
+                  primaryText: ''
+                tenantInfo:
+                  hasEnrolledForTrial: false
+                  isInitialSetupCreated: true
+                  hasCopilotLicense: true
+                  isAIBaselineCreated: true
+                  license: E5
+                  isTenantLicenseSuccess: true
+                  isLicenseCheckDisabled: false
+                  isTrialActive: false
+                  trialEnrollmentLink: https://admin.microsoft.com/Adminportal/Home?#/catalog/offer-details/compliance-manager-premium-assessment-add-on/00000000-0000-0000-0000-000000000000
+                  maxTotalEvidenceFileUploadSizeInBytes: 1073741824
+                  tenantContentUpdateState: None
+                scopedAuthorizationRights:
+                  '/ComplianceManagerV3/Master':
+                    - Create
+                    - Modify
+                    - Delete
+                    - Approve
+                  '/ComplianceManager/Customer':
+                    - Delete
+                    - Archive
+                    - Assess
+                    - Create
+                    - Modify
+                    - Read
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

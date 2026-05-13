@@ -1,0 +1,27 @@
+{
+  "portal": "defender",
+  "subArea": "exposure_management",
+  "endpointCount": 42,
+  "paginationDistribution": {
+    "pageIndex0Based": 3,
+    "none": 39
+  },
+  "timeFilterEndpointCount": 0,
+  "topEntities": [
+    "Software.Version",
+    "Tenant.Id",
+    "Vuln.CveId",
+    "Host.RiskScore",
+    "Time.Generated",
+    "Software.Name",
+    "Software.Vendor",
+    "Url.Path"
+  ],
+  "cadenceSuggestion": "1h",
+  "productionScale": {
+    "VolumeLargeT": "1K-100K rows",
+    "RateLimitRisk": "MEDIUM",
+    "DeltaPollPriority": "high"
+  },
+  "generatedUtc": "2026-05-13T07:21:41Z"
+}

@@ -1,0 +1,97 @@
+  /MultiFactorAuthentication/AuthenticationReport:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get MFA authentication report
+      description: >-
+        Get MFA authentication report.
+      operationId: MFA.AuthenticationReport.Get
+      tags: [Multi Factor Authentication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDateTime:
+                  type: string
+                  format: date-time
+                  example: 2024-05-09T10:54:46.010Z
+                endDateTime:
+                  type: string
+                  format: date-time
+                  example: 2024-06-08T10:54:46.010Z
+                authenticationModes:
+                  type: array
+                  items:
+                    type: string
+                  example: []
+                authenticationTypes:
+                  type: array
+                  items:
+                    type: string
+                  example: []
+                usernames:
+                  type: array
+                  items:
+                    type: string
+                  example: []
+                tenantId:
+                  $ref: common.yml#/components/schemas/tenantId
+                continuationToken:
+                  type: string
+                  example: ''
+                licenseKey:
+                  type: string
+                  example: ''
+                resultsPerPage:
+                  type: integer
+                  example: 25
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pageResults:
+                    type: array
+                  hasMorePages:
+                    type: boolean
+                    example: false
+                  continuationToken:
+                    type: string
+                    nullable: true
+                    example: null
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

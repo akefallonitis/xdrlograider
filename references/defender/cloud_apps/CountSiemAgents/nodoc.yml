@@ -1,0 +1,22 @@
+  /mcas/api/v1/agents/siem/count:
+    get:
+      summary: Count SIEM agents
+      description: >-
+        Retrieve the SIEM agent count summary for Defender for Cloud Apps.
+      operationId: CloudApps.CountSiemAgents
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SiemAgentCountResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,23 @@
+  /astgws/AttackSimulator/api/v1/userProfileType:
+    get:
+      summary: Get user profile type
+      description: >-
+        Retrieve the user profile type for the attack simulator service. Discovered on Attack Simulator page.
+      operationId: AttackSimulator.GetUserProfileType
+      tags: [AttackSimulator]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,142 @@
+name: release
+
+# Cosign keyless signing notes:
+#   - The `id-token: write` permission below grants the workflow access to
+#     GitHub Actions' BUILT-IN OIDC token endpoint.
+#   - That OIDC token is used INTERNALLY by sigstore.dev / Fulcio to issue a
+#     short-lived signing cert. Operators do NOT configure ANYTHING.
+#   - This is the same signing approach the pilot at xdrlograider/ uses since
+#     v0.1.0 GA — no setup steps in any Azure tenant, no Entra federated
+#     credentials, no Service Principal, no Key Vault.
+#   - "Azure OIDC for deployment" (which DOES require Entra federated cred
+#     setup) is a DIFFERENT pattern that this repo deliberately does NOT use.
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  preflight:
+    name: Run CI gates first
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    name: Build + cosign-sign + publish
+    needs: preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version from tag
+        id: ver
+        run: echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Az modules into bundle layout
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path src/Modules/.az -Force | Out-Null
+          $azModules = @(
+            @{ Name = 'Az.Accounts';  Version = '5.4.0' }
+            @{ Name = 'Az.KeyVault';  Version = '6.4.3' }
+            @{ Name = 'Az.Storage';   Version = '7.5.0' }
+          )
+          foreach ($m in $azModules) {
+            Save-Module -Name $m.Name -RequiredVersion $m.Version -Path src/Modules/.az -Force
+          }
+          # Flatten to Modules root (Az.Accounts/<ver>/... → Az.Accounts/...)
+          Get-ChildItem src/Modules/.az -Directory | ForEach-Object {
+            $modDir = $_
+            $verDir = Get-ChildItem $modDir.FullName -Directory | Select-Object -First 1
+            if ($verDir) {
+              Copy-Item -Path (Join-Path $verDir.FullName '*') -Destination "src/Modules/$($modDir.Name)/" -Recurse -Force
+            }
+          }
+          Remove-Item src/Modules/.az -Recurse -Force
+
+      - name: Build all generated artifacts
+        shell: pwsh
+        run: |
+          pwsh ./tools/Build-Manifest.ps1
+          pwsh ./tools/Build-DcrJson.ps1
+          pwsh ./tools/Build-FunctionApp.ps1
+          pwsh ./tools/Build-ArmTemplate.ps1
+          pwsh ./tools/Build-SentinelSolution.ps1
+
+      - name: Package function-app.zip
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          # Zip src/ contents (host.json, profile.ps1, requirements.psd1, Modules/, functions/) into function-app.zip
+          Compress-Archive -Path src/* -DestinationPath dist/function-app.zip -CompressionLevel Optimal
+          $sizeMb = [math]::Round((Get-Item dist/function-app.zip).Length / 1MB, 2)
+          Write-Host "function-app.zip: $sizeMb MB"
+          if ($sizeMb -gt 200) { throw "function-app.zip exceeds 200 MB; SKU may reject." }
+
+      - name: Stage ARM artifacts
+        shell: pwsh
+        run: |
+          Copy-Item deploy/mainTemplate.json       dist/
+          Copy-Item deploy/createUiDefinition.json dist/
+          Copy-Item deploy/parameters.json         dist/
+          Copy-Item deploy/sentinelContent.json    dist/
+
+      - name: SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        continue-on-error: true
+        with:
+          path: ./
+          output-file: dist/sbom.spdx.json
+          format: spdx-json
+
+      - name: Cosign keyless OIDC sign (Sigstore → Fulcio → Rekor)
+        uses: sigstore/cosign-installer@v3
+      - shell: bash
+        env:
+          COSIGN_EXPERIMENTAL: 'true'
+        run: |
+          set -euo pipefail
+          for f in dist/function-app.zip dist/mainTemplate.json dist/createUiDefinition.json dist/sentinelContent.json; do
+            [[ -f "$f" ]] && cosign sign-blob --yes --output-signature "$f.sig" --output-certificate "$f.cert" "$f"
+          done
+          [[ -f dist/sbom.spdx.json ]] && cosign sign-blob --yes --output-signature dist/sbom.spdx.json.sig --output-certificate dist/sbom.spdx.json.cert dist/sbom.spdx.json || true
+          ls -la dist/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: XdrLogRaider ${{ steps.ver.outputs.tag }}
+          body: |
+            XdrLogRaider Defender XDR portal-only telemetry connector.
+
+            Deploy via one-click ARM from the repo's deploy/ folder, or via
+            the Azure CLI `deployment` workflow against the included parameters.json.
+
+            All artifacts in this release are signed with Sigstore cosign
+            keyless OIDC (Fulcio short-lived cert + Rekor transparency log).
+            Verify with: `cosign verify-blob --certificate <file>.cert --signature <file>.sig <file>`.
+          files: |
+            dist/function-app.zip
+            dist/function-app.zip.sig
+            dist/function-app.zip.cert
+            dist/mainTemplate.json
+            dist/mainTemplate.json.sig
+            dist/mainTemplate.json.cert
+            dist/createUiDefinition.json
+            dist/createUiDefinition.json.sig
+            dist/createUiDefinition.json.cert
+            dist/sentinelContent.json
+            dist/sentinelContent.json.sig
+            dist/sentinelContent.json.cert
+            dist/parameters.json
+            dist/sbom.spdx.json
+            dist/sbom.spdx.json.sig
+            dist/sbom.spdx.json.cert

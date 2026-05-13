@@ -1,0 +1,52 @@
+  /di/find/RiskSpotlightingInsight:
+    get:
+      operationId: getRiskSpotlightingInsights
+      summary: Get risk spotlighting insights
+      description: >-
+        Retrieve risk spotlighting insights from the Data Infrastructure service.
+        Provides time-bounded risk insights for users and activities within the tenant.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: startTime
+          in: query
+          required: false
+          description: The start of the time range for insights (ISO 8601 format).
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: false
+          description: The end of the time range for insights (ISO 8601 format).
+          schema:
+            type: string
+            format: date-time
+        - name: Filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow results.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

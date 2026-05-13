@@ -1,0 +1,30 @@
+  /_api/SPO.Tenant/GetSPListItemCount:
+    post:
+      tags: [Sites]
+      summary: Get admin list item count
+      description: |
+        Returns the item count for an internal SharePoint admin list.
+      operationId: SharePointAdmin.GetAdminListItemCount
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListNameRequest'
+      responses:
+        '200':
+          description: Item count returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataIntegerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

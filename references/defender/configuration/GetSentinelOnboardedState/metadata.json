@@ -1,0 +1,72 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "GetSentinelOnboardedState",
+  "operationId": "Configuration.GetSentinelOnboardedState",
+  "path": "/mtp/sentinelOnboarding/sentinel/workspaces/isOnboarded",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Sentinel onboarding state",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:37:25.8728441Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "useRealTime",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Whether the portal should bypass cached onboarding metadata."
+    }
+  ],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": "true",
+    "required": false,
+    "description": "Whether the portal should bypass cached onboarding metadata.",
+    "type": "boolean",
+    "name": "useRealTime"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

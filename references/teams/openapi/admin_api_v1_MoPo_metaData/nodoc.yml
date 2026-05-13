@@ -1,0 +1,18 @@
+  /admin/api/v1/MoPo/metaData:
+    servers:
+      - url: https://admin.devicemgmt.teams.microsoft.com
+        description: Teams device management admin host
+    get:
+      tags: [TeamsDeviceManagement]
+      summary: Get Teams device management metadata
+      description: |
+        Metadata bootstrap route observed before the portal loaded Teams device inventory pages.
+      responses:
+        '200':
+          description: Device management metadata payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

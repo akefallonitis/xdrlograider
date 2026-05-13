@@ -1,0 +1,42 @@
+  /iris/v4/api/selection:
+    get:
+      operationId: getIrisSelection
+      summary: Get IRIS promotional/feature selection
+      description: >-
+        Retrieve IRIS promotional and feature selection data. Returns targeted
+        content and feature recommendations based on placement, locale, and other criteria.
+      tags: [PlatformServices]
+      parameters:
+        - name: placement
+          in: query
+          required: false
+          description: The placement context for the selection.
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: The locale for localized content.
+          schema:
+            type: string
+        - name: country
+          in: query
+          required: false
+          description: The country code for regional content.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/OcpsPoliciesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

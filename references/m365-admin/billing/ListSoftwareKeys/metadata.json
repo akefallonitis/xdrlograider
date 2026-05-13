@@ -1,0 +1,65 @@
+{
+  "portal": "m365-admin",
+  "subArea": "billing",
+  "slug": "ListSoftwareKeys",
+  "operationId": "Billing.ListSoftwareKeys",
+  "path": "/fd/KeyFulfillment/v3.0/softwareKeys",
+  "methods": [
+    "get"
+  ],
+  "summary": "List software keys",
+  "sourceFile": "billing.yml",
+  "capturedUtc": "2026-05-12T15:13:25.2217376Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "includeProductKeyDetails",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Whether the response should include detailed product key metadata."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": false,
+    "description": "Whether the response should include detailed product key metadata.",
+    "type": "boolean",
+    "name": "includeProductKeyDetails"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Name"
+  ],
+  "cadenceSuggestion": "daily"
+}

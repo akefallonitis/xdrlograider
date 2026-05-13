@@ -1,0 +1,49 @@
+{
+  "httpStatus": 200,
+  "successKind": "live",
+  "rowCount": 7,
+  "errorText": "",
+  "responseShape": "wrapper:value[]",
+  "sample": {
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#directoryRoles",
+    "value": [
+      {
+        "id": "8e9fb75e-bdeb-4b7b-8ac0-c6c2ea26ce90",
+        "deletedDateTime": null,
+        "description": "Can create and manage all aspects of app registrations and enterprise apps.",
+        "displayName": "Application Administrator",
+        "roleTemplateId": "9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3"
+      },
+      {
+        "id": "9a6596c1-3717-428c-a802-31a511f21091",
+        "deletedDateTime": null,
+        "description": "Can read security information and reports in Microsoft Entra ID and Office 365.",
+        "displayName": "Security Reader",
+        "roleTemplateId": "5d6b6bb7-de71-4623-b4af-96380a352509"
+      },
+      {
+        "id": "b0c555e9-edce-4109-bcc5-696d757951c8",
+        "deletedDateTime": null,
+        "description": "Can manage all aspects of Microsoft Entra ID and Microsoft services that use Microsoft Entra identities.",
+        "displayName": "Global Administrator",
+        "roleTemplateId": "62e90394-69f5-4237-9190-012177145e10"
+      },
+      {
+        "id": "b31f4ed0-cb2f-45ad-bd2f-95096ae18a27",
+        "deletedDateTime": null,
+        "description": "Security Administrator allows ability to read and manage security configuration and reports.",
+        "displayName": "Security Administrator",
+        "roleTemplateId": "194ae4cb-b126-40b2-bd5b-6091b380977d"
+      },
+      {
+        "id": "be5261f4-27c3-4058-9cac-ede488e74962",
+        "deletedDateTime": null,
+        "description": "Can read everything that a Global Administrator can, but not update anything.",
+        "displayName": "Global Reader",
+        "roleTemplateId": "f2ef992c-3afb-46b9-b7cf-a126ee74c451"
+      }
+    ],
+    "_truncatedTo": 5,
+    "_totalRows": 7
+  }
+}

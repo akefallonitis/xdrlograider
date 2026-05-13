@@ -1,0 +1,23 @@
+  /admin/api/services/apps/vivainsights:
+    get:
+      summary: Get Viva Insights settings
+      description: >-
+        Retrieve the Viva Insights service settings for the tenant (Org Settings > Viva Insights).
+      operationId: AppSettings.GetVivaInsights
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

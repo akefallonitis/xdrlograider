@@ -1,0 +1,23 @@
+  /admin/api/users/surveysInfo:
+    get:
+      summary: Get survey information
+      description: >-
+        Retrieve survey information for the current admin user.
+      operationId: UsersGroups.GetSurveysInfo
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Survey information. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

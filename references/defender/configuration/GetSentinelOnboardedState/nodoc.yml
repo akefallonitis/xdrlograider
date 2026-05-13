@@ -1,0 +1,30 @@
+  /mtp/sentinelOnboarding/sentinel/workspaces/isOnboarded:
+    get:
+      summary: Get Sentinel onboarding state
+      description: >-
+        Retrieve whether Microsoft Sentinel onboarding has already been completed from
+        the Defender unified connector experience.
+      operationId: Configuration.GetSentinelOnboardedState
+      tags: [Configuration]
+      parameters:
+        - name: useRealTime
+          in: query
+          description: Whether the portal should bypass cached onboarding metadata.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

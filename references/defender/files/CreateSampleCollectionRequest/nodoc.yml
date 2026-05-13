@@ -1,0 +1,27 @@
+  /mtp/responseApiPortal/sampledownloadrequest/createcollectionrequest:
+    post:
+      summary: Create file collection request
+      description: >-
+        Submit the **Collect file** action from the file page. The portal only enables this
+        when `sampledownloadrequest/state` returns `ActionType = 2` (`Collect`).
+      operationId: Files.CreateSampleCollectionRequest
+      tags: [Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileCreateCollectionRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileCreateCollectionResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,22 @@
+  /admin/api/users/svinfo:
+    get:
+      summary: Get server version info
+      description: >-
+        Retrieve server version information for the admin portal.
+      operationId: UsersGroups.GetServerVersionInfo
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ServerViewInfoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

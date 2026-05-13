@@ -1,0 +1,28 @@
+  /mtp/mdeDeepAnalysis/api/DeepAnalysisRequest:
+    get:
+      summary: Get deep analysis request state
+      description: >-
+        Return the current deep-analysis submission state for the file hash shown on the
+        Defender file page.
+      operationId: Files.GetDeepAnalysisStatus
+      tags: [Files]
+      parameters:
+        - name: sha1
+          in: query
+          required: true
+          description: The SHA-1 of the file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDeepAnalysisState'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,32 @@
+  /support/odata/v1/supportRequests('{supportRequestId}')/UploadAttachment:
+    post:
+      tags: [Support]
+      summary: Upload a support request attachment
+      description: |
+        Uploads a base64-encoded attachment to a Windows Autopatch support request. The exact
+        request shape was recovered from the Support requests bundle. This write was not executed
+        live in this pass.
+      operationId: IntuneAutopatch.Support.UploadSupportRequestAttachment
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestUploadAttachmentRequest'
+      responses:
+        '200':
+          description: Attachment uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '204':
+          description: Attachment uploaded successfully with no response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

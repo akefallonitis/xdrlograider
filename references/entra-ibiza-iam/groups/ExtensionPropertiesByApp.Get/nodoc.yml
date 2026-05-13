@@ -1,0 +1,14 @@
+  /Groups/{groupId}/GetExtensionPropertiesByApp:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/groupId'
+    get:
+      summary: Get group extension properties by app
+      description: Get group extension properties by app.
+      operationId: Group.ExtensionPropertiesByApp.Get
+      tags: [Groups]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

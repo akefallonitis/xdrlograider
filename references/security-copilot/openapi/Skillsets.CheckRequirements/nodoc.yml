@@ -1,0 +1,16 @@
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/checkRequirements:
+    get:
+      tags: [Builder]
+      summary: Check builder requirements for skillsets
+      description: Retrieves builder prerequisite and missing-auth checks for skillsets before setup or agent creation proceeds.
+      operationId: SecurityCopilotPortal.Skillsets.CheckRequirements
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Skillset requirement checks returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'

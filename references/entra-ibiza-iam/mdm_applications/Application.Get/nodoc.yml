@@ -1,0 +1,20 @@
+  /MdmApplications/Application/{appId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: appId
+        description: The application ID (client ID) of the MDM application.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/applicationId
+    get:
+      summary: Get MDM application
+      description: >-
+        : Get MDM application.
+      operationId: MdmApplication.Application.Get
+      tags: [MDM]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

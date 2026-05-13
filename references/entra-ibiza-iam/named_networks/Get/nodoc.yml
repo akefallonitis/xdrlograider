@@ -1,0 +1,20 @@
+  /NamedNetworksV2/{id}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        description: The unique identifier of the network.
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get named network (v2)
+      description: Get named network (version 2).
+      operationId: NamedNetworksV2.Get
+      tags: [Policies]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

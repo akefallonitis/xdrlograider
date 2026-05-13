@@ -1,0 +1,22 @@
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/trend:
+    get:
+      summary: Get domain device trend
+      description: Return the domain device trend chart.
+      operationId: EntityPivots.GetDomainDeviceTrend
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotTrendResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

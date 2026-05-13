@@ -1,0 +1,136 @@
+  /WhatIf/Evaluate:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Evaluate policy
+      description: >-
+        Evaluate policy using WhatIf service.
+      operationId: WhatIf.Evaluate
+      tags: [Policies]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                conditions:
+                  type: object
+                  properties:
+                    users:
+                      $ref: '#/components/schemas/users'
+                    servicePrincipals:
+                      $ref: '#/components/schemas/servicePrincipalsBase'
+                    conditions:
+                      type: object
+                      properties:
+                        minUserRisk:
+                          $ref: '#/components/schemas/minUserRisk'
+                        minSigninRisk:
+                          $ref: '#/components/schemas/minSigninRisk'
+                        minInsiderRisk:
+                          type: array
+                        servicePrincipalRiskLevels:
+                          $ref: '#/components/schemas/servicePrincipalRiskLevels'
+                        devicePlatforms:
+                          $ref: '#/components/schemas/devicePlatforms'
+                        locations:
+                          $ref: '#/components/schemas/locations'
+                        clientAppsV2:
+                          $ref: '#/components/schemas/clientAppsV2'
+                        deviceState:
+                          $ref: '#/components/schemas/deviceStateBase'
+                ipAddress:
+                  description: IP address of the access scenario to query.
+                  type: string
+                  example: 123.123.123.x
+                country:
+                  description: Country of the access scenario to query.
+                  type: string
+                  example: UnknownAreas
+                device:
+                  type: object
+                authenticationStrengths:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        description: Authentication strength ID.
+                        type: string
+                        format: uuid
+                        example: 00000000-0000-0000-0000-000000000002
+                      createdDateTime:
+                        description: Created timestamp.
+                        type: string
+                        format: date-time
+                        example: 2021-12-01T00:00:00Z
+                      modifiedDateTime:
+                        description: Modified timestamp.
+                        type: string
+                        format: date-time
+                        example: 2021-12-01T00:00:00Z
+                      displayName:
+                        description: Authentication strenth display name.
+                        type: string
+                        example: Multifactor authentication
+                      description:
+                        description: Authentication method description.
+                        type: string
+                        example: Combinations of methods that satisfy strong authentication, such as a password + SMS
+                      policyType:
+                        description: Policy type.
+                        type: string
+                        example: builtIn
+                      requirementsSatisfied:
+                        description: Comma seperated list of satisfied requirements.
+                        type: string
+                        example: mfa
+                      allowedCombinations:
+                        description: Allowed combinations.
+                        type: array
+                        uniqueItems: true
+                        items:
+                          type: string
+                          example: windowsHelloForBusiness
+                      combinationConfigurations@odata.context:
+                        description: odata context.
+                        type: string
+                        example: https://graph.microsoft.com/beta/$metadata#identity/conditionalAccess/authenticationStrength/policies('00000000-0000-0000-0000-000000000002')/combinationConfigurations
+                      combinationConfigurations:
+                        description: pending
+                        type: array
+
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

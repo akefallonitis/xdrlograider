@@ -1,0 +1,91 @@
+{
+  "portal": "defender",
+  "subArea": "exposure_management",
+  "slug": "GetK8sDeviceTotals",
+  "operationId": "ExposureManagement.GetK8sDeviceTotals",
+  "path": "/mtp/k8s/machines/deviceTotals",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Kubernetes device totals",
+  "sourceFile": "exposure_management.yml",
+  "capturedUtc": "2026-05-12T14:39:27.4493071Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "lookingBackIndays",
+      "In": "query",
+      "Type": "integer",
+      "Default": "",
+      "Description": "Number of days to look back for device data."
+    },
+    {
+      "Name": "hideLowFidelityDevices",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "false",
+      "Description": "Whether to exclude low-fidelity device records."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 14,
+    "errorText": "",
+    "responseShape": "array"
+  },
+  "parsingNotes": [
+    "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live (14 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Number of days to look back for device data.",
+      "type": "integer",
+      "name": "lookingBackIndays"
+    },
+    {
+      "in": "query",
+      "default": "false",
+      "required": false,
+      "description": "Whether to exclude low-fidelity device records.",
+      "type": "boolean",
+      "name": "hideLowFidelityDevices"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.RiskScore"
+  ],
+  "cadenceSuggestion": "daily"
+}

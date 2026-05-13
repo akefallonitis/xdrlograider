@@ -1,0 +1,41 @@
+  /mtp/ndr/machines/deviceTotalCount:
+    get:
+      summary: Get NDR device total count
+      description: >-
+        Retrieve the total number of NDR-scoped devices matching the current
+        filters.
+      operationId: EndpointDevices.GetNdrDeviceTotalCount
+      tags: [Endpoint Devices]
+      parameters:
+        - name: lookingBackIndays
+          in: query
+          description: The NDR discovery lookback window, in days.
+          schema:
+            type: integer
+            default: 180
+        - name: deviceRoles
+          in: query
+          description: Optional NDR device-role filter.
+          schema:
+            type: string
+        - name: deviceRoleConfidence
+          in: query
+          description: Optional confidence filter for the selected device role.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - NDR device total count
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

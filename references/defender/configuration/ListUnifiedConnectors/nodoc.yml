@@ -1,0 +1,26 @@
+  /mtp/unifiedConnectors/public/connectors:
+    get:
+      summary: List unified connectors
+      description: >-
+        Retrieve the catalog of unified connectors available from the Defender portal's
+        Sentinel and identity connector experiences.
+      operationId: Configuration.ListUnifiedConnectors
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - unified connector definition
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

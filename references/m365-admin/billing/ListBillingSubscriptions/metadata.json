@@ -1,0 +1,114 @@
+{
+  "portal": "m365-admin",
+  "subArea": "billing",
+  "slug": "ListBillingSubscriptions",
+  "operationId": "Billing.ListBillingSubscriptions",
+  "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingSubscriptions",
+  "methods": [
+    "get"
+  ],
+  "summary": "List billing subscriptions",
+  "sourceFile": "billing.yml",
+  "capturedUtc": "2026-05-12T15:13:25.1744286Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "billingAccountId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The ARM billing account identifier."
+    },
+    {
+      "Name": "api-version",
+      "In": "query",
+      "Type": "string",
+      "Default": "'2024-08-01-preview'",
+      "Description": "ARM API version used by the billing subscription request."
+    },
+    {
+      "Name": "excludeCharges",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Whether charge details should be excluded from the result."
+    },
+    {
+      "Name": "$includePartnerAssets",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Whether partner asset metadata should be included."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingSubscriptions' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The ARM billing account identifier.",
+      "type": "string",
+      "name": "billingAccountId"
+    },
+    {
+      "in": "query",
+      "default": "2024-08-01-preview",
+      "required": false,
+      "description": "ARM API version used by the billing subscription request.",
+      "type": "string",
+      "name": "api-version"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Whether charge details should be excluded from the result.",
+      "type": "boolean",
+      "name": "excludeCharges"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Whether partner asset metadata should be included.",
+      "type": "boolean",
+      "name": "$includePartnerAssets"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Name",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

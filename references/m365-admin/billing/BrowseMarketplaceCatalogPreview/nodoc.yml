@@ -1,0 +1,67 @@
+  /fd/bsxcommerce/v1/moderncatalog/browsecatalogforpreview:
+    get:
+      summary: Browse marketplace preview catalog
+      description: >-
+        Retrieve marketplace preview catalog results used by the marketplace experience.
+        This is a read-only preview browse request observed during page load.
+      operationId: Billing.BrowseMarketplaceCatalogPreview
+      tags: [Billing]
+      parameters:
+        - name: market
+          in: query
+          schema:
+            type: string
+        - name: languages
+          in: query
+          schema:
+            type: string
+        - name: fieldsTemplate
+          in: query
+          schema:
+            type: string
+        - name: actionFilter
+          in: query
+          schema:
+            type: string
+        - name: pricingAudience
+          in: query
+          schema:
+            type: string
+        - name: internalPreview
+          in: query
+          schema:
+            type: boolean
+        - name: nationalCloud
+          in: query
+          schema:
+            type: string
+        - name: accountId
+          in: query
+          schema:
+            type: string
+        - name: orgId
+          in: query
+          schema:
+            type: string
+        - name: bgId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Preview marketplace catalog result. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

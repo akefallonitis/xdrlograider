@@ -1,0 +1,85 @@
+{
+  "portal": "defender",
+  "subArea": "action_center",
+  "slug": "ListAutomationRules",
+  "operationId": "ActionCenter.ListAutomationRules",
+  "path": "/mtp/automation/internal/automation/{TenantId}/automationRules",
+  "methods": [
+    "get"
+  ],
+  "summary": "List automation rules",
+  "sourceFile": "action_center.yml",
+  "capturedUtc": "2026-05-12T14:33:25.6373417Z",
+  "pagination": {
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": "pageSize",
+    "defaults": {
+      "pageSize": "100"
+    },
+    "indexParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "TenantId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Microsoft Entra tenant identifier."
+    }
+  ],
+  "suggestedCadence": "10min",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/automation/internal/automation/{TenantId}/automationRules' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The Microsoft Entra tenant identifier.",
+      "type": "string",
+      "name": "TenantId"
+    },
+    {
+      "in": "query",
+      "default": "100",
+      "required": false,
+      "description": "The number of automation rules to request.",
+      "type": "integer",
+      "name": "pageSize"
+    }
+  ],
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

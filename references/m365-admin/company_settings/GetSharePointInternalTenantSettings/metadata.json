@@ -1,0 +1,66 @@
+{
+  "portal": "m365-admin",
+  "subArea": "company_settings",
+  "slug": "GetSharePointInternalTenantSettings",
+  "operationId": "CompanySettings.GetSharePointInternalTenantSettings",
+  "path": "/_api/SPOInternalUseOnly.Tenant",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get SharePoint internal tenant settings",
+  "sourceFile": "company_settings.yml",
+  "capturedUtc": "2026-05-12T15:13:25.280536Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "$select",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": ">-"
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 404,
+  "lastDiagnostic": "not found",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": true,
+    "description": ">-",
+    "type": "string",
+    "name": "$select"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Url.Domain"
+  ],
+  "cadenceSuggestion": "daily"
+}

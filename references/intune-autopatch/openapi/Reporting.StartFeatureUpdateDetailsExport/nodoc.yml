@@ -1,0 +1,29 @@
+  /reporting/reports/v2/windowsFeatureUpdates/detailsExport:
+    post:
+      tags: [Reporting]
+      summary: Start a feature update details export
+      description: |
+        Starts the feature update details export flow. The route and request body were recovered
+        from the report bundle; the helper expects a `trackingId` response, then polls
+        `GET /reporting/reports/v1/export/status/` with
+        `queryName=DeviceFeatureUpdatesDetailsQuery` until an export SAS URL is returned.
+      operationId: IntuneAutopatch.Reporting.StartFeatureUpdateDetailsExport
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdateDetailsExportRequest'
+      responses:
+        '200':
+          description: Feature update export job started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportExportStartResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

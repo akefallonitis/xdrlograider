@@ -1,0 +1,31 @@
+  /ApplicationProxy/Connectors/{connectorId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: connectorId
+        description: The ID of the connector.
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get Application Proxy connector
+      description: >-
+        Get Application Proxy connector by connector ID.
+      operationId: ApplicationProxy.Connectors.Get
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    patch:
+      summary: Update Application Proxy connector
+      description: >-
+        Update Application Proxy connector by connector ID.
+      operationId: ApplicationProxy.Connectors.Update
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,26 @@
+  /Skype.Policy/configurations/{policyType}/configuration/{policyName}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsPolicyConfigurations]
+      summary: Get a named Teams policy configuration instance
+      description: |
+        Named policy configuration route observed for global policy records such as
+        `OnlineDialInConferencingTenantSettings/configuration/Global`,
+        `OnlineDialOutPolicy/configuration/Global`, and
+        `TeamsAppPermissionPolicy/configuration/Global`.
+      parameters:
+        - $ref: '#/components/parameters/PolicyType'
+        - $ref: '#/components/parameters/PolicyName'
+      responses:
+        '200':
+          description: Named policy configuration payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

@@ -1,0 +1,44 @@
+{
+  "portal": "intune-autopatch",
+  "subArea": "openapi",
+  "slug": "Support.GetTenantManagedService",
+  "operationId": "IntuneAutopatch.Support.GetTenantManagedService",
+  "path": "/support/v1.0/Tenants/GetTenantManagedService/{plan}",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get tenant managed service state",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:10.8979468Z",
+  "pagination": {
+    "style": "none",
+    "sizeParam": null,
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "endParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/support/v1.0/Tenants/GetTenantManagedService/{plan}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

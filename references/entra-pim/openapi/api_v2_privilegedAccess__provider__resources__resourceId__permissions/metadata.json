@@ -1,0 +1,44 @@
+{
+  "portal": "entra-pim",
+  "subArea": "openapi",
+  "slug": "api_v2_privilegedAccess__provider__resources__resourceId__permissions",
+  "operationId": null,
+  "path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/permissions",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get current user's PIM permissions for a resource",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:14.7279586Z",
+  "pagination": {
+    "tokenParam": null,
+    "defaults": {},
+    "style": "none",
+    "sizeParam": null,
+    "indexParam": null
+  },
+  "timeFilter": {
+    "type": null,
+    "supported": false,
+    "lookbackParam": null,
+    "startParam": null,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/api/v2/privilegedAccess/{provider}/resources/{resourceId}/permissions' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

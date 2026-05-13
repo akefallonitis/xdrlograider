@@ -1,0 +1,23 @@
+  /mcas/cas/api/version:
+    get:
+      summary: Get Cloud Apps bundle versions
+      description: >-
+        Retrieve the current console, i18n, and supporting bundle versions used by
+        Defender for Cloud Apps.
+      operationId: CloudApps.GetVersion
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsVersionResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

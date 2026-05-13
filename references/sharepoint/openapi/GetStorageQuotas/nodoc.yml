@@ -1,0 +1,37 @@
+  /_api/StorageQuotas():
+    get:
+      tags: [Storage]
+      summary: Get storage quotas
+      description: |
+        Returns tenant storage quota information by geography. Observed on the
+        Home and Active sites experiences.
+      operationId: SharePointAdmin.GetStorageQuotas
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+      x-nodoc-operation-context:
+        surface: Home / Active sites
+        workflows:
+          - Open the SharePoint admin home or Active sites experiences and inspect tenant storage quota summaries.
+        headerProfile: sharepoint-admin-read
+        variants:
+          - location: query
+            selector: api-version
+            knownValues:
+              - 1.3.2
+            notes: The legacy storage quota helper was captured with an explicit api-version selector.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified during authenticated SharePoint admin home and Active sites browsing.
+      responses:
+        '200':
+          description: Storage quotas returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

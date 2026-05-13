@@ -1,0 +1,47 @@
+  /admin/api/settings/apps/planner:
+    get:
+      summary: Get Planner settings
+      description: >-
+        Retrieve the Microsoft Planner application settings for the tenant.
+      operationId: AppSettings.GetPlanner
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Planner application settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Planner settings
+      description: >-
+        Update the Microsoft Planner application settings for the tenant.
+      operationId: AppSettings.SetPlanner
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Planner settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

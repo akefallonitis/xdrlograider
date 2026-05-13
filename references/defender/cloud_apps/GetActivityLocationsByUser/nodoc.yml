@@ -1,0 +1,30 @@
+  /mcas/cas/api/v1/activities_locations/by_user:
+    get:
+      summary: Get activity locations by user
+      description: >-
+        Retrieve the activity-location summary shown for a resolved Cloud Apps user entity.
+      operationId: CloudApps.GetActivityLocationsByUser
+      tags: [CloudApps]
+      parameters:
+        - name: username
+          in: query
+          required: true
+          description: The encoded Cloud Apps entity identifier for the selected user.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - activity locations by user response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

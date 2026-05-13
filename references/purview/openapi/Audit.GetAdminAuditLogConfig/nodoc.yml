@@ -1,0 +1,19 @@
+  /api/adminauditlogconfig/:
+    get:
+      tags: [Audit]
+      summary: Get admin audit log configuration
+      description: |
+        Returns the tenant's Purview admin audit log ingestion status and first opt-in timestamp.
+        Confirmed live from the Settings experience.
+      operationId: PurviewPortal.Audit.GetAdminAuditLogConfig
+      responses:
+        '200':
+          description: Admin audit log settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurviewPortalAdminAuditLogConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

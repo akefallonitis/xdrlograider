@@ -1,0 +1,23 @@
+  /access-control/odata/v1/ScopedForResources:
+    get:
+      tags: [Roles]
+      summary: Check whether a permission is resource-scoped
+      description: |
+        Returns whether a Windows Autopatch permission is scoped for resources. Recovered from the
+        roles bundle and confirmed with a GET probe.
+      operationId: IntuneAutopatch.Roles.GetScopedForResources
+      parameters:
+        - $ref: '#/components/parameters/permission'
+      responses:
+        '200':
+          description: Resource-scoping state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataBooleanResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

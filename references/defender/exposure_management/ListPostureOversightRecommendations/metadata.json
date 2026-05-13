@@ -1,0 +1,172 @@
+{
+  "portal": "defender",
+  "subArea": "exposure_management",
+  "slug": "ListPostureOversightRecommendations",
+  "operationId": "ExposureManagement.ListPostureOversightRecommendations",
+  "path": "/mtp/posture/oversight/recommendations",
+  "methods": [
+    "get"
+  ],
+  "summary": "List posture oversight recommendations",
+  "sourceFile": "exposure_management.yml",
+  "capturedUtc": "2026-05-12T14:39:33.9632212Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "calculationId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Calculation snapshot ID."
+    },
+    {
+      "Name": "sort.sortDirection",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": ""
+    },
+    {
+      "Name": "sort.sortByField",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Field to sort by (e.g. domainScoreImpact)."
+    },
+    {
+      "Name": "pagination.pageNumber",
+      "In": "query",
+      "Type": "integer",
+      "Default": "",
+      "Description": ""
+    },
+    {
+      "Name": "pagination.numberOfPageRecords",
+      "In": "query",
+      "Type": "integer",
+      "Default": "",
+      "Description": ""
+    },
+    {
+      "Name": "highlights",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "false",
+      "Description": ""
+    },
+    {
+      "Name": "filters",
+      "In": "query",
+      "Type": "object",
+      "Default": "",
+      "Description": ">-"
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_ExposureRecommendations_CL",
+    "v1Tier": "XspmGraph",
+    "v1Category": "Exposure Management (XSPM)",
+    "v1RawPath": "/apiproxy/mtp/posture/oversight/recommendations"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 10,
+    "errorText": "",
+    "responseShape": "wrapper:results[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live (10 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Calculation snapshot ID.",
+      "type": "string",
+      "name": "calculationId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "",
+      "type": "string",
+      "name": "sort.sortDirection"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Field to sort by (e.g. domainScoreImpact).",
+      "type": "string",
+      "name": "sort.sortByField"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "",
+      "type": "integer",
+      "name": "pagination.pageNumber"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "",
+      "type": "integer",
+      "name": "pagination.numberOfPageRecords"
+    },
+    {
+      "in": "query",
+      "default": "false",
+      "required": false,
+      "description": "",
+      "type": "boolean",
+      "name": "highlights"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": ">-",
+      "type": "object",
+      "name": "filters"
+    }
+  ],
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Name",
+    "Url.Path"
+  ],
+  "cadenceSuggestion": "1h"
+}

@@ -1,0 +1,27 @@
+  /mtp/deviceManagement/configuration/PotentiallyUnwantedApplications:
+    get:
+      summary: Get PUA configuration
+      description: >-
+        Retrieve the Potentially Unwanted Applications (PUA) protection
+        configuration for endpoints.
+      operationId: EndpointConfiguration.GetPuaConfiguration
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    description: Whether PUA protection is enabled.
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,36 @@
+  /mtp/tvm/analytics/configurations/securescore/categories:
+    get:
+      summary: Get secure score categories
+      description: >-
+        Retrieve the secure score breakdown by SCA category (e.g. Network, Accounts,
+        Security controls, OS, Application), including current and maximum scores for
+        each. Observed live on the Microsoft Secure Score page.
+      operationId: SecureScore.GetConfigurationsSecureScoreCategories
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category:
+                      type: string
+                      description: Score category name (e.g. Network, Accounts, OS).
+                    currentScore:
+                      type: number
+                      format: double
+                      description: Current score points for this category.
+                    maxScore:
+                      type: number
+                      format: double
+                      description: Maximum achievable score for this category.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

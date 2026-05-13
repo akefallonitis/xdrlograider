@@ -1,0 +1,14 @@
+  /inventory/api/SecurityCurrencyDevices/GetSecurityUpdateStatusMetrics:
+    get:
+      tags: [Security Currency]
+      summary: Get security update status metrics
+      description: Returns aggregate security update status totals for inventoried devices.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Security update status metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCurrencyMetrics'

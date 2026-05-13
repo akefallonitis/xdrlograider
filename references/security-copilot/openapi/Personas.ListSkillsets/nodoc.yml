@@ -1,0 +1,18 @@
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/personas/skillsets:
+    get:
+      tags: [Workspace]
+      summary: List persona skillset mappings
+      description: Retrieves the skillset names associated with current persona configuration.
+      operationId: SecurityCopilotPortal.Personas.ListSkillsets
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Persona skillset names returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string

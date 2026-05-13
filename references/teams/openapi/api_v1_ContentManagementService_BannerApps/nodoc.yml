@@ -1,0 +1,20 @@
+  /api/v1/ContentManagementService/BannerApps:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: List Teams banner apps
+      description: |
+        Banner app inventory observed from Teams add-on licensing and promotional surfaces.
+      responses:
+        '200':
+          description: Banner app payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

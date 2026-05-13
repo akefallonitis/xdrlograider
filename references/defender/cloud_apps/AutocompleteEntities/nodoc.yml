@@ -1,0 +1,22 @@
+  /mcas/cas/api/v1/autocomplete/entities:
+    get:
+      summary: Autocomplete entities
+      description: >-
+        Retrieve autocomplete suggestions for entities. Discovered on OAuth Apps page.
+      operationId: CloudApps.AutocompleteEntities
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

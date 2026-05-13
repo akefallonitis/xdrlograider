@@ -1,0 +1,18 @@
+  /api/v2/devices/summary:
+    servers:
+      - url: https://admin.devicemgmt.teams.microsoft.com
+        description: Teams device management data host
+    get:
+      tags: [TeamsDeviceManagement]
+      summary: Get the Teams device inventory summary
+      description: |
+        Device-summary route observed from Teams devices overview pages.
+      responses:
+        '200':
+          description: Device summary payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

@@ -1,0 +1,23 @@
+  /astgws/AttackSimulator/api/v1/Simulations:
+    get:
+      summary: List attack simulations
+      description: >-
+        Retrieve a list of attack simulations configured in the tenant. Discovered on Attack Simulator page.
+      operationId: AttackSimulator.ListSimulations
+      tags: [AttackSimulator]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,29 @@
+  /securityplatform/jobs/details:
+    get:
+      summary: Get job details
+      description: >-
+        Retrieve job details for the security data lake and related security platform
+        background jobs.
+      operationId: DataLake.GetJobDetails
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - job details entry
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

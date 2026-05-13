@@ -1,0 +1,54 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "application_proxy",
+  "slug": "Applications.TestButtonReport.Get",
+  "operationId": "ApplicationProxy.Applications.TestButtonReport.Get",
+  "path": "/ApplicationProxy/Applications/TestButtonReport",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Application Proxy application test button report",
+  "sourceFile": "application_proxy.yml",
+  "capturedUtc": "2026-05-12T15:13:11.6967198Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "appId",
+      "In": "query",
+      "Type": "",
+      "Default": "",
+      "Description": "The Application ID (client ID) of the application."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "request-shape-error",
+  "lastHttpStatus": 400,
+  "lastDiagnostic": "Graph call failed with httpCode=BadRequest, errorCode=Request_UnsupportedQuery, errorMessage=Unsupported or invalid query filter clause specified for property 'appId' of resource 'Application'., reason=Bad Request, correlationId = 8776c9d9-40a5-4a04-9fe1-19d669a515db, response = {\\",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

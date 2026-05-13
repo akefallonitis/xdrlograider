@@ -1,0 +1,22 @@
+  /Teams.User/users/{userId}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsUsers]
+      summary: Get a Teams user record
+      description: |
+        User lookup used by the dashboard and user-management surfaces. The retained capture selected
+        `usageLocation`, but the response still included a broader user record payload.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: User record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsUserRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

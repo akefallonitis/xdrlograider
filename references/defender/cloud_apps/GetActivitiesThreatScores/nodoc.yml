@@ -1,0 +1,29 @@
+  /mcas/cas/api/v1/activities/get_activities_threat_scores:
+    post:
+      summary: Get activity threat scores
+      description: >-
+        Retrieve threat scores for cloud app activities. Discovered on Activity Log page.
+      operationId: CloudApps.GetActivitiesThreatScores
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,37 @@
+  /admin/api/localizedvideo/getbyfeature/{locale}:
+    post:
+      summary: Get localized video by feature
+      description: >-
+        Retrieve localized help videos by feature for the specified locale (Groups > Active).
+      operationId: UsersGroups.GetLocalizedVideoByFeature
+      tags: [UsersGroups]
+      parameters:
+        - name: locale
+          in: path
+          required: true
+          description: The locale code (e.g., en-US).
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

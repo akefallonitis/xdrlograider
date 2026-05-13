@@ -1,0 +1,14 @@
+  /releases/v1.0/LatestRelease/MonthlyEnterpriseChannel:
+    get:
+      tags: [Releases]
+      summary: Get latest Monthly Enterprise release
+      description: Returns the latest release metadata for Monthly Enterprise Channel.
+      parameters:
+        - $ref: '#/components/parameters/releaseType'
+      responses:
+        '200':
+          description: Monthly Enterprise release metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestRelease'

@@ -1,0 +1,35 @@
+  /mtp/xspm/hunting:
+    post:
+      summary: Run XSPM hunting query
+      description: >-
+        Execute an exposure management hunting query to search for specific
+        attack paths or exposure scenarios.
+      operationId: ExposureManagement.RunHuntingQuery
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  description: The hunting query to execute.
+                  type: string
+              required:
+                - query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - hunting query results
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

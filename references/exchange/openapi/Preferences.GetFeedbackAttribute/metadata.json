@@ -1,0 +1,50 @@
+{
+  "portal": "exchange",
+  "subArea": "openapi",
+  "slug": "Preferences.GetFeedbackAttribute",
+  "operationId": "ExchangeBeta.Preferences.GetFeedbackAttribute",
+  "path": "/beta/UserProfile/ExchangeAdminCenter.GetFeedbackAttribute()",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get feedback attributes",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:42:22.5656549Z",
+  "pagination": {
+    "style": "none",
+    "defaults": {},
+    "indexParam": null,
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "supported": false,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "out-of-scope-graph-covers",
+    "Method": "Microsoft Graph covers — out of portal-only scope"
+  },
+  "v1Manifest": null,
+  "xdrInternalsHint": "Get-XdrExchangeBetaPreferences.GetFeedbackAttribute",
+  "defenderHarvester": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

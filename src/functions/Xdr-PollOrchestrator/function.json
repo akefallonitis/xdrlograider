@@ -1,0 +1,10 @@
+{
+  "description": "Phase H — Durable Functions orchestrator. Receives { Portal, Tier } from a timer-starter; reads manifest entries matching Portal+Tier; fans out one Xdr-PollStream activity per stream; aggregates results into per-tier rollup. Per directive 16 in .claude/plans/immutable-splashing-waffle.md. Replay-safe per Durable Functions PowerShell pattern.",
+  "bindings": [
+    {
+      "name": "Context",
+      "type": "orchestrationTrigger",
+      "direction": "in"
+    }
+  ]
+}

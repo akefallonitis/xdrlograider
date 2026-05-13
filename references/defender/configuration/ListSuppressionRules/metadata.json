@@ -1,0 +1,64 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "ListSuppressionRules",
+  "operationId": "Configuration.ListSuppressionRules",
+  "path": "/mtp/suppressionRulesService/suppressionRules",
+  "methods": [
+    "get"
+  ],
+  "summary": "List suppression rules",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:36:58.7162102Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_SuppressionRules_CL",
+    "v1Tier": "Configuration",
+    "v1Category": "Configuration and Settings",
+    "v1RawPath": "/apiproxy/mtp/suppressionRulesService/suppressionRules"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 21,
+    "errorText": "",
+    "responseShape": "array"
+  },
+  "parsingNotes": [
+    "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=live (21 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.FullName"
+  ],
+  "cadenceSuggestion": "daily"
+}

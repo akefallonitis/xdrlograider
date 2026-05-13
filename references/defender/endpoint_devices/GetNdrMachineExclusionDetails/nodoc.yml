@@ -1,0 +1,35 @@
+  /mtp/ndr/machines/{MachineId}/exclusionDetails:
+    get:
+      summary: Get NDR machine exclusion details
+      description: >-
+        Retrieve the NDR exclusion state and explanatory metadata for a machine.
+      operationId: EndpointDevices.GetNdrMachineExclusionDetails
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+        - name: senseMachineId
+          in: query
+          description: Redundant machine identifier currently sent by the portal.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - NDR machine exclusion details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

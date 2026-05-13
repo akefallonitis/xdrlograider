@@ -1,0 +1,26 @@
+  /mtoapi/recentItems:
+    get:
+      summary: Get recent items
+      description: >-
+        Retrieve recently accessed items in the Defender XDR portal for the current user.
+        Used to populate the recent items list in the portal navigation.
+      operationId: MultiTenant.GetRecentItems
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - recent item details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

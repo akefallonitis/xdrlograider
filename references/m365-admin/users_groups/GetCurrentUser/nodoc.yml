@@ -1,0 +1,22 @@
+  /admin/api/users/currentUser:
+    get:
+      summary: Get current user info
+      description: >-
+        Retrieve information about the currently authenticated admin user.
+      operationId: UsersGroups.GetCurrentUser
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CurrentUserResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

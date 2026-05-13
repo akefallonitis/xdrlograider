@@ -1,0 +1,47 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "users",
+  "slug": "ImageProperties.Update",
+  "operationId": "Users.ImageProperties.Update",
+  "path": "/UpdateUser/{userId}/ImageProperties",
+  "methods": [
+    "patch"
+  ],
+  "summary": "Update user image properties",
+  "sourceFile": "users.yml",
+  "capturedUtc": "2026-05-12T15:13:12.919076Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/UpdateUser/{userId}/ImageProperties' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.AadId",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

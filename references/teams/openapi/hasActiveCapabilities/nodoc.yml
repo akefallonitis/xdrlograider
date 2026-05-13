@@ -1,0 +1,27 @@
+  /hasActiveCapabilities:
+    servers:
+      - url: https://amer.vamonetization.teams.microsoft.com
+        description: Regional virtual appointments monetization backend
+    post:
+      tags: [RegionalVAMonetization]
+      summary: Check active virtual appointments capabilities
+      description: |
+        Capability lookup observed with `{ "Type": "premiumva" }` in the request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapabilityRequest'
+      responses:
+        '200':
+          description: Capability state.
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # monet.teams.microsoft.com/api

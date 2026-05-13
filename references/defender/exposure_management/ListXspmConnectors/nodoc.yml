@@ -1,0 +1,29 @@
+  /mtp/XspmConnectors/connectors/getAllConnectors:
+    get:
+      summary: List XSPM connectors
+      description: >-
+        Retrieve the exposure data connectors configured for the Defender portal's XSPM
+        and exposure management experiences.
+      operationId: ExposureManagement.ListXspmConnectors
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - XSPM connector entry
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

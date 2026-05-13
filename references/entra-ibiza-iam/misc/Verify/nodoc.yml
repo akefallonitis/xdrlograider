@@ -1,0 +1,20 @@
+  /Domains('{domainName}')/verify:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: domainName
+        description: The domain name to verify
+        in: path
+        required: true
+        example: contoso.com
+        schema:
+          type: string
+    get:
+      summary: Verify domain
+      description: Verify domain.
+      operationId: Domains.Verify
+      tags: [General]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,33 @@
+  /mtp/tvm/analytics/riskscore:
+    get:
+      summary: Get TVM risk score
+      description: >-
+        Retrieve the current organisational exposure risk score from Threat and Vulnerability
+        Management, including a historical time series. Observed live on the Exposure Management
+        overview page.
+      operationId: ExposureManagement.GetTvmRiskScore
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  risk:
+                    type: number
+                    format: double
+                    description: Current risk score (0–100).
+                  riskHistory:
+                    type: array
+                    items:
+                      type: number
+                      format: double
+                    description: Historical risk score values in reverse-chronological order.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,73 @@
+  /mtp/posture/oversight/recommendations:
+    get:
+      summary: List posture oversight recommendations
+      description: >-
+        Retrieve a paginated list of posture oversight recommendations, with sorting,
+        filtering by category, and highlights toggle. Observed live on the Exposure
+        Management overview and recommendations pages.
+      operationId: ExposureManagement.ListPostureOversightRecommendations
+      tags: [Exposure Management]
+      parameters:
+        - name: calculationId
+          in: query
+          description: Calculation snapshot ID.
+          schema:
+            type: string
+        - name: sort.sortDirection
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: sort.sortByField
+          in: query
+          description: Field to sort by (e.g. domainScoreImpact).
+          schema:
+            type: string
+        - name: pagination.pageNumber
+          in: query
+          schema:
+            type: integer
+            example: 1
+        - name: pagination.numberOfPageRecords
+          in: query
+          schema:
+            type: integer
+            example: 25
+        - name: highlights
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: filters
+          in: query
+          description: >-
+            Filter criteria using bracket notation. Key, value array, and operator per entry.
+            Example: filters[0].key=category&filters[0].value[0]=DeviceMisconfiguration&filters[0].operator=Contains.
+          style: deepObject
+          explode: true
+          schema:
+            type: array
+            items:
+              type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostureRecommendation'
+                  recordsCount:
+                    type: integer
+                  calculationId:
+                    type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

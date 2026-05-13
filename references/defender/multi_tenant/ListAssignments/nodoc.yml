@@ -1,0 +1,24 @@
+  /mtoapi/assignments:
+    get:
+      summary: List content distribution assignments
+      description: >-
+        Retrieve content distribution assignments from the MTO Content distribution
+        page, including target tenants, synced templates, variable maps, and
+        per-target sync status.
+      operationId: MultiTenant.ListAssignments
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,20 @@
+  /MultiFactorAuthentication/HardwareToken/upload/{tokenId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: tokenId
+        description: The ID of the uploaded token
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      summary: Remove MFA hardware token upload
+      description: >-
+        Remote MFA hardware token upload.
+      operationId: Mfa.HardwareToken.Upload
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

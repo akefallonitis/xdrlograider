@@ -1,0 +1,79 @@
+{
+  "portal": "defender",
+  "subArea": "exposure_management",
+  "slug": "GetIdentitySecureScoreMetric",
+  "operationId": "ExposureManagement.GetIdentitySecureScoreMetric",
+  "path": "/mtp/posture/oversight/metrics/category_identity_secure_score",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get identity secure score metric",
+  "sourceFile": "exposure_management.yml",
+  "capturedUtc": "2026-05-12T14:39:59.4237614Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "fullData",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Return the full metric history and recommendation payload."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_IdentitySecureScore_CL",
+    "v1Tier": "XspmGraph",
+    "v1Category": "Exposure Management (XSPM)",
+    "v1RawPath": "/apiproxy/mtp/posture/oversight/metrics/category_identity_secure_score"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 175,
+    "errorText": "",
+    "responseShape": "wrapper:recommendations[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='recommendations' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live (175 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": "true",
+    "required": false,
+    "description": "Return the full metric history and recommendation payload.",
+    "type": "boolean",
+    "name": "fullData"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

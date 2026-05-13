@@ -1,0 +1,29 @@
+  /di/Aggregate/ThreatInstanceList:
+    post:
+      summary: Aggregate threat instances
+      description: >-
+        Aggregate and retrieve a list of threat instances with filtering criteria.
+      operationId: PortalServices.AggregateThreatInstances
+      tags: [Portal Services]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - threat instance aggregation request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - aggregated threat instances
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

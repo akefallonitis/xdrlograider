@@ -1,0 +1,101 @@
+{
+  "portal": "m365-admin",
+  "subArea": "search",
+  "slug": "GetInsightsReportStatus",
+  "operationId": "Search.GetInsightsReportStatus",
+  "path": "/fd/mssearchinsights/api/v1/45f52f35-73d5-4066-8378-fe506ee90fb1/status/reportdata",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get search insights report readiness",
+  "sourceFile": "search.yml",
+  "capturedUtc": "2026-05-12T15:13:26.1763428Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "tenantId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The tenant identifier used by the Search insights service."
+    },
+    {
+      "Name": "reports",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Comma-delimited report names to check."
+    },
+    {
+      "Name": "daysToCheck",
+      "In": "query",
+      "Type": "integer",
+      "Default": "28",
+      "Description": "Number of trailing days to validate for report readiness."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/fd/mssearchinsights/api/v1/{tenantId}/status/reportdata' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 403,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The tenant identifier used by the Search insights service.",
+      "type": "string",
+      "name": "tenantId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "Comma-delimited report names to check.",
+      "type": "string",
+      "name": "reports"
+    },
+    {
+      "in": "query",
+      "default": "28",
+      "required": false,
+      "description": "Number of trailing days to validate for report readiness.",
+      "type": "integer",
+      "name": "daysToCheck"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

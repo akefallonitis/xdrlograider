@@ -1,0 +1,30 @@
+  /admin/api/privatecatalog/GetAddInDetails:
+    post:
+      summary: Get add-in details
+      description: >-
+        Retrieve detailed information about a specific add-in from the private catalog (Add-ins > Add-ins).
+      operationId: IntegratedApps.GetAddInDetails
+      tags: [IntegratedApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

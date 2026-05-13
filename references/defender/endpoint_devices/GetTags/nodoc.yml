@@ -1,0 +1,31 @@
+  /mtp/machineTag/machineTags/{DeviceId}:
+    get:
+      summary: Get device tags
+      description: >-
+        Retrieve all tags assigned to a specific endpoint device.
+      operationId: EndpointDevices.GetTags
+      tags: [Endpoint Devices]
+      parameters:
+        - name: DeviceId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceTag'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

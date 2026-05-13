@@ -1,0 +1,587 @@
+{
+  "portal": "entra-ibiza-iam",
+  "authChain": null,
+  "capturedUtc": "2026-05-12T15:24:22.1017083Z",
+  "subAreaCount": 32,
+  "authFinding": {
+    "ImplementationModule": "Xdr.Entra.Auth (v0.2.0b) — design: refresh-token-cache",
+    "AuthMethod": "NOT-unattended-TOTP (ROPC blocked)",
+    "AuthFlow": "MSAL.js SPA at entra.microsoft.com; backend Bearer at main.iam.ad.ext.azure.com",
+    "Status": "programmatic-TOTP-auth-PROVEN-NOT-POSSIBLE-via-ROPC"
+  },
+  "subAreas": [
+    {
+      "subArea": "account_sku",
+      "endpointCount": 17,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 17,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "File.Path",
+        "Software.Name",
+        "Software.Version",
+        "Url.Path"
+      ],
+      "paginationStyles": [],
+      "valueProp": "License SKU inventory + assignment state per user — license audit"
+    },
+    {
+      "subArea": "application_insights",
+      "endpointCount": 6,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 6,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version",
+        "Url.Path"
+      ],
+      "paginationStyles": [],
+      "valueProp": "App Insights telemetry config for Entra"
+    },
+    {
+      "subArea": "application_proxy",
+      "endpointCount": 7,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 7,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "File.Path",
+        "Software.Version",
+        "Tenant.Id",
+        "Url.Domain"
+      ],
+      "paginationStyles": [],
+      "valueProp": "On-prem app publishing config + connector health"
+    },
+    {
+      "subArea": "application_sso",
+      "endpointCount": 27,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 27,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version",
+        "Url.Path"
+      ],
+      "paginationStyles": [],
+      "valueProp": "SSO configurations per app — federation drift"
+    },
+    {
+      "subArea": "applications",
+      "endpointCount": 4,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 4,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "App registration inventory"
+    },
+    {
+      "subArea": "authentication_methods",
+      "endpointCount": 3,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 3,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "TOTP/FIDO2/Windows Hello/passkey registrations per user — MFA posture audit"
+    },
+    {
+      "subArea": "b2b",
+      "endpointCount": 3,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 3,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "B2B guest invitation + management state"
+    },
+    {
+      "subArea": "b2c",
+      "endpointCount": 1,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 1,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version",
+        "Url.Domain"
+      ],
+      "paginationStyles": [],
+      "valueProp": "B2C tenant link to Entra (if any)"
+    },
+    {
+      "subArea": "claim_providers",
+      "endpointCount": 3,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 3,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Custom claim provider configs"
+    },
+    {
+      "subArea": "classic_policies",
+      "endpointCount": 7,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 7,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Legacy classic Entra ID policies (pre-CA)"
+    },
+    {
+      "subArea": "data_insights",
+      "endpointCount": 2,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 2,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "Account.UPN",
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Entra data insights telemetry"
+    },
+    {
+      "subArea": "devices",
+      "endpointCount": 3,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 3,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Entra-joined/registered device inventory + sync state"
+    },
+    {
+      "subArea": "directories",
+      "endpointCount": 23,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 23,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "Account.UPN",
+        "File.Path",
+        "Software.Version",
+        "Tenant.Id",
+        "Url.Domain",
+        "Url.Path"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Tenant directory metadata + cross-tenant settings"
+    },
+    {
+      "subArea": "document_processor_tasks",
+      "endpointCount": 5,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 5,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [],
+      "paginationStyles": [],
+      "valueProp": "Entra document processing pipeline state"
+    },
+    {
+      "subArea": "enterprise_applications",
+      "endpointCount": 3,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 3,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Service principal + OAuth grant inventory — third-party app sprawl"
+    },
+    {
+      "subArea": "gdpr",
+      "endpointCount": 4,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 4,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Data subject request inventory + completion state"
+    },
+    {
+      "subArea": "groups",
+      "endpointCount": 8,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 8,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Group inventory + dynamic group rules + membership drift"
+    },
+    {
+      "subArea": "managed_applications",
+      "endpointCount": 6,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 6,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Microsoft-managed apps (preconfigured) in tenant"
+    },
+    {
+      "subArea": "mdm_applications",
+      "endpointCount": 4,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 4,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "File.Path",
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "MDM app integration state"
+    },
+    {
+      "subArea": "microsoft_entra_connect",
+      "endpointCount": 1,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 1,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "File.Path",
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "AAD Connect sync state"
+    },
+    {
+      "subArea": "misc",
+      "endpointCount": 9,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 9,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "File.Path",
+        "Software.Version",
+        "Url.Domain"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Miscellaneous Entra portal operations"
+    },
+    {
+      "subArea": "multifactor_authentication",
+      "endpointCount": 26,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 26,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 1,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.UPN",
+        "Policy.Id",
+        "Software.Version",
+        "Tenant.Id"
+      ],
+      "paginationStyles": [
+        "continuationToken"
+      ],
+      "valueProp": "Per-user MFA settings + Conditional Access overlap — auth posture"
+    },
+    {
+      "subArea": "named_networks",
+      "endpointCount": 4,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 4,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Named location definitions for CA — network posture"
+    },
+    {
+      "subArea": "password_reset",
+      "endpointCount": 8,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 8,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "Account.UPN",
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "SSPR config + reset history"
+    },
+    {
+      "subArea": "permissions",
+      "endpointCount": 4,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 4,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Permission grants + consent inventory"
+    },
+    {
+      "subArea": "policies",
+      "endpointCount": 6,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 6,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "IP.Address",
+        "Policy.Id",
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Conditional Access + IdProtection + crossTenant policies — auth-policy drift"
+    },
+    {
+      "subArea": "registered_applications",
+      "endpointCount": 3,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 3,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Single-tenant + multi-tenant app registrations"
+    },
+    {
+      "subArea": "reports",
+      "endpointCount": 10,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 10,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "Account.UPN",
+        "File.Path",
+        "Host.MdatpId",
+        "Host.OsPlatform",
+        "IP.Address",
+        "Software.Version",
+        "Tenant.Id"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Entra reports (sign-in / risky users / etc.)"
+    },
+    {
+      "subArea": "request_approvals",
+      "endpointCount": 6,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 6,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 2,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [
+        "offsetLimit"
+      ],
+      "valueProp": "PIM activation request inventory"
+    },
+    {
+      "subArea": "roles",
+      "endpointCount": 2,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 2,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "File.Path",
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Built-in + custom role definitions + assignments"
+    },
+    {
+      "subArea": "security_defaults",
+      "endpointCount": 3,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 3,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Security Defaults enablement + bypass user list"
+    },
+    {
+      "subArea": "users",
+      "endpointCount": 16,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 16,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "Account.UPN",
+        "File.Path",
+        "Software.Version",
+        "Url.Domain",
+        "Url.Path"
+      ],
+      "paginationStyles": [],
+      "valueProp": "User inventory + risk state + AAL+"
+    }
+  ],
+  "authPattern": {
+    "nodocOfficialName": "Delegated OAuth2 (Entra IAM / ADIbizaUX)",
+    "transport": "bearer",
+    "browserAcquired": true,
+    "unattendedTotpCompatible": false,
+    "cookies": null,
+    "headers": [
+      "Authorization: Bearer",
+      "X-Ms-Client-Request-Id"
+    ],
+    "note": "ADIbizaUX resource via Azure-portal MSAL flow",
+    "postmanCollection": "..\\..\\xdrlograider\\.internal\\nodoc-reference\\postman\\collections\\entra-iam.collection.json",
+    "nodocReference": "https://nodoc.nathanmcnulty.com/getting-started"
+  }
+}

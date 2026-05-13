@@ -1,0 +1,32 @@
+  /fd/msgraph/v1.0/users/{userId}/extensions/commerce.Common.Preferences:
+    get:
+      summary: Get user commerce preferences extension
+      description: >-
+        Retrieve the user-scoped `commerce.Common.Preferences` extension via the
+        admin center Graph proxy. The portal probes this extension even when the
+        extension is not provisioned for the user.
+      operationId: GraphProxy.GetUserCommercePreferencesExtension
+      tags: [GraphProxy]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The user object identifier targeted by the extension lookup.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User extension payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          description: Extension with the requested identifier was not found for the user.

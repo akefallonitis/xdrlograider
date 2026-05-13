@@ -1,0 +1,37 @@
+  /api/tenants/GetAndInitializeTenantPolicy:
+    get:
+      tags: [Tenant]
+      summary: Get and initialize tenant policy
+      description: |
+        Retrieves and optionally initializes the B2C tenant policy configuration.
+        The `skipInitialization` parameter controls whether to trigger first-time
+        setup of B2C policies.
+
+        **Note:** Returns 400 if self-service sign-up is not enabled.
+
+        **Warning:** Setting `skipInitialization=false` may perform write operations
+        to initialize tenant policies.
+      operationId: Tenants.GetAndInitializeTenantPolicy
+      parameters:
+        - $ref: '#/components/parameters/tenantDomain'
+        - name: skipInitialization
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: |
+            If `true`, skips initialization and only reads existing policy.
+            If `false`, may create default policies if none exist.
+      responses:
+        '200':
+          description: Tenant policy configuration
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Self-service sign-up not enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/B2CError'

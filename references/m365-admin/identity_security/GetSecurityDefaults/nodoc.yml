@@ -1,0 +1,23 @@
+  /admin/api/identitysecurity/securitydefaults:
+    get:
+      summary: Get security defaults status
+      description: >-
+        Retrieve the security defaults status for the tenant, indicating whether
+        security defaults are enabled or disabled.
+      operationId: IdentitySecurity.GetSecurityDefaults
+      tags: [IdentitySecurity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SecurityDefaultsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

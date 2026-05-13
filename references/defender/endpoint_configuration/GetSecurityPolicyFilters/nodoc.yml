@@ -1,0 +1,32 @@
+  /mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters:
+    get:
+      summary: Get endpoint security policy filters
+      description: >-
+        Retrieve the filter values used by the Defender policy inventory page
+        for Microsoft Intune endpoint security policies.
+      operationId: EndpointConfiguration.GetSecurityPolicyFilters
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: platform
+          in: query
+          required: true
+          description: The platform family to enumerate filters for.
+          schema:
+            type: string
+            example: Windows
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - endpoint security policy filters
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

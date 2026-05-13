@@ -1,0 +1,30 @@
+  /mtp/siamApi/domaincontrollers/list:
+    get:
+      summary: List SIAM domain controllers
+      description: >-
+        Retrieve the domain controller inventory displayed by the Defender portal's
+        identity attachment experience.
+      operationId: Identity.ListDomainControllers
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    deviceId:
+                      type: string
+                    deviceName:
+                      type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

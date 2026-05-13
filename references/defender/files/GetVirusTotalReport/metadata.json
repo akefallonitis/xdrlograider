@@ -1,0 +1,120 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "GetVirusTotalReport",
+  "operationId": "Files.GetVirusTotalReport",
+  "path": "/mtp/files/files/{Sha256}/virustotal",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get VirusTotal report",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:07.8177689Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "Sha256",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The SHA-256 of the file."
+    },
+    {
+      "Name": "fileIdentifier",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The file hash the portal wants scored by the VirusTotal-backed service."
+    },
+    {
+      "Name": "UseVirusTotalFromEntityPagesService",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Feature flag sent by the current portal client."
+    },
+    {
+      "Name": "tenantIds",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional multi-tenant context."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/files/files/{Sha256}/virustotal' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The SHA-256 of the file.",
+      "type": "string",
+      "name": "Sha256"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The file hash the portal wants scored by the VirusTotal-backed service.",
+      "type": "string",
+      "name": "fileIdentifier"
+    },
+    {
+      "in": "query",
+      "default": "true",
+      "required": false,
+      "description": "Feature flag sent by the current portal client.",
+      "type": "boolean",
+      "name": "UseVirusTotalFromEntityPagesService"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional multi-tenant context.",
+      "type": "string",
+      "name": "tenantIds"
+    }
+  ],
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Sha256"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,16 @@
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/promptbooks:
+    get:
+      tags: [Promptbooks]
+      summary: List promptbooks
+      description: Retrieves promptbooks available to the current workspace and portal experience.
+      operationId: SecurityCopilotPortal.Promptbooks.List
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Promptbooks returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'

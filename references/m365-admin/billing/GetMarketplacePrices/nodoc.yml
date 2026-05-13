@@ -1,0 +1,63 @@
+  /fd/bsxcommerce/v1/moderncatalog/new/prices:
+    get:
+      summary: Get marketplace price quotes
+      description: >-
+        Retrieve read-only marketplace price quotes for selected product and term combinations.
+        The portal emitted this request while browsing marketplace offers, without submitting
+        a purchase flow.
+      operationId: Billing.GetMarketplacePrices
+      tags: [Billing]
+      parameters:
+        - name: psats
+          in: query
+          description: Selected product and term identifiers requested for pricing.
+          schema:
+            type: string
+        - name: market
+          in: query
+          schema:
+            type: string
+        - name: languages
+          in: query
+          schema:
+            type: string
+        - name: catalogIds
+          in: query
+          schema:
+            type: string
+        - name: pricingAudience
+          in: query
+          schema:
+            type: string
+        - name: nationalCloud
+          in: query
+          schema:
+            type: string
+        - name: accountId
+          in: query
+          schema:
+            type: string
+        - name: orgId
+          in: query
+          schema:
+            type: string
+        - name: bgId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Marketplace pricing payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,58 @@
+{
+  "portal": "defender",
+  "subArea": "entity_pivots",
+  "slug": "GetDomainClickPrevalence",
+  "operationId": "EntityPivots.GetDomainClickPrevalence",
+  "path": "/mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/prevalence",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get domain click prevalence",
+  "sourceFile": "entity_pivots.yml",
+  "capturedUtc": "2026-05-12T14:39:20.3033581Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Url.Domain"
+  ],
+  "cadenceSuggestion": "weekly"
+}

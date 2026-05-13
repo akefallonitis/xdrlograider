@@ -1,0 +1,79 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "GetTopWebContentFilteringCategories",
+  "operationId": "Configuration.GetTopWebContentFilteringCategories",
+  "path": "/mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get top web content filtering categories",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:38:04.2768417Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "includeActivityChange",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "false",
+      "Description": "Whether to include activity change deltas in the report response."
+    }
+  ],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_WebContentFiltering_CL",
+    "v1Tier": "Inventory",
+    "v1Category": "Endpoint Configuration",
+    "v1RawPath": "/apiproxy/mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": "false",
+    "required": false,
+    "description": "Whether to include activity change deltas in the report response.",
+    "type": "boolean",
+    "name": "includeActivityChange"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Name"
+  ],
+  "cadenceSuggestion": "daily"
+}

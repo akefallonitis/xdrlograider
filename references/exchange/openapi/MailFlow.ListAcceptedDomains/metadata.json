@@ -1,0 +1,50 @@
+{
+  "portal": "exchange",
+  "subArea": "openapi",
+  "slug": "MailFlow.ListAcceptedDomains",
+  "operationId": "ExchangeBeta.MailFlow.ListAcceptedDomains",
+  "path": "/beta/AcceptedDomain",
+  "methods": [
+    "get"
+  ],
+  "summary": "List accepted domains",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:42:25.1730759Z",
+  "pagination": {
+    "style": "none",
+    "defaults": {},
+    "indexParam": null,
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "supported": false,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "out-of-scope-graph-covers",
+    "Method": "Microsoft Graph covers — out of portal-only scope"
+  },
+  "v1Manifest": null,
+  "xdrInternalsHint": "Get-XdrExchangeBetaMailFlow.ListAcceptedDomains",
+  "defenderHarvester": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 4,
+    "errorText": "",
+    "responseShape": "wrapper:value[]"
+  },
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

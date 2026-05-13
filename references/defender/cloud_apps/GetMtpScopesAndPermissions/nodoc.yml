@@ -1,0 +1,25 @@
+  /mcas/cas/api/v1/mtp_scopes_and_permissions:
+    get:
+      summary: Get MTP scopes and permissions
+      description: >-
+        Retrieve MTP scopes and permissions available to Defender for Cloud Apps
+        integrations. The observed tenant returned `403`, but the route is
+        confirmed from portal traffic.
+      operationId: CloudApps.GetMtpScopesAndPermissions
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,35 @@
+# Test results
+tests/results/
+coverage.xml
+*.coverage.xml
+coverage.json
+
+# Local environment (operator-specific)
+tests/.env.local
+.env
+*.env.local
+
+# Build artifacts
+dist/
+*.zip
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+
+# PowerShell
+*.psd1.bak
+*.psm1.bak
+
+# Cosign signature/cert pairs for local testing
+*.sig
+*.cert
+
+# Phase 0 forward-compat captures excluded for v0.1.0 because some path
+# components exceed Windows MAX_PATH (260 chars). Re-add in v0.2.0 when the
+# Power Platform onboarding lands (Phase 0 nodoc capture script will be
+# constrained to <240 chars per path component). Other portal dirs under
+# references/ are fine.
+references/power-platform/

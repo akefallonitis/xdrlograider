@@ -1,0 +1,12 @@
+{
+  "portal": "m365-admin",
+  "path": "/adminportal/home/ClassicModernAdminDataStream",
+  "method": "GET",
+  "finalUrl": "https://admin.microsoft.com/adminportal/home/ClassicModernAdminDataStream?ref=%2Fhomepage",
+  "httpStatus": 200,
+  "successKind": "live",
+  "diagnostic": null,
+  "contentLen": 1305,
+  "rawSample": "\n\n\n<html>\n<head>\n    \n\n    <script type='text/javascript' nonce=\"xeCQhii9/WIYAsXUV4fyM5VmkIkcC53cHRqjwWbj2/c=\">\n            try {\n                var redirectURL = 'https://admin.cloud.microsoft';\n                var hashPage = window.location.hash.substring(1);\n                var queryString = '?ref=%2Fhomepage';\n                var ignoreHashHandling = 'True';\n\n                if (queryString && queryString.length > 0) {\n                    redirectURL = redirectURL + queryString;\n                }\n                if (ignoreHashHandling == 'False' && hashPage.length > 0) {\n                    var refPart = queryString.length > 0 ? \"&\" : \"?\";\n                    refPart = refPart + \"ref=\" + hashPage;\n                    redirectURL = redirectURL + refPart;\n                }\n\n                performance.mark('@ms/mac/IB_CHPR_OCDI_Redirect');\n\n                const mark = performance.getEntriesByName('@ms/mac/IB_CHPR_OCDI_Redirect')[0];\n                if (mark) {\n                    sessionStorage.setItem('@ms/mac/IB_CHPR_OCDI_Redirect', mark.startTime.toString());\n                }\n\n                window.location.href = redirectURL;\n            }\n            catch (err) {\n                window.location.href = 'https://admin.cloud.microsoft';\n            }\n</script>\n</head>\n</html>",
+  "capturedUtc": "2026-05-13T07:13:14Z"
+}

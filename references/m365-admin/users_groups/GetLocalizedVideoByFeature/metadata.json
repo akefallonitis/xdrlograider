@@ -1,0 +1,65 @@
+{
+  "portal": "m365-admin",
+  "subArea": "users_groups",
+  "slug": "GetLocalizedVideoByFeature",
+  "operationId": "UsersGroups.GetLocalizedVideoByFeature",
+  "path": "/admin/api/localizedvideo/getbyfeature/{locale}",
+  "methods": [
+    "post"
+  ],
+  "summary": "Get localized video by feature",
+  "sourceFile": "users_groups.yml",
+  "capturedUtc": "2026-05-12T15:13:26.5321492Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "locale",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The locale code (e.g., en-US)."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "PathTemplate — '/admin/api/localizedvideo/getbyfeature/{locale}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The locale code (e.g., en-US).",
+    "type": "string",
+    "name": "locale"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

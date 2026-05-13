@@ -1,0 +1,19 @@
+  /api/user/IsAdminForVirtualVisitsAnalytics:
+    servers:
+      - url: https://amer-ehrconnectorsvc.teams.microsoft.com
+        description: Regional virtual visits backend
+    get:
+      tags: [RegionalEhrConnector]
+      summary: Check whether the current admin can view virtual visits analytics
+      description: |
+        Boolean capability check used by the dashboard virtual visits widget.
+      responses:
+        '200':
+          description: Admin capability flag.
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'

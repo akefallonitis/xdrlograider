@@ -1,0 +1,19 @@
+  /Teams.User/users:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsUsers]
+      summary: List Teams user records
+      description: |
+        User inventory route observed from `Users > Manage users` before drilling into per-user detail
+        pages.
+      responses:
+        '200':
+          description: Teams user inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

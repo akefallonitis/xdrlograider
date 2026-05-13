@@ -1,0 +1,12 @@
+{
+  "portal": "entra-ibiza-iam",
+  "path": "/Directories/GetPasswordSyncStatus",
+  "method": "GET",
+  "finalUrl": "https://main.iam.ad.ext.azure.com/api/Directories/GetPasswordSyncStatus",
+  "httpStatus": 403,
+  "successKind": "tenant-gated",
+  "diagnostic": "Forbidden",
+  "contentLen": 756,
+  "rawSample": "{\"ClassName\":\"Microsoft.Portal.Framework.Exceptions.ClientException\",\"Message\":\"Graph call failed with httpCode=Forbidden, errorCode=Authorization_RequestDenied, errorMessage=Insufficient privileges to complete the operation., reason=Forbidden, correlationId = 0809f0fd-51e7-42fc-8c03-8de9c0b3c485.\",\"Data\":{},\"HResult\":-2146233088,\"XMsServerRequestId\":null,\"Source\":null,\"HttpStatusCode\":403,\"ClientData\":{\"errorCode\":\"Forbidden\",\"localizedErrorDetails\":null,\"operationResults\":null,\"timeStampUtc\":\"2026-05-13T07:17:20.9351064Z\",\"clientRequestId\":\"0809f0fd-51e7-42fc-8c03-8de9c0b3c485\",\"internalTransactionId\":\"34965731-f459-4400-b3ba-1e223e5f9aad\",\"tenantId\":null,\"userObjectId\":\"9b0a5108-6952-4fc7-941a-133004153bda\",\"exceptionType\":\"MsGraphException\"}}",
+  "capturedUtc": "2026-05-13T07:17:20Z"
+}

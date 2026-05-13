@@ -1,0 +1,17 @@
+  /inventory/api/DeviceActions/GetUpdateProgressSummaryByChannel():
+    get:
+      tags: [Update Progress]
+      summary: Get update progress summary by channel
+      description: Returns update progress totals by servicing channel and update state.
+      parameters:
+        - $ref: '#/components/parameters/cloudManagement'
+        - $ref: '#/components/parameters/mecVersion'
+        - $ref: '#/components/parameters/ccVersion'
+        - $ref: '#/components/parameters/saecVersion'
+      responses:
+        '200':
+          description: Update progress summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceUpdateProgressSummaryResponse'

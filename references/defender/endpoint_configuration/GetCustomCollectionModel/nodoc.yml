@@ -1,0 +1,23 @@
+  /mtp/mdeCustomCollection/model:
+    get:
+      summary: Get custom data collection model
+      description: >-
+        Retrieve the platform, table, action-type, and column catalog used by
+        the Endpoints settings > Custom data collection rule builder.
+      operationId: EndpointConfiguration.GetCustomCollectionModel
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomCollectionModel'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

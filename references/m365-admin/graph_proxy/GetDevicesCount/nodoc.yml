@@ -1,0 +1,22 @@
+  /fd/msgraph/v1.0/devices/$count:
+    get:
+      summary: Get device count
+      description: >-
+        Retrieve the total count of Entra ID devices via the M365 Admin Center Graph proxy.
+      operationId: GraphProxy.GetDevicesCount
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

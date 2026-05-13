@@ -1,0 +1,90 @@
+{
+  "portal": "defender",
+  "subArea": "identity",
+  "slug": "GetManager",
+  "operationId": "Identity.GetManager",
+  "path": "/mdi/identity/userapiservice/manager",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get user manager",
+  "sourceFile": "identity.yml",
+  "capturedUtc": "2026-05-12T14:41:16.8045968Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "managerAd",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Empty query flag requesting the Active Directory manager projection."
+    },
+    {
+      "Name": "userAad",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Microsoft Entra object ID for the selected user."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 405,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 405 (Method Not Allowed).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=error/405 — operator should check live response body for diagnosis"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Empty query flag requesting the Active Directory manager projection.",
+      "type": "boolean",
+      "name": "managerAd"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The Microsoft Entra object ID for the selected user.",
+      "type": "string",
+      "name": "userAad"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Path"
+  ],
+  "cadenceSuggestion": "daily"
+}

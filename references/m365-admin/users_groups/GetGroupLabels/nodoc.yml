@@ -1,0 +1,26 @@
+  /admin/api/groups/labels:
+    get:
+      summary: Get group labels
+      description: >-
+        Retrieve the available labels for groups in the tenant.
+      operationId: UsersGroups.GetGroupLabels
+      tags: [UsersGroups]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/GroupLabelsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

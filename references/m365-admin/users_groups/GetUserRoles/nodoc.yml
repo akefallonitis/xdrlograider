@@ -1,0 +1,39 @@
+  /admin/api/users/getuserroles:
+    post:
+      summary: Get user roles
+      description: >-
+        Retrieve the admin roles assigned to a user. Accepts a principal ID and
+        security group memberships to resolve role assignments.
+      operationId: UsersGroups.GetUserRoles
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PrincipalId:
+                  type: string
+                  description: The principal (user) ID to look up roles for.
+                UserSecurityGroups:
+                  type: array
+                  description: List of security group IDs the user belongs to.
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User role assignments. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,29 @@
+  /di/Aggregate/ThreatProfileDetails:
+    post:
+      summary: Aggregate threat profile details
+      description: >-
+        Aggregate and retrieve threat profile details with filtering criteria.
+      operationId: PortalServices.AggregateThreatProfileDetails
+      tags: [Portal Services]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - threat profile aggregation request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - aggregated threat profile details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

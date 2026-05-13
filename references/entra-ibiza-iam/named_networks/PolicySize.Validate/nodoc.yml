@@ -1,0 +1,19 @@
+  /NamedNetworksV2/ValidatePolicySize/{id}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        description: The unique identifier of the network.
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Validate named network policy size (v2)
+      description: Validate named network policy size (version 2).
+      operationId: NamedNetworksV2.PolicySize.Validate
+      tags: [Policies]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

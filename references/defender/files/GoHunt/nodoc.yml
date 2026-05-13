@@ -1,0 +1,27 @@
+  /mtp/huntingService/goHunt/File:
+    post:
+      summary: Generate file hunting pivot
+      description: >-
+        Build the guided hunting payloads behind the file page's **Go hunt** action.
+        The returned values are compressed or encoded KQL query presets for portal use.
+      operationId: Files.GoHunt
+      tags: [Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileGoHuntRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileGoHuntResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

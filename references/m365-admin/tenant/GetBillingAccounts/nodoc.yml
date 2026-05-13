@@ -1,0 +1,25 @@
+  /admin/api/tenant/billingAccountsWithShell:
+    get:
+      summary: Get billing accounts
+      description: >-
+        Retrieve billing accounts associated with the tenant, integrated
+        with the admin portal shell.
+      operationId: Tenant.GetBillingAccounts
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: common.yml#/components/schemas/BillingAccountWithShell
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

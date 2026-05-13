@@ -1,0 +1,47 @@
+{
+  "portal": "security-copilot",
+  "authChain": {
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775",
+    "Status": "auth-research-needed",
+    "Method": "Get-EntraEstsAuth — $Config missing required fields; need different bootstrap",
+    "CookieHost": "securitycopilot.microsoft.com"
+  },
+  "capturedUtc": "2026-05-12T15:24:21.1140987Z",
+  "subAreaCount": 1,
+  "authFinding": {
+    "ImplementationModule": "Xdr.SecurityCopilot.Auth (v0.2.0h)",
+    "AuthMethod": "Bearer via MSAL",
+    "AuthFlow": "SPA shell at securitycopilot.microsoft.com; backend Bearer at api.securitycopilot.microsoft.com (also api.medeina-ppe.defender.microsoft.com)",
+    "Status": "ROPC-blocked"
+  },
+  "subAreas": [
+    {
+      "subArea": "openapi",
+      "endpointCount": 32,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 32,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "File.Path"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Security Copilot prompts + skills + plugins + agent telemetry (cross-product AI assistant config)"
+    }
+  ],
+  "authPattern": {
+    "nodocOfficialName": "Portal bearer tokens (Security Copilot)",
+    "transport": "bearer",
+    "browserAcquired": true,
+    "unattendedTotpCompatible": false,
+    "cookies": null,
+    "headers": null,
+    "note": "Backend at api.securitycopilot.microsoft.com + api.medeina-ppe.defender.microsoft.com",
+    "postmanCollection": "..\\..\\xdrlograider\\.internal\\nodoc-reference\\postman\\collections\\security-copilot.collection.json",
+    "nodocReference": "https://nodoc.nathanmcnulty.com/getting-started"
+  }
+}

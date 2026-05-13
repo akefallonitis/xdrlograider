@@ -1,0 +1,75 @@
+{
+  "portal": "m365-admin",
+  "subArea": "integrated_apps",
+  "slug": "GetActionableApps",
+  "operationId": "IntegratedApps.GetActionableApps",
+  "path": "/fd/addins/api/actionableApps",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get actionable apps",
+  "sourceFile": "integrated_apps.yml",
+  "capturedUtc": "2026-05-12T15:13:25.7915745Z",
+  "pagination": {
+    "indexParam": null,
+    "defaults": {
+      "limit": "200"
+    },
+    "tokenParam": null,
+    "sizeParam": "limit",
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "workloads",
+      "In": "query",
+      "Type": "string",
+      "Default": "MetaOS,SharedAgent",
+      "Description": "Comma-separated workload filter."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": [
+    {
+      "in": "query",
+      "default": "MetaOS,SharedAgent",
+      "required": false,
+      "description": "Comma-separated workload filter.",
+      "type": "string",
+      "name": "workloads"
+    },
+    {
+      "in": "query",
+      "default": "200",
+      "required": false,
+      "description": "Maximum number of apps to return.",
+      "type": "integer",
+      "name": "limit"
+    }
+  ],
+  "paginationStyle": "limitOffset",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

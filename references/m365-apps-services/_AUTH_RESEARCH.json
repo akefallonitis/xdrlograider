@@ -1,0 +1,89 @@
+{
+  "portal": "m365-apps-services",
+  "catalogue": {
+    "postmanCollection": "m365-apps-services.collection.json",
+    "nodocDir": "nodoc-m365-apps-services",
+    "specPaths": 1,
+    "openApiServerUrls": "https://clients.config.office.net"
+  },
+  "authModel": {
+    "requiredHeaders": [
+      "x-api-name",
+      "x-correlationid",
+      "x-manageoffice-client-sid",
+      "x-requested-with"
+    ],
+    "portalHost": "clients.config.office.net",
+    "apiHost": null,
+    "cookieNames": null,
+    "audience": "TBD",
+    "apiHosts": null,
+    "requiredQueryParams": null,
+    "bucket": "B-bearer",
+    "audienceName": null,
+    "clientId": "TBD-from-bundle"
+  },
+  "postmanFindings": {
+    "error": "Conversion from JSON failed with error: Invalid property identifier character: {. Path 'item[2].item[0].item[0].item[3].item[0].response[0].originalRequest.content', line 672, position 60."
+  },
+  "unattendedAuth": {
+    "totpSupported": true,
+    "estsauthpersistent": {
+      "useForSilentRenewal": "/oauth2/v2.0/authorize?prompt=none uses ESTSAUTHPERSISTENT for SSO, mints fresh code without TOTP",
+      "lifetime": "90 days",
+      "description": "Microsoft KMSI cookie issued at LoginOptions=1 via Resolve-EntraInterruptPage"
+    },
+    "passkeySupported": true,
+    "sccauthNote": "sccauth cookie itself is ~1h life. Renew via silent /authorize+prompt=none using ESTSAUTHPERSISTENT (not via fresh TOTP every cycle).",
+    "reauthCadence": {
+      "comparedToV1": "v1 does full TOTP-MFA every 50 min (sccauth ~1h life). v2 keeps ESTSAUTHPERSISTENT 90d, silent renewal between bootstraps.",
+      "steadyState": "Refresh access_token every ~50 min via refresh_token (NO TOTP)",
+      "bootstrap": "Once per portal per ~85 days (TOTP or Passkey)"
+    },
+    "refreshToken": {
+      "grant": "POST /oauth2/v2.0/token grant_type=refresh_token",
+      "originHeader": "Required for SPA client_id types per AADSTS9002327",
+      "lifetime": "~90 days (mirrors KMSI)",
+      "description": "Issued when scope contains offline_access; renews access_token silently"
+    },
+    "conditionalAccess": {
+      "requireMfa": "TOTP and Passkey both pass",
+      "requireCompliantDevice": "Both FAIL; operator must exclude SA from this policy",
+      "requirePhishingResistantMfa": "TOTP FAILS; Passkey passes (FIDO2 satisfies)",
+      "blockLegacyAuth": "Both pass (modern flow)",
+      "requireHybridJoin": "Both FAIL; operator must exclude SA from this policy"
+    }
+  },
+  "unattendedStatus": "same as m365-apps-config",
+  "kvSecretSchema": {
+    "secrets": [
+      {
+        "required": true,
+        "purpose": "Service account UPN",
+        "name": "m365-apps-services-upn"
+      },
+      {
+        "required": "CredentialsTotp method only",
+        "purpose": "SA password",
+        "name": "m365-apps-services-password"
+      },
+      {
+        "required": "CredentialsTotp method only",
+        "purpose": "Base32 TOTP secret",
+        "name": "m365-apps-services-totp"
+      },
+      {
+        "required": "Passkey method only",
+        "purpose": "JSON {upn,credentialId,privateKeyPem,rpId}",
+        "name": "m365-apps-services-passkey"
+      },
+      {
+        "required": "Steady-state polling",
+        "purpose": "Long-lived refresh_token (Bearer portals)",
+        "name": "m365-apps-services-refresh"
+      }
+    ],
+    "description": "Per-portal KV secrets following v1's mde-portal-* pattern"
+  },
+  "generatedUtc": "2026-05-12T16:20:55Z"
+}

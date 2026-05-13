@@ -1,0 +1,133 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gitleaks:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  psscript-analyzer:
+    name: PSScriptAnalyzer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse -Settings .config/PSScriptAnalyzerSettings.psd1 -ErrorAction Stop
+          $errors = $results | Where-Object Severity -eq 'Error'
+          if ($errors) {
+            $errors | Format-Table -AutoSize
+            throw "$($errors.Count) PSSA Error(s) — hard-fail."
+          }
+          Write-Host "PSSA OK ($($results.Count) total findings · 0 Errors)"
+
+  unit-tests:
+    name: Pester unit + ARM + KQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Install-Module Pester -Force -Scope CurrentUser -SkipPublisherCheck -MinimumVersion 5.5.0
+          pwsh ./tests/Run-Tests.ps1 -Category all-offline
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: tests/results/
+          retention-days: 14
+
+  static-validate:
+    name: ARM-TTK + custom validators
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # ARM-TTK
+          git clone --depth=1 https://github.com/Azure/arm-ttk.git /tmp/arm-ttk
+          Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
+          # Lint mainTemplate.json
+          $r1 = Test-AzTemplate -TemplatePath deploy/ -Skip CreateUIDefinition,solution
+          $fail1 = $r1 | Where-Object { -not $_.Passed }
+          if ($fail1) {
+            $fail1 | Format-Table -AutoSize
+            throw "$($fail1.Count) ARM-TTK failure(s) on mainTemplate — hard-fail (Rule 18)."
+          }
+          # Lint createUiDefinition.json — separate run (different TTK rule set)
+          $r2 = Test-AzTemplate -TemplatePath deploy/createUiDefinition.json -Test 'CreateUIDefinition'
+          $fail2 = $r2 | Where-Object { -not $_.Passed }
+          if ($fail2) {
+            $fail2 | Format-Table -AutoSize
+            throw "$($fail2.Count) ARM-TTK failure(s) on createUiDefinition — hard-fail."
+          }
+          # Custom validators
+          pwsh ./tools/Validate-ArmJson.ps1
+          pwsh ./tools/Validate-Manifest.ps1
+
+  auto-regenerate-gate:
+    name: Generated artifacts up-to-date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # Re-run all generators and ensure no diff vs committed output.
+          pwsh ./tools/Build-Manifest.ps1
+          pwsh ./tools/Build-DcrJson.ps1
+          pwsh ./tools/Build-FunctionApp.ps1
+          pwsh ./tools/Build-ArmTemplate.ps1
+          pwsh ./tools/Build-SentinelSolution.ps1
+          $diff = git status --porcelain
+          if ($diff) {
+            Write-Host 'Generated artifacts out of date:'
+            Write-Host $diff
+            git --no-pager diff | Out-String | Write-Host
+            throw 'Run Build-*.ps1 locally and commit the result.'
+          }
+          Write-Host 'All generated artifacts match committed output.'
+
+  summary:
+    name: CI summary
+    runs-on: ubuntu-latest
+    needs: [gitleaks, psscript-analyzer, unit-tests, static-validate, auto-regenerate-gate]
+    if: always()
+    steps:
+      - shell: pwsh
+        run: |
+          $jobs = @(
+            @{ Name = 'gitleaks';            Result = '${{ needs.gitleaks.result }}' }
+            @{ Name = 'psscript-analyzer';   Result = '${{ needs.psscript-analyzer.result }}' }
+            @{ Name = 'unit-tests';          Result = '${{ needs.unit-tests.result }}' }
+            @{ Name = 'static-validate';     Result = '${{ needs.static-validate.result }}' }
+            @{ Name = 'auto-regenerate-gate';Result = '${{ needs.auto-regenerate-gate.result }}' }
+          )
+          $jobs | Format-Table -AutoSize
+          $failed = $jobs | Where-Object { $_.Result -ne 'success' }
+          if ($failed) { throw "$($failed.Count) job(s) failed" }

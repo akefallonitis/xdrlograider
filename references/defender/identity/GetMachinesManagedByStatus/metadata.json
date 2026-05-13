@@ -1,0 +1,59 @@
+{
+  "portal": "defender",
+  "subArea": "identity",
+  "slug": "GetMachinesManagedByStatus",
+  "operationId": "Identity.GetMachinesManagedByStatus",
+  "path": "/mtp/siamApi/MachinesManagedByStatus",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get SIAM managed-by status",
+  "sourceFile": "identity.yml",
+  "capturedUtc": "2026-05-12T14:41:46.5764088Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 6,
+    "errorText": "",
+    "responseShape": "array"
+  },
+  "parsingNotes": [
+    "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (6 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.OsPlatform"
+  ],
+  "cadenceSuggestion": "daily"
+}

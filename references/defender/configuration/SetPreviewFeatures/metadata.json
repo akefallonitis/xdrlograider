@@ -1,0 +1,72 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "SetPreviewFeatures",
+  "operationId": "Configuration.SetPreviewFeatures",
+  "path": "/mtp/settings/SavePreviewExperienceSetting",
+  "methods": [
+    "post"
+  ],
+  "summary": "Set preview features",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:37:07.5275519Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "context",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The context to update preview settings for."
+    }
+  ],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 403 (Forbidden).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "write",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": true,
+    "description": "The context to update preview settings for.",
+    "type": "string",
+    "name": "context"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

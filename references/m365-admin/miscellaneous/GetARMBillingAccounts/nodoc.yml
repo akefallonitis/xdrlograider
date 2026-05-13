@@ -1,0 +1,31 @@
+  /fd/arm/providers/Microsoft.Billing/billingAccounts:
+    get:
+      summary: Get ARM billing accounts
+      description: >-
+        Retrieve billing accounts via the Azure Resource Manager (ARM) proxy,
+        providing access to the tenant billing account details.
+      operationId: Misc.GetARMBillingAccounts
+      tags: [Miscellaneous]
+      parameters:
+        - name: api-version
+          in: query
+          description: ARM API version.
+          schema:
+            type: string
+            default: '2020-05-01'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: ARM billing accounts. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,91 @@
+{
+  "portal": "entra-pim",
+  "subArea": "openapi",
+  "slug": "api_v2_privilegedAccess__provider__activities_getExpiredAssignmentAudits_roleAssignmentLevel___level___resourceId___resourceId___subjectId___subjectId",
+  "operationId": null,
+  "path": "/api/v2/privilegedAccess/{provider}/activities/getExpiredAssignmentAudits(roleAssignmentLevel='{level}',resourceId='{resourceId}',subjectId='{subjectId}')",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get expired assignment audit records",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:14.7491913Z",
+  "pagination": {
+    "tokenParam": null,
+    "defaults": {},
+    "style": "none",
+    "sizeParam": null,
+    "indexParam": null
+  },
+  "timeFilter": {
+    "type": null,
+    "supported": false,
+    "lookbackParam": null,
+    "startParam": null,
+    "endParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "level",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": ""
+    },
+    {
+      "Name": "resourceId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": ""
+    },
+    {
+      "Name": "subjectId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "User ID or empty string for all users"
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/api/v2/privilegedAccess/{provider}/activities/getExpiredAssignmentAudits(roleAssignmentLevel='{level}',resourceId='{resourceId}',subjectId='{subjectId}')' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "",
+      "type": "string",
+      "name": "level"
+    },
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "",
+      "type": "string",
+      "name": "resourceId"
+    },
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "User ID or empty string for all users",
+      "type": "string",
+      "name": "subjectId"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,30 @@
+  /admin/api/contact/GetContacts:
+    post:
+      summary: Get contacts
+      description: >-
+        Retrieve a list of contacts in the tenant (Users > Contacts).
+      operationId: UsersGroups.GetContacts
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

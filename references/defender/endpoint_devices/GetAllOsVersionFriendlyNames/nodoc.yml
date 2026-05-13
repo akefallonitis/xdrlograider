@@ -1,0 +1,23 @@
+  /mtp/ndr/machines/allOsVersionFriendlyNames:
+    get:
+      summary: Get all OS version friendly names
+      description: >-
+        Retrieve a list of all unique OS version friendly names across the device inventory.
+      operationId: EndpointDevices.GetAllOsVersionFriendlyNames
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - all OS version friendly names
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

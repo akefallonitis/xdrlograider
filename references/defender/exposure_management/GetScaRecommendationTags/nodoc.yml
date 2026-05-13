@@ -1,0 +1,29 @@
+  /mtp/posture/oversight/scaRecommendations/tags:
+    get:
+      summary: Get SCA recommendation tags
+      description: >-
+        Retrieve the list of available tags for filtering SCA recommendations.
+        Observed live on the Exposure Management overview page.
+      operationId: ExposureManagement.GetScaRecommendationTags
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: string
+                    description: Available tag values.
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

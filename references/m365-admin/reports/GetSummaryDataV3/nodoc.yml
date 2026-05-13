@@ -1,0 +1,69 @@
+  /admin/api/reports/GetSummaryDataV3:
+    get:
+      summary: Get summary report data
+      description: >-
+        Retrieve summary report data for Microsoft 365 services. Supports Copilot activity
+        reports and other service-level summaries.
+      operationId: Reports.GetSummaryDataV3
+      tags: [Reports]
+      parameters:
+        - name: ServiceId
+          in: query
+          required: true
+          description: The service identifier (e.g., MicrosoftOffice).
+          schema:
+            type: string
+        - name: CategoryId
+          in: query
+          required: true
+          description: The report category (e.g., MicrosoftCopilot, MicrosoftCopilotBCE).
+          schema:
+            type: string
+        - name: Report
+          in: query
+          required: true
+          description: The report name (e.g., CopilotActivityReport, CopilotBCEActivityReport).
+          schema:
+            type: string
+        - name: active_view
+          in: query
+          description: >-
+            The active view within the report. Known values include:
+            CopilotAdoptionByProductsV2, CopilotAdoptionByDateV2,
+            CopilotEDPAdoptionSummaryByPeriodV2, CopilotBCEAdoptionByPeriodV2,
+            CopilotBCEAdoptionByDateV2.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Reports
+        workflows:
+          - Open usage or Copilot summaries that resolve data through GetSummaryDataV3.
+        headerProfile: m365-admin-homepage
+        requestShapes:
+          - name: summary-report
+            bodyKind: none
+            requiredParameters:
+              - ServiceId
+              - CategoryId
+              - Report
+            notes: The response schema changes with the service, category, report, and active view combination.
+        variants:
+          - location: query
+            selector: active_view
+            notes: Active view selects the rendered summary slice inside the same report family.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Summary report data. Schema varies by report type.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

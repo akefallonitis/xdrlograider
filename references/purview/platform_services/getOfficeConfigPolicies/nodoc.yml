@@ -1,0 +1,24 @@
+  /ocps/user/v1.0/web/policies:
+    get:
+      operationId: getOfficeConfigPolicies
+      summary: Get Office Configuration policies for user
+      description: >-
+        Retrieve Office Configuration Service (OCPS) policies for the current user.
+        Returns policy settings that control Office application behavior and features.
+      tags: [PlatformServices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

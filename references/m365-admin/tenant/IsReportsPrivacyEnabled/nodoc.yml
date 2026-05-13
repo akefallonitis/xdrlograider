@@ -1,0 +1,23 @@
+  /admin/api/tenant/isReportsPrivacyEnabled:
+    get:
+      summary: Check reports privacy enabled
+      description: >-
+        Check if reports privacy is enabled for the tenant.
+      operationId: Tenant.IsReportsPrivacyEnabled
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Reports privacy enabled status. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,48 @@
+  /mdc/views/inventory/schema:
+    post:
+      summary: Get cloud asset inventory schema
+      description: >-
+        Retrieve the schema definition for the Defender for Cloud asset inventory view.
+      operationId: Configuration.GetCloudAssetInventorySchema
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schemaId:
+                  type: string
+                schemaParameters:
+                  type: object
+                  additionalProperties: true
+              required:
+                - schemaId
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud inventory schema definition.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

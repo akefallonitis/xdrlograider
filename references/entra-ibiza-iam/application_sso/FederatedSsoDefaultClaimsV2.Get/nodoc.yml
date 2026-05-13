@@ -1,0 +1,66 @@
+  /ApplicationSso/FederatedSsoDefaultClaimsV2:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get Application Federated SSO default claims (V2)
+      description: >-
+        Get enterprise application federated single-signon default claims (version 2).
+      operationId: Application.FederatedSsoDefaultClaimsV2.Get
+      tags: [Application SSO]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nameIdentifierDefaultClaims:
+                    type: object
+                  defaultClaims:
+                    type: object
+                  nameIdentifierUserAttributes:
+                    type: object
+                    nullable: true
+                  defaultUserAttributesAndExtensions:
+                    type: object
+                    nullable: true
+                  singleValueSources:
+                    type: array
+                    items:
+                      type: string
+                  enableViewAndEditUserAttribute:
+                    type: boolean
+                    nullable: true
+                    example: null
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

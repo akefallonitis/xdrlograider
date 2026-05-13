@@ -1,0 +1,38 @@
+{
+  "subArea": "streaming",
+  "suggestedCadence": "weekly",
+  "endpointCount": 1,
+  "endpoints": [
+    {
+      "slug": "GetConfiguration",
+      "operationId": "StreamingApi.GetConfiguration",
+      "path": "/mtp/streamingapi/streamingApiConfiguration",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": "MDE_StreamingApiConfig_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 1,
+  "cntNoLive": 0,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [],
+  "paginationStyles": [],
+  "valueProp": "Defender XDR Streaming API destinations — audit data egress"
+}

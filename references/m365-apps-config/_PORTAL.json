@@ -1,0 +1,47 @@
+{
+  "portal": "m365-apps-config",
+  "authChain": null,
+  "capturedUtc": "2026-05-12T15:24:21.8488816Z",
+  "subAreaCount": 1,
+  "authFinding": {
+    "ImplementationModule": "Xdr.M365Admin.Auth (v0.2.0f)",
+    "AuthMethod": "Bearer via M365 admin MSAL",
+    "AuthFlow": "Bearer at config.office.com",
+    "Status": "ROPC-blocked"
+  },
+  "subAreas": [
+    {
+      "subArea": "openapi",
+      "endpointCount": 22,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 22,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "M365 Apps cloud-attached config (Office apps update channels, feature toggles, GPO replacement)"
+    }
+  ],
+  "authPattern": {
+    "nodocOfficialName": "Portal bearer tokens + diagnostic headers",
+    "transport": "bearer+diag-headers",
+    "browserAcquired": true,
+    "unattendedTotpCompatible": false,
+    "cookies": null,
+    "headers": [
+      "Authorization: Bearer",
+      "x-api-name",
+      "x-correlationid",
+      "x-manageoffice-client-sid",
+      "x-requested-with"
+    ],
+    "note": null,
+    "postmanCollection": "..\\..\\xdrlograider\\.internal\\nodoc-reference\\postman\\collections\\m365-apps-config.collection.json",
+    "nodocReference": "https://nodoc.nathanmcnulty.com/getting-started"
+  }
+}

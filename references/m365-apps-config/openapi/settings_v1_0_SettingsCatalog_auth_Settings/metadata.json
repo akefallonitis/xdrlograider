@@ -1,0 +1,44 @@
+{
+  "portal": "m365-apps-config",
+  "subArea": "openapi",
+  "slug": "settings_v1_0_SettingsCatalog_auth_Settings",
+  "operationId": null,
+  "path": "/settings/v1.0/SettingsCatalog/auth/Settings",
+  "methods": [
+    "get"
+  ],
+  "summary": "Query auth settings catalog entries",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:16.8811305Z",
+  "pagination": {
+    "tokenParam": null,
+    "sizeParam": null,
+    "style": "none",
+    "defaults": {},
+    "indexParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null,
+    "startParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

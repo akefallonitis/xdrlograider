@@ -1,0 +1,27 @@
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings:
+    get:
+      tags: [Role Settings]
+      summary: List role settings for a resource
+      description: |
+        Retrieves PIM settings for all roles on the specified resource. Settings
+        include activation requirements (MFA, justification, ticket info),
+        assignment rules (max duration, permanent eligibility), and notification
+        configuration.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$expand'
+      responses:
+        '200':
+          description: List of role settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object

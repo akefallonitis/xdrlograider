@@ -1,0 +1,14 @@
+  /inventory/api/SecurityCurrencyDevices/GetSecurityUpdateStatusMetricsByChannel:
+    get:
+      tags: [Security Currency]
+      summary: Get security update status metrics by channel
+      description: Returns per-channel security update status metrics as an OData-style collection.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Security update status metrics by channel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'

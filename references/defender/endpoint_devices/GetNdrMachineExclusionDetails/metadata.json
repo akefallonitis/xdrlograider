@@ -1,0 +1,90 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetNdrMachineExclusionDetails",
+  "operationId": "EndpointDevices.GetNdrMachineExclusionDetails",
+  "path": "/mtp/ndr/machines/{MachineId}/exclusionDetails",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get NDR machine exclusion details",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:00.8622181Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "MachineId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the device."
+    },
+    {
+      "Name": "senseMachineId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Redundant machine identifier currently sent by the portal."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/ndr/machines/{MachineId}/exclusionDetails' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The unique identifier of the device.",
+      "type": "string",
+      "name": "MachineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Redundant machine identifier currently sent by the portal.",
+      "type": "string",
+      "name": "senseMachineId"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.MdatpId"
+  ],
+  "cadenceSuggestion": "daily"
+}

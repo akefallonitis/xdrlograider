@@ -1,0 +1,29 @@
+  /data/noam/RunQueryDashboard:
+    servers:
+      - url: https://cqd.teams.cloud.microsoft
+        description: Regional CQD data host
+    post:
+      tags: [TeamsCQDData]
+      summary: Run a CQD dashboard query
+      description: |
+        CQD dashboard query route observed from the Call Quality Dashboard surface after regional host
+        resolution.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      responses:
+        '200':
+          description: CQD dashboard query result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # amer.tags.teams.microsoft.com/api

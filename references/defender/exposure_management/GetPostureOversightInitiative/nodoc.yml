@@ -1,0 +1,29 @@
+  /mtp/posture/oversight/initiatives/{InitiativeId}:
+    get:
+      summary: Get posture oversight initiative details
+      description: >-
+        Retrieve the detail payload for a selected posture oversight initiative,
+        including Threat Analytics-backed initiative cards linked from Exposure Management.
+      operationId: ExposureManagement.GetPostureOversightInitiative
+      tags: [Exposure Management]
+      parameters:
+        - name: InitiativeId
+          in: path
+          required: true
+          description: The posture oversight initiative identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - posture oversight initiative detail
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

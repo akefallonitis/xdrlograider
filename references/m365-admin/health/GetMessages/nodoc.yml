@@ -1,0 +1,26 @@
+  /admin/api/messagecenter:
+    get:
+      summary: Get message center messages
+      description: >-
+        Retrieve message center messages for the tenant including service updates and advisories (Health > Message center).
+      operationId: MessageCenter.GetMessages
+      tags: [MessageCenter]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ActiveChangeManagementResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

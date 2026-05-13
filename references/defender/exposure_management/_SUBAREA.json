@@ -1,0 +1,1001 @@
+{
+  "subArea": "exposure_management",
+  "suggestedCadence": "1h",
+  "endpointCount": 42,
+  "endpoints": [
+    {
+      "slug": "GetAppsSecureScoreMetric",
+      "operationId": "ExposureManagement.GetAppsSecureScoreMetric",
+      "path": "/mtp/posture/oversight/metrics/category_apps_secure_score",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 93,
+      "v1Stream": "MDE_AppsSecureScore_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='recommendations' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (93 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetAttackPaths",
+      "operationId": "ExposureManagement.GetAttackPaths",
+      "path": "/mtp/xspm/attackpaths",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetAttackSurfaceAttackPathFilters",
+      "operationId": "ExposureManagement.GetAttackSurfaceAttackPathFilters",
+      "path": "/mtp/xspmatlas/attacksurface/attackpaths/filters",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetAttackSurfaceChokepointFilters",
+      "operationId": "ExposureManagement.GetAttackSurfaceChokepointFilters",
+      "path": "/mtp/xspmatlas/attacksurface/chokepoints/filters",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetChokePoints",
+      "operationId": "ExposureManagement.GetChokePoints",
+      "path": "/mtp/xspm/chokepoints",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetDataSecureScoreMetric",
+      "operationId": "ExposureManagement.GetDataSecureScoreMetric",
+      "path": "/mtp/posture/oversight/metrics/category_data_secure_score",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 4,
+      "v1Stream": "MDE_DataSecureScore_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='recommendations' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (4 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetEasmVendors",
+      "operationId": "ExposureManagement.GetEasmVendors",
+      "path": "/mtp/posture/oversight/easm/vendors",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 20,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Vendor",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (20 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetIdentitySecureScoreMetric",
+      "operationId": "ExposureManagement.GetIdentitySecureScoreMetric",
+      "path": "/mtp/posture/oversight/metrics/category_identity_secure_score",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 175,
+      "v1Stream": "MDE_IdentitySecureScore_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='recommendations' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (175 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetK8sDeviceTotals",
+      "operationId": "ExposureManagement.GetK8sDeviceTotals",
+      "path": "/mtp/k8s/machines/deviceTotals",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 14,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.RiskScore",
+      "parsingNotes": [
+        "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (14 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetMdcRecommendationMetrics",
+      "operationId": "ExposureManagement.GetMdcRecommendationMetrics",
+      "path": "/mdc/views/recommendations/recommendationsMetrics",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetMdcRecommendationsByResourceType",
+      "operationId": "ExposureManagement.GetMdcRecommendationsByResourceType",
+      "path": "/mdc/views/vulnerabilities/recommendationsByResourceType",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetMdcRecommendationSchema",
+      "operationId": "ExposureManagement.GetMdcRecommendationSchema",
+      "path": "/mdc/views/recommendations/schema",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetMdcTopCloudCvesSchema",
+      "operationId": "ExposureManagement.GetMdcTopCloudCvesSchema",
+      "path": "/mdc/views/vulnerabilities/topCloudCVEsSchema",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Vuln.CveId",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetMdcVulnerabilitiesOverTime",
+      "operationId": "ExposureManagement.GetMdcVulnerabilitiesOverTime",
+      "path": "/mdc/views/vulnerabilities/getVulnerabilitiesOvertime",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetMdcVulnerabilityInsights",
+      "operationId": "ExposureManagement.GetMdcVulnerabilityInsights",
+      "path": "/mdc/views/vulnerabilities/vulnerabilitiesInsights",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetMdcVulnerabilitySchema",
+      "operationId": "ExposureManagement.GetMdcVulnerabilitySchema",
+      "path": "/mdc/views/vulnerabilities/schema",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetMdcVulnerabilityStatisticsHeader",
+      "operationId": "ExposureManagement.GetMdcVulnerabilityStatisticsHeader",
+      "path": "/mdc/views/vulnerabilities/statisticsHeader",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetPostureOversightInitiative",
+      "operationId": "ExposureManagement.GetPostureOversightInitiative",
+      "path": "/mtp/posture/oversight/initiatives/{InitiativeId}",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/posture/oversight/initiatives/{InitiativeId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetPostureOversightInitiativesSummarized",
+      "operationId": "ExposureManagement.GetPostureOversightInitiativesSummarized",
+      "path": "/mtp/posture/oversight/initiatives/summarized",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": "MDE_PostureInitiativesSummarized_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "GetPostureOversightMetricIds",
+      "operationId": "ExposureManagement.GetPostureOversightMetricIds",
+      "path": "/mtp/posture/oversight/metrics/ids",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 142,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (142 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetPostureOversightRecommendationsAggregated",
+      "operationId": "ExposureManagement.GetPostureOversightRecommendationsAggregated",
+      "path": "/mtp/posture/oversight/recommendations/aggregated",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetPostureOversightTenants",
+      "operationId": "ExposureManagement.GetPostureOversightTenants",
+      "path": "/mtp/posture/oversight/tenants",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": "MDE_PostureTenants_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetRecommendations",
+      "operationId": "ExposureManagement.GetRecommendations",
+      "path": "/mtp/exposureManagement/recommendations",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "pageIndex0Based",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Pagination=pageIndex0Based — index starts at 0 (some MS endpoints reject 0; verify per endpoint)",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "GetScaRecommendationFilters",
+      "operationId": "ExposureManagement.GetScaRecommendationFilters",
+      "path": "/mtp/posture/oversight/scaRecommendations/filters",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 3,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (3 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetScaRecommendationTags",
+      "operationId": "ExposureManagement.GetScaRecommendationTags",
+      "path": "/mtp/posture/oversight/scaRecommendations/tags",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 3,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (3 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetTopEntryPoints",
+      "operationId": "ExposureManagement.GetTopEntryPoints",
+      "path": "/mtp/xspm/topentrypoints",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetTopTargets",
+      "operationId": "ExposureManagement.GetTopTargets",
+      "path": "/mtp/xspm/toptargets",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetTvmRiskScore",
+      "operationId": "ExposureManagement.GetTvmRiskScore",
+      "path": "/mtp/tvm/analytics/riskscore",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.RiskScore",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "ListAttackSurfaceAttackPaths",
+      "operationId": "ExposureManagement.ListAttackSurfaceAttackPaths",
+      "path": "/mtp/xspmatlas/attacksurface/attackpaths",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": "MDE_AttackSurfaceAttackPaths_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "ListAttackSurfaceChokepoints",
+      "operationId": "ExposureManagement.ListAttackSurfaceChokepoints",
+      "path": "/mtp/xspmatlas/attacksurface/chokepoints/list",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": "MDE_AttackSurfaceChokepoints_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "ListMdcAllVulnerabilitiesPageItems",
+      "operationId": "ExposureManagement.ListMdcAllVulnerabilitiesPageItems",
+      "path": "/mdc/views/vulnerabilities/allVulnerabilitiesPageItems",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListMdcRecommendationItems",
+      "operationId": "ExposureManagement.ListMdcRecommendationItems",
+      "path": "/mdc/views/recommendations/items",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListMdcTopCloudCvesItems",
+      "operationId": "ExposureManagement.ListMdcTopCloudCvesItems",
+      "path": "/mdc/views/vulnerabilities/topCloudCVEsItems",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Vuln.CveId",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListMdcVulnerabilityItems",
+      "operationId": "ExposureManagement.ListMdcVulnerabilityItems",
+      "path": "/mdc/views/vulnerabilities/items",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListPostureOversightInitiatives",
+      "operationId": "ExposureManagement.ListPostureOversightInitiatives",
+      "path": "/mtp/posture/oversight/initiatives",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 10,
+      "v1Stream": "MDE_XspmInitiatives_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (10 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "ListPostureOversightMetrics",
+      "operationId": "ExposureManagement.ListPostureOversightMetrics",
+      "path": "/mtp/posture/oversight/metrics",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 10,
+      "v1Stream": "MDE_PostureMetrics_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Software.Version",
+        "Tenant.Id"
+      ],
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (10 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "ListPostureOversightRecommendations",
+      "operationId": "ExposureManagement.ListPostureOversightRecommendations",
+      "path": "/mtp/posture/oversight/recommendations",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 10,
+      "v1Stream": "MDE_ExposureRecommendations_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Software.Name",
+        "Url.Path"
+      ],
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (10 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "ListPostureOversightUpdates",
+      "operationId": "ExposureManagement.ListPostureOversightUpdates",
+      "path": "/mtp/posture/oversight/updates",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": "MDE_ExposureSnapshots_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "ListPostureSecurityEvents",
+      "operationId": "ExposureManagement.ListPostureSecurityEvents",
+      "path": "/mtp/posture/oversight/securityEvents",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 137,
+      "v1Stream": "MDE_PostureSecurityEvents_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Time.Generated",
+        "Tenant.Id"
+      ],
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (137 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "ListXspmConnectors",
+      "operationId": "ExposureManagement.ListXspmConnectors",
+      "path": "/mtp/XspmConnectors/connectors/getAllConnectors",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": "MDE_XspmConnectors_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "QueryAttackSurface",
+      "operationId": "ExposureManagement.QueryAttackSurface",
+      "path": "/mtp/xspmatlas/attacksurface/query",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 415,
+      "liveRowCount": 0,
+      "v1Stream": "MDE_XspmAttackPaths_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=error/415 — operator should check live response body for diagnosis"
+      ]
+    },
+    {
+      "slug": "RunHuntingQuery",
+      "operationId": "ExposureManagement.RunHuntingQuery",
+      "path": "/mtp/xspm/hunting",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    }
+  ],
+  "cntLive": 18,
+  "cntLiveEmpty": 4,
+  "cntError": 19,
+  "cntNoLive": 1,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 1,
+  "entitiesAvailable": [
+    "Host.RiskScore",
+    "Software.Name",
+    "Software.Vendor",
+    "Software.Version",
+    "Tenant.Id",
+    "Time.Generated",
+    "Url.Path",
+    "Vuln.CveId"
+  ],
+  "paginationStyles": [
+    "pageIndex0Based"
+  ],
+  "valueProp": "XSPM attack paths + chokepoints + asset rules + posture metrics — proactive risk posture"
+}

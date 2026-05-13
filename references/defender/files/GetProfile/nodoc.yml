@@ -1,0 +1,43 @@
+  /mtp/detectionCyberProfile/api/detection/cyberprofileprovider/user/profiles/file:
+    get:
+      summary: Get file cyber profile
+      description: >-
+        Retrieve the file metadata card used to bootstrap the unified Defender file page.
+        The portal calls this endpoint with either a SHA-1 or SHA-256 identifier depending
+        on page context.
+      operationId: Files.GetProfile
+      tags: [Files]
+      parameters:
+        - name: searchBy
+          in: query
+          required: true
+          description: Selects which file hash field the `id` parameter contains.
+          schema:
+            type: string
+            enum: [Sha1, Sha256]
+        - name: id
+          in: query
+          required: true
+          description: The file hash to resolve.
+          schema:
+            type: string
+            example: 82d330861950d594c415efaa33fe388b50d7cfbf
+        - name: UseCyberProfileProviderService
+          in: query
+          description: Feature flag sent by the current portal client.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileProfile'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

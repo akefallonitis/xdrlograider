@@ -1,0 +1,44 @@
+{
+  "portal": "m365-apps-services",
+  "subArea": "openapi",
+  "slug": "onboarding_odata_v1_0_FeatureData",
+  "operationId": null,
+  "path": "/onboarding/odata/v1.0/FeatureData",
+  "methods": [
+    "get"
+  ],
+  "summary": "List feature definitions",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:18.2428157Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "style": "none",
+    "tokenParam": null,
+    "indexParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "lookbackParam": null,
+    "type": null,
+    "endParam": null,
+    "startParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

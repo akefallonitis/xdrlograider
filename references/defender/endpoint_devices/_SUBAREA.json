@@ -1,0 +1,1149 @@
+{
+  "subArea": "endpoint_devices",
+  "suggestedCadence": "daily",
+  "endpointCount": 48,
+  "endpoints": [
+    {
+      "slug": "ExportNdrMachines",
+      "operationId": "EndpointDevices.ExportNdrMachines",
+      "path": "/mtp/ndr/machines/commandExport",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.RiskScore",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "Get",
+      "operationId": "EndpointDevices.Get",
+      "path": "/mtp/getMachine/machines",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetActionPermissions",
+      "operationId": "EndpointDevices.GetActionPermissions",
+      "path": "/mtp/responseApiPortal/requests/permissions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetActionResult",
+      "operationId": "EndpointDevices.GetActionResult",
+      "path": "/mtp/responseApiPortal/requests/{ActionId}",
+      "methods": [
+        "get",
+        "delete"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Action.Id",
+        "Host.MdatpId"
+      ],
+      "parsingNotes": [
+        "PathTemplate — '/mtp/responseApiPortal/requests/{ActionId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetActionState",
+      "operationId": "EndpointDevices.GetActionState",
+      "path": "/mtp/responseApiPortal/requests/machinestate",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetAllFirmwareVersions",
+      "operationId": "EndpointDevices.GetAllFirmwareVersions",
+      "path": "/mtp/ndr/machines/allFirmwareVersions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "GetAllMachineTags",
+      "operationId": "EndpointDevices.GetAllMachineTags",
+      "path": "/mtp/ndr/machines/allMachinesTags",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetAllModels",
+      "operationId": "EndpointDevices.GetAllModels",
+      "path": "/mtp/ndr/machines/allModels",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "GetAllOsVersionFriendlyNames",
+      "operationId": "EndpointDevices.GetAllOsVersionFriendlyNames",
+      "path": "/mtp/ndr/machines/allOsVersionFriendlyNames",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 7,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (7 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetAllVendors",
+      "operationId": "EndpointDevices.GetAllVendors",
+      "path": "/mtp/ndr/machines/allVendors",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetAllWindowsReleaseVersions",
+      "operationId": "EndpointDevices.GetAllWindowsReleaseVersions",
+      "path": "/mtp/ndr/machines/allWindowsReleaseVersions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 3,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (3 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetDataSensitivity",
+      "operationId": "EndpointDevices.GetDataSensitivity",
+      "path": "/mtp/getDataSensitivity/machines/{MachineId}/dataSensitivity",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/getDataSensitivity/machines/{MachineId}/dataSensitivity' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetDevicesWithoutSiteTotals",
+      "operationId": "EndpointDevices.GetDevicesWithoutSiteTotals",
+      "path": "/mtp/ndr/machines/devicesWithoutSiteTotals",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetDeviceTotals",
+      "operationId": "EndpointDevices.GetDeviceTotals",
+      "path": "/mtp/ndr/machines/deviceTotals",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 14,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.RiskScore",
+      "parsingNotes": [
+        "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (14 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetIpTimelineEvents",
+      "operationId": "EndpointDevices.GetIpTimelineEvents",
+      "path": "/mtp/mdeTimelineExperience/ips/{IpAddress}/events",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "fromDate",
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "IP.Address",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/mdeTimelineExperience/ips/{IpAddress}/events' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=fromDate/endParam=toDate"
+      ]
+    },
+    {
+      "slug": "GetLatestActionRequest",
+      "operationId": "EndpointDevices.GetLatestActionRequest",
+      "path": "/mtp/responseApiPortal/requests/latest",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetLatestIps",
+      "operationId": "EndpointDevices.GetLatestIps",
+      "path": "/mtp/getLatestMachineIpsByIds/LatestMachineIpsByIds",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Host.FullName",
+        "Host.MdatpId",
+        "Time.Generated"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetLicenseReport",
+      "operationId": "EndpointDevices.GetLicenseReport",
+      "path": "/mtp/deviceManagement/deviceLicenseReport",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "GetMachineGroups",
+      "operationId": "EndpointDevices.GetMachineGroups",
+      "path": "/mtp/rbacManagementApi/rbac/machine_groups",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 4,
+      "v1Stream": "MDE_RbacDeviceGroups_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='items' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (4 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetMachineMarkedEvents",
+      "operationId": "EndpointDevices.GetMachineMarkedEvents",
+      "path": "/mtp/getMachineMarkedEvents/machines/{MachineId}/eventMarks",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Host.FullName",
+        "Host.MdatpId"
+      ],
+      "parsingNotes": [
+        "PathTemplate — '/mtp/getMachineMarkedEvents/machines/{MachineId}/eventMarks' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetMachinesWdatp",
+      "operationId": "EndpointDevices.GetMachinesWdatp",
+      "path": "/mtp/wdatpApi/machines",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 14,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Host.FullName",
+        "Time.Generated",
+        "Host.OsPlatform",
+        "Software.Version",
+        "Host.HealthStatus",
+        "Host.RiskScore",
+        "Host.AadDeviceId",
+        "IP.Address"
+      ],
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (14 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetMachineTimelineEvents",
+      "operationId": "EndpointDevices.GetMachineTimelineEvents",
+      "path": "/mtp/mdeTimelineExperience/machines/{MachineId}/events",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "fromDate",
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": "MDE_DeviceTimeline_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Host.FullName",
+        "Host.MdatpId",
+        "Software.Version"
+      ],
+      "parsingNotes": [
+        "PathTemplate — '/mtp/mdeTimelineExperience/machines/{MachineId}/events' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=fromDate/endParam=toDate"
+      ]
+    },
+    {
+      "slug": "GetNdrDeviceTotalCount",
+      "operationId": "EndpointDevices.GetNdrDeviceTotalCount",
+      "path": "/mtp/ndr/machines/deviceTotalCount",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetNdrDeviceTypeDistribution",
+      "operationId": "EndpointDevices.GetNdrDeviceTypeDistribution",
+      "path": "/mtp/ndr/machines/deviceTypeDistribution",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 3,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (3 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetNdrInterceptingMachines",
+      "operationId": "EndpointDevices.GetNdrInterceptingMachines",
+      "path": "/mtp/ndr/machines/{MachineId}/InterceptingMachines",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/ndr/machines/{MachineId}/InterceptingMachines' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetNdrMachineExclusionDetails",
+      "operationId": "EndpointDevices.GetNdrMachineExclusionDetails",
+      "path": "/mtp/ndr/machines/{MachineId}/exclusionDetails",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/ndr/machines/{MachineId}/exclusionDetails' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetNdrMachineTags",
+      "operationId": "EndpointDevices.GetNdrMachineTags",
+      "path": "/mtp/ndr/machines/machineTags",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetRbacGroups",
+      "operationId": "EndpointDevices.GetRbacGroups",
+      "path": "/mtp/rbacGroupAssignment/machineRbacGroupAssignments/{DeviceId}",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/rbacGroupAssignment/machineRbacGroupAssignments/{DeviceId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetRbacGroupScopes",
+      "operationId": "EndpointDevices.GetRbacGroupScopes",
+      "path": "/mtp/rbacGroupAssignment/rbacGroupsScopes/{DeviceId}",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/rbacGroupAssignment/rbacGroupsScopes/{DeviceId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetSensorCompatibleMachines",
+      "operationId": "EndpointDevices.GetSensorCompatibleMachines",
+      "path": "/mtp/mdi/tri/defensor/onboarding/devices/sensor_compatible_machines",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetTags",
+      "operationId": "EndpointDevices.GetTags",
+      "path": "/mtp/machineTag/machineTags/{DeviceId}",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/machineTag/machineTags/{DeviceId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetTimeline",
+      "operationId": "EndpointDevices.GetTimeline",
+      "path": "/mtp/deviceTimeline/timeline/{DeviceId}",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/deviceTimeline/timeline/{DeviceId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetTopUsers",
+      "operationId": "EndpointDevices.GetTopUsers",
+      "path": "/mtp/getTopUsersByIds/TopUsersByIds",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Host.FullName",
+        "Host.MdatpId"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetTotals",
+      "operationId": "EndpointDevices.GetTotals",
+      "path": "/mtp/deviceManagement/deviceTotals",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "HasAnyActionRequests",
+      "operationId": "EndpointDevices.HasAnyActionRequests",
+      "path": "/mtp/responseApiPortal/requests/machine/any",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "InvokeAction",
+      "operationId": "EndpointDevices.InvokeAction",
+      "path": "/mtp/responseApiPortal/requests/create",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 415,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Action.Id",
+        "Host.MdatpId"
+      ],
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=error/415 — operator should check live response body for diagnosis"
+      ]
+    },
+    {
+      "slug": "List",
+      "operationId": "EndpointDevices.List",
+      "path": "/mtp/ndr/machines",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "pageIndex1Based",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 9,
+      "v1Stream": "MDE_Machines_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Host.OsPlatform",
+        "Time.Generated",
+        "Host.FullName",
+        "Host.AadDeviceId",
+        "Url.Domain",
+        "Host.HealthStatus",
+        "Host.RiskScore",
+        "Host.MdatpId"
+      ],
+      "parsingNotes": [
+        "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+        "Pagination=pageIndex1Based — index starts at 1",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (9 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "ListAlertEvidences",
+      "operationId": "EndpointDevices.ListAlertEvidences",
+      "path": "/mtp/alertsApiService/Evidences/device/Alerts",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "lookBackInDays",
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Host.FullName",
+        "Host.MdatpId"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via lookbackParam=lookBackInDays",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListModels",
+      "operationId": "EndpointDevices.ListModels",
+      "path": "/mtp/deviceManagement/deviceModels",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "ListOsVersions",
+      "operationId": "EndpointDevices.ListOsVersions",
+      "path": "/mtp/deviceManagement/osVersions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "ListVendors",
+      "operationId": "EndpointDevices.ListVendors",
+      "path": "/mtp/deviceManagement/deviceVendors",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "ListWindowsReleaseVersions",
+      "operationId": "EndpointDevices.ListWindowsReleaseVersions",
+      "path": "/mtp/deviceManagement/windowsReleaseVersions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "PrefetchMachineTimeline",
+      "operationId": "EndpointDevices.PrefetchMachineTimeline",
+      "path": "/mtp/mdeTimelineExperience/machines/{MachineId}/prefetch",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "fromDate",
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Host.FullName",
+        "Host.MdatpId"
+      ],
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "PathTemplate — '/mtp/mdeTimelineExperience/machines/{MachineId}/prefetch' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=fromDate/endParam=toDate"
+      ]
+    },
+    {
+      "slug": "SetAssetValue",
+      "operationId": "EndpointDevices.SetAssetValue",
+      "path": "/mtp/assetvalue/machineAssetValue",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "SetCriticalityLevel",
+      "operationId": "EndpointDevices.SetCriticalityLevel",
+      "path": "/mtp/assetvalue/setCriticalityLevel",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "SetExclusionState",
+      "operationId": "EndpointDevices.SetExclusionState",
+      "path": "/mtp/machineExclusionState/updateMachineExclusionState",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "SetRbacGroup",
+      "operationId": "EndpointDevices.SetRbacGroup",
+      "path": "/mtp/rbacGroupAssignment/updateMachineRbacGroupAssignments",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "SetTag",
+      "operationId": "EndpointDevices.SetTag",
+      "path": "/mtp/machineTag/machineTag",
+      "methods": [
+        "patch"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "no-live-method-PATCH",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+      ]
+    }
+  ],
+  "cntLive": 12,
+  "cntLiveEmpty": 2,
+  "cntError": 21,
+  "cntNoLive": 13,
+  "cntWithTimeFilter": 4,
+  "cntWithPagination": 1,
+  "entitiesAvailable": [
+    "Action.Id",
+    "Host.AadDeviceId",
+    "Host.FullName",
+    "Host.HealthStatus",
+    "Host.MdatpId",
+    "Host.OsPlatform",
+    "Host.RiskScore",
+    "IP.Address",
+    "Software.Version",
+    "Time.Generated",
+    "Url.Domain"
+  ],
+  "paginationStyles": [
+    "pageIndex1Based"
+  ],
+  "valueProp": "Device inventory with risk + exposure scores; foundation for cross-table joins (Host.MdatpId is the universal join key)"
+}

@@ -1,0 +1,38 @@
+  /mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices/{ManagedDeviceId}/users:
+    get:
+      summary: List managed device users
+      description: >-
+        Retrieve the primary users projected from the linked Microsoft Intune managed device.
+      operationId: EndpointConfiguration.ListManagedDeviceUsers
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: ManagedDeviceId
+          in: path
+          required: true
+          description: The Microsoft Intune managed-device identifier.
+          schema:
+            type: string
+        - name: $select
+          in: query
+          description: Projection of the user fields required by the portal.
+          schema:
+            type: string
+            default: id,displayName,userPrincipalName
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - managed device user
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

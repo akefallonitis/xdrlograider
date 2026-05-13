@@ -1,0 +1,81 @@
+  /mtp/responseApiPortal/ti/indicators:
+    get:
+      summary: List custom threat indicators
+      description: >-
+        Retrieve the custom threat indicators shown in the Defender portal's
+        configuration management experience.
+      operationId: Configuration.ListThreatIndicators
+      tags: [Configuration]
+      parameters:
+        - name: type
+          in: query
+          description: Indicator type to return.
+          schema:
+            type: string
+            example: url
+        - name: PageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    IndicatorId:
+                      type: integer
+                    OrgId:
+                      type: string
+                    IndicatorType:
+                      type: integer
+                    IndicatorValue:
+                      type: string
+                    IoaDefinitionId:
+                      type: string
+                    CreationTime:
+                      type: string
+                      format: date-time
+                    CreatedBy:
+                      type: string
+                    LastUpdateTime:
+                      type: string
+                      format: date-time
+                    IsEnabled:
+                      type: boolean
+                    Action:
+                      type: integer
+                    Severity:
+                      type: integer
+                    Title:
+                      type: string
+                    Category:
+                      type: integer
+                    Description:
+                      type: string
+                    Application:
+                      type: string
+                    EducateUrl:
+                      type: string
+                      nullable: true
+                    GenerateAlert:
+                      type: boolean
+                    CreatedByDisplayName:
+                      type: string
+                    CreatedBySource:
+                      type: integer
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

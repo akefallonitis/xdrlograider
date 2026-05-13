@@ -1,0 +1,24 @@
+  /internal/ux/getTeamsPremiumV2UserDetail:
+    servers:
+      - url: https://reportsncu.office.com
+        description: Teams premium report UX host
+    get:
+      tags: [ReportsUx]
+      summary: Get Teams Premium user detail
+      description: |
+        Detailed per-user Premium reporting route observed during the second-pass report interaction
+        crawl.
+      parameters:
+        - $ref: '#/components/parameters/TenantIdQuery'
+        - $ref: '#/components/parameters/Aggregate'
+      responses:
+        '200':
+          description: Teams Premium user detail payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataValueCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # substrate.office.com/AdminAppCatalog/teamsApps

@@ -1,0 +1,38 @@
+  /di/find/DlpComplianceRule:
+    get:
+      operationId: getDlpComplianceRules
+      summary: Get DLP compliance rules
+      description: >-
+        Retrieve DLP compliance rules from the Data Infrastructure service.
+        These rules define the conditions and actions for Data Loss Prevention enforcement.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow results.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

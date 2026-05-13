@@ -1,0 +1,21 @@
+  /api/v1/regionalDomainNameForTenant:
+    servers:
+      - url: https://ehrconnectorsvc.teams.microsoft.com
+        description: Global virtual visits resolver
+    get:
+      tags: [EhrConnectorResolver]
+      summary: Resolve the virtual visits regional host for the tenant
+      description: |
+        Bootstrap endpoint that maps the current tenant to a regional virtual visits backend such as
+        `amer-ehrconnectorsvc.teams.microsoft.com`.
+      responses:
+        '200':
+          description: Regional host resolver result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsRegionalHostResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # amer-ehrconnectorsvc.teams.microsoft.com/api

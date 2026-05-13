@@ -1,0 +1,22 @@
+  /mtp/xspmatlas/attacksurface/chokepoints/filters:
+    get:
+      summary: Get choke point filter options
+      description: >-
+        Retrieve the available filter options for attack surface choke points. Bundle-discovered;
+        direct GET probing returned a contextual 500 without page-specific parameters.
+      operationId: ExposureManagement.GetAttackSurfaceChokepointFilters
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Choke point filter options — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.

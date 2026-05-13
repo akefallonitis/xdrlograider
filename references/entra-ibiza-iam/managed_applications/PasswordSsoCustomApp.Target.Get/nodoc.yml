@@ -1,0 +1,27 @@
+  /ManagedApplications/{spId}/PasswordSsoCredentials/{targetType}/{targetId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+      - name: targetType
+        description: The type of the credential target.
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: targetId
+        description: The Id of the credential target.
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get managed application Password SSO custom app target
+      description: >-
+        Get managed application Password SSO custom app target.
+      operationId: ManagedApplications.PasswordSsoCustomApp.Target.Get
+      tags: [Managed Applications]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

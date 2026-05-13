@@ -1,0 +1,36 @@
+  /api/v1/billingConfigurations/guestBilling:
+    get:
+      tags: [Billing]
+      summary: Get guest billing configuration
+      description: |
+        Retrieves the guest user billing configuration for the tenant.
+        Controls whether the tenant pays for guest user access to
+        entitlement management resources.
+
+        **Note:** Returns 404 if the guest billing feature has not been
+        configured for the tenant.
+      responses:
+        '200':
+          description: Guest billing configuration
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Guest billing not configured for this tenant
+    put:
+      tags: [Billing]
+      summary: Update guest billing configuration
+      description: |
+        Updates the guest billing configuration for the tenant.
+
+        **Warning:** This endpoint modifies billing configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Guest billing configuration updated

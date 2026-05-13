@@ -1,0 +1,35 @@
+  /radius/api/radius/identities/getCriticalityScore:
+    get:
+      summary: Get identity criticality score
+      description: >-
+        Retrieve the Radius criticality score for the selected identity.
+      operationId: Identity.GetRadiusCriticalityScore
+      tags: [Identity]
+      parameters:
+        - name: onPremiseSid
+          in: query
+          description: The on-premises SID for the identity.
+          schema:
+            type: string
+        - name: aadId
+          in: query
+          description: The Microsoft Entra object ID for the identity.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - criticality score data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

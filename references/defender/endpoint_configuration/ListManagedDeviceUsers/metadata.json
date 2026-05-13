@@ -1,0 +1,90 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_configuration",
+  "slug": "ListManagedDeviceUsers",
+  "operationId": "EndpointConfiguration.ListManagedDeviceUsers",
+  "path": "/mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices/{ManagedDeviceId}/users",
+  "methods": [
+    "get"
+  ],
+  "summary": "List managed device users",
+  "sourceFile": "endpoint_configuration.yml",
+  "capturedUtc": "2026-05-12T14:38:22.3058713Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "ManagedDeviceId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Microsoft Intune managed-device identifier."
+    },
+    {
+      "Name": "$select",
+      "In": "query",
+      "Type": "string",
+      "Default": "id,displayName,userPrincipalName",
+      "Description": "Projection of the user fields required by the portal."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices/{ManagedDeviceId}/users' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The Microsoft Intune managed-device identifier.",
+      "type": "string",
+      "name": "ManagedDeviceId"
+    },
+    {
+      "in": "query",
+      "default": "id,displayName,userPrincipalName",
+      "required": false,
+      "description": "Projection of the user fields required by the portal.",
+      "type": "string",
+      "name": "$select"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.UPN"
+  ],
+  "cadenceSuggestion": "6h"
+}

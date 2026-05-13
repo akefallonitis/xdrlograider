@@ -1,0 +1,36 @@
+  /radius/api/radius/identities/accountsByUserId:
+    post:
+      summary: List Radius accounts by user ID
+      description: >-
+        Retrieve Radius-linked accounts for the supplied identity ID.
+      operationId: Identity.ListRadiusAccountsByUserId
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PageSize:
+                  type: integer
+                  description: Number of rows to return.
+                userId:
+                  type: string
+                  description: The Radius or Defender identity ID to resolve.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Radius accounts list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,77 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_configuration",
+  "slug": "GetPreviewFeatures",
+  "operationId": "EndpointConfiguration.GetPreviewFeatures",
+  "path": "/mtp/settings/GetPreviewExperienceSetting",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get preview features setting",
+  "sourceFile": "endpoint_configuration.yml",
+  "capturedUtc": "2026-05-12T14:38:15.3702016Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "context",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The context to retrieve preview settings for."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_PreviewFeatures_CL",
+    "v1Tier": "Configuration",
+    "v1Category": "Configuration and Settings",
+    "v1RawPath": "/apiproxy/mtp/settings/GetPreviewExperienceSetting?context=MdatpContext"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": true,
+    "description": "The context to retrieve preview settings for.",
+    "type": "string",
+    "name": "context"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

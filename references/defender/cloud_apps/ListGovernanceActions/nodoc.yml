@@ -1,0 +1,29 @@
+  /mcas/cas/api/v1/governance:
+    post:
+      summary: List governance actions
+      description: >-
+        Retrieve a list of governance actions with filtering. Discovered on Governance Log page.
+      operationId: CloudApps.ListGovernanceActions
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

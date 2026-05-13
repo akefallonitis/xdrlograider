@@ -1,0 +1,131 @@
+  /ApplicationProxy/Directory:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get Application Proxy directory
+      description: >-
+        Get Application Proxy directory.
+      operationId: ApplicationProxy.Directory.Get
+      tags: [Application Proxy]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objectId:
+                    $ref: common.yml#/components/schemas/tenantId
+                  displayName:
+                    description: The display name of the directory.
+                    type: string
+                    example: contoso
+                  companyLastDirSyncTime:
+                    description: The timestamp of the last directory sync.
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  dirSyncEnabled:
+                    description: Whether directory sync is enabled.
+                    type: boolean
+                    nullable: true
+                    example: false
+                  replicationScope:
+                    description: The scope of directory replication.
+                    type: string
+                    example: EU
+                  dataCenterLocation:
+                    description: The location of the directory data center.
+                    type: string
+                    nullable: true
+                    example: null
+                  countryLetterCode:
+                    description: The country letter code for the directory.
+                    type: string
+                    example: IE
+                  countryName:
+                    description: The name of the directory country.
+                    type: string
+                    nullable: true
+                    example: null
+                  preferredLanguage:
+                    description: The preferred language for the directory
+                    type: string
+                    example: en
+                  preferredLanguages:
+                    type: array
+                    nullable: true
+                    items:
+                      description: The preferred language for the directory
+                      type: string
+                    example: null
+                  verifiedDomains:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          description: The ID of the verified domain.
+                          type: string
+                          example: 333322221111000F
+                        type:
+                          description: The type of verified domain.
+                          type: string
+                          enum: [Managed, Unmanaged]
+                          example: Managed
+                        name:
+                          description: The name of the verified domain.
+                          type: string
+                          example: contoso.com
+                        initial:
+                          description: Whether this is the initial domain.
+                          type: boolean
+                          example: true
+                        isDirSyncExchangeOnlineDomain:
+                          description: Whether directory sync is enabled on the domain.
+                          type: boolean
+                          example: true
+                  globalAdminCanManageAzureSubscriptions:
+                    description: Whether the global administrator can manage Azure subscriptions.
+                    type: boolean
+                    example: false
+                  privacyProfile:
+                    description: The directory privacy profile
+                  technicalNotificationMails:
+                    description: The email addresses for technical notifications.
+                    type: array
+                    items:
+                      type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

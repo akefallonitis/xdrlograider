@@ -1,0 +1,19 @@
+  /_api/TenantAdminEndpoints:
+    get:
+      tags: [Tenant]
+      summary: Get tenant admin endpoint map
+      description: |
+        Returns the endpoint bundle used by the SharePoint admin center during
+        startup. Observed on the Home blade.
+      operationId: SharePointAdmin.GetTenantAdminEndpoints
+      responses:
+        '200':
+          description: Tenant endpoint map returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantAdminEndpointsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

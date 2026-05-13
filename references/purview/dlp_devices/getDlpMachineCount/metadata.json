@@ -1,0 +1,104 @@
+{
+  "portal": "purview",
+  "subArea": "dlp_devices",
+  "slug": "getDlpMachineCount",
+  "operationId": "getDlpMachineCount",
+  "path": "/mtp/ndr/dlpmachines/count",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get DLP machine count",
+  "sourceFile": "dlp_devices.yml",
+  "capturedUtc": "2026-05-12T15:10:22.8559868Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "lookingBackInDays",
+      "In": "query",
+      "Type": "integer",
+      "Default": "",
+      "Description": "Number of days to look back for machine activity."
+    },
+    {
+      "Name": "lastPolicyUpdateTime",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Filter by the last time a policy was updated on the machine."
+    },
+    {
+      "Name": "configurationStatus",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Filter by the DLP configuration status of machines."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Number of days to look back for machine activity.",
+      "type": "integer",
+      "name": "lookingBackInDays"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Filter by the last time a policy was updated on the machine.",
+      "type": "string",
+      "name": "lastPolicyUpdateTime"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Filter by the DLP configuration status of machines.",
+      "type": "string",
+      "name": "configurationStatus"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

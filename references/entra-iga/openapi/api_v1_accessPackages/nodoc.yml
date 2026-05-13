@@ -1,0 +1,30 @@
+  /api/v1/accessPackages:
+    get:
+      tags: [Entitlement Management]
+      summary: List access packages
+      description: |
+        Retrieves access packages managed through the ELM service.
+        Access packages bundle resources with policies that govern
+        who can request access and for how long.
+      parameters:
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+      responses:
+        '200':
+          description: List of access packages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+              example:
+                value:
+                  - id: 0e69f959-bc56-4bf0-bf0a-20b9d674e9dc
+                    displayName: Contractors - CRM
+                    description: Temporary CRM access for external contractors.
+                    catalogId: 5a501947-3f03-4f4a-b3fb-6d7f9c7656d5

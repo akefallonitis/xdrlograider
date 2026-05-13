@@ -1,0 +1,80 @@
+  /ApplicationSso/{spId}/SsoApplication:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+    get:
+      summary: Get Application SSO properties
+      description: >-
+        Get enterprise application single-signon properties.
+      operationId: ApplicationSso.SsoApplication.Get
+      tags: [Application SSO]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  appDisplayName:
+                    description: Display name of the application.
+                    type: string
+                    example: Application 1
+                  parentAppId:
+                    description: Application ID of a parent application.
+                    type: string
+                    format: uuid
+                    nullable: true
+                    example: null
+                  isCustomApp:
+                    description: Whether application is custom.
+                    type: boolean
+                    example: false
+                  identifierUris:
+                    description: A list of identifier URIs.
+                    type: array
+                    items:
+                      type: string
+                  replyUrls:
+                    description: A list of reply URLs.
+                    type: array
+                    items:
+                      type: string
+                      format: url
+                  tags:
+                    description: Tags applied to the application.
+                    type: array
+                    items:
+                      type: string
+                      example: WindowsAzureActiveDirectoryIntegratedApp
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

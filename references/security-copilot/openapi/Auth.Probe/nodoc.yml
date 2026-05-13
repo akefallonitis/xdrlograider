@@ -1,0 +1,13 @@
+  /auth:
+    get:
+      tags: [Auth]
+      summary: Probe Security Copilot auth readiness
+      description: |
+        Performs the lightweight auth probe used during portal startup. In the captured tenant this
+        returned `204 No Content` when called as `GET /auth?CheckWorkspaceAccess=false`.
+      operationId: SecurityCopilotPortal.Auth.Probe
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceAccessCheck'
+      responses:
+        '204':
+          description: The current browser session is authenticated for the requested probe mode.

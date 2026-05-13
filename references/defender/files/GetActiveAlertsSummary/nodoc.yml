@@ -1,0 +1,47 @@
+  /mtp/activeAlertsSummary/activeAlertsSummary:
+    get:
+      summary: Get active alert summary for file
+      description: >-
+        Return the severity rollup and incident count shown on the file overview page.
+        The portal supplies either `Sha1` or `Sha256` depending on file context.
+      operationId: Files.GetActiveAlertsSummary
+      tags: [Files]
+      parameters:
+        - name: lookingBackInDays
+          in: query
+          description: Alert-summary lookback window, in days.
+          schema:
+            type: integer
+            default: 180
+        - name: Sha1
+          in: query
+          description: SHA-1 identifier for the file.
+          schema:
+            type: string
+        - name: Sha256
+          in: query
+          description: SHA-256 identifier for the file.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: >-
+            Optional multi-tenant context. The single-tenant portal commonly sends the
+            literal string `null`.
+          schema:
+            type: string
+            nullable: true
+            example: 'null'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileActiveAlertsSummary'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

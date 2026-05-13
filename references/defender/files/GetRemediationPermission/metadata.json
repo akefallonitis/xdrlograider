@@ -1,0 +1,105 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "GetRemediationPermission",
+  "operationId": "Files.GetRemediationPermission",
+  "path": "/mtp/responseApiPortal/remediation/permission",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get file remediation permission",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:05.2579261Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "FileIdentifier",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The file hash to evaluate for action eligibility."
+    },
+    {
+      "Name": "FileIdentifierType",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The hash type supplied in `FileIdentifier`."
+    },
+    {
+      "Name": "tenantIds",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional multi-tenant context."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 500,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 500 (Internal Server Error).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The file hash to evaluate for action eligibility.",
+      "type": "string",
+      "name": "FileIdentifier"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The hash type supplied in `FileIdentifier`.",
+      "type": "string",
+      "name": "FileIdentifierType"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional multi-tenant context.",
+      "type": "string",
+      "name": "tenantIds"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Sha1"
+  ],
+  "cadenceSuggestion": "weekly"
+}

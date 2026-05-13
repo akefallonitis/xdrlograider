@@ -1,0 +1,20 @@
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop:
+    post:
+      tags: [Instances]
+      summary: Stop an access review instance
+      description: |
+        Stops a currently active access review instance.
+
+        **Warning:** This endpoint terminates an active review.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Review instance stopped

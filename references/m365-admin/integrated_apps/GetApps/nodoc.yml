@@ -1,0 +1,32 @@
+  /fd/addins/api/apps:
+    get:
+      summary: Get integrated apps
+      description: >-
+        Retrieve the list of integrated apps (add-ins) deployed in the tenant.
+      operationId: IntegratedApps.GetApps
+      tags: [IntegratedApps]
+      parameters:
+        - name: workloads
+          in: query
+          description: >-
+            Comma-separated list of workloads to filter apps by.
+            Known values: AzureActiveDirectory, WXPO, MetaOS, SharePoint.
+          schema:
+            type: string
+            default: AzureActiveDirectory,WXPO,MetaOS,SharePoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Integrated apps list. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

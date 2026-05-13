@@ -1,0 +1,18 @@
+  /beta/MobileDeviceMailboxPolicy:
+    get:
+      tags: [Mobile]
+      summary: List mobile device mailbox policies
+      description: |
+        Returns mobile device mailbox policies surfaced by the Mobile device mailbox policy page.
+      operationId: ExchangeBeta.Mobile.ListMobileDeviceMailboxPolicies
+      responses:
+        '200':
+          description: Mobile device mailbox policies returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

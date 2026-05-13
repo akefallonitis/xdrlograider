@@ -1,0 +1,59 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetAllOsVersionFriendlyNames",
+  "operationId": "EndpointDevices.GetAllOsVersionFriendlyNames",
+  "path": "/mtp/ndr/machines/allOsVersionFriendlyNames",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get all OS version friendly names",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:38:52.9139104Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 7,
+    "errorText": "",
+    "responseShape": "array"
+  },
+  "parsingNotes": [
+    "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (7 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

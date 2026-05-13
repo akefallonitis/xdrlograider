@@ -1,0 +1,32 @@
+  /di/find/MipAnalyticsTenantSettings:
+    get:
+      operationId: getMipAnalyticsTenantSettings
+      summary: Get MIP analytics tenant settings
+      description: >-
+        Retrieve Microsoft Information Protection analytics settings for the tenant.
+        Controls how MIP analytics data is collected and reported.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

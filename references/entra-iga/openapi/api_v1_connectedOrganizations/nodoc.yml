@@ -1,0 +1,28 @@
+  /api/v1/connectedOrganizations:
+    get:
+      tags: [Connected Organizations]
+      summary: List connected organizations
+      description: |
+        Retrieves the list of connected organizations. Connected organizations
+        represent external organizations whose users can request access to
+        your entitlement management resources.
+      parameters:
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: List of connected organizations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+              example:
+                value:
+                  - id: 9d08f505-242b-4a80-9170-2644d4412b17
+                    displayName: Fabrikam
+                    description: Partner organization approved for entitlement requests.

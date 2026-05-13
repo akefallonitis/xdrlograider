@@ -1,0 +1,48 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "policies",
+  "slug": "List",
+  "operationId": "Policies.List",
+  "path": "/Policies/Policies",
+  "methods": [
+    "get"
+  ],
+  "summary": "List policies",
+  "sourceFile": "policies.yml",
+  "capturedUtc": "2026-05-12T15:13:12.6923851Z",
+  "pagination": {
+    "tokenParam": null,
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": "top",
+    "defaults": {}
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Policy.Id",
+    "Software.Version",
+    "Time.Generated"
+  ],
+  "cadenceSuggestion": "daily"
+}

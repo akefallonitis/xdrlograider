@@ -1,0 +1,104 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetNdrDeviceTotalCount",
+  "operationId": "EndpointDevices.GetNdrDeviceTotalCount",
+  "path": "/mtp/ndr/machines/deviceTotalCount",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get NDR device total count",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:02.041656Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "lookingBackIndays",
+      "In": "query",
+      "Type": "integer",
+      "Default": "180",
+      "Description": "The NDR discovery lookback window, in days."
+    },
+    {
+      "Name": "deviceRoles",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional NDR device-role filter."
+    },
+    {
+      "Name": "deviceRoleConfidence",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional confidence filter for the selected device role."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": "180",
+      "required": false,
+      "description": "The NDR discovery lookback window, in days.",
+      "type": "integer",
+      "name": "lookingBackIndays"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional NDR device-role filter.",
+      "type": "string",
+      "name": "deviceRoles"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional confidence filter for the selected device role.",
+      "type": "string",
+      "name": "deviceRoleConfidence"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

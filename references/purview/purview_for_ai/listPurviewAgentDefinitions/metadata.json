@@ -1,0 +1,105 @@
+{
+  "portal": "purview",
+  "subArea": "purview_for_ai",
+  "slug": "listPurviewAgentDefinitions",
+  "operationId": "listPurviewAgentDefinitions",
+  "path": "/medeina/agentDefinitions",
+  "methods": [
+    "get"
+  ],
+  "summary": "List Purview agent definitions",
+  "sourceFile": "purview_for_ai.yml",
+  "capturedUtc": "2026-05-12T15:11:23.0348261Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "scope",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The workspace scope used by the agent library query."
+    },
+    {
+      "Name": "publisher",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Publisher filter applied by the agent library query."
+    },
+    {
+      "Name": "product",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Product filter applied by the agent library query."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 404,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 404",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The workspace scope used by the agent library query.",
+      "type": "string",
+      "name": "scope"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Publisher filter applied by the agent library query.",
+      "type": "string",
+      "name": "publisher"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Product filter applied by the agent library query.",
+      "type": "string",
+      "name": "product"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Name"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,72 @@
+  /fd/msgraph/beta/$batch:
+    post:
+      summary: Graph batch request
+      description: >-
+        Submit a batch of Microsoft Graph API requests in a single call,
+        proxied through the M365 Admin Center. Supports combining multiple
+        Graph API calls for efficiency.
+      operationId: GraphProxy.Batch
+      tags: [GraphProxy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique identifier for the request in the batch.
+                      method:
+                        type: string
+                        description: HTTP method (GET, POST, PUT, PATCH, DELETE).
+                      url:
+                        type: string
+                        description: Relative Graph API URL.
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load offboarding summary counts.
+        headerProfile: m365-admin-microsoft-365-backup
+        requestShapes:
+          - name: backup-offboarding-counts
+            contentType: application/json
+            bodyKind: batch
+            notes: The live portal batched offboarding count reads for SharePoint site, OneDrive drive, and Exchange mailbox protection units.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route. Other portal surfaces may also use this generic batch endpoint.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        status:
+                          type: integer
+                        body:
+                          type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

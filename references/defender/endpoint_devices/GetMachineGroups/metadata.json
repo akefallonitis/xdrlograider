@@ -1,0 +1,94 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetMachineGroups",
+  "operationId": "EndpointDevices.GetMachineGroups",
+  "path": "/mtp/rbacManagementApi/rbac/machine_groups",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get machine groups (RBAC)",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:38:56.7180153Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "addAadGroupNames",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include Azure AD group names in results."
+    },
+    {
+      "Name": "addMachineGroupCount",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include machine count per group."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_RbacDeviceGroups_CL",
+    "v1Tier": "Configuration",
+    "v1Category": "Configuration and Settings",
+    "v1RawPath": "/apiproxy/mtp/rbacManagementApi/rbac/machine_groups?addAadGroupNames=true&addMachineGroupCount=false"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 4,
+    "errorText": "",
+    "responseShape": "wrapper:items[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='items' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (4 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include Azure AD group names in results.",
+      "type": "boolean",
+      "name": "addAadGroupNames"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include machine count per group.",
+      "type": "boolean",
+      "name": "addMachineGroupCount"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

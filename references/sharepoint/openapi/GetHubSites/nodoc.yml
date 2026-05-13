@@ -1,0 +1,19 @@
+  /_api/HubSites:
+    get:
+      tags: [Groups]
+      summary: Get hub sites
+      description: |
+        Returns the current hub site inventory. Observed during Home and Active
+        sites initialization.
+      operationId: SharePointAdmin.GetHubSites
+      responses:
+        '200':
+          description: Hub sites returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

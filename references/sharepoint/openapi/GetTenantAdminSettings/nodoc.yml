@@ -1,0 +1,21 @@
+  /_api/TenantAdminSettings:
+    get:
+      tags: [Settings]
+      summary: Get selected tenant admin settings
+      description: |
+        Returns selected properties from the tenant admin settings service.
+        Observed on the Settings blade.
+      operationId: SharePointAdmin.GetTenantAdminSettings
+      parameters:
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: Tenant admin settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

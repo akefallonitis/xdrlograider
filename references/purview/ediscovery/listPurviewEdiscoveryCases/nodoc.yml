@@ -1,0 +1,87 @@
+  /aedmcc/ediscovery/v1/purviewcases:
+    get:
+      operationId: listPurviewEdiscoveryCases
+      summary: List all Purview eDiscovery cases
+      description: >-
+        Retrieve a list of all Purview eDiscovery cases accessible to the current user.
+        Returns case metadata including status, creation date, and members.
+      tags: [eDiscovery]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/PurviewCasesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  "/aedmcc/ediscovery/v1/purviewcases('{caseId}')":
+    get:
+      operationId: getPurviewEdiscoveryCase
+      summary: Get a specific Purview eDiscovery case
+      description: >-
+        Retrieve details of a specific Purview eDiscovery case by its case ID.
+        Returns full case metadata and configuration.
+      tags: [eDiscovery]
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          description: The unique identifier of the eDiscovery case.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  "/aedmcc/ediscovery/v1/cases('{caseId}')/setting":
+    get:
+      operationId: getEdiscoveryCaseSettings
+      summary: Get case settings
+      description: >-
+        Retrieve the settings for a specific eDiscovery case.
+        Includes configuration options such as analytics, OCR, and notification settings.
+      tags: [eDiscovery]
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          description: The unique identifier of the eDiscovery case.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

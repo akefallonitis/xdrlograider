@@ -1,0 +1,44 @@
+  /fd/msgraph/beta/solutions/backupRestore:
+    get:
+      summary: Get backup restore solution status
+      description: >-
+        Retrieve the root Microsoft 365 Backup solution resource used by the admin
+        portal to determine whether the backup service is enabled and which consumer
+        state is active.
+      operationId: GraphProxy.GetBackupRestoreSolution
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  serviceStatus:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                      disableReason:
+                        type: string
+                      backupServiceConsumer:
+                        type: string
+                      lastModifiedDateTime:
+                        type: string
+                        format: date-time
+                      lastModifiedBy:
+                        type: object
+                        additionalProperties: true
+                    additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

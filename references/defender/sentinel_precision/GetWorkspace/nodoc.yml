@@ -1,0 +1,33 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}:
+    get:
+      summary: Get Sentinel workspace
+      description: >-
+        Retrieve the attached Log Analytics workspace details used across the Sentinel
+        experiences surfaced in Defender, including threat intelligence, search,
+        workbooks, and hunting.
+      operationId: SentinelPrecision.GetWorkspace
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Log Analytics workspace resource.
+          schema:
+            type: string
+            default: '2025-07-01'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - workspace resource
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

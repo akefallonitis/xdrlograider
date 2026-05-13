@@ -1,0 +1,40 @@
+  /mtp/CustomerSubmissionService/file/enterprise/query/{TenantId}:
+    get:
+      summary: List file submissions
+      description: >-
+        Retrieve the file-submission entries displayed on the Defender portal's
+        submissions experience.
+      operationId: Configuration.ListFileSubmissions
+      tags: [Configuration]
+      parameters:
+        - name: TenantId
+          in: path
+          required: true
+          description: The Microsoft Entra tenant identifier.
+          schema:
+            type: string
+            format: uuid
+        - name: trackingId
+          in: query
+          description: Optional client tracking identifier added by the portal.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - file submission record
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

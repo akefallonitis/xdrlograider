@@ -1,0 +1,23 @@
+  /admin/api/partners/AOBOClients:
+    get:
+      summary: Get AOBO partner clients
+      description: >-
+        Retrieve the list of Admin on Behalf Of (AOBO) partner clients
+        associated with the tenant.
+      operationId: Partners.GetAOBOClients
+      tags: [Partners]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/AOBOClientsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

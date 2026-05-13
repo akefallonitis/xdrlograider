@@ -1,0 +1,32 @@
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/ExtensibleIndicators/limits:
+    get:
+      operationId: getExtensibleIndicatorLimits
+      summary: Get extensible indicator limits
+      description: >-
+        Retrieve tenant limits for extensible Insider Risk indicators used by
+        Purview's Insider Risk application settings experience.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,45 @@
+  /mdi/identity/identitiesapiservice/identity/entities:
+    post:
+      summary: List identity entities
+      description: >-
+        Retrieve a list of identity entities from Defender for Identity.
+        Supports filtering and pagination.
+      operationId: Identity.ListEntities
+      tags: [Identity]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria for identity entities.
+                  type: object
+                pageIndex:
+                  description: The page index for pagination.
+                  type: integer
+                pageSize:
+                  description: The number of results per page.
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      entities:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/IdentityEntity'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

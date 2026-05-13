@@ -1,0 +1,51 @@
+  /mtp/posture/oversight/securityEvents:
+    get:
+      summary: List posture security events
+      description: >-
+        Retrieve the list of recent posture security events, including drift events and
+        score changes across initiatives. Observed live on the Exposure Management overview page.
+      operationId: ExposureManagement.ListPostureSecurityEvents
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        eventType:
+                          type: string
+                          description: Event type (e.g. Drift).
+                        eventTime:
+                          type: string
+                          format: date-time
+                        tenantId:
+                          type: string
+                          format: uuid
+                        isGlobal:
+                          type: boolean
+                        createdTimestamp:
+                          type: string
+                          format: date-time
+                        properties:
+                          type: object
+                          description: >-
+                            Event-type-specific properties. For Drift events includes
+                            resourceId, resourceType, resourceName, driftStartTime,
+                            driftEndTime, and driftPercentage.
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

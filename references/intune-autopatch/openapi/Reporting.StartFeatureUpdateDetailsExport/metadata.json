@@ -1,0 +1,46 @@
+{
+  "portal": "intune-autopatch",
+  "subArea": "openapi",
+  "slug": "Reporting.StartFeatureUpdateDetailsExport",
+  "operationId": "IntuneAutopatch.Reporting.StartFeatureUpdateDetailsExport",
+  "path": "/reporting/reports/v2/windowsFeatureUpdates/detailsExport",
+  "methods": [
+    "post"
+  ],
+  "summary": "Start a feature update details export",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:10.8214208Z",
+  "pagination": {
+    "style": "none",
+    "sizeParam": null,
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "endParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Url.Path"
+  ],
+  "cadenceSuggestion": "daily"
+}

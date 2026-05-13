@@ -1,0 +1,31 @@
+  /mcas/cas/api/v1/discovery/app_catalog/count:
+    post:
+      summary: Get discovery app catalog count
+      description: >-
+        Retrieve the total number of discovered apps matching the current app
+        catalog query. Discovered during the Defender for Cloud Apps full-nav
+        capture.
+      operationId: CloudApps.GetDiscoveryAppCatalogCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - app catalog count query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

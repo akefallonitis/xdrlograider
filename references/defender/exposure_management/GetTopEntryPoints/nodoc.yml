@@ -1,0 +1,44 @@
+  /mtp/xspm/topentrypoints:
+    post:
+      summary: Get top entry points
+      description: >-
+        Retrieve the top entry points identified by the Exposure Management engine.
+        Entry points are external-facing assets that could be used to gain initial access.
+      operationId: ExposureManagement.GetTopEntryPoints
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria.
+                  type: object
+                pageIndex:
+                  type: integer
+                pageSize:
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - entry point details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

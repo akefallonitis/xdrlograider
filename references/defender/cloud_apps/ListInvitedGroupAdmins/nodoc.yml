@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/invited_group_admins:
+    get:
+      summary: List invited group admins
+      description: >-
+        Retrieve invited group-admin records for tenant administration. The observed
+        tenant returned an empty list.
+      operationId: CloudApps.ListInvitedGroupAdmins
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsInvitedGroupAdminListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

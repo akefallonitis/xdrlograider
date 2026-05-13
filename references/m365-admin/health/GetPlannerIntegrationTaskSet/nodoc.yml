@@ -1,0 +1,23 @@
+  /admin/api/messagecenter/GetPlannerIntegrationTaskSet:
+    get:
+      summary: Get Planner integration task set
+      description: >-
+        Retrieve the Planner integration task set configuration for message center items (Health > Message center).
+      operationId: MessageCenter.GetPlannerIntegrationTaskSet
+      tags: [MessageCenter]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

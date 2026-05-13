@@ -1,0 +1,56 @@
+{
+  "portal": "defender",
+  "subArea": "attack_simulator",
+  "slug": "GetTrainingCompletionChartNRT",
+  "operationId": "AttackSimulator.GetTrainingCompletionChartNRT",
+  "path": "/astgws/AttackSimulator/api/v1/AdvanceReporting/chart/NRT/TrainingCompletion",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get training completion chart data (NRT)",
+  "sourceFile": "attack_simulator.yml",
+  "capturedUtc": "2026-05-12T14:33:29.6559302Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 404,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 404 (Not Found).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

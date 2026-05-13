@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/app_connectors/metadata:
+    get:
+      summary: Get app connectors metadata
+      description: >-
+        Retrieve metadata for app connectors including filter definitions. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.GetAppConnectorsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

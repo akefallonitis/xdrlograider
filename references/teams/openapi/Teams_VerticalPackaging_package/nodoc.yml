@@ -1,0 +1,19 @@
+  /Teams.VerticalPackaging/package:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTemplates]
+      summary: Get Teams vertical packaging metadata
+      description: |
+        Vertical packaging metadata observed while drilling into Teams templates and industry packaging
+        surfaces.
+      responses:
+        '200':
+          description: Vertical packaging payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

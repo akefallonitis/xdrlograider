@@ -1,0 +1,19 @@
+  /_api/SPO.Tenant/GetHomeSitesDetails:
+    get:
+      tags: [Settings]
+      summary: Get home sites details
+      description: |
+        Returns the configured SharePoint home site details, or a null payload
+        when the tenant has no home site configured.
+      operationId: SharePointAdmin.GetHomeSitesDetails
+      responses:
+        '200':
+          description: Home-site details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

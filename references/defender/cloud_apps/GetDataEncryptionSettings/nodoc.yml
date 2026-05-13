@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/data_encryption_settings/get:
+    get:
+      summary: Get data encryption settings
+      description: >-
+        Retrieve the tenant setting that controls Defender for Cloud Apps encryption
+        of data at rest.
+      operationId: CloudApps.GetDataEncryptionSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsDataEncryptionSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

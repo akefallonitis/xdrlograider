@@ -1,0 +1,59 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "password_reset",
+  "slug": "Execute",
+  "operationId": "PasswordReset.Execute",
+  "path": "/PasswordReset/ResetPasswordByUpn",
+  "methods": [
+    "put"
+  ],
+  "summary": "Reset user password by UPN",
+  "sourceFile": "password_reset.yml",
+  "capturedUtc": "2026-05-12T15:13:12.6422986Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "UserPrincipalName",
+      "In": "query",
+      "Type": "",
+      "Default": "",
+      "Description": "The user principal name to reset the password for."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": false,
+    "description": "The user principal name to reset the password for.",
+    "type": "",
+    "name": "UserPrincipalName"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.UPN",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

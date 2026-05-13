@@ -1,0 +1,61 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "groups",
+  "slug": "id.owner.count.get",
+  "operationId": "Group.id.owner.count.get",
+  "path": "/Groups/{groupId}/owners/count",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get owner count for group",
+  "sourceFile": "groups.yml",
+  "capturedUtc": "2026-05-12T15:13:12.306289Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "groupId",
+      "In": "path",
+      "Type": "",
+      "Default": "",
+      "Description": "The object ID of the group to retrieve owner count for."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/Groups/{groupId}/owners/count' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The object ID of the group to retrieve owner count for.",
+    "type": "",
+    "name": "groupId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

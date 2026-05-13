@@ -1,0 +1,47 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "named_networks",
+  "slug": "CountryCodes.List",
+  "operationId": "NamedNetworksV2.CountryCodes.List",
+  "path": "/NamedNetworksV2/CountryCodes",
+  "methods": [
+    "get"
+  ],
+  "summary": "List named network country codes (v2)",
+  "sourceFile": "named_networks.yml",
+  "capturedUtc": "2026-05-12T15:13:12.5855184Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "semantic-override",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 404,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Name",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,55 @@
+  /mdi/identity/userapiservice/pdProtection/entities:
+    post:
+      summary: List password protection entities
+      description: >-
+        Retrieve password hygiene and password policy findings from the identity
+        posture experience.
+      operationId: Identity.ListPasswordProtectionEntities
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pageSize:
+                  type: integer
+                  description: Number of rows to return.
+                skip:
+                  type: integer
+                  description: Number of rows to skip.
+                searchText:
+                  type: string
+                  description: Free-text search input.
+                categories:
+                  type: array
+                  description: High-level report categories.
+                  items:
+                    type: string
+                subCategories:
+                  type: array
+                  description: Report subcategories.
+                  items:
+                    type: string
+                ReportNames:
+                  type: array
+                  description: Concrete report names to query.
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password protection entities
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

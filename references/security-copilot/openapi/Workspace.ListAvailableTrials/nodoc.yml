@@ -1,0 +1,16 @@
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/availabletrials:
+    get:
+      tags: [Workspace]
+      summary: List workspace-available trials
+      description: Retrieves Security Copilot trial offers available to the current workspace. The captured tenant returned an empty list.
+      operationId: SecurityCopilotPortal.Workspace.ListAvailableTrials
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Available trials returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'

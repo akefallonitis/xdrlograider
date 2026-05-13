@@ -1,0 +1,32 @@
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/IsMcasEnabled:
+    get:
+      operationId: getInsiderRiskMcasStatus
+      summary: Get Insider Risk MCAS status
+      description: >-
+        Retrieve whether the Insider Risk experience is connected to Microsoft
+        Defender for Cloud Apps.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

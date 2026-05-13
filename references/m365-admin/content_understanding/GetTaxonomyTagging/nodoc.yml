@@ -1,0 +1,23 @@
+  /admin/api/contentunderstanding/taxonomytaggingsetting:
+    get:
+      summary: Get taxonomy tagging settings
+      description: >-
+        Retrieve the taxonomy tagging settings for automatic content classification.
+      operationId: ContentUnderstanding.GetTaxonomyTagging
+      tags: [ContentUnderstanding]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - taxonomy tagging settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

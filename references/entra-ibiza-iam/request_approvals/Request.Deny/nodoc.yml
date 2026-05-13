@@ -1,0 +1,22 @@
+  /RequestApprovals/V2/Requests/{requestId}/deny:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: requestId
+        description: The unique ID of the request
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Deny approval request (v2)
+      description: >-
+        Deny approval request (version 2).
+      operationId: RequestApprovalsV2.Request.Deny
+      tags: [General]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

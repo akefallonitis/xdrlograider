@@ -1,0 +1,19 @@
+  /Teams.PlatformService/v2/ApplicationInstances:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsCpc]
+      summary: List Teams application instances
+      description: |
+        Application-instance inventory observed alongside voice app and shared-device administration
+        pages.
+      responses:
+        '200':
+          description: Application-instance inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

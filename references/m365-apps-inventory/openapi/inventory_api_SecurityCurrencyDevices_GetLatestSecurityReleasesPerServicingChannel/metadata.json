@@ -1,0 +1,46 @@
+{
+  "portal": "m365-apps-inventory",
+  "subArea": "openapi",
+  "slug": "inventory_api_SecurityCurrencyDevices_GetLatestSecurityReleasesPerServicingChannel",
+  "operationId": null,
+  "path": "/inventory/api/SecurityCurrencyDevices/GetLatestSecurityReleasesPerServicingChannel",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get latest security releases per servicing channel",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:17.5963205Z",
+  "pagination": {
+    "defaults": {},
+    "style": "none",
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "endParam": null,
+    "type": null,
+    "supported": false,
+    "lookbackParam": null,
+    "startParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Vuln.CveId"
+  ],
+  "cadenceSuggestion": "daily"
+}

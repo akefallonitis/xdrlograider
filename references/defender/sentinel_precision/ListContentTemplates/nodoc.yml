@@ -1,0 +1,38 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/contenttemplates:
+    get:
+      summary: List Sentinel content templates
+      description: >-
+        Retrieve Sentinel content-template resources associated with the attached
+        workspace. Observed live on Workbooks and Hunting with `contentKind`
+        filters such as `Workbook` and `HuntingQuery`.
+      operationId: SentinelPrecision.ListContentTemplates
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the content templates resource.
+          schema:
+            type: string
+            default: '2023-10-01-preview'
+        - name: $filter
+          in: query
+          description: ARM filter expression for the desired Sentinel content kind.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Sentinel content template list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

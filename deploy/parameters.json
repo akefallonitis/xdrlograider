@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "projectPrefix": { "value": "xdrlr" },
+    "env":           { "value": "prod" },
+    "existingWorkspaceId": { "value": "/subscriptions/REPLACE-ME/resourceGroups/REPLACE-ME/providers/Microsoft.OperationalInsights/workspaces/REPLACE-ME" },
+    "workspaceLocation":   { "value": "westeurope" },
+    "serviceAccountUpn":   { "value": "REPLACE-ME@contoso.com" },
+    "authMethod":          { "value": "credentials_totp" },
+    "planSku":             { "value": "Y1" },
+    "retentionInDays":     { "value": 90 },
+    "githubRepo":          { "value": "akefallonitis/xdrlograider" },
+    "releaseTag":          { "value": "latest" }
+  }
+}

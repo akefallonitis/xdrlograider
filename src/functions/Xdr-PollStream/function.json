@@ -1,0 +1,10 @@
+{
+  "description": "Phase H — Durable Functions activity. Receives { Portal, Tier, StreamName, StreamPath } from orchestrator; performs auth + single-stream poll + ingest; returns @{ StreamName, RowsIngested, LatencyMs, Success, Error }. Per directive 16. Activities CAN do non-deterministic work (KV reads, portal API calls, current time). Binding name 'ActivityInput' MUST match run.ps1 param name and MUST NOT be 'Input' (PowerShell automatic-variable shadow).",
+  "bindings": [
+    {
+      "name": "ActivityInput",
+      "type": "activityTrigger",
+      "direction": "in"
+    }
+  ]
+}

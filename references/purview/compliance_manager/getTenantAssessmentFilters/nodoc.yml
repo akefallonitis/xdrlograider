@@ -1,0 +1,23 @@
+  /cpm/v1.0/Tenant/Filters:
+    get:
+      operationId: getTenantAssessmentFilters
+      summary: Get tenant assessment filters
+      description: >-
+        Retrieve the available filter options for tenant assessments in Compliance Manager.
+        Returns filter categories such as regulation, status, and assessment type.
+      tags: [ComplianceManager]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ComplianceFiltersResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,44 @@
+  /mtp/xspm/toptargets:
+    post:
+      summary: Get top targets
+      description: >-
+        Retrieve the top target assets identified by the Exposure Management engine.
+        Top targets are critical assets that are reachable through multiple attack paths.
+      operationId: ExposureManagement.GetTopTargets
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria.
+                  type: object
+                pageIndex:
+                  type: integer
+                pageSize:
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - target asset details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,176 @@
+  /beta/Recipient:
+    get:
+      tags: [Objects]
+      summary: List recipients for mailbox detail selectors
+      description: |
+        Returns the recipient picker inventory used by mailbox detail blades and Exchange
+        selector experiences. Observed requests selected core identity fields and filtered by
+        recipient type.
+      operationId: ExchangeBeta.Objects.ListRecipients
+      responses:
+        '200':
+          description: Recipients returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/Mailbox({mailboxId})":
+    get:
+      tags: [Objects]
+      summary: Get mailbox details
+      description: |
+        Returns the mailbox entity loaded by mailbox detail blades, including identity,
+        addressing, recipient type, and mailbox configuration fields.
+      operationId: ExchangeBeta.Objects.GetMailbox
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailbox'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Mailbox({mailboxId})/ExchangeAdminCenter.GetMailboxStatistics(Archive=false)":
+    get:
+      tags: [Objects]
+      summary: Get mailbox statistics
+      description: |
+        Returns mailbox statistics for the primary mailbox, including last logon time and total
+        item size. Observed from mailbox detail blades with `Archive=false`.
+      operationId: ExchangeBeta.Objects.GetMailboxStatistics
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox statistics returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailboxStatistics'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Mailbox({mailboxId})/FullAccessPermission":
+    get:
+      tags: [Objects]
+      summary: Get mailbox full-access permissions
+      description: |
+        Returns the permission helper payload used by the mailbox detail blade to inspect
+        full-access delegates.
+      operationId: ExchangeBeta.Objects.GetMailboxFullAccessPermissions
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox full-access permissions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailbox'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Mailbox({mailboxId})/SendAsPermission":
+    get:
+      tags: [Objects]
+      summary: Get mailbox send-as permissions
+      description: |
+        Returns the permission helper payload used by mailbox detail blades to inspect send-as
+        delegates.
+      operationId: ExchangeBeta.Objects.GetMailboxSendAsPermissions
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox send-as permissions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailbox'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Mailbox({mailboxId})/SendOnBehalfPermission":
+    get:
+      tags: [Objects]
+      summary: Get mailbox send-on-behalf permissions
+      description: |
+        Returns the permission helper payload used by mailbox detail blades to inspect
+        send-on-behalf delegates.
+      operationId: ExchangeBeta.Objects.GetMailboxSendOnBehalfPermissions
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox send-on-behalf permissions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailbox'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/MailboxAutoReplyConfiguration('{mailboxId}')":
+    get:
+      tags: [Objects]
+      summary: Get mailbox auto-reply configuration
+      description: |
+        Returns the automatic reply settings loaded by mailbox detail blades, including reply
+        state, internal and external messages, and audience settings.
+      operationId: ExchangeBeta.Objects.GetMailboxAutoReplyConfiguration
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox auto-reply configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'

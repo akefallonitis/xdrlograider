@@ -1,0 +1,19 @@
+  /beta/AcceptedDomainFullListIC:
+    get:
+      tags: [MailFlow]
+      summary: List accepted domains with full portal details
+      description: |
+        Returns the richer accepted-domain collection used by the Exchange admin center list view,
+        including domain type, default status, coexistence flags, and authentication type.
+      operationId: ExchangeBeta.MailFlow.ListAcceptedDomainsFull
+      responses:
+        '200':
+          description: Full accepted-domain list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeAcceptedDomainCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

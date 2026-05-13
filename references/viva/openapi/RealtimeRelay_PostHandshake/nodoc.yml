@@ -1,0 +1,82 @@
+  /cometd/handshake:
+    post:
+      tags: [RealtimeRelay]
+      summary: Open a Viva Engage realtime relay session
+      description: |
+        Bayeux handshake request sent to the transient `*.rt.yammer.com` relay host returned by
+        `RealtimeConnectionSettingsClients`.
+
+        The captured admin session sent redacted `token` and `hub_tenant_token` values in the
+        handshake `ext` payload instead of using `Authorization` or cookie headers.
+      operationId: RealtimeRelay_PostHandshake
+      security: []
+      servers:
+        - url: https://{relayHost}
+          description: Tenant- and user-scoped realtime relay host returned by the authenticated Viva Engage shell.
+          variables:
+            relayHost:
+              default: relay-instance.rt.yammer.com
+              description: Placeholder for the transient `*.rt.yammer.com` relay host returned by `RealtimeConnectionSettingsClients`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealtimeCometdEnvelope'
+            examples:
+              handshakeRequest:
+                summary: Redacted handshake envelope
+                value:
+                  - channel: /meta/handshake
+                    id: "1"
+                    version: "1.0"
+                    minimumVersion: "1.0"
+                    supportedConnectionTypes:
+                      - long-polling
+                    advice:
+                      timeout: 60000
+                      interval: 0
+                    ext:
+                      auth: oauth
+                      push_message_bodies: false
+                      token: "[redacted]"
+                      hub_tenant_token: "[redacted]"
+      x-nodoc-operation-context:
+        surface: Realtime bootstrap
+        workflows:
+          - Open `https://engage.cloud.microsoft/main/admin` or a validated admin sub-route and allow `RealtimeConnectionSettingsClients` to return the transient `cometdBaseUrl`.
+          - Reuse that `cometdBaseUrl` host to post a Bayeux handshake to `/cometd/handshake`.
+        headerProfile: viva-engage-realtime-relay
+        availability:
+          level: tenant-conditional
+          notes:
+            - The relay host is transient and was observed changing across page loads.
+            - The handshake request carried redacted auth material in the body and did not include `Authorization` or cookie headers.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - The default Edge profile captured the handshake immediately after `RealtimeConnectionSettingsClients` returned `cometdBaseUrl`.
+      responses:
+        '200':
+          description: Successful Bayeux handshake response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealtimeCometdEnvelope'
+              examples:
+                handshakeResponse:
+                  summary: Successful handshake response
+                  value:
+                    - channel: /meta/handshake
+                      id: "1"
+                      version: "1.0"
+                      minimumVersion: "1.0"
+                      successful: true
+                      clientId: relay-client-id
+                      supportedConnectionTypes:
+                        - long-polling
+                      advice:
+                        interval: 2000
+                        timeout: 28000
+                        reconnect: retry

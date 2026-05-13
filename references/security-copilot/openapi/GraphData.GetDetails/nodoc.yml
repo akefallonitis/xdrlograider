@@ -1,0 +1,19 @@
+  /graphData/details:
+    post:
+      tags: [Workspace]
+      summary: Resolve Entra object details for workspace policy views
+      description: Resolves user, role, group, and service-principal identifiers into display metadata for the Manage workspaces experience.
+      operationId: SecurityCopilotPortal.GraphData.GetDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GraphDetailsRequest'
+      responses:
+        '200':
+          description: Directory details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDetailsResponse'

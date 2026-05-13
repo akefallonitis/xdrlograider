@@ -1,0 +1,76 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_configuration",
+  "slug": "GetSecurityPolicyFilters",
+  "operationId": "EndpointConfiguration.GetSecurityPolicyFilters",
+  "path": "/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get endpoint security policy filters",
+  "sourceFile": "endpoint_configuration.yml",
+  "capturedUtc": "2026-05-12T14:38:21.7624006Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "platform",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The platform family to enumerate filters for."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_AntivirusPolicy_CL",
+    "v1Tier": "Inventory",
+    "v1Category": "Endpoint Configuration",
+    "v1RawPath": "/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters?platform=Windows"
+  },
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 403 (Forbidden).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": true,
+    "description": "The platform family to enumerate filters for.",
+    "type": "string",
+    "name": "platform"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "6h"
+}

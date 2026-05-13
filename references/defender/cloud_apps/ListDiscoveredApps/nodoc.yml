@@ -1,0 +1,32 @@
+  /mcas/cas/api/v1/discovery/discovered_apps:
+    post:
+      summary: List discovered apps
+      description: >-
+        Retrieve the paged Cloud Discovery discovered-apps inventory shown on the
+        Defender Applications page. Observed live posting paging, sorting, stream,
+        and timeframe settings and returning a `data` array with `hasNext`.
+      operationId: CloudApps.ListDiscoveredApps
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - discovered apps query envelope
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered apps page
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

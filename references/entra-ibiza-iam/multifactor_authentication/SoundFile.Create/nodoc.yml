@@ -1,0 +1,18 @@
+  /MultiFactorAuthentication/Soundfile:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create MFA sound file
+      description: >-
+        Create MFA sound file.
+      operationId: Mfa.SoundFile.Create
+      tags: [Multi Factor Authentication]
+      parameters:
+        - $ref: '#/components/parameters/licenseKey'
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

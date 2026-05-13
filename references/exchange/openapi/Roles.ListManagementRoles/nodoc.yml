@@ -1,0 +1,18 @@
+  /beta/ManagementRoleV2:
+    get:
+      tags: [Roles]
+      summary: List management roles
+      description: |
+        Returns the management role catalog surfaced by Exchange admin role assignment pages.
+      operationId: ExchangeBeta.Roles.ListManagementRoles
+      responses:
+        '200':
+          description: Management roles returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

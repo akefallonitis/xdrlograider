@@ -1,0 +1,20 @@
+  /aatp/api/alertthresholds/withExpiry/recommendedTestMode:
+    get:
+      summary: Get recommended test mode alert thresholds
+      description: >-
+        Retrieve recommended test mode alert thresholds with expiry. Returned 404 during capture - may require Defender for Identity licensing. Discovered on Identity Settings > Adjust alerts thresholds page.
+      operationId: Identity.GetAlertThresholdsRecommendedTestMode
+      tags: [Identity]
+      responses:
+        '404':
+          description: Not Found - may require additional licensing
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden

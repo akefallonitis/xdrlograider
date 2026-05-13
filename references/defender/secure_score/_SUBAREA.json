@@ -1,0 +1,207 @@
+{
+  "subArea": "secure_score",
+  "suggestedCadence": "daily",
+  "endpointCount": 8,
+  "endpoints": [
+    {
+      "slug": "GetCloudInitiativeMetrics",
+      "operationId": "SecureScore.GetCloudInitiativeMetrics",
+      "path": "/mdc/views/secureScore/cloudInitiativeMetrics",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetConfigurationsSecureScoreCategories",
+      "operationId": "SecureScore.GetConfigurationsSecureScoreCategories",
+      "path": "/mtp/tvm/analytics/configurations/securescore/categories",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 5,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (5 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetConfigurationsSecureScoreTotal",
+      "operationId": "SecureScore.GetConfigurationsSecureScoreTotal",
+      "path": "/mtp/tvm/analytics/configurations/securescore/total",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetControlProfilesV2",
+      "operationId": "SecureScore.GetControlProfilesV2",
+      "path": "/mtp/secureScore/security/secureScoreControlProfilesV2",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 445,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Software.Vendor",
+        "Url.Path"
+      ],
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (445 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetInsights",
+      "operationId": "SecureScore.GetInsights",
+      "path": "/mtp/secureScore/security/secureScoreInsights",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 2700,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (2700 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetSecureScoresV2",
+      "operationId": "SecureScore.GetSecureScoresV2",
+      "path": "/mtp/secureScore/security/secureScoresV2",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 90,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Vendor",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (90 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetSecurityInitiativesV2",
+      "operationId": "SecureScore.GetSecurityInitiativesV2",
+      "path": "/mtp/secureScore/security/secureScoreSecurityInitiativesV2",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Vendor",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetTenantProfile",
+      "operationId": "SecureScore.GetTenantProfile",
+      "path": "/mtp/secureScore/security/secureScoreTenantProfile",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "daily",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    }
+  ],
+  "cntLive": 7,
+  "cntLiveEmpty": 0,
+  "cntError": 1,
+  "cntNoLive": 0,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Software.Vendor",
+    "Software.Version",
+    "Url.Path"
+  ],
+  "paginationStyles": [],
+  "valueProp": "Per-category secure score breakdown + historical trend (DCSPM, TVM SCA, V2 control profiles) — Graph only covers overall score history"
+}

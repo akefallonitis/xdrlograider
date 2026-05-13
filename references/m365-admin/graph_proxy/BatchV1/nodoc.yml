@@ -1,0 +1,75 @@
+  /fd/msgraph/v1.0/$batch:
+    post:
+      summary: Graph v1.0 batch request
+      description: >-
+        Submit a batch of Microsoft Graph v1.0 API requests in a single call,
+        proxied through the M365 Admin Center.
+      operationId: GraphProxy.BatchV1
+      tags: [GraphProxy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique identifier for the request in the batch.
+                      method:
+                        type: string
+                        description: HTTP method (GET, POST, PUT, PATCH, DELETE).
+                      url:
+                        type: string
+                        description: Relative Graph API URL.
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load the OneDrive and Exchange summary cards.
+        headerProfile: m365-admin-microsoft-365-backup
+        requestShapes:
+          - name: backup-onedrive-summary
+            contentType: application/json
+            bodyKind: batch
+            notes: The live portal batched drive protection unit counts, OneDrive protection policies, and active restore session counts.
+          - name: backup-exchange-summary
+            contentType: application/json
+            bodyKind: batch
+            notes: The live portal batched mailbox protection unit counts, Exchange protection policies, and active restore session counts.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        status:
+                          type: integer
+                        body:
+                          type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

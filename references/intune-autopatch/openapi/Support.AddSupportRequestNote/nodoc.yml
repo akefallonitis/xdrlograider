@@ -1,0 +1,32 @@
+  /support/odata/v1/supportRequests('{supportRequestId}')/addNote:
+    post:
+      tags: [Support]
+      summary: Add a note to a support request
+      description: |
+        Adds a note to a Windows Autopatch support request discussion thread. The exact request body
+        was recovered from the Support requests bundle. This write was not executed live in this
+        pass.
+      operationId: IntuneAutopatch.Support.AddSupportRequestNote
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestAddNoteRequest'
+      responses:
+        '200':
+          description: Note added successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '204':
+          description: Note added successfully with no response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

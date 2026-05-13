@@ -1,0 +1,166 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetTopUsers",
+  "operationId": "EndpointDevices.GetTopUsers",
+  "path": "/mtp/getTopUsersByIds/TopUsersByIds",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get top users for device",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:05.9911052Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "isUnifiedDevicePage",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Indicates the unified device page requested the lookup."
+    },
+    {
+      "Name": "machineId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Defender machine identifier."
+    },
+    {
+      "Name": "senseMachineId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Sense machine identifier for the same device."
+    },
+    {
+      "Name": "computerDnsName",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The current DNS name of the device."
+    },
+    {
+      "Name": "tenantIds",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional cross-tenant context. The portal currently sends an empty value."
+    },
+    {
+      "Name": "armId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional Azure resource ID context for the device."
+    },
+    {
+      "Name": "lookingBackIndays",
+      "In": "query",
+      "Type": "integer",
+      "Default": "30",
+      "Description": "Number of days of user activity to include."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": "true",
+      "required": false,
+      "description": "Indicates the unified device page requested the lookup.",
+      "type": "boolean",
+      "name": "isUnifiedDevicePage"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The Defender machine identifier.",
+      "type": "string",
+      "name": "machineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The Sense machine identifier for the same device.",
+      "type": "string",
+      "name": "senseMachineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The current DNS name of the device.",
+      "type": "string",
+      "name": "computerDnsName"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional cross-tenant context. The portal currently sends an empty value.",
+      "type": "string",
+      "name": "tenantIds"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional Azure resource ID context for the device.",
+      "type": "string",
+      "name": "armId"
+    },
+    {
+      "in": "query",
+      "default": "30",
+      "required": false,
+      "description": "Number of days of user activity to include.",
+      "type": "integer",
+      "name": "lookingBackIndays"
+    }
+  ],
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.FullName",
+    "Host.MdatpId"
+  ],
+  "cadenceSuggestion": "daily"
+}

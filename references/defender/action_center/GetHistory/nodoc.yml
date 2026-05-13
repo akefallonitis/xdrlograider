@@ -1,0 +1,65 @@
+  /mtp/actionCenter/actioncenterui/history-actions:
+    get:
+      summary: Get action center history
+      description: >-
+        Retrieve the history of completed actions from the Defender XDR Action Center.
+        Includes automated investigation actions, manual response actions, and
+        remediation activities.
+      operationId: ActionCenter.GetHistory
+      tags: [Action Center]
+      parameters:
+        - name: $skip
+          in: query
+          description: Number of records to skip.
+          schema:
+            type: integer
+        - name: $top
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          description: The number of results per page.
+          schema:
+            type: integer
+            default: 50
+        - name: pageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 0
+        - name: sortByField
+          in: query
+          description: Field to sort results by.
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          description: Sort order.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      actions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ActionCenterItem'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

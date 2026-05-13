@@ -1,0 +1,23 @@
+  /mtp/suppressionRulesService/suppressionRules/builtInRulesHash:
+    get:
+      summary: Get built-in suppression rules hash
+      description: >-
+        Retrieve the built-in suppression rules hash used by the portal to detect
+        whether the built-in rule catalog has changed.
+      operationId: Configuration.GetBuiltInSuppressionRulesHash
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

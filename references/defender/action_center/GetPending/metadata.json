@@ -1,0 +1,129 @@
+{
+  "portal": "defender",
+  "subArea": "action_center",
+  "slug": "GetPending",
+  "operationId": "ActionCenter.GetPending",
+  "path": "/mtp/actionCenter/actioncenterui/pending-actions",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get pending actions",
+  "sourceFile": "action_center.yml",
+  "capturedUtc": "2026-05-12T14:33:17.2290652Z",
+  "pagination": {
+    "tokenParam": "$skip",
+    "style": "pageIndex0Based",
+    "sizeParam": "pageSize",
+    "defaults": {
+      "pageSize": "50"
+    },
+    "indexParam": "pageIndex"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "sortByField",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Field to sort results by."
+    },
+    {
+      "Name": "sortOrder",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Sort order."
+    }
+  ],
+  "suggestedCadence": "10min",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_PendingActions_CL",
+    "v1Tier": "ActionCenter",
+    "v1Category": "Action Center",
+    "v1RawPath": "/apiproxy/mtp/actionCenter/actioncenterui/pending-actions"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": "wrapper:results[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+    "Pagination=pageIndex0Based — index starts at 0 (some MS endpoints reject 0; verify per endpoint)",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 10min cadence × full inventory)",
+    "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Number of records to skip.",
+      "type": "integer",
+      "name": "$skip"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Maximum number of records to return.",
+      "type": "integer",
+      "name": "$top"
+    },
+    {
+      "in": "query",
+      "default": "50",
+      "required": false,
+      "description": "The number of results per page.",
+      "type": "integer",
+      "name": "pageSize"
+    },
+    {
+      "in": "query",
+      "default": "0",
+      "required": false,
+      "description": "The page index for pagination.",
+      "type": "integer",
+      "name": "pageIndex"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Field to sort results by.",
+      "type": "string",
+      "name": "sortByField"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Sort order.",
+      "type": "string",
+      "name": "sortOrder"
+    }
+  ],
+  "paginationStyle": "topSkip",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "10min"
+}

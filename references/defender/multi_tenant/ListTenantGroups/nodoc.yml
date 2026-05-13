@@ -1,0 +1,25 @@
+  /mtoapi/tenantGroups:
+    get:
+      summary: List tenant groups
+      description: >-
+        Retrieve tenant groups available in the MTO portal. Confirmed in live
+        traffic from the Tenant groups page.
+      operationId: MultiTenant.ListTenantGroups
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantGroup'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,30 @@
+  /mcas/cas/api/v1/discovery/snapshot_reports:
+    post:
+      summary: List discovery snapshot reports
+      description: >-
+        Retrieve snapshot reports available for Cloud Discovery. Discovered
+        during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.ListDiscoverySnapshotReports
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - snapshot report query envelope
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

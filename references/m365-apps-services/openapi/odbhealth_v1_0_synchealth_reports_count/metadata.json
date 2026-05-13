@@ -1,0 +1,44 @@
+{
+  "portal": "m365-apps-services",
+  "subArea": "openapi",
+  "slug": "odbhealth_v1_0_synchealth_reports_count",
+  "operationId": null,
+  "path": "/odbhealth/v1.0/synchealth/reports/count",
+  "methods": [
+    "post"
+  ],
+  "summary": "Get OneDrive Sync bucket counts",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:18.2247539Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "style": "none",
+    "tokenParam": null,
+    "indexParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "lookbackParam": null,
+    "type": null,
+    "endParam": null,
+    "startParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

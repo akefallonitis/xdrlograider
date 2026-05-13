@@ -1,0 +1,127 @@
+{
+  "portal": "m365-admin",
+  "subArea": "reports",
+  "slug": "GetReportData",
+  "operationId": "Reports.GetReportData",
+  "path": "/admin/api/reports/GetReportData",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get report data",
+  "sourceFile": "reports.yml",
+  "capturedUtc": "2026-05-12T15:13:26.0587624Z",
+  "pagination": {
+    "indexParam": null,
+    "defaults": {
+      "pagesize": "100"
+    },
+    "tokenParam": null,
+    "sizeParam": "pagesize",
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "entityName",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": ">-"
+    },
+    {
+      "Name": "entityname",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": ">-"
+    },
+    {
+      "Name": "period",
+      "In": "query",
+      "Type": "integer",
+      "Default": "",
+      "Description": "Time period in days for the report."
+    },
+    {
+      "Name": "locale",
+      "In": "query",
+      "Type": "string",
+      "Default": "en-US",
+      "Description": "Locale for the report data."
+    },
+    {
+      "Name": "query-driven-report",
+      "In": "",
+      "Type": "",
+      "Default": "",
+      "Description": ""
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": ">-",
+      "type": "string",
+      "name": "entityName"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": ">-",
+      "type": "string",
+      "name": "entityname"
+    },
+    {
+      "in": "query",
+      "default": "100",
+      "required": false,
+      "description": "Number of results per page.",
+      "type": "integer",
+      "name": "pagesize"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Time period in days for the report.",
+      "type": "integer",
+      "name": "period"
+    },
+    {
+      "in": "query",
+      "default": "en-US",
+      "required": false,
+      "description": "Locale for the report data.",
+      "type": "string",
+      "name": "locale"
+    }
+  ],
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

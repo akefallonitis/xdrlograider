@@ -1,0 +1,71 @@
+  /Common/VerifiedDomains:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List verified domains
+      description: List verified domains.
+      operationId: Common.VerifiedDomains.List
+      tags: [General]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    authenticationType:
+                      description: The authentication type of the domain.
+                      type: string
+                      enum: [Managed]
+                      example: Managed
+                    isDefault:
+                      description: Whether the domain is the default domain.
+                      type: boolean
+                      example: false
+                    isInitial:
+                      description: Whether the domain is the initial domain.
+                      type: boolean
+                      example: true
+                    isVerified:
+                      description: Whether the domain is verified.
+                      type: boolean
+                      example: true
+                    name:
+                      description: The name of the domain.
+                      type: string
+                      example: contoso.com
+
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,43 @@
+{
+  "portal": "entra-idgov",
+  "subArea": "openapi",
+  "slug": "ListReports",
+  "operationId": "AccessReviews.ListReports",
+  "path": "/accessReviews/v2.0/reports",
+  "methods": [
+    "get"
+  ],
+  "summary": "List access review reports",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:16.0719973Z",
+  "pagination": {
+    "sizeParam": null,
+    "tokenParam": null,
+    "indexParam": null,
+    "style": "none",
+    "defaults": {}
+  },
+  "timeFilter": {
+    "supported": false,
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "live-empty",
+  "lastHttpStatus": 200,
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

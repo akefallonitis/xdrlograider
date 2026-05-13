@@ -1,0 +1,25 @@
+  /RevokeMFA/{0}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: '0'
+        description: Unknown
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: keyIdentifier
+        description: The identifier of the key
+        in: query
+        schema:
+          type: string
+    put:
+      summary: Revoke MFA
+      description: >-
+        Revoke MFA.
+      operationId: Mfa.Revoke
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

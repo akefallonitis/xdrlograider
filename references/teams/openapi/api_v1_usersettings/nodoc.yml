@@ -1,0 +1,21 @@
+  /api/v1/usersettings:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin preference service
+    get:
+      tags: [RegionalAdmin]
+      summary: Get saved Teams admin grid settings
+      description: |
+        Returns saved column widths, visibility preferences, and other table-level settings for Teams admin
+        center pages such as users and activity log.
+      responses:
+        '200':
+          description: User settings payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsUserSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

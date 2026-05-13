@@ -1,0 +1,44 @@
+{
+  "portal": "intune-autopatch",
+  "subArea": "openapi",
+  "slug": "Support.ListSupportRequestActivities",
+  "operationId": "IntuneAutopatch.Support.ListSupportRequestActivities",
+  "path": "/support/odata/v1/supportRequests('{supportRequestId}')/activities",
+  "methods": [
+    "get"
+  ],
+  "summary": "List support request activities",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:10.8628604Z",
+  "pagination": {
+    "style": "none",
+    "sizeParam": null,
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "endParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/support/odata/v1/supportRequests('{supportRequestId}')/activities' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

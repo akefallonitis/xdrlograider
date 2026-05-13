@@ -1,0 +1,19 @@
+  /_api/SPOInternalUseOnly.TenantAdminSettings:
+    get:
+      tags: [Internal]
+      summary: Get internal tenant admin settings
+      description: |
+        Returns the internal tenant admin settings service object surfaced by the
+        SharePoint admin center settings experience.
+      operationId: SharePointAdmin.GetInternalTenantAdminSettings
+      responses:
+        '200':
+          description: Internal tenant admin settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

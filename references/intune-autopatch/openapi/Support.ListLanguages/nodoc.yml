@@ -1,0 +1,21 @@
+  /support/v1/Languages:
+    get:
+      tags: [Support]
+      summary: List support languages
+      description: |
+        Returns available support languages. Recovered from the support bundles and confirmed with
+        a GET probe.
+      operationId: IntuneAutopatch.Support.ListLanguages
+      responses:
+        '200':
+          description: Support languages returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupportLanguage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

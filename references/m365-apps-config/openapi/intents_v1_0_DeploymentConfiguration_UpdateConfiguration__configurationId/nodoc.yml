@@ -1,0 +1,23 @@
+  /intents/v1.0/DeploymentConfiguration/UpdateConfiguration/{configurationId}:
+    put:
+      tags: [Device Configuration]
+      summary: Update deployment configuration metadata
+      description: |
+        Captured by intercepting a save from the deployment configuration editor
+        after changing only the configuration name. This request is emitted
+        alongside the auth deployment settings update request above.
+      parameters:
+        - $ref: '#/components/parameters/configurationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeploymentConfiguration'
+      responses:
+        '200':
+          description: Configuration save result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'

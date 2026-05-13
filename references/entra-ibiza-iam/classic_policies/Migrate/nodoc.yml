@@ -1,0 +1,16 @@
+  /ClassicPolicies/Migrate:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Migrate classic policy
+      description: >-
+        Migrate classic policy by object ID.
+      operationId: ClassicPolicies.Migrate
+      tags: [Classic Policies]
+      requestBody:
+        $ref: 'common.yml#/components/requestBodies/unknownRequest'
+      responses:
+        '200':
+          $ref: 'common.yml#/components/responses/UnknownResponse'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,26 @@
+  /mtp/ndr/rulesengine/rules:
+    get:
+      summary: Get asset rule management rules
+      description: >-
+        Retrieve the device asset rule management rules used for automatic
+        device tagging and classification.
+      operationId: Configuration.GetAssetRules
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - asset rule details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

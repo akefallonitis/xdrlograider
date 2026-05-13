@@ -1,0 +1,29 @@
+name: validate-solution
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/sentinelContent.json'
+      - 'deploy/solution/**'
+      - 'tools/Build-SentinelSolution.ps1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  solution-compliance:
+    name: Sentinel Content Hub compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # Phase 1 lock invariants only — runs the dedicated Pester suite.
+          Install-Module Pester -Force -Scope CurrentUser -SkipPublisherCheck -MinimumVersion 5.5.0
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = 'tests/arm/SentinelContent.MinimalLock.Tests.ps1'
+          $cfg.Run.PassThru = $true
+          $cfg.Run.Exit = $true
+          Invoke-Pester -Configuration $cfg

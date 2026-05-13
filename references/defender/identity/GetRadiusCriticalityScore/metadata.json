@@ -1,0 +1,91 @@
+{
+  "portal": "defender",
+  "subArea": "identity",
+  "slug": "GetRadiusCriticalityScore",
+  "operationId": "Identity.GetRadiusCriticalityScore",
+  "path": "/radius/api/radius/identities/getCriticalityScore",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get identity criticality score",
+  "sourceFile": "identity.yml",
+  "capturedUtc": "2026-05-12T14:41:32.6400046Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "onPremiseSid",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The on-premises SID for the identity."
+    },
+    {
+      "Name": "aadId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Microsoft Entra object ID for the identity."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The on-premises SID for the identity.",
+      "type": "string",
+      "name": "onPremiseSid"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The Microsoft Entra object ID for the identity.",
+      "type": "string",
+      "name": "aadId"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.Sid",
+    "Host.AadDeviceId"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,69 @@
+{
+  "portal": "m365-admin",
+  "subArea": "users_groups",
+  "slug": "GetUserById",
+  "operationId": "UsersGroups.GetUserById",
+  "path": "/admin/api/users/xdrlogreader@CloudSectra.com",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get user by ID",
+  "sourceFile": "users_groups.yml",
+  "capturedUtc": "2026-05-12T15:13:26.5066681Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "userId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the user."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/admin/api/users/{userId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "request-shape-error",
+  "lastHttpStatus": 400,
+  "lastDiagnostic": "The request is invalid.",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The unique identifier of the user.",
+    "type": "string",
+    "name": "userId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.AadId"
+  ],
+  "cadenceSuggestion": "daily"
+}

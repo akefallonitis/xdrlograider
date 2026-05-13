@@ -1,0 +1,31 @@
+  /mdi/identity/userapiservice/user/activityPeriod:
+    post:
+      summary: Get user activity period
+      description: >-
+        Retrieve the first-seen and last-seen activity period summary for the
+        selected user.
+      operationId: Identity.GetUserActivityPeriod
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - user activity period request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user activity period summary
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,21 @@
+  /repository/tenant/dataservice:
+    servers:
+      - url: https://cqd.teams.microsoft.com
+        description: CQD bootstrap host
+    get:
+      tags: [CQD]
+      summary: Resolve the tenant CQD data service host
+      description: |
+        Returns the regional Call Quality Dashboard data endpoint used by Teams admin center links and
+        report pivots.
+      responses:
+        '200':
+          description: CQD data service URL.
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uri
+                example: https://cqd.teams.cloud.microsoft/data/noam/
+        '401':
+          $ref: '#/components/responses/Unauthorized'

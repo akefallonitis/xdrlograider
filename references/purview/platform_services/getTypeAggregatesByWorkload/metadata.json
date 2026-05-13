@@ -1,0 +1,71 @@
+{
+  "portal": "purview",
+  "subArea": "platform_services",
+  "slug": "getTypeAggregatesByWorkload",
+  "operationId": "getTypeAggregatesByWorkload",
+  "path": "/purviewplatform/api/v1/insight/GetTypeAggregatesByWorkload",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get type aggregates by workload",
+  "sourceFile": "platform_services.yml",
+  "capturedUtc": "2026-05-12T15:11:06.2168232Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "type",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The type of aggregate to retrieve."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 500,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 500",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": false,
+    "description": "The type of aggregate to retrieve.",
+    "type": "string",
+    "name": "type"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

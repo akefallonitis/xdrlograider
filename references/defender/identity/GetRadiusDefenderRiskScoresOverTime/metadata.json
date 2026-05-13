@@ -1,0 +1,94 @@
+{
+  "portal": "defender",
+  "subArea": "identity",
+  "slug": "GetRadiusDefenderRiskScoresOverTime",
+  "operationId": "Identity.GetRadiusDefenderRiskScoresOverTime",
+  "path": "/radius/api/radius/identities/getDefenderRiskScoresOverTime",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Defender risk scores over time",
+  "sourceFile": "identity.yml",
+  "capturedUtc": "2026-05-12T14:41:34.1182068Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": "startTime",
+    "type": "iso8601",
+    "supported": true,
+    "endParam": "endTime"
+  },
+  "otherParameters": [
+    {
+      "Name": "identityId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Defender identity identifier."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=startTime/endParam=endTime",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The Defender identity identifier.",
+      "type": "string",
+      "name": "identityId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The inclusive start of the requested time range.",
+      "type": "string",
+      "name": "startTime"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The inclusive end of the requested time range.",
+      "type": "string",
+      "name": "endTime"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": [
+    "startTime",
+    "endTime"
+  ],
+  "entities": [
+    "Time.Generated"
+  ],
+  "cadenceSuggestion": "daily"
+}

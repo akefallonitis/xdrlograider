@@ -1,0 +1,52 @@
+  /mtoapi/mtp/CaseManagement/be/cases:
+    get:
+      summary: List MTO cases
+      description: >-
+        Retrieve case-management records through the MTO wrapper. Confirmed in
+        live traffic from the MTO Cases page.
+      operationId: MultiTenant.ListCases
+      tags: [Multi-Tenant]
+      parameters:
+        - name: $orderby
+          in: query
+          description: Optional OData sort expression for case rows.
+          schema:
+            type: string
+        - name: paginationGuid
+          in: query
+          description: Optional pagination cursor returned by prior MTO case reads.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      value:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - MTO case record
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

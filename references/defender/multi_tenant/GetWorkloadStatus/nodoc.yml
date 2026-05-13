@@ -1,0 +1,41 @@
+  /mtoapi/tenants/{TenantId}/workloadStatus:
+    get:
+      summary: Get tenant workload status
+      description: >-
+        Retrieve the workload status for a specific managed tenant,
+        including the activation status of each Defender XDR workload.
+      operationId: MultiTenant.GetWorkloadStatus
+      tags: [Multi-Tenant]
+      parameters:
+        - name: TenantId
+          in: path
+          required: true
+          description: The unique identifier of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tenantId:
+                    description: The tenant identifier.
+                    type: string
+                    format: uuid
+                  workloads:
+                    description: Status of each workload.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WorkloadStatus'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

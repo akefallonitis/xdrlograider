@@ -1,0 +1,23 @@
+  /admin/api/tenant/isTenantEligibleToRemoveSAC:
+    get:
+      summary: Check SAC removal eligibility
+      description: >-
+        Check if the tenant is eligible to remove Self-service Account Creation (SAC) (Org Settings > M365 installation options).
+      operationId: Tenant.IsTenantEligibleToRemoveSAC
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

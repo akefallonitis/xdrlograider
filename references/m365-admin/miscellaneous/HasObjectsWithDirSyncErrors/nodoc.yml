@@ -1,0 +1,23 @@
+  /admin/api/DirsyncManagement/hasobjectswithdirsyncerrors:
+    get:
+      summary: Check for directory sync errors
+      description: >-
+        Check whether the tenant currently has Entra Connect objects with directory
+        synchronization errors.
+      operationId: Misc.HasObjectsWithDirSyncErrors
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

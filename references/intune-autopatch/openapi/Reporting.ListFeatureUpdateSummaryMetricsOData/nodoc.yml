@@ -1,0 +1,22 @@
+  /unified-reporting/odata/1.0/WindowsFeatureUpdatesSummaryMetrics:
+    get:
+      tags: [Reporting]
+      summary: Get feature update summary metrics via URS
+      description: |
+        Returns the alternate URS/OData model for feature update summary metrics. The path was
+        recovered from the report bundle and confirmed with a safe GET probe.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateSummaryMetricsOData
+      parameters:
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/filter'
+      responses:
+        '200':
+          description: Feature update summary metrics returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WindowsFeatureUpdateSummaryMetricsODataCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

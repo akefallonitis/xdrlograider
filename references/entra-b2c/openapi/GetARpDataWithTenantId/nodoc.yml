@@ -1,0 +1,32 @@
+  /api/tenantResource/GetARpDataWithTenantId:
+    get:
+      tags: [Resources]
+      summary: Get Azure resource provider data for tenant
+      description: |
+        Retrieves the Azure Resource Provider (ARP) data associated with the B2C
+        tenant, including subscription details, resource group, billing type, and
+        data residency location.
+
+        This is used by the portal to display subscription and billing information
+        on the B2C tenant overview page.
+      operationId: TenantResource.GetARpDataWithTenantId
+      parameters:
+        - $ref: '#/components/parameters/tenantDomain'
+      responses:
+        '200':
+          description: Tenant resource and subscription data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResource'
+              example:
+                tenantObjectId: 847b5907-ca15-40f4-b171-eb18619dbfab
+                tenantCountryCode: US
+                subscriptionState: 0
+                subscriptionId: 43babb60-9e73-4dc8-b769-4401c01aad73
+                resourceGroupName: rg-contoso-b2c
+                resourceName: contoso.onmicrosoft.com
+                subscriptionTenantId: 847b5907-ca15-40f4-b171-eb18619dbfab
+                billingType: MAU
+                location: United States
+                isGoLocalEnabled: false

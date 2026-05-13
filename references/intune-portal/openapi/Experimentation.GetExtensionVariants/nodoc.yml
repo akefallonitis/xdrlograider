@@ -1,0 +1,25 @@
+  /api/Experimentation/GetExtensionVariants:
+    get:
+      tags: [Experimentation]
+      summary: Get extension variants
+      description: |
+        Resolves experimentation flights and variables for an Intune or Azure portal extension.
+        Confirmed live for Intune enrollment, Intune devices, Azure Monitor, and PIM-related
+        extensions while browsing tenant administration blades.
+      operationId: IntunePortal.Experimentation.GetExtensionVariants
+      parameters:
+        - $ref: '#/components/parameters/extension'
+        - $ref: '#/components/parameters/extensionVersion'
+      responses:
+        '200':
+          description: Experimentation variants resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentationVariantsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

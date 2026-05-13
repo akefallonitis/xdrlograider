@@ -1,0 +1,25 @@
+  /mtp/suppressionRulesService/suppressionRules:
+    get:
+      summary: List suppression rules
+      description: >-
+        Retrieve all alert suppression (tuning) rules configured in the tenant.
+        Suppression rules automatically suppress alerts matching specified conditions.
+      operationId: Configuration.ListSuppressionRules
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SuppressionRule'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

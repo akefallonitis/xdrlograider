@@ -1,0 +1,64 @@
+  /mtoapi/cdssecuritycopilot/trial:
+    get:
+      summary: Get MTO Security Copilot trial status
+      description: >-
+        Retrieve the Security Copilot trial status probe used by the MTO Advanced
+        hunting and Custom detection pages. Live traffic in the current tenant
+        returned a contextual `400 InvalidProxyPrefix` response.
+      operationId: MultiTenant.GetSecurityCopilotTrial
+      tags: [Multi-Tenant]
+      parameters:
+        - name: scope
+          in: query
+          required: true
+          description: Requested access scope for the trial probe.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Multi-tenant Security Copilot entrypoint
+        workflows:
+          - Open MTO Advanced hunting or Custom detection experiences that probe Security Copilot readiness.
+        authProfile: defender-copilot-entitlement
+        requestShapes:
+          - name: scoped-trial-probe
+            bodyKind: none
+            requiredParameters:
+              - scope
+            notes: The portal submits an access-scope query value while checking multi-tenant Security Copilot readiness.
+        availability:
+          level: tenant-conditional
+          notes:
+            - Trial readiness depends on tenant onboarding, current scope, and whether the MTO wrapper accepts the requested proxy prefix.
+        provenance:
+          - source: live-portal-capture
+            confidence: medium
+            notes:
+              - Live traffic in the current tenant returned a contextual 400 InvalidProxyPrefix response, confirming the probe path and parameter shape.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Security Copilot trial status
+        '400':
+          description: Contextual backend validation error returned by the current tenant.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+                    description: Backend error string.
+                required:
+                  - Error
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

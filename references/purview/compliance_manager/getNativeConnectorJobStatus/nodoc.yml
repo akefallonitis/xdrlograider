@@ -1,0 +1,39 @@
+  /Ingestion/NativeConnectorJob:
+    get:
+      operationId: getNativeConnectorJobStatus
+      summary: Get native connector ingestion job status
+      description: >-
+        Retrieve the status of a native connector ingestion job.
+        Used to track the progress of data ingestion from native connectors.
+      tags: [ComplianceManager]
+      parameters:
+        - name: correlationId
+          in: query
+          required: false
+          description: A correlation identifier for tracking the job.
+          schema:
+            type: string
+            format: uuid
+        - name: locale
+          in: query
+          required: false
+          description: The locale for localized response content.
+          schema:
+            type: string
+            example: en-us
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Native connector ingestion job status envelope returned while the portal tracks a correlation ID.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

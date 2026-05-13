@@ -1,0 +1,61 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "request_approvals",
+  "slug": "Request.Deny",
+  "operationId": "RequestApprovalsV2.Request.Deny",
+  "path": "/RequestApprovals/V2/Requests/{requestId}/deny",
+  "methods": [
+    "get"
+  ],
+  "summary": "Deny approval request (v2)",
+  "sourceFile": "request_approvals.yml",
+  "capturedUtc": "2026-05-12T15:13:12.8159826Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "requestId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique ID of the request"
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/RequestApprovals/V2/Requests/{requestId}/deny' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The unique ID of the request",
+    "type": "string",
+    "name": "requestId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,12 @@
+  /onboarding/odata/v1.0/EligibilityRecord:
+    get:
+      tags: [Onboarding]
+      summary: Get onboarding eligibility record
+      description: Returns the tenant eligibility record that gates M365 Apps admin center features.
+      responses:
+        '200':
+          description: Eligibility record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityRecord'

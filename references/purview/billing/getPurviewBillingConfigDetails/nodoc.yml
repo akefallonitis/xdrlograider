@@ -1,0 +1,24 @@
+  /cbill/PurviewAccount/billing-config-details:
+    get:
+      operationId: getPurviewBillingConfigDetails
+      summary: Get Purview billing configuration details
+      description: >-
+        Retrieve detailed billing configuration for the Purview account.
+        Returns meter usage, capacity units, and billing tier information.
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

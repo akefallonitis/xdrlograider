@@ -1,0 +1,85 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "users",
+  "slug": "Query",
+  "operationId": "User.Query",
+  "path": "/Users",
+  "methods": [
+    "post",
+    "delete"
+  ],
+  "summary": "Query users",
+  "sourceFile": "users.yml",
+  "capturedUtc": "2026-05-12T15:13:12.8764931Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "orderByThumnails",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Switch to order by thumbnails"
+    },
+    {
+      "Name": "maxThumbnailCount",
+      "In": "query",
+      "Type": "integer",
+      "Default": "",
+      "Description": "The maximum number of thumbnails to return."
+    },
+    {
+      "Name": "filterValue",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "pending."
+    },
+    {
+      "Name": "state",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "pending."
+    },
+    {
+      "Name": "adminUnit",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The object ID of an Administrative Unit to filter results by."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.AadId",
+    "File.Path",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,71 @@
+{
+  "portal": "defender",
+  "subArea": "threat_analytics",
+  "slug": "GetOutbreakImpactedAssetsOverTime",
+  "operationId": "ThreatAnalytics.GetOutbreakImpactedAssetsOverTime",
+  "path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsOvertime",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get outbreak impacted assets over time",
+  "sourceFile": "threat_analytics.yml",
+  "capturedUtc": "2026-05-12T14:42:43.7343217Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "OutbreakId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Threat Analytics outbreak identifier."
+    }
+  ],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsOvertime' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The Threat Analytics outbreak identifier.",
+    "type": "string",
+    "name": "OutbreakId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "6h"
+}

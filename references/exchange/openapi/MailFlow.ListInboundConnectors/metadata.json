@@ -1,0 +1,50 @@
+{
+  "portal": "exchange",
+  "subArea": "openapi",
+  "slug": "MailFlow.ListInboundConnectors",
+  "operationId": "ExchangeBeta.MailFlow.ListInboundConnectors",
+  "path": "/beta/InboundConnector",
+  "methods": [
+    "get"
+  ],
+  "summary": "List inbound connectors",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:42:27.4942627Z",
+  "pagination": {
+    "style": "none",
+    "defaults": {},
+    "indexParam": null,
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "supported": false,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "out-of-scope-graph-covers",
+    "Method": "Microsoft Graph covers — out of portal-only scope"
+  },
+  "v1Manifest": null,
+  "xdrInternalsHint": "Get-XdrExchangeBetaMailFlow.ListInboundConnectors",
+  "defenderHarvester": null,
+  "live": {
+    "httpStatus": 500,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 500",
+    "responseShape": null
+  },
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,18 @@
+  /api/v1.0/assets:
+    servers:
+      - url: https://monet.teams.microsoft.com
+        description: Teams add-on monetization backend
+    get:
+      tags: [TeamsMonetization]
+      summary: List Teams add-on monetization assets
+      description: |
+        Asset inventory observed from Teams add-on licensing and storefront surfaces.
+      responses:
+        '200':
+          description: Monetization asset payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

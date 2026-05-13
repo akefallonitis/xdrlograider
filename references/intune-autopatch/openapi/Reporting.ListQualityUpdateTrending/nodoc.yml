@@ -1,0 +1,38 @@
+  /reporting/reports/v2/deviceAccounting/wqu/trending:
+    post:
+      tags: [Reporting]
+      summary: List quality update trend points
+      description: |
+        Returns Windows quality update trend buckets for durations such as `Trend30To0d`.
+        Confirmed live on the report blade's initial load.
+      x-nodoc-live-capture:
+        source: "authenticated Intune admin center"
+        browsedPages:
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+      operationId: IntuneAutopatch.Reporting.ListQualityUpdateTrending
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityUpdateTrendingRequest'
+      responses:
+        '200':
+          description: Quality update trend rows returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityUpdateTrendingResponse'
+              example:
+                values: []
+                totalRowCount: 0
+                startRowIndex: 0
+                endRowIndex: 0
+                tenantId: 00000000-0000-0000-0000-000000000000
+                activityId: 00000000-0000-0000-0000-000000000003
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

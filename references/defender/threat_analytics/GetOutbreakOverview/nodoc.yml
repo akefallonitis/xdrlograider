@@ -1,0 +1,31 @@
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/overview:
+    get:
+      summary: Get outbreak overview
+      description: >-
+        Retrieve the overview payload for a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.GetOutbreakOverview
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak overview
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

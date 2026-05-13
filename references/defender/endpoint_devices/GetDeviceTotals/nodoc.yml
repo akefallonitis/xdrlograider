@@ -1,0 +1,37 @@
+  /mtp/ndr/machines/deviceTotals:
+    get:
+      summary: Get device totals
+      description: >-
+        Retrieve the total device counts aggregated by various dimensions
+        such as OS, health status, and risk level.
+      operationId: EndpointDevices.GetDeviceTotals
+      tags: [Endpoint Devices]
+      parameters:
+        - name: hideLowFidelityDevices
+          in: query
+          description: Exclude low-fidelity (unmanaged) devices.
+          schema:
+            type: boolean
+            default: true
+        - name: lookingBackIndays
+          in: query
+          description: Number of days to look back for device activity.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device totals data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

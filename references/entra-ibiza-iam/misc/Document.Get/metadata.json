@@ -1,0 +1,56 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "misc",
+  "slug": "Document.Get",
+  "operationId": "SupportRequestProblemDetails.Document.Get",
+  "path": "/SupportRequestProblemDetails/Document",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get support request problem details document",
+  "sourceFile": "misc.yml",
+  "capturedUtc": "2026-05-12T15:13:12.4112458Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "topicId",
+      "In": "query",
+      "Type": "integer",
+      "Default": "",
+      "Description": "The topid ID"
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 404,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Name",
+    "File.Path",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

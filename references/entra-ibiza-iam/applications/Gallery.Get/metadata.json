@@ -1,0 +1,61 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "applications",
+  "slug": "Gallery.Get",
+  "operationId": "Application.Gallery.Get",
+  "path": "/Applications/Gallery/{appId}",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Gallery Application by app ID",
+  "sourceFile": "applications.yml",
+  "capturedUtc": "2026-05-12T15:13:11.8908552Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "appId",
+      "In": "path",
+      "Type": "",
+      "Default": "",
+      "Description": "pending."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/Applications/Gallery/{appId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "pending.",
+    "type": "",
+    "name": "appId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

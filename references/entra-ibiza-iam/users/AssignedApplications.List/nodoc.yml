@@ -1,0 +1,114 @@
+  /Users/{userId}/assignedApplications:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/nextLink
+      - $ref: common.yml#/components/parameters/top
+      - name: userId
+        description: The user ID to retrieve.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/userId
+      - name: fetchThumbnail
+        description: Whether to fetch the application thumbnails.
+        in: query
+        schema:
+          type: boolean
+    get:
+      summary: List applications assigned to a user
+      description: >-
+        List applications assigned to a user by user ID.
+      operationId: User.AssignedApplications.List
+      tags: [Users]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        resourceAppId:
+                          $ref: common.yml#/components/schemas/applicationId
+                        logo45Url:
+                          type: string
+                          description: The URL to the 45x45 logo
+                          nullable: true
+                          example: null
+                        roleName:
+                          type: string
+                          description: The name of the role
+                          example: page.create
+                        objectId:
+                          type: string
+                          description: The object ID of the assignment
+                          example: 9MulgA8-iEK2S95wp4ERqlIJqTtRDWlQFArH
+                        principalId:
+                          $ref: common.yml#/components/schemas/objectId
+                        inheritedGroup:
+                          $ref: common.yml#/components/schemas/groupId
+                        resourceDisplayName:
+                          type: string
+                          description: The display name of the application.
+                          example: Application
+                        resourceId:
+                          $ref: common.yml#/components/schemas/appObjectId
+                        creationTimestamp:
+                          description: The creation timestamp of the app assignment
+                          type: string
+                          format: date-time
+                          example: 2024-06-08T12:13:50.2749565Z
+                        applicationPublisherName:
+                          description: The publisher name of the application.
+                          type: string
+                          example: Constoso
+                        imageUrl:
+                          type: string
+                          description: The URL to the application image
+                          example: 'https://main.iam.ad.ext.azure.com/api/Images/Applications/V2vfVXmvDZBH7'
+                        principalType:
+                          type: string
+                          description: The type of principal that has been assigned to the application.
+                          enum: [User]
+                          example: User
+                        principalDisplayName:
+                          type: string
+                          description: The display name of the principal that has been assigned to the application.
+                          example: UserA
+
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

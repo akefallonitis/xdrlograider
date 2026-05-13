@@ -1,0 +1,22 @@
+  /admin/api/billing/BillingModel:
+    get:
+      summary: Get billing model
+      description: >-
+        Retrieve the billing model information for the tenant.
+      operationId: Billing.GetBillingModel
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/BillingModelResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

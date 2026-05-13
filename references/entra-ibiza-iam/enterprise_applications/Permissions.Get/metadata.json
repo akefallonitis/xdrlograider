@@ -1,0 +1,79 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "enterprise_applications",
+  "slug": "Permissions.Get",
+  "operationId": "EnterpriseApplication.Permissions.Get",
+  "path": "/EnterpriseApplications/{spId}/ServicePrincipalPermissions",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get consented Enterprise Application permissions",
+  "sourceFile": "enterprise_applications.yml",
+  "capturedUtc": "2026-05-12T15:13:12.2279496Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "consentType",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": ">-"
+    },
+    {
+      "Name": "userObjectId",
+      "In": "query",
+      "Type": "",
+      "Default": "",
+      "Description": ">-"
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/EnterpriseApplications/{spId}/ServicePrincipalPermissions' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": ">-",
+      "type": "string",
+      "name": "consentType"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": ">-",
+      "type": "",
+      "name": "userObjectId"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.AadId",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

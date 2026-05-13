@@ -1,0 +1,16 @@
+  /inventory/api/Onboarding:
+    get:
+      tags: [Onboarding]
+      summary: Get inventory onboarding state
+      description: Returns the tenant onboarding state and the onboarding action link. Hidden endpoint confirmed by a token-backed probe.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+      responses:
+        '200':
+          description: Onboarding state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingState'

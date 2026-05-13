@@ -1,0 +1,23 @@
+  /mtp/ndr/machines/allVendors:
+    get:
+      summary: Get all vendors
+      description: >-
+        Retrieve a list of all unique device vendors across the device inventory.
+      operationId: EndpointDevices.GetAllVendors
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - all device vendors
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

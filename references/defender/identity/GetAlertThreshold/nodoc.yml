@@ -1,0 +1,23 @@
+  /mdi/identity/userapiservice/alertThreshold:
+    get:
+      summary: Get alert threshold
+      description: >-
+        Retrieve the alert threshold configuration for Defender for Identity.
+      operationId: Identity.GetAlertThreshold
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - alert threshold configuration
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

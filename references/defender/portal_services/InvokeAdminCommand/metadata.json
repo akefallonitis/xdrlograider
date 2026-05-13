@@ -1,0 +1,74 @@
+{
+  "portal": "defender",
+  "subArea": "portal_services",
+  "slug": "InvokeAdminCommand",
+  "operationId": "PortalServices.InvokeAdminCommand",
+  "path": "/admin/Beta/{tenantId}/InvokeCommand",
+  "methods": [
+    "post"
+  ],
+  "summary": "Invoke admin command",
+  "sourceFile": "portal_services.yml",
+  "capturedUtc": "2026-05-12T14:42:11.0539256Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "tenantId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The tenant GUID to invoke the command against."
+    }
+  ],
+  "suggestedCadence": "weekly",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "PathTemplate — '/admin/Beta/{tenantId}/InvokeCommand' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "write",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The tenant GUID to invoke the command against.",
+    "type": "string",
+    "name": "tenantId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

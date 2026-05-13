@@ -1,0 +1,18 @@
+  /inventory/api/OfficeAddins:
+    get:
+      tags: [Devices]
+      summary: List Office add-ins
+      description: Returns add-in inventory ordered by number of devices.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Office add-in inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'

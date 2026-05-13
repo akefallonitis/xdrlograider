@@ -1,0 +1,56 @@
+  /di/Search/SubmissionDIESDataAggregation:
+    post:
+      summary: Aggregate report submission data
+      description: >-
+        Query aggregated Data Insights report-submission metrics for the selected
+        tenant and time window. Observed live on the Report Submission experience,
+        which posts an aggregation expression set for interval and pivot dimensions.
+      operationId: PortalServices.AggregateSubmissionDiesData
+      tags: [Portal Services]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: Tenant ID to query.
+          schema:
+            type: string
+            format: uuid
+        - name: StartTime
+          in: query
+          required: true
+          description: Inclusive lower bound for the aggregation interval.
+          schema:
+            type: string
+            format: date-time
+        - name: EndTime
+          in: query
+          required: true
+          description: Inclusive upper bound for the aggregation interval.
+          schema:
+            type: string
+            format: date-time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: >-
+                Data Insights aggregation envelope including filter expressions and
+                grouping configuration.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Data Insights submission aggregation response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

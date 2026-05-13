@@ -1,0 +1,13 @@
+  /settings/datashare:
+    get:
+      tags: [Auth]
+      summary: Get tenant data-sharing settings
+      description: Retrieves tenant-level data-sharing and feature settings used by Security Copilot startup and administration pages.
+      operationId: SecurityCopilotPortal.Settings.GetDataShare
+      responses:
+        '200':
+          description: Data-sharing settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataShareSettings'

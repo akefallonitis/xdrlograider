@@ -1,0 +1,24 @@
+  /mtp/secureScore/security/secureScoresV2:
+    get:
+      summary: Get secure scores V2
+      description: >-
+        Retrieve the current secure scores for the organization using the V2 endpoint,
+        including overall score and category breakdowns.
+      operationId: SecureScore.GetSecureScoresV2
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - secure scores V2 data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

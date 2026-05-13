@@ -1,0 +1,29 @@
+  /cpm/v1.0/Assessments/List:
+    post:
+      operationId: listComplianceAssessments
+      summary: List compliance assessments
+      description: >-
+        Retrieve a list of compliance assessments from Compliance Manager.
+        Assessments track the tenant's progress against regulatory frameworks and standards.
+      tags: [ComplianceManager]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Assessment list query options. The captured Compliance Manager request succeeded with an empty object body.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ComplianceAssessmentsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

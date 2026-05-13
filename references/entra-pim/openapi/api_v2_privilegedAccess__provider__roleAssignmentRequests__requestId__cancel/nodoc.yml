@@ -1,0 +1,17 @@
+  /api/v2/privilegedAccess/{provider}/roleAssignmentRequests/{requestId}/cancel:
+    post:
+      tags: [Role Assignment Requests]
+      summary: Cancel a submitted role assignment request
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Request cancelled successfully
+        '404':
+          description: Request not found

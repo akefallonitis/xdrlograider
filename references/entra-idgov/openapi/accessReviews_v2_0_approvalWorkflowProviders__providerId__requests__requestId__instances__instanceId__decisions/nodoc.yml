@@ -1,0 +1,30 @@
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/decisions:
+    get:
+      tags: [Decisions]
+      summary: List decisions for an access review instance
+      description: |
+        Retrieves all review decisions for a specific instance. Each decision
+        represents one reviewer's determination for one reviewed access.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: List of access review decisions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object

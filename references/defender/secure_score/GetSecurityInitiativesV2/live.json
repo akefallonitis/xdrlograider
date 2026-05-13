@@ -1,0 +1,2086 @@
+{
+  "httpStatus": 200,
+  "successKind": "live",
+  "rowCount": 1,
+  "errorText": "",
+  "responseShape": "wrapper:value[]",
+  "sample": {
+    "@odata.context": "http://security.microsoft.com/api/tvm/security/$metadata#SecureScoreSecurityInitiativesV2",
+    "value": [
+      {
+        "Name": "Microsoft Secure Score",
+        "Category": "Industry Benchmark",
+        "Description": "Microsoft Secure Score",
+        "DefaultGrouping": "NistFunction",
+        "id": "securescore",
+        "azureTenantId": "45f52f35-73d5-4066-8378-fe506ee90fb1",
+        "Subgroups": [
+          {
+            "Id": "default",
+            "SubgroupContext": "default",
+            "DisplayName": "default",
+            "Controls": [
+              {
+                "ReferenceId": "IntegratedApps",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "RoleOverlap",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "PWAgePolicyNew",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AdminMFAV2",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "OneAdmin",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "SigninRiskPolicy",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "UserRiskPolicy",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MFARegistrationV2",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "BlockLegacyAuthentication",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "PasswordHashSync",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "SelfServicePasswordReset",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_admin_consent_workflow",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_third_party_apps",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_sign_in_freq_session_timeout",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_admin_accounts_separate_unassigned_cloud_only",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_managed_approved_public_groups_only",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_phishing_MFA_strength",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_limited_administrative_roles",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "admincenter_owned_apps_and_services",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "forms_external_sharing",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "forms_phishing_protection",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "sway_block_sharing_with_outside_users",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AppG_unusual_activity_with_priority_account",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AppG_regulate_access_to_sensitive_data",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AppG_regulate_unused_cloud_apps",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AppG_regulate_apps_unused_credentials",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AppG_monitor_credential_expiration",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Sensor",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_HoneyToken",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Vpn",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Wdatp",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AuditPolicyMA",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ClearText",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_WeakCipher",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_KerberosDelegations",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_PrintSpooler",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_DormantAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_PwdLAPS",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_PathRisk",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_SIDHistory",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_UnsecureAccount",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_UnsecureDomain",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_DefenderForIdentityIsNotInstalled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AdminSDHolder",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_EntitiesWithOldPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_DomainControllerLocalUsers",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_NonAdminDCSyncAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSCertificateTemplateEnrolementSuppliesSubject",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSInsecureCertificateEnrollmentIisEndpoints",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSMisconfiguredCertificateTemplateAcl",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSMisconfiguredCertificateTemplateEnrollmentAgent",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSMisconfiguredCertificateTemplateEku",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSMisconfiguredCertificateTemplateOwner",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSMisconfiguredCertificateAuthorityAcl",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSSanSpecifiedByUserEnabled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSMisconfiguredRpcEnrollmentSigning",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AzureSsoAccountOldPasswords",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AzureSsoAccountProblematicAttributes",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_EntraConnectAccountsOldPasswords",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_EntraConnectAccountUnnecessaryReplicationPermission",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_GroupPolicyAbnormalModificationAssignment",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_GroupPolicyAssignsUnprivilegedIdentitiesToElevatedLocalGroups",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_DnsAdminsGroupWithUnsafePermissions",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_BuiltinAdministratorAccountWithOldPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_GroupPolicyPasswordInPreferences",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AccountsWithNonDefaultPrimaryGroup",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_DomainControllersWithOldPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_BuiltinGuestAccountIsEnabled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_PrivilegedAccountsWithDelegationAllowed",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_BuiltinKrbtgtAccountWithOldPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ADCSCertificateTemplateArbitraryAppPolicies",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Okta_Dormant",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Okta_HighNumberOfSuperAdmins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Okta_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_EntraConnectAccountsWithConnectorAccountAsDefaultAdmin",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_EntraConnectSensitiveAccountsWithUnsafePermissions",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Okta_SensitiveAccountWithoutFactorsAssigned",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Okta_SensitiveAccountWithOldPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Okta_SensitiveApiToken",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_SingleManagedServiceAccountsWithOldPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_GroupManagedServiceAccountWithUnrecommendedPasswordChangeInterval",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AccountWithLeakedCredentials",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AdcsComputersWithNoMdiSensorInstalled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AdfsComputersWithNoMdiSensorInstalled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_EntraConnectComputersWithNoMdiSensorInstalled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ExposedPasswordsInADAttributes",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_InactiveServiceAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Ping_Dormant",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Ping_HighNumberOfSuperAdmins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Ping_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Ping_SensitiveAccountWithoutFactorsAssigned",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_Ping_SensitiveAccountWithOldPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_CyberArk_MFAforPriviledgedUserAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_CyberArk_PriviledgedUserAccountsWithOldPasswords",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_CyberArk_HighNumberOfPriviledgedIdentityAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_CyberArk_HighNumberOfSystemAdmins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_CyberArk_DormantPriviledgedAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_SailPoint_DormantPriviledgedAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_SailPoint_HighNumberOfPriviledgedIdentityAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_SailPoint_HighNumberOfSystemAdmins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_SailPoint_MFAforPriviledgedUserAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_SailPoint_PriviledgedUserAccountsWithOldPasswords",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AccountsInOperatorGroups",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_PrivilegedEntraIdAndActiveDirectoryAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_ServiceAccountsInPrivilegedGroup",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_StaleAccounts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "exo_individualsharing",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "CustomerLockBoxEnabled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "TLSDeprecation",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "exo_internalsenderadminnotifications",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "exo_transportrulesallowlistdomains",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_test",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_advanced_security_configuration",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_password_reused_prohibited",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_never_expires_password",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_conection_from_jail_broken_rooted_devices",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_wipe_on_multiple_signin_failures",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_minimum_password_length",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_device_lock_after_inactivity",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_device_encryption",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_complex_password_alphanumeric",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_complex_password_simple_password_blocked",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_AV_firewall_enabled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_email_profiles_requirement",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "intune_mobile_password_requirement",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "McasCutomActivityPolicy",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "McasFirewallLogUpload",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "McasCloudAppNotification",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "McasOAuthAppNotification",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mcas_mda_enabled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Test_Control",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableXssProtection",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableMultipleSamlConfigs",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_lockSessionsToDomain",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableSMSIdentity",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableClickjackSetup",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableClickjackNonsetupSFDC",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableClickjackNonsetupUser",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableClickjackNonsetupUserHeaderless",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableCSRFOnGet",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableCSRFOnPost",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_requireHttpOnly",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_maxLoginAttempts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_minimumPasswordLifetime",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_forceRelogin",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enforceIpRangesEveryRequest",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableCSPOnEmail",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableContentSniffingProtection",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableAdminLoginAsAnyUser",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_password_historyRestriction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_password_minimumPasswordLength",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_password_expiration",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_password_complexity",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_password_obscureSecretAnswer",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_forceLogoutOnSessionTimeout",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_identityConfirmationOnEmailChange",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_disableProtocolSecurity",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_password_questionRestriction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_password_sessionTimeout",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_password_lockoutInterval",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SF_enableCacheAndAutocomplete",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_CitrixSF_EnableTwoFactorAuth",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_CitrixSF_ForceSSO",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_CitrixSF_InactiveTimeoutMins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_CitrixSF_LoginFailMaxAttempts",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_CitrixSF_LoginFailLockoutSecs",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_CitrixSF_MinimumLength",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_CitrixSF_MinimumSpecialCharacters",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_CitrixSF_MinimumNumeric",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_CitrixSF_PasswordMaxAgeDays",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_DocuSign_SessionTimeout",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_DocuSign_EnhancedPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_DocuSign_PasswordExpires",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_MFA",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_PrivateRepositoryForkingSetting",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_IPallowListConfigurationForOrgResources",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_PublicRepoCreation",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_RepoVisibility_change",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_DependencyInsights",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_RepoTransferOrDeletion",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_OutsideCollabInvitation",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_EmailNotificationRestrictedToVerifiedOrApprovedDomains",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_GitHub_SAML",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Okta_MFA",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Okta_SessionTimeout",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Okta_EnhancedPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Okta_PasswordExpires",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_highSecurity",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_authRequiredJson2",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_authRequiredSOAP",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_roleManagement",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_smDefaultMode",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_scriptSecureAjaxgliderecord",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_scriptCcsiIsPublic",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_cauthRequiredScriptedProcessor",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_systemSecurity",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_soapRequireContentTypeXml",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_authRequiredUnl",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_httpCacheControl",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_concourseOnmessageEnforceSameOrigin",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_userCookieMaxLifeSpanInDays",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_useCsrfToken",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_loginNoBlankPassword",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_authenticateMultifactor",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_enablePasswordPolicy",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_sncUserLockoutCheck",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_uiSessionTimeout",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_scriptUseSandbox",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_SNOW_soapStrictSecurity",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zoom_MFA",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zoom_SessionTimeoutWeb",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zoom_SessionTimeoutClient",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zoom_PasswordReq",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zoom_MeetingE2eEncryption",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zoom_BlockDomains",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Google_EnableTwoFactorAuth",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Google_Passwordexpiry",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Google_passwordStrength",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Google_ForceSSO_SAML",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Google_Sessiontimeout",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Google_suslogins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Atlassian_EnableTwoFactorAuth",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Atlassian_ForceSSO",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Atlassian_InactiveTimeoutMins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Atlassian_passwordStrength",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Atlassian_passwordExpiry",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Atlassian_mobile_UsersAffected",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Atlassian_mobile_dataprotection",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Atlassian_mobile_access",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_BlockAccountAssumption",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_EmailNotificationsforPassChange",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_AdminPassChange",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_IPrestrictions",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_bypassIPrestrictions",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_enableapp",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_MFA",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_ZanAuth",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_SSO",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Zendesk_sessionexpiry",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Slack_EnableTwoFactorAuth",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_NetDocuments_SSO",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Workplace_SSO",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Dropbox_EnableTwoFactorAuth",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Dropbox_ForceSSO",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Dropbox_InactiveTimeoutMinsFull",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Dropbox_PasswordControl",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "MDA_Dropbox_InactiveTimeoutMins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_safeattachments",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_allowedsender",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_safelinksforemail",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_connectionfilter",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_zapmalware",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_zapphish",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_zapspam",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_bulkspamaction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_bulkthreshold",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_highconfidencephishaction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_highconfidencespamaction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_allowedsenderscombined",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_phisspamacation",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_quarantineretentionperiod",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_spamaction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_autoforwardingmode",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_recipientexternallimitperhour",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_recipientinternallimitperhour",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_recipientlimitperday",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_thresholdreachedaction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_atpprotection",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_safedocuments",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_phishthresholdlevel",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_targetedusersprotection",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_enabledomainstoprotect",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_enablemailboxintelligence",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_mailboxintelligenceprotection",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_targeteduserprotectionaction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_targeteddomainprotectionaction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_mailboxintelligenceprotectionaction",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_similaruserssafetytips",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_similardomainssafetytips",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_unusualcharacterssafetytips",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_commonattachmentsfilter",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "dlp_datalossprevention",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mip_sensitivitylabelspolicies",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mip_autosensitivitylabelspolicies",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mip_purviewlabelconsent",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_datalossprotection",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_organizationsharing",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mip_search_auditlog",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mip_management_API_enabled_four_workloads",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "exo_oauth2clientprofileenabled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_spam_notifications_only_for_admins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "exo_mailtipsenabled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_safeattachmentpolicy",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_justintime_access",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_linkedin_connection_disables",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_collaboration_invitations_allowed_domains",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_password_protection",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "aad_custom_banned_passwords",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "AATP_AdAccountWithPotentiallyLeakedCredentials",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "exo_SPF_records_for_all_domains",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mip_external_domains_Skype_Teams",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mip_DLP_policies_Teams",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_antiphishingpolicies",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_safelinksforOfficeApps",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_blockmailforward",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "exo_mailboxaudit",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "exo_storageproviderrestricted",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_dkimenabled",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "exo_outlookaddins",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1000",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1001",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1002",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1003",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1004",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1005",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1006",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1007",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1008",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1009",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1010",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "oxoid_1011",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "spo_idle_session_timeout",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "spo_guest_share_items",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "spo_guest_share_account",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "spo_legacy_auth",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "spo_external_sharing_managed",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "spo_external_users_sharing",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "spo_block_onedrive_sync_unmanaged_devices",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_inlinesafetytips",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "mdo_firstcontactsafetytips",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "meeting_restrictanonymousjoin_v1",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "meeting_pstnusersbypasslobby_v1",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "meeting_externalrequestcontrol_v1",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "meeting_anonymousstartmeeting_v1",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "meeting_autoadmitusers_v1",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "meeting_designatedpresenter_v1",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_15",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_16",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_17",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_19",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_20",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_21",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_22",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_23",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_24",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_25",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_26",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_27",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_29",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_30",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_36",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_37",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_38",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_39",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_40",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_43",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_46",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_49",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_50",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_51",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_52",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_53",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_54",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_57",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_58",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_59",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_60",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_61",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_62",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_63",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_64",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_65",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_66",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_67",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_68",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_69",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_70",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_71",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_72",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_73",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_74",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_75",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_76",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_77",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_78",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_79",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_80",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_81",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_82",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_83",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_84",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_85",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_87",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_88",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_89",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_90",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_91",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_92",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_93",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_94",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_95",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2000",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2001",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2002",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2010",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2011",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2012",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2013",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2014",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2020",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2021",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2051",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2060",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2061",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2070",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2071",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2072",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2073",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2080",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2090",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2091",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2093",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2509",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2503",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2500",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2501",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2506",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2507",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2504",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2505",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2016",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2512",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2513",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2514",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2515",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2510",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2511",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_96",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_9",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2003",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2508",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2502",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_97",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_98",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_99",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_100",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_101",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_3001",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_3002",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_3003",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2004",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_3010",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_3011",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_32",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_33",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_34",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_35",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_55",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_41",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_44",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_28",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_42",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5001",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5002",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5003",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5004",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5005",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5006",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5007",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5009",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5010",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5011",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5013",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5014",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5090",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5091",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5094",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5095",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6001",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6002",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6014",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6090",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6091",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6094",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6095",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_45",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_4000",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_4001",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_4002",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_4003",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2030",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_102",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_103",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_104",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_105",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_106",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_108",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_109",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2100",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2516",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2517",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_2518",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5092",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_5093",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6092",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6093",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6100",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_6101",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_110",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_111",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_112",
+                "Metadata": []
+              },
+              {
+                "ReferenceId": "scid_107",
+                "Metadata": []
+              }
+            ]
+          }
+        ],
+        "Links": [],
+        "vendorInformation": {
+          "provider": "SecureScore",
+          "providerVersion": null,
+          "subProvider": null,
+          "vendor": "Microsoft"
+        }
+      }
+    ],
+    "_truncatedTo": 5,
+    "_totalRows": 1
+  }
+}

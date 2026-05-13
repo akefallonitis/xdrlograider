@@ -1,0 +1,29 @@
+  /mcas/cas/api/v1/activities:
+    post:
+      summary: List activities
+      description: >-
+        Retrieve a list of cloud app activities with filtering. Discovered on Activity Log page.
+      operationId: CloudApps.ListActivities
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Activity list query envelope with filter, paging, and sort controls.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Activity collection returned for the supplied cloud app activity query.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

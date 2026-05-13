@@ -1,0 +1,88 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "GetDevicePrevalence",
+  "operationId": "Files.GetDevicePrevalence",
+  "path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/prevalence",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get file device prevalence",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:01.6980194Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "entityId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The SHA-256 of the file on unified file pages."
+    },
+    {
+      "Name": "daysToLookBack",
+      "In": "query",
+      "Type": "integer",
+      "Default": "30",
+      "Description": "The device-observation lookback window, in days."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The SHA-256 of the file on unified file pages.",
+      "type": "string",
+      "name": "entityId"
+    },
+    {
+      "in": "query",
+      "default": "30",
+      "required": false,
+      "description": "The device-observation lookback window, in days.",
+      "type": "integer",
+      "name": "daysToLookBack"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "weekly"
+}

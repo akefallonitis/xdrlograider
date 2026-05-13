@@ -1,0 +1,50 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "application_proxy",
+  "slug": "Directory.Get",
+  "operationId": "ApplicationProxy.Directory.Get",
+  "path": "/ApplicationProxy/Directory",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Application Proxy directory",
+  "sourceFile": "application_proxy.yml",
+  "capturedUtc": "2026-05-12T15:13:11.7165468Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Name",
+    "File.Path",
+    "Software.Name",
+    "Software.Version",
+    "Tenant.Id",
+    "Url.Domain"
+  ],
+  "cadenceSuggestion": "daily"
+}

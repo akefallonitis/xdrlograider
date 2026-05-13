@@ -1,0 +1,23 @@
+  /mtp/disrupt/api/exclusions/Identity:
+    get:
+      summary: Get identity disruption exclusions
+      description: >-
+        Retrieve the identity-specific disruption exclusions configured in the Defender portal.
+      operationId: Configuration.GetIdentityDisruptionExclusions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identity disruption exclusions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

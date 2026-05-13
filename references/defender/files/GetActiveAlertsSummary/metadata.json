@@ -1,0 +1,122 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "GetActiveAlertsSummary",
+  "operationId": "Files.GetActiveAlertsSummary",
+  "path": "/mtp/activeAlertsSummary/activeAlertsSummary",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get active alert summary for file",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:04.7263436Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "lookingBackInDays",
+      "In": "query",
+      "Type": "integer",
+      "Default": "180",
+      "Description": "Alert-summary lookback window, in days."
+    },
+    {
+      "Name": "Sha1",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "SHA-1 identifier for the file."
+    },
+    {
+      "Name": "Sha256",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "SHA-256 identifier for the file."
+    },
+    {
+      "Name": "tenantIds",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": ">-"
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": "180",
+      "required": false,
+      "description": "Alert-summary lookback window, in days.",
+      "type": "integer",
+      "name": "lookingBackInDays"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "SHA-1 identifier for the file.",
+      "type": "string",
+      "name": "Sha1"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "SHA-256 identifier for the file.",
+      "type": "string",
+      "name": "Sha256"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": ">-",
+      "type": "string",
+      "name": "tenantIds"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Sha1",
+    "File.Sha256"
+  ],
+  "cadenceSuggestion": "1h"
+}

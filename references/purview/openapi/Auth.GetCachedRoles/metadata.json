@@ -1,0 +1,71 @@
+{
+  "portal": "purview",
+  "subArea": "openapi",
+  "slug": "Auth.GetCachedRoles",
+  "operationId": "PurviewPortal.Auth.GetCachedRoles",
+  "path": "/api/v2/auth/GetCachedRoles",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get cached Purview roles",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:11:33.5946631Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "refreshCache",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Force the portal to refresh its cached role state before returning it."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 404,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 404",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": false,
+    "description": "Force the portal to refresh its cached role state before returning it.",
+    "type": "boolean",
+    "name": "refreshCache"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

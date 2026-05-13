@@ -1,0 +1,22 @@
+  /mcas/api/v1/agents/siem:
+    get:
+      summary: List SIEM agents
+      description: >-
+        Retrieve configured SIEM agents and pagination state for Defender for Cloud Apps.
+      operationId: CloudApps.ListSiemAgents
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SiemAgentsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

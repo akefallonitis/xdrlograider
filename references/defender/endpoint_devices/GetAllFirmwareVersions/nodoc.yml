@@ -1,0 +1,23 @@
+  /mtp/ndr/machines/allFirmwareVersions:
+    get:
+      summary: Get all firmware versions
+      description: >-
+        Retrieve a list of all unique firmware versions across devices in the inventory.
+      operationId: EndpointDevices.GetAllFirmwareVersions
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - all firmware versions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

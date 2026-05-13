@@ -1,0 +1,25 @@
+{
+  "portal": "defender",
+  "subArea": "portal_services",
+  "endpointCount": 21,
+  "paginationDistribution": {
+    "none": 21
+  },
+  "timeFilterEndpointCount": 2,
+  "topEntities": [
+    "Tenant.Id",
+    "Time.Generated",
+    "Account.UPN",
+    "Software.Version",
+    "Account.SamName",
+    "Account.AadId",
+    "Host.HealthStatus"
+  ],
+  "cadenceSuggestion": "daily",
+  "productionScale": {
+    "VolumeLargeT": "1-100",
+    "RateLimitRisk": "LOW",
+    "DeltaPollPriority": "none"
+  },
+  "generatedUtc": "2026-05-13T07:21:46Z"
+}

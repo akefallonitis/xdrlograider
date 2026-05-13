@@ -1,0 +1,26 @@
+{
+  "portal": "defender",
+  "subArea": "identity",
+  "endpointCount": 74,
+  "paginationDistribution": {
+    "none": 74
+  },
+  "timeFilterEndpointCount": 1,
+  "topEntities": [
+    "Url.Domain",
+    "File.Path",
+    "Account.AadId",
+    "Account.SamName",
+    "Host.AadDeviceId",
+    "Account.Sid",
+    "Time.Generated",
+    "Host.FullName"
+  ],
+  "cadenceSuggestion": "daily",
+  "productionScale": {
+    "VolumeLargeT": "1K-100K rows",
+    "RateLimitRisk": "MEDIUM",
+    "DeltaPollPriority": "high"
+  },
+  "generatedUtc": "2026-05-13T07:21:45Z"
+}

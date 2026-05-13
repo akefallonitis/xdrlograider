@@ -1,0 +1,114 @@
+  /mcas/cas/api/v1/app_connectors:
+    post:
+      summary: List app connectors
+      description: >-
+        Retrieve a list of cloud app connectors. POST method is used for
+        listing with filter parameters. Discovered on Cloud Apps Dashboard page.
+      operationId: CloudApps.ListAppConnectors
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Connector list query envelope used when the dashboard applies filters, paging, or sorting.
+            example: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cloud app connector collection with API, proxy, and discovery connection state.
+              example:
+                data:
+                  - appId: 11161
+                    name: Microsoft 365
+                    _id: 63dd5f272b9cbba7bb29d703
+                    instanceName: null
+                    category: SAASDB_CATEGORY_COLLABORATION
+                    api:
+                      lastCheckTime: 1775347859564
+                      isConnected: true
+                      usersCount: 898
+                      creator: user@contoso.com
+                      isEnabled: true
+                      lastConnected: 1773702127907
+                      disabledBy: console
+                      isSSPMEnabled: true
+                    proxy:
+                      status: 0
+                      inDeployment: false
+                      isConnected: false
+                      isInProxyPolicy: null
+                      isSuspended: false
+                      isConfigured: false
+                      isConfiguredInAAD: false
+                      isSessionProxySupported: false
+                      isAppStatusEnabled: false
+                      isSessionProxyDisabled: true
+                      lastConnected: null
+                      proxySettings: null
+                      isOIDCBasedProtocol: true
+                    discovery:
+                      isConnected: false
+                    isOfficeApp: true
+                    isApiConnectable: true
+                    aadInfo: null
+                    lastUsed: null
+                    customData: {}
+                    isCustomApp: false
+                    securityConfiguration: {}
+                    appName: Microsoft 365
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    get:
+      summary: Get app connectors
+      description: >-
+        Retrieve app connectors information. Discovered on App Governance page.
+      operationId: CloudApps.GetAppConnectors
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cloud app connector collection with API, proxy, and discovery connection state.
+              example:
+                data:
+                  - appId: 11161
+                    name: Microsoft 365
+                    _id: 63dd5f272b9cbba7bb29d703
+                    instanceName: null
+                    category: SAASDB_CATEGORY_COLLABORATION
+                    api:
+                      isConnected: true
+                      usersCount: 898
+                      creator: user@contoso.com
+                      isEnabled: true
+                    proxy:
+                      isConnected: false
+                      isConfigured: false
+                      isSessionProxySupported: false
+                    discovery:
+                      isConnected: false
+                    isOfficeApp: true
+                    isApiConnectable: true
+                    appName: Microsoft 365
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

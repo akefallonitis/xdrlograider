@@ -1,0 +1,52 @@
+  /di/search/PurviewForAIActivityData:
+    post:
+      operationId: searchPurviewForAiActivityData
+      summary: Search Purview for AI activity data
+      description: >-
+        Retrieve Purview for AI activity data and aggregations for overview and
+        report visuals.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The tenant GUID used by the Purview for AI service.
+          schema:
+            type: string
+            format: uuid
+        - name: startTime
+          in: query
+          required: false
+          description: The start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: false
+          description: The end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

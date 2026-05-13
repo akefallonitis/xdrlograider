@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/entities/metadata:
+    get:
+      summary: Get entities metadata
+      description: >-
+        Retrieve metadata for the entities endpoint. Discovered on Activity Log page.
+      operationId: CloudApps.GetEntitiesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

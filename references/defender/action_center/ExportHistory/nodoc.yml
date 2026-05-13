@@ -1,0 +1,64 @@
+  /mtp/actionCenter/actioncenterui/history-actions/export:
+    get:
+      summary: Export action center history
+      description: >-
+        Export the filtered Action Center history grid as CSV from the Defender portal.
+      operationId: ActionCenter.ExportHistory
+      tags: [Action Center]
+      parameters:
+        - name: sortByField
+          in: query
+          description: Field to sort the export by.
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          description: Sort direction for the export.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+        - name: type
+          in: query
+          description: The Action Center dataset to export.
+          schema:
+            type: string
+            default: history
+        - name: pageIndex
+          in: query
+          description: The current page index used to scope the export request.
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: The current page size used to scope the export request.
+          schema:
+            type: integer
+            default: 9
+        - name: toDate
+          in: query
+          description: End of the exported date range.
+          schema:
+            type: string
+            format: date-time
+        - name: fromDate
+          in: query
+          description: Start of the exported date range.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

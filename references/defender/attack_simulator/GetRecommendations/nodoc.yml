@@ -1,0 +1,23 @@
+  /astgws/AttackSimulator/api/v1/Recommendations:
+    get:
+      summary: Get attack simulator recommendations
+      description: >-
+        Retrieve recommendations for improving attack simulation coverage and effectiveness. Discovered on Attack Simulator page.
+      operationId: AttackSimulator.GetRecommendations
+      tags: [AttackSimulator]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

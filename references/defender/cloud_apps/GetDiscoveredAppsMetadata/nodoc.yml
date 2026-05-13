@@ -1,0 +1,25 @@
+  /mcas/cas/api/v1/discovery/discovered_apps/metadata:
+    get:
+      summary: Get discovered apps metadata
+      description: >-
+        Retrieve filter and column metadata for the Cloud Discovery discovered-apps
+        grid shown on the Defender Applications page. Observed live returning the
+        `discovered_apps` schema definition, including available filters and operators.
+      operationId: CloudApps.GetDiscoveredAppsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered apps metadata
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

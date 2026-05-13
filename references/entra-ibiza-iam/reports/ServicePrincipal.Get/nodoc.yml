@@ -1,0 +1,20 @@
+  /Reports/ServicePrincipals/{spId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: spId
+        description: The object ID of the service principal.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/servicePrincipalId
+    get:
+      summary: Get basic details about service principal
+      description: >-
+        Get basic details about service principal.
+      operationId: Reports.ServicePrincipal.Get
+      tags: [Reports]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

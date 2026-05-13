@@ -1,0 +1,69 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "ListCriticalAssetClassifications",
+  "operationId": "Configuration.ListCriticalAssetClassifications",
+  "path": "/mtp/xspmatlas/assetrules",
+  "methods": [
+    "get",
+    "post",
+    "put",
+    "delete"
+  ],
+  "summary": "List critical asset classifications",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:37:11.5654349Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_AssetRules_CL",
+    "v1Tier": "XspmGraph",
+    "v1Category": "Exposure Management (XSPM)",
+    "v1RawPath": "/apiproxy/mtp/xspmatlas/assetrules"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 132,
+    "errorText": "",
+    "responseShape": "wrapper:rules[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='rules' for projection",
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=live (132 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Rule.Id",
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "1h"
+}

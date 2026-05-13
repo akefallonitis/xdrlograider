@@ -1,0 +1,29 @@
+  /mcas/cas/api/v1/activities/count:
+    post:
+      summary: Get activities count
+      description: >-
+        Retrieve the count of cloud app activities matching filter criteria. Discovered on Activity Log page.
+      operationId: CloudApps.GetActivitiesCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Aggregate count of activities matching the supplied query.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

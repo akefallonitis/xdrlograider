@@ -1,0 +1,27 @@
+  /radius/api/radius/serviceaccounts/classificationrule/getall:
+    get:
+      summary: Get service account classification rules
+      description: >-
+        Retrieve all service account classification rules from the RADIUS
+        identity service. These rules define how service accounts are
+        automatically identified and classified.
+      operationId: Configuration.GetServiceAccountClassifications
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - service account classification rule
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

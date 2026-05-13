@@ -1,0 +1,73 @@
+{
+  "subArea": "roles",
+  "suggestedCadence": "unknown",
+  "endpointCount": 2,
+  "endpoints": [
+    {
+      "slug": "Assignments.Create",
+      "operationId": "Role.Assignments.Create",
+      "path": "/Roles/{roleId}/RoleAssignments",
+      "methods": [
+        "put",
+        "delete"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Account.AadId",
+        "Software.Version"
+      ],
+      "parsingNotes": [
+        "PathTemplate — '/Roles/{roleId}/RoleAssignments' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "User.Assignments.Get",
+      "operationId": "Role.User.Assignments.Get",
+      "path": "/Roles/User/{userId}/RoleAssignments",
+      "methods": [
+        "get",
+        "put"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Account.AadId",
+        "File.Path",
+        "Software.Version"
+      ],
+      "parsingNotes": [
+        "PathTemplate — '/Roles/User/{userId}/RoleAssignments' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 0,
+  "cntNoLive": 2,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Account.AadId",
+    "File.Path",
+    "Software.Version"
+  ],
+  "paginationStyles": [],
+  "valueProp": "Built-in + custom role definitions + assignments"
+}

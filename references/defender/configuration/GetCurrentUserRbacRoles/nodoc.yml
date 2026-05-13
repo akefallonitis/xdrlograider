@@ -1,0 +1,23 @@
+  /mtp/rbacManagementApi/rbac/user_roles:
+    get:
+      summary: Get current user RBAC roles
+      description: >-
+        Retrieve the RBAC role assignments resolved for the current Defender portal user.
+      operationId: Configuration.GetCurrentUserRbacRoles
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - current user RBAC roles
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

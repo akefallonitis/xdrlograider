@@ -1,0 +1,26 @@
+  /mtp/mdeEntitiesExperience/files/{Sha256}/capabilities:
+    get:
+      summary: Get file page capabilities
+      description: Return capability flags for the unified file experience.
+      operationId: Files.GetCapabilities
+      tags: [Files]
+      parameters:
+        - name: Sha256
+          in: path
+          required: true
+          description: The SHA-256 of the file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileCapabilitiesResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

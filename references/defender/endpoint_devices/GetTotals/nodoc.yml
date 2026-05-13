@@ -1,0 +1,24 @@
+  /mtp/deviceManagement/deviceTotals:
+    get:
+      summary: Get device totals
+      description: >-
+        Retrieve summary totals for the endpoint device inventory,
+        including counts by platform, health status, and onboarding status.
+      operationId: EndpointDevices.GetTotals
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device total statistics
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

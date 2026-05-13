@@ -1,0 +1,42 @@
+  /B2B/customIdentityProviders:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List B2B custom identity providers
+      description: >-
+        List B2B custom identity providers.
+      operationId: B2B.CustomIdentityProviders.List
+      tags: [B2B]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create B2B custom identity provider
+      description: >-
+        Create B2B custom identity providers.
+      operationId: B2B.CustomIdentityProviders.Create
+      tags: [B2B]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    patch:
+      summary: Update B2B custom identity provider
+      description: >-
+        Update B2B custom identity providers.
+      operationId: B2B.CustomIdentityProviders.Update
+      tags: [B2B]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

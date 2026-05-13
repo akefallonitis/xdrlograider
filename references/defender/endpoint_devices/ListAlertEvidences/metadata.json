@@ -1,0 +1,174 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "ListAlertEvidences",
+  "operationId": "EndpointDevices.ListAlertEvidences",
+  "path": "/mtp/alertsApiService/Evidences/device/Alerts",
+  "methods": [
+    "get"
+  ],
+  "summary": "List device alert evidences",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:03.9938673Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": "lookBackInDays",
+    "startParam": null,
+    "type": "duration-units-from-now",
+    "supported": true,
+    "endParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "status",
+      "In": "query",
+      "Type": "integer",
+      "Default": "6",
+      "Description": "Alert status filter applied by the device page."
+    },
+    {
+      "Name": "WcdMachineId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The device identifier used by the device evidence experience."
+    },
+    {
+      "Name": "ComputerDnsName",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The current DNS name of the device."
+    },
+    {
+      "Name": "MachineId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Defender machine identifier."
+    },
+    {
+      "Name": "tenantIds",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional cross-tenant context. The portal currently sends an empty value."
+    },
+    {
+      "Name": "sortByField",
+      "In": "query",
+      "Type": "string",
+      "Default": "severity",
+      "Description": "The field used to sort the device alerts grid."
+    },
+    {
+      "Name": "sortOrder",
+      "In": "query",
+      "Type": "string",
+      "Default": "Descending",
+      "Description": "Sort direction for the alert grid."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via lookbackParam=lookBackInDays",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": "6",
+      "required": false,
+      "description": "Alert status filter applied by the device page.",
+      "type": "integer",
+      "name": "status"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The device identifier used by the device evidence experience.",
+      "type": "string",
+      "name": "WcdMachineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The current DNS name of the device.",
+      "type": "string",
+      "name": "ComputerDnsName"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The Defender machine identifier.",
+      "type": "string",
+      "name": "MachineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional cross-tenant context. The portal currently sends an empty value.",
+      "type": "string",
+      "name": "tenantIds"
+    },
+    {
+      "in": "query",
+      "default": "180",
+      "required": false,
+      "description": "Number of days of alert history to include.",
+      "type": "integer",
+      "name": "lookBackInDays"
+    },
+    {
+      "in": "query",
+      "default": "severity",
+      "required": false,
+      "description": "The field used to sort the device alerts grid.",
+      "type": "string",
+      "name": "sortByField"
+    },
+    {
+      "in": "query",
+      "default": "Descending",
+      "required": false,
+      "description": "Sort direction for the alert grid.",
+      "type": "string",
+      "name": "sortOrder"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.FullName",
+    "Host.MdatpId"
+  ],
+  "cadenceSuggestion": "1h"
+}

@@ -1,0 +1,30 @@
+  /fd/commerceMgmt/moderncommerce/footprint:
+    get:
+      summary: Get modern commerce footprint
+      description: >-
+        Retrieve the tenant-level modern commerce footprint used by the subscriptions
+        and partner experiences to determine available commerce capabilities.
+      operationId: Billing.GetModernCommerceFootprint
+      tags: [Billing]
+      parameters:
+        - name: api-version
+          in: query
+          description: API version requested by the commerce footprint service.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Modern commerce footprint payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

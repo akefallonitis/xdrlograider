@@ -1,0 +1,24 @@
+  /ApplicationSso/{spId}/SetupFederation:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+    post:
+      parameters:
+        - name: tenantName
+          description: The name of the tenant for federation.
+          in: query
+          required: true
+          schema:
+            type: string
+      summary: Setup federation for SSO application
+      description: >-
+        Setup federation for SSO application.
+      operationId: ApplicationSso.SsoFederation.Setup
+      tags: [Application SSO]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

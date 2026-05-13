@@ -1,0 +1,38 @@
+  /mtp/posture/oversight/scaRecommendations/filters:
+    get:
+      summary: Get SCA recommendation filter categories
+      description: >-
+        Retrieve the available filter categories and sub-categories for SCA
+        (Security Configuration Assessment) recommendations. Observed live on the
+        Exposure Management overview page.
+      operationId: ExposureManagement.GetScaRecommendationFilters
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        category:
+                          type: string
+                          description: Top-level filter category.
+                        subCategories:
+                          type: array
+                          items:
+                            type: string
+                          description: Sub-category options within this category.
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

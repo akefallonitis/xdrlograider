@@ -1,0 +1,151 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "ExportNdrMachines",
+  "operationId": "EndpointDevices.ExportNdrMachines",
+  "path": "/mtp/ndr/machines/commandExport",
+  "methods": [
+    "get"
+  ],
+  "summary": "Export NDR machine inventory",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:14.2321747Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "machinesApiServiceMigration",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Whether the portal is using the migrated machines API service."
+    },
+    {
+      "Name": "deviceCategories",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Device-category filter applied to the export."
+    },
+    {
+      "Name": "lookingBackIndays",
+      "In": "query",
+      "Type": "integer",
+      "Default": "30",
+      "Description": "Number of days of NDR history to include."
+    },
+    {
+      "Name": "paginationGuid",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Pagination cursor. The portal currently sends undefined when absent."
+    },
+    {
+      "Name": "sortOrder",
+      "In": "query",
+      "Type": "string",
+      "Default": "Descending",
+      "Description": "Sort direction for the export."
+    },
+    {
+      "Name": "sortByField",
+      "In": "query",
+      "Type": "string",
+      "Default": "riskscore",
+      "Description": "Field used to sort the export."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": "true",
+      "required": false,
+      "description": "Whether the portal is using the migrated machines API service.",
+      "type": "boolean",
+      "name": "machinesApiServiceMigration"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Device-category filter applied to the export.",
+      "type": "string",
+      "name": "deviceCategories"
+    },
+    {
+      "in": "query",
+      "default": "30",
+      "required": false,
+      "description": "Number of days of NDR history to include.",
+      "type": "integer",
+      "name": "lookingBackIndays"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Pagination cursor. The portal currently sends undefined when absent.",
+      "type": "string",
+      "name": "paginationGuid"
+    },
+    {
+      "in": "query",
+      "default": "Descending",
+      "required": false,
+      "description": "Sort direction for the export.",
+      "type": "string",
+      "name": "sortOrder"
+    },
+    {
+      "in": "query",
+      "default": "riskscore",
+      "required": false,
+      "description": "Field used to sort the export.",
+      "type": "string",
+      "name": "sortByField"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.RiskScore"
+  ],
+  "cadenceSuggestion": "daily"
+}

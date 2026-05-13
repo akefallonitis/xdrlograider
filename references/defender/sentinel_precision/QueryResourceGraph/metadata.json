@@ -1,0 +1,74 @@
+{
+  "portal": "defender",
+  "subArea": "sentinel_precision",
+  "slug": "QueryResourceGraph",
+  "operationId": "SentinelPrecision.QueryResourceGraph",
+  "path": "/apiproxy/arm/providers/Microsoft.ResourceGraph/resources",
+  "methods": [
+    "post"
+  ],
+  "summary": "Query Azure Resource Graph",
+  "sourceFile": "sentinel_precision.yml",
+  "capturedUtc": "2026-05-12T14:42:34.8372875Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "api-version",
+      "In": "query",
+      "Type": "string",
+      "Default": "'2019-04-01'",
+      "Description": "ARM API version for the Resource Graph query endpoint."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 404,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 404 (Unknown proxy).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": "2019-04-01",
+    "required": false,
+    "description": "ARM API version for the Resource Graph query endpoint.",
+    "type": "string",
+    "name": "api-version"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

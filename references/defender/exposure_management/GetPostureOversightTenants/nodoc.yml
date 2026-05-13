@@ -1,0 +1,65 @@
+  /mtp/posture/oversight/tenants:
+    get:
+      summary: Get posture oversight tenant configuration
+      description: >-
+        Retrieve tenant configuration and infrastructure details for Exposure Management
+        posture oversight, including geo-region, data-center assignments, EASM onboarding
+        state, and cluster routing details. Observed live on the Exposure Management overview page.
+      operationId: ExposureManagement.GetPostureOversightTenants
+      tags: [Exposure Management]
+      parameters:
+        - name: warmCache
+          in: query
+          description: Pre-warm the server-side cache before returning data.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orgId:
+                    type: string
+                    format: uuid
+                    description: Organisation identifier.
+                  tenantId:
+                    type: string
+                    format: uuid
+                  geoRegion:
+                    type: string
+                    description: Geographic region for the tenant.
+                  dataCenter:
+                    type: string
+                    description: Primary data center.
+                  mpsDataCenter:
+                    type: string
+                  mpsSliceId:
+                    type: integer
+                  oversightSliceId:
+                    type: integer
+                  oversightTvmDedicatedClusterUrl:
+                    type: string
+                  immuneTvmDedicatedClusterUrl:
+                    type: string
+                  easmData:
+                    type: object
+                    description: EASM (External Attack Surface Management) onboarding details.
+                    properties:
+                      vendorId:
+                        type: string
+                      vendorName:
+                        type: string
+                      onboardingDate:
+                        type: string
+                        format: date-time
+                      isPremium:
+                        type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,30 @@
+  /api/v1/settings:
+    get:
+      tags: [Settings]
+      summary: Get Identity Governance settings
+      description: |
+        Retrieves the global Identity Governance settings for the tenant,
+        including entitlement management configuration and default policies.
+      responses:
+        '200':
+          description: Identity Governance settings
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      tags: [Settings]
+      summary: Update Identity Governance settings
+      description: |
+        Updates the global Identity Governance settings.
+
+        **Warning:** This endpoint modifies tenant-level governance settings.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Settings updated

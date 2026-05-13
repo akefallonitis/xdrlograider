@@ -1,0 +1,23 @@
+  /mtp/mdiotSettingsService/settings/v2/MagellanFeatures:
+    get:
+      summary: Get device discovery feature flags
+      description: >-
+        Retrieve Device discovery feature flags such as proactive discovery,
+        Corelight integration, and Log4j scanning.
+      operationId: EndpointConfiguration.GetMagellanFeatures
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MagellanFeatures'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

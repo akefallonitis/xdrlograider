@@ -1,0 +1,104 @@
+{
+  "portal": "defender",
+  "subArea": "multi_tenant",
+  "slug": "ListHuntingQueries",
+  "operationId": "MultiTenant.ListHuntingQueries",
+  "path": "/mtoapi/mtp/huntingService/queries/",
+  "methods": [
+    "get"
+  ],
+  "summary": "List MTO hunting queries",
+  "sourceFile": "multi_tenant.yml",
+  "capturedUtc": "2026-05-12T14:41:53.4707723Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "type",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Query collection type to retrieve."
+    },
+    {
+      "Name": "tenantIds[]",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Tenant IDs to scope the query collection to."
+    },
+    {
+      "Name": "includeUsxQueries",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "false",
+      "Description": "Whether to include USX queries in the result set."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Query collection type to retrieve.",
+      "type": "string",
+      "name": "type"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Tenant IDs to scope the query collection to.",
+      "type": "string",
+      "name": "tenantIds[]"
+    },
+    {
+      "in": "query",
+      "default": "false",
+      "required": false,
+      "description": "Whether to include USX queries in the result set.",
+      "type": "boolean",
+      "name": "includeUsxQueries"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

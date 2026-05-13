@@ -1,0 +1,50 @@
+{
+  "portal": "exchange",
+  "subArea": "openapi",
+  "slug": "Migration.ListMigrationEndpoints",
+  "operationId": "ExchangeBeta.Migration.ListMigrationEndpoints",
+  "path": "/beta/MigrationEndpoint",
+  "methods": [
+    "get"
+  ],
+  "summary": "List migration endpoints",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:42:44.8192329Z",
+  "pagination": {
+    "style": "none",
+    "defaults": {},
+    "indexParam": null,
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "supported": false,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "out-of-scope-graph-covers",
+    "Method": "Microsoft Graph covers — out of portal-only scope"
+  },
+  "v1Manifest": null,
+  "xdrInternalsHint": "Get-XdrExchangeBetaMigration.ListMigrationEndpoints",
+  "defenderHarvester": null,
+  "live": {
+    "httpStatus": 412,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 412",
+    "responseShape": null
+  },
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

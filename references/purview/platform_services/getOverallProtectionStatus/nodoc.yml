@@ -1,0 +1,23 @@
+  /purviewplatform/api/v1/insight/GetOverallProtectionStatus:
+    get:
+      operationId: getOverallProtectionStatus
+      summary: Get overall data protection status
+      description: >-
+        Retrieve the overall data protection status from the Purview Platform.
+        Returns a summary of data protection coverage across the tenant's data estate.
+      tags: [PlatformServices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/PurviewOverallProtectionStatusResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,24 @@
+  /mcas/cas/api/v1/preview_features/get:
+    get:
+      summary: Get Cloud Apps preview features
+      description: >-
+        Retrieve the preview features opt-in status for Microsoft Defender
+        for Cloud Apps (MCAS).
+      operationId: Configuration.GetMcasPreviewFeatures
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MCAS preview feature settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

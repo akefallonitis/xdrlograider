@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/app_connectors/table_config_values:
+    get:
+      summary: Get app connectors table config values
+      description: >-
+        Retrieve table configuration values for the app connectors view. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.GetAppConnectorsTableConfigValues
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

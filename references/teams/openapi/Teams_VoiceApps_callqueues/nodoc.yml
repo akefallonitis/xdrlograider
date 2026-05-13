@@ -1,0 +1,18 @@
+  /Teams.VoiceApps/callqueues:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsVoiceApps]
+      summary: List Teams call queues
+      description: |
+        Call queue inventory route observed from Teams voice administration pages.
+      responses:
+        '200':
+          description: Call queue collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

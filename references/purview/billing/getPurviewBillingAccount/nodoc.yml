@@ -1,0 +1,24 @@
+  /cbill/PurviewAccount:
+    get:
+      operationId: getPurviewBillingAccount
+      summary: Get Purview billing account info
+      description: >-
+        Retrieve Purview billing account information.
+        Returns the billing account details and subscription status.
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

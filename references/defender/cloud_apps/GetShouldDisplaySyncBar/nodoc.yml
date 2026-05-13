@@ -1,0 +1,24 @@
+  /mcas/cas/api/v1/user_config/get_should_display_sync_bar:
+    get:
+      summary: Get sync bar visibility
+      description: >-
+        Retrieve whether the Cloud Apps UI should show the synchronization status bar
+        for the current user.
+      operationId: CloudApps.GetShouldDisplaySyncBar
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

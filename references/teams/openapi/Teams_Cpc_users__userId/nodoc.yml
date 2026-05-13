@@ -1,0 +1,20 @@
+  /Teams.Cpc/users/{userId}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsCpc]
+      summary: Get Teams common area phone user details
+      description: |
+        CPC user detail route observed from Teams voice and shared-device pages.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Common area phone user payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

@@ -1,0 +1,64 @@
+{
+  "portal": "m365-admin",
+  "subArea": "billing",
+  "slug": "GetSyntexSubscriptionPermissions",
+  "operationId": "Billing.GetSyntexSubscriptionPermissions",
+  "path": "/admin/api/syntexbilling/azureSubscriptions/{subscriptionId}/permissions",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Syntex billing subscription permissions",
+  "sourceFile": "billing.yml",
+  "capturedUtc": "2026-05-12T15:13:25.2391998Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "subscriptionId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Azure subscription identifier."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/admin/api/syntexbilling/azureSubscriptions/{subscriptionId}/permissions' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The Azure subscription identifier.",
+    "type": "string",
+    "name": "subscriptionId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

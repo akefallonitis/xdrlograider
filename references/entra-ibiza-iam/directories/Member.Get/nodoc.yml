@@ -1,0 +1,153 @@
+  /DirectoryObjectPicker/DirectoryMembersFromIds:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get directory members
+      description: >-
+        Get directory members by object IDs.
+      operationId: Directories.Member.Get
+      tags: [Directory]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/objectId
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objectId:
+                    $ref: common.yml#/components/schemas/objectId
+                  email:
+                    description: Email for the object.
+                    type: string
+                    nullable: true
+                    example: allcompany@contoso.onmicrosoft.com
+                  displayName:
+                    description: Display name for the object.
+                    type: string
+                    example: All Company
+                  type:
+                    description: >
+                      Object type:
+                        - `1`: User
+                        - `2`: Group
+                        - `3`: Unknown
+                        - `4`: Service Principal
+                    type: integer
+                    enum: [1, 2, 3, 4]
+                    example: 2
+                  thumbnailPhoto@odata.mediaContentType:
+                    type: string
+                    nullable: true
+                    example: null
+                  hasThumbnail:
+                    description: Whether the object has a thumbnail.
+                    type: boolean
+                    example: false
+                  imageUrl:
+                    description: URL to object image.
+                    type: string
+                    format: url
+                    example: https://main.iam.ad.ext.azure.com/api/Images/...
+                  isUser:
+                    description: Whether the object is a user.
+                    type: boolean
+                    example: false
+                  isGroup:
+                    description: Whether the object is a group.
+                    type: boolean
+                    example: true
+                  isGuest:
+                    description: Whether the object is a guest.
+                    type: boolean
+                    example: false
+                  userType:
+                    description: The type of user object.
+                    type: string
+                    nullable: true
+                    enum: [Member, Guest]
+                    example: null
+                  objectType:
+                    description: The type of object.
+                    type: string
+                    enum: [User, Group, ServicePrincipal]
+                    example: Group
+                  userPrincipalName:
+                    description: User principal name for user object.
+                    type: string
+                    nullable: true
+                    example: null
+                  mail:
+                    description: Mail attribute for object.
+                    type: string
+                    example: allcompany@contoso.onmicrosoft.com
+                  dirSyncEnabled:
+                    description: Whether the object is directory synced.
+                    type: boolean
+                    nullable: true
+                    example: null
+                  lastDirSyncTime:
+                    description: Timestamp of the last directory sync.
+                    type: string
+                    nullable: true
+                    format: date-time
+                    example: null
+                  appId:
+                    $ref: common.yml#/components/schemas/applicationId
+                  groupTypes:
+                    type: array
+                    nullable: true
+                    example: null
+                  mailEnabled:
+                    description: Whether the group is mail enabled.
+                    type: boolean
+                    example: true
+                  securityEnabled:
+                    description: Whether the group is mail enabled.
+                    type: boolean
+                    example: false
+                  appRoles:
+                    type: array
+                    nullable: true
+                    example: null
+                  isAssignableToRole:
+                    type: boolean
+                    example: false
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

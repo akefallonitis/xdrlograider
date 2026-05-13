@@ -1,0 +1,12 @@
+  /rollout/v1.0/residency:
+    get:
+      tags: [Rollout]
+      summary: Get tenant residency metadata
+      description: Returns mailbox and data-boundary residency metadata used by rollout and regional feature logic.
+      responses:
+        '200':
+          description: Residency information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResidencyInfo'

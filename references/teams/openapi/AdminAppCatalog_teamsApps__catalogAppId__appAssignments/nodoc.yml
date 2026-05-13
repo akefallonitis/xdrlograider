@@ -1,0 +1,23 @@
+  /AdminAppCatalog/teamsApps/{catalogAppId}/appAssignments:
+    servers:
+      - url: https://substrate.office.com
+        description: Teams app catalog backend
+    get:
+      tags: [AppCatalog]
+      summary: List Teams app catalog assignments for an app
+      description: |
+        App-specific assignment route observed while drilling into `Teams apps > Manage apps` detail
+        pages and their security tabs.
+      parameters:
+        - $ref: '#/components/parameters/CatalogAppId'
+      responses:
+        '200':
+          description: App assignment payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # cqd.teams.microsoft.com/repository

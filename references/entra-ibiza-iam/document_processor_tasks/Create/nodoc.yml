@@ -1,0 +1,15 @@
+  /DocumentProcessorTasks:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create document processor task
+      description: Create document processor task.
+      operationId: DocumentProcessorTasks.Create
+      tags: [Document Processor Tasks]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

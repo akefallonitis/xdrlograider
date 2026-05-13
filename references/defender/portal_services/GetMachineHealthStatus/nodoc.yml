@@ -1,0 +1,24 @@
+  /mtp/mdepDnH/reports/machineHealth/healthStatus:
+    get:
+      summary: Get machine health status report
+      description: >-
+        Retrieve the machine health status report including device health
+        distribution and trends.
+      operationId: PortalServices.GetMachineHealthStatus
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - machine health status report data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

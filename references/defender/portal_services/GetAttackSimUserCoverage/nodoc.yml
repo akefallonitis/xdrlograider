@@ -1,0 +1,24 @@
+  /astgws/AttackSimulator/api/v1/AdvanceReporting/chart/UserCoverage:
+    get:
+      summary: Get attack simulator user coverage
+      description: >-
+        Retrieve the attack simulation user coverage chart data for
+        advance reporting.
+      operationId: PortalServices.GetAttackSimUserCoverage
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - attack simulator user coverage data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

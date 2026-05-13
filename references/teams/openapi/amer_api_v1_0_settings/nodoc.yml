@@ -1,0 +1,20 @@
+  /amer/api/v1.0/settings:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    get:
+      tags: [TeamsFrontline]
+      summary: Get Frontline orchestration settings
+      description: |
+        Frontline settings read observed from orchestration and usage pages.
+      responses:
+        '200':
+          description: Frontline settings payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # admin.devicemgmt.teams.microsoft.com

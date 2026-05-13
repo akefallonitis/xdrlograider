@@ -1,0 +1,15 @@
+  /trial:
+    get:
+      tags: [Auth]
+      summary: List Security Copilot trial records
+      description: Retrieves Security Copilot trial records from the CDS-backed trial service used during portal startup.
+      operationId: SecurityCopilotPortal.Trial.List
+      responses:
+        '200':
+          description: Trial records returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrialRecord'

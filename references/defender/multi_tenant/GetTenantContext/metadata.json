@@ -1,0 +1,81 @@
+{
+  "portal": "defender",
+  "subArea": "multi_tenant",
+  "slug": "GetTenantContext",
+  "operationId": "MultiTenant.GetTenantContext",
+  "path": "/mtoapi/mtp/sccManagement/mgmt/TenantContext",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get MTO tenant context",
+  "sourceFile": "multi_tenant.yml",
+  "capturedUtc": "2026-05-12T14:41:52.8524741Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "realTime",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "false",
+      "Description": "Whether to fetch real-time context instead of cached data."
+    },
+    {
+      "Name": "cached-or-realtime-bootstrap",
+      "In": "",
+      "Type": "",
+      "Default": "",
+      "Description": ""
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": "false",
+    "required": false,
+    "description": "Whether to fetch real-time context instead of cached data.",
+    "type": "boolean",
+    "name": "realTime"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Path"
+  ],
+  "cadenceSuggestion": "daily"
+}

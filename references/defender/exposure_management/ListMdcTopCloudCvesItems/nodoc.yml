@@ -1,0 +1,29 @@
+  /mdc/views/vulnerabilities/topCloudCVEsItems:
+    post:
+      summary: List MDC top cloud CVE items
+      description: >-
+        Retrieve the top cloud CVE records shown by the Defender portal's Microsoft
+        Defender for Cloud vulnerability experience.
+      operationId: ExposureManagement.ListMdcTopCloudCvesItems
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC top cloud CVE items query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC top cloud CVE items response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

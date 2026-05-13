@@ -1,0 +1,23 @@
+  /mtp/responseApiPortal/onboarding/intune/status:
+    get:
+      summary: Get Intune onboarding status
+      description: >-
+        Retrieve the Intune onboarding status for the response API portal.
+      operationId: Configuration.GetIntuneOnboardingStatus
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Intune onboarding status
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,31 @@
+  /mdi/identity/userapiservice/timeline/mtp:
+    post:
+      summary: Get user cross-workload timeline
+      description: >-
+        Retrieve the cross-workload timeline shown on the unified user entity
+        page.
+      operationId: Identity.GetUserMtpTimeline
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - cross-workload timeline request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - cross-workload timeline
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

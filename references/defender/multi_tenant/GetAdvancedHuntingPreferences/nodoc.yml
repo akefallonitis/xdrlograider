@@ -1,0 +1,23 @@
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting_mto:
+    get:
+      summary: Get MTO advanced hunting preferences
+      description: >-
+        Retrieve the serialized multi-tenant advanced hunting preference blob.
+        Confirmed in live traffic from the MTO Advanced hunting and Custom detection pages.
+      operationId: MultiTenant.GetAdvancedHuntingPreferences
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/MtoHuntingPreference'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

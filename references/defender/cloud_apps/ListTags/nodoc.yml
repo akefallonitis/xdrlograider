@@ -1,0 +1,23 @@
+  /mcas/cas/api/tags:
+    get:
+      summary: List Cloud Apps tags
+      description: >-
+        Retrieve built-in and custom tags used by Defender for Cloud Apps for
+        discovery, entity labeling, and governance filters.
+      operationId: CloudApps.ListTags
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsTagListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

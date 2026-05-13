@@ -1,0 +1,28 @@
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/details:
+    get:
+      summary: List devices for URL
+      description: >-
+        Return the device details grid shown on URL investigation pages.
+      operationId: EntityPivots.ListUrlDevices
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack7'
+        - $ref: '#/components/parameters/FirstRowIndex'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/RiskScores'
+        - $ref: '#/components/parameters/ExposureScores'
+        - $ref: '#/components/parameters/OsPlatformFriendlyNames'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

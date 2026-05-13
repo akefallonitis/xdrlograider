@@ -1,0 +1,21 @@
+  /support/v1.0/Tenants/GetTenantManagedService/{plan}:
+    get:
+      tags: [Support]
+      summary: Get tenant managed service state
+      description: |
+        Returns Windows Autopatch managed-service state for a specific plan. Recovered from the
+        support bundles and confirmed with a GET probe for the `Starter` plan.
+      operationId: IntuneAutopatch.Support.GetTenantManagedService
+      parameters:
+        - $ref: '#/components/parameters/plan'
+      responses:
+        '200':
+          description: Managed service state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedServiceStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

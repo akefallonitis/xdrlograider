@@ -1,0 +1,44 @@
+{
+  "portal": "intune-autopatch",
+  "subArea": "openapi",
+  "slug": "Roles.ListRoleDefinitions",
+  "operationId": "IntuneAutopatch.Roles.ListRoleDefinitions",
+  "path": "/access-control/odata/v1/RoleDefinitions",
+  "methods": [
+    "get"
+  ],
+  "summary": "List role definitions",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:10.7089377Z",
+  "pagination": {
+    "style": "none",
+    "sizeParam": null,
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "endParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

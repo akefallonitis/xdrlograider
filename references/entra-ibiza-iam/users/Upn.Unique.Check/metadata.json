@@ -1,0 +1,47 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "users",
+  "slug": "Upn.Unique.Check",
+  "operationId": "Users.Upn.Unique.Check",
+  "path": "/Users/IsUPNUnique",
+  "methods": [
+    "get"
+  ],
+  "summary": "Check if UPN is unique",
+  "sourceFile": "users.yml",
+  "capturedUtc": "2026-05-12T15:13:12.9435886Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 404,
+  "lastDiagnostic": "Not Found",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.UPN",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

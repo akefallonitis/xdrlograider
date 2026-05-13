@@ -1,0 +1,23 @@
+  /mtp/mdiotSettingsService/settings/DiscoveryEnabledTags:
+    get:
+      summary: Get device discovery enabled tags
+      description: >-
+        Retrieve the device-tag configuration that controls which tagged devices
+        participate in Device discovery scanning.
+      operationId: EndpointConfiguration.GetDiscoveryEnabledTags
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoveryEnabledTagsResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

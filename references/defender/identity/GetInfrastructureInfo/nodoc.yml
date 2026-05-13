@@ -1,0 +1,29 @@
+  /aatp/api/sensors/identityInfrastructuresInfo:
+    get:
+      summary: Get identity infrastructure inventory
+      description: >-
+        Retrieve the identity infrastructure devices and sensor coverage inventory used by
+        the Defender for Identity dashboard.
+      operationId: Identity.GetInfrastructureInfo
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Devices:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - identity infrastructure device
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

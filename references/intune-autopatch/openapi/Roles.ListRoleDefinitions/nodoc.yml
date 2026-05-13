@@ -1,0 +1,22 @@
+  /access-control/odata/v1/RoleDefinitions:
+    get:
+      tags: [Roles]
+      summary: List role definitions
+      description: |
+        Lists Windows Autopatch built-in and custom role definitions. Confirmed live from the
+        roles blade and further grounded with a GET probe.
+      operationId: IntuneAutopatch.Roles.ListRoleDefinitions
+      parameters:
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderBy'
+      responses:
+        '200':
+          description: Role definitions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleDefinitionCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

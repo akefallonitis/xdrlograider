@@ -1,0 +1,26 @@
+  /mtp/threatAnalyticsIndicators/stix/oneti/reputation/fileHash:
+    get:
+      summary: Get file hash reputation
+      description: Return the Threat Analytics reputation score and matching rules for a file hash.
+      operationId: Files.GetThreatReputation
+      tags: [Files]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: The file hash to score.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileHashReputationResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

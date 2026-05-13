@@ -1,0 +1,15 @@
+  /amer/api/reports/v1.0/flw/usage/metadata:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    get:
+      tags: [TeamsFrontline]
+      summary: Get Frontline usage metadata
+      description: |
+        Metadata companion route for Frontline usage reporting. The retained tenant returned
+        `204 No Content`.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

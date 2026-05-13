@@ -1,0 +1,468 @@
+{
+  "subArea": "threat_analytics",
+  "suggestedCadence": "6h",
+  "endpointCount": 20,
+  "endpoints": [
+    {
+      "slug": "CountOutbreakIndicators",
+      "operationId": "ThreatAnalytics.CountOutbreakIndicators",
+      "path": "/mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "PathTemplate — '/mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/count' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetEnrichedOutbreakData",
+      "operationId": "ThreatAnalytics.GetEnrichedOutbreakData",
+      "path": "/mtp/threatAnalytics/outbreaks/outbreaksEnrichedDataMtp",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1000,
+      "v1Stream": "MDE_ThreatAnalyticsEnriched_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.RiskScore",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='items' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=live (1000 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetIndicatorReputation",
+      "operationId": "ThreatAnalytics.GetIndicatorReputation",
+      "path": "/mtp/threatAnalyticsIndicators/stix/oneti/reputation",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetOutbreakAlertsOverTimeSummary",
+      "operationId": "ThreatAnalytics.GetOutbreakAlertsOverTimeSummary",
+      "path": "/mtp/threatAnalytics/outbreaks/{OutbreakId}/alertsOvertimeSummary",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/threatAnalytics/outbreaks/{OutbreakId}/alertsOvertimeSummary' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetOutbreakChangeCount",
+      "operationId": "ThreatAnalytics.GetOutbreakChangeCount",
+      "path": "/mtp/threatAnalytics/outbreaks/changeCount",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetOutbreakDevices",
+      "operationId": "ThreatAnalytics.GetOutbreakDevices",
+      "path": "/mtp/outbreaks/outbreaks/v2/{OutbreakId}/devices",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/outbreaks/outbreaks/v2/{OutbreakId}/devices' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetOutbreakImpactedAssetsOverTime",
+      "operationId": "ThreatAnalytics.GetOutbreakImpactedAssetsOverTime",
+      "path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsOvertime",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsOvertime' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetOutbreakImpactedAssetsSummary",
+      "operationId": "ThreatAnalytics.GetOutbreakImpactedAssetsSummary",
+      "path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsSummary",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsSummary' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetOutbreakIncidentsAlertsSummary",
+      "operationId": "ThreatAnalytics.GetOutbreakIncidentsAlertsSummary",
+      "path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/incidentsAlertsSummary",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/incidentsAlertsSummary' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetOutbreakOverview",
+      "operationId": "ThreatAnalytics.GetOutbreakOverview",
+      "path": "/mtp/threatAnalytics/outbreaks/{OutbreakId}/overview",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/threatAnalytics/outbreaks/{OutbreakId}/overview' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetOutbreakPatchData",
+      "operationId": "ThreatAnalytics.GetOutbreakPatchData",
+      "path": "/mtp/threatAnalytics/outbreaks/{OutbreakId}/patchdata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/threatAnalytics/outbreaks/{OutbreakId}/patchdata' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetOutbreakRelatedIntelligence",
+      "operationId": "ThreatAnalytics.GetOutbreakRelatedIntelligence",
+      "path": "/mtp/threatAnalytics/outbreaks/{OutbreakId}/relatedIntelligence",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/threatAnalytics/outbreaks/{OutbreakId}/relatedIntelligence' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetOutbreakTvmDetails",
+      "operationId": "ThreatAnalytics.GetOutbreakTvmDetails",
+      "path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/tvmDetails",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/tvmDetails' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetOutbreakUserExposure",
+      "operationId": "ThreatAnalytics.GetOutbreakUserExposure",
+      "path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/userExposure",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/userExposure' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetTopThreats",
+      "operationId": "ThreatAnalytics.GetTopThreats",
+      "path": "/mtp/threatAnalytics/outbreaks/topthreats",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": "MDE_ThreatAnalyticsTopThreats_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.RiskScore",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetUrlReputation",
+      "operationId": "ThreatAnalytics.GetUrlReputation",
+      "path": "/mtp/threatAnalyticsIndicators/stix/oneti/reputation/URL",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListOutbreaks",
+      "operationId": "ThreatAnalytics.ListOutbreaks",
+      "path": "/mtp/threatAnalyticsAPI/outbreaks",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "pageIndex0Based",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Pagination=pageIndex0Based — index starts at 0 (some MS endpoints reject 0; verify per endpoint)",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "ListPortalOutbreaks",
+      "operationId": "ThreatAnalytics.ListPortalOutbreaks",
+      "path": "/mtp/threatAnalytics/outbreaks",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 2984,
+      "v1Stream": "MDE_ThreatAnalytics_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=live (2984 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "QueryOutbreakIndicators",
+      "operationId": "ThreatAnalytics.QueryOutbreakIndicators",
+      "path": "/mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/query",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "PathTemplate — '/mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/query' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "UpdateOutbreakUserState",
+      "operationId": "ThreatAnalytics.UpdateOutbreakUserState",
+      "path": "/mtp/threatAnalytics/outbreaks/userState",
+      "methods": [
+        "patch"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "no-live-method-PATCH",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+      ]
+    }
+  ],
+  "cntLive": 4,
+  "cntLiveEmpty": 0,
+  "cntError": 3,
+  "cntNoLive": 13,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 1,
+  "entitiesAvailable": [
+    "Host.RiskScore",
+    "Url.Domain",
+    "Url.Path"
+  ],
+  "paginationStyles": [
+    "pageIndex0Based"
+  ],
+  "valueProp": "Threat outbreaks + enriched data + top threats — proactive intel correlation"
+}

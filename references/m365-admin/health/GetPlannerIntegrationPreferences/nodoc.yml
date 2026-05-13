@@ -1,0 +1,20 @@
+  /admin/api/messagecenter/GetPlannerIntegrationPreferences:
+    get:
+      summary: Get Planner integration preferences
+      description: >-
+        Retrieve Planner integration preferences for message center. Note: returns 404 if Planner integration has not been set up for the tenant (Health > Message center).
+      operationId: MessageCenter.GetPlannerIntegrationPreferences
+      tags: [MessageCenter]
+      responses:
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden

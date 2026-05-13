@@ -1,0 +1,39 @@
+  /accessReviews/v2.0/reports:
+    get:
+      tags: [Requests]
+      summary: List access review reports
+      description: |
+        Retrieves report rows shown by the Access reviews > Review History experience.
+        Confirmed live from the Identity Governance Review History blade.
+      operationId: AccessReviews.ListReports
+      parameters:
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: Access review reports returned successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  '@odata.count':
+                    type: integer
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#reports"
+                '@odata.count': 1
+                value:
+                  - requestId: 52a2c256-9a91-4f56-9edc-06969fdcc298
+                    displayName: Quarterly guest access review
+                    status: Completed
+                    reviewedEntityCount: 42
+                    startDateTime: '2026-01-27T18:09:30.283Z'
+                    endDateTime: '2026-02-10T18:09:30.283Z'

@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/settings:
+    get:
+      summary: Get Cloud Apps settings
+      description: >-
+        Retrieve tenant-wide Defender for Cloud Apps settings, including quarantine,
+        masking, integration, and session-control options.
+      operationId: CloudApps.GetSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

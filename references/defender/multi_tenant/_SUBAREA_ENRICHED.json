@@ -1,0 +1,20 @@
+{
+  "portal": "defender",
+  "subArea": "multi_tenant",
+  "endpointCount": 17,
+  "paginationDistribution": {
+    "none": 17
+  },
+  "timeFilterEndpointCount": 0,
+  "topEntities": [
+    "Tenant.Id",
+    "File.Path"
+  ],
+  "cadenceSuggestion": "daily",
+  "productionScale": {
+    "VolumeLargeT": "10-1K tenants",
+    "RateLimitRisk": "LOW",
+    "DeltaPollPriority": "low"
+  },
+  "generatedUtc": "2026-05-13T07:21:46Z"
+}

@@ -1,0 +1,32 @@
+  /cdssecuritycopilot/trial:
+    get:
+      summary: Get Security Copilot trial status
+      description: >-
+        Retrieve the Security Copilot trial status for the tenant.
+      operationId: PortalServices.GetSecurityCopilotTrial
+      tags: [Portal Services]
+      x-nodoc-operation-context:
+        surface: Security Copilot entrypoint
+        workflows:
+          - Load trial, onboarding, or entitlement UX for Security Copilot from the Defender portal.
+        authProfile: defender-copilot-entitlement
+        availability:
+          level: tenant-conditional
+          notes:
+            - Trial state is specific to the current tenant and may be absent where Security Copilot onboarding is disabled.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Security Copilot trial status
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,30 @@
+  /mdi/identity/userapiservice/status:
+    get:
+      summary: Get onboarding status
+      description: >-
+        Retrieve the Defender for Identity onboarding and deployment status
+        for the tenant.
+      operationId: Identity.GetOnboardingStatus
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isOnboarded:
+                    description: Whether MDI is onboarded.
+                    type: boolean
+                  sensorCount:
+                    description: Number of deployed sensors.
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

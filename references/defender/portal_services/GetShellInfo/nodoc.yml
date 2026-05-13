@@ -1,0 +1,31 @@
+  /shell/api/shell/shellinfo:
+    get:
+      summary: Get shell info
+      description: >-
+        Retrieve shell information for the Defender XDR portal session.
+      operationId: PortalServices.GetShellInfo
+      tags: [Portal Services]
+      x-nodoc-operation-context:
+        surface: Portal shell
+        workflows:
+          - Load or refresh the Defender XDR shell before feature blades and cross-solution entry points fully hydrate.
+        authProfile: defender-session-baseline
+        availability:
+          level: user-context
+          notes:
+            - Returned shell state reflects the signed-in operator, current tenant, and enabled Defender surfaces.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ShellInfoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,18 @@
+  /beta/PublicFolder:
+    get:
+      tags: [Folders]
+      summary: List public folders
+      description: |
+        Returns the public folder inventory surfaced by the Public folders page.
+      operationId: ExchangeBeta.Folders.ListPublicFolders
+      responses:
+        '200':
+          description: Public folders returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

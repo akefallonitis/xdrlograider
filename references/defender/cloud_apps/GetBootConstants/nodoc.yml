@@ -1,0 +1,23 @@
+  /mcas/cas/boot_constants:
+    get:
+      summary: Get boot constants
+      description: >-
+        Retrieve boot constants for the Cloud Apps service. Discovered on OAuth Apps page.
+      operationId: CloudApps.GetBootConstants
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

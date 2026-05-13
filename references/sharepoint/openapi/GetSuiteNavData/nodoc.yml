@@ -1,0 +1,32 @@
+  /_api/Microsoft.SharePoint.Portal.SuiteNavData.GetSuiteNavData:
+    get:
+      tags: [Tenant]
+      summary: Get suite navigation bootstrap data
+      description: |
+        Returns the SharePoint suite navigation payload used to render shell
+        links and user context for the admin center.
+      operationId: SharePointAdmin.GetSuiteNavData
+      parameters:
+        - name: v
+          in: query
+          description: Navigation schema version.
+          schema:
+            type: integer
+            example: 2
+        - name: Locale
+          in: query
+          description: Locale requested by the current admin session.
+          schema:
+            type: string
+            example: en-US
+      responses:
+        '200':
+          description: Suite navigation payload returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataStringResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

@@ -1,0 +1,73 @@
+{
+  "portal": "purview",
+  "subArea": "data_infrastructure",
+  "slug": "getMipAnalyticsTenantSettings",
+  "operationId": "getMipAnalyticsTenantSettings",
+  "path": "/di/find/MipAnalyticsTenantSettings",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get MIP analytics tenant settings",
+  "sourceFile": "data_infrastructure.yml",
+  "capturedUtc": "2026-05-12T15:10:14.6424866Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "tenantid",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier (GUID) of the tenant."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 403",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": true,
+    "description": "The unique identifier (GUID) of the tenant.",
+    "type": "string",
+    "name": "tenantid"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

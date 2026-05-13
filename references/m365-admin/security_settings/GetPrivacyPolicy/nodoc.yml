@@ -1,0 +1,23 @@
+  /admin/api/settings/security/privacypolicy:
+    get:
+      summary: Get privacy policy settings
+      description: >-
+        Retrieve the privacy profile and policy settings for the tenant (Org Settings > Privacy profile).
+      operationId: SecuritySettings.GetPrivacyPolicy
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

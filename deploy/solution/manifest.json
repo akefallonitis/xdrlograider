@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/sentinel-solution-manifest.json",
+  "Name": "XdrLogRaider",
+  "Author": "Alex Kefallonitis",
+  "Logo": "<img src=\"https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/deploy/solution/Images/Logo.svg\" width=\"75px\" height=\"75px\">",
+  "Description": "**XdrLogRaider v0.1.0** is a Microsoft Sentinel solution that ingests **Microsoft Defender XDR portal-only telemetry** that the public Graph Security, MDE REST, and Streaming APIs do not expose. Covers 18 Defender XDR sub-areas via 492 read-only endpoints with manifest-driven cadence, pagination, dynamic regionality (TenantContext), per-sub-area circuit-breaker resilience, and ConnectorHeartbeat liveness. Operators bring their own KQL — no analytic rules, workbooks, hunting queries, or parsers in v0.1.0 (data-only ship; content lands in v0.3.0).",
+  "DataConnectorsBladeDescription": "One data connector — XdrLogRaider — authenticates to security.microsoft.com via session cookies (sccauth + XSRF) and publishes to 19 Log Analytics tables: 18 `Defender_<NodocSubArea>_CL` per sub-area plus 1 `XdrConnectorHealth_CL` ops table.",
+  "DataConnectors": [
+    "Data Connectors/XdrLogRaider_DataConnector.json"
+  ],
+  "Metadata": "SolutionMetadata.json",
+  "BasePath": ".",
+  "Version": "0.1.0",
+  "TemplateSpec": true,
+  "Is1PConnector": false,
+  "StaticDataConnectorIds": [
+    "XdrLogRaiderInternal"
+  ]
+}
