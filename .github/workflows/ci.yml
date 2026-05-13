@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+  # release.yml calls this workflow as its preflight job. Required for
+  # `uses: ./.github/workflows/ci.yml` to work — without workflow_call,
+  # release.yml fails immediately with a workflow-file-issue error.
+  workflow_call:
 
 permissions:
   contents: read
