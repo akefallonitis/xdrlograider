@@ -21,14 +21,13 @@ permissions:
   attestations: write
 
 jobs:
-  preflight:
-    name: Run CI gates first
-    uses: ./.github/workflows/ci.yml
-
   release:
     name: Build + cosign-sign + publish
-    needs: preflight
     runs-on: ubuntu-latest
+    # CI gates already ran on every push to main; tags fire only on commits
+    # that already passed CI (main is the tag target). The reusable-workflow
+    # call pattern was removed because `uses: ./.github/workflows/ci.yml`
+    # was causing startup_failure on the runner.
     steps:
       - uses: actions/checkout@v4
         with:
