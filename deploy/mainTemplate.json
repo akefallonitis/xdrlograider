@@ -163,7 +163,7 @@
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2024-01-01",
       "name": "[variables('stName')]",
       "location": "[parameters('location')]",
       "tags": "[variables('commonTag')]",
@@ -180,7 +180,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2024-01-01",
       "name": "[concat(variables('stName'), '/default')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('stName'))]"
@@ -189,7 +189,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2024-01-01",
       "name": "[concat(variables('stName'), '/default/', 'connectorCheckpoints')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
@@ -197,7 +197,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2024-01-01",
       "name": "[concat(variables('stName'), '/default/', 'xdrIngestDlq')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
@@ -205,7 +205,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2024-01-01",
       "name": "[concat(variables('stName'), '/default/', 'XdrTierState')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
@@ -213,7 +213,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2024-01-01",
       "name": "[concat(variables('stName'), '/default/', 'XdrTenantState')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]"
@@ -221,7 +221,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults",
-      "apiVersion": "2023-07-01",
+      "apiVersion": "2024-11-01",
       "name": "[variables('kvName')]",
       "location": "[parameters('location')]",
       "tags": "[variables('commonTag')]",
@@ -240,7 +240,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
+      "apiVersion": "2024-11-01",
       "name": "[concat(variables('kvName'), '/', 'defender-upn')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
@@ -251,7 +251,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
+      "apiVersion": "2024-11-01",
       "name": "[concat(variables('kvName'), '/', 'defender-password')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
@@ -262,7 +262,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
+      "apiVersion": "2024-11-01",
       "name": "[concat(variables('kvName'), '/', 'defender-totp')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
@@ -273,7 +273,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
+      "apiVersion": "2024-11-01",
       "name": "[concat(variables('kvName'), '/', 'defender-passkey')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
@@ -284,7 +284,7 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
+      "apiVersion": "2024-11-01",
       "name": "[concat(variables('kvName'), '/', 'defender-auth-method')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
@@ -330,7 +330,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2024-03-01",
       "name": "[concat('customTables-', variables('suffix'))]",
       "resourceGroup": "[variables('workspaceResourceGroup')]",
       "subscriptionId": "[variables('workspaceSubscriptionId')]",

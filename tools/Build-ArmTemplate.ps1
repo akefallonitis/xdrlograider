@@ -175,7 +175,7 @@ $resources = New-Object System.Collections.Generic.List[object]
 
 $resources.Add([ordered]@{
     type       = 'Microsoft.Storage/storageAccounts'
-    apiVersion = '2023-05-01'
+    apiVersion = '2024-01-01'
     name       = "[variables('stName')]"
     location   = "[parameters('location')]"
     tags       = "[variables('commonTag')]"
@@ -191,7 +191,7 @@ $resources.Add([ordered]@{
 
 $tableServices = [ordered]@{
     type       = 'Microsoft.Storage/storageAccounts/tableServices'
-    apiVersion = '2023-05-01'
+    apiVersion = '2024-01-01'
     name       = "[concat(variables('stName'), '/default')]"
     dependsOn  = @("[resourceId('Microsoft.Storage/storageAccounts', variables('stName'))]")
     properties = @{}
@@ -201,7 +201,7 @@ $resources.Add($tableServices)
 foreach ($tbl in @('connectorCheckpoints','xdrIngestDlq','XdrTierState','XdrTenantState')) {
     $resources.Add([ordered]@{
         type       = 'Microsoft.Storage/storageAccounts/tableServices/tables'
-        apiVersion = '2023-05-01'
+        apiVersion = '2024-01-01'
         name       = "[concat(variables('stName'), '/default/', '$tbl')]"
         dependsOn  = @("[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('stName'), 'default')]")
     })
@@ -212,7 +212,7 @@ foreach ($tbl in @('connectorCheckpoints','xdrIngestDlq','XdrTierState','XdrTena
 # -----------------------------------------------------------------------------
 $resources.Add([ordered]@{
     type       = 'Microsoft.KeyVault/vaults'
-    apiVersion = '2023-07-01'
+    apiVersion = '2024-11-01'
     name       = "[variables('kvName')]"
     location   = "[parameters('location')]"
     tags       = "[variables('commonTag')]"
@@ -241,7 +241,7 @@ foreach ($s in @(
 )) {
     $resources.Add([ordered]@{
         type       = 'Microsoft.KeyVault/vaults/secrets'
-        apiVersion = '2023-07-01'
+        apiVersion = '2024-11-01'
         name       = "[concat(variables('kvName'), '/', '$($s.Name)')]"
         dependsOn  = @("[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]")
         properties = [ordered]@{ value = $s.Value }
@@ -365,7 +365,7 @@ $nestedTableResources.Add([ordered]@{
 
 $resources.Add([ordered]@{
     type            = 'Microsoft.Resources/deployments'
-    apiVersion      = '2022-09-01'
+    apiVersion      = '2024-03-01'
     name            = "[concat('customTables-', variables('suffix'))]"
     resourceGroup   = "[variables('workspaceResourceGroup')]"
     subscriptionId  = "[variables('workspaceSubscriptionId')]"
