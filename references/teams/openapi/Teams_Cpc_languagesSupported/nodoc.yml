@@ -1,0 +1,18 @@
+  /Teams.Cpc/languagesSupported:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsCpc]
+      summary: List Teams CPC supported languages
+      description: |
+        Supported language inventory used by common area phone and auto attendant setup flows.
+      responses:
+        '200':
+          description: Supported language collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

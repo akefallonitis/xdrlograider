@@ -1,0 +1,24 @@
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/tenantinfo:
+    get:
+      summary: Get unified RBAC workload configuration
+      description: >-
+        Retrieve the unified RBAC (Role-Based Access Control) configuration
+        for the tenant, including enabled workloads and permission scopes.
+      operationId: Configuration.GetUnifiedRbacWorkload
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - unified RBAC configuration
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,44 @@
+{
+  "portal": "intune-portal",
+  "subArea": "openapi",
+  "slug": "Settings.Select",
+  "operationId": "IntunePortal.Settings.Select",
+  "path": "/api/Settings/Select",
+  "methods": [
+    "post"
+  ],
+  "summary": "Read portal persistent settings",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:09.9853726Z",
+  "pagination": {
+    "defaults": {},
+    "style": "none",
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null,
+    "startParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "write",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

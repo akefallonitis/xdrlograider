@@ -1,0 +1,84 @@
+{
+  "type": "Microsoft.Insights/dataCollectionRules",
+  "apiVersion": "2023-03-11",
+  "name": "[concat(variables('dcrName'), '-ops')]",
+  "location": "[parameters('workspaceLocation')]",
+  "tags": "[variables('commonTag')]",
+  "dependsOn": [
+    "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+    "[concat('customTables-', variables('suffix'))]"
+  ],
+  "properties": {
+    "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+    "streamDeclarations": {
+      "Custom-XdrConnectorHealth_CL": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "FunctionName",
+            "type": "string"
+          },
+          {
+            "name": "Tier",
+            "type": "string"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "StreamsAttempted",
+            "type": "int"
+          },
+          {
+            "name": "StreamsSucceeded",
+            "type": "int"
+          },
+          {
+            "name": "RowsIngested",
+            "type": "int"
+          },
+          {
+            "name": "LatencyMs",
+            "type": "int"
+          },
+          {
+            "name": "ConnectorVersion",
+            "type": "string"
+          },
+          {
+            "name": "ConnectorBuildId",
+            "type": "string"
+          },
+          {
+            "name": "Notes",
+            "type": "dynamic"
+          }
+        ]
+      }
+    },
+    "destinations": {
+      "logAnalytics": [
+        {
+          "name": "la-destination",
+          "workspaceResourceId": "[parameters('existingWorkspaceId')]"
+        }
+      ]
+    },
+    "dataFlows": [
+      {
+        "streams": [
+          "Custom-XdrConnectorHealth_CL"
+        ],
+        "destinations": [
+          "la-destination"
+        ],
+        "outputStream": "Custom-XdrConnectorHealth_CL",
+        "transformKql": "source | extend SourceName = 'XdrConnectorHealth_CL'"
+      }
+    ]
+  }
+}

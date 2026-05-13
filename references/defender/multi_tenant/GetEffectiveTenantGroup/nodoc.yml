@@ -1,0 +1,39 @@
+  /mtoapi/tenantGroups/effective/:
+    get:
+      summary: Get effective tenant group
+      description: >-
+        Retrieve the effective tenant group resolved for the signed-in user.
+        Confirmed in live traffic across the MTO homepage, incidents, hunting,
+        cases, identity inventory, content distribution, tenant groups, and
+        unified RBAC pages.
+      operationId: MultiTenant.GetEffectiveTenantGroup
+      tags: [Multi-Tenant]
+      x-nodoc-operation-context:
+        surface: Multi-tenant shell
+        workflows:
+          - Open or switch MTO homepage, incidents, hunting, cases, identity inventory, content distribution, tenant groups, or unified RBAC views.
+        authProfile: defender-mto-tenant-context
+        availability:
+          level: user-context
+          notes:
+            - Effective tenant-group state depends on the signed-in operator and the current managed-tenant selection.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in live traffic across the MTO homepage, incidents, hunting, cases, identity inventory, content distribution, tenant groups, and unified RBAC pages.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantGroup'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

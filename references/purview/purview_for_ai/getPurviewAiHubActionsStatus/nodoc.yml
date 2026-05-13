@@ -1,0 +1,32 @@
+  /cpm/v1.0/Tenant/AIHubActionsStatus:
+    get:
+      operationId: getPurviewAiHubActionsStatus
+      summary: Get AI Hub actions status
+      description: >-
+        Retrieve AI Hub action status used by Purview for AI unified overview
+        cards and onboarding checks.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The tenant GUID used by the Purview for AI service.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

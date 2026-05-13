@@ -1,0 +1,48 @@
+{
+  "portal": "sharepoint",
+  "subArea": "openapi",
+  "slug": "CanUserCreateGroup",
+  "operationId": "SharePointAdmin.CanUserCreateGroup",
+  "path": "/_api/GroupSiteManager/CanUserCreateGroup",
+  "methods": [
+    "get"
+  ],
+  "summary": "Check whether the user can create group-connected sites",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:21.5732553Z",
+  "pagination": {
+    "sizeParam": null,
+    "defaults": {},
+    "tokenParam": null,
+    "style": "none",
+    "indexParam": null
+  },
+  "timeFilter": {
+    "type": null,
+    "supported": false,
+    "startParam": null,
+    "lookbackParam": null,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "CookieHost": "*-admin.sharepoint.com",
+    "Method": "Tenant-specific host; ClientId TBD",
+    "Status": "auth-research-needed"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

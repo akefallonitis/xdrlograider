@@ -1,0 +1,329 @@
+{
+  "subArea": "openapi",
+  "suggestedCadence": "unknown",
+  "endpointCount": 14,
+  "endpoints": [
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__featureFlags",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__partnerTenantSettings",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requests",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests",
+      "methods": [
+        "get",
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requests__requestId",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}",
+      "methods": [
+        "get",
+        "patch",
+        "delete"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requests__requestId__instances",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requests__requestId__instances__instanceId",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requests__requestId__instances__instanceId__applyDecisions",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/applyDecisions",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/applyDecisions' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requests__requestId__instances__instanceId__decisions",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/decisions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/decisions' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requests__requestId__instances__instanceId__resetDecisions",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/resetDecisions",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/resetDecisions' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requests__requestId__instances__instanceId__stop",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requestsAwaitingMyDecision",
+      "operationId": "",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requestsAwaitingMyDecision",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requestsAwaitingMyDecision' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "ListBusinessFlows",
+      "operationId": "AccessReviews.ListBusinessFlows",
+      "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/businessFlows",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/businessFlows' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "ListReports",
+      "operationId": "AccessReviews.ListReports",
+      "path": "/accessReviews/v2.0/reports",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 0,
+  "cntNoLive": 14,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [],
+  "paginationStyles": [],
+  "valueProp": "Access Reviews: review definitions, decisions, completion state"
+}

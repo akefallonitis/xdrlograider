@@ -1,0 +1,39 @@
+  /mtp/responseApiPortal/webcategory/policies:
+    get:
+      summary: List web content filtering policies
+      description: >-
+        Retrieve the web content filtering policies configured through the Defender
+        portal's response API portal experience.
+      operationId: Configuration.ListWebCategoryPolicies
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    blockedCategoryIds:
+                      type: array
+                      items:
+                        type: integer
+                    auditCategoryIds:
+                      type: array
+                      items:
+                        type: integer
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

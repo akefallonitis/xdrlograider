@@ -1,0 +1,18 @@
+  /Skype.OperatorConnect/operator-consents:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: List Operator Connect consents
+      description: |
+        Consent inventory used by Teams Operator Connect pages.
+      responses:
+        '200':
+          description: Operator consent collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

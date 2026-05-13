@@ -1,0 +1,27 @@
+{
+  "portal": "defender",
+  "subArea": "action_center",
+  "endpointCount": 11,
+  "paginationDistribution": {
+    "topSkip": 2,
+    "pageIndex0Based": 1,
+    "none": 7,
+    "pageIndex1Based": 1
+  },
+  "timeFilterEndpointCount": 0,
+  "topEntities": [
+    "Investigation.Id",
+    "Time.Generated",
+    "Action.Id",
+    "Host.MdatpId",
+    "Tenant.Id",
+    "Software.Name"
+  ],
+  "cadenceSuggestion": "daily",
+  "productionScale": {
+    "VolumeLargeT": "100-10K events",
+    "RateLimitRisk": "LOW",
+    "DeltaPollPriority": "medium"
+  },
+  "generatedUtc": "2026-05-13T07:21:27Z"
+}

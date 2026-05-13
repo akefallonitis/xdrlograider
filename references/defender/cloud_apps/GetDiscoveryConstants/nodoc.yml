@@ -1,0 +1,24 @@
+  /mcas/cas/api/v1/discovery/constants:
+    get:
+      summary: Get discovery constants
+      description: >-
+        Retrieve the Cloud Discovery constants, lookup values, and static configuration
+        used by the applications and discovery policy experiences in the Defender portal.
+      operationId: CloudApps.GetDiscoveryConstants
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Cloud Discovery constants payload
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

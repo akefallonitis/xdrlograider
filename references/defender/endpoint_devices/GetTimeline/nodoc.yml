@@ -1,0 +1,31 @@
+  /mtp/deviceTimeline/timeline/{DeviceId}:
+    get:
+      summary: Get device timeline
+      description: >-
+        Retrieve the timeline of events for a specific endpoint device,
+        including security events, alerts, and other activities.
+      operationId: EndpointDevices.GetTimeline
+      tags: [Endpoint Devices]
+      parameters:
+        - name: DeviceId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - timeline event data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

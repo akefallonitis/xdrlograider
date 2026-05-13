@@ -69,12 +69,76 @@ if ($tierStreams.Count -eq 0) {
     }
 }
 
-# Fan out: one activity per stream (NoWait pattern then WaitAll)
+# Phase A2 circuit-breaker pre-flight: read XdrTierState for this Portal,
+# count streams currently in CircuitState='open' with unexpired CooldownUntilUtc.
+# If ALL streams in this Tier are open, skip the entire fan-out (no point
+# burning auth/orchestration cost on a sub-area whose every endpoint is
+# in cooldown). Per-stream circuit-breaker check happens inside each activity
+# (Phase A1) so partial-open tiers still progress.
+#
+# Replay-safe: this is a DETERMINISTIC read of state at orchestration start.
+# Same input produces same decision on replay (state is not mutated here).
+$skippedCount = 0
+try {
+    $tierStateMap = Get-XdrTierStateAggregate `
+        -StorageAccountName $env:STORAGE_ACCOUNT_NAME `
+        -PartitionKey       $portal
+    if ($tierStateMap -is [System.Collections.IDictionary]) {
+        $openInTier = 0
+        $consideredInTier = 0
+        $now = [DateTime]::UtcNow
+        foreach ($stream in $tierStreams) {
+            $ek = if ($stream.Contains('EntryKey') -and $stream.EntryKey) { [string]$stream.EntryKey } else { [string]$stream.Stream }
+            if ($tierStateMap.ContainsKey($ek)) {
+                $consideredInTier++
+                $r = $tierStateMap[$ek]
+                $cs = if ($r.PSObject.Properties['CircuitState']) { [string]$r.CircuitState } else { 'closed' }
+                if ($cs -eq 'open') {
+                    $cooldownExpired = $true
+                    if ($r.PSObject.Properties['CooldownUntilUtc']) {
+                        try {
+                            $cu = [DateTime]::Parse($r.CooldownUntilUtc)
+                            $cooldownExpired = ($cu -le $now)
+                        } catch { $cooldownExpired = $true }
+                    }
+                    if (-not $cooldownExpired) { $openInTier++ }
+                }
+            }
+        }
+        if ($consideredInTier -gt 0 -and $openInTier -eq $consideredInTier) {
+            Write-Information ("Xdr-PollOrchestrator: ALL {0} streams in {1}|{2} circuit-open; skipping fan-out" -f $consideredInTier, $portal, $tier)
+            $skippedCount = $consideredInTier
+        }
+    }
+} catch {
+    Write-Warning ("Xdr-PollOrchestrator: pre-flight circuit-breaker check failed; proceeding anyway: {0}" -f $_.Exception.Message)
+}
+
+if ($skippedCount -gt 0) {
+    return [pscustomobject]@{
+        Portal = $portal
+        Tier = $tier
+        StreamsAttempted = 0
+        StreamsSucceeded = 0
+        RowsIngested = 0
+        StreamsSkippedCircuitOpen = $skippedCount
+        Errors = @{}
+        FunctionName = $functionName
+    }
+}
+
+# Fan out: one activity per stream (NoWait pattern then WaitAll).
+# Phase A1: pass EntryKey for activity-side dispatch — manifest is EntryKey-keyed
+# (`<sub_area>::<slug>`, unique per endpoint). StreamName (workspace table name,
+# e.g. Defender_ActionCenter_CL) is shared by multiple endpoints within a
+# sub-area; activity uses EntryKey to look up the right manifest entry.
 $activityTasks = @()
 foreach ($stream in $tierStreams) {
+    $entryKeyValue = if ($stream.Contains('EntryKey') -and $stream.EntryKey) { [string]$stream.EntryKey } else { [string]$stream.Stream }
     $activityInput = @{
         Portal      = $portal
         Tier        = $tier
+        EntryKey    = $entryKeyValue
         StreamName  = $stream.Stream
         StreamPath  = $stream.Path
         OperationId = $operationId   # Section R B-4: propagate correlation ID to activity → telemetry → ingest

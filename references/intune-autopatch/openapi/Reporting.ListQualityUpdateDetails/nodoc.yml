@@ -1,0 +1,28 @@
+  /reporting/reports/v2/deviceAccounting/wqu/details:
+    post:
+      tags: [Reporting]
+      summary: List quality update device details
+      description: |
+        Returns the Windows quality update device-detail grid. The route was recovered from the
+        report bundle and confirmed with a safe probe; this tenant returned an empty `values`
+        array, so the field list here comes from the blade's response-mapping code.
+      operationId: IntuneAutopatch.Reporting.ListQualityUpdateDetails
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityUpdateDetailsRequest'
+      responses:
+        '200':
+          description: Quality update device details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityUpdateDetailsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

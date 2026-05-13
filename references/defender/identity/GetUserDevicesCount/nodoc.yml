@@ -1,0 +1,31 @@
+  /mdi/identity/userapiservice/devices/count:
+    post:
+      summary: Get user devices count
+      description: >-
+        Retrieve the total number of devices associated with the supplied
+        identity payload.
+      operationId: Identity.GetUserDevicesCount
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - user device count request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user devices count
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

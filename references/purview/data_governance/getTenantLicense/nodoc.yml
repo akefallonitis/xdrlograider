@@ -1,0 +1,23 @@
+  /dgs/Item/GetTenantLicense:
+    get:
+      operationId: getTenantLicense
+      summary: Get tenant license information
+      description: >-
+        Retrieve tenant license information from the Data Governance Services.
+        Returns the current licensing status and entitlements for Purview features.
+      tags: [DataGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/DataGovernanceTenantLicenseResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

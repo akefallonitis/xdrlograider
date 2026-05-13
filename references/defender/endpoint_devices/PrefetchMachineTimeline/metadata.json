@@ -1,0 +1,153 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "PrefetchMachineTimeline",
+  "operationId": "EndpointDevices.PrefetchMachineTimeline",
+  "path": "/mtp/mdeTimelineExperience/machines/{MachineId}/prefetch",
+  "methods": [
+    "post"
+  ],
+  "summary": "Prefetch machine timeline",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:00.8410316Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": "fromDate",
+    "type": "iso8601",
+    "supported": true,
+    "endParam": "toDate"
+  },
+  "otherParameters": [
+    {
+      "Name": "MachineId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the device."
+    },
+    {
+      "Name": "machineId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Redundant machine identifier currently sent by the portal."
+    },
+    {
+      "Name": "machineDnsName",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The machine DNS name echoed by the current portal client."
+    },
+    {
+      "Name": "generateIdentityEvents",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include generated identity events in the prefetch request."
+    },
+    {
+      "Name": "supportMdiOnlyEvents",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include MDI-only timeline events when supported."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "PathTemplate — '/mtp/mdeTimelineExperience/machines/{MachineId}/prefetch' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=fromDate/endParam=toDate"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "semantic-override",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The unique identifier of the device.",
+      "type": "string",
+      "name": "MachineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Redundant machine identifier currently sent by the portal.",
+      "type": "string",
+      "name": "machineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The machine DNS name echoed by the current portal client.",
+      "type": "string",
+      "name": "machineDnsName"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The inclusive start of the requested time range.",
+      "type": "string",
+      "name": "fromDate"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The inclusive end of the requested time range.",
+      "type": "string",
+      "name": "toDate"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include generated identity events in the prefetch request.",
+      "type": "boolean",
+      "name": "generateIdentityEvents"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include MDI-only timeline events when supported.",
+      "type": "boolean",
+      "name": "supportMdiOnlyEvents"
+    }
+  ],
+  "paginationStyle": "fromSize",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.FullName",
+    "Host.MdatpId"
+  ],
+  "cadenceSuggestion": "daily"
+}

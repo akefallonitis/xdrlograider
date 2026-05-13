@@ -1,0 +1,41 @@
+  /api/v1/userpreference:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin preference service
+    get:
+      tags: [RegionalAdmin]
+      summary: Get Teams admin dashboard preferences
+      description: |
+        Retrieves saved dashboard and carousel layout preferences for the signed-in Teams admin.
+      responses:
+        '200':
+          description: User preference payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsUserPreference'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [RegionalAdmin]
+      summary: Update Teams admin dashboard preferences
+      description: |
+        Persists dashboard layout preferences for the current Teams admin user. Observed during dashboard
+        layout persistence and should be treated as a real write.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamsUserPreference'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

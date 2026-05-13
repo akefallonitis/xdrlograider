@@ -1,0 +1,51 @@
+  /mtp/settings/GetAdvancedFeaturesSetting:
+    get:
+      summary: Get advanced features setting
+      description: >-
+        Retrieve the current advanced features settings for Microsoft Defender
+        for Endpoint via GET request.
+      operationId: EndpointConfiguration.GetAdvancedFeaturesGet
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvancedFeaturesSettings'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Get advanced features settings
+      description: >-
+        Retrieve the current advanced features settings for Microsoft Defender
+        for Endpoint. This includes toggles for features like automated investigation,
+        live response, custom network indicators, and more.
+      operationId: EndpointConfiguration.GetAdvancedFeatures
+      tags: [Endpoint Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvancedFeaturesSettings'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

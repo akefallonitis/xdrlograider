@@ -1,0 +1,29 @@
+  /mcas/cas/api/v1/app_permissions:
+    post:
+      summary: List app permissions
+      description: >-
+        Retrieve a list of OAuth app permissions with filtering. Discovered on OAuth Apps page.
+      operationId: CloudApps.ListAppPermissions
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

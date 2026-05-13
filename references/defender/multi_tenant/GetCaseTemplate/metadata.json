@@ -1,0 +1,71 @@
+{
+  "portal": "defender",
+  "subArea": "multi_tenant",
+  "slug": "GetCaseTemplate",
+  "operationId": "MultiTenant.GetCaseTemplate",
+  "path": "/mtoapi/mtp/CaseManagement/be/templates/{TemplateId}",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get MTO case template",
+  "sourceFile": "multi_tenant.yml",
+  "capturedUtc": "2026-05-12T14:41:55.2737291Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "TemplateId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the case template."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtoapi/mtp/CaseManagement/be/templates/{TemplateId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The unique identifier of the case template.",
+    "type": "string",
+    "name": "TemplateId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

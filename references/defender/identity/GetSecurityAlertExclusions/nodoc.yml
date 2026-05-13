@@ -1,0 +1,23 @@
+  /aatp/odata/SecurityAlertExclusionDatas:
+    get:
+      summary: Get security alert exclusions by detection rule
+      description: >-
+        Retrieve security alert exclusion data organized by detection rule using the OData endpoint. Discovered on Identity Settings > Exclusions by detection rule page.
+      operationId: Identity.GetSecurityAlertExclusions
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

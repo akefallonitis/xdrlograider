@@ -1,0 +1,43 @@
+  /mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices:
+    get:
+      summary: Resolve Intune managed device
+      description: >-
+        Look up the backing Microsoft Intune managed-device record that corresponds
+        to the selected Defender device.
+      operationId: EndpointConfiguration.ListManagedDevices
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: $filter
+          in: query
+          required: true
+          description: OData filter used to resolve the managed device by Entra device ID.
+          schema:
+            type: string
+        - name: $top
+          in: query
+          description: Maximum number of managed devices to return.
+          schema:
+            type: integer
+            default: 1
+        - name: $select
+          in: query
+          description: Projection of the managed-device fields required by the portal.
+          schema:
+            type: string
+            default: id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - managed-device lookup response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

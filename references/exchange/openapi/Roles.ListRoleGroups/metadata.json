@@ -1,0 +1,50 @@
+{
+  "portal": "exchange",
+  "subArea": "openapi",
+  "slug": "Roles.ListRoleGroups",
+  "operationId": "ExchangeBeta.Roles.ListRoleGroups",
+  "path": "/beta/RoleGroup",
+  "methods": [
+    "get"
+  ],
+  "summary": "List Exchange role groups",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:42:38.7329726Z",
+  "pagination": {
+    "style": "none",
+    "defaults": {},
+    "indexParam": null,
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "supported": false,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "out-of-scope-graph-covers",
+    "Method": "Microsoft Graph covers — out of portal-only scope"
+  },
+  "v1Manifest": null,
+  "xdrInternalsHint": "Get-XdrExchangeBetaRoles.ListRoleGroups",
+  "defenderHarvester": null,
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 403",
+    "responseShape": null
+  },
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

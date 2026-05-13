@@ -1,0 +1,15 @@
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts/{alertId}:
+    get:
+      tags: [Alerts]
+      summary: Get a specific PIM alert
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alert details

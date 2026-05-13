@@ -1,0 +1,12 @@
+{
+  "portal": "entra-ibiza-iam",
+  "path": "/MultiFactorAuthentication/ActivationCredentials",
+  "method": "GET",
+  "finalUrl": "https://main.iam.ad.ext.azure.com/api/MultiFactorAuthentication/ActivationCredentials",
+  "httpStatus": 403,
+  "successKind": "tenant-gated",
+  "diagnostic": "Unauthorized",
+  "contentLen": 1003,
+  "rawSample": "{\"httpStatusCode\":403,\"xMsServerRequestId\":null,\"clientData\":{\"errorCode\":\"Unauthorized\",\"localizedErrorDetails\":null,\"operationResults\":null,\"timeStampUtc\":\"2026-05-13T07:17:29.6970828Z\",\"clientRequestId\":\"f5ba9f5e-7865-447f-a96c-4b59ff6289f2\",\"internalTransactionId\":\"c26136ec-6182-4bb4-bb75-ba300924c297\",\"tenantId\":null,\"userObjectId\":\"9b0a5108-6952-4fc7-941a-133004153bda\",\"exceptionType\":\"AuthenticationException\"},\"message\":\"Missing permission required to perform action 'Update' on target 'MultiFactorAuthentication'\",\"data\":{},\"innerException\":{\"ClassName\":\"System.Security.Authentication.AuthenticationException\",\"Message\":\"Missing permission required to perform action 'Update' on target 'MultiFactorAuthentication'\",\"Data\":null,\"InnerException\":null,\"HelpURL\":null,\"StackTraceString\":null,\"RemoteStackTraceString\":null,\"RemoteStackIndex\":0,\"ExceptionMethod\":null,\"HResult\":-2146233087,\"Source\":null,\"WatsonBuckets\":null},\"stackTrace\":null,\"helpLink\":null,\"source\":null,\"hResult\":-2146233088}",
+  "capturedUtc": "2026-05-13T07:17:28Z"
+}

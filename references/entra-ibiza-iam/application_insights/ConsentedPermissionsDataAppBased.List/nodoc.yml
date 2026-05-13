@@ -1,0 +1,78 @@
+  /ApplicationInsights/ConsentedPermissionsDataAppBased:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Application Insights application consented permissions (app-based)
+      description: >-
+        List Application Insights application consented permissions (app-based).
+      operationId: ApplicationInsights.ConsentedPermissionsDataAppBased.List
+      tags: [Application Insights]
+      parameters:
+        - name: inputText
+          description: A text string to search results by
+          in: query
+          required: true
+          schema:
+            type: string
+            example: graph
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    appLogo:
+                      description: URL to application logo.
+                      type: string
+                      example: https://main.iam.ad.ext.azure.com/api/Images/Applications/iUpXTCQjlu5Q-sFbZwEfQ45W0SgSDEZaZOH9p-9PNR0=.jpg?t=638533969331975381
+                    appDisplayName:
+                      description: The display name of the application.
+                      example: Graph Connector Service
+                    appId:
+                      $ref: common.yml#/components/schemas/applicationId
+                    objectId:
+                      $ref: common.yml#/components/schemas/servicePrincipalId
+                    permissionRiskLevel:
+                      type: integer
+                      example: -2
+                    credentialRiskLevel:
+                      type: integer
+                      example: 3
+                    numberOfConsents:
+                      type: integer
+                      example: 0
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

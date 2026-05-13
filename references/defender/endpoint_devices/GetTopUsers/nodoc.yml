@@ -1,0 +1,64 @@
+  /mtp/getTopUsersByIds/TopUsersByIds:
+    get:
+      summary: Get top users for device
+      description: >-
+        Retrieve the top user identities shown on the unified device page.
+      operationId: EndpointDevices.GetTopUsers
+      tags: [Endpoint Devices]
+      parameters:
+        - name: isUnifiedDevicePage
+          in: query
+          description: Indicates the unified device page requested the lookup.
+          schema:
+            type: boolean
+            default: true
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: senseMachineId
+          in: query
+          description: The Sense machine identifier for the same device.
+          schema:
+            type: string
+        - name: computerDnsName
+          in: query
+          description: The current DNS name of the device.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+        - name: armId
+          in: query
+          description: Optional Azure resource ID context for the device.
+          schema:
+            type: string
+            nullable: true
+        - name: lookingBackIndays
+          in: query
+          description: Number of days of user activity to include.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - top users for device
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

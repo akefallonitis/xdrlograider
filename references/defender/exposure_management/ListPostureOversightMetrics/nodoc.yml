@@ -1,0 +1,48 @@
+  /mtp/posture/oversight/metrics:
+    get:
+      summary: List posture oversight metrics
+      description: >-
+        Retrieve posture oversight metrics, optionally filtered by initiative and whether
+        to include full data and highlights. Returns time-series metric objects with
+        category, description, and scoring detail. Observed live on the Exposure Management
+        overview page.
+      operationId: ExposureManagement.ListPostureOversightMetrics
+      tags: [Exposure Management]
+      parameters:
+        - name: initiativeId
+          in: query
+          description: Filter metrics for a specific initiative ID.
+          schema:
+            type: string
+        - name: highlights
+          in: query
+          description: Include highlight metadata.
+          schema:
+            type: boolean
+            default: true
+        - name: fullData
+          in: query
+          description: Return the full data set rather than a reduced summary.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostureMetric'
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

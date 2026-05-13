@@ -1,0 +1,91 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetDeviceTotals",
+  "operationId": "EndpointDevices.GetDeviceTotals",
+  "path": "/mtp/ndr/machines/deviceTotals",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get device totals",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:38:55.6725254Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "hideLowFidelityDevices",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Exclude low-fidelity (unmanaged) devices."
+    },
+    {
+      "Name": "lookingBackIndays",
+      "In": "query",
+      "Type": "integer",
+      "Default": "30",
+      "Description": "Number of days to look back for device activity."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 14,
+    "errorText": "",
+    "responseShape": "array"
+  },
+  "parsingNotes": [
+    "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (14 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": "true",
+      "required": false,
+      "description": "Exclude low-fidelity (unmanaged) devices.",
+      "type": "boolean",
+      "name": "hideLowFidelityDevices"
+    },
+    {
+      "in": "query",
+      "default": "30",
+      "required": false,
+      "description": "Number of days to look back for device activity.",
+      "type": "integer",
+      "name": "lookingBackIndays"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.RiskScore"
+  ],
+  "cadenceSuggestion": "daily"
+}

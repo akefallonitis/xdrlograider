@@ -1,0 +1,44 @@
+  /beta/RoleAssignments:
+    get:
+      tags: [Roles]
+      summary: List role assignments
+      description: |
+        Returns role assignment entities used by the User roles and Admin roles pages. Observed
+        requests filtered assignments by principal identifier.
+      operationId: ExchangeBeta.Roles.ListRoleAssignments
+      responses:
+        '200':
+          description: Role assignments returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/RoleGroup('{roleGroupId}')/ExchangeAdminCenter.GetRoleGroupMembers()":
+    get:
+      tags: [Roles]
+      summary: Get role group members
+      description: |
+        Returns the member inventory for a specific Exchange role group detail blade.
+      operationId: ExchangeBeta.Roles.GetRoleGroupMembers
+      parameters:
+        - $ref: '#/components/parameters/roleGroupId'
+      responses:
+        '200':
+          description: Role group members returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'

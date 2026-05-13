@@ -1,0 +1,19 @@
+  /_api/GroupSiteManager/CanUserCreateGroup:
+    get:
+      tags: [Groups]
+      summary: Check whether the user can create group-connected sites
+      description: |
+        Returns whether the current principal can create a Microsoft 365
+        group-connected site.
+      operationId: SharePointAdmin.CanUserCreateGroup
+      responses:
+        '200':
+          description: Group-creation capability returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

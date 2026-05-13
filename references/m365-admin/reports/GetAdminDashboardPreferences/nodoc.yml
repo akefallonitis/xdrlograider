@@ -1,0 +1,31 @@
+  /admin/api/admindashboard/preferences:
+    get:
+      summary: Get admin dashboard preferences
+      description: >-
+        Retrieve admin dashboard preferences for the current user.
+      operationId: Reports.GetAdminDashboardPreferences
+      tags: [Reports]
+      x-nodoc-operation-context:
+        surface: Dashboard
+        workflows:
+          - Open the admin homepage dashboard and read saved user preferences.
+        headerProfile: m365-admin-homepage
+        availability:
+          level: user-context
+          notes:
+            - Preferences are scoped to the signed-in administrator rather than the whole tenant.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/AdminDashboardPreferencesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

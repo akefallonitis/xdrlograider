@@ -1,0 +1,24 @@
+  /mtp/secureScore/security/secureScoreInsights:
+    get:
+      summary: Get secure score insights
+      description: >-
+        Retrieve insights and recommendations for improving the organization's
+        secure score.
+      operationId: SecureScore.GetInsights
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - secure score insights data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

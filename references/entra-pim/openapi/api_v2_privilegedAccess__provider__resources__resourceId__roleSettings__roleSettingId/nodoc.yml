@@ -1,0 +1,42 @@
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings/{roleSettingId}:
+    get:
+      tags: [Role Settings]
+      summary: Get settings for a specific role
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: roleSettingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Role setting details
+    patch:
+      tags: [Role Settings]
+      summary: Update role settings
+      description: |
+        Updates PIM settings for a specific role. Controls activation requirements,
+        assignment rules, and notification settings.
+
+        **Warning:** This endpoint modifies PIM role configuration.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: roleSettingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Role settings updated

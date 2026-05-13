@@ -1,0 +1,23 @@
+  /admin/api/services/apps/m365lighthouse:
+    get:
+      summary: Get M365 Lighthouse settings
+      description: >-
+        Retrieve the Microsoft 365 Lighthouse service settings for the tenant (Org Settings > Microsoft 365 Lighthouse).
+      operationId: AppSettings.GetM365Lighthouse
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

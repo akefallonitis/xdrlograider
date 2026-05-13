@@ -1,0 +1,60 @@
+  /_api/MigrationCenterServices/Storage/TotalDevicesAdded:
+    get:
+      tags: [Migration]
+      summary: Get total migration devices added
+      description: |
+        Returns the total number of devices that have been added to the
+        SharePoint Migration Manager experience.
+      operationId: SharePointAdmin.GetMigrationTotalDevicesAdded
+      responses:
+        '200':
+          description: Migration device count returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataIntegerResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/_api/MigrationCenterServices/Properties/GetProperty('{propertyName}')":
+    get:
+      tags: [Migration]
+      summary: Get a migration center property
+      description: |
+        Returns a named Migration Manager property used to light up source-system
+        onboarding cards on the Migration blade. Observed for Box, Dropbox,
+        Egnyte, Google Workspace, and Microsoft Stream property keys.
+      operationId: SharePointAdmin.GetMigrationProperty
+      parameters:
+        - $ref: '#/components/parameters/MigrationPropertyName'
+      x-nodoc-operation-context:
+        surface: Migration
+        workflows:
+          - Open Migration Manager and inspect source-system onboarding cards on the migration landing page.
+        headerProfile: sharepoint-admin-read
+        requestShapes:
+          - name: migration-property-by-key
+            bodyKind: none
+            requiredParameters:
+              - propertyName
+            notes: The propertyName path literal selects the source-system onboarding record the portal wants to load.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated SharePoint Migration Manager browsing for Box, Dropbox, Egnyte, Google Workspace, and Microsoft Stream cards.
+      responses:
+        '200':
+          description: Migration property returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'

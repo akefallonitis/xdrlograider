@@ -1,0 +1,30 @@
+  /fd/storeForBusinessMgmt/bd-prod/agreements/vlpermissions:
+    get:
+      summary: Get volume licensing permissions
+      description: >-
+        Retrieve the volume licensing permission set used by the subscriptions
+        experience to determine whether software key and agreement actions are available.
+      operationId: Billing.GetVolumeLicensingPermissions
+      tags: [Billing]
+      parameters:
+        - name: api-version
+          in: query
+          description: API version requested by the Store for Business agreement service.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Volume licensing permission payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,46 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "reports",
+  "slug": "GroupActivitySummary.Get",
+  "operationId": "Reports.GroupActivitySummary.Get",
+  "path": "/Reports/GroupsActivitySummary",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get groups activity summary",
+  "sourceFile": "reports.yml",
+  "capturedUtc": "2026-05-12T15:13:12.7558715Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 404,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

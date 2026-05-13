@@ -1,0 +1,440 @@
+{
+  "subArea": "entity_pivots",
+  "suggestedCadence": "1h",
+  "endpointCount": 19,
+  "endpoints": [
+    {
+      "slug": "GetDomainClickPrevalence",
+      "operationId": "EntityPivots.GetDomainClickPrevalence",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/prevalence",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetDomainClickTrend",
+      "operationId": "EntityPivots.GetDomainClickTrend",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/trend",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetDomainDevicePrevalence",
+      "operationId": "EntityPivots.GetDomainDevicePrevalence",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/domain/device/prevalence",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetDomainDeviceTrend",
+      "operationId": "EntityPivots.GetDomainDeviceTrend",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/domain/device/trend",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetDomainEmailPrevalence",
+      "operationId": "EntityPivots.GetDomainEmailPrevalence",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/domain/email/prevalence",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetDomainEmailTrend",
+      "operationId": "EntityPivots.GetDomainEmailTrend",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/domain/email/trend",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetUrlClickPrevalence",
+      "operationId": "EntityPivots.GetUrlClickPrevalence",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/prevalence",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetUrlClickTrend",
+      "operationId": "EntityPivots.GetUrlClickTrend",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/trend",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetUrlDevicePrevalence",
+      "operationId": "EntityPivots.GetUrlDevicePrevalence",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/url/device/prevalence",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetUrlDeviceTrend",
+      "operationId": "EntityPivots.GetUrlDeviceTrend",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/url/device/trend",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetUrlEmailPrevalence",
+      "operationId": "EntityPivots.GetUrlEmailPrevalence",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/url/email/prevalence",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetUrlEmailTrend",
+      "operationId": "EntityPivots.GetUrlEmailTrend",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/url/email/trend",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetUrlOverview",
+      "operationId": "EntityPivots.GetUrlOverview",
+      "path": "/mtp/useServiceBaseUrl/ine/entitypagesservice/urls/overview",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Url.Domain",
+        "Url.Path"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListDomainClicks",
+      "operationId": "EntityPivots.ListDomainClicks",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/details",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListDomainDevices",
+      "operationId": "EntityPivots.ListDomainDevices",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/domain/device/details",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListDomainEmails",
+      "operationId": "EntityPivots.ListDomainEmails",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/domain/email/details",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Domain",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListUrlClicks",
+      "operationId": "EntityPivots.ListUrlClicks",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/details",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListUrlDevices",
+      "operationId": "EntityPivots.ListUrlDevices",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/url/device/details",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListUrlEmails",
+      "operationId": "EntityPivots.ListUrlEmails",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/url/email/details",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 19,
+  "cntNoLive": 0,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Url.Domain",
+    "Url.Path"
+  ],
+  "paginationStyles": [],
+  "valueProp": "On-demand entity context lookups — operator drill-down support"
+}

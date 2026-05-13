@@ -1,0 +1,25 @@
+  /_api/v2.1/unifiedStorageQuotaEligible:
+    get:
+      tags: [Storage]
+      summary: Check unified storage quota eligibility
+      description: |
+        Returns the tenant's unified storage quota eligibility and over-quota
+        status as surfaced by the SharePoint admin center.
+      operationId: SharePointAdmin.GetUnifiedStorageQuotaEligibility
+      responses:
+        '200':
+          description: Unified storage quota eligibility returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnifiedStorageQuotaEligibleResponse'
+              example:
+                '@odata.context': string
+                isEligible: false
+                lastUpdated: '1968-09-02T11:28:11.888Z'
+                isOverQuota: true
+                isEligibleFeature: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

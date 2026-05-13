@@ -1,0 +1,264 @@
+{
+  "httpStatus": 200,
+  "successKind": "live",
+  "rowCount": 10,
+  "errorText": "",
+  "responseShape": "wrapper:results[]",
+  "sample": {
+    "results": [
+      {
+        "id": "mss_bp_ensure_pingone_identities_configured_securely",
+        "version": 1.0,
+        "name": "[Preview] Missing best practices to ensure PingOne identities are configured securely",
+        "category": "utilization",
+        "description": "Number of Secure Score points given for ensuring Ping identities accounts are configured securely, out of the total potential points of the aggregated recommendations.",
+        "latestCount": -1.0,
+        "latestTotal": -1.0,
+        "latestValue": -2.0,
+        "targetValue": 0.0,
+        "latestCalculatedWeight": -1.0,
+        "latestCalculatedScoreImpact": 0.0,
+        "latestScore": -1.0,
+        "latestCalculationId": "32a90bde-04e6-427b-b8e9-e79d8bc63538",
+        "sentimentType": "negative",
+        "weight": 0.0,
+        "supportGetAssets": false,
+        "recommendations": [
+          "AATP_Ping_Dormant",
+          "AATP_Ping_HighNumberOfSuperAdmins",
+          "AATP_Ping_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
+          "AATP_Ping_SensitiveAccountWithoutFactorsAssigned",
+          "AATP_Ping_SensitiveAccountWithOldPassword"
+        ],
+        "recommendationsV2": {
+          "identity": [
+            "AATP_Ping_Dormant",
+            "AATP_Ping_HighNumberOfSuperAdmins",
+            "AATP_Ping_HighNumberOfNonSuperAdminPrivilegedUserAccounts",
+            "AATP_Ping_SensitiveAccountWithoutFactorsAssigned",
+            "AATP_Ping_SensitiveAccountWithOldPassword"
+          ]
+        },
+        "workloads": [
+          "MDI"
+        ],
+        "suggestions": [
+          {
+            "title": "Deploy Microsoft Defender for Identity sensor and integrate PingOne",
+            "description": "To see data associated to this metric establish the API connection between your PingOne environment and Defender for Identity",
+            "actions": [
+              {
+                "text": "Learn more about Defender for Identity deployment",
+                "link": "https://aka.ms/DeployMDI"
+              },
+              {
+                "text": "Enable PingOne integration",
+                "link": "https://aka.ms/MdiPingOneIntegrationDocs"
+              }
+            ]
+          }
+        ],
+        "dataHistory": [
+          {
+            "metricId": "mss_bp_ensure_pingone_identities_configured_securely",
+            "version": 1.0,
+            "count": 0.0,
+            "total": 0.0,
+            "date": "2026-05-12T11:23:42.264566Z",
+            "providerLastUpdate": "2026-05-12T11:23:42.2645443Z",
+            "score": 0.0,
+            "weight": 0.0,
+            "calculationId": "32a90bde-04e6-427b-b8e9-e79d8bc63538",
+            "tenantId": "45f52f35-73d5-4066-8378-fe506ee90fb1",
+            "scopingProperties": {}
+          },
+          {
+            "metricId": "mss_bp_ensure_pingone_identities_configured_securely",
+            "version": 1.0,
+            "count": 0.0,
+            "total": 0.0,
+            "date": "2026-04-28T19:39:52.6062158Z",
+            "providerLastUpdate": "2026-04-28T19:39:52.6061933Z",
+            "score": 0.0,
+            "weight": 0.0,
+            "calculationId": "d812f4b2-c9a1-4d09-ba01-992731138f17",
+            "tenantId": "45f52f35-73d5-4066-8378-fe506ee90fb1",
+            "scopingProperties": {}
+          }
+        ],
+        "hasNoAssets": true,
+        "hasNoDataHistory": false,
+        "dataTypes": [
+          "scores"
+        ],
+        "initiativeScoreImpact": 0.0,
+        "releaseNotes": {
+          "description": "Enhancing the Identity Security initiative with updated metrics"
+        },
+        "state": "riskAccepted"
+      },
+      {
+        "id": "cloudmapv2_all_critical_cloud_resources",
+        "version": 1.0,
+        "name": "# all critical cloud resources",
+        "category": "protection",
+        "description": "Number of critical cloud resources.",
+        "latestCount": -1.0,
+        "latestTotal": -1.0,
+        "latestValue": -2.0,
+        "targetValue": 0.0,
+        "latestCalculatedWeight": -1.0,
+        "latestCalculatedScoreImpact": 0.0,
+        "latestScore": -1.0,
+        "latestCalculationId": "",
+        "sentimentType": "negative",
+        "weight": 0.0,
+        "supportGetAssets": true,
+        "recommendations": [],
+        "recommendationsV2": {},
+        "workloads": [],
+        "suggestions": [],
+        "dataHistory": [],
+        "hasNoAssets": true,
+        "hasNoDataHistory": true,
+        "dataTypes": [
+          "cloudResources"
+        ],
+        "initiativeScoreImpact": 0.0,
+        "state": "riskAccepted"
+      },
+      {
+        "id": "cloudmapv2_all_critical_devices",
+        "version": 1.0,
+        "name": "# all critical devices",
+        "category": "protection",
+        "description": "Number of critical devices.",
+        "latestCount": -1.0,
+        "latestTotal": -1.0,
+        "latestValue": -2.0,
+        "targetValue": 0.0,
+        "latestCalculatedWeight": -1.0,
+        "latestCalculatedScoreImpact": 0.0,
+        "latestScore": -1.0,
+        "latestCalculationId": "",
+        "sentimentType": "negative",
+        "weight": 0.0,
+        "supportGetAssets": true,
+        "recommendations": [],
+        "recommendationsV2": {},
+        "workloads": [],
+        "suggestions": [],
+        "dataHistory": [],
+        "hasNoAssets": true,
+        "hasNoDataHistory": true,
+        "dataTypes": [
+          "devices"
+        ],
+        "initiativeScoreImpact": 0.0,
+        "state": "riskAccepted"
+      },
+      {
+        "id": "cloudmapv2_all_critical_identities",
+        "version": 1.0,
+        "name": "# all critical identities",
+        "category": "protection",
+        "description": "Number of critical identities.",
+        "latestCount": -1.0,
+        "latestTotal": -1.0,
+        "latestValue": -2.0,
+        "targetValue": 0.0,
+        "latestCalculatedWeight": -1.0,
+        "latestCalculatedScoreImpact": 0.0,
+        "latestScore": -1.0,
+        "latestCalculationId": "",
+        "sentimentType": "negative",
+        "weight": 0.0,
+        "supportGetAssets": true,
+        "recommendations": [],
+        "recommendationsV2": {},
+        "workloads": [],
+        "suggestions": [],
+        "dataHistory": [],
+        "hasNoAssets": true,
+        "hasNoDataHistory": true,
+        "dataTypes": [
+          "identities"
+        ],
+        "initiativeScoreImpact": 0.0,
+        "state": "riskAccepted"
+      },
+      {
+        "id": "mss_mfa_set_for_administrators",
+        "version": 3.0,
+        "name": "Administrators without multifactor authentication  (MFA) enabled",
+        "category": "utilization",
+        "description": "Number of administrator accounts without MFA enabled, out of all administrator accounts.",
+        "latestCount": 0.0,
+        "latestTotal": 1000.0,
+        "latestValue": 0.0,
+        "targetValue": 0.0,
+        "latestCalculatedWeight": 10.0,
+        "latestCalculatedScoreImpact": 0.0,
+        "latestScore": 10.0,
+        "latestCalculationId": "070d76ae-3872-438e-bc36-f5b532ccd228",
+        "sentimentType": "negative",
+        "weight": 10.0,
+        "supportGetAssets": true,
+        "recommendations": [
+          "AdminMFAV2",
+          "aad_phishing_MFA_strength"
+        ],
+        "recommendationsV2": {
+          "identity": [
+            "AdminMFAV2",
+            "aad_phishing_MFA_strength"
+          ]
+        },
+        "workloads": [
+          "AAD"
+        ],
+        "suggestions": [],
+        "dataHistory": [
+          {
+            "metricId": "mss_mfa_set_for_administrators",
+            "version": 3.0,
+            "count": 0.0,
+            "total": 1000.0,
+            "date": "2026-05-12T11:23:42.2713604Z",
+            "providerLastUpdate": "2026-05-11T01:40:08Z",
+            "score": 10.0,
+            "weight": 10.0,
+            "calculationId": "070d76ae-3872-438e-bc36-f5b532ccd228",
+            "tenantId": "45f52f35-73d5-4066-8378-fe506ee90fb1",
+            "scopingProperties": {}
+          },
+          {
+            "metricId": "mss_mfa_set_for_administrators",
+            "version": 3.0,
+            "count": 0.0,
+            "total": 1000.0,
+            "date": "2026-04-28T19:39:52.6141562Z",
+            "providerLastUpdate": "2026-04-26T01:46:32Z",
+            "score": 10.0,
+            "weight": 10.0,
+            "calculationId": "0d79650f-ab1d-4f2a-988d-d3950f6197f8",
+            "tenantId": "45f52f35-73d5-4066-8378-fe506ee90fb1",
+            "scopingProperties": {}
+          }
+        ],
+        "hasNoAssets": false,
+        "hasNoDataHistory": false,
+        "dataTypes": [],
+        "initiativeScoreImpact": 0.0,
+        "updateId": "MDI_MDA_Updates",
+        "releaseNotes": {
+          "description": "Updating this metric by adding relevant recommendations and refining others to ensure its accuracy"
+        },
+        "state": "targetMet"
+      }
+    ],
+    "recordsCount": 142,
+    "_truncatedTo": 5,
+    "_totalRows": 10
+  }
+}

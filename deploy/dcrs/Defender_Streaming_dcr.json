@@ -1,0 +1,80 @@
+{
+  "type": "Microsoft.Insights/dataCollectionRules",
+  "apiVersion": "2023-03-11",
+  "name": "[concat(variables('dcrName'), '-streaming')]",
+  "location": "[parameters('workspaceLocation')]",
+  "tags": "[variables('commonTag')]",
+  "dependsOn": [
+    "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+    "[concat('customTables-', variables('suffix'))]"
+  ],
+  "properties": {
+    "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+    "streamDeclarations": {
+      "Custom-Defender_Streaming_CL": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Endpoint",
+            "type": "string"
+          },
+          {
+            "name": "EntityId",
+            "type": "string"
+          },
+          {
+            "name": "SuccessKind",
+            "type": "string"
+          },
+          {
+            "name": "HttpStatus",
+            "type": "int"
+          },
+          {
+            "name": "RawJson",
+            "type": "dynamic"
+          },
+          {
+            "name": "RawResponseBody",
+            "type": "string"
+          },
+          {
+            "name": "SubArea",
+            "type": "string"
+          },
+          {
+            "name": "Tier",
+            "type": "string"
+          },
+          {
+            "name": "LicenseHint",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "destinations": {
+      "logAnalytics": [
+        {
+          "name": "la-destination",
+          "workspaceResourceId": "[parameters('existingWorkspaceId')]"
+        }
+      ]
+    },
+    "dataFlows": [
+      {
+        "streams": [
+          "Custom-Defender_Streaming_CL"
+        ],
+        "destinations": [
+          "la-destination"
+        ],
+        "outputStream": "Custom-Defender_Streaming_CL",
+        "transformKql": "source | extend SourceName = 'Defender_Streaming_CL'"
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+  /mtp/siamApi/MdeAttachEnabled:
+    get:
+      summary: Get SIAM MDE attachment state
+      description: >-
+        Retrieve whether the tenant has enabled the Microsoft Defender for Endpoint
+        attachment used by the identity posture experience.
+      operationId: Identity.GetMdeAttachEnabled
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

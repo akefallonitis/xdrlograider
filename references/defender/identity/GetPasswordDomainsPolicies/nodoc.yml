@@ -1,0 +1,24 @@
+  /mdi/identity/userapiservice/pdProtection/domainsPolicies:
+    get:
+      summary: Get password domains and policies
+      description: >-
+        Retrieve password protection domains and policy metadata for the
+        identity posture experience.
+      operationId: Identity.GetPasswordDomainsPolicies
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password domains and policy metadata
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

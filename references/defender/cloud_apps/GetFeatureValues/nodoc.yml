@@ -1,0 +1,30 @@
+  /mcas/cas/api/v1/get_feature_values:
+    post:
+      summary: Get feature values
+      description: >-
+        Resolve Cloud Apps feature flag values for a requested set of feature
+        names. Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetFeatureValues
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - feature flag lookup request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

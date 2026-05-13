@@ -1,0 +1,23 @@
+  /mtp/posture/oversight/initiatives/summarized:
+    get:
+      summary: Get summarized posture initiatives
+      description: >-
+        Retrieve a compact summary of posture oversight initiatives. Bundle-discovered;
+        direct GET probing returned a contextual 500 without page-specific parameters.
+        Shape mirrors /mtp/posture/oversight/initiatives but with reduced field depth.
+      operationId: ExposureManagement.GetPostureOversightInitiativesSummarized
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Summarized initiatives response — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.

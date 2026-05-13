@@ -1,0 +1,29 @@
+  /gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes:
+    post:
+      operationId: checkPermissionWithScopes
+      summary: Check if user has permission with scopes
+      description: >-
+        Check whether the current user has a specific permission with the given scopes.
+        Used for authorization decisions within the Governance Web Services.
+      tags: [GovernanceServices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/GovernanceRolesWithScopeInfoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

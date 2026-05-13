@@ -1,0 +1,2074 @@
+{
+  "subArea": "cloud_apps",
+  "suggestedCadence": "6h",
+  "endpointCount": 92,
+  "endpoints": [
+    {
+      "slug": "AutocompleteAppPermissionNames",
+      "operationId": "CloudApps.AutocompleteAppPermissionNames",
+      "path": "/mcas/api/v1/autocomplete/app-permission-names",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "AutocompleteAppPermissionPermissions",
+      "operationId": "CloudApps.AutocompleteAppPermissionPermissions",
+      "path": "/mcas/api/v1/autocomplete/app-permission-permissions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "AutocompleteDiscoveryAppTags",
+      "operationId": "CloudApps.AutocompleteDiscoveryAppTags",
+      "path": "/mcas/cas/api/v1/autocomplete/discovery_app_tags",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "AutocompleteEntities",
+      "operationId": "CloudApps.AutocompleteEntities",
+      "path": "/mcas/cas/api/v1/autocomplete/entities",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "AutocompleteScopedProfiles",
+      "operationId": "CloudApps.AutocompleteScopedProfiles",
+      "path": "/mcas/cas/api/v1/autocomplete/scoped_profiles",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "AutocompleteTags",
+      "operationId": "CloudApps.AutocompleteTags",
+      "path": "/mcas/cas/api/v1/autocomplete/tags",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "AutocompleteTokens",
+      "operationId": "CloudApps.AutocompleteTokens",
+      "path": "/mcas/cas/api/v1/autocomplete/tokens",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "AutocompleteUsers",
+      "operationId": "CloudApps.AutocompleteUsers",
+      "path": "/mcas/cas/api/v1/autocomplete/users",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "CountSiemAgents",
+      "operationId": "CloudApps.CountSiemAgents",
+      "path": "/mcas/api/v1/agents/siem/count",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetAboutInfo",
+      "operationId": "CloudApps.GetAboutInfo",
+      "path": "/mcas/cas/api/about/info",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetAboutServerUrl",
+      "operationId": "CloudApps.GetAboutServerUrl",
+      "path": "/mcas/cas/api/about/server_url",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetActivitiesCount",
+      "operationId": "CloudApps.GetActivitiesCount",
+      "path": "/mcas/cas/api/v1/activities/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetActivitiesMetadata",
+      "operationId": "CloudApps.GetActivitiesMetadata",
+      "path": "/mcas/cas/api/v1/activities/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetActivitiesThreatScores",
+      "operationId": "CloudApps.GetActivitiesThreatScores",
+      "path": "/mcas/cas/api/v1/activities/get_activities_threat_scores",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetActivityLocationsByUser",
+      "operationId": "CloudApps.GetActivityLocationsByUser",
+      "path": "/mcas/cas/api/v1/activities_locations/by_user",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetAppConnectorInstanceCountByApp",
+      "operationId": "CloudApps.GetAppConnectorInstanceCountByApp",
+      "path": "/mcas/cas/api/v1/app_connectors/dashboard/get_instance_count_by_app",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetAppConnectorsCount",
+      "operationId": "CloudApps.GetAppConnectorsCount",
+      "path": "/mcas/cas/api/v1/app_connectors/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetAppConnectorsLastActivity",
+      "operationId": "CloudApps.GetAppConnectorsLastActivity",
+      "path": "/mcas/cas/api/v1/app_connectors/last_activity",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetAppConnectorsMetadata",
+      "operationId": "CloudApps.GetAppConnectorsMetadata",
+      "path": "/mcas/cas/api/v1/app_connectors/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetAppConnectorsTableConfigValues",
+      "operationId": "CloudApps.GetAppConnectorsTableConfigValues",
+      "path": "/mcas/cas/api/v1/app_connectors/table_config_values",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetAppPermissionsCount",
+      "operationId": "CloudApps.GetAppPermissionsCount",
+      "path": "/mcas/cas/api/v1/app_permissions/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetAppPermissionsMetadata",
+      "operationId": "CloudApps.GetAppPermissionsMetadata",
+      "path": "/mcas/cas/api/v1/app_permissions/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetAppsCountByStatus",
+      "operationId": "CloudApps.GetAppsCountByStatus",
+      "path": "/mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetBootConstants",
+      "operationId": "CloudApps.GetBootConstants",
+      "path": "/mcas/cas/boot_constants",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetCloudAppsFileCount",
+      "operationId": "Files.GetCloudAppsFileCount",
+      "path": "/mcas/cas/api/v1/files/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetComplianceAppMetadata",
+      "operationId": "AppGovernance.GetComplianceAppMetadata",
+      "path": "/m365appprotection/mapg-glsservice/compliance/appmetadata",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetDataEncryptionSettings",
+      "operationId": "CloudApps.GetDataEncryptionSettings",
+      "path": "/mcas/cas/api/v1/data_encryption_settings/get",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetDiscoveredAppsCount",
+      "operationId": "CloudApps.GetDiscoveredAppsCount",
+      "path": "/mcas/cas/api/v1/discovery/discovered_apps/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetDiscoveredAppsMetadata",
+      "operationId": "CloudApps.GetDiscoveredAppsMetadata",
+      "path": "/mcas/cas/api/v1/discovery/discovered_apps/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetDiscoveryAppCatalogCount",
+      "operationId": "CloudApps.GetDiscoveryAppCatalogCount",
+      "path": "/mcas/cas/api/v1/discovery/app_catalog/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetDiscoveryAppCatalogMetadata",
+      "operationId": "CloudApps.GetDiscoveryAppCatalogMetadata",
+      "path": "/mcas/cas/api/v1/discovery/app_catalog/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetDiscoveryCategoryStats",
+      "operationId": "CloudApps.GetDiscoveryCategoryStats",
+      "path": "/mcas/cas/api/v1/discovery/category_stats",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetDiscoveryConstants",
+      "operationId": "CloudApps.GetDiscoveryConstants",
+      "path": "/mcas/cas/api/v1/discovery/constants",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetDiscoveryServiceLocations",
+      "operationId": "CloudApps.GetDiscoveryServiceLocations",
+      "path": "/mcas/cas/api/v1/discovery/service_locations",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetDiscoveryTopApps",
+      "operationId": "CloudApps.GetDiscoveryTopApps",
+      "path": "/mcas/cas/api/v1/discovery/top_apps",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetDiscoveryTopCategories",
+      "operationId": "CloudApps.GetDiscoveryTopCategories",
+      "path": "/mcas/cas/api/v1/discovery/top_categories",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetDiscoveryTopEntities",
+      "operationId": "CloudApps.GetDiscoveryTopEntities",
+      "path": "/mcas/cas/api/v1/discovery/top_entities",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetEntitiesMetadata",
+      "operationId": "CloudApps.GetEntitiesMetadata",
+      "path": "/mcas/cas/api/v1/entities/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetFeatureValues",
+      "operationId": "CloudApps.GetFeatureValues",
+      "path": "/mcas/cas/api/v1/get_feature_values",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetGovernanceCount",
+      "operationId": "CloudApps.GetGovernanceCount",
+      "path": "/mcas/cas/api/v1/governance/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetGovernanceMetadata",
+      "operationId": "CloudApps.GetGovernanceMetadata",
+      "path": "/mcas/cas/api/v1/governance/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetLcncSettings",
+      "operationId": "CloudApps.GetLcncSettings",
+      "path": "/mcas/cas/api/v1/lcnc_settings",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetLinkedPoliciesByTemplateIds",
+      "operationId": "CloudApps.GetLinkedPoliciesByTemplateIds",
+      "path": "/mcas/cas/api/v1/policy_templates_inmemo/linked_policies_by_template_ids",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetMailSettings",
+      "operationId": "CloudApps.GetMailSettings",
+      "path": "/mcas/cas/api/v1/mail_settings/get",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetMtpScopesAndPermissions",
+      "operationId": "CloudApps.GetMtpScopesAndPermissions",
+      "path": "/mcas/cas/api/v1/mtp_scopes_and_permissions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetPoliciesCount",
+      "operationId": "CloudApps.GetPoliciesCount",
+      "path": "/mcas/cas/api/v1/policies/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetPoliciesMetadata",
+      "operationId": "CloudApps.GetPoliciesMetadata",
+      "path": "/mcas/cas/api/v1/policies/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetPolicy",
+      "operationId": "AppGovernance.GetPolicy",
+      "path": "/m365appprotection/mapg-glsservice/compliance/Policy",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetPolicyInsights",
+      "operationId": "AppGovernance.GetPolicyInsights",
+      "path": "/m365appprotection/mapg-glsservice/compliance/policyinsights",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetPolicyTemplatesCount",
+      "operationId": "CloudApps.GetPolicyTemplatesCount",
+      "path": "/mcas/cas/api/v1/policy_templates_inmemo/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetPolicyTemplatesMetadata",
+      "operationId": "CloudApps.GetPolicyTemplatesMetadata",
+      "path": "/mcas/cas/api/v1/policy_templates_inmemo/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetSettings",
+      "operationId": "CloudApps.GetSettings",
+      "path": "/mcas/cas/api/v1/settings",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": "MDE_CloudAppsConfig_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetShouldDisplaySyncBar",
+      "operationId": "CloudApps.GetShouldDisplaySyncBar",
+      "path": "/mcas/cas/api/v1/user_config/get_should_display_sync_bar",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetStandaloneEntitiesCount",
+      "operationId": "CloudApps.GetStandaloneEntitiesCount",
+      "path": "/mcas/cas/api/v1/standalone_entities/count",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetStandaloneEntitiesMetadata",
+      "operationId": "CloudApps.GetStandaloneEntitiesMetadata",
+      "path": "/mcas/cas/api/v1/standalone_entities/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetStoryDetails",
+      "operationId": "CloudApps.GetStoryDetails",
+      "path": "/mcas/cas/api/stories/get_stories_details",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetSubnetMetadata",
+      "operationId": "CloudApps.GetSubnetMetadata",
+      "path": "/mcas/cas/api/v1/subnet/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetSupportedAppConnectorMetadata",
+      "operationId": "CloudApps.GetSupportedAppConnectorMetadata",
+      "path": "/mcas/cas/api/v1/app_connectors/dashboard/get_supported_apps_metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetTenantDataTraffic",
+      "operationId": "AppGovernance.GetTenantDataTraffic",
+      "path": "/m365appprotection/mapg-glsservice/compliance/tenantdatatraffic",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetTenantLabelMetric",
+      "operationId": "AppGovernance.GetTenantLabelMetric",
+      "path": "/m365appprotection/mapg-glsservice/compliance/tenantLabelMetric",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetTenantMetrics",
+      "operationId": "AppGovernance.GetTenantMetrics",
+      "path": "/m365appprotection/mapg-glsservice/compliance/tenantmetrics",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetTokensMetadata",
+      "operationId": "CloudApps.GetTokensMetadata",
+      "path": "/mcas/cas/api/v1/tokens/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetUserProfile",
+      "operationId": "AppGovernance.GetUserProfile",
+      "path": "/m365appprotection/mapg-glsservice/compliance/getUserProfile",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetUserTagsMetadata",
+      "operationId": "CloudApps.GetUserTagsMetadata",
+      "path": "/mcas/cas/api/v1/user_tags/metadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetVersion",
+      "operationId": "CloudApps.GetVersion",
+      "path": "/mcas/cas/api/version",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "IsExternalAdminUser",
+      "operationId": "CloudApps.IsExternalAdminUser",
+      "path": "/mcas/cas/api/v1/manage_admins/is_external_user",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "ListActivities",
+      "operationId": "CloudApps.ListActivities",
+      "path": "/mcas/cas/api/v1/activities",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListAppConnectors",
+      "operationId": "CloudApps.ListAppConnectors",
+      "path": "/mcas/cas/api/v1/app_connectors",
+      "methods": [
+        "post",
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListAppPermissions",
+      "operationId": "CloudApps.ListAppPermissions",
+      "path": "/mcas/cas/api/v1/app_permissions",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListComplianceApps",
+      "operationId": "AppGovernance.ListComplianceApps",
+      "path": "/m365appprotection/mapg-glsservice/compliance/apps",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListComplianceLabels",
+      "operationId": "AppGovernance.ListComplianceLabels",
+      "path": "/m365appprotection/mapg-glsservice/compliance/getLabels",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListConnectedServiceApps",
+      "operationId": "CloudApps.ListConnectedServiceApps",
+      "path": "/mcas/cas/api/v1/connected_services/apps",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListConnectedServiceInstances",
+      "operationId": "CloudApps.ListConnectedServiceInstances",
+      "path": "/mcas/cas/api/v1/connected_services/instances",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListDiscoveredAppCategories",
+      "operationId": "CloudApps.ListDiscoveredAppCategories",
+      "path": "/mcas/cas/api/v1/discovery/discovered_apps/categories",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListDiscoveredApps",
+      "operationId": "CloudApps.ListDiscoveredApps",
+      "path": "/mcas/cas/api/v1/discovery/discovered_apps",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListDiscoveryAppCatalog",
+      "operationId": "CloudApps.ListDiscoveryAppCatalog",
+      "path": "/mcas/cas/api/v1/discovery/app_catalog",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListDiscoveryAppCatalogCategories",
+      "operationId": "CloudApps.ListDiscoveryAppCatalogCategories",
+      "path": "/mcas/cas/api/v1/discovery/app_catalog/categories",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListDiscoveryCategories",
+      "operationId": "CloudApps.ListDiscoveryCategories",
+      "path": "/mcas/cas/api/v1/discovery/categories",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "ListDiscoverySnapshotReports",
+      "operationId": "CloudApps.ListDiscoverySnapshotReports",
+      "path": "/mcas/cas/api/v1/discovery/snapshot_reports",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListDiscoveryStreams",
+      "operationId": "CloudApps.ListDiscoveryStreams",
+      "path": "/mcas/cas/api/discovery/streams",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "ListGovernanceActions",
+      "operationId": "CloudApps.ListGovernanceActions",
+      "path": "/mcas/cas/api/v1/governance",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListInvitedGroupAdmins",
+      "operationId": "CloudApps.ListInvitedGroupAdmins",
+      "path": "/mcas/cas/api/v1/invited_group_admins",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListPolicies",
+      "operationId": "AppGovernance.ListPolicies",
+      "path": "/m365appprotection/mapg-glsservice/compliance/policies",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListPolicyTemplates",
+      "operationId": "CloudApps.ListPolicyTemplates",
+      "path": "/mcas/cas/api/v1/policy_templates_inmemo",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListServices",
+      "operationId": "CloudApps.ListServices",
+      "path": "/mcas/cas/api/services",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListSiemAgents",
+      "operationId": "CloudApps.ListSiemAgents",
+      "path": "/mcas/api/v1/agents/siem",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "ListTags",
+      "operationId": "CloudApps.ListTags",
+      "path": "/mcas/cas/api/tags",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ListUserQueries",
+      "operationId": "CloudApps.ListUserQueries",
+      "path": "/mcas/cas/api/v1/user_queries",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "LogTranslationError",
+      "operationId": "CloudApps.LogTranslationError",
+      "path": "/mcas/cas/api/v1/translation/log-error",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "ResolveEntity",
+      "operationId": "CloudApps.ResolveEntity",
+      "path": "/mcas/cas/api/v1/entities/resolve_entity",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Account.Sid",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "SearchDiscoveryLocations",
+      "operationId": "CloudApps.SearchDiscoveryLocations",
+      "path": "/mcas/cas/api/v1/discovery/get_locations",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "UpdateUsageInfo",
+      "operationId": "CloudApps.UpdateUsageInfo",
+      "path": "/mcas/cas/update_usage_info",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "6h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    }
+  ],
+  "cntLive": 2,
+  "cntLiveEmpty": 0,
+  "cntError": 90,
+  "cntNoLive": 0,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Account.Sid",
+    "Software.Version",
+    "Url.Path"
+  ],
+  "paginationStyles": [],
+  "valueProp": "MCAS app inventory + governance — shadow IT discovery, OAuth app sprawl, DLP enforcement"
+}

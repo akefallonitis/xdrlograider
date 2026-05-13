@@ -1,0 +1,18 @@
+  /Teams.Cpc/bridges:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsCpc]
+      summary: List Teams CPC bridges
+      description: |
+        Bridge inventory used by shared-device and application-instance administration surfaces.
+      responses:
+        '200':
+          description: CPC bridge collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

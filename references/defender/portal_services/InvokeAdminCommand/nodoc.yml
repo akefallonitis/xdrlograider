@@ -1,0 +1,37 @@
+  /admin/Beta/{tenantId}/InvokeCommand:
+    post:
+      summary: Invoke admin command
+      description: >-
+        Invoke an administrative command for the specified tenant.
+      operationId: PortalServices.InvokeAdminCommand
+      tags: [Portal Services]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The tenant GUID to invoke the command against.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - admin command request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - admin command result
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

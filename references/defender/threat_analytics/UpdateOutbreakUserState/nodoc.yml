@@ -1,0 +1,39 @@
+  /mtp/threatAnalytics/outbreaks/userState:
+    patch:
+      summary: Update outbreak user state
+      description: >-
+        Update per-user Threat Analytics outbreak state such as favorite status and the
+        last visited timestamp from the report detail experience.
+      operationId: ThreatAnalytics.UpdateOutbreakUserState
+      tags: [Threat Analytics]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  IsFavorite:
+                    type: boolean
+                  LastVisitTime:
+                    type: string
+                    format: date-time
+                  OutbreakId:
+                    type: string
+                required:
+                  - IsFavorite
+                  - LastVisitTime
+                  - OutbreakId
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,20 @@
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/sessions:
+    get:
+      tags: [Sessions]
+      summary: List recent Security Copilot sessions
+      description: Retrieves recent sessions shown in the home and history experiences.
+      operationId: SecurityCopilotPortal.Sessions.List
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/SessionLimit'
+        - $ref: '#/components/parameters/SessionSortBy'
+        - $ref: '#/components/parameters/SessionSortDirection'
+        - $ref: '#/components/parameters/EnablePagination'
+      responses:
+        '200':
+          description: Session list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionsResponse'

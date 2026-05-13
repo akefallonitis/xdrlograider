@@ -1,0 +1,70 @@
+  /mtp/posture/oversight/initiatives:
+    get:
+      summary: List posture oversight initiatives
+      description: >-
+        Retrieve the list of security posture initiatives (e.g. XSPM, Threat Analytics)
+        with optional highlights and time-range filtering. Supports pagination. Observed live
+        on the Exposure Management overview and initiatives pages.
+      operationId: ExposureManagement.ListPostureOversightInitiatives
+      tags: [Exposure Management]
+      parameters:
+        - name: highlights
+          in: query
+          description: Include highlight metadata for each initiative.
+          schema:
+            type: boolean
+            default: true
+        - name: daysAgo
+          in: query
+          description: Number of days to look back.
+          schema:
+            type: integer
+            example: 90
+        - name: initiativeTypes
+          in: query
+          description: >-
+            Filter by initiative types. Can be repeated. Known values: XSPM, TA.
+            Use bracket notation (initiativeTypes[0]=XSPM&initiativeTypes[1]=TA).
+          style: deepObject
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: calculationId
+          in: query
+          description: Calculation snapshot ID for deterministic result sets.
+          schema:
+            type: string
+        - name: pagination.pageNumber
+          in: query
+          schema:
+            type: integer
+            example: 1
+        - name: pagination.numberOfPageRecords
+          in: query
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostureInitiative'
+                  recordsCount:
+                    type: integer
+                  calculationId:
+                    type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

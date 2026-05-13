@@ -1,0 +1,47 @@
+  /apiproxy/arm/providers/Microsoft.ResourceGraph/resources:
+    post:
+      summary: Query Azure Resource Graph
+      description: >-
+        Execute Azure Resource Graph queries used by Sentinel pages in Defender to
+        resolve workspace context and content-backed assets such as workbooks and
+        hunting queries.
+      operationId: SentinelPrecision.QueryResourceGraph
+      tags: [Sentinel]
+      parameters:
+        - name: api-version
+          in: query
+          description: ARM API version for the Resource Graph query endpoint.
+          schema:
+            type: string
+            default: '2019-04-01'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscriptions:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                query:
+                  type: string
+              required:
+                - subscriptions
+                - query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Resource Graph query result
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

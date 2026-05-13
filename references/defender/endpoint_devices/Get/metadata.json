@@ -1,0 +1,120 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "Get",
+  "operationId": "EndpointDevices.Get",
+  "path": "/mtp/getMachine/machines",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get endpoint device details",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:38:27.9952453Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "machineId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the device."
+    },
+    {
+      "Name": "idType",
+      "In": "query",
+      "Type": "string",
+      "Default": "SenseMachineId",
+      "Description": "The type of identifier used."
+    },
+    {
+      "Name": "readFromCache",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Whether to read from cache."
+    },
+    {
+      "Name": "lookingBackIndays",
+      "In": "query",
+      "Type": "integer",
+      "Default": "180",
+      "Description": "Number of days to look back."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The unique identifier of the device.",
+      "type": "string",
+      "name": "machineId"
+    },
+    {
+      "in": "query",
+      "default": "SenseMachineId",
+      "required": true,
+      "description": "The type of identifier used.",
+      "type": "string",
+      "name": "idType"
+    },
+    {
+      "in": "query",
+      "default": "true",
+      "required": false,
+      "description": "Whether to read from cache.",
+      "type": "boolean",
+      "name": "readFromCache"
+    },
+    {
+      "in": "query",
+      "default": "180",
+      "required": false,
+      "description": "Number of days to look back.",
+      "type": "integer",
+      "name": "lookingBackIndays"
+    }
+  ],
+  "paginationStyle": "fromSize",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.MdatpId"
+  ],
+  "cadenceSuggestion": "daily"
+}

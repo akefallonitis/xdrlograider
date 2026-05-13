@@ -1,0 +1,76 @@
+  /_api/SPO.Tenant/GetFilteredSPListItems:
+    post:
+      tags: [Sites]
+      summary: Get filtered admin list items
+      description: |
+        Returns items from an internal SharePoint admin list filtered by a single
+        column/value pair. Observed for user-storage and grid bootstrap lookups.
+      operationId: SharePointAdmin.GetFilteredListItems
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilteredListItemsRequest'
+      responses:
+        '200':
+          description: Filtered list items returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/_api/web/lists/GetByTitle('DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_POLICYINSIGHTS_STORAGE')/items":
+    get:
+      tags: [Sites]
+      summary: Get aggregated policy insights items
+      description: |
+        Reads the internal aggregated policy-insights list used by the admin
+        center home cards and tracking widgets.
+      operationId: SharePointAdmin.GetAggregatedPolicyInsightsItems
+      parameters:
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/Top'
+      responses:
+        '200':
+          description: Aggregated policy insights returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/_api/web/lists/GetByTitle('DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_SITECOLLECTIONS')/RootFolder/Properties":
+    get:
+      tags: [Sites]
+      summary: Get aggregated site-collections list root properties
+      description: |
+        Returns root-folder properties for the internal aggregated site-collections
+        list, including activity refresh metadata used by the admin center.
+      operationId: SharePointAdmin.GetAggregatedSiteCollectionsRootProperties
+      parameters:
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: Aggregated site-collections root properties returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

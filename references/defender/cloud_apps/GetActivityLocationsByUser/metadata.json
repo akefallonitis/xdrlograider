@@ -1,0 +1,71 @@
+{
+  "portal": "defender",
+  "subArea": "cloud_apps",
+  "slug": "GetActivityLocationsByUser",
+  "operationId": "CloudApps.GetActivityLocationsByUser",
+  "path": "/mcas/cas/api/v1/activities_locations/by_user",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get activity locations by user",
+  "sourceFile": "cloud_apps.yml",
+  "capturedUtc": "2026-05-12T14:36:55.209889Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "username",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The encoded Cloud Apps entity identifier for the selected user."
+    }
+  ],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 500,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 500 (Internal Server Error).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": true,
+    "description": "The encoded Cloud Apps entity identifier for the selected user.",
+    "type": "string",
+    "name": "username"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

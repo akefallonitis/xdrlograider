@@ -1,0 +1,32 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/entities/GetAnomaliesSummary:
+    get:
+      summary: Get Sentinel anomalies summary
+      description: >-
+        Retrieve aggregate anomaly counters for the attached Sentinel workspace from the
+        Defender Precision page. Observed live returning a rolling 14-day summary with
+        anomaly counts grouped by type.
+      operationId: SentinelPrecision.GetAnomaliesSummary
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the anomalies summary action.
+          schema:
+            type: string
+            default: '2025-07-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelAnomaliesSummaryResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

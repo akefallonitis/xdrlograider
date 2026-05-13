@@ -43,17 +43,22 @@ foreach ($file in $publicFiles) {
     }
 }
 
-# 3) Warm the manifest cache at import time so any first-call latency stays in
-#    cold-start rather than first real poll.
-$null = Get-XdrEndpointManifest -Portal Defender
+# 3) Manifest loads lazily on first Get-XdrEndpointManifest call.
+#    Get-XdrEndpointManifest memoises its result in module scope, so the
+#    second-and-subsequent calls are O(1). This shifts the first-call
+#    parse cost into the first real poll rather than module import,
+#    so functions that never reach a poll (e.g. cold-start aborts) don't
+#    pay it.
 
 Export-ModuleMember -Function @(
     'Invoke-MDEEndpoint',
     'Invoke-MDETierPoll',
-    'Invoke-TierPollWithHeartbeat',
     'Invoke-MDEPortalEndpoint',
     'ConvertTo-MDEIngestRow',
     'Expand-MDEResponse',
-    # Section R++.A: truth-signal side-channel for activity callers.
-    'Get-MDEEndpointLastResult'
+    'Get-MDEEndpointLastResult',
+    'Get-XdrCustomCollectionRule',
+    'Get-XdrCustomCollectionRuleById',
+    'Get-XdrCustomCollectionModel',
+    'Get-DefenderTenantContext'
 )

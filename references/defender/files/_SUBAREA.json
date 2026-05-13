@@ -1,0 +1,455 @@
+{
+  "subArea": "files",
+  "suggestedCadence": "1h",
+  "endpointCount": 19,
+  "endpoints": [
+    {
+      "slug": "CreateSampleCollectionRequest",
+      "operationId": "Files.CreateSampleCollectionRequest",
+      "path": "/mtp/responseApiPortal/sampledownloadrequest/createcollectionrequest",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GenerateSampleDownloadUri",
+      "operationId": "Files.GenerateSampleDownloadUri",
+      "path": "/mtp/responseApiPortal/sampledownloadrequest/generatedownloaduri/V2",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "File.Name",
+        "Url.Path"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetActiveAlertsSummary",
+      "operationId": "Files.GetActiveAlertsSummary",
+      "path": "/mtp/activeAlertsSummary/activeAlertsSummary",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "File.Sha1",
+        "File.Sha256"
+      ],
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetCapabilities",
+      "operationId": "Files.GetCapabilities",
+      "path": "/mtp/mdeEntitiesExperience/files/{Sha256}/capabilities",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "File.Sha256",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/mdeEntitiesExperience/files/{Sha256}/capabilities' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetContentAnalysis",
+      "operationId": "Files.GetContentAnalysis",
+      "path": "/mtp/mdeEntitiesExperience/files/{Sha256}/content",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "File.Sha256",
+        "Url.Path"
+      ],
+      "parsingNotes": [
+        "PathTemplate — '/mtp/mdeEntitiesExperience/files/{Sha256}/content' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetDeepAnalysisStatus",
+      "operationId": "Files.GetDeepAnalysisStatus",
+      "path": "/mtp/mdeDeepAnalysis/api/DeepAnalysisRequest",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "File.Sha1",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetDevicePrevalence",
+      "operationId": "Files.GetDevicePrevalence",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/prevalence",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetDeviceTrend",
+      "operationId": "Files.GetDeviceTrend",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/trend",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetProfile",
+      "operationId": "Files.GetProfile",
+      "path": "/mtp/detectionCyberProfile/api/detection/cyberprofileprovider/user/profiles/file",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "File.Sha1",
+        "File.Sha256"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "GetRemediationPermission",
+      "operationId": "Files.GetRemediationPermission",
+      "path": "/mtp/responseApiPortal/remediation/permission",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "File.Sha1",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "GetSampleDownloadState",
+      "operationId": "Files.GetSampleDownloadState",
+      "path": "/mtp/responseApiPortal/sampledownloadrequest/state",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetThreatReputation",
+      "operationId": "Files.GetThreatReputation",
+      "path": "/mtp/threatAnalyticsIndicators/stix/oneti/reputation/fileHash",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetVirusTotalReport",
+      "operationId": "Files.GetVirusTotalReport",
+      "path": "/mtp/files/files/{Sha256}/virustotal",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "File.Sha256",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/files/files/{Sha256}/virustotal' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GoHunt",
+      "operationId": "Files.GoHunt",
+      "path": "/mtp/huntingService/goHunt/File",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 415,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=error/415 — operator should check live response body for diagnosis"
+      ]
+    },
+    {
+      "slug": "ListDeviceDetails",
+      "operationId": "Files.ListDeviceDetails",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/details",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListIndicators",
+      "operationId": "Files.ListIndicators",
+      "path": "/mtp/papin/api/cloud/public/internal/indicators/getQuery",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "ListObservedNames",
+      "operationId": "Files.ListObservedNames",
+      "path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/fileNamesBySha2",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "ListVerdicts",
+      "operationId": "Files.ListVerdicts",
+      "path": "/mtp/files/files/{Sha256}/FileVerdict",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "File.Sha256",
+      "parsingNotes": [
+        "PathTemplate — '/mtp/files/files/{Sha256}/FileVerdict' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "QueryThreatAnalyticsOutbreaks",
+      "operationId": "Files.QueryThreatAnalyticsOutbreaks",
+      "path": "/mtp/threatAnalyticsIndicators/stix/outbreaks/indicators/outbreaks/query",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "1h",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 415,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+        "LiveProbe=error/415 — operator should check live response body for diagnosis"
+      ]
+    }
+  ],
+  "cntLive": 1,
+  "cntLiveEmpty": 2,
+  "cntError": 12,
+  "cntNoLive": 4,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "File.Name",
+    "File.Sha1",
+    "File.Sha256",
+    "Url.Path"
+  ],
+  "paginationStyles": [],
+  "valueProp": "File prevalence + reputation — forensic context for incidents involving binaries"
+}

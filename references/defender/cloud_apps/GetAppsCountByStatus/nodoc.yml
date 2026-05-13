@@ -1,0 +1,27 @@
+  /mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status:
+    get:
+      summary: Get apps count by status (dashboard)
+      description: >-
+        Retrieve the count of connected cloud apps grouped by their connection status for the dashboard.
+      operationId: CloudApps.GetAppsCountByStatus
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsStatusCountResponse
+              example:
+                data:
+                  protected: 2
+                  needAttention: 0
+                  notProtected: 2
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

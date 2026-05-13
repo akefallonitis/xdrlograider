@@ -1,0 +1,42 @@
+  /mtoapi/mtp/CaseManagement/be/templates/{TemplateId}:
+    get:
+      summary: Get MTO case template
+      description: >-
+        Retrieve a case template through the MTO wrapper. Confirmed in live traffic
+        from the MTO Cases page using the default all-zero template ID.
+      operationId: MultiTenant.GetCaseTemplate
+      tags: [Multi-Tenant]
+      parameters:
+        - name: TemplateId
+          in: path
+          required: true
+          description: The unique identifier of the case template.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/MtoCaseTemplate'
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

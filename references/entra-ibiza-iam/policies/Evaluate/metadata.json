@@ -1,0 +1,49 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "policies",
+  "slug": "Evaluate",
+  "operationId": "WhatIf.Evaluate",
+  "path": "/WhatIf/Evaluate",
+  "methods": [
+    "post"
+  ],
+  "summary": "Evaluate policy",
+  "sourceFile": "policies.yml",
+  "capturedUtc": "2026-05-12T15:13:12.707498Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "IP.Address",
+    "Software.Name",
+    "Software.Version",
+    "Time.Generated"
+  ],
+  "cadenceSuggestion": "daily"
+}

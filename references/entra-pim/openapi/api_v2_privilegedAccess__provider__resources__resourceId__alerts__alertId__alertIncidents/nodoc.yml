@@ -1,0 +1,19 @@
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts/{alertId}/alertIncidents:
+    get:
+      tags: [Alerts]
+      summary: List incidents for a PIM alert
+      description: |
+        Retrieves the individual incidents that triggered a specific alert.
+        For example, for a "too many permanent admins" alert, each incident
+        represents one permanent admin assignment.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of alert incidents

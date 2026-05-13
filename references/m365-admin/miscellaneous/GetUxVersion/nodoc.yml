@@ -1,0 +1,23 @@
+  /admin/api/uxversion:
+    get:
+      summary: Get UX version
+      description: >-
+        Retrieve the current UX version of the admin portal.
+      operationId: Misc.GetUxVersion
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: UX version information. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

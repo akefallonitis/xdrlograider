@@ -1,0 +1,22 @@
+  /mcas/cas/api/v1/user_queries:
+    get:
+      summary: List user queries
+      description: >-
+        Retrieve saved user queries for Cloud Apps. Discovered on OAuth Apps page.
+      operationId: CloudApps.ListUserQueries
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsSavedQueryListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

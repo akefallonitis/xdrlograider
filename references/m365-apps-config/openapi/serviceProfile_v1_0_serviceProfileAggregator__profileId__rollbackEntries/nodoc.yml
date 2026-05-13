@@ -1,0 +1,18 @@
+  /serviceProfile/v1.0/serviceProfileAggregator/{profileId}/rollbackEntries:
+    get:
+      tags: [Servicing Profiles]
+      summary: Get servicing profile rollback entries
+      description: Returns rollback eligibility or execution entries for a servicing profile. Observed responses can be an empty array.
+      parameters:
+        - $ref: '#/components/parameters/profileId'
+        - $ref: '#/components/parameters/includeRollbackByOfficeServicingChannel'
+      responses:
+        '200':
+          description: Rollback entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericObject'
+              example: []

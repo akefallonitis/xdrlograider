@@ -1,0 +1,24 @@
+  /mdi/identity/userapiservice/statistics:
+    get:
+      summary: Get identity statistics
+      description: >-
+        Retrieve identity-related statistics from Defender for Identity,
+        including user counts, risk distributions, and coverage metrics.
+      operationId: Identity.GetStatistics
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identity statistics
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

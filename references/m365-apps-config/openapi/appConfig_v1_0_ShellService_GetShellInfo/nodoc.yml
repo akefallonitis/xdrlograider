@@ -1,0 +1,12 @@
+  /appConfig/v1.0/ShellService/GetShellInfo:
+    get:
+      tags: [Bootstrap]
+      summary: Get portal shell metadata
+      description: Returns shell metadata, menu links, and environment-specific UX configuration.
+      responses:
+        '200':
+          description: Shell metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShellInfo'

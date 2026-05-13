@@ -1,0 +1,32 @@
+  /di/find/AutoSensitivityLabelPolicy:
+    get:
+      operationId: getAutoSensitivityLabelPolicies
+      summary: Get auto-sensitivity label policies
+      description: >-
+        Retrieve auto-sensitivity label policies from the Data Infrastructure service.
+        These policies define rules for automatically applying sensitivity labels to content.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

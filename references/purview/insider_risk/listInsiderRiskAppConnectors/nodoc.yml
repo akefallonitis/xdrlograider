@@ -1,0 +1,37 @@
+  /mcas/cas/api/v1/app_connectors/:
+    get:
+      operationId: listInsiderRiskAppConnectors
+      summary: List Defender for Cloud Apps connectors
+      description: >-
+        Retrieve Defender for Cloud Apps connectors checked by Purview's Insider
+        Risk application settings experience.
+      tags: [InsiderRisk]
+      parameters:
+        - name: filters
+          in: query
+          required: false
+          description: Serialized filter payload applied by the app connector query.
+          schema:
+            type: string
+        - name: skip
+          in: query
+          required: false
+          description: The number of connector records to skip.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

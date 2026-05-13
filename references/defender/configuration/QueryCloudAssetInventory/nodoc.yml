@@ -1,0 +1,67 @@
+  /mdc/views/inventory/assets:
+    post:
+      summary: Query cloud asset inventory
+      description: >-
+        Retrieve the Defender for Cloud inventory table used by the assets inventory view.
+      operationId: Configuration.QueryCloudAssetInventory
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schemaId:
+                  type: string
+                  description: Inventory schema identifier to query.
+                schemaParameters:
+                  type: object
+                  additionalProperties: true
+                searchTerms:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - asset inventory search term
+                columns:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - requested inventory column
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - inventory filter
+                paging:
+                  type: object
+                  description: Paging settings for the inventory query.
+              required:
+                - schemaId
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud inventory table response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

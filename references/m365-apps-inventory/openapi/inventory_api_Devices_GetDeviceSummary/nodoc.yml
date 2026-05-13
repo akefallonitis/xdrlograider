@@ -1,0 +1,14 @@
+  /inventory/api/Devices/GetDeviceSummary:
+    get:
+      tags: [Devices]
+      summary: Get device summary
+      description: Returns aggregate device totals and architecture counts used by the Inventory landing page.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Device summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceSummary'

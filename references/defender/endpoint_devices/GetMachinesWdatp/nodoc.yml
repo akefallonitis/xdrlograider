@@ -1,0 +1,23 @@
+  /mtp/wdatpApi/machines:
+    get:
+      summary: Get machines via WDATP API
+      description: >-
+        Retrieve the list of machines using the Windows Defender ATP API endpoint.
+      operationId: EndpointDevices.GetMachinesWdatp
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - WDATP machines list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

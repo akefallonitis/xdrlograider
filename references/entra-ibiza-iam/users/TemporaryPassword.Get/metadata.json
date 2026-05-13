@@ -1,0 +1,45 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "users",
+  "slug": "TemporaryPassword.Get",
+  "operationId": "User.TemporaryPassword.Get",
+  "path": "/User/TemporaryPassword",
+  "methods": [
+    "get"
+  ],
+  "summary": "Generate temporary password",
+  "sourceFile": "users.yml",
+  "capturedUtc": "2026-05-12T15:13:12.8716368Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

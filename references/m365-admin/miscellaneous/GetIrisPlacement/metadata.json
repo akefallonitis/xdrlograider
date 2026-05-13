@@ -1,0 +1,126 @@
+{
+  "portal": "m365-admin",
+  "subArea": "miscellaneous",
+  "slug": "GetIrisPlacement",
+  "operationId": "Misc.GetIrisPlacement",
+  "path": "/fd/iris",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get IRIS placement content",
+  "sourceFile": "miscellaneous.yml",
+  "capturedUtc": "2026-05-12T15:13:25.8778864Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "placement",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Placement identifier requested by the client. Some homepage probes send `undefined`."
+    },
+    {
+      "Name": "nct",
+      "In": "query",
+      "Type": "integer",
+      "Default": "",
+      "Description": "Numeric content type discriminator."
+    },
+    {
+      "Name": "country",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Country code associated with the request context."
+    },
+    {
+      "Name": "locale",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Locale associated with the request context."
+    },
+    {
+      "Name": "bcnt",
+      "In": "query",
+      "Type": "integer",
+      "Default": "",
+      "Description": "Homepage batch-count discriminator."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "server-error",
+  "lastHttpStatus": 500,
+  "lastDiagnostic": "HTTP 500",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Placement identifier requested by the client. Some homepage probes send `undefined`.",
+      "type": "string",
+      "name": "placement"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Numeric content type discriminator.",
+      "type": "integer",
+      "name": "nct"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Country code associated with the request context.",
+      "type": "string",
+      "name": "country"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Locale associated with the request context.",
+      "type": "string",
+      "name": "locale"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Homepage batch-count discriminator.",
+      "type": "integer",
+      "name": "bcnt"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

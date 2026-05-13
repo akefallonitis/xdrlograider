@@ -1,0 +1,24 @@
+  /fd/purview/api/boot/getNexusBootInfo:
+    get:
+      summary: Get Nexus boot info
+      description: >-
+        Retrieve the Purview Nexus portal bootstrap information, including
+        available features and service endpoints.
+      operationId: Purview.GetNexusBootInfo
+      tags: [Purview]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Nexus boot information. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

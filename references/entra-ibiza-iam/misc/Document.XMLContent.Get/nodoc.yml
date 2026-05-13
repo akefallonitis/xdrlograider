@@ -1,0 +1,14 @@
+  /SupportRequestProblemDetails/Document/XMLContent:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get support request problem details document XML Content
+      description: >-
+        Get support request problem details document XML Content.
+      operationId: SupportRequestProblemDetails.Document.XMLContent.Get
+      tags: [General]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

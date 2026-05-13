@@ -1,0 +1,74 @@
+{
+  "portal": "defender",
+  "subArea": "multi_tenant",
+  "slug": "RunHuntingQuery",
+  "operationId": "MultiTenant.RunHuntingQuery",
+  "path": "/mtoapi/tenants/{TenantId}/huntingQueries/run",
+  "methods": [
+    "post"
+  ],
+  "summary": "Run cross-tenant hunting query",
+  "sourceFile": "multi_tenant.yml",
+  "capturedUtc": "2026-05-12T14:41:57.6154348Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "TenantId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the target tenant."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "PathTemplate — '/mtoapi/tenants/{TenantId}/huntingQueries/run' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "write",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The unique identifier of the target tenant.",
+    "type": "string",
+    "name": "TenantId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

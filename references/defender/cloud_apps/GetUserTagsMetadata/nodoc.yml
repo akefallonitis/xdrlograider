@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/user_tags/metadata:
+    get:
+      summary: Get user tag metadata
+      description: >-
+        Retrieve filter and sorting metadata for the user groups grid in Defender for
+        Cloud Apps.
+      operationId: CloudApps.GetUserTagsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMetadataCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

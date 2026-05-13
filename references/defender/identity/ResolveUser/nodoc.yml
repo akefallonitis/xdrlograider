@@ -1,0 +1,38 @@
+  /mdi/identity/userapiservice/user/resolve:
+    post:
+      summary: Resolve identity user
+      description: >-
+        Resolve a user identity from Microsoft Defender for Identity (MDI).
+        Returns detailed user information including lateral movement paths
+        and risk assessment data.
+      operationId: Identity.ResolveUser
+      tags: [Identity]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accountName:
+                  description: The user account name to resolve.
+                  type: string
+                accountDomain:
+                  description: The domain of the user account.
+                  type: string
+              required:
+                - accountName
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityUser'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

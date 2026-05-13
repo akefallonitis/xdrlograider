@@ -1,0 +1,59 @@
+  /mtp/getLatestMachineIpsByIds/LatestMachineIpsByIds:
+    get:
+      summary: Get latest device IP addresses
+      description: >-
+        Retrieve the latest IP address observations shown on the unified device page.
+      operationId: EndpointDevices.GetLatestIps
+      tags: [Endpoint Devices]
+      parameters:
+        - name: isUnifiedDevicePage
+          in: query
+          description: Indicates the unified device page requested the lookup.
+          schema:
+            type: boolean
+            default: true
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: idType
+          in: query
+          required: true
+          description: The type of machine identifier provided.
+          schema:
+            type: string
+            default: SenseMachineId
+        - name: lastSeen
+          in: query
+          description: Timestamp used by the portal to anchor the latest IP lookup.
+          schema:
+            type: string
+            format: date-time
+        - name: senseMachineId
+          in: query
+          description: The Sense machine identifier for the same device.
+          schema:
+            type: string
+        - name: computerDnsName
+          in: query
+          description: The current DNS name of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - latest device IP observations
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

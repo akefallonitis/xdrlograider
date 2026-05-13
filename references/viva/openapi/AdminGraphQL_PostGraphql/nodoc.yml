@@ -1,0 +1,192 @@
+  /graphql:
+    post:
+      tags: [AdminGraphQL]
+      summary: Execute Viva Engage admin GraphQL operations
+      description: |
+        Same-origin persisted GraphQL endpoint exposed by the Viva Engage web application.
+
+        The authenticated admin landing capture observed 27 unique persisted operations on this
+        route, including `CurrentUserClients`, `FeatureAccessSettingsClients`,
+        `AdminFeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, and
+        `RealtimeConnectionSettingsClients`.
+
+        Follow-up direct-route captures on `/main/admin/segmentation`,
+        `/main/admin/external-networks-settings`, and
+        `/main/admin/setup-external-network` added route-specific operations such as
+        `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`.
+
+        Repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned
+        create-capability flags and dismissable prompt state for the shell `Create new`
+        affordance.
+
+        A no-submit probe of a visible access-code control such as `Generate code` or
+        `Redeem code` stayed on `/main/admin/setup-external-network` and did not emit a
+        distinct write or redemption request before the next user-input step.
+
+        The same authenticated admin shell also issued `RealtimeConnectionSettingsClients`, which
+        returned a tenant- and user-scoped `cometdBaseUrl` that the browser immediately used for
+        transient `*.rt.yammer.com` Bayeux relay traffic.
+      operationId: AdminGraphQL_PostGraphql
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GraphQLRequest'
+            examples:
+              observedPersistedQuery:
+                summary: Authenticated landing request using a persisted query
+                value:
+                  operationName: FeatureAccessSettingsClients
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 88293049c2d71d875b2ee6af1de7f8360017fa4ef068d9a81cb8bd79d5adfeb1
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+                        - project: ClientForward
+                          key: InformationBarriersPhase0
+                          value: "true"
+              segmentationPersistedQuery:
+                summary: Direct-route segmentation request
+                value:
+                  operationName: NetworkSegmentationQuery
+                  variables:
+                    first: 50
+                    endCursor: null
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 96ba51f119a8844875395433a65fc18b1c5ecc2e091b54b0bc0ab6dd2d5513c1
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+              externalNetworksPersistedQuery:
+                summary: Direct-route external networks settings request
+                value:
+                  operationName: ExternalNetworksAdminSettingsClients
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 367e072a20056b93d0b58ca17958a3d84fcdc346a0e6cf15b6cbe448f2975527
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+              universalCreateButtonPersistedQuery:
+                summary: Admin shell create-button state request
+                value:
+                  operationName: UniversalCreateButtonQuery
+                  variables:
+                    dismissablePromptKey: universal-create-button-state
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: e4de6b9cacea631a44f327c9facb52acdf822275b0a0f6d94c79b0e682a6ab07
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+                        - project: ClientForward
+                          key: MultiTenantOrganization
+                          value: "true"
+              realtimeConnectionSettingsPersistedQuery:
+                summary: Landing request that returns the realtime relay base URL
+                value:
+                  operationName: RealtimeConnectionSettingsClients
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: adc0cb117fbf66b72968bc937c2dc4ba4f22de3185baf3fc34aee2b3f8c3a0b2
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+      x-nodoc-operation-context:
+        surface: Admin shell
+        workflows:
+          - Open `https://engage.cloud.microsoft/main/admin`, allow the Viva Engage admin shell to authenticate through MSAL, and wait for the landing view to resolve its persisted GraphQL calls.
+          - Open `https://engage.cloud.microsoft/main/admin/segmentation` to load the dedicated segmentation admin page and its persisted GraphQL bootstrap query.
+          - Open `https://engage.cloud.microsoft/main/admin/external-networks-settings` to load the canonical external-networks admin page.
+          - Open `https://engage.cloud.microsoft/main/admin/setup-external-network` to continue into the external-network setup flow, which reused the external-networks admin bootstrap query during this pass.
+          - Click a visible access-code control such as `Generate code` or `Redeem code` without submitting or entering a code to confirm that the flow stays on the same route and does not emit a distinct write or redemption family before the next user-input step.
+          - Preserve the `RealtimeConnectionSettingsClients` response if present, because it provides the transient `cometdBaseUrl` used by the Yammer-era realtime relay chain.
+        headerProfile: viva-engage-graphql
+        availability:
+          level: tenant-conditional
+          notes:
+            - The authenticated landing capture confirmed 27 unique persisted query names or aliases, but the exact operation mix remains tenant- and role-dependent.
+            - The admin landing pass confirmed operations such as `CurrentUserClients`, `FeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, `NavigationGroupsClients`, and `RealtimeConnectionSettingsClients`.
+            - Repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned create-capability flags and dismissable prompt state for the shell `Create new` affordance.
+            - The segmentation direct-route capture confirmed `NetworkSegmentationQueryClients` together with the dedicated `4-page-admin-segmentation-settings.js` route chunk.
+            - The external-networks settings and setup direct-route captures confirmed `ExternalNetworksAdminSettingsClients` together with the dedicated `4-page-admin-external-networks-settings.js` route chunk.
+            - A no-submit probe of a visible access-code control such as `Generate code` or `Redeem code` stayed on `/main/admin/setup-external-network` and did not emit a distinct write or redemption request before the next user-input step.
+            - The `RealtimeConnectionSettingsClients` operation returned transient `cometdBaseUrl` values that bootstrapped `*.rt.yammer.com/cometd/handshake`, `/cometd/`, and `/cometd/connect` relay calls without `Authorization` or cookie headers.
+            - Navigating to `/main/admin/external-networks` updated the URL but rendered the generic admin landing state during this pass, so `external-networks-settings` should be treated as the canonical external-networks route.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - The default Edge profile captured persisted GraphQL POST requests after the Viva Engage admin shell hydrated successfully.
+          - source: live-direct-route-capture
+            confidence: high
+            notes:
+              - Direct-route captures validated the segmentation, external-networks settings, and setup-external-network admin pages in the authenticated default Edge profile.
+          - source: bundle-analysis
+            confidence: medium
+            notes:
+              - The checked-in bundle set exposed `https://engage.cloud.microsoft/graphql` as the configured GraphQL host.
+      responses:
+        '200':
+          description: GraphQL response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphQLResponse'
+              examples:
+                realtimeConnectionSettingsResponse:
+                  summary: GraphQL response that returns the transient realtime relay base URL
+                  value:
+                    data:
+                      settings:
+                        realtimeConnectionSettings:
+                          cometdBaseUrl: https://relay-instance.rt.yammer.com/cometd/
+                universalCreateButtonResponse:
+                  summary: GraphQL response describing create-button and dismissable prompt state
+                  value:
+                    data:
+                      viewer:
+                        isRestrictedToViewOnlyMode: false
+                        canCreateGroup: true
+                        dismissablePrompts:
+                          - isDismissed: false
+                            promptKey: universal-create-button-state
+                        canScheduleAndCreateTeamsMeeting: true
+                        user:
+                          wallFeed:
+                            viewerCanStartThread: true
+                          id: "[redacted-user-id]"
+                      settings:
+                        article:
+                          viewerCanCreateArticle: false
+                        campaigns:
+                          viewerCanCreateCampaigns: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

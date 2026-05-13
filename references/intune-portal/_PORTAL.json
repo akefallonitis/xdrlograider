@@ -1,0 +1,39 @@
+{
+  "portal": "intune-portal",
+  "authChain": null,
+  "capturedUtc": "2026-05-12T15:24:22.066567Z",
+  "subAreaCount": 1,
+  "authFinding": {
+    "ImplementationModule": "Xdr.Intune.Auth (v0.2.0d) — design: stored-refresh-token-in-KV + auto-refresh",
+    "AuthMethod": "NOT-unattended-TOTP (ROPC blocked by AADSTS50076 MFA policy; needs device-code or refresh-token-cache)",
+    "AuthFlow": "MSAL.js SPA; backend = Bearer",
+    "Status": "programmatic-TOTP-auth-PROVEN-NOT-POSSIBLE-via-ROPC; needs interactive-bootstrap + refresh-token-cache OR Playwright"
+  },
+  "subAreas": [
+    {
+      "subArea": "openapi",
+      "endpointCount": 5,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 5,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [],
+      "paginationStyles": [],
+      "valueProp": "Intune admin center same-origin portal API (5 paths — research-gap; needs expansion)"
+    }
+  ],
+  "authPattern": {
+    "nodocOfficialName": "Portal bearer tokens (Intune)",
+    "transport": "bearer",
+    "browserAcquired": true,
+    "unattendedTotpCompatible": false,
+    "cookies": null,
+    "headers": null,
+    "note": null,
+    "postmanCollection": "..\\..\\xdrlograider\\.internal\\nodoc-reference\\postman\\collections\\intune-portal.collection.json",
+    "nodocReference": "https://nodoc.nathanmcnulty.com/getting-started"
+  }
+}

@@ -1,0 +1,36 @@
+  /mdi/identity/userapiservice/identities/aggregatedData:
+    post:
+      summary: Get identities aggregated data
+      description: >-
+        Retrieve aggregated totals and facets for the identities grid.
+      operationId: Identity.GetIdentitiesAggregatedData
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Filters:
+                  type: object
+                  description: Identity filter set.
+                SearchText:
+                  type: string
+                  description: Free-text search input.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identities aggregated data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

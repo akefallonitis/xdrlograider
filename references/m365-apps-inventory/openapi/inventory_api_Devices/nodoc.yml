@@ -1,0 +1,17 @@
+  /inventory/api/Devices:
+    get:
+      tags: [Devices]
+      summary: Query devices
+      description: Returns an OData-style collection of devices filtered by inventory attributes.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Device collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'

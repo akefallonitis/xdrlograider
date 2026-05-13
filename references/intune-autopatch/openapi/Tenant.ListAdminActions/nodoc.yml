@@ -1,0 +1,50 @@
+  /tenant-management/v2/AdminActionsV:
+    get:
+      tags: [Tenant]
+      summary: Get tenant admin actions
+      description: |
+        Returns Windows Autopatch tenant-level admin actions such as client broker install tasks.
+        Confirmed live on the Tenant management blade and validated with a GET probe.
+      operationId: IntuneAutopatch.Tenant.ListAdminActions
+      responses:
+        '200':
+          description: Admin actions returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminAction'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Tenant]
+      summary: Submit tenant admin actions
+      description: |
+        Submits one or more Windows Autopatch tenant admin actions such as
+        `ClientBrokerInstall`. The call was recovered from the Tenant management bundle and
+        corroborated by a live install flow in the Intune admin center that changed the
+        `ClientBrokerInstall` row from `NotStarted` to `Pending`, then redirected the portal to
+        `ClientBroker.ReactView`.
+
+        The exact success status code and response body were not captured during the live flow;
+        after submission the portal polls `GET /tenant-management/v2/AdminActionsV/actionStatus`
+        for per-action state.
+      operationId: IntuneAutopatch.Tenant.SubmitAdminActions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdminAction'
+      responses:
+        default:
+          description: Action submission response returned by the service.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

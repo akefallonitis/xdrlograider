@@ -1,0 +1,107 @@
+  /mtp/mdeTimelineExperience/machines/{MachineId}/events:
+    get:
+      summary: Get machine timeline events
+      description: >-
+        Retrieve the event stream backing the modern machine timeline
+        experience.
+      operationId: EndpointDevices.GetMachineTimelineEvents
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+        - name: machineDnsName
+          in: query
+          description: The machine DNS name echoed by the current portal client.
+          schema:
+            type: string
+            nullable: true
+        - name: SenseClientVersion
+          in: query
+          description: The endpoint sensor version shown on device pages.
+          schema:
+            type: string
+            nullable: true
+        - name: fromDate
+          in: query
+          description: The inclusive start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          description: The inclusive end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: pageSize
+          in: query
+          description: The number of timeline rows to return.
+          schema:
+            type: integer
+            default: 200
+        - name: generateIdentityEvents
+          in: query
+          description: Include generated identity events in the timeline.
+          schema:
+            type: boolean
+        - name: includeIdentityEvents
+          in: query
+          description: Include identity events in the timeline response.
+          schema:
+            type: boolean
+        - name: supportMdiOnlyEvents
+          in: query
+          description: Include MDI-only timeline events when supported.
+          schema:
+            type: boolean
+        - name: correlationId
+          in: query
+          description: Correlation identifier supplied by the portal timeline client.
+          schema:
+            type: string
+            format: uuid
+        - name: doNotUseCache
+          in: query
+          description: Bypass the timeline cache when true.
+          schema:
+            type: boolean
+        - name: forceUseCache
+          in: query
+          description: Force use of cached timeline data when true.
+          schema:
+            type: boolean
+        - name: includeSentinelEvents
+          in: query
+          description: Include Sentinel-backed events when available.
+          schema:
+            type: boolean
+        - name: ReportIdForScrolling
+          in: query
+          description: Optional continuation cursor returned by prior timeline responses.
+          schema:
+            type: string
+        - name: IsScrollingForward
+          in: query
+          description: Indicates the requested scroll direction for continuation queries.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - machine timeline event data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

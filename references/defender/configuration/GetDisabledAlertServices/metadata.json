@@ -1,0 +1,76 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "GetDisabledAlertServices",
+  "operationId": "Configuration.GetDisabledAlertServices",
+  "path": "/mtp/alertsApiService/workloads/disabled",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get disabled alert service settings",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:37:01.9658753Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "includeDetails",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Whether to include detailed workload information."
+    }
+  ],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_AlertServiceConfig_CL",
+    "v1Tier": "Configuration",
+    "v1Category": "Configuration and Settings",
+    "v1RawPath": "/apiproxy/mtp/alertsApiService/workloads/disabled?includeDetails=true"
+  },
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 403 (Forbidden).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": "true",
+    "required": false,
+    "description": "Whether to include detailed workload information.",
+    "type": "boolean",
+    "name": "includeDetails"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "1h"
+}

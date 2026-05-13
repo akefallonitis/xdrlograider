@@ -1,0 +1,105 @@
+{
+  "portal": "m365-admin",
+  "subArea": "integrated_apps",
+  "slug": "GetAgents",
+  "operationId": "IntegratedApps.GetAgents",
+  "path": "/fd/addins/api/agents",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get deployed agents",
+  "sourceFile": "integrated_apps.yml",
+  "capturedUtc": "2026-05-12T15:13:25.786451Z",
+  "pagination": {
+    "indexParam": null,
+    "defaults": {
+      "limit": "200"
+    },
+    "tokenParam": null,
+    "sizeParam": "limit",
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "workloads",
+      "In": "query",
+      "Type": "string",
+      "Default": "SharedAgent",
+      "Description": "Workload filter for agents."
+    },
+    {
+      "Name": "scopes",
+      "In": "query",
+      "Type": "string",
+      "Default": "Shared",
+      "Description": "Scope filter for agents."
+    },
+    {
+      "Name": "creatorId",
+      "In": "query",
+      "Type": "string",
+      "Default": "none",
+      "Description": "Filter by creator ID. Use 'none' for all creators."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": [
+    {
+      "in": "query",
+      "default": "SharedAgent",
+      "required": false,
+      "description": "Workload filter for agents.",
+      "type": "string",
+      "name": "workloads"
+    },
+    {
+      "in": "query",
+      "default": "Shared",
+      "required": false,
+      "description": "Scope filter for agents.",
+      "type": "string",
+      "name": "scopes"
+    },
+    {
+      "in": "query",
+      "default": "200",
+      "required": false,
+      "description": "Maximum number of agents to return.",
+      "type": "integer",
+      "name": "limit"
+    },
+    {
+      "in": "query",
+      "default": "none",
+      "required": false,
+      "description": "Filter by creator ID. Use ",
+      "type": "string",
+      "name": "creatorId"
+    }
+  ],
+  "paginationStyle": "limitOffset",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

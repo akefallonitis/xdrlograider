@@ -1,0 +1,31 @@
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/patchdata:
+    get:
+      summary: Get outbreak patch data
+      description: >-
+        Retrieve the patch and mitigation data shown on a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.GetOutbreakPatchData
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak patch data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

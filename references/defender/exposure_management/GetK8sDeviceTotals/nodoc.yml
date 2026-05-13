@@ -1,0 +1,68 @@
+  /mtp/k8s/machines/deviceTotals:
+    get:
+      summary: Get Kubernetes device totals
+      description: >-
+        Retrieve device count totals for Kubernetes nodes, grouped by risk score,
+        exposure score, onboarding status, and asset attributes. Observed live on the
+        Exposure Management overview page.
+      operationId: ExposureManagement.GetK8sDeviceTotals
+      tags: [Exposure Management]
+      parameters:
+        - name: lookingBackIndays
+          in: query
+          description: Number of days to look back for device data.
+          schema:
+            type: integer
+            example: 30
+        - name: hideLowFidelityDevices
+          in: query
+          description: Whether to exclude low-fidelity device records.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    DeviceCount:
+                      type: integer
+                      description: Number of devices matching this group.
+                    RiskScore:
+                      type: string
+                      description: Risk score level (e.g. None, Low, Medium, High, Critical).
+                    ExposureScore:
+                      type: string
+                      description: Exposure score level.
+                    AssetValue:
+                      type: string
+                      nullable: true
+                      description: Asset value classification.
+                    OnboardingStatus:
+                      type: string
+                      description: Device onboarding status.
+                    DeviceCategory:
+                      type: string
+                      nullable: true
+                      description: Device category classification.
+                    IsActiveOnboarded:
+                      type: boolean
+                    IsNewDevice:
+                      type: boolean
+                    IsInternetFacing:
+                      type: boolean
+                    IsCriticalAsset:
+                      type: boolean
+                    IsLowFidelity:
+                      type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

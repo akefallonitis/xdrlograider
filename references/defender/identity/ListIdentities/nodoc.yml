@@ -1,0 +1,46 @@
+  /mdi/identity/userapiservice/identities:
+    post:
+      summary: List identities
+      description: >-
+        Retrieve identities from the user API service with filtering, search,
+        and sorting.
+      operationId: Identity.ListIdentities
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PageSize:
+                  type: integer
+                  description: Number of rows to return.
+                Skip:
+                  type: integer
+                  description: Number of rows to skip.
+                SortBy:
+                  type: object
+                  description: Requested sort field and direction.
+                Filters:
+                  type: object
+                  description: Identity filter set.
+                SearchText:
+                  type: string
+                  description: Free-text search input.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identities list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

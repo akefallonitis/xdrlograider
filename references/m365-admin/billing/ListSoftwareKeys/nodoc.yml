@@ -1,0 +1,30 @@
+  /fd/KeyFulfillment/v3.0/softwareKeys:
+    get:
+      summary: List software keys
+      description: >-
+        Retrieve the software key inventory exposed by the subscriptions experience,
+        optionally including detailed product key information.
+      operationId: Billing.ListSoftwareKeys
+      tags: [Billing]
+      parameters:
+        - name: includeProductKeyDetails
+          in: query
+          description: Whether the response should include detailed product key metadata.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Software key inventory payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

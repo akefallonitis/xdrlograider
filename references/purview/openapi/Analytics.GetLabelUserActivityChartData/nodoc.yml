@@ -1,0 +1,27 @@
+  /api/LabelUserActivityLog/GetChartData:
+    post:
+      tags: [Analytics]
+      summary: Get label user activity chart data
+      description: |
+        Retrieves Records Management label activity chart data for a requested pivot and time range.
+        Confirmed from the label activity experience with the `File-WhoApplied` pivot.
+      operationId: PurviewPortal.Analytics.GetLabelUserActivityChartData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurviewPortalLabelActivityRequest'
+      responses:
+        '200':
+          description: Label activity chart payload returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurviewPortalLabelActivityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

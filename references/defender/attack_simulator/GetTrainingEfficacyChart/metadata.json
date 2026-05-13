@@ -1,0 +1,57 @@
+{
+  "portal": "defender",
+  "subArea": "attack_simulator",
+  "slug": "GetTrainingEfficacyChart",
+  "operationId": "AttackSimulator.GetTrainingEfficacyChart",
+  "path": "/astgws/AttackSimulator/api/v1/AdvanceReporting/chart/TrainingEfficacy",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get training efficacy chart data",
+  "sourceFile": "attack_simulator.yml",
+  "capturedUtc": "2026-05-12T14:33:31.5083079Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

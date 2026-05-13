@@ -1,0 +1,146 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetIpTimelineEvents",
+  "operationId": "EndpointDevices.GetIpTimelineEvents",
+  "path": "/mtp/mdeTimelineExperience/ips/{IpAddress}/events",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get IP timeline events",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:00.8521291Z",
+  "pagination": {
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": "pageSize",
+    "defaults": {
+      "pageSize": "200"
+    },
+    "indexParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": "fromDate",
+    "type": "iso8601",
+    "supported": true,
+    "endParam": "toDate"
+  },
+  "otherParameters": [
+    {
+      "Name": "IpAddress",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The IP address shown on the entity page."
+    },
+    {
+      "Name": "generateIdentityEvents",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include generated identity events in the timeline."
+    },
+    {
+      "Name": "includeIdentityEvents",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include identity events in the timeline response."
+    },
+    {
+      "Name": "correlationId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Correlation identifier supplied by the portal timeline client."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/mdeTimelineExperience/ips/{IpAddress}/events' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=fromDate/endParam=toDate"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The IP address shown on the entity page.",
+      "type": "string",
+      "name": "IpAddress"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The inclusive start of the requested time range.",
+      "type": "string",
+      "name": "fromDate"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The inclusive end of the requested time range.",
+      "type": "string",
+      "name": "toDate"
+    },
+    {
+      "in": "query",
+      "default": "200",
+      "required": false,
+      "description": "The number of timeline rows to return.",
+      "type": "integer",
+      "name": "pageSize"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include generated identity events in the timeline.",
+      "type": "boolean",
+      "name": "generateIdentityEvents"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include identity events in the timeline response.",
+      "type": "boolean",
+      "name": "includeIdentityEvents"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Correlation identifier supplied by the portal timeline client.",
+      "type": "string",
+      "name": "correlationId"
+    }
+  ],
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [
+    "IP.Address"
+  ],
+  "cadenceSuggestion": "daily"
+}

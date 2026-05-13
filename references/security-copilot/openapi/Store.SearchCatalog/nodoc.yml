@@ -1,0 +1,16 @@
+  /catalog/search:
+    get:
+      tags: [Store]
+      summary: Search Security Store catalog
+      description: Searches the Security Store catalog for agents and related marketplace offerings.
+      operationId: SecurityCopilotPortal.Store.SearchCatalog
+      parameters:
+        - $ref: '#/components/parameters/ProductCapabilities'
+        - $ref: '#/components/parameters/SecurityMarketplaceApiVersion'
+      responses:
+        '200':
+          description: Catalog search results returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceSearchResponse'

@@ -1,0 +1,50 @@
+{
+  "portal": "viva",
+  "subArea": "openapi",
+  "slug": "RealtimeRelay_PostHandshake",
+  "operationId": "RealtimeRelay_PostHandshake",
+  "path": "/cometd/handshake",
+  "methods": [
+    "post"
+  ],
+  "summary": "Open a Viva Engage realtime relay session",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:23.3432218Z",
+  "pagination": {
+    "style": "none",
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null,
+    "indexParam": null
+  },
+  "timeFilter": {
+    "endParam": null,
+    "startParam": null,
+    "type": null,
+    "supported": false,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Method": "Low operator-value priority",
+    "Status": "low-priority"
+  },
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version",
+    "Url.Path"
+  ],
+  "cadenceSuggestion": "daily"
+}

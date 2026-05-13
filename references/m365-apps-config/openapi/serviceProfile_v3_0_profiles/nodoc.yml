@@ -1,0 +1,17 @@
+  /serviceProfile/v3.0/profiles:
+    get:
+      tags: [Servicing Profiles]
+      summary: List servicing profiles (v3)
+      description: |
+        Hidden servicing-profile collection confirmed during the feature-gated
+        probe pass. It returned the same high-level servicing profile summaries as
+        the older v1 surface.
+      responses:
+        '200':
+          description: Servicing profile summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceProfile'

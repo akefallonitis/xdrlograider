@@ -1,0 +1,93 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "application_proxy",
+  "slug": "Applications.Get",
+  "operationId": "ApplicationProxy.Applications.Get",
+  "path": "/ApplicationProxy/Applications/{appId}",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Application Proxy application",
+  "sourceFile": "application_proxy.yml",
+  "capturedUtc": "2026-05-12T15:13:11.6925458Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "origExternalUrl",
+      "In": "query",
+      "Type": "",
+      "Default": "",
+      "Description": "pending"
+    },
+    {
+      "Name": "isFirstApp",
+      "In": "query",
+      "Type": "",
+      "Default": "",
+      "Description": "pending"
+    },
+    {
+      "Name": "EnableAppProxy",
+      "In": "query",
+      "Type": "",
+      "Default": "",
+      "Description": "pending"
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/ApplicationProxy/Applications/{appId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "pending",
+      "type": "",
+      "name": "origExternalUrl"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "pending",
+      "type": "",
+      "name": "isFirstApp"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "pending",
+      "type": "",
+      "name": "EnableAppProxy"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,57 @@
+{
+  "portal": "defender",
+  "subArea": "exposure_management",
+  "slug": "GetScaRecommendationFilters",
+  "operationId": "ExposureManagement.GetScaRecommendationFilters",
+  "path": "/mtp/posture/oversight/scaRecommendations/filters",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get SCA recommendation filter categories",
+  "sourceFile": "exposure_management.yml",
+  "capturedUtc": "2026-05-12T14:39:35.3553785Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 3,
+    "errorText": "",
+    "responseShape": "wrapper:results[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live (3 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "1h"
+}

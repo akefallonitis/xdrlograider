@@ -1,0 +1,12 @@
+{
+  "portal": "m365-admin",
+  "path": "/admin/api/recommendations/m365/ccs",
+  "method": "GET",
+  "finalUrl": "https://admin.microsoft.com/admin/api/recommendations/m365/ccs",
+  "httpStatus": 200,
+  "successKind": "live",
+  "diagnostic": null,
+  "contentLen": 1269,
+  "rawSample": "{\"ResultCode\":\"Success\",\"TenantId\":\"45f52f35-73d5-4066-8378-fe506ee90fb1\",\"Recommendations\":[{\"SettingId\":\"preRequisiteLicenseAssigned\",\"Status\":\"NotApplicable\",\"DisplayName\":\"Assign prerequisite Microsoft 365 licenses\"},{\"SettingId\":\"supportedUpdateChannel\",\"Status\":\"NotApplicable\",\"DisplayName\":\"Get users on a supported update channel\"},{\"SettingId\":\"allowCopilot\",\"Status\":\"Completed\",\"IsCopilotAllowed\":true,\"DisplayName\":\"Allow Copilot access for your users\"},{\"SettingId\":\"setUpOneDrive\",\"Status\":\"NotApplicable\",\"DisplayName\":\"Set up OneDrive for your organization\"},{\"SettingId\":\"webGrounding\",\"Status\":\"Completed\",\"UserPercentage\":1.0,\"DisplayName\":\"Turn on web search for Microsoft 365 Copilot and Microsoft 365 Copilot Chat\"},{\"SettingId\":\"imageGenerationOn\",\"Status\":\"RecommendedAction\",\"UserPercentage\":1.0,\"DisplayName\":\"Turn on multimodal input and output for Copilot\"},{\"SettingId\":\"aIAdministrator\",\"Status\":\"RecommendedAction\",\"HasAIAdmin\":false,\"DisplayName\":\"Assign the AI Administrator role\"},{\"SettingId\":\"blocked1PAgent\",\"Status\":\"Completed\",\"Blocked1PAgent\":false,\"DisplayName\":\"Allow Microsoft-built agents\"},{\"SettingId\":\"copilotChatPin\",\"Status\":\"RequiredAction\",\"UserPercentage\":0.0,\"DisplayName\":\"Pin Copilot in the Microsoft 365 apps\"}]}",
+  "capturedUtc": "2026-05-13T07:13:32Z"
+}

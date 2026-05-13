@@ -1,0 +1,17 @@
+  /settings/v1.0/SettingsCatalog/auth/Settings:
+    get:
+      tags: [Policy Management]
+      summary: Query auth settings catalog entries
+      description: |
+        Hidden auth settings catalog confirmed during the feature-gated probe
+        pass. The current tenant returned the same settings catalog entry shape as
+        the main Cloud Policy catalog.
+      responses:
+        '200':
+          description: Auth settings catalog entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SettingsCatalogEntry'

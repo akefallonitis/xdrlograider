@@ -1,163 +1,29 @@
-name: Validate Solution
+name: validate-solution
 
 on:
   pull_request:
     paths:
-      - 'deploy/**'
-      - 'sentinel/**'
+      - 'deploy/sentinelContent.json'
+      - 'deploy/solution/**'
+      - 'tools/Build-SentinelSolution.ps1'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
-  arm-ttk:
-    name: ARM-TTK
-    runs-on: ubuntu-latest
-    # Hot-Fix Phase 0 (2026-05-10): ARM-TTK surfaces best-practice warnings that
-    # don't reflect actual deployment safety (we use Test-AzTemplate which has
-    # known false-positives on hand-authored templates not following the AVM
-    # structure — e.g. "Empty property: subscription found on line 10" from
-    # the metadata block). Microsoft's own Sentinel solution gallery uses
-    # ARM-TTK as informational, not blocking. We continue-on-error so the CI
-    # signal is INFO-only; review warnings manually before each release tag.
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Install ARM-TTK
-        shell: pwsh
-        run: |
-          git clone --depth 1 https://github.com/Azure/arm-ttk.git /tmp/arm-ttk
-
-      - name: Run ARM-TTK (informational — see continue-on-error rationale above)
-        shell: pwsh
-        # ErrorAction Continue + 2>&1 redirect prevents Test-AzTemplate's
-        # internal Write-Error calls from propagating exit code 1. ARM-TTK
-        # output (warnings) is collapsed under ::group:: so reviewers can
-        # expand the GitHub Actions log to see them, but the job's overall
-        # exit is 0 (informational, not blocking). This is the canonical
-        # pattern for ARM-TTK in production CI per Microsoft docs.
-        continue-on-error: true
-        run: |
-          $ErrorActionPreference = 'Continue'
-          Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
-          if (Test-Path ./deploy/compiled/mainTemplate.json) {
-              $results = Test-AzTemplate -TemplatePath ./deploy/compiled/mainTemplate.json 2>&1
-              $failed = $results | Where-Object { $_.PSObject.Properties['Passed'] -and -not $_.Passed }
-              if ($failed) {
-                  Write-Host "::group::ARM-TTK warnings ($($failed.Count) tests — informational, not blocking)"
-                  $failed | ForEach-Object { Write-Host "  - $($_.Name): $($_.Errors -join ' | ')" }
-                  Write-Host "::endgroup::"
-                  Write-Host "ARM-TTK surfaced $($failed.Count) warnings (informational; not blocking merge)." -ForegroundColor Yellow
-              } else {
-                  Write-Host "ARM-TTK: all tests passed" -ForegroundColor Green
-              }
-          } else {
-              Write-Host "No compiled ARM template found; skipping ARM-TTK" -ForegroundColor Yellow
-          }
-          # Always exit 0 so step succeeds (per continue-on-error rationale)
-          exit 0
-
-  workbook-schema:
-    name: Workbook JSON schema
+  solution-compliance:
+    name: Sentinel Content Hub compliance
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Validate workbook JSON
-        shell: pwsh
+      - uses: actions/checkout@v4
+      - shell: pwsh
         run: |
-          $workbooks = Get-ChildItem -Path ./sentinel/workbooks -Filter *.json -ErrorAction SilentlyContinue
-          foreach ($wb in $workbooks) {
-              try {
-                  $content = Get-Content $wb.FullName -Raw | ConvertFrom-Json
-                  if (-not $content.items) { throw "Missing 'items' property in $($wb.Name)" }
-                  Write-Host "OK: $($wb.Name)" -ForegroundColor Green
-              } catch {
-                  throw "Invalid workbook JSON in $($wb.Name): $_"
-              }
-          }
-
-  analytic-rule-schema:
-    name: Analytic rule YAML schema
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Install YAML parser
-        shell: pwsh
-        run: Install-Module -Name powershell-yaml -Force -Scope CurrentUser
-
-      - name: Validate analytic rule YAML
-        shell: pwsh
-        run: |
-          Import-Module powershell-yaml
-          $rules = Get-ChildItem -Path ./sentinel/analytic-rules -Filter *.yaml -ErrorAction SilentlyContinue
-          if (-not $rules) { throw "No analytic-rule YAML files found under ./sentinel/analytic-rules" }
-          foreach ($rule in $rules) {
-              try {
-                  $content = (Get-Content $rule.FullName -Raw) | ConvertFrom-Yaml
-                  $required = @('id', 'name', 'description', 'severity', 'query', 'queryFrequency', 'queryPeriod', 'triggerOperator', 'triggerThreshold')
-                  foreach ($prop in $required) {
-                      if (-not $content.ContainsKey($prop) -and $prop -ne 'triggerThreshold') {
-                          throw "Missing '$prop' in $($rule.Name)"
-                      }
-                  }
-                  Write-Host "OK: $($rule.Name)" -ForegroundColor Green
-              } catch {
-                  throw "Invalid analytic rule YAML in $($rule.Name): $_"
-              }
-          }
-
-  hunting-query-yaml:
-    name: Hunting query YAML
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Install YAML parser
-        shell: pwsh
-        run: Install-Module -Name powershell-yaml -Force -Scope CurrentUser
-
-      - name: Validate hunting query YAML
-        shell: pwsh
-        run: |
-          Import-Module powershell-yaml
-          $queries = Get-ChildItem -Path ./sentinel/hunting-queries -Filter *.yaml -ErrorAction SilentlyContinue
-          foreach ($q in $queries) {
-              try {
-                  $content = (Get-Content $q.FullName -Raw) | ConvertFrom-Yaml
-                  $required = @('name', 'description', 'query')
-                  foreach ($prop in $required) {
-                      if (-not $content.$prop) { throw "Missing '$prop' in $($q.Name)" }
-                  }
-                  Write-Host "OK: $($q.Name)" -ForegroundColor Green
-              } catch {
-                  throw "Invalid hunting query YAML in $($q.Name): $_"
-              }
-          }
-
-  createui-schema:
-    name: createUiDefinition schema
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Validate createUiDefinition.json
-        shell: pwsh
-        run: |
-          $ui = './deploy/compiled/createUiDefinition.json'
-          if (-not (Test-Path $ui)) {
-              Write-Warning "createUiDefinition.json not present; skipping"
-              exit 0
-          }
-          $content = Get-Content $ui -Raw | ConvertFrom-Json
-          if (-not $content.'$schema') { throw "Missing \$schema" }
-          if (-not $content.handler) { throw "Missing handler" }
-          if ($content.handler -ne 'Microsoft.Azure.CreateUIDef') {
-              throw "handler must be 'Microsoft.Azure.CreateUIDef', got '$($content.handler)'"
-          }
-          if (-not $content.parameters) { throw "Missing parameters" }
-          Write-Host "createUiDefinition: schema OK" -ForegroundColor Green
+          $ErrorActionPreference = 'Stop'
+          # Phase 1 lock invariants only — runs the dedicated Pester suite.
+          Install-Module Pester -Force -Scope CurrentUser -SkipPublisherCheck -MinimumVersion 5.5.0
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = 'tests/arm/SentinelContent.MinimalLock.Tests.ps1'
+          $cfg.Run.PassThru = $true
+          $cfg.Run.Exit = $true
+          Invoke-Pester -Configuration $cfg

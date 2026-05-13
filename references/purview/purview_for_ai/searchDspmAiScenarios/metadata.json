@@ -1,0 +1,57 @@
+{
+  "portal": "purview",
+  "subArea": "purview_for_ai",
+  "slug": "searchDspmAiScenarios",
+  "operationId": "searchDspmAiScenarios",
+  "path": "/gws/dspmaimtapp/api/v1/scenariosearch",
+  "methods": [
+    "post"
+  ],
+  "summary": "Search DSPM for AI scenarios",
+  "sourceFile": "purview_for_ai.yml",
+  "capturedUtc": "2026-05-12T15:11:22.3787037Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 415,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 415",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=error/415 — operator should check live response body for diagnosis"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

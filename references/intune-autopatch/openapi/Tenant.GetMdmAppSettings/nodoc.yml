@@ -1,0 +1,20 @@
+  /update-management/partnergraph/1.0/tenantSettings/mdmAppSettings:
+    get:
+      tags: [Tenant]
+      summary: Get MDM app tenant settings
+      description: |
+        Returns tenant MDM application settings exposed through the Windows Autopatch update
+        management surface. Confirmed live on the Tenant management blade and validated with a
+        GET probe.
+      operationId: IntuneAutopatch.Tenant.GetMdmAppSettings
+      responses:
+        '200':
+          description: Tenant MDM app settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataGenericCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

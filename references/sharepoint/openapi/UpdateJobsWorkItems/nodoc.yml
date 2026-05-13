@@ -1,0 +1,27 @@
+  /_api/SPO.Tenant/UpdateJobsWorkItems:
+    post:
+      tags: [Internal]
+      summary: Update pending job work items
+      description: |
+        Notifies the portal backend that a batch of admin jobs should be marked
+        as processed or refreshed. Observed during Home blade initialization.
+      operationId: SharePointAdmin.UpdateJobsWorkItems
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobsRequest'
+      responses:
+        '204':
+          description: Work items updated successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

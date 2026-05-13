@@ -1,0 +1,61 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "multifactor_authentication",
+  "slug": "HardwareToken.Users.Download",
+  "operationId": "Mfa.HardwareToken.Users.Download",
+  "path": "/MultiFactorAuthentication/HardwareToken/users/download",
+  "methods": [
+    "get"
+  ],
+  "summary": "Download hardware token user assignments",
+  "sourceFile": "multifactor_authentication.yml",
+  "capturedUtc": "2026-05-12T15:13:12.5035463Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "upn",
+      "In": "query",
+      "Type": "",
+      "Default": "",
+      "Description": "The user principal name."
+    },
+    {
+      "Name": "enabledFilter",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Whether to filter for enabled results only."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 403,
+  "lastDiagnostic": "Unauthorized",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.UPN"
+  ],
+  "cadenceSuggestion": "daily"
+}

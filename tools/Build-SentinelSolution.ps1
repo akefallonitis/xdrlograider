@@ -1,210 +1,237 @@
-#Requires -Version 7.0
 <#
 .SYNOPSIS
-    Packages XdrLogRaider as a Microsoft Sentinel Solution for Content Hub submission.
+    Generates deploy/sentinelContent.json — minimal Phase 1 Sentinel solution
+    wrapper (contentPackage + dataConnector + metadata; NO analytic rules,
+    workbooks, hunting queries, or parsers).
 
 .DESCRIPTION
-    Produces a solution ZIP that matches the Azure-Sentinel/Solutions/<Name>/ layout:
-      Analytic Rules/     — 15 YAML files
-      Data Connectors/    — connector definition JSON
-      Hunting Queries/    — 10 YAML files
-      Parsers/            — 6 KQL files
-      Workbooks/          — 6 JSON + 6 YAML sidecars
-      Images/             — Logo.svg
-      Package/
-        mainTemplate.json
-        createUiDefinition.json
-        <version>.zip      ← this file — the solution-installable bundle
-      Data/
-        Solution_XdrLogRaider.json  — solution generator input
-      ReleaseNotes.md
-      Solution_README.md
+    Phase 1 ship-lock: data-connector card ONLY. The 19 data types (18
+    `Defender_<Sub>_CL` + `XdrConnectorHealth_CL`) are advertised so Sentinel's
+    Content Hub can show the card. Content (analytic rules / workbooks / hunting
+    queries / parsers) lands in v0.3.0+ via builder extension.
 
-.PARAMETER Version
-    Semver version (e.g., 1.0.0).
+    The data-connector card uses `connectivityCriteria` (singular per Sentinel
+    V2 Microsoft.SecurityInsights/dataConnectors schema) with freshness-signal
+    KQL: `XdrConnectorHealth_CL | where TimeGenerated > ago(15m) | take 1`.
+    Existence of a row in 15m = Heartbeat fired = connector alive (= Connected).
+    Per Decision 12: CardState is intentionally a Notes JSON field for operator
+    diagnostics — the card MUST NOT depend on it (would couple card signal to
+    heartbeat self-classification, defeating the freshness signal's purpose).
 
-.PARAMETER OutputRoot
-    Where to write the staging folder. Defaults to deploy/solution-staging/.
+.PARAMETER OutputPath
+    Output sentinelContent.json. Default: ../deploy/sentinelContent.json.
 
 .EXAMPLE
-    ./tools/Build-SentinelSolution.ps1 -Version 1.0.0
+    pwsh ./tools/Build-SentinelSolution.ps1
 #>
-
+#Requires -Version 7.0
 [CmdletBinding()]
 param(
-    [string] $Version = '1.0.0',
-    [string] $RepoRoot = (Split-Path -Parent $PSScriptRoot),
-    [string] $OutputRoot
+    [string] $OutputPath = (Join-Path $PSScriptRoot '..' 'deploy' 'sentinelContent.json')
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-if (-not $OutputRoot) {
-    $OutputRoot = Join-Path $RepoRoot 'deploy' 'solution-staging'
-}
-
-$solutionName    = 'XdrLogRaider'
-$stagingDir      = Join-Path $OutputRoot $solutionName
-$sentinelDir     = Join-Path $RepoRoot 'sentinel'
-$deployDir       = Join-Path $RepoRoot 'deploy'
-
-Write-Host "Building Sentinel Solution package v$Version" -ForegroundColor Cyan
-Write-Host "  Staging: $stagingDir"
-
-# --- Clean + prepare staging ---
-
-if (Test-Path $stagingDir) {
-    Remove-Item -Path $stagingDir -Recurse -Force
-}
-$dirs = @(
-    'Analytic Rules',
-    'Data Connectors',
-    'Hunting Queries',
-    'Parsers',
-    'Workbooks',
-    'Images',
-    'Package',
-    'Data'
+$SubAreas = @(
+    'action_center', 'attack_simulator', 'cloud_apps', 'configuration', 'data_lake',
+    'endpoint_configuration', 'endpoint_devices', 'entity_pivots', 'exposure_management',
+    'files', 'identity', 'multi_tenant', 'portal_services', 'secure_score',
+    'sentinel_precision', 'streaming', 'threat_analytics', 'vulnerability_management'
 )
-foreach ($d in $dirs) {
-    New-Item -ItemType Directory -Path (Join-Path $stagingDir $d) -Force | Out-Null
+
+function ConvertTo-PascalCase {
+    param([Parameter(Mandatory)][string] $Snake)
+    $parts = $Snake -split '_'
+    ($parts | ForEach-Object {
+        if ($_.Length -eq 0) { return '' }
+        $_.Substring(0,1).ToUpperInvariant() + $_.Substring(1).ToLowerInvariant()
+    }) -join ''
 }
 
-# --- Copy sentinel content ---
-
-Write-Host "`nCopying Sentinel content..." -ForegroundColor Cyan
-
-Copy-Item -Path (Join-Path $sentinelDir 'analytic-rules\*.yaml')   -Destination (Join-Path $stagingDir 'Analytic Rules')  -Force
-Copy-Item -Path (Join-Path $sentinelDir 'hunting-queries\*.yaml')  -Destination (Join-Path $stagingDir 'Hunting Queries') -Force
-Copy-Item -Path (Join-Path $sentinelDir 'parsers\*.kql')           -Destination (Join-Path $stagingDir 'Parsers')         -Force
-Copy-Item -Path (Join-Path $sentinelDir 'workbooks\*.json')        -Destination (Join-Path $stagingDir 'Workbooks')       -Force
-Copy-Item -Path (Join-Path $sentinelDir 'workbooks\*.yaml')        -Destination (Join-Path $stagingDir 'Workbooks')       -Force -ErrorAction SilentlyContinue
-
-$arCount = (Get-ChildItem -Path (Join-Path $stagingDir 'Analytic Rules') -Filter *.yaml).Count
-$hqCount = (Get-ChildItem -Path (Join-Path $stagingDir 'Hunting Queries') -Filter *.yaml).Count
-$pCount  = (Get-ChildItem -Path (Join-Path $stagingDir 'Parsers') -Filter *.kql).Count
-$wbCount = (Get-ChildItem -Path (Join-Path $stagingDir 'Workbooks') -Filter *.json).Count
-
-Write-Host "  Analytic rules:  $arCount"
-Write-Host "  Hunting queries: $hqCount"
-Write-Host "  Parsers:         $pCount"
-Write-Host "  Workbooks:       $wbCount"
-
-# --- Data Connectors ---
-
-Copy-Item -Path (Join-Path $deployDir 'solution\Data Connectors\*.json') -Destination (Join-Path $stagingDir 'Data Connectors') -Force
-
-# --- Images ---
-
-Copy-Item -Path (Join-Path $deployDir 'solution\Images\*') -Destination (Join-Path $stagingDir 'Images') -Force -Recurse
-
-# --- Package/ — compiled ARM + createUiDefinition ---
-
-Copy-Item -Path (Join-Path $deployDir 'compiled\mainTemplate.json')     -Destination (Join-Path $stagingDir 'Package')
-Copy-Item -Path (Join-Path $deployDir 'compiled\createUiDefinition.json') -Destination (Join-Path $stagingDir 'Package')
-Copy-Item -Path (Join-Path $deployDir 'compiled\sentinelContent.json')   -Destination (Join-Path $stagingDir 'Package') -ErrorAction SilentlyContinue
-
-# --- Data/Solution_XdrLogRaider.json — solution generator input ---
-
-$solutionInput = [ordered]@{
-    Name        = $solutionName
-    Author      = 'Alex Kefallonitis'
-    Logo        = '<img src="Images/Logo.svg" width="75px" height="75px">'
-    Description = 'XdrLogRaider ingests Defender XDR portal-only telemetry (configuration, compliance, drift, exposure, governance) that is NOT exposed by public Graph Security / Defender XDR / MDE public APIs. 72 streams (71 live + 1 deprecated) across 5 cadence tiers (10m/1h/6h/24h/7d); drift detection via pure KQL; 8 workbooks, 21 analytic rules (14 detection + 7 XdrOps; all ship disabled), 12 hunting queries, 4 cadence-tier parsers.'
-    Workbooks   = @(Get-ChildItem -Path (Join-Path $stagingDir 'Workbooks') -Filter *.json | ForEach-Object { "Workbooks/$($_.Name)" })
-    AnalyticalRules = @(Get-ChildItem -Path (Join-Path $stagingDir 'Analytic Rules') -Filter *.yaml | ForEach-Object { "Analytic Rules/$($_.Name)" })
-    HuntingQueries  = @(Get-ChildItem -Path (Join-Path $stagingDir 'Hunting Queries') -Filter *.yaml | ForEach-Object { "Hunting Queries/$($_.Name)" })
-    Parsers         = @(Get-ChildItem -Path (Join-Path $stagingDir 'Parsers') -Filter *.kql | ForEach-Object { "Parsers/$($_.Name)" })
-    DataConnectors  = @(Get-ChildItem -Path (Join-Path $stagingDir 'Data Connectors') -Filter *.json | ForEach-Object { "Data Connectors/$($_.Name)" })
-    BasePath        = '.'
-    Version         = $Version
-    Metadata        = 'SolutionMetadata.json'
-    TemplateSpec    = $true
-    Is1PConnector   = $false
+# -----------------------------------------------------------------------------
+# Build dataTypes list (19 tables)
+# -----------------------------------------------------------------------------
+$dataTypes = New-Object System.Collections.Generic.List[object]
+foreach ($sub in $SubAreas) {
+    $pascal = ConvertTo-PascalCase -Snake $sub
+    $tbl = "Defender_${pascal}_CL"
+    $dataTypes.Add([ordered]@{
+        name      = $tbl
+        lastDataReceivedQuery = "$tbl | where TimeGenerated > ago(24h) | summarize Time = max(TimeGenerated) by Type"
+    })
 }
-$solutionInputPath = Join-Path $stagingDir 'Data' "Solution_$solutionName.json"
-$solutionInput | ConvertTo-Json -Depth 20 | Set-Content -Path $solutionInputPath -Encoding UTF8
+$dataTypes.Add([ordered]@{
+    name      = 'XdrConnectorHealth_CL'
+    lastDataReceivedQuery = 'XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | summarize Time = max(TimeGenerated) by Type'
+})
 
-# --- SolutionMetadata ---
+# -----------------------------------------------------------------------------
+# Build the GenericUI dataConnector resource
+# -----------------------------------------------------------------------------
+$connectorId = 'XdrLogRaiderInternal'
 
-$metadata = [ordered]@{
-    publisherId         = 'akefallonitis'
-    offerId             = 'xdrlograider'
-    firstPublishDate    = (Get-Date -Format 'yyyy-MM-dd')
-    providers           = @('Community')
-    categories          = @{
-        domains  = @('Security - Threat Protection', 'Security - Cloud Security', 'Compliance')
-        verticals = @()
+$dataConnector = [ordered]@{
+    type       = 'Microsoft.OperationalInsights/workspaces/providers/dataConnectors'
+    apiVersion = '2023-02-01-preview'
+    name       = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '$connectorId')]"
+    kind       = 'GenericUI'
+    properties = [ordered]@{
+        connectorUiConfig = [ordered]@{
+            title       = 'XdrLogRaider'
+            publisher   = 'Community'
+            descriptionMarkdown = 'XdrLogRaider ingests Microsoft Defender XDR portal-only telemetry across 18 sub-areas via 492 read-only endpoints (Action Center · Attack Simulator · Cloud Apps · Configuration · Data Lake · Endpoint Configuration · Endpoint Devices · Entity Pivots · Exposure Management · Files · Identity · Multi-Tenant · Portal Services · Secure Score · Sentinel Precision · Streaming · Threat Analytics · Vulnerability Management). Authenticates via service-account sccauth+XSRF session cookies; auto-refreshes session every 50 min. Per-sub-area timer triggers with staggered cron, circuit-breaker resilience, and dynamic regionality via TenantContext. ConnectorHeartbeat emits liveness independent of poll state.'
+            graphQueries = @(
+                [ordered]@{
+                    metricName = 'Total rows received'
+                    legend     = 'XdrLogRaider rows'
+                    baseQuery  = 'union withsource=Table Defender_*_CL, XdrConnectorHealth_CL'
+                }
+            )
+            sampleQueries = @(
+                [ordered]@{ description = 'ConnectorHeartbeat — last 24h'; query = 'XdrConnectorHealth_CL | where TimeGenerated > ago(24h) | order by TimeGenerated desc | take 50' }
+                [ordered]@{ description = 'Per-sub-area row volume — last 24h'; query = 'union withsource=Table Defender_*_CL | where TimeGenerated > ago(24h) | summarize Rows=count() by Table' }
+                [ordered]@{ description = 'License-blocked endpoints (LicenseHint populated)'; query = 'union withsource=Table Defender_*_CL | where TimeGenerated > ago(24h) and isnotempty(LicenseHint) | summarize Endpoints=dcount(Endpoint) by Table, LicenseHint' }
+                [ordered]@{ description = 'Rate-limited cycles (HTTP 429) — last 24h'; query = 'union withsource=Table Defender_*_CL | where TimeGenerated > ago(24h) and SuccessKind == "rate-limited" | summarize Count=count() by Table, Endpoint' }
+                [ordered]@{ description = 'Per-stream error rate — last 24h'; query = 'union withsource=Table Defender_*_CL | where TimeGenerated > ago(24h) | summarize Total=count(), Errors=countif(SuccessKind == "error") by Table, Endpoint | extend ErrorPct = round(100.0 * Errors / Total, 2) | order by ErrorPct desc' }
+                [ordered]@{ description = 'Open circuit-breakers (sub-areas in error cooldown)'; query = 'XdrConnectorHealth_CL | where TimeGenerated > ago(15m) | top 1 by TimeGenerated desc | mv-expand Notes.perStream | where Notes_perStream.circuitState == "open" | project SubArea = Notes_perStream.subArea, CircuitState = Notes_perStream.circuitState, CooldownUntilUtc = Notes_perStream.cooldownUntilUtc' }
+            )
+            dataTypes = $dataTypes.ToArray()
+            connectivityCriteria = @(
+                [ordered]@{
+                    type  = 'IsConnectedQuery'
+                    value = @('XdrConnectorHealth_CL | where TimeGenerated > ago(15m) | take 1')
+                }
+            )
+            availability = [ordered]@{
+                status      = 1
+                isPreview   = $false
+            }
+            permissions = [ordered]@{
+                resourceProvider = @(
+                    [ordered]@{
+                        provider     = 'Microsoft.OperationalInsights/workspaces'
+                        permissionsDisplayText = 'read and write permissions on the workspace are required.'
+                        providerDisplayName = 'Workspace'
+                        scope         = 'Workspace'
+                        requiredPermissions = [ordered]@{ write = $true; read = $true; delete = $true }
+                    }
+                )
+                customs = @(
+                    [ordered]@{
+                        name = 'Defender XDR service account'
+                        description = 'A read-only service account with Sentinel Reader + Defender XDR read role. Unattended auth via Password+TOTP or FIDO2 passkey; provisioned by ARM into Key Vault.'
+                    }
+                )
+            }
+            instructionSteps = @(
+                [ordered]@{
+                    title = '1. Deploy the connector'
+                    description = 'Use the Deploy to Azure button (or the included ARM template at deploy/mainTemplate.json) to provision the Function App + DCE + 19 DCRs + 19 workspace tables.'
+                }
+                [ordered]@{
+                    title = '2. Upload service-account credentials to Key Vault'
+                    description = 'If you skipped the inline credentials at deploy time, upload them to the Key Vault now: `defender-upn`, `defender-password`, `defender-totp` (or `defender-passkey`), `defender-auth-method`.'
+                }
+                [ordered]@{
+                    title = '3. Verify deployment locally'
+                    description = 'Run `pwsh ./tools/Verify-Deploy.ps1 -ResourceGroup <rg>` for a 14-phase post-deploy check (resources present · KV + SAMI · heartbeat liveness · DCR ingestion · circuit-breaker states).'
+                }
+            )
+        }
     }
-    support             = @{
-        tier  = 'Community'
-        name  = 'XdrLogRaider community'
-        email = ''
-        link  = 'https://github.com/akefallonitis/xdrlograider/issues'
-    }
-    version             = $Version
-}
-$metadataPath = Join-Path $stagingDir 'SolutionMetadata.json'
-$metadata | ConvertTo-Json -Depth 10 | Set-Content -Path $metadataPath -Encoding UTF8
-
-# --- ReleaseNotes + Solution_README ---
-
-$releaseNotes = @"
-## XdrLogRaider v$Version
-
-### Highlights
-- 72 Defender XDR portal-only telemetry streams (71 live + 1 deprecated)
-- Two unattended auto-refreshing auth methods: Credentials+TOTP, Software Passkey
-- 4 KQL drift parsers, 8 workbooks, 21 analytic rules (14 detection + 7 XdrOps), 12 hunting queries
-- Full documentation + 3-OS CI
-- MIT licensed; community-maintained
-
-### Known limitations
-- Portal endpoints are undocumented by Microsoft; may be hardened without notice
-- Auth chain depends on sccauth cookie pattern (MSRC-acknowledged as intended behavior per April 2026 CloudBrothers disclosure)
-- Analytic rules ship disabled; enable selectively after tuning
-"@
-Set-Content -Path (Join-Path $stagingDir 'ReleaseNotes.md') -Value $releaseNotes -Encoding UTF8
-
-$solutionReadme = Get-Content (Join-Path $RepoRoot 'README.md') -Raw
-Set-Content -Path (Join-Path $stagingDir 'Solution_README.md') -Value $solutionReadme -Encoding UTF8
-
-# --- Package into ZIP ---
-
-$zipPath = Join-Path $stagingDir 'Package' "$Version.zip"
-Write-Host "`nPackaging solution ZIP: $zipPath" -ForegroundColor Cyan
-
-# Zip the full staging layout (including Package/mainTemplate.json +
-# createUiDefinition.json + sentinelContent.json). Exclude only the zip itself
-# to avoid self-inclusion on re-runs.
-if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
-
-$topLevel = Get-ChildItem -Path $stagingDir
-$zipInputs = @()
-foreach ($entry in $topLevel) {
-    if ($entry.PSIsContainer -and $entry.Name -eq 'Package') {
-        # inside Package/, include the three compiled JSONs but NOT the <version>.zip
-        $jsonFiles = Get-ChildItem -Path $entry.FullName -Filter '*.json'
-        $zipInputs += $jsonFiles.FullName
-        continue
-    }
-    $zipInputs += $entry.FullName
 }
 
-Compress-Archive -Path $zipInputs -DestinationPath $zipPath -Force
+# -----------------------------------------------------------------------------
+# Build the contentPackage
+# -----------------------------------------------------------------------------
+$contentPackage = [ordered]@{
+    type       = 'Microsoft.OperationalInsights/workspaces/providers/contentPackages'
+    apiVersion = '2023-04-01-preview'
+    name       = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/community.xdrlograider')]"
+    properties = [ordered]@{
+        contentId    = 'community.xdrlograider'
+        contentKind  = 'Solution'
+        contentSchemaVersion = '3.0.0'
+        displayName  = 'XdrLogRaider'
+        version      = '0.1.0'
+        author       = [ordered]@{ name = 'Alex Kefallonitis' }
+        source       = [ordered]@{ kind = 'Community'; name = 'XdrLogRaider' }
+        support      = [ordered]@{ tier = 'Community' }
+        descriptionHtml = '<p><strong>XdrLogRaider v0.1.0</strong> — Microsoft Defender XDR portal-only telemetry connector for Microsoft Sentinel.</p>'
+        dependencies = [ordered]@{ operator = 'AND'; criteria = @() }
+        contentProductId = 'community.xdrlograider'
+        packageId        = 'community.xdrlograider'
+        packageKind      = 'Solution'
+        packageName      = 'XdrLogRaider'
+        packageVersion   = '0.1.0'
+    }
+}
 
-$zipSize = (Get-Item $zipPath).Length
-Write-Host "  Solution ZIP: $([int]($zipSize / 1024)) KB" -ForegroundColor Green
+# -----------------------------------------------------------------------------
+# Build solution metadata (one resource describing the solution itself)
+# -----------------------------------------------------------------------------
+$solutionMetadata = [ordered]@{
+    type       = 'Microsoft.OperationalInsights/workspaces/providers/metadata'
+    apiVersion = '2023-04-01-preview'
+    name       = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/community.xdrlograider')]"
+    properties = [ordered]@{
+        kind        = 'Solution'
+        contentId   = 'community.xdrlograider'
+        version     = '0.1.0'
+        parentId    = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/community.xdrlograider')]"
+        source      = [ordered]@{ kind = 'Community'; name = 'XdrLogRaider' }
+        author      = [ordered]@{ name = 'Alex Kefallonitis' }
+        support     = [ordered]@{ tier = 'Community' }
+    }
+}
 
-# --- Summary ---
+$dataConnectorMetadata = [ordered]@{
+    type       = 'Microsoft.OperationalInsights/workspaces/providers/metadata'
+    apiVersion = '2023-04-01-preview'
+    name       = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/DataConnector-XdrLogRaider')]"
+    properties = [ordered]@{
+        kind        = 'DataConnector'
+        contentId   = 'XdrLogRaiderInternal'
+        version     = '0.1.0'
+        parentId    = "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/community.xdrlograider')]"
+        source      = [ordered]@{ kind = 'Community'; name = 'XdrLogRaider' }
+        author      = [ordered]@{ name = 'Alex Kefallonitis' }
+        support     = [ordered]@{ tier = 'Community' }
+    }
+}
 
-Write-Host "`n" + ('=' * 67) -ForegroundColor Green
-Write-Host " Sentinel Solution package v$Version built" -ForegroundColor Green
-Write-Host ('=' * 67) -ForegroundColor Green
-Write-Host "  Staging dir:  $stagingDir"
-Write-Host "  Solution zip: $zipPath"
-Write-Host ""
-Write-Host "  To submit to Content Hub: see docs/SENTINEL-SOLUTION-SUBMISSION.md"
-Write-Host "  For self-hosted deploy:   push function-app.zip + Package/*.json to a GitHub release"
-Write-Host ""
+# -----------------------------------------------------------------------------
+# Assemble Sentinel content nested template
+# -----------------------------------------------------------------------------
+$template = [ordered]@{
+    '$schema'      = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
+    contentVersion = '1.0.0.0'
+    metadata       = [ordered]@{
+        _generator = [ordered]@{ name = 'Build-SentinelSolution.ps1 — Phase 1 minimal wrapper (data-connector card only)' }
+        comments   = 'Phase 1 ship-lock: NO analytic rules, NO workbooks, NO hunting queries, NO parsers. Content lands in v0.3.0.'
+    }
+    parameters     = [ordered]@{
+        workspaceName = [ordered]@{ type = 'string' }
+    }
+    resources = @(
+        $contentPackage,
+        $solutionMetadata,
+        $dataConnector,
+        $dataConnectorMetadata
+    )
+}
+
+$json = ($template | ConvertTo-Json -Depth 30) -replace "`r`n", "`n" -replace "`r", "`n"
+
+$outDir = Split-Path $OutputPath -Parent
+if (-not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir -Force | Out-Null }
+[System.IO.File]::WriteAllText($OutputPath, $json, [System.Text.UTF8Encoding]::new($false))
+
+# Phase 1 size budget: ≤30 KB
+$sizeKb = [math]::Round((Get-Item $OutputPath).Length / 1KB, 1)
+Write-Host "Wrote $OutputPath ($sizeKb KB · $($template.resources.Count) resources)"
+Write-Host "  1 contentPackage · 2 metadata · 1 dataConnector card · 19 dataTypes · 6 sampleQueries"
+if ($sizeKb -gt 30) {
+    Write-Warning "Solution package $sizeKb KB exceeds Phase 1 30 KB target. Trim sampleQueries or instructionSteps."
+}

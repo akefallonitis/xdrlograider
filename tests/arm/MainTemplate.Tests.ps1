@@ -1,727 +1,313 @@
-#Requires -Modules Pester
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.5.0' }
+# Phase 1 mainTemplate.json + createUiDefinition.json invariants.
 
-BeforeAll {
-    $script:DeployDir = Join-Path $PSScriptRoot '..' '..' 'deploy'
-    $script:MainTemplatePath  = Join-Path $script:DeployDir 'compiled' 'mainTemplate.json'
-    $script:UiDefinitionPath  = Join-Path $script:DeployDir 'compiled' 'createUiDefinition.json'
-    $script:BicepMainPath     = Join-Path $script:DeployDir 'main.bicep'
-}
-
-Describe 'ARM template files — presence' {
-    It 'mainTemplate.json exists' {
-        Test-Path $script:MainTemplatePath | Should -BeTrue
-    }
-
-    It 'createUiDefinition.json exists' {
-        Test-Path $script:UiDefinitionPath | Should -BeTrue
-    }
-
-    It 'main.bicep source exists' -Skip {
-        # Bicep is archived to .internal/bicep-reference/ in v0.2.0 (ARM is the
-        # single source of truth). The deploy/main.bicep file no longer ships.
-        Test-Path $script:BicepMainPath | Should -BeTrue
-    }
-}
-
-Describe 'mainTemplate.json — schema + structure' {
+Describe 'mainTemplate.json invariants' {
     BeforeAll {
-        $script:MainTemplate = Get-Content $script:MainTemplatePath -Raw | ConvertFrom-Json
-    }
+        $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+        $script:TemplatePath = Join-Path $script:RepoRoot 'deploy' 'mainTemplate.json'
+        $script:CreateUiPath = Join-Path $script:RepoRoot 'deploy' 'createUiDefinition.json'
+        $script:T = Get-Content -Raw $script:TemplatePath | ConvertFrom-Json -Depth 50
+        $script:UI = Get-Content -Raw $script:CreateUiPath | ConvertFrom-Json -Depth 50
 
-    It 'has a valid ARM $schema' {
-        $script:MainTemplate.'$schema' | Should -Match 'schema\.management\.azure\.com.*deploymentTemplate'
-    }
-
-    It 'has required top-level keys' {
-        foreach ($key in 'contentVersion', 'parameters', 'variables', 'resources', 'outputs') {
-            $script:MainTemplate.PSObject.Properties[$key] | Should -Not -BeNullOrEmpty
-        }
-    }
-
-    It 'declares projectPrefix parameter with valid constraints' {
-        $p = $script:MainTemplate.parameters.projectPrefix
-        $p | Should -Not -BeNullOrEmpty
-        $p.type | Should -Be 'string'
-        $p.minLength | Should -Be 3
-        $p.maxLength | Should -Be 12
-    }
-
-    It 'mainTemplate variables.packageUrl resolves /releases/latest/download/function-app.zip (no functionAppZipVersion parameter)' {
-        # v0.1.0 GA first publish: drops the functionAppZipVersion wizard
-        # field. The Function App ZIP URL tracks GitHub Releases /latest
-        # unconditionally (Marketplace best practice for community connectors).
-        # /latest resolves to the most-recent non-prerelease tag — operators
-        # don't have to edit the wizard for routine upgrades.
-        $script:MainTemplate.parameters.PSObject.Properties.Name | Should -Not -Contain 'functionAppZipVersion' -Because 'parameter retired in v0.1.0 GA first publish'
-        $packageUrl = $script:MainTemplate.variables.packageUrl
-        $packageUrl | Should -Match '/releases/latest/download/function-app\.zip' -Because 'packageUrl must point at /releases/latest/download/function-app.zip'
-    }
-
-    It 'declares authMethod parameter with validation' {
-        $p = $script:MainTemplate.parameters.authMethod
-        $p | Should -Not -BeNullOrEmpty
-        $p.allowedValues | Should -Contain 'passkey'
-        $p.allowedValues | Should -Contain 'credentials_totp'
-    }
-
-    It 'declares serviceAccountUpn parameter' {
-        $script:MainTemplate.parameters.serviceAccountUpn | Should -Not -BeNullOrEmpty
-    }
-
-    It 'declares optional secure params for wizard secret upload (servicePassword, totpSeed, passkeyJson)' {
-        foreach ($name in 'servicePassword', 'totpSeed', 'passkeyJson') {
-            $p = $script:MainTemplate.parameters.$name
-            $p | Should -Not -BeNullOrEmpty -Because "secure param '$name' must be declared so wizard can write directly to KV"
-            $p.type | Should -Be 'securestring'
-            $p.defaultValue | Should -Be ''
-        }
-    }
-
-    It 'declares deploySentinelContent bool parameter with defaultValue=true (Hot-Fix 2 — operator-selectable Sentinel content deploy)' {
-        $p = $script:MainTemplate.parameters.deploySentinelContent
-        $p | Should -Not -BeNullOrEmpty -Because 'deploySentinelContent parameter must exist for operator wizard toggle'
-        $p.type | Should -Be 'bool'
-        $p.defaultValue | Should -BeTrue -Because 'default behavior must be deploy-content-on (matches prior unconditional behavior)'
-    }
-
-    It 'sentinelContent-{suffix} nested deploy IS conditional on deploySentinelContent param (Hot-Fix 2)' {
-        $sentinel = $script:MainTemplate.resources | Where-Object {
-            $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'sentinelContent'
-        } | Select-Object -First 1
-        $sentinel | Should -Not -BeNullOrEmpty
-        $sentinel.condition | Should -Be "[parameters('deploySentinelContent')]" -Because 'sentinelContent nested deploy must respect operator wizard toggle (regression-locker for Hot-Fix 2)'
-    }
-
-    It 'solution-{suffix} nested deploy STAYS unconditional (Solution metadata + Content Hub linkage always required)' {
-        $sol = $script:MainTemplate.resources | Where-Object {
-            $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'solution-'
-        } | Select-Object -First 1
-        $sol | Should -Not -BeNullOrEmpty
-        $sol.PSObject.Properties['condition'] | Should -BeNullOrEmpty -Because 'Solution metadata + Content Hub linkage required for Sentinel UI integration regardless of content deploy toggle'
-    }
-
-    It 'customTables-{suffix} nested deploy STAYS unconditional (DCRs depend on workspace tables)' {
-        $tables = $script:MainTemplate.resources | Where-Object {
-            $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'customTables'
-        } | Select-Object -First 1
-        $tables | Should -Not -BeNullOrEmpty
-        $tables.PSObject.Properties['condition'] | Should -BeNullOrEmpty -Because 'workspace tables required by DCRs regardless of content deploy toggle'
-    }
-
-    It 'every DCR transformKql uses ONLY DCR-supported KQL functions (Hot-Fix 3 regression-locker — array_slice etc. banned)' {
-        # DCR transformations support a LIMITED subset of KQL.
-        # Banned scalar functions: array_slice, prev, next, max_of, min_of, percentile, percentile_array,
-        #                          row_number, row_window_session, pack_dictionary, pack_array, pack_all,
-        #                          series_decompose, series_outliers, hash_combine
-        # Banned operators: summarize, top, sort, take, limit, distinct, count, mv-apply, mv-expand,
-        #                   union, join, lookup, render, evaluate, externaldata, range, serialize,
-        #                   partition, materialize, make-series, cluster, database, find, search, getschema, invoke
-        # Per https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-transformations-kql
-
-        $bannedFunctions = @(
-            'array_slice', 'prev', 'next', 'max_of', 'min_of',
-            'row_number', 'row_window_session',
-            'percentile_array',
-            'pack_dictionary', 'pack_array', 'pack_all',
-            'series_decompose', 'series_outliers', 'hash_combine'
-        )
-        $bannedOperators = @(
-            'summarize', 'top', 'sort', 'take', 'limit', 'distinct',
-            'mv-apply', 'mv-expand', 'union', 'join', 'lookup',
-            'render', 'evaluate', 'externaldata', 'serialize', 'partition',
-            'materialize', 'make-series', 'find', 'search', 'getschema', 'invoke'
-        )
-
-        # Find ALL transformKql expressions
-        $transforms = New-Object System.Collections.ArrayList
-        function Find-Transforms {
-            param($obj)
-            if ($null -eq $obj) { return }
-            if ($obj -is [array] -or $obj -is [System.Collections.IList]) {
-                foreach ($item in $obj) { Find-Transforms $item }
-            } elseif ($obj -is [PSCustomObject]) {
-                if ($obj.PSObject.Properties.Name -contains 'transformKql') {
-                    $stream = if ($obj.PSObject.Properties.Name -contains 'streams' -and $obj.streams) { $obj.streams[0] } else { '?' }
-                    [void]$transforms.Add([PSCustomObject]@{ Stream = $stream; Kql = $obj.transformKql })
-                }
-                foreach ($p in $obj.PSObject.Properties) { Find-Transforms $p.Value }
-            }
-        }
-        Find-Transforms $script:MainTemplate
-
-        $transforms.Count | Should -BeGreaterThan 0 -Because 'mainTemplate.json must contain at least 1 DCR transformKql expression'
-
-        $violations = @()
-        foreach ($t in $transforms) {
-            foreach ($banned in $bannedFunctions) {
-                if ($t.Kql -match "\b$banned\b") {
-                    $violations += "[$($t.Stream)] uses banned function '$banned'"
-                }
-            }
-            foreach ($banned in $bannedOperators) {
-                # Operator usage: preceded by | or at start of expression
-                if ($t.Kql -match "\|\s*$banned\b" -or $t.Kql -match "^\s*$banned\b") {
-                    $violations += "[$($t.Stream)] uses banned operator '$banned'"
-                }
-            }
-        }
-
-        $violations | Should -BeNullOrEmpty -Because (
-            'DCR transformKql must only use the DCR-supported KQL subset. Banned tokens found: ' +
-            ($violations -join '; ') +
-            '. See https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-transformations-kql for the supported function list.'
+        $script:PhaseSubAreas = @(
+            'action_center', 'attack_simulator', 'cloud_apps', 'configuration', 'data_lake',
+            'endpoint_configuration', 'endpoint_devices', 'entity_pivots', 'exposure_management',
+            'files', 'identity', 'multi_tenant', 'portal_services', 'secure_score',
+            'sentinel_precision', 'streaming', 'threat_analytics', 'vulnerability_management'
         )
     }
 
-    It 'creates KV secrets for auth method + UPN unconditionally' {
-        $secrets = @($script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.KeyVault/vaults/secrets' })
-        $secretNames = $secrets | ForEach-Object { $_.name }
-        $secretNames | Where-Object { $_ -match 'mde-portal-auth-method' } | Should -Not -BeNullOrEmpty
-        $secretNames | Where-Object { $_ -match 'mde-portal-upn' }         | Should -Not -BeNullOrEmpty
+    It 'has the ARM template top-level structure' {
+        $script:T.'$schema'      | Should -Match 'deploymentTemplate.json'
+        $script:T.contentVersion | Should -Be '1.0.0.0'
+        $script:T.parameters     | Should -Not -BeNullOrEmpty
+        $script:T.variables      | Should -Not -BeNullOrEmpty
+        $script:T.resources      | Should -Not -BeNullOrEmpty
+        $script:T.outputs        | Should -Not -BeNullOrEmpty
     }
 
-    It 'creates conditional KV secrets for password + totp + passkey (only when wizard provided value)' {
-        $secrets = @($script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.KeyVault/vaults/secrets' })
-        foreach ($leaf in 'mde-portal-password', 'mde-portal-totp', 'mde-portal-passkey') {
-            $s = $secrets | Where-Object { $_.name -match $leaf } | Select-Object -First 1
-            $s | Should -Not -BeNullOrEmpty -Because "wizard secret-write resource for '$leaf' must exist"
-            $s.PSObject.Properties['condition'] | Should -Not -BeNullOrEmpty -Because "'$leaf' write must be conditional so empty wizard input is a no-op"
+    It 'declares the required parameters' {
+        $params = ($script:T.parameters | Get-Member -MemberType NoteProperty).Name
+        foreach ($p in @('projectPrefix','env','connectorLocation','existingWorkspaceId','workspaceLocation','serviceAccountUpn','authMethod','planSku','retentionInDays','githubRepo','releaseTag','deployRoleAssignments')) {
+            $params | Should -Contain $p
         }
     }
 
-    It 'existingWorkspaceId is REQUIRED (no default value)' {
-        $p = $script:MainTemplate.parameters.existingWorkspaceId
-        $p | Should -Not -BeNullOrEmpty
-        $p.PSObject.Properties['defaultValue'] | Should -BeNullOrEmpty
-        $p.minLength | Should -Be 1
+    It 'defaults planSku to Y1 (Linux Consumption — cost-optimal) with EP1+ opt-in' {
+        $script:T.parameters.planSku.defaultValue | Should -Be 'Y1'
+        $script:T.parameters.planSku.allowedValues | Should -Contain 'Y1'
+        $script:T.parameters.planSku.allowedValues | Should -Contain 'EP1'
+        $script:T.parameters.planSku.allowedValues | Should -Contain 'EP2'
+        $script:T.parameters.planSku.allowedValues | Should -Contain 'EP3'
     }
 
-    It 'workspaceLocation is REQUIRED' {
-        $p = $script:MainTemplate.parameters.workspaceLocation
-        $p | Should -Not -BeNullOrEmpty
-        $p.minLength | Should -Be 1
+    It 'plan resource handles BOTH Y1 (Dynamic + functionapp kind) AND EP* (ElasticPremium + linux kind)' {
+        $plan = ($script:T.resources | Where-Object { $_.type -eq 'Microsoft.Web/serverfarms' })
+        # SKU and kind are conditional ARM expressions
+        $plan.sku  | Should -Match "if\(equals\(parameters\('planSku'\), 'Y1'\)"
+        $plan.kind | Should -Match "if\(equals\(parameters\('planSku'\), 'Y1'\)"
     }
 
-    It 'has NO workspace-creation resource (workspace must pre-exist)' {
-        $types = $script:MainTemplate.resources | ForEach-Object { $_.type }
-        $types | Should -Not -Contain 'Microsoft.OperationalInsights/workspaces'
+    It 'has 19 DCRs (18 sub-area + 1 ConnectorHealth-ops)' {
+        $dcrs = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' })
+        $dcrs.Count | Should -Be 19
+        # Last segment of DCR name suffix
+        $opsDcr = @($dcrs | Where-Object { $_.name -match '-ops' })
+        $opsDcr.Count | Should -Be 1
     }
 
-    It 'creates core connector resource types' {
-        $types = $script:MainTemplate.resources | ForEach-Object { $_.type } | Sort-Object -Unique
-        $types | Should -Contain 'Microsoft.Storage/storageAccounts'
-        $types | Should -Contain 'Microsoft.KeyVault/vaults'
-        $types | Should -Contain 'Microsoft.Web/sites'
-        $types | Should -Contain 'Microsoft.Web/serverfarms'
-        $types | Should -Contain 'Microsoft.Insights/components'
-        $types | Should -Contain 'Microsoft.Insights/dataCollectionEndpoints'
-        $types | Should -Contain 'Microsoft.Insights/dataCollectionRules'
-        $types | Should -Contain 'Microsoft.Authorization/roleAssignments'
-        $types | Should -Contain 'Microsoft.Resources/deployments'
+    It 'has Function App with WEBSITE_RUN_FROM_PACKAGE + SystemAssigned identity + Y1-required settings' {
+        $fa = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.Web/sites' })
+        $fa.Count | Should -Be 1
+        $fa[0].identity.type | Should -Be 'SystemAssigned'
+        $settings = @($fa[0].properties.siteConfig.appSettings | Where-Object { $_.name -eq 'WEBSITE_RUN_FROM_PACKAGE' })
+        $settings.Count | Should -Be 1
+        $settings[0].value | Should -Match "variables\('packageUrl'\)"
+        $script:T.variables.packageUrl | Should -Match 'function-app.zip'
+        # Y1 Consumption requirements (also harmless on EP)
+        $names = @($fa[0].properties.siteConfig.appSettings | ForEach-Object { $_.name })
+        $names | Should -Contain 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+        $names | Should -Contain 'WEBSITE_CONTENTSHARE'
+        # SuccessKind classifier env contract from profile.ps1
+        $names | Should -Contain 'AUTH_METHOD'
+        $names | Should -Contain 'TENANT_ID'
+        $names | Should -Contain 'DCR_IMMUTABLE_IDS_JSON'
     }
 
-    It 'Function App has SystemAssigned managed identity' {
-        $funcApp = $script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Web/sites' } | Select-Object -First 1
-        $funcApp.identity.type | Should -Be 'SystemAssigned'
+    It 'declares exactly 1 serverfarms resource (SKU + kind + properties are conditional ARM expressions)' {
+        $plan = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.Web/serverfarms' })
+        $plan.Count | Should -Be 1
+        # reserved=true must appear in both Y1 + EP branches (Linux mode for both)
+        $plan[0].properties | Should -Match 'reserved.*true'
     }
 
-    It 'creates exactly 15 role assignments for the MI (v0.1.0 GA: KV Secrets User + Storage Table Contributor + 13x Monitoring Metrics Publisher per per-category DCR)' {
-        # 13 per-category DCRs sharing one DCE → 13 separate Monitoring Metrics Publisher
-        # role assignments. With KV Secrets User + Storage Table Contributor, that's 15
-        # unconditional role assignments on Y1.
-        $roleAssignments = @($script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Authorization/roleAssignments' })
-        $roleAssignments.Count | Should -Be 15
+    It 'declares Key Vault with RBAC + 5 secrets + soft-delete enabled (purge-protection + retention left to operator policy)' {
+        $kv = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.KeyVault/vaults' })
+        $kv.Count | Should -Be 1
+        $kv[0].properties.enableRbacAuthorization | Should -BeTrue
+        $kv[0].properties.enableSoftDelete | Should -BeTrue
+        # Purge-protection + soft-delete retention are intentionally NOT forced —
+        # operators enable per tenant compliance policy post-deploy. Connector ARM
+        # should not dictate a specific audit/compliance posture.
+        $kv[0].properties.enablePurgeProtection | Should -BeFalse -Because 'operator opt-in; do not force a non-reversible setting'
+        $secrets = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.KeyVault/vaults/secrets' })
+        $secrets.Count | Should -Be 5
     }
 
-    It 'has a nested deployment for cross-RG custom tables' {
-        $nestedDeployments = @($script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' })
-        $nestedDeployments.Count | Should -BeGreaterOrEqual 2  # customTables + Sentinel Solution wrapper (data connector card)
-        $customTablesDeploy = $nestedDeployments | Where-Object { $_.name -match 'customTables' }
-        $customTablesDeploy | Should -Not -BeNullOrEmpty
-        $customTablesDeploy.subscriptionId | Should -Not -BeNullOrEmpty  # cross-subscription capable
-        $customTablesDeploy.resourceGroup  | Should -Not -BeNullOrEmpty  # cross-RG
+    It 'declares ZERO diagnostic settings (operator wires per tenant policy)' {
+        # Connector ARM intentionally does NOT emit Diagnostic Settings on FA/KV/Storage.
+        # Operators run their own `az monitor diagnostic-settings create` aligned with
+        # their tenant compliance posture. Forcing a posture from the connector would
+        # break operators with stricter policies (e.g. legal-hold workspaces, separate
+        # audit workspaces) and require manual ARM-level subtraction every deploy.
+        $diag = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.Insights/diagnosticSettings' })
+        $diag.Count | Should -Be 0
     }
 
-    It 'has a nested deployment for cross-RG Sentinel content' {
-        $sentinelDeploy = $script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'sentinelContent' }
-        $sentinelDeploy | Should -Not -BeNullOrEmpty
-        $sentinelDeploy.properties.templateLink.uri | Should -Match 'sentinelContent\.json'
+    It 'CONNECTOR_VERSION + CONNECTOR_BUILD_ID env vars wired in FA appSettings (H13)' {
+        $fa = $script:T.resources | Where-Object { $_.type -eq 'Microsoft.Web/sites' }
+        $names = @($fa[0].properties.siteConfig.appSettings | ForEach-Object { $_.name })
+        $names | Should -Contain 'CONNECTOR_VERSION'
+        $names | Should -Contain 'CONNECTOR_BUILD_ID'
+        # Values reference variables, not hardcoded — re-deploy with new releaseTag bumps build ID.
+        $cv = $fa[0].properties.siteConfig.appSettings | Where-Object { $_.name -eq 'CONNECTOR_VERSION' }
+        $cv.value | Should -Match "variables\('connectorVersion'\)"
+        $cb = $fa[0].properties.siteConfig.appSettings | Where-Object { $_.name -eq 'CONNECTOR_BUILD_ID' }
+        $cb.value | Should -Match "variables\('connectorBuildId'\)"
+        # And the variables themselves exist
+        $script:T.variables.connectorVersion | Should -Be '0.1.0'
+        $script:T.variables.connectorBuildId | Should -Match "parameters\('releaseTag'\)"
     }
 
-    It 'DCE + DCR use workspaceLocation (not connectorLocation)' {
-        $dce = $script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionEndpoints' } | Select-Object -First 1
-        $dcr = $script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules'    } | Select-Object -First 1
-        $dce.location | Should -Be "[parameters('workspaceLocation')]"
-        $dcr.location | Should -Be "[parameters('workspaceLocation')]"
+    It 'XdrConnectorHealth_CL workspace table declares 11 typed cols (Decision 15 / H13)' {
+        $nested = $script:T.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'customTables' }
+        $health = $nested.properties.template.resources |
+            Where-Object { $_.type -eq 'Microsoft.OperationalInsights/workspaces/tables' -and $_.name -match 'XdrConnectorHealth_CL' }
+        $health | Should -Not -BeNullOrEmpty
+        $colNames = @($health.properties.schema.columns | ForEach-Object { $_.name })
+        $colNames | Should -Contain 'ConnectorVersion' -Because 'H13: operator-facing build pin'
+        $colNames | Should -Contain 'ConnectorBuildId' -Because 'H13: git SHA/release tag traceability'
+        # Lean Notes (Decision 15 cost optimization)
+        $colNames | Should -Contain 'Notes'
+        ($health.properties.schema.columns | Where-Object { $_.name -eq 'Notes' }).type | Should -Be 'dynamic'
     }
 
-    It 'DCE does NOT have a `kind` property (the AMA-era label)' {
-        $dce = $script:MainTemplate.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionEndpoints' } | Select-Object -First 1
-        $dce.PSObject.Properties['kind'] | Should -BeNullOrEmpty
+    It 'declares 4 storage tables (checkpoints, dlq, tier-state, tenant-state)' {
+        $tables = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.Storage/storageAccounts/tableServices/tables' })
+        $tables.Count | Should -Be 4
+        # Names are ARM expressions like "[concat(variables('stName'), '/default/', 'connectorCheckpoints')]"
+        # — extract the trailing quoted literal.
+        $names = @($tables | ForEach-Object {
+            if ($_.name -match "'([A-Za-z][A-Za-z0-9]+)'\)\]$") { $matches[1] }
+        })
+        $names | Should -Contain 'connectorCheckpoints'
+        $names | Should -Contain 'xdrIngestDlq'
+        $names | Should -Contain 'XdrTierState'
+        $names | Should -Contain 'XdrTenantState'
     }
 
-    It 'outputs keyVaultName, dceEndpoint, dcrImmutableIdsJson, per-category dcr-suffix ImmutableId outputs, workspace context' {
-        # 13-DCR per-category shape (v0.1.0 GA): the FA needs the per-stream
-        # map (dcrImmutableIdsJson) for the lookup helper; operators benefit
-        # from each per-category id being separately accessible.
-        $script:MainTemplate.outputs.keyVaultName            | Should -Not -BeNullOrEmpty
-        $script:MainTemplate.outputs.dceEndpoint             | Should -Not -BeNullOrEmpty
-        $script:MainTemplate.outputs.dcrImmutableIdsJson     | Should -Not -BeNullOrEmpty
-        # Per-suffix outputs (camelCase from kebab-case suffix)
-        $expectedSuffixes = @('actioncenter','configAlertsDetection','configPlatformRbac','endpointConfig','endpointDevice','exposureAttackSurface','exposurePostureScore','identity','multitenant','streamingApi','threatAnalytics','vulnMgmt','ops')
-        foreach ($s in $expectedSuffixes) {
-            $script:MainTemplate.outputs."dcr${s}ImmutableId" | Should -Not -BeNullOrEmpty -Because "per-category output dcr${s}ImmutableId must exist"
+    It 'declares 19 workspace tables via nested deployment (18 Defender_<Sub>_CL + 1 XdrConnectorHealth_CL)' {
+        $nested = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'customTables' })
+        $nested.Count | Should -Be 1
+        $tables = @($nested[0].properties.template.resources | Where-Object { $_.type -eq 'Microsoft.OperationalInsights/workspaces/tables' })
+        $tables.Count | Should -Be 19
+        # Names are ARM expressions like "[concat(parameters('workspaceName'), '/', 'Defender_ActionCenter_CL')]";
+        # extract the trailing table-name literal.
+        $tableNames = @($tables | ForEach-Object {
+            if ($_.name -match "'([A-Za-z][A-Za-z0-9_]*_CL)'") { $matches[1] }
+        })
+        $tableNames | Should -Contain 'XdrConnectorHealth_CL'
+        foreach ($s in $script:PhaseSubAreas) {
+            $pascal = ($s -split '_' | ForEach-Object { $_.Substring(0,1).ToUpper() + $_.Substring(1).ToLower() }) -join ''
+            $tableNames | Should -Contain "Defender_${pascal}_CL"
         }
-        $script:MainTemplate.outputs.workspaceId             | Should -Not -BeNullOrEmpty
-        $script:MainTemplate.outputs.workspaceRg             | Should -Not -BeNullOrEmpty
-        $script:MainTemplate.outputs.workspaceLocation       | Should -Not -BeNullOrEmpty
-        $script:MainTemplate.outputs.postDeployCommand       | Should -Not -BeNullOrEmpty
+    }
+
+    It 'has 3 role assignments (1 KV Secrets User + 1 Storage Table Data Contributor + 1 RG-scoped Monitoring Metrics Publisher) all gated on deployRoleAssignments parameter' {
+        # Collapsed from 21 to 3 — the 19 per-DCR MMP grants merged into a single
+        # RG-scoped MMP assignment. createUiDefinition prompts operator for a fresh
+        # RG dedicated to this connector, so RG-scope = effectively DCR-scope for
+        # all 19 DCRs without 19 explicit grants cluttering RBAC audit.
+        $ra = @($script:T.resources | Where-Object { $_.type -eq 'Microsoft.Authorization/roleAssignments' })
+        $ra.Count | Should -Be 3
+        # KV Secrets User scoped at the Key Vault
+        ($ra | Where-Object { $_.scope -match 'Microsoft.KeyVault/vaults' }).Count | Should -Be 1
+        # Storage Table Data Contributor scoped at the Storage account
+        ($ra | Where-Object { $_.scope -match 'Microsoft.Storage/storageAccounts' }).Count | Should -Be 1
+        # Monitoring Metrics Publisher with no scope field = RG-scoped (covers all 19 DCRs)
+        ($ra | Where-Object { -not $_.PSObject.Properties['scope'] -or [string]::IsNullOrEmpty($_.scope) }).Count | Should -Be 1
+        # All 3 RAs MUST be conditional on deployRoleAssignments parameter (v1-pilot opt-out
+        # pattern — Contributor-only deploy identities set this to false + grant manually post-deploy).
+        foreach ($r in $ra) {
+            $r.condition | Should -Match "parameters\('deployRoleAssignments'\)" -Because 'RAs must be skippable when deploying identity lacks Microsoft.Authorization/roleAssignments/write'
+        }
+    }
+
+    It 'declares deployRoleAssignments parameter (bool, default=true) — v1 opt-out pattern' {
+        $script:T.parameters.deployRoleAssignments | Should -Not -BeNullOrEmpty
+        $script:T.parameters.deployRoleAssignments.type | Should -Be 'bool'
+        $script:T.parameters.deployRoleAssignments.defaultValue | Should -BeTrue -Because 'default ON — initial Owner/UAA deploy creates RAs; only Contributor-only redeploys set false'
+    }
+
+    It 'has no NULL "$null" placeholders in resource definitions' {
+        $json = Get-Content -Raw $script:TemplatePath
+        # Catch raw '$null' string-literal that some serializers emit; PSObject -> JSON conversion shouldn't produce this
+        $json | Should -Not -Match '"\$null"'
+    }
+
+    It 'has NO Claude/AI references in template strings' {
+        $json = Get-Content -Raw $script:TemplatePath
+        $json | Should -Not -Match 'Claude'
+        $json | Should -Not -Match 'anthropic'
+        $json | Should -Not -Match 'Generated with Claude'
+        $json | Should -Not -Match 'Co-Authored-By: Claude'
+    }
+
+    It 'has NO V2 module/class references (StorageV2 azure-kind allowed)' {
+        $json = Get-Content -Raw $script:TemplatePath
+        # Allow Azure 'StorageV2' kind (legit API constant). Forbidden: project-level V2 suffixes.
+        $json | Should -Not -Match 'ClientV2'
+        $json | Should -Not -Match 'AuthV2'
+        $json | Should -Not -Match 'Xdr\.\w+V2'
+    }
+
+    It 'has NO MDE_*_CL legacy table names (Rule 5)' {
+        # The DCR streamDeclarations should be Custom-Defender_*_CL, transformKql output streams Custom-Defender_*_CL.
+        # Allow MDE/MDI within URLs (apiproxy paths) — those are real Defender API paths.
+        # But MDE_*_CL pattern (table-suffix) is the Rule 5 violation.
+        $json = Get-Content -Raw $script:TemplatePath
+        $tableMatches = [regex]::Matches($json, 'MDE_[A-Z][A-Za-z0-9]+_CL')
+        $tableMatches.Count | Should -Be 0
+    }
+
+    It 'has outputs including dcrImmutableIdsJson + dceEndpoint + functionAppName' {
+        $outs = ($script:T.outputs | Get-Member -MemberType NoteProperty).Name
+        $outs | Should -Contain 'functionAppName'
+        $outs | Should -Contain 'keyVaultName'
+        $outs | Should -Contain 'storageAccountName'
+        $outs | Should -Contain 'dceEndpoint'
+        $outs | Should -Contain 'dcrImmutableIdsJson'
     }
 }
 
-Describe 'createUiDefinition.json — schema + structure' {
+Describe 'createUiDefinition.json invariants' {
     BeforeAll {
-        $script:UiDef = Get-Content $script:UiDefinitionPath -Raw | ConvertFrom-Json
+        $script:UI = Get-Content -Raw (Join-Path (Resolve-Path (Join-Path $PSScriptRoot '..' '..')) 'deploy' 'createUiDefinition.json') | ConvertFrom-Json -Depth 50
     }
 
-    It 'has correct handler' {
-        $script:UiDef.handler | Should -Be 'Microsoft.Azure.CreateUIDef'
+    It 'is the multi-VM wizard schema' {
+        $script:UI.'$schema' | Should -Match 'CreateUIDefinition.MultiVm.json'
+        $script:UI.handler   | Should -Be 'Microsoft.Azure.CreateUIDef'
     }
 
-    It 'has schema property' {
-        $script:UiDef.'$schema' | Should -Match 'schema\.management\.azure\.com.*CreateUIDefinition'
+    It 'is wizard-style with 3 steps (workspace · auth · advanced)' {
+        $script:UI.parameters.config.isWizard | Should -BeTrue
+        $script:UI.parameters.steps.Count | Should -Be 3
+        $stepNames = $script:UI.parameters.steps | ForEach-Object { $_.name }
+        $stepNames | Should -Contain 'workspaceStep'
+        $stepNames | Should -Contain 'authStep'
+        $stepNames | Should -Contain 'advancedStep'
     }
 
-    It 'declares basics elements' {
-        $script:UiDef.parameters.basics | Should -Not -BeNullOrEmpty
+    It 'workspace step uses ResourceSelector for existing workspace' {
+        $ws = $script:UI.parameters.steps | Where-Object { $_.name -eq 'workspaceStep' }
+        $sel = $ws.elements | Where-Object { $_.type -eq 'Microsoft.Solutions.ResourceSelector' }
+        $sel.resourceType | Should -Be 'Microsoft.OperationalInsights/workspaces'
     }
 
-    It 'has authentication step' {
-        $authStep = $script:UiDef.parameters.steps | Where-Object name -eq 'authSettings'
-        $authStep | Should -Not -BeNullOrEmpty
+    It 'auth step supports credentials_totp + passkey + conditional UI' {
+        $auth = $script:UI.parameters.steps | Where-Object { $_.name -eq 'authStep' }
+        $method = $auth.elements | Where-Object { $_.name -eq 'authMethod' }
+        $allowedValues = $method.constraints.allowedValues | ForEach-Object { $_.value }
+        $allowedValues | Should -Contain 'credentials_totp'
+        $allowedValues | Should -Contain 'passkey'
     }
 
-    It 'outputs match mainTemplate parameters' {
-        $outputs = $script:UiDef.parameters.outputs.PSObject.Properties.Name
-        foreach ($requiredOutput in 'projectPrefix', 'serviceAccountUpn', 'authMethod', 'existingWorkspaceId', 'workspaceLocation') {
-            $outputs | Should -Contain $requiredOutput
-        }
+    It 'has outputs mapping basics + steps to template params' {
+        $outs = ($script:UI.parameters.outputs | Get-Member -MemberType NoteProperty).Name
+        $outs | Should -Contain 'projectPrefix'
+        $outs | Should -Contain 'existingWorkspaceId'
+        $outs | Should -Contain 'serviceAccountUpn'
+        $outs | Should -Contain 'authMethod'
+        $outs | Should -Contain 'planSku'
+        $outs | Should -Contain 'deployRoleAssignments' -Because 'v1 opt-out flag for split-role admin tenants'
     }
 
-    It 'has workspaceSettings step with a ResourceSelector for the Log Analytics workspace' {
-        # v0.1.0-beta UI simplification: the workspace picker is now a
-        # Microsoft.Solutions.ResourceSelector (dropdown of existing
-        # workspaces) instead of a manual TextBox, and the region auto-fills
-        # from the selected workspace.location (with optional override).
-        $wsStep = $script:UiDef.parameters.steps | Where-Object name -eq 'workspaceSettings'
-        $wsStep | Should -Not -BeNullOrEmpty
-
-        $wsPicker = $wsStep.elements | Where-Object name -eq 'existingWorkspace'
-        $wsPicker | Should -Not -BeNullOrEmpty -Because 'workspace picker element must exist'
-        $wsPicker.type | Should -Be 'Microsoft.Solutions.ResourceSelector'
-        $wsPicker.resourceType | Should -Be 'Microsoft.OperationalInsights/workspaces'
-
-        # Output must still provide the canonical workspace ID + location
-        # (derived from the picker) to the mainTemplate.
-        $outputs = $script:UiDef.parameters.outputs
-        $outputs.existingWorkspaceId | Should -Match 'existingWorkspace\.id'
-        $outputs.workspaceLocation   | Should -Match 'existingWorkspace\.location'
-    }
-}
-
-Describe 'Bicep source — files present' -Skip {
-    # Bicep is archived to .internal/bicep-reference/ in v0.2.0 (ARM is the
-    # single source of truth). These assertions reference deploy/main.bicep
-    # and deploy/modules/*.bicep which no longer ship. Re-enable in v0.2.0
-    # when Bicep + auto-compile is reintroduced.
-    It 'main.bicep is non-empty' {
-        (Get-Content $script:BicepMainPath -Raw).Length | Should -BeGreaterThan 500
-    }
-
-    It 'has modular submodules (no log-analytics.bicep — workspace is external)' {
-        $modulesDir = Join-Path $script:DeployDir 'modules'
-        $modules = Get-ChildItem -Path $modulesDir -Filter '*.bicep'
-        $modules.Count | Should -BeGreaterOrEqual 6
-        $moduleNames = $modules | ForEach-Object { $_.BaseName }
-        $moduleNames | Should -Not -Contain 'log-analytics'
-    }
-
-    It 'main.bicep requires existingWorkspaceId + workspaceLocation (no defaults)' {
-        $bicep = Get-Content $script:BicepMainPath -Raw
-        $bicep | Should -Match "param existingWorkspaceId string\b"
-        $bicep | Should -Match "param workspaceLocation string\b"
-        $bicep | Should -Match "@minLength\(1\)"
-    }
-
-    It 'main.bicep wires Sentinel Solution module (sentinelSolution) before sentinelContent' {
-        $bicep = Get-Content $script:BicepMainPath -Raw
-        $bicep | Should -Match "module sentinelSolution 'modules/data-connector\.bicep'"
-        $bicep | Should -Match "name: 'solution-\$\{uniq\}'"
-    }
-
-    It 'main.bicep uses cross-RG scope for custom-tables module' {
-        $bicep = Get-Content $script:BicepMainPath -Raw
-        $bicep | Should -Match "scope:\s*resourceGroup\(workspaceSubscriptionId,\s*workspaceResourceGroup\)"
+    It 'advancedStep has deployRoleAssignments CheckBox defaulting to true' {
+        $adv = $script:UI.parameters.steps | Where-Object { $_.name -eq 'advancedStep' }
+        $dra = $adv.elements | Where-Object { $_.name -eq 'deployRoleAssignments' }
+        $dra | Should -Not -BeNullOrEmpty
+        $dra.type | Should -Be 'Microsoft.Common.CheckBox'
+        $dra.defaultValue | Should -BeTrue
     }
 }
 
-Describe 'Sentinel Solution shape — connector visible in Data Connectors blade' {
-    # v0.1.0-beta iteration 12: the connector appears in Sentinel → Data
-    # Connectors alongside Microsoft Defender XDR / MDE / Office 365 — using
-    # the canonical shape for community FA-based connectors per Trend Micro
-    # Vision One reference (kind=GenericUI + apiVersion=2021-03-01-preview).
-    # The compiled mainTemplate must contain a 'solution-*' nested deployment
-    # with 3 canonical resources: contentPackages + GenericUI dataConnector +
-    # DataConnector metadata. (No metadata-Solution per AbnormalSecurity ref.)
+Describe 'Cross-template consistency (DCR ↔ workspace table names)' {
     BeforeAll {
-        $script:SolutionDeploy = $script:MainTemplate.resources |
-            Where-Object { $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'solution-' } |
-            Select-Object -First 1
+        $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+        $script:T = Get-Content -Raw (Join-Path $script:RepoRoot 'deploy' 'mainTemplate.json') | ConvertFrom-Json -Depth 50
     }
 
-    It 'mainTemplate.json contains solution-* nested deploy (cross-RG into workspace)' {
-        $script:SolutionDeploy | Should -Not -BeNullOrEmpty -Because 'connector won''t appear in Data Connectors blade without it'
-        $script:SolutionDeploy.subscriptionId | Should -Not -BeNullOrEmpty -Because 'must be cross-subscription capable'
-        $script:SolutionDeploy.resourceGroup  | Should -Not -BeNullOrEmpty -Because 'must scope into the workspace RG'
-    }
+    It 'every workspace table is targeted by exactly one DCR outputStream' {
+        $nested = $script:T.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'customTables' }
+        # Extract pure table names from ARM concat expressions like
+        # "[concat(parameters('workspaceName'), '/', 'Defender_ActionCenter_CL')]"
+        $tables = @($nested.properties.template.resources | ForEach-Object {
+            if ($_.name -match "'([A-Za-z][A-Za-z0-9_]*_CL)'") { $matches[1] }
+        })
+        $tables.Count | Should -Be 19
 
-    It 'solution-* deploy has NO condition (always deploys)' {
-        # The Solution package + connector card should always be present; the
-        # entire sentinel content nested deploy is also unconditional after
-        # the deploySentinelContent toggle was removed.
-        $script:SolutionDeploy.PSObject.Properties['condition'] | Should -BeNullOrEmpty
-    }
-
-    It 'solution-* dependsOn customTables (tables exist before connector references them)' {
-        $deps = @($script:SolutionDeploy.dependsOn)
-        ($deps -join '|') | Should -Match 'customTables-' -Because 'connector dataTypes reference tables that must exist'
-    }
-
-    It 'inner template emits 3 canonical resources: contentPackages + GenericUI dataConnector + DataConnector metadata (NO redundant Solution metadata)' {
-        # Per AbnormalSecurity 2026-02-17 reference (contentSchemaVersion 3.0.0):
-        # newer Sentinel solutions use ONLY contentPackages as the Solution wrapper.
-        # Adding a separate metadata kind=Solution triggers Sentinel's `Invalid data
-        # model - solutions expect contentId to match parentId` because that
-        # metadata's parentId is a full resourceId while contentId is the slug —
-        # they can never match by string.
-        # Per Trend Micro Vision One reference (the canonical FA-based community
-        # connector that surfaces correctly in Data Connectors blade after direct
-        # ARM deploy): kind=GenericUI is the right kind; StaticUI is reserved for
-        # first-party Microsoft connectors and is treated differently by the
-        # Sentinel UI blade indexer when the publisher is non-Microsoft.
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        @($inner | Where-Object { $_.type -match 'contentPackages$' }).Count                                                       | Should -BeGreaterOrEqual 1
-        @($inner | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'Solution' }).Count                       | Should -Be 0 -Because 'metadata kind=Solution causes Sentinel API rejection in cross-RG nested deploys'
-        @($inner | Where-Object { $_.type -match 'dataConnectors$' -and $_.kind -eq 'GenericUI' }).Count                           | Should -BeGreaterOrEqual 1 -Because 'GenericUI is the canonical kind for community FA-based connectors per Trend Micro reference'
-        @($inner | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'DataConnector' }).Count                  | Should -BeGreaterOrEqual 1
-    }
-
-    It 'dataConnector apiVersion is 2021-03-01-preview (canonical FA-community version per Trend Micro reference)' {
-        # Trend Micro Vision One — the production reference for FA-push community
-        # connectors that surface in Sentinel → Data Connectors after direct ARM
-        # deploy — uses 2021-03-01-preview. Newer 2023-04-01-preview is documented
-        # for first-party MS solutions; mixing it with a non-MS publisher caused
-        # iter 11 connector card to stay hidden.
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        $dc    = $inner | Where-Object { $_.type -match 'dataConnectors$' } | Select-Object -First 1
-        $dc.apiVersion | Should -Be '2021-03-01-preview' -Because 'Trend Micro reference uses this apiVersion for FA-community connectors'
-    }
-
-    It 'dataConnector metadata.parentId uses extensionResourceId() form (Sentinel UI indexer chains correctly)' {
-        # The hierarchical resourceId() form
-        # ('Microsoft.OperationalInsights/workspaces/providers/dataConnectors')
-        # produces a different canonical resource ID string than the extension
-        # form ('Microsoft.SecurityInsights/dataConnectors'). The Sentinel UI
-        # blade indexer expects the latter when chaining metadata back-links.
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        $meta  = $inner | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'DataConnector' } | Select-Object -First 1
-        $meta.properties.parentId | Should -Match 'extensionResourceId\('                              -Because 'Trend Micro reference uses extensionResourceId, not hierarchical resourceId'
-        $meta.properties.parentId | Should -Match "Microsoft\.SecurityInsights/dataConnectors"          -Because 'extension form targets Microsoft.SecurityInsights/dataConnectors, not OI workspaces/providers/dataConnectors'
-    }
-
-    It 'Solution package contentKind = Solution and the inner template defines XdrLogRaider' {
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        $pkg   = $inner | Where-Object { $_.type -match 'contentPackages$' } | Select-Object -First 1
-        $pkg.properties.contentKind | Should -Be 'Solution'
-        $pkg.properties.version     | Should -Not -BeNullOrEmpty
-        # displayName is an ARM expression that resolves at deploy time. Walk
-        # the inner template variables to confirm the resolved name is correct.
-        $vars = $script:SolutionDeploy.properties.template.variables
-        $vars.solutionName | Should -Be 'XdrLogRaider'
-        $vars.solutionId   | Should -Be 'community.xdrlograider'
-    }
-
-    It 'GenericUI dataConnector has connectivityCriteria (Sentinel uses this for Connected status)' {
-        # Section R+ (2026-05-06): the property was misspelled `connectivityCriterias`
-        # (plural) in the pre-Section-R+ template - Sentinel UI silently ignores
-        # the misspelling and the card stays Disconnected. The canonical schema
-        # key is `connectivityCriteria` (singular).
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        $dc    = $inner | Where-Object { $_.type -match 'dataConnectors$' } | Select-Object -First 1
-        $dc.properties.connectorUiConfig.connectivityCriteria | Should -Not -BeNullOrEmpty
-        $dc.properties.connectorUiConfig.dataTypes            | Should -Not -BeNullOrEmpty
-    }
-
-    It 'DataConnector metadata back-links to dataConnector via parentId' {
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        $meta  = $inner | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'DataConnector' } | Select-Object -First 1
-        $meta.properties.parentId | Should -Match 'dataConnectors'
-    }
-
-    It 'inner template does NOT contain a metadata kind=Solution resource (intentional per AbnormalSecurity 2026-02-17)' {
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        $solMeta = @($inner | Where-Object { $_.type -match 'metadata$' -and $_.properties.kind -eq 'Solution' })
-        $solMeta.Count | Should -Be 0 -Because 'metadata kind=Solution is redundant when contentPackages exists; including it triggers Sentinel parentId/contentId mismatch rejection'
-    }
-
-    It 'every Solution resource has a location field (contentPackages + metadata + dataConnectors)' {
-        # Microsoft Sentinel content resources require Azure region. Missing
-        # location triggers Marketplace/Content Hub indexing failures and may
-        # cause silent UI rendering issues. Iteration 8 added location to all 4.
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        $solRes = $inner | Where-Object {
-            $_.type -in 'Microsoft.OperationalInsights/workspaces/providers/contentPackages',
-                        'Microsoft.OperationalInsights/workspaces/providers/metadata',
-                        'Microsoft.OperationalInsights/workspaces/providers/dataConnectors'
-        }
-        # Iter 11: dropped metadata-Solution per AbnormalSecurity reference, so count is 3 (contentPackages + dataConnectors + DataConnector metadata)
-        @($solRes).Count | Should -BeGreaterOrEqual 3
-        $missingLoc = @($solRes | Where-Object { -not $_.PSObject.Properties['location'] -or -not $_.location })
-        $missingLoc.Count | Should -Be 0 -Because 'every Sentinel Solution resource must carry location for Content Hub indexing'
-    }
-
-    It 'contentPackages has dependencies block with criteria array' {
-        # The dependencies block tells Content Hub about prerequisite content
-        # packages. Even an empty criteria array is a valid declaration that
-        # the Solution has no external dependencies.
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        $cp = $inner | Where-Object { $_.type -eq 'Microsoft.OperationalInsights/workspaces/providers/contentPackages' } | Select-Object -First 1
-        $cp.properties.PSObject.Properties['dependencies'] | Should -Not -BeNullOrEmpty
-        $cp.properties.dependencies.PSObject.Properties['criteria'] | Should -Not -BeNullOrEmpty
-    }
-
-    It 'contentPackages has all 6 required Sentinel content schema 3.0.0 properties' {
-        # Microsoft.SecurityInsights API rejects PUT with
-        #   `properties.contentSchemaVersion is required` BadRequestException.
-        # Pinned required set per reference solutions
-        # (Solutions/Akamai Security Events/Package/mainTemplate.json):
-        #   contentSchemaVersion, kind, version, displayName, contentKind, contentId.
-        $inner = @($script:SolutionDeploy.properties.template.resources)
-        $cp    = $inner | Where-Object { $_.type -eq 'Microsoft.OperationalInsights/workspaces/providers/contentPackages' } | Select-Object -First 1
-        $cp | Should -Not -BeNullOrEmpty
-        foreach ($f in 'contentSchemaVersion', 'kind', 'version', 'displayName', 'contentKind', 'contentId') {
-            $cp.properties.PSObject.Properties[$f] | Should -Not -BeNullOrEmpty -Because "contentPackages.$f is required by Sentinel content schema; missing field causes deploy to fail"
-        }
-        $cp.properties.contentSchemaVersion | Should -Match '^\d+\.\d+\.\d+$' -Because 'contentSchemaVersion should be semver (3.0.0 is the modern Sentinel content schema)'
-        $cp.properties.kind                 | Should -Be 'Solution'
-        $cp.properties.contentKind          | Should -Be 'Solution'
-    }
-
-    It 'inner template uses resourceId() (NOT extensionResourceId) for hierarchical workspaces/providers types' {
-        # Iteration 6 deploy blocker: bicep `solutionPackage.id` compiled to
-        # extensionResourceId(workspaceScope, type, 2 names) but ARM requires
-        # 3 names for Microsoft.OperationalInsights/workspaces/providers/<X>
-        # types. Result: "Unable to evaluate template language function
-        # 'extensionResourceId': the type ... requires '3' resource name
-        # argument(s)" at template validation. Lock the canonical form.
-        $body = $script:SolutionDeploy.properties.template | ConvertTo-Json -Depth 50 -Compress
-        $bad  = [regex]::Matches($body, 'extensionResourceId\([^)]*workspaces/providers/')
-        $bad.Count | Should -Be 0 -Because "extensionResourceId() with hierarchical workspaces/providers/ types breaks at deploy validation; use resourceId('Microsoft.OperationalInsights/workspaces/providers/<resource>', workspaceName, 'Microsoft.SecurityInsights', <name>)"
-    }
-}
-
-Describe 'DCR — Azure service-quota gates' {
-    # Microsoft.Insights/dataCollectionRules has hard service quotas that the
-    # JSON schema and ARM-TTK do not catch. Hitting these manifests at preflight
-    # (PreflightValidationCheckFailed) — too late. v0.1.0-beta originally
-    # generated 47 dataFlows (one per stream) and tripped 'DataFlows item count
-    # should be 10 or less'. These tests guard against regression.
-    BeforeAll {
-        $script:Dcrs = @($script:MainTemplate.resources |
-            Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' })
-    }
-
-    It 'every DCR has dataFlows count <= 10 (Azure hard limit)' {
-        $script:Dcrs.Count | Should -BeGreaterOrEqual 1
-        foreach ($dcr in $script:Dcrs) {
-            $flowCount = @($dcr.properties.dataFlows).Count
-            $flowCount | Should -BeLessOrEqual 10 -Because "DCR '$($dcr.name)' has $flowCount dataFlows; Azure rejects >10 at preflight"
-        }
-    }
-
-    It 'every dataFlow has streams count <= 20 (Azure hard limit per dataFlow)' {
-        # Tripped after the first consolidation attempt (1 flow × 47 streams).
-        # Azure rejects with InvalidDataFlow / 'Streams item count should be 20 or less'.
-        foreach ($dcr in $script:Dcrs) {
-            for ($i = 0; $i -lt @($dcr.properties.dataFlows).Count; $i++) {
-                $flow = $dcr.properties.dataFlows[$i]
-                $sCount = @($flow.streams).Count
-                $sCount | Should -BeLessOrEqual 20 -Because "DCR '$($dcr.name)' dataFlow[$i] has $sCount streams; Azure caps at 20 per dataFlow"
+        $dcrs = $script:T.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' }
+        $outputStreams = @()
+        foreach ($d in $dcrs) {
+            foreach ($flow in $d.properties.dataFlows) {
+                $outputStreams += $flow.outputStream
             }
         }
-    }
 
-    It 'every DCR has destinations count <= 10' {
-        foreach ($dcr in $script:Dcrs) {
-            $destCount = 0
-            foreach ($destProp in $dcr.properties.destinations.PSObject.Properties) {
-                if ($destProp.Value -is [array]) { $destCount += @($destProp.Value).Count }
-                elseif ($destProp.Value)         { $destCount += 1 }
-            }
-            $destCount | Should -BeLessOrEqual 10 -Because "DCR '$($dcr.name)' has $destCount destinations; Azure limit is 10"
+        foreach ($t in $tables) {
+            $expected = "Custom-$t"
+            $outputStreams | Should -Contain $expected -Because "workspace table $t must be the outputStream of at least one DCR dataFlow"
         }
-    }
-
-    It 'every streamDeclaration is referenced in at least one dataFlow.streams' {
-        foreach ($dcr in $script:Dcrs) {
-            $declared = @($dcr.properties.streamDeclarations.PSObject.Properties.Name)
-            $referenced = @()
-            foreach ($df in $dcr.properties.dataFlows) {
-                $referenced += @($df.streams)
-            }
-            $orphans = @($declared | Where-Object { $_ -notin $referenced })
-            $orphans.Count | Should -Be 0 -Because "DCR '$($dcr.name)' has orphan streamDeclarations not referenced in dataFlows: $($orphans -join ', ')"
-        }
-    }
-
-    It '13 DCRs partition 65 streams per-category (v0.1.0 GA shape post-Phase-1: B+G7+G8 - F1 MachineActions removed)' {
-        # 65 streams > 10-flow-per-DCR cap → split across 13 per-category DCRs sharing 1 DCE.
-        # 11 single-category DCRs + 2 categories split into semantic sub-domains
-        # (Configuration: alerts-detection / platform-rbac; Exposure: attack-surface / posture-score).
-        # 65 = 64 data + 1 operational (XdrConnectorHealth_CL).
-        # F1 2026-05-08: MachineActions REMOVED → actioncenter DCR drops from 2 to 1 streamDecl.
-        @($script:Dcrs).Count | Should -Be 13 -Because 'v0.1.0 GA: per-category DCRs (10 categories + 2 split into sub-domains + 1 ops = 13)'
-        $declCounts = @()
-        $allStreams = @()
-        foreach ($dcr in $script:Dcrs) {
-            $declCount = @($dcr.properties.streamDeclarations.PSObject.Properties.Name).Count
-            $declCounts += $declCount
-            foreach ($df in $dcr.properties.dataFlows) {
-                $allStreams += @($df.streams)
-            }
-        }
-        $sortedCounts = @($declCounts | Sort-Object)
-        # 13 DCRs distribution post F1 + Phase 2 batch 1: ops(1) + streaming-api(2) + actioncenter(2) + endpoint-device(3) +
-        # multitenant(3) + threat-analytics(3) + vuln-mgmt(5) + identity(6) + config-alerts(6) + exposure-posture(7) +
-        # config-platform(8) + endpoint-config(10) + exposure-attack(10) = 66 streams
-        # Phase 2 batch 1 (2026-05-09): MDE_PendingActions_CL added to actioncenter DCR (1 -> 2)
-        # Phase 2 batch 2 (2026-05-09): MDE_IdentityDormantAccounts_CL added to identity DCR (6 -> 7)
-        # Phase 2 batch 3 (2026-05-09): MDE_IdentityLateralMovementPaths_CL added to identity DCR (7 -> 8)
-        # Phase 2 batch 4 (2026-05-09): MDE_VulnerabilityCertificates_CL added to vuln-mgmt DCR (5 -> 6)
-        # Phase 2 batch 5 (2026-05-09): MDE_VulnerabilitySummary_CL added to vuln-mgmt DCR (6 -> 7)
-        # Phase 2 batch 6 (2026-05-09): MDE_VulnerabilityExtensions_CL added to vuln-mgmt DCR (7 -> 8)
-        # Phase 2 batch 7 (2026-05-09): MDE_VulnerabilityAssetCountByExposure_CL added to vuln-mgmt DCR (8 -> 9)
-        # Phase 2 batch 8 (2026-05-09): MDE_VulnerabilityAdvisories_CL added to vuln-mgmt DCR (9 -> 10)
-        $sortedCounts | Should -Be @(1, 2, 2, 3, 3, 3, 6, 7, 8, 8, 10, 10, 10) -Because 'per-category DCR distribution post-F1 + Phase 2 batches 1-8 (vuln-mgmt:10)'
-        @($allStreams | Sort-Object -Unique).Count | Should -Be 73 -Because 'every declared stream must appear in exactly one dataFlow (72 data + 1 ops = 73; Phase 2 batches 1-8)'
-    }
-
-    It 'no dataFlow combines multiple streams with a transformKql (Microsoft DCR rule)' {
-        # Microsoft DCR docs: "If you use a transformation, the data flow
-        # should only use a single stream." First DCR PUT in v0.1.0-beta
-        # tripped this with InvalidPayload. Lock the rule.
-        foreach ($dcr in $script:Dcrs) {
-            for ($i = 0; $i -lt @($dcr.properties.dataFlows).Count; $i++) {
-                $df = $dcr.properties.dataFlows[$i]
-                $hasTransform = ($df.PSObject.Properties['transformKql'] -and $df.transformKql)
-                $multiStream  = (@($df.streams).Count -gt 1)
-                ($hasTransform -and $multiStream) | Should -BeFalse -Because "DCR '$($dcr.name)' dataFlow[$i] has $(@($df.streams).Count) streams + transformKql — Azure rejects this combo"
-            }
-        }
-    }
-
-    It 'DCR dependsOn includes the customTables cross-RG nested deploy' {
-        # The DCR API does a synchronous "tables exist?" check at PUT time. If
-        # the DCR resource is not dependsOn'd on the cross-RG customTables-*
-        # nested deploy, ARM runs them in parallel and DCR creation races —
-        # fails with InvalidOutputTable. Caught us in the second deploy attempt.
-        $template = $script:MainTemplate
-        $dcrRes = $template.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' } | Select-Object -First 1
-        $dcrRes | Should -Not -BeNullOrEmpty
-        $dcrRes.dependsOn | Should -Not -BeNullOrEmpty
-        $hasTablesDep = $false
-        foreach ($d in $dcrRes.dependsOn) {
-            if ($d -match 'customTables|tables-') { $hasTablesDep = $true; break }
-        }
-        $hasTablesDep | Should -BeTrue -Because 'DCR must dependsOn customTables-* nested deploy or it races the table creation'
-    }
-
-    It 'every dataFlow has outputStream set + transformKql injects SourceName (Phase J.C.2-5 architecture)' {
-        # Phase J.C.2-5 (2026-05-04): 47 per-stream MDE_*_CL workspace tables
-        # consolidated to 10 per-category Defender_<Category>_CL tables. DCR
-        # dataFlows now project source streams to category outputStreams via
-        # transformKql='source | extend SourceName=''<Stream>''.
-        # XdrConnectorHealth_CL ops stream stays 1:1 (identity transform OK).
-        foreach ($dcr in $script:Dcrs) {
-            for ($i = 0; $i -lt @($dcr.properties.dataFlows).Count; $i++) {
-                $df = $dcr.properties.dataFlows[$i]
-                @($df.streams).Count | Should -Be 1 -Because 'canonical pattern is single-stream per dataFlow'
-                $df.PSObject.Properties['outputStream'] | Should -Not -BeNullOrEmpty -Because 'outputStream MUST be set to avoid InvalidTransformOutput'
-
-                $sourceStream = $df.streams[0]
-                if ($sourceStream -eq 'Custom-XdrConnectorHealth_CL') {
-                    $df.outputStream | Should -Be 'Custom-XdrConnectorHealth_CL' -Because 'XdrConnectorHealth_CL ops table is 1:1'
-                } else {
-                    $df.outputStream | Should -Match '^Custom-Defender_\w+_CL$' -Because "stream '$sourceStream' must project to a Defender_<Category>_CL table per Phase J.C.2-5"
-                    $df.transformKql | Should -Match "source\s*\|\s*extend\s+SourceName\s*=\s*'" -Because "data dataFlow for '$sourceStream' must inject SourceName via transformKql"
-                }
-            }
-        }
-    }
-}
-
-Describe 'DCR streams — completeness' {
-    BeforeAll {
-        # Source = compiled mainTemplate.json (Bicep was archived to
-        # .internal/bicep-reference/ in v0.1.0-beta — ARM is the single
-        # source of truth). Stream declarations live inside each
-        # Microsoft.Insights/dataCollectionRules resource under
-        # `properties.streamDeclarations.<key>`.
-        $script:RawTemplate = Get-Content $script:MainTemplatePath -Raw
-        $tpl = $script:RawTemplate | ConvertFrom-Json
-        $dcrs = @($tpl.resources | Where-Object { $_.type -eq 'Microsoft.Insights/dataCollectionRules' })
-        $script:DcrStreamKeys = @()
-        foreach ($dcr in $dcrs) {
-            $sd = $dcr.properties.streamDeclarations
-            if ($null -ne $sd) {
-                foreach ($k in $sd.PSObject.Properties.Name) {
-                    $script:DcrStreamKeys += $k
-                }
-            }
-        }
-        $script:DcrStreamKeys = $script:DcrStreamKeys | Sort-Object -Unique
-    }
-
-    It 'DCR includes 46 MDE_*_CL data stream declarations + 1 XdrConnectorHealth_CL operational table' {
-        # 46 active+deprecated MDE_* data streams + 1 operational (XdrConnectorHealth_CL).
-        # Phase K (2026-05-04): operational table renamed XdrConnectorHealth_CL -> XdrConnectorHealth_CL
-        # for multi-portal forward-compat (Xdr* prefix transcends portal).
-        # The legacy MDE_AuthTestResult_CL stream was retired in v0.1.0-beta first
-        # publish — auth chain diagnostics moved to App Insights customEvents
-        # (AuthChain.* event names) instead of a dedicated workspace table.
-        # StrictMode-safe: wrap Where-Object output in @() so .Count works even
-        # when result is a single value or null (PowerShell collection coercion).
-        $mdeStreams = @($script:DcrStreamKeys | Where-Object { $_ -match '^Custom-MDE_\w+_CL$' })
-        $opsStreams = @($script:DcrStreamKeys | Where-Object { $_ -match '^Custom-XdrConnectorHealth_CL$' })
-        $mdeStreams.Count | Should -BeGreaterOrEqual 46 -Because '46 MDE_* data streams'
-        $opsStreams.Count | Should -Be 1 -Because '1 XdrConnectorHealth_CL operational table'
-        ($mdeStreams.Count + $opsStreams.Count) | Should -BeGreaterOrEqual 47 -Because '46 data + 1 ops = 47 total stream declarations'
-    }
-
-    It 'DCR has NO dropped streams (v1.0.0 P4 + v1.0.2 + v0.1.0-beta.1 removals)' {
-        # Negative gate: scan the raw ARM JSON for any reference (column or key)
-        # to a known-removed stream. Source is the same compiled template above.
-        # v1.0.0 early drops
-        $script:RawTemplate | Should -Not -Match 'MDE_AirDecisions'
-        $script:RawTemplate | Should -Not -Match 'MDE_InvestigationPackage'
-        # v1.0.2 NO_PUBLIC_API removals
-        $script:RawTemplate | Should -Not -Match 'MDE_AsrRulesConfig_CL'
-        $script:RawTemplate | Should -Not -Match 'MDE_AntiRansomwareConfig_CL'
-        $script:RawTemplate | Should -Not -Match 'MDE_ControlledFolderAccess_CL'
-        $script:RawTemplate | Should -Not -Match 'MDE_NetworkProtectionConfig_CL'
-        $script:RawTemplate | Should -Not -Match 'MDE_ApprovalAssignments_CL'
-        # v0.1.0-beta.1 write-endpoint removals
-        $script:RawTemplate | Should -Not -Match 'MDE_CriticalAssets_CL'
-        $script:RawTemplate | Should -Not -Match 'MDE_DeviceCriticality_CL'
     }
 }

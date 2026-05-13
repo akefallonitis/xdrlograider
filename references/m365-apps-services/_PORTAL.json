@@ -1,0 +1,43 @@
+{
+  "portal": "m365-apps-services",
+  "authChain": null,
+  "capturedUtc": "2026-05-12T15:24:21.4336459Z",
+  "subAreaCount": 1,
+  "authFinding": {
+    "ImplementationModule": "Xdr.M365Admin.Auth (v0.2.0f)",
+    "AuthMethod": "Bearer via M365 admin MSAL",
+    "AuthFlow": "Bearer at clients.config.office.net",
+    "Status": "ROPC-blocked"
+  },
+  "subAreas": [
+    {
+      "subArea": "openapi",
+      "endpointCount": 8,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 8,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "M365 Apps shared services API (cross-app config)"
+    }
+  ],
+  "authPattern": {
+    "nodocOfficialName": "Portal bearer tokens + diagnostic headers",
+    "transport": "bearer+diag-headers",
+    "browserAcquired": true,
+    "unattendedTotpCompatible": false,
+    "cookies": null,
+    "headers": [
+      "Authorization: Bearer"
+    ],
+    "note": null,
+    "postmanCollection": "..\\..\\xdrlograider\\.internal\\nodoc-reference\\postman\\collections\\m365-apps-services.collection.json",
+    "nodocReference": "https://nodoc.nathanmcnulty.com/getting-started"
+  }
+}

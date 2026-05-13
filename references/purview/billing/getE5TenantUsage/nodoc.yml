@@ -1,0 +1,32 @@
+  /cbill/LicenseUsage/E5TenantUsage:
+    get:
+      operationId: getE5TenantUsage
+      summary: Get E5 tenant usage summary
+      description: >-
+        Retrieve the E5 tenant usage summary shown by Purview's License Usage
+        report.
+      tags: [Billing]
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: The reporting timestamp used by the license usage blade.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

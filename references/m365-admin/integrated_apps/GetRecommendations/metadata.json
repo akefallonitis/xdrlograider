@@ -1,0 +1,63 @@
+{
+  "portal": "m365-admin",
+  "subArea": "integrated_apps",
+  "slug": "GetRecommendations",
+  "operationId": "IntegratedApps.GetRecommendations",
+  "path": "/fd/addins/api/recommendations/appRecommendations",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get app recommendations",
+  "sourceFile": "integrated_apps.yml",
+  "capturedUtc": "2026-05-12T15:13:25.8029129Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "appRecommendationType",
+      "In": "query",
+      "Type": "string",
+      "Default": "PopularApps",
+      "Description": "Type of recommendation to retrieve."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": {
+    "in": "query",
+    "default": "PopularApps",
+    "required": false,
+    "description": "Type of recommendation to retrieve.",
+    "type": "string",
+    "name": "appRecommendationType"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

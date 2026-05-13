@@ -1,0 +1,29 @@
+  /mcas/cas/api/v1/translation/log-error:
+    post:
+      summary: Log translation error
+      description: >-
+        Log a translation error in the Cloud Apps service. Discovered on OAuth Apps page.
+      operationId: CloudApps.LogTranslationError
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

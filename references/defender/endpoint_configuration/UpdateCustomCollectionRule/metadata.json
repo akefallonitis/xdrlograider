@@ -1,0 +1,75 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_configuration",
+  "slug": "UpdateCustomCollectionRule",
+  "operationId": "EndpointConfiguration.UpdateCustomCollectionRule",
+  "path": "/mtp/mdeCustomCollection/rules/{RuleId}",
+  "methods": [
+    "put"
+  ],
+  "summary": "Update custom data collection rule",
+  "sourceFile": "endpoint_configuration.yml",
+  "capturedUtc": "2026-05-12T14:38:15.9971375Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "RuleId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the rule to update."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PATH CORRECTED 2026-05-13: was /mtp/customDataCollection/rules/{RuleId}; corrected to /mtp/mdeCustomCollection/rules/{RuleId} per XDRInternals canonical (Set-XdrEndpointConfigurationCustomCollectionRule cmdlet).",
+    "WRITE endpoint — excluded from Phase 1 manifest (readSemantics='write')",
+    "Optimistic concurrency: PUT requires echoing updateKey + version from prior GET",
+    "Body keys (PascalCase): ruleId, ruleName, ruleDescription, isEnabled, table, platform, actionType, scope, filters, tags, createdBy, creationDateTimeUtc, lastModifiedBy, version, updateKey"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "write",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The unique identifier of the rule to update.",
+    "type": "string",
+    "name": "RuleId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Rule.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,32 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectorDefinitions:
+    get:
+      summary: List Sentinel data connector definitions
+      description: >-
+        Retrieve the catalog of Sentinel data connector definitions that the Defender
+        Precision experience checks when rendering connector coverage and onboarding state.
+        The observed workspace returned an empty `value` array on first load.
+      operationId: SentinelPrecision.ListDataConnectorDefinitions
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel data connector definitions resource.
+          schema:
+            type: string
+            default: '2024-01-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelMetadataListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

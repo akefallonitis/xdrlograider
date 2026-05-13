@@ -1,0 +1,22 @@
+  /mcas/cas/api/v1/mail_settings/get:
+    get:
+      summary: Get Cloud Apps mail settings
+      description: >-
+        Retrieve the mail notification settings envelope used by Defender for Cloud Apps.
+      operationId: CloudApps.GetMailSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMailSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

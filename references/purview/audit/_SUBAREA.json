@@ -1,0 +1,62 @@
+{
+  "subArea": "audit",
+  "suggestedCadence": "unknown",
+  "endpointCount": 2,
+  "endpoints": [
+    {
+      "slug": "checkAuditEnabled",
+      "operationId": "checkAuditEnabled",
+      "path": "/adtsch/AuditEnabled",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "listAuditLogSearches",
+      "operationId": "listAuditLogSearches",
+      "path": "/adtsch/AuditLogSearch",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    }
+  ],
+  "cntLive": 2,
+  "cntLiveEmpty": 0,
+  "cntError": 0,
+  "cntNoLive": 0,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [],
+  "paginationStyles": [],
+  "valueProp": "Unified audit log search history + audit enablement state — compliance backbone"
+}

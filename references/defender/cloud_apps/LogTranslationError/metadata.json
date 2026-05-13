@@ -1,0 +1,57 @@
+{
+  "portal": "defender",
+  "subArea": "cloud_apps",
+  "slug": "LogTranslationError",
+  "operationId": "CloudApps.LogTranslationError",
+  "path": "/mcas/cas/api/v1/translation/log-error",
+  "methods": [
+    "post"
+  ],
+  "summary": "Log translation error",
+  "sourceFile": "cloud_apps.yml",
+  "capturedUtc": "2026-05-12T14:36:26.2427621Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 403 (Unauthorized).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "write",
+  "readSemanticsReason": "semantic-override",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

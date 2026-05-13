@@ -1,0 +1,25 @@
+  /mcas/cas/api/discovery/streams:
+    get:
+      summary: List discovery streams
+      description: >-
+        Retrieve the Cloud Discovery traffic streams available for reporting and
+        filtering. Discovered during the Defender for Cloud Apps full-nav
+        capture.
+      operationId: CloudApps.ListDiscoveryStreams
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

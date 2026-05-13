@@ -67,21 +67,39 @@ function Get-XdrEndpointManifest {
         throw "Unknown Portal '$Portal'. Supported: $(($portalMap.Keys | Sort-Object) -join ', ')"
     }
 
-    # Walk up from this module's location to find <repoRoot>/src/Modules/<ClientModule>/
-    # This module lives at: src/Modules/Xdr.Common.Manifest/Public/<this>.ps1
-    # We need: src/Modules/<ClientModule>/endpoints.manifest.psd1
+    # Manifest path resolution (in priority order):
+    #   1. <repoRoot>/manifests/<portal>.psd1  (preferred — Phase 1+ convention)
+    #   2. <repoRoot>/src/Modules/<ClientModule>/endpoints.manifest.psd1  (pilot fallback)
+    # This module lives at: <repo>/src/Modules/Xdr.Common.Manifest/Public/<this>.ps1
+    # PSScriptRoot = .../Public; parent = ModuleDir; parent = Modules; parent = src; parent = repoRoot.
     $modulesDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $clientModuleDir = Join-Path $modulesDir $clientModule
-    $manifestPath = Join-Path $clientModuleDir 'endpoints.manifest.psd1'
+    $srcDir     = Split-Path -Parent $modulesDir
+    $repoRoot   = Split-Path -Parent $srcDir
 
-    if (-not (Test-Path $manifestPath)) {
+    $portalLower    = $Portal.ToLowerInvariant()
+    $manifestCandidates = @(
+        (Join-Path $repoRoot 'manifests' "$portalLower.psd1")
+        (Join-Path $modulesDir $clientModule 'endpoints.manifest.psd1')
+    )
+    $manifestPath = $manifestCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+    if (-not $manifestPath) {
         if ($Portal -ne 'Defender') {
-            throw "Portal '$Portal' is v0.2.0 roadmap — manifest not yet populated at $manifestPath. Use Portal='Defender' for v0.1.0 GA."
+            throw "Portal '$Portal' is v0.2.0 roadmap — manifest not yet populated. Searched: $($manifestCandidates -join '; ')"
         }
-        throw "Endpoint manifest not found: $manifestPath"
+        throw "Endpoint manifest not found. Searched: $($manifestCandidates -join '; ')"
     }
 
-    $raw = Import-PowerShellDataFile -Path $manifestPath
+    # Two-stage parse: Import-PowerShellDataFile (preferred · strict-mode) then
+    # scriptblock-eval fallback for large manifests (>95KB) where the strict
+    # parser silently bails on size. Both produce equivalent hashtable structure.
+    $raw = $null
+    try {
+        $raw = Import-PowerShellDataFile -Path $manifestPath -ErrorAction Stop
+    } catch {
+        $sb  = [scriptblock]::Create((Get-Content -Raw -Path $manifestPath))
+        $raw = & $sb
+    }
     if (-not $raw.Endpoints) {
         throw "Manifest at $manifestPath missing required 'Endpoints' array"
     }
@@ -108,8 +126,14 @@ function Get-XdrEndpointManifest {
             Write-Warning "Skipping malformed manifest entry (missing $missingField): $($entry | ConvertTo-Json -Compress -Depth 3)"
             continue
         }
-        if ($indexed.ContainsKey($entry.Stream)) {
-            throw "Duplicate Stream '$($entry.Stream)' in manifest"
+        # Phase 1+ uniqueness: EntryKey (= '<SubArea>::<Slug>') is the unique
+        # per-endpoint identifier. Stream is the DCR stream/table — many entries
+        # share the same Stream (one Stream per sub-area, 18 unique Streams
+        # across ~493 endpoints). Pilot used Stream as unique key because
+        # 1 endpoint = 1 table; Phase 1 consolidated 492 endpoints into 18 tables.
+        $lookupKey = if ($entry.ContainsKey('EntryKey') -and $entry.EntryKey) { $entry.EntryKey } else { $entry.Stream }
+        if ($indexed.ContainsKey($lookupKey)) {
+            throw "Duplicate manifest key '$lookupKey'"
         }
 
         # Apply each Default field if not overridden.
@@ -160,7 +184,7 @@ function Get-XdrEndpointManifest {
             throw "Manifest entry '$($entry.Stream)' has AuditScope='public-api-covered'. The connector ingests portal-only telemetry; publicly-API-covered streams must be removed (use the official Microsoft Sentinel data connector instead)."
         }
 
-        $indexed[$entry.Stream] = $entry
+        $indexed[$lookupKey] = $entry
     }
 
     $script:ManifestCache[$Portal] = $indexed

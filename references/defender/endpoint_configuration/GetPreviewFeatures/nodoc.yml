@@ -1,0 +1,36 @@
+  /mtp/settings/GetPreviewExperienceSetting:
+    get:
+      summary: Get preview features setting
+      description: >-
+        Retrieve the preview features opt-in status. Supports multiple contexts
+        including Microsoft Threat Protection (MtpContext) and Microsoft Defender
+        for Endpoint (MdatpContext).
+      operationId: EndpointConfiguration.GetPreviewFeatures
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: context
+          in: query
+          required: true
+          description: The context to retrieve preview settings for.
+          schema:
+            type: string
+            enum: [MtpContext, MdatpContext]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isOptedIn:
+                    description: Whether preview features are enabled.
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

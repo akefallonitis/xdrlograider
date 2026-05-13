@@ -47,11 +47,41 @@ function Get-XdrTierStateAggregate {
     #>
     [CmdletBinding()]
     [OutputType([pscustomobject[]])]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory)] [string] $StorageAccountName,
         [string] $TableName = 'XdrTierState',
-        [datetime] $SinceUtc = ([DateTime]::UtcNow.AddHours(-24))
+        [datetime] $SinceUtc = ([DateTime]::UtcNow.AddHours(-24)),
+
+        # BySubArea path (default): returns hashtable keyed by RowKey for rows
+        # under PartitionKey='Defender'. Each value is the full row entity
+        # (Tier/CircuitState/StreamsAttempted/etc.) — exactly what
+        # ConnectorHeartbeat needs to compose populated Notes JSON (Rule 12).
+        [string] $PartitionKey = 'Defender',
+
+        # ByTier: legacy pilot path — returns array grouped by Portal|Tier.
+        [switch] $ByTier
     )
+
+    if (-not $ByTier) {
+        # Phase 1 per-sub-area path.
+        $rows = @(Invoke-XdrStorageTableEntity `
+            -StorageAccountName $StorageAccountName `
+            -TableName          $TableName `
+            -Operation          'Query' `
+            -Filter             "PartitionKey eq '$PartitionKey'")
+        $result = @{}
+        foreach ($r in $rows) {
+            if ($r -is [System.Collections.IDictionary]) {
+                $rk = $r['RowKey']
+            } else {
+                $rk = $r.PSObject.Properties['RowKey']?.Value
+            }
+            if (-not $rk) { continue }
+            $result[$rk] = $r
+        }
+        return $result
+    }
 
     # Query all rows EXCEPT the dispatcher's __schedule__ control rows.
     # The Xdr-Refresh dispatcher upserts rows with RowKey='__schedule__' that

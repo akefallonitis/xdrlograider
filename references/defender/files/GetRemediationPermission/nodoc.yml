@@ -1,0 +1,42 @@
+  /mtp/responseApiPortal/remediation/permission:
+    get:
+      summary: Get file remediation permission
+      description: >-
+        Return the permission gate the file page uses before enabling remediation-oriented
+        actions. The observed file page requests this with the file SHA-1.
+      operationId: Files.GetRemediationPermission
+      tags: [Files]
+      parameters:
+        - name: FileIdentifier
+          in: query
+          required: true
+          description: The file hash to evaluate for action eligibility.
+          schema:
+            type: string
+        - name: FileIdentifierType
+          in: query
+          required: true
+          description: The hash type supplied in `FileIdentifier`.
+          schema:
+            type: string
+            example: Sha1
+        - name: tenantIds
+          in: query
+          description: Optional multi-tenant context.
+          schema:
+            type: string
+            nullable: true
+            example: 'null'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileRemediationPermissionResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/activities/metadata:
+    get:
+      summary: Get activities metadata
+      description: >-
+        Retrieve metadata for the activities endpoint including filter definitions. Discovered on Activity Log page.
+      operationId: CloudApps.GetActivitiesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

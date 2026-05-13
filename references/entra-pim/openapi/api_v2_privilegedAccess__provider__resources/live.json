@@ -1,0 +1,12 @@
+{
+  "portal": "entra-pim",
+  "path": "/api/v2/privilegedAccess/aadroles/resources",
+  "method": "GET",
+  "finalUrl": "https://api.azrbac.mspim.azure.com/api/v2/privilegedAccess/aadroles/resources?api-version=2020-08-01",
+  "httpStatus": 400,
+  "successKind": "request-shape-error",
+  "diagnostic": "The tenant needs to have Microsoft Entra ID P2 or Microsoft Entra ID Governance license.",
+  "contentLen": 147,
+  "rawSample": "{\"error\":{\"code\":\"AadPremiumLicenseRequired\",\"message\":\"The tenant needs to have Microsoft Entra ID P2 or Microsoft Entra ID Governance license.\"}}",
+  "capturedUtc": "2026-05-13T07:07:04Z"
+}

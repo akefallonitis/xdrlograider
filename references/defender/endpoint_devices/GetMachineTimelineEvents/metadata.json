@@ -1,0 +1,273 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetMachineTimelineEvents",
+  "operationId": "EndpointDevices.GetMachineTimelineEvents",
+  "path": "/mtp/mdeTimelineExperience/machines/{MachineId}/events",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get machine timeline events",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:00.8250997Z",
+  "pagination": {
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": "pageSize",
+    "defaults": {
+      "pageSize": "200"
+    },
+    "indexParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": "fromDate",
+    "type": "iso8601",
+    "supported": true,
+    "endParam": "toDate"
+  },
+  "otherParameters": [
+    {
+      "Name": "MachineId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the device."
+    },
+    {
+      "Name": "machineDnsName",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The machine DNS name echoed by the current portal client."
+    },
+    {
+      "Name": "SenseClientVersion",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The endpoint sensor version shown on device pages."
+    },
+    {
+      "Name": "generateIdentityEvents",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include generated identity events in the timeline."
+    },
+    {
+      "Name": "includeIdentityEvents",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include identity events in the timeline response."
+    },
+    {
+      "Name": "supportMdiOnlyEvents",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include MDI-only timeline events when supported."
+    },
+    {
+      "Name": "correlationId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Correlation identifier supplied by the portal timeline client."
+    },
+    {
+      "Name": "doNotUseCache",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Bypass the timeline cache when true."
+    },
+    {
+      "Name": "forceUseCache",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Force use of cached timeline data when true."
+    },
+    {
+      "Name": "includeSentinelEvents",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Include Sentinel-backed events when available."
+    },
+    {
+      "Name": "ReportIdForScrolling",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional continuation cursor returned by prior timeline responses."
+    },
+    {
+      "Name": "IsScrollingForward",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Indicates the requested scroll direction for continuation queries."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_DeviceTimeline_CL",
+    "v1Tier": "ActionCenter",
+    "v1Category": "Endpoint Device Management",
+    "v1RawPath": "/apiproxy/mtp/mdeTimelineExperience/machines/{MachineId}/events"
+  },
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/mdeTimelineExperience/machines/{MachineId}/events' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=fromDate/endParam=toDate"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The unique identifier of the device.",
+      "type": "string",
+      "name": "MachineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The machine DNS name echoed by the current portal client.",
+      "type": "string",
+      "name": "machineDnsName"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The endpoint sensor version shown on device pages.",
+      "type": "string",
+      "name": "SenseClientVersion"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The inclusive start of the requested time range.",
+      "type": "string",
+      "name": "fromDate"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The inclusive end of the requested time range.",
+      "type": "string",
+      "name": "toDate"
+    },
+    {
+      "in": "query",
+      "default": "200",
+      "required": false,
+      "description": "The number of timeline rows to return.",
+      "type": "integer",
+      "name": "pageSize"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include generated identity events in the timeline.",
+      "type": "boolean",
+      "name": "generateIdentityEvents"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include identity events in the timeline response.",
+      "type": "boolean",
+      "name": "includeIdentityEvents"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include MDI-only timeline events when supported.",
+      "type": "boolean",
+      "name": "supportMdiOnlyEvents"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Correlation identifier supplied by the portal timeline client.",
+      "type": "string",
+      "name": "correlationId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Bypass the timeline cache when true.",
+      "type": "boolean",
+      "name": "doNotUseCache"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Force use of cached timeline data when true.",
+      "type": "boolean",
+      "name": "forceUseCache"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include Sentinel-backed events when available.",
+      "type": "boolean",
+      "name": "includeSentinelEvents"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional continuation cursor returned by prior timeline responses.",
+      "type": "string",
+      "name": "ReportIdForScrolling"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Indicates the requested scroll direction for continuation queries.",
+      "type": "boolean",
+      "name": "IsScrollingForward"
+    }
+  ],
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.FullName",
+    "Host.MdatpId",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

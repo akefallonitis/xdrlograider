@@ -1,0 +1,60 @@
+{
+  "portal": "entra-idgov",
+  "subArea": "openapi",
+  "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requests__requestId__instances__instanceId__stop",
+  "operationId": null,
+  "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop",
+  "methods": [
+    "post"
+  ],
+  "summary": "Stop an access review instance",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:16.0943108Z",
+  "pagination": {
+    "sizeParam": null,
+    "tokenParam": null,
+    "indexParam": null,
+    "style": "none",
+    "defaults": {}
+  },
+  "timeFilter": {
+    "supported": false,
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "endParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "instanceId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": ""
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "",
+    "type": "string",
+    "name": "instanceId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

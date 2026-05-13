@@ -1,0 +1,123 @@
+  /ManagedApplications/{spId}/AppRoleAssignments:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+      - $ref: common.yml#/components/parameters/nextLink
+      - $ref: common.yml#/components/parameters/top
+    get:
+      summary: Get managed application app role assignments
+      description: >-
+        Get managed application (service principal) app role assignments.
+        Note: This operation hangs with no response for invalid service principal ID (`spId`).
+      operationId: ManagedApplication.AppRoleAssginemnts.Get
+      tags: [Managed Applications]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/appRoleAssignment'
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create managed application app role assignments
+      description: >-
+        Create managed application (service principal) app role assignments.
+        Note: This operation hangs with no response for invalid service principal ID (`spId`).
+      operationId: ManagedApplication.AppRoleAssginemnts.Create
+      tags: [Managed Applications]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objectId:
+                  $ref: common.yml#/components/schemas/servicePrincipalId
+                applicationRoleId:
+                  type: string
+                  description: The unique identifier of the app role.
+                  example: a39633e3-7be8-4402-ac1c-d9234fa03519
+                userId:
+                  $ref: common.yml#/components/schemas/userId
+                groupId:
+                  $ref: common.yml#/components/schemas/groupId
+                passwordSSOCredentials:
+                  description: Password SSO Credentials (format unknown)
+                  type: object
+                  nullable: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appRoleAssignment'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,25 @@
+  /mdi/identity/identitiesapiservice/domainController/coverage:
+    get:
+      summary: Get domain controller coverage
+      description: >-
+        Retrieve the Defender for Identity sensor coverage status for
+        domain controllers in the environment.
+      operationId: Identity.GetDomainControllerCoverage
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DomainControllerCoverage'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

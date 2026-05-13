@@ -1,0 +1,48 @@
+  /fd/addins/api/agents:
+    get:
+      summary: Get deployed agents
+      description: >-
+        Retrieve the list of agents deployed through the integrated apps platform.
+      operationId: IntegratedApps.GetAgents
+      tags: [IntegratedApps]
+      parameters:
+        - name: workloads
+          in: query
+          description: Workload filter for agents.
+          schema:
+            type: string
+            default: SharedAgent
+        - name: scopes
+          in: query
+          description: Scope filter for agents.
+          schema:
+            type: string
+            default: Shared
+        - name: limit
+          in: query
+          description: Maximum number of agents to return.
+          schema:
+            type: integer
+            default: 200
+        - name: creatorId
+          in: query
+          description: Filter by creator ID. Use 'none' for all creators.
+          schema:
+            type: string
+            default: none
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Agents list. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

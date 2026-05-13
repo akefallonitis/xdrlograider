@@ -1,0 +1,18 @@
+  /Teams.VoiceApps/callqueues/count:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsVoiceApps]
+      summary: Get the Teams call queue count
+      description: |
+        Count helper used by Teams voice administration pages before loading full call queue data.
+      responses:
+        '200':
+          description: Call queue count payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

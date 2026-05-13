@@ -1,0 +1,24 @@
+  /mcas/cas/api/v1/manage_admins/is_external_user:
+    get:
+      summary: Check whether current user is external
+      description: >-
+        Retrieve a boolean indicating whether the current Defender for Cloud Apps
+        administrator is considered external to the tenant.
+      operationId: CloudApps.IsExternalAdminUser
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

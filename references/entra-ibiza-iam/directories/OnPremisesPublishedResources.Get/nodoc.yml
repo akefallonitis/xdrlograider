@@ -1,0 +1,21 @@
+  /Directories/{tenantId}/OnPremisesPublishedResources/{publishedResourceId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/tenantId'
+      - name: publishedResourceId
+        description: The ID of the published resource
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Directory]
+      summary: Get on premises published resource
+      description: >-
+        Get on premises published resource.
+      operationId: Directories.OnPremisesPublishedResources.Get
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

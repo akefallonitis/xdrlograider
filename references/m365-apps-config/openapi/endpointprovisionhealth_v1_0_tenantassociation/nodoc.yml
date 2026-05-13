@@ -1,0 +1,12 @@
+  /endpointprovisionhealth/v1.0/tenantassociation:
+    get:
+      tags: [Device Configuration]
+      summary: Get tenant association state
+      description: Returns the setup-time tenant association token and whether endpoint provisioning health is enabled.
+      responses:
+        '200':
+          description: Tenant association metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantAssociation'

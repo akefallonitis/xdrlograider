@@ -1,0 +1,19 @@
+  /beta/MobileDevice:
+    get:
+      tags: [Mobile]
+      summary: List mobile devices
+      description: |
+        Returns mobile device inventory surfaced by Exchange device-management pages. The observed
+        tenant response was an empty OData collection.
+      operationId: ExchangeBeta.Mobile.ListMobileDevices
+      responses:
+        '200':
+          description: Mobile devices returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

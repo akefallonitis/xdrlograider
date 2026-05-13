@@ -1,0 +1,22 @@
+  /admin/api/tenant/datalocationandcommitments:
+    get:
+      summary: Get data location and commitments
+      description: >-
+        Retrieve the data residency location and commitment information for the tenant.
+      operationId: Tenant.GetDataLocation
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/DataLocationCommitmentsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

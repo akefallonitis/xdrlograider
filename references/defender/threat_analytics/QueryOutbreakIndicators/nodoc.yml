@@ -1,0 +1,39 @@
+  /mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/query:
+    post:
+      summary: Query outbreak indicators
+      description: >-
+        Retrieve the STIX indicators grid rows shown on a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.QueryOutbreakIndicators
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - outbreak indicators query request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak indicators query response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

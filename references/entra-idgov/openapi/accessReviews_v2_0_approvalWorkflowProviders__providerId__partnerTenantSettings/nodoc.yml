@@ -1,0 +1,17 @@
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings:
+    get:
+      tags: [Configuration]
+      summary: Get partner tenant settings
+      description: |
+        Retrieves partner/tenant-specific settings for the access reviews provider.
+        Includes configuration like default review duration, notification settings,
+        and auto-apply behavior.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+      responses:
+        '200':
+          description: Partner tenant settings
+          content:
+            application/json:
+              schema:
+                type: object

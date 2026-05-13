@@ -1,0 +1,55 @@
+  /mdc/views/inventory/ai-agents-v3/agents-discovered-overtime:
+    post:
+      summary: Get AI agents discovered over time
+      description: >-
+        Retrieve the AI-agent discovery-over-time chart used by the Defender for Cloud
+        AI inventory experience.
+      operationId: Configuration.GetAiAgentsDiscoveredOverTime
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                daysAgo:
+                  type: string
+                  description: Relative lookback window such as 60d.
+                platforms:
+                  type: string
+                  description: Comma-separated AI platforms to include.
+                paging:
+                  type: object
+                  description: Paging settings for the metric query.
+              required:
+                - daysAgo
+                - platforms
+                - paging
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AI-agent discovery-over-time response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

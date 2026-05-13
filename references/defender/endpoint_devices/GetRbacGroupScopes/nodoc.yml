@@ -1,0 +1,30 @@
+  /mtp/rbacGroupAssignment/rbacGroupsScopes/{DeviceId}:
+    get:
+      summary: Get device RBAC group scopes
+      description: >-
+        Retrieve the RBAC group scopes applicable to a specific endpoint device.
+      operationId: EndpointDevices.GetRbacGroupScopes
+      tags: [Endpoint Devices]
+      parameters:
+        - name: DeviceId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

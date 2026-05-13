@@ -1,0 +1,24 @@
+  /mcas/cas/api/v1/discovery/app_catalog/metadata:
+    get:
+      summary: Get discovery app catalog metadata
+      description: >-
+        Retrieve filter and column metadata for the Cloud Discovery app catalog.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetDiscoveryAppCatalogMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

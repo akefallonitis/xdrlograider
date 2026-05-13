@@ -1,0 +1,36 @@
+  /mtp/responseApiPortal/requests/machinestate:
+    get:
+      summary: Get device response action state
+      description: >-
+        Retrieve the response-action state block shown on the unified device page.
+      operationId: EndpointDevices.GetActionState
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: overrideCache
+          in: query
+          description: Whether the portal should bypass cached machine action state.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device response action state
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

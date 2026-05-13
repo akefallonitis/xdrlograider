@@ -1,0 +1,43 @@
+  /medeina/agents:
+    get:
+      operationId: listCopilotAgents
+      summary: List Copilot agents
+      description: >-
+        Retrieve a list of available Security Copilot agents.
+        Supports filtering by scope and agent definition name, with optional expansion of related data.
+      tags: [Copilot]
+      parameters:
+        - name: scope
+          in: query
+          required: false
+          description: The scope to filter agents by.
+          schema:
+            type: string
+        - name: agentDefinitionName
+          in: query
+          required: false
+          description: The agent definition name to filter by.
+          schema:
+            type: string
+        - name: expand
+          in: query
+          required: false
+          description: Related entities to expand in the response.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

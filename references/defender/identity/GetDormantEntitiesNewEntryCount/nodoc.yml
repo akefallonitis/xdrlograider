@@ -1,0 +1,30 @@
+  /aatp/api/ispmReports/DormantEntities/newEntryCount:
+    get:
+      summary: Get dormant entities report delta
+      description: >-
+        Retrieve the count of newly surfaced dormant-entity posture findings used by the
+        Defender for Identity coverage and maturity dashboard.
+      operationId: Identity.GetDormantEntitiesNewEntryCount
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Count:
+                    type: integer
+                    description: Number of new dormant-entity report entries.
+                  IsCountExceeded:
+                    type: boolean
+                    description: Whether the result exceeded the service-side count ceiling.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

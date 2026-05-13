@@ -1,0 +1,48 @@
+{
+  "portal": "sharepoint",
+  "subArea": "openapi",
+  "slug": "GetTenantAdminSettings",
+  "operationId": "SharePointAdmin.GetTenantAdminSettings",
+  "path": "/_api/TenantAdminSettings",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get selected tenant admin settings",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:21.50737Z",
+  "pagination": {
+    "sizeParam": null,
+    "defaults": {},
+    "tokenParam": null,
+    "style": "none",
+    "indexParam": null
+  },
+  "timeFilter": {
+    "type": null,
+    "supported": false,
+    "startParam": null,
+    "lookbackParam": null,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "CookieHost": "*-admin.sharepoint.com",
+    "Method": "Tenant-specific host; ClientId TBD",
+    "Status": "auth-research-needed"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

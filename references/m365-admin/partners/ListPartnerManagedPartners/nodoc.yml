@@ -1,0 +1,30 @@
+  /fd/commerceMgmt2/partnermanage/partners:
+    get:
+      summary: List partner-managed partners
+      description: >-
+        Retrieve the partner relationship inventory exposed through the partner
+        management commerce service.
+      operationId: Partners.ListPartnerManagedPartners
+      tags: [Partners]
+      parameters:
+        - name: api-version
+          in: query
+          description: API version requested by the partner management commerce service.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Partner management payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

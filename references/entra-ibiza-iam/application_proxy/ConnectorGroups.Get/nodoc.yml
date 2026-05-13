@@ -1,0 +1,42 @@
+  /ApplicationProxy/ConnectorGroups/{groupId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: groupId
+        description: The ID of the connector group.
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get Application Proxy connector group
+      description: >-
+        Get Application Proxy connector group by ID.
+      operationId: ApplicationProxy.ConnectorGroups.Get
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    patch:
+      summary: Update Application Proxy onnector group
+      description: >-
+        Update Application Proxy connector group by group ID.
+      operationId: ApplicationProxy.ConnectorGroups.Update
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete Application Proxy onnector group
+      description: >-
+        Delete Application Proxy connector group by group ID.
+      operationId: ApplicationProxy.ConnectorGroups.Delete
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

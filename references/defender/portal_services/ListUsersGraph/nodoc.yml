@@ -1,0 +1,23 @@
+  /msgraph/v1.0/users:
+    get:
+      summary: List users via Graph proxy
+      description: >-
+        Retrieve a list of users via the Microsoft Graph API proxy endpoint
+        in the Defender XDR portal.
+      operationId: PortalServices.ListUsersGraph
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/GraphUsersResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

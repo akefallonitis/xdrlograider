@@ -1,0 +1,43 @@
+  /beta/ResourceMailbox:
+    get:
+      tags: [Objects]
+      summary: List resource mailboxes
+      description: |
+        Returns room and equipment mailbox inventory surfaced by the Resources page.
+      operationId: ExchangeBeta.Objects.ListResourceMailboxes
+      responses:
+        '200':
+          description: Resource mailboxes returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/ResourceMailbox('{resourceMailboxId}')":
+    get:
+      tags: [Objects]
+      summary: Get resource mailbox details
+      description: |
+        Returns the resource mailbox entity loaded by the Resources page detail blades.
+      operationId: ExchangeBeta.Objects.GetResourceMailbox
+      parameters:
+        - $ref: '#/components/parameters/resourceMailboxId'
+      responses:
+        '200':
+          description: Resource mailbox details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'

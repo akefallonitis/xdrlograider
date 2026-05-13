@@ -49,40 +49,65 @@ function Invoke-MDEEndpoint {
     .OUTPUTS
         [object[]] — DCE-ready rows (may be empty).
     #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'ByEntryKey')]
     [OutputType([object[]])]
     param(
         [Parameter(Mandatory)] [pscustomobject] $Session,
 
-        [Parameter(Mandatory)]
-        [ValidateScript({
-            $manifest = Get-XdrEndpointManifest -Portal Defender
-            if ($_ -notin $manifest.Keys) {
-                throw "Unknown Stream '$_'. Known streams: $($manifest.Keys -join ', ')"
-            }
-            $true
-        })]
+        # ByEntryKey (Phase 1 preferred): unique per-endpoint key '<SubArea>::<Slug>'.
+        [Parameter(Mandatory, ParameterSetName = 'ByEntryKey')]
+        [string] $EntryKey,
+
+        # ByStream (legacy compatibility): only resolves uniquely when one entry
+        # exists for the stream. Phase 1 has 18 sub-area-level Streams shared by
+        # many endpoints; prefer -EntryKey.
+        [Parameter(Mandatory, ParameterSetName = 'ByStream')]
         [string] $Stream,
 
         [datetime] $FromUtc,
         [hashtable] $PathParams = @{},
+        [hashtable] $BodyOverride = $null,
 
-        # Section R++++++ Architecture C (2026-05-07): per-call body override.
-        # Used by PerPlatformFanout activity loop to pass body['platform']='Linux',
-        # 'Windows', 'macOS', 'iOS' across iterations of the same stream. Merged
-        # into the manifest-declared Body (keys in BodyOverride win on collision).
-        # Also usable for pagination loops (BodyOverride={pageIndex=2}, etc).
-        [hashtable] $BodyOverride = $null
+        # Phase A0.3 multi-cycle pagination resume. Activity layer reads
+        # connectorCheckpoints, passes StartFromPage = LastCompletedPage + 1
+        # so an interrupted vuln_management 1000-page first poll resumes
+        # from where the previous activity left off. MaxPagesPerCycle caps
+        # pages consumed per activity invocation so each call stays under
+        # the Y1 10-min activity timeout (default: respect manifest MaxPages;
+        # override to a smaller number to spread work across cycles).
+        [int] $StartFromPage = 1,
+        [Nullable[int]] $MaxPagesPerCycle = $null
     )
 
-    $entry = (Get-XdrEndpointManifest -Portal Defender)[$Stream]
+    $manifest = Get-XdrEndpointManifest -Portal Defender
+    $entry = $null
+    if ($PSCmdlet.ParameterSetName -eq 'ByEntryKey') {
+        if (-not $manifest.ContainsKey($EntryKey)) {
+            throw "Unknown EntryKey '$EntryKey'. Format is '<sub-area>::<slug>' (e.g. 'action_center::GetHistory')."
+        }
+        $entry = $manifest[$EntryKey]
+    } else {
+        $matches = @($manifest.Values | Where-Object { $_.Stream -eq $Stream })
+        if ($matches.Count -eq 0) {
+            throw "No manifest entry with Stream='$Stream'."
+        }
+        if ($matches.Count -gt 1) {
+            throw "Stream '$Stream' resolves to $($matches.Count) entries. Use -EntryKey '<sub-area>::<slug>' to disambiguate."
+        }
+        $entry = $matches[0]
+    }
+
+    # Stable per-row identifier used for log messages + Set-MDEEndpointLastResult.
+    # EntryKey when available; Stream as fallback for pilot-shaped manifests.
+    $entryKey = if ($entry.ContainsKey('EntryKey') -and $entry.EntryKey) { $entry.EntryKey } else { $entry.Stream }
+    $streamForLA = $entry.Stream
 
     # --- Path substitution ---
     $path = $entry.Path
     if ($entry.ContainsKey('PathParams') -and $entry.PathParams) {
         foreach ($key in $entry.PathParams) {
             if (-not $PathParams.ContainsKey($key)) {
-                throw "Invoke-MDEEndpoint Stream='$Stream' requires -PathParams @{ $key = '...' }"
+                throw "Invoke-MDEEndpoint EntryKey='$entryKey' requires -PathParams @{ $key = '...' }"
             }
             $escaped = [uri]::EscapeDataString([string]$PathParams[$key])
             $path = $path -replace "\{$key\}", $escaped
@@ -137,12 +162,31 @@ function Invoke-MDEEndpoint {
     # logic; per-page checkpoint is handled by the activity layer.
     $pagination = if ($entry.ContainsKey('Pagination') -and $entry.Pagination) { $entry.Pagination } else { $null }
 
-    $r = Invoke-MDEPortalEndpoint -Session $Session -Path $path -Method $httpMethod -Body $postBody -AdditionalHeaders $extraHeaders
+    # Phase A0.3 multi-cycle resume: when StartFromPage > 1, skip directly to
+    # the requested page (no page-1 fetch). This avoids re-ingesting earlier
+    # pages on activity-cycle restart for endpoints with multi-cycle pagination.
+    # Single-cycle path (StartFromPage=1, the default) is unchanged.
+    $lastPageFetched = 0
+    $paginationExhausted = $true
+
+    if ($null -ne $pagination -and $StartFromPage -gt 1) {
+        $pageSize   = if ($pagination.ContainsKey('PageSize'))  { [int]$pagination.PageSize }  else { 200 }
+        $sep        = if ($path.Contains('?')) { '&' } else { '?' }
+        $pagedPath  = "${path}${sep}pageIndex=${StartFromPage}&pageSize=${pageSize}"
+        $r = Invoke-MDEPortalEndpoint -Session $Session -Path $pagedPath -Method $httpMethod -Body $postBody -AdditionalHeaders $extraHeaders
+        $lastPageFetched = $StartFromPage
+    } else {
+        $r = Invoke-MDEPortalEndpoint -Session $Session -Path $path -Method $httpMethod -Body $postBody -AdditionalHeaders $extraHeaders
+        $lastPageFetched = 1
+    }
 
     if ($null -ne $pagination -and $null -ne $r -and $r.Success -and $null -ne $r.Data) {
-        $maxPages   = if ($pagination.ContainsKey('MaxPages'))  { [int]$pagination.MaxPages }  else { 50 }
-        $pageSize   = if ($pagination.ContainsKey('PageSize'))  { [int]$pagination.PageSize }  else { 200 }
-        $unwrapKey  = if ($entry.ContainsKey('UnwrapProperty')) { [string]$entry.UnwrapProperty } else { $null }
+        $manifestMaxPages = if ($pagination.ContainsKey('MaxPages'))  { [int]$pagination.MaxPages }  else { 50 }
+        # Per-cycle cap: caller may override to spread vuln_management 1000-page
+        # first poll across many cycles. Default = manifest MaxPages (no spread).
+        $cycleMaxPages = if ($null -ne $MaxPagesPerCycle) { [int]$MaxPagesPerCycle } else { $manifestMaxPages }
+        $pageSize      = if ($pagination.ContainsKey('PageSize'))  { [int]$pagination.PageSize }  else { 200 }
+        $unwrapKey     = if ($entry.ContainsKey('UnwrapProperty')) { [string]$entry.UnwrapProperty } else { $null }
 
         # Extract first-page items via the same UnwrapProperty rule the activity uses.
         $firstPageItems = @()
@@ -157,7 +201,9 @@ function Invoke-MDEEndpoint {
 
         # Continue paginating only if first page filled (likely more pages exist).
         if ($firstPageItems.Count -ge $pageSize) {
-            for ($pageIndex = 2; $pageIndex -le $maxPages; $pageIndex++) {
+            $cyclePagesConsumed = 1
+            $absoluteCap = [Math]::Min($manifestMaxPages, ($lastPageFetched + $cycleMaxPages - 1))
+            for ($pageIndex = ($lastPageFetched + 1); $pageIndex -le $absoluteCap; $pageIndex++) {
                 $sep = if ($path.Contains('?')) { '&' } else { '?' }
                 $pagedPath = "${path}${sep}pageIndex=${pageIndex}&pageSize=${pageSize}"
                 $rPage = Invoke-MDEPortalEndpoint -Session $Session -Path $pagedPath -Method $httpMethod -Body $postBody -AdditionalHeaders $extraHeaders
@@ -171,7 +217,21 @@ function Invoke-MDEEndpoint {
                     $pageItems = @($rPage.Data)
                 }
                 $aggregatedItems += $pageItems
-                if ($pageItems.Count -lt $pageSize) { break }  # last page
+                $lastPageFetched = $pageIndex
+                $cyclePagesConsumed++
+                if ($pageItems.Count -lt $pageSize) {
+                    # Last page (partial fill) — pagination exhausted.
+                    $paginationExhausted = $true
+                    break
+                }
+            }
+            # Decide whether pagination is exhausted vs interrupted by cycle cap.
+            # If we stopped because of the per-cycle cap AND haven't seen a partial
+            # page, more pages likely remain → next cycle resumes at lastPageFetched+1.
+            if ($lastPageFetched -ge $manifestMaxPages) {
+                $paginationExhausted = $true  # hit manifest hard cap
+            } elseif ($firstPageItems.Count -ge $pageSize -and $lastPageFetched -lt $manifestMaxPages -and $cyclePagesConsumed -ge $cycleMaxPages) {
+                $paginationExhausted = $false  # cycle-cap interruption; resume next cycle
             }
         }
 
@@ -190,7 +250,7 @@ function Invoke-MDEEndpoint {
                 HttpStatus = 200
             }
         }
-        Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' aggregated $($aggregatedItems.Count) items across pagination loop"
+        Write-Verbose "Invoke-MDEEndpoint EntryKey='$entryKey' aggregated $($aggregatedItems.Count) items (pages $StartFromPage..$lastPageFetched, exhausted=$paginationExhausted)"
     }
 
     # Iter 13.9 (C5): consolidate the early-exit gates. Three failure modes
@@ -202,40 +262,54 @@ function Invoke-MDEEndpoint {
     # surface area for strict-mode crashes if a future helper returns a
     # different shape.
     # ----------------------------------------------------------------------
-    # Section R++.A — TRUTH-SIGNAL via module-scope side-channel.
+    # 4-value truth-signal (Rule 6, tenant-gated retired per Rule 23).
     # The legacy contract (return ,@() on any failure) is preserved so existing
-    # callers + tests don't break. Activity callers can now read the latest
-    # call's outcome via Get-MDEEndpointLastResult to distinguish:
+    # callers + tests don't break. Activity callers read Get-MDEEndpointLastResult
+    # after each call to distinguish:
     #   live           — 200 with non-empty Data (rows returned)
     #   live-empty     — 200 with null/empty Data (legitimate "no data this poll")
-    #   tenant-gated   — 401/403/404 (license-gated; expected on unlicensed tenant)
-    #   error          — 5xx, network failure, helper-side bug (REAL failure)
-    # Activity uses this to drive Set-XdrTierStateRow -Reason + connector-card UX.
-    # See R++.A in plan immutable-splashing-waffle.md.
+    #   rate-limited   — 429 (apiproxy throttling; back off and retry next cycle)
+    #   error          — 5xx, network failure, helper bug, OR 401/403/404 with
+    #                    LicenseHint populated when the endpoint requires a SKU
+    #                    the tenant doesn't have. Operators see LicenseHint in
+    #                    XdrConnectorHealth_CL Notes; it's a configuration
+    #                    signal, not a connector defect (Rule 23).
     # ----------------------------------------------------------------------
     if ($null -eq $r) {
-        Set-MDEEndpointLastResult -Stream $Stream -SuccessKind 'error' -HttpStatus 0 `
+        Set-MDEEndpointLastResult -Stream $entryKey -SuccessKind 'error' -HttpStatus 0 `
             -ErrorText 'Invoke-MDEPortalEndpoint returned null (helper-side bug)'
-        Write-Warning "Invoke-MDEEndpoint Stream='$Stream' failed: Invoke-MDEPortalEndpoint returned null (helper-side bug)"
+        Write-Warning "Invoke-MDEEndpoint EntryKey='$entryKey' failed: Invoke-MDEPortalEndpoint returned null (helper-side bug)"
         return ,@()
     }
     if (-not $r.Success) {
-        # Classify by HTTP status when available. 401/403/404 = tenant-gated
-        # (license/scope absent). 5xx + network errors = real failure.
         $status = 0
         if ($null -ne $r.PSObject.Properties['HttpStatus']) { $status = [int]$r.HttpStatus }
+        elseif ($r.Error -match '\b(429)\b')     { $status = 429 }
         elseif ($r.Error -match '\b(40[134])\b') { $status = [int]$matches[1] }
         elseif ($r.Error -match '\b(5\d\d)\b')   { $status = [int]$matches[1] }
-        $kind = if ($status -in 401, 403, 404) { 'tenant-gated' } else { 'error' }
-        Set-MDEEndpointLastResult -Stream $Stream -SuccessKind $kind -HttpStatus $status -ErrorText $r.Error
-        Write-Warning "Invoke-MDEEndpoint Stream='$Stream' [$kind/$status]: $($r.Error)"
+        if ($status -eq 429) {
+            Set-MDEEndpointLastResult -Stream $entryKey -SuccessKind 'rate-limited' -HttpStatus 429 -ErrorText $r.Error
+            Write-Warning "Invoke-MDEEndpoint EntryKey='$entryKey' [rate-limited/429]: $($r.Error)"
+            return ,@()
+        }
+        $licenseHint = ''
+        if ($status -in 401, 403, 404) {
+            $licenseHint = [string]($entry['LicenseHint'])
+        }
+        Set-MDEEndpointLastResult -Stream $entryKey -SuccessKind 'error' -HttpStatus $status `
+            -ErrorText $r.Error -LicenseHint $licenseHint
+        if ($licenseHint) {
+            Write-Warning "Invoke-MDEEndpoint EntryKey='$entryKey' [error/$status, license-blocked: $licenseHint]: $($r.Error)"
+        } else {
+            Write-Warning "Invoke-MDEEndpoint EntryKey='$entryKey' [error/$status]: $($r.Error)"
+        }
         return ,@()
     }
     if ($null -eq $r.Data) {
         # 200 with empty body — legitimate "no data" (e.g. tenant has no
         # configured exclusions; not a failure, not gated).
-        Set-MDEEndpointLastResult -Stream $Stream -SuccessKind 'live-empty' -HttpStatus 200 -ErrorText ''
-        Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' returned 200 with empty body — 0 rows"
+        Set-MDEEndpointLastResult -Stream $entryKey -SuccessKind 'live-empty' -HttpStatus 200 -ErrorText ''
+        Write-Verbose "Invoke-MDEEndpoint EntryKey='$entryKey' returned 200 with empty body — 0 rows"
         return ,@()
     }
 
@@ -243,7 +317,7 @@ function Invoke-MDEEndpoint {
     # Pass -Stream so Expand-MDEResponse can:
     #  (a) attach -Stream context to Ingest.BoundaryMarker AppInsights events
     #  (b) fire the XDR_DEBUG_RESPONSE_CAPTURE one-shot per stream when env=true
-    $expandArgs = @{ Response = $r.Data; Stream = $Stream }
+    $expandArgs = @{ Response = $r.Data; Stream = $streamForLA }
     if ($entry.ContainsKey('IdProperty') -and $entry.IdProperty) {
         $expandArgs['IdProperty'] = [string[]]$entry.IdProperty
     }
@@ -328,12 +402,13 @@ function Invoke-MDEEndpoint {
             # remains MANIFEST-INTERNAL reference only. Per-row stamping was
             # over-engineering; operators query typed cols + RawJson, not nodoc
             # metadata. Reverted to original ConvertTo-MDEIngestRow signature.
-            ConvertTo-MDEIngestRow -Stream $Stream -EntityId $entityId -Raw $entity -Extras $extras -ProjectionMap $projMap
+            ConvertTo-MDEIngestRow -Stream $streamForLA -EntityId $entityId -Raw $entity -Extras $extras -ProjectionMap $projMap
         }
     )
     # Section R++.A: success path — distinguish live (rows) from live-empty (no rows).
     $kind = if ($rows.Count -gt 0) { 'live' } else { 'live-empty' }
-    Set-MDEEndpointLastResult -Stream $Stream -SuccessKind $kind -HttpStatus 200 -ErrorText ''
-    Write-Verbose "Invoke-MDEEndpoint Stream='$Stream' -> $($rows.Count) rows [$kind]"
+    Set-MDEEndpointLastResult -Stream $entryKey -SuccessKind $kind -HttpStatus 200 -ErrorText '' `
+        -LastCompletedPage $lastPageFetched -PaginationExhausted $paginationExhausted
+    Write-Verbose "Invoke-MDEEndpoint EntryKey='$entryKey' -> $($rows.Count) rows [$kind] lastPage=$lastPageFetched exhausted=$paginationExhausted"
     return ,$rows
 }

@@ -1,0 +1,553 @@
+{
+  "subArea": "openapi",
+  "suggestedCadence": "unknown",
+  "endpointCount": 25,
+  "endpoints": [
+    {
+      "slug": "inventory_api_DeviceActions_GetUpdateProgressSummaryByChannel",
+      "operationId": "",
+      "path": "/inventory/api/DeviceActions/GetUpdateProgressSummaryByChannel()",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_Devices",
+      "operationId": "",
+      "path": "/inventory/api/Devices",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_Devices_GetDeviceSummary",
+      "operationId": "",
+      "path": "/inventory/api/Devices/GetDeviceSummary",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_DevicesWithCloudManagementInfo",
+      "operationId": "",
+      "path": "/inventory/api/DevicesWithCloudManagementInfo",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_DevicesWithMetadata_GetOfficeBuildChannelSummaryWithMetadata",
+      "operationId": "",
+      "path": "/inventory/api/DevicesWithMetadata/GetOfficeBuildChannelSummaryWithMetadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_DevicesWithMetadata_GetOfficeBuildDeviceSummaryWithMetadata",
+      "operationId": "",
+      "path": "/inventory/api/DevicesWithMetadata/GetOfficeBuildDeviceSummaryWithMetadata",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_Languages",
+      "operationId": "",
+      "path": "/inventory/api/Languages",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_OfficeAddins",
+      "operationId": "",
+      "path": "/inventory/api/OfficeAddins",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_OfficeAddins__Count",
+      "operationId": "",
+      "path": "/inventory/api/OfficeAddins/$Count",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_OfficeAddinVersions",
+      "operationId": "",
+      "path": "/inventory/api/OfficeAddinVersions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_OfficeApplications",
+      "operationId": "",
+      "path": "/inventory/api/OfficeApplications",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_Onboarding",
+      "operationId": "",
+      "path": "/inventory/api/Onboarding",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_Onboarding_Offboard",
+      "operationId": "",
+      "path": "/inventory/api/Onboarding/Offboard",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_Onboarding_Onboard",
+      "operationId": "",
+      "path": "/inventory/api/Onboarding/Onboard()",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_SecurityCurrencyDevices_GetLatestPatchDate",
+      "operationId": "",
+      "path": "/inventory/api/SecurityCurrencyDevices/GetLatestPatchDate",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_SecurityCurrencyDevices_GetLatestSecurityReleasesPerServicingChannel",
+      "operationId": "",
+      "path": "/inventory/api/SecurityCurrencyDevices/GetLatestSecurityReleasesPerServicingChannel",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Vuln.CveId",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_SecurityCurrencyDevices_GetSecurityUpdateStatusMetrics",
+      "operationId": "",
+      "path": "/inventory/api/SecurityCurrencyDevices/GetSecurityUpdateStatusMetrics",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_SecurityCurrencyDevices_GetSecurityUpdateStatusMetricsByChannel",
+      "operationId": "",
+      "path": "/inventory/api/SecurityCurrencyDevices/GetSecurityUpdateStatusMetricsByChannel",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_SecurityCurrencyGoal",
+      "operationId": "",
+      "path": "/inventory/api/SecurityCurrencyGoal",
+      "methods": [
+        "get",
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_SecurityCurrencyGoal__goalId",
+      "operationId": "",
+      "path": "/inventory/api/SecurityCurrencyGoal({goalId})",
+      "methods": [
+        "patch"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/inventory/api/SecurityCurrencyGoal({goalId})' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_SecurityVulnerabilities_GetSecurityVulnerabilityByChannel",
+      "operationId": "",
+      "path": "/inventory/api/SecurityVulnerabilities/GetSecurityVulnerabilityByChannel",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_SecurityVulnerabilities_GetSecurityVulnerabilityByReleaseDate",
+      "operationId": "",
+      "path": "/inventory/api/SecurityVulnerabilities/GetSecurityVulnerabilityByReleaseDate",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_SecurityVulnerabilitiesDevices_GetSecurityVulnerabilityForEveryDevice",
+      "operationId": "",
+      "path": "/inventory/api/SecurityVulnerabilitiesDevices/GetSecurityVulnerabilityForEveryDevice()",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_Settings",
+      "operationId": "",
+      "path": "/inventory/api/Settings",
+      "methods": [
+        "get",
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Url.Path",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "inventory_api_Settings__settingsId",
+      "operationId": "",
+      "path": "/inventory/api/Settings({settingsId})",
+      "methods": [
+        "patch"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "PathTemplate — '/inventory/api/Settings({settingsId})' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 0,
+  "cntNoLive": 25,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Software.Version",
+    "Url.Path",
+    "Vuln.CveId"
+  ],
+  "paginationStyles": [],
+  "valueProp": "M365 Apps deployed-version inventory + health telemetry per device + user"
+}

@@ -1,0 +1,43 @@
+  /medeina/agentDefinitions:
+    get:
+      operationId: listPurviewAgentDefinitions
+      summary: List Purview agent definitions
+      description: >-
+        Retrieve Purview-published Medeina agent definitions displayed in the
+        Agent Library experience.
+      tags: [PurviewForAI]
+      parameters:
+        - name: scope
+          in: query
+          required: false
+          description: The workspace scope used by the agent library query.
+          schema:
+            type: string
+        - name: publisher
+          in: query
+          required: false
+          description: Publisher filter applied by the agent library query.
+          schema:
+            type: string
+        - name: product
+          in: query
+          required: false
+          description: Product filter applied by the agent library query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

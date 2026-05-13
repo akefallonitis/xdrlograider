@@ -1,0 +1,51 @@
+  /mtoapi/mtp/huntingService/queries/:
+    get:
+      summary: List MTO hunting queries
+      description: >-
+        Retrieve saved advanced hunting queries in the MTO portal. Confirmed in
+        live traffic from the MTO Advanced hunting page with `type=user`,
+        `type=shared`, and `type=scheduled` query variants.
+      operationId: MultiTenant.ListHuntingQueries
+      tags: [Multi-Tenant]
+      parameters:
+        - name: type
+          in: query
+          description: Query collection type to retrieve.
+          schema:
+            type: string
+            enum: [user, shared, scheduled]
+        - name: tenantIds[]
+          in: query
+          description: Tenant IDs to scope the query collection to.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: includeUsxQueries
+          in: query
+          description: Whether to include USX queries in the result set.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: >-
+                  pending - MTO hunting query list; exact response envelope is
+                  still pending because the captured body could not be recovered
+                  from DevTools after navigation.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

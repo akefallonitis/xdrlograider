@@ -1,0 +1,118 @@
+{
+  "portal": "m365-admin",
+  "subArea": "reports",
+  "slug": "GetSummaryDataV3",
+  "operationId": "Reports.GetSummaryDataV3",
+  "path": "/admin/api/reports/GetSummaryDataV3",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get summary report data",
+  "sourceFile": "reports.yml",
+  "capturedUtc": "2026-05-12T15:13:26.063675Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "ServiceId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The service identifier (e.g., MicrosoftOffice)."
+    },
+    {
+      "Name": "CategoryId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The report category (e.g., MicrosoftCopilot, MicrosoftCopilotBCE)."
+    },
+    {
+      "Name": "Report",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The report name (e.g., CopilotActivityReport, CopilotBCEActivityReport)."
+    },
+    {
+      "Name": "active_view",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": ">-"
+    },
+    {
+      "Name": "summary-report",
+      "In": "",
+      "Type": "",
+      "Default": "",
+      "Description": ""
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 403,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The service identifier (e.g., MicrosoftOffice).",
+      "type": "string",
+      "name": "ServiceId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The report category (e.g., MicrosoftCopilot, MicrosoftCopilotBCE).",
+      "type": "string",
+      "name": "CategoryId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The report name (e.g., CopilotActivityReport, CopilotBCEActivityReport).",
+      "type": "string",
+      "name": "Report"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": ">-",
+      "type": "string",
+      "name": "active_view"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

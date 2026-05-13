@@ -1,0 +1,61 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "groups",
+  "slug": "id.dynamic,get",
+  "operationId": "Group.id.dynamic,get",
+  "path": "/Groups/{groupId}/GetDynamicGroupProperties",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get group dynamic group properties",
+  "sourceFile": "groups.yml",
+  "capturedUtc": "2026-05-12T15:13:12.3016279Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "groupId",
+      "In": "path",
+      "Type": "",
+      "Default": "",
+      "Description": "The object ID of the group to retrieve dynamic properties for."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/Groups/{groupId}/GetDynamicGroupProperties' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The object ID of the group to retrieve dynamic properties for.",
+    "type": "",
+    "name": "groupId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

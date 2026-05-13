@@ -1,0 +1,117 @@
+  /Directories/{tenantId}/Details:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: tenantId
+        description: The unique identifier of the tenant to retrieve details for.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/tenantId
+    get:
+      summary: Get directory details
+      description: >-
+        Get directory details.
+      operationId: Directories.Details.Get
+      tags: [Directory]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tenantId:
+                    $ref: common.yml#/components/schemas/tenantId
+                  usersCount:
+                    type: integer
+                    description: The number of users in the directory.
+                    example: 333
+                  groupsCount:
+                    type: integer
+                    description: The number of groups in the directory.
+                    example: 140
+                  devicesCount:
+                    type: integer
+                    description: The number of devices in the directory.
+                    example: 333
+                  applicationsCount:
+                    type: integer
+                    description: The number of applications in the directory.
+                    example: 53
+                  userObjectId:
+                    $ref: common.yml#/components/schemas/userId
+                  userDisplayName:
+                    description: The display name of the current user.
+                    type: string
+                    example: User
+                  isSubscriptionLinked:
+                    type: boolean
+                    example: false
+                  userRoles:
+                    type: array
+                    description: Roles assigned to the current user.
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          $ref: common.yml#/components/schemas/objectId
+                        displayName:
+                          description: The display name of the role.
+                          type: string
+                          example: Global Administrator
+                  signInEventsSummary:
+                    type: object
+                    properties:
+                      id:
+                        $ref: common.yml#/components/schemas/objectId
+                      userId:
+                        $ref: common.yml#/components/schemas/userId
+                      appId:
+                        $ref: common.yml#/components/schemas/applicationId
+                      activityData:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            dateTime:
+                              type: string
+                              format: date-time
+                              example: 2024-06-07T00:00:00Z
+                            dateTimeInMillis:
+                              type: integer
+                              example: 1717718400000
+                            activityCount:
+                              type: integer
+                              example: 3
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

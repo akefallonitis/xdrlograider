@@ -1,0 +1,38 @@
+  /mtp/ndr/dlpmachines/summaryStatus:
+    get:
+      operationId: getDlpMachinesSummaryStatus
+      summary: Get DLP machines summary status
+      description: >-
+        Retrieve a summary of DLP machine statuses. Returns aggregated counts
+        of machines grouped by their configuration and health status.
+      tags: [DLPDevices]
+      parameters:
+        - name: lookingBackInDays
+          in: query
+          required: false
+          description: Number of days to look back for machine activity.
+          schema:
+            type: integer
+        - name: lastPolicyUpdateTime
+          in: query
+          required: false
+          description: Filter by the last time a policy was updated on the machine.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

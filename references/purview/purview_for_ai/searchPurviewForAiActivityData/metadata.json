@@ -1,0 +1,96 @@
+{
+  "portal": "purview",
+  "subArea": "purview_for_ai",
+  "slug": "searchPurviewForAiActivityData",
+  "operationId": "searchPurviewForAiActivityData",
+  "path": "/di/search/PurviewForAIActivityData",
+  "methods": [
+    "post"
+  ],
+  "summary": "Search Purview for AI activity data",
+  "sourceFile": "purview_for_ai.yml",
+  "capturedUtc": "2026-05-12T15:11:20.2133696Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": true,
+    "startParam": "startTime",
+    "endParam": "endTime",
+    "lookbackParam": null,
+    "type": "iso8601"
+  },
+  "otherParameters": [
+    {
+      "Name": "tenantid",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The tenant GUID used by the Purview for AI service."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 403",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=startTime/endParam=endTime",
+    "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The tenant GUID used by the Purview for AI service.",
+      "type": "string",
+      "name": "tenantid"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The start of the requested time range.",
+      "type": "string",
+      "name": "startTime"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The end of the requested time range.",
+      "type": "string",
+      "name": "endTime"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": [
+    "startTime",
+    "endTime"
+  ],
+  "entities": [
+    "Tenant.Id",
+    "Time.Generated"
+  ],
+  "cadenceSuggestion": "daily"
+}

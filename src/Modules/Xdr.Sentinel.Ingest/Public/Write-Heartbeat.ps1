@@ -43,10 +43,10 @@ function Write-Heartbeat {
         Optional additional structured info (as pscustomobject).
 
     .PARAMETER OrchestrationInstanceId
-        Phase J D'.2 (2026-05-04): Durable Functions instance GUID. Null for
-        legacy direct-invocation path (Invoke-TierPollWithHeartbeat fallback).
-        Operators correlate heartbeat row to specific orchestration instance
-        for incident debugging.
+        Durable Functions orchestration GUID — set by Xdr-PollOrchestrator on
+        every cycle so heartbeat rows correlate to a specific orchestration
+        instance for incident debugging. Null for the Connector-Heartbeat
+        timer itself (it's an independent 5-min timer, not Durable).
 
     .PARAMETER DurableActivityCount
         Phase J D'.2: number of fan-out activities (Xdr-PollStream) the
@@ -56,9 +56,11 @@ function Write-Heartbeat {
         Phase J D'.2: count of activities that completed successfully.
 
     .PARAMETER FunctionType
-        Phase J D'.2: 'Simple' (Connector-Heartbeat) | 'Starter' (Defender-*-Refresh
-        timer-trigger) | 'Orchestrator' (Xdr-PollOrchestrator) | 'Activity'
-        (Xdr-PollStream).
+        4-Durable topology labels (Decision 1):
+          'Simple'       — Connector-Heartbeat (independent 5-min timer)
+          'Starter'      — Xdr-Refresh (universal 1-min timer + durableClient dispatcher)
+          'Orchestrator' — Xdr-PollOrchestrator (orchestrationTrigger fan-out)
+          'Activity'     — Xdr-PollStream (activityTrigger per-stream poll)
 
     .PARAMETER Portal
         Phase J D'.2: portal identifier (Defender|Entra|Purview|Intune). Default
@@ -92,8 +94,23 @@ function Write-Heartbeat {
         [ValidateSet('Simple', 'Starter', 'Orchestrator', 'Activity', $null)]
         [string] $FunctionType = $null,
         [ValidateSet('Defender', 'Entra', 'Purview', 'Intune')]
-        [string] $Portal = 'Defender'
+        [string] $Portal = 'Defender',
+        # H13 (Decision 15): operator-facing build pin — captured by every heartbeat
+        # row so latest XdrConnectorHealth_CL row reveals the deployed version.
+        [string] $ConnectorVersion = '',
+        [string] $ConnectorBuildId = ''
     )
+
+    # H14 (Decision 15): Notes MUST NEVER be '{}'/null (Rule 12). If caller did not
+    # supply, emit a minimal-but-populated lean form so the contract holds even on
+    # the liveness pulse. Caller-supplied Notes wins (composed lean per Heartbeat
+    # function — cardState/dlqDepth/openCircuits/fatalError).
+    $notesJson = if ($Notes) {
+        $Notes | ConvertTo-Json -Compress -Depth 5
+    } else {
+        # Minimal lean fallback — at least signals liveness with no diagnostic data.
+        '{"cardState":"Connected","dlqDepth":0,"openCircuits":0,"fatalError":null}'
+    }
 
     $row = [ordered]@{
         TimeGenerated             = [datetime]::UtcNow.ToString('o')
@@ -103,8 +120,10 @@ function Write-Heartbeat {
         StreamsSucceeded          = $StreamsSucceeded
         RowsIngested              = $RowsIngested
         LatencyMs                 = $LatencyMs
+        ConnectorVersion          = $ConnectorVersion
+        ConnectorBuildId          = $ConnectorBuildId
         HostName                  = [System.Environment]::MachineName
-        Notes                     = if ($Notes) { $Notes | ConvertTo-Json -Compress -Depth 5 } else { '{}' }
+        Notes                     = $notesJson
         OrchestrationInstanceId   = $OrchestrationInstanceId
         DurableActivityCount      = $DurableActivityCount
         DurableActivitySuccessful = $DurableActivitySuccessful

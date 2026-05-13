@@ -1,0 +1,24 @@
+  /m365appprotection/mapg-glsservice/compliance/Policy:
+    get:
+      summary: Get App Governance policy
+      description: >-
+        Retrieve a single App Governance policy record for the Defender portal's
+        policy detail experience.
+      operationId: AppGovernance.GetPolicy
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance policy response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

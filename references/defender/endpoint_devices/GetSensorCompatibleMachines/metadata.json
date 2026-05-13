@@ -1,0 +1,56 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetSensorCompatibleMachines",
+  "operationId": "EndpointDevices.GetSensorCompatibleMachines",
+  "path": "/mtp/mdi/tri/defensor/onboarding/devices/sensor_compatible_machines",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get MDI sensor-compatible machines",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:00.80692Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 403 (Forbidden).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

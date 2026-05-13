@@ -1,0 +1,28 @@
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/details:
+    get:
+      summary: List domain click events
+      description: >-
+        Return email click-through details associated with the selected domain.
+      operationId: EntityPivots.ListDomainClicks
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+        - $ref: '#/components/parameters/FirstRowIndex'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/ActionType'
+        - $ref: '#/components/parameters/ThreatTypes'
+        - $ref: '#/components/parameters/DetectionMethods'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

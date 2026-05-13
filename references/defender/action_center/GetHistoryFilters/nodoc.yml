@@ -1,0 +1,23 @@
+  /mtp/actionCenter/actioncenterui/history-actions/filters:
+    get:
+      summary: Get history actions filters
+      description: >-
+        Retrieve the available filter options for history actions in the Action Center.
+      operationId: ActionCenter.GetHistoryFilters
+      tags: [Action Center]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - history actions filter options
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

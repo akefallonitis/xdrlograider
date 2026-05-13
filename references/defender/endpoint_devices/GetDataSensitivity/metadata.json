@@ -1,0 +1,105 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetDataSensitivity",
+  "operationId": "EndpointDevices.GetDataSensitivity",
+  "path": "/mtp/getDataSensitivity/machines/{MachineId}/dataSensitivity",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get machine data sensitivity",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:11.6748828Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "MachineId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Defender machine identifier."
+    },
+    {
+      "Name": "id",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Duplicate machine identifier currently sent by the portal."
+    },
+    {
+      "Name": "tenantIds",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional cross-tenant context. The portal currently sends an empty value."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/getDataSensitivity/machines/{MachineId}/dataSensitivity' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The Defender machine identifier.",
+      "type": "string",
+      "name": "MachineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Duplicate machine identifier currently sent by the portal.",
+      "type": "string",
+      "name": "id"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional cross-tenant context. The portal currently sends an empty value.",
+      "type": "string",
+      "name": "tenantIds"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.MdatpId"
+  ],
+  "cadenceSuggestion": "daily"
+}

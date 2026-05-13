@@ -1,0 +1,12 @@
+{
+  "portal": "m365-admin",
+  "path": "/fd/msgraph/v1.0/devices/$count",
+  "method": "GET",
+  "finalUrl": "https://admin.microsoft.com/fd/msgraph/v1.0/devices/$count",
+  "httpStatus": 400,
+  "successKind": "request-shape-error",
+  "diagnostic": "Raw count (/$count) is not supported because the 'ConsistencyLevel:eventual' header is missing. Refer to https://aka.ms/graph-docs/advanced-queries for more information",
+  "contentLen": 381,
+  "rawSample": "{\"error\":{\"code\":\"Request_UnsupportedQuery\",\"message\":\"Raw count (/$count) is not supported because the 'ConsistencyLevel:eventual' header is missing. Refer to https://aka.ms/graph-docs/advanced-queries for more information\",\"innerError\":{\"date\":\"2026-05-13T07:12:16\",\"request-id\":\"302491b9-e7aa-402a-9a6f-2a3cbeae442f\",\"client-request-id\":\"302491b9-e7aa-402a-9a6f-2a3cbeae442f\"}}}",
+  "capturedUtc": "2026-05-13T07:12:15Z"
+}

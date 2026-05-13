@@ -1,0 +1,120 @@
+{
+  "portal": "defender",
+  "subArea": "sentinel_precision",
+  "slug": "ListWorkbooks",
+  "operationId": "SentinelPrecision.ListWorkbooks",
+  "path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/workbooks",
+  "methods": [
+    "get"
+  ],
+  "summary": "List Sentinel workbooks",
+  "sourceFile": "sentinel_precision.yml",
+  "capturedUtc": "2026-05-12T14:42:34.0055414Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "api-version",
+      "In": "query",
+      "Type": "string",
+      "Default": "'2018-06-17-preview'",
+      "Description": "ARM API version for workbook resources."
+    },
+    {
+      "Name": "canFetchContent",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "false",
+      "Description": "Whether the workbook content should be expanded inline."
+    },
+    {
+      "Name": "$filter",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "ARM filter expression for the backing workspace source ID."
+    },
+    {
+      "Name": "category",
+      "In": "query",
+      "Type": "string",
+      "Default": "sentinel",
+      "Description": "Workbook category to return."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/workbooks' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": "2018-06-17-preview",
+      "required": false,
+      "description": "ARM API version for workbook resources.",
+      "type": "string",
+      "name": "api-version"
+    },
+    {
+      "in": "query",
+      "default": "false",
+      "required": false,
+      "description": "Whether the workbook content should be expanded inline.",
+      "type": "boolean",
+      "name": "canFetchContent"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "ARM filter expression for the backing workspace source ID.",
+      "type": "string",
+      "name": "$filter"
+    },
+    {
+      "in": "query",
+      "default": "sentinel",
+      "required": false,
+      "description": "Workbook category to return.",
+      "type": "string",
+      "name": "category"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": "$filter",
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

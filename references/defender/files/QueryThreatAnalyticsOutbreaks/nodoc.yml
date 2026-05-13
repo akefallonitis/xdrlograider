@@ -1,0 +1,27 @@
+  /mtp/threatAnalyticsIndicators/stix/outbreaks/indicators/outbreaks/query:
+    post:
+      summary: Query threat analytics outbreaks for file hash
+      description: >-
+        Search Threat Analytics outbreak reports that reference the file hash from the file
+        page's intelligence cards.
+      operationId: Files.QueryThreatAnalyticsOutbreaks
+      tags: [Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThreatAnalyticsOutbreakQueryRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatAnalyticsOutbreakQueryResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,46 @@
+  /mtoapi/tenants/{TenantId}/huntingQueries/run:
+    post:
+      summary: Run cross-tenant hunting query
+      description: >-
+        Execute an advanced hunting query against a specific managed tenant.
+        Allows cross-tenant threat hunting from the multi-tenant management view.
+      operationId: MultiTenant.RunHuntingQuery
+      tags: [Multi-Tenant]
+      parameters:
+        - name: TenantId
+          in: path
+          required: true
+          description: The unique identifier of the target tenant.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  description: The KQL query to execute.
+                  type: string
+                timespan:
+                  description: The time span for the query.
+                  type: string
+              required:
+                - query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - hunting query results
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

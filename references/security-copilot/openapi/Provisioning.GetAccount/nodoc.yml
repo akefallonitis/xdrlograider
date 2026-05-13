@@ -1,0 +1,15 @@
+  /provisioning/account:
+    get:
+      tags: [Provisioning]
+      summary: Get Security Platform account and pod inventory
+      description: Retrieves the Security Platform account record and regional pod inventory backing the current tenant.
+      operationId: SecurityCopilotPortal.Provisioning.GetAccount
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion20240301Preview'
+      responses:
+        '200':
+          description: Account inventory returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvisioningAccountResponse'

@@ -1,0 +1,29 @@
+  /serviceProfile/v1.0/tenantrules:
+    get:
+      tags: [Servicing Profiles]
+      summary: Get tenant servicing rules
+      description: Returns tenant-wide servicing rules that apply before per-profile rule evaluation.
+      responses:
+        '200':
+          description: Tenant servicing rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantRules'
+    put:
+      tags: [Servicing Profiles]
+      summary: Update tenant servicing rules
+      description: Bundle-generated servicing-profile client exposes a PUT that persists tenant-wide servicing rules before per-profile rule evaluation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantRules'
+      responses:
+        '200':
+          description: Updated tenant servicing rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantRules'

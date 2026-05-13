@@ -1,0 +1,23 @@
+  /_api/SPO.Tenant/GetSPListRootFolderProperties:
+    post:
+      tags: [Sites]
+      summary: Get admin list root folder properties
+      description: |
+        Returns root-folder metadata for an internal SharePoint admin list.
+        Observed as a body-less POST during Active sites initialization.
+      operationId: SharePointAdmin.GetAdminListRootFolderProperties
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      responses:
+        '200':
+          description: Root folder properties returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

@@ -2,31 +2,40 @@ function Get-MDEEndpointLastResult {
     <#
     .SYNOPSIS
         Returns the truth-signal metadata from the most recent Invoke-MDEEndpoint
-        call (Section R++.A side-channel).
+        call (side-channel companion to the legacy return contract).
 
     .DESCRIPTION
         Invoke-MDEEndpoint preserves its legacy contract of returning ,@() on
         any failure (so existing callers + tests don't break). To distinguish
-        legitimate empty responses from tenant-gating from real failures, it
-        ALSO populates a module-scope $script:MDEEndpointLastResult with:
+        legitimate empty responses from license-blocked endpoints from real
+        failures, it ALSO populates a module-scope $script:MDEEndpointLastResult
+        with:
           Stream         — stream name
-          SuccessKind    — live | live-empty | tenant-gated | error
+          SuccessKind    — live | live-empty | rate-limited | error  (4 values, Rule 6)
           HttpStatus     — int (0 if helper failed before reaching HTTP)
           ErrorText      — error message (empty for live + live-empty)
+          LicenseHint    — populated when the endpoint is license-blocked
+                          (HTTP 401/403/404 + manifest-declared license requirement);
+                          carries the SKU/feature name an operator needs to
+                          unblock this stream. Surfaces in row metadata and
+                          in XdrConnectorHealth_CL Notes.perStream[X].licenseHints.
+                          Per Rule 23: licence-gated is NOT a failure mode; it's
+                          a configuration signal — SuccessKind stays 'error' but
+                          LicenseHint differentiates from genuine error.
           TimestampUtc   — when this result was set
 
-        Activity callers (Xdr-PollStream) read this AFTER each Invoke-MDEEndpoint
-        call to drive Set-XdrTierStateRow -Reason + connector-card UX.
+        Activity callers (per-sub-area timer triggers) read this AFTER each
+        Invoke-MDEEndpoint call to drive Set-XdrTierStateRow + connector-card UX.
 
     .OUTPUTS
-        [pscustomobject] with the 5 fields above, or $null if Invoke-MDEEndpoint
+        [pscustomobject] with the 6 fields above, or $null if Invoke-MDEEndpoint
         has not been called in this session.
 
     .EXAMPLE
-        $rows = @(Invoke-MDEEndpoint -Session $s -Stream 'MDE_DeviceTimeline_CL')
+        $rows = @(Invoke-MDEEndpoint -Session $s -Stream 'Defender_EndpointDevices_CL')
         $result = Get-MDEEndpointLastResult
-        if ($result.SuccessKind -eq 'tenant-gated') {
-            Write-Verbose "Stream is tenant-gated; not a failure"
+        if ($result.LicenseHint) {
+            Write-Verbose "Stream is license-blocked: needs $($result.LicenseHint)"
         }
     #>
     [CmdletBinding()]
@@ -45,16 +54,28 @@ function Set-MDEEndpointLastResult {
     param(
         [Parameter(Mandatory)] [string] $Stream,
         [Parameter(Mandatory)]
-        [ValidateSet('live', 'live-empty', 'tenant-gated', 'error')]
+        [ValidateSet('live', 'live-empty', 'rate-limited', 'error')]
         [string] $SuccessKind,
         [int] $HttpStatus = 0,
-        [string] $ErrorText = ''
+        [string] $ErrorText = '',
+        [string] $LicenseHint = '',
+        # Phase A0.3: multi-cycle pagination resume side-channel. Activity layer
+        # reads this after each Invoke-MDEEndpoint call to write checkpoint
+        # state into connectorCheckpoints. LastCompletedPage=0 + PaginationToken=''
+        # means single-cycle complete (caller should ClearPagination).
+        [int] $LastCompletedPage = 0,
+        [string] $PaginationToken = '',
+        [bool] $PaginationExhausted = $true
     )
     $script:MDEEndpointLastResult = [pscustomobject]@{
-        Stream       = $Stream
-        SuccessKind  = $SuccessKind
-        HttpStatus   = $HttpStatus
-        ErrorText    = $ErrorText
-        TimestampUtc = ([DateTime]::UtcNow).ToString('o')
+        Stream              = $Stream
+        SuccessKind         = $SuccessKind
+        HttpStatus          = $HttpStatus
+        ErrorText           = $ErrorText
+        LicenseHint         = $LicenseHint
+        LastCompletedPage   = $LastCompletedPage
+        PaginationToken     = $PaginationToken
+        PaginationExhausted = $PaginationExhausted
+        TimestampUtc        = ([DateTime]::UtcNow).ToString('o')
     }
 }

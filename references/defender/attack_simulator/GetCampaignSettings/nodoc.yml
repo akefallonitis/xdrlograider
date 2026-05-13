@@ -1,0 +1,23 @@
+  /astgws/AttackSimulator/api/v1/campaignSettings:
+    get:
+      summary: Get campaign settings
+      description: >-
+        Retrieve the campaign settings for attack simulations. Discovered on Attack Simulator page.
+      operationId: AttackSimulator.GetCampaignSettings
+      tags: [AttackSimulator]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

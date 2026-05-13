@@ -1,0 +1,23 @@
+  /mcas/api/v1/autocomplete/app-permission-permissions:
+    get:
+      summary: Autocomplete app permission permissions
+      description: >-
+        Retrieve autocomplete suggestions for app permission permissions. Discovered on OAuth Apps page.
+      operationId: CloudApps.AutocompleteAppPermissionPermissions
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

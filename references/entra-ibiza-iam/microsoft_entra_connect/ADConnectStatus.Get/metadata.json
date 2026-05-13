@@ -1,0 +1,46 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "microsoft_entra_connect",
+  "slug": "ADConnectStatus.Get",
+  "operationId": "Directories.ADConnectStatus.Get",
+  "path": "/Directories/ADConnectStatus",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get directory AD Connect status",
+  "sourceFile": "microsoft_entra_connect.yml",
+  "capturedUtc": "2026-05-12T15:13:12.3684694Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Path",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

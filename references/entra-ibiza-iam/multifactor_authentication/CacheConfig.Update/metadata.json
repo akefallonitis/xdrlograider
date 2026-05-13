@@ -1,0 +1,62 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "multifactor_authentication",
+  "slug": "CacheConfig.Update",
+  "operationId": "Mfa.CacheConfig.Update",
+  "path": "/MultiFactorAuthentication/CacheConfig/{configId}",
+  "methods": [
+    "patch"
+  ],
+  "summary": "Update MFA cache config",
+  "sourceFile": "multifactor_authentication.yml",
+  "capturedUtc": "2026-05-12T15:13:12.4589799Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "configId",
+      "In": "path",
+      "Type": "number",
+      "Default": "",
+      "Description": "The ID of the cache config."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/MultiFactorAuthentication/CacheConfig/{configId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The ID of the cache config.",
+    "type": "number",
+    "name": "configId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Policy.Id",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

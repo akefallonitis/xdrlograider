@@ -1,0 +1,16 @@
+  /settings/v1.0/SettingsCatalog/Settings:
+    get:
+      tags: [Policy Management]
+      summary: Query settings catalog entries
+      description: Returns setting definitions and metadata used by Cloud Policy policy authoring and filtering.
+      parameters:
+        - $ref: '#/components/parameters/settingsFilter'
+      responses:
+        '200':
+          description: Settings catalog entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SettingsCatalogEntry'

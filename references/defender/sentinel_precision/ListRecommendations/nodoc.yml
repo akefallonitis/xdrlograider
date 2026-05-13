@@ -1,0 +1,33 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/recommendations:
+    get:
+      summary: List Sentinel precision recommendations
+      description: >-
+        Retrieve Microsoft Sentinel Precision recommendations for the attached workspace.
+        Observed live on the Defender `/sentinel/precision` page, where the response
+        included coverage-improvement recommendations with suggested analytics rule
+        template IDs and tactic/technique guidance.
+      operationId: SentinelPrecision.ListRecommendations
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel recommendations resource.
+          schema:
+            type: string
+            default: '2024-01-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelRecommendationListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

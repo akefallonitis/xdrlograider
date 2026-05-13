@@ -1,0 +1,45 @@
+  /mtp/webThreatProtection/webThreats/reports/webThreatSummary:
+    get:
+      summary: Get web threat summary
+      description: >-
+        Retrieve the aggregate web threat counters shown in the Defender portal's web
+        threat protection reports.
+      operationId: Configuration.GetWebThreatSummary
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  TotalThreats:
+                    type: integer
+                  Phishing:
+                    type: integer
+                  Malicious:
+                    type: integer
+                  CustomIndicator:
+                    type: integer
+                  Unknown:
+                    type: integer
+                  CmdCtrl:
+                    type: integer
+                  TechScam:
+                    type: integer
+                  Untrusted:
+                    type: integer
+                  Exploit:
+                    type: integer
+                  UpdateTime:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

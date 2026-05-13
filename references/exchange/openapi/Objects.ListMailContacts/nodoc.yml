@@ -1,0 +1,18 @@
+  /beta/MailContact:
+    get:
+      tags: [Objects]
+      summary: List mail contacts
+      description: |
+        Returns the mail contact collection used by the Contacts page.
+      operationId: ExchangeBeta.Objects.ListMailContacts
+      responses:
+        '200':
+          description: Mail contacts returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

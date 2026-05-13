@@ -1,0 +1,53 @@
+{
+  "portal": "m365-admin",
+  "subArea": "app_settings",
+  "slug": "GetLearning",
+  "operationId": "AppSettings.GetLearning",
+  "path": "/admin/api/settings/apps/learning",
+  "methods": [
+    "get",
+    "post"
+  ],
+  "summary": "Get Viva Learning settings",
+  "sourceFile": "app_settings.yml",
+  "capturedUtc": "2026-05-12T15:13:24.9739172Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 403,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,20 @@
+  /api/v2.0/billing-accounts:
+    servers:
+      - url: https://monet.teams.microsoft.com
+        description: Teams add-on monetization backend
+    get:
+      tags: [TeamsMonetization]
+      summary: List Teams add-on billing accounts
+      description: |
+        Billing-account inventory used by Teams add-on licensing and storefront flows.
+      responses:
+        '200':
+          description: Billing-account payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # flworchestrator.teams.microsoft.com/amer/api

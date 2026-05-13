@@ -1,0 +1,73 @@
+{
+  "portal": "defender",
+  "subArea": "sentinel_precision",
+  "slug": "ListWorkspacePermissions",
+  "operationId": "SentinelPrecision.ListWorkspacePermissions",
+  "path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/microsoft.authorization/permissions",
+  "methods": [
+    "get"
+  ],
+  "summary": "List Sentinel workspace permissions",
+  "sourceFile": "sentinel_precision.yml",
+  "capturedUtc": "2026-05-12T14:42:34.0251052Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "api-version",
+      "In": "query",
+      "Type": "string",
+      "Default": "'2018-01-01-preview'",
+      "Description": "ARM API version for the permissions action."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/microsoft.authorization/permissions' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": "2018-01-01-preview",
+    "required": false,
+    "description": "ARM API version for the permissions action.",
+    "type": "string",
+    "name": "api-version"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

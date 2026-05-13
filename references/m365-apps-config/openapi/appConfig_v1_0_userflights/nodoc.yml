@@ -1,0 +1,12 @@
+  /appConfig/v1.0/userflights:
+    get:
+      tags: [Bootstrap]
+      summary: Get portal feature flights
+      description: Returns client-side feature flags that light up or suppress M365 Apps admin center experiences.
+      responses:
+        '200':
+          description: Portal feature flag state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFlights'

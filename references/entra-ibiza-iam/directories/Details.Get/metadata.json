@@ -1,0 +1,67 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "directories",
+  "slug": "Details.Get",
+  "operationId": "Directories.Details.Get",
+  "path": "/Directories/45f52f35-73d5-4066-8378-fe506ee90fb1/Details",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get directory details",
+  "sourceFile": "directories.yml",
+  "capturedUtc": "2026-05-12T15:13:12.1551397Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "tenantId",
+      "In": "path",
+      "Type": "",
+      "Default": "",
+      "Description": "The unique identifier of the tenant to retrieve details for."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/Directories/{tenantId}/Details' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The unique identifier of the tenant to retrieve details for.",
+    "type": "",
+    "name": "tenantId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.AadId",
+    "File.Path",
+    "Software.Name",
+    "Software.Version",
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

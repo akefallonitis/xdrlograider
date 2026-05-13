@@ -1,0 +1,19 @@
+  /api/v1/jobs:
+    servers:
+      - url: https://amer.tags.teams.microsoft.com
+        description: Regional Teams tags backend
+    get:
+      tags: [Tags]
+      summary: List Teams tags jobs
+      description: |
+        Returns current or pending jobs for the Teams tags service. The retained capture returned an empty
+        jobs collection.
+      responses:
+        '200':
+          description: Jobs collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsJobsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

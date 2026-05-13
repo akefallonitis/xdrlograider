@@ -1,0 +1,23 @@
+  /mdi/identity/userapiservice/pdProtection/mdaReports/PasswordPolicies:
+    get:
+      summary: Get password policy reports
+      description: >-
+        Retrieve the available password policy report catalog.
+      operationId: Identity.GetPasswordPolicyReports
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password policy reports
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

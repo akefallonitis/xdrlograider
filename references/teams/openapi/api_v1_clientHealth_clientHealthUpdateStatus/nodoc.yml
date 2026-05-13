@@ -1,0 +1,20 @@
+  /api/v1/clientHealth/clientHealthUpdateStatus:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: Get Teams client health update status
+      description: |
+        Client update-status route observed from `Teams client health`.
+      responses:
+        '200':
+          description: Client health update status payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

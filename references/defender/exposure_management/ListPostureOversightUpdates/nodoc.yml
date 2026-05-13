@@ -1,0 +1,30 @@
+  /mtp/posture/oversight/updates:
+    get:
+      summary: List posture oversight updates
+      description: >-
+        Retrieve pending posture oversight updates or changelog entries. Observed live on
+        the Exposure Management overview page. Response was empty during capture (no
+        pending updates in the test tenant).
+      operationId: ExposureManagement.ListPostureOversightUpdates
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: pending — update item shape not captured (empty response in test tenant).
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

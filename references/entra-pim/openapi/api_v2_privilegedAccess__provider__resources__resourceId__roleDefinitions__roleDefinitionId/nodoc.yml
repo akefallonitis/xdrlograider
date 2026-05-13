@@ -1,0 +1,16 @@
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleDefinitions/{roleDefinitionId}:
+    get:
+      tags: [Role Definitions]
+      summary: Get a specific role definition
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: roleDefinitionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Role definition details

@@ -1,0 +1,38 @@
+{
+  "subArea": "data_security_investigations",
+  "suggestedCadence": "unknown",
+  "endpointCount": 1,
+  "endpoints": [
+    {
+      "slug": "listDataSecurityInvestigations",
+      "operationId": "listDataSecurityInvestigations",
+      "path": "/dsi/api/v1/investigations",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 1,
+  "cntNoLive": 0,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [],
+  "paginationStyles": [],
+  "valueProp": "DSI cases + investigation telemetry"
+}

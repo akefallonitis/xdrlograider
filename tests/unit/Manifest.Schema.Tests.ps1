@@ -1,182 +1,101 @@
-#Requires -Modules Pester
-<#
-.SYNOPSIS
-    D'.6 v0.1.0 GA Phase 5.3 — manifest entry schema gate.
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.5.0' }
+# Manifest schema invariants — locks Phase 1 structure across rebuilds.
 
-.DESCRIPTION
-    Asserts every entry in `endpoints.manifest.psd1` has the mandatory fields
-    declared with valid enum values. Catches drift in:
+Describe 'manifests/defender.psd1 schema invariants' {
+    BeforeAll {
+        $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+        $script:ManifestPath = Join-Path $script:RepoRoot 'manifests' 'defender.psd1'
 
-      Stream         must match ^MDE_[A-Za-z0-9]+_CL$
-      Path           must start with /apiproxy/ or /api/
-      Tier           one of: ActionCenter | XspmGraph | Configuration | Inventory | Maintenance
-      Category       one of the 10 nathanmcnulty taxonomy values
-      CategoryId     1..10 (matches the 10-category taxonomy)
-      Purpose        non-empty operator-facing description
-      Availability   one of: live | tenant-gated | deprecated
-      ProjectionMap  required for non-deprecated; >=3 keys; valid type-cast hints
+        # Import via scriptblock-eval (manifest >95KB exceeds Import-PowerShellDataFile)
+        $sb = [scriptblock]::Create((Get-Content -Raw $script:ManifestPath))
+        $script:Manifest = & $sb
 
-    Conjugates with Manifest.SchemaContract.Tests.ps1 (declares the manifest is
-    correctly shaped) and Manifest.ProjectionMap.Coverage.Tests.ps1 (declares
-    projections are LA-table-safe). This file specifically gates entry-level
-    fields are present + valid enum values.
-#>
-
-BeforeAll {
-    $script:RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:ManifestPath = Join-Path $script:RepoRoot 'src/Modules/Xdr.Defender.Client/endpoints.manifest.psd1'
-    $script:Manifest = Import-PowerShellDataFile -Path $script:ManifestPath
-    $script:Endpoints = @($script:Manifest.Endpoints)
-
-    $script:ValidTiers = @('ActionCenter', 'XspmGraph', 'Configuration', 'Inventory', 'Maintenance')
-    # Section R++.B B9 (2026-05-07): added 'requires-delegated-auth'.
-    $script:ValidAvailability = @('live', 'tenant-gated', 'deprecated', 'requires-delegated-auth', 'role-gated')
-    $script:ValidCategories = @(
-        'Endpoint Device Management',
-        'Endpoint Configuration',
-        'Vulnerability Management (TVM)',
-        'Identity Protection (MDI)',
-        'Configuration and Settings',
-        'Exposure Management (XSPM)',
-        'Threat Analytics',
-        'Action Center',
-        'Multi-Tenant Operations',
-        'Streaming API'
-    )
-    $script:CategoryToCategoryId = @{
-        'Endpoint Device Management'     = 1
-        'Endpoint Configuration'          = 2
-        'Vulnerability Management (TVM)' = 3
-        'Identity Protection (MDI)'       = 4
-        'Configuration and Settings'      = 5
-        'Exposure Management (XSPM)'      = 6
-        'Threat Analytics'                = 7
-        'Action Center'                   = 8
-        'Multi-Tenant Operations'         = 9
-        'Streaming API'                   = 10
+        $script:Phase1SubAreas = @(
+            'action_center', 'attack_simulator', 'cloud_apps', 'configuration', 'data_lake',
+            'endpoint_configuration', 'endpoint_devices', 'entity_pivots', 'exposure_management',
+            'files', 'identity', 'multi_tenant', 'portal_services', 'secure_score',
+            'sentinel_precision', 'streaming', 'threat_analytics', 'vulnerability_management'
+        )
     }
-}
 
-Describe 'Manifest.Schema — required fields + valid enum values' {
+    It 'has Defaults and Endpoints top-level keys' {
+        $script:Manifest.Keys | Should -Contain 'Defaults'
+        $script:Manifest.Keys | Should -Contain 'Endpoints'
+    }
 
-    It 'every entry has Stream matching ^MDE_[A-Za-z0-9]+_CL$' {
-        foreach ($e in $script:Endpoints) {
-            $e.Stream | Should -Match '^MDE_[A-Za-z0-9]+_CL$' -Because "Stream '$($e.Stream)' must match the LA custom-table convention"
+    It 'has exactly 493 endpoint entries (492 read + 1 synthetic TenantContext)' {
+        $script:Manifest.Endpoints.Count | Should -Be 493
+    }
+
+    It 'covers all 18 Phase 1 sub-areas (excludes AH/AI/LR)' {
+        $present = @($script:Manifest.Endpoints | ForEach-Object { $_['SubArea'] } | Sort-Object -Unique)
+        $present.Count | Should -Be 18
+        foreach ($s in $script:Phase1SubAreas) {
+            $present | Should -Contain $s
         }
+        # Wholesale-excluded
+        $present | Should -Not -Contain 'advanced_hunting'
+        $present | Should -Not -Contain 'alerts_incidents'
+        $present | Should -Not -Contain 'live_response'
     }
 
-    It 'every entry has Path starting with /apiproxy/ or /api/' {
-        foreach ($e in $script:Endpoints) {
-            ($e.Path -match '^/(apiproxy|api)/') | Should -BeTrue -Because "Path '$($e.Path)' must start with /apiproxy/ or /api/ (Stream=$($e.Stream))"
-        }
+    It 'every entry has EntryKey (unique per row)' {
+        $keys = @($script:Manifest.Endpoints | ForEach-Object { $_['EntryKey'] })
+        ($keys | Where-Object { -not $_ }).Count | Should -Be 0
+        ($keys | Sort-Object -Unique).Count | Should -Be $keys.Count
     }
 
-    It 'every entry Tier is one of the 5 valid cadence-tiers' {
-        foreach ($e in $script:Endpoints) {
-            $script:ValidTiers | Should -Contain $e.Tier -Because "Stream=$($e.Stream) Tier='$($e.Tier)' must be one of: $($script:ValidTiers -join ', ')"
-        }
-    }
-
-    It 'every entry Category is one of the 10 taxonomy values' {
-        foreach ($e in $script:Endpoints) {
-            $script:ValidCategories | Should -Contain $e.Category -Because "Stream=$($e.Stream) Category='$($e.Category)' must be one of the 10 nathanmcnulty taxonomy categories"
-        }
-    }
-
-    It 'every entry CategoryId is 1..10 and matches the Category mapping' {
-        foreach ($e in $script:Endpoints) {
-            $expectedId = $script:CategoryToCategoryId[$e.Category]
-            $e.CategoryId | Should -Be $expectedId -Because "Stream=$($e.Stream) Category='$($e.Category)' must have CategoryId=$expectedId (got $($e.CategoryId))"
-        }
-    }
-
-    It 'every entry Availability is one of: live | tenant-gated | deprecated' {
-        foreach ($e in $script:Endpoints) {
-            $script:ValidAvailability | Should -Contain $e.Availability -Because "Stream=$($e.Stream) Availability='$($e.Availability)' must be one of: $($script:ValidAvailability -join ', ')"
-        }
-    }
-
-    It 'every entry has non-empty Purpose (operator-facing description)' {
-        foreach ($e in $script:Endpoints) {
-            $e.Purpose | Should -Not -BeNullOrEmpty -Because "Stream=$($e.Stream) Purpose must be a non-empty operator-facing description"
-            ([string]$e.Purpose).Length | Should -BeGreaterThan 20 -Because "Stream=$($e.Stream) Purpose='$($e.Purpose)' too terse to be useful for operators"
-        }
-    }
-
-    It 'every non-deprecated entry has ProjectionMap with >=3 typed columns' {
-        foreach ($e in $script:Endpoints) {
-            if ($e.Availability -eq 'deprecated') { continue }
-            $e.ContainsKey('ProjectionMap') | Should -BeTrue -Because "Stream=$($e.Stream) (non-deprecated) must declare ProjectionMap"
-            @($e.ProjectionMap.Keys).Count | Should -BeGreaterOrEqual 3 -Because "Stream=$($e.Stream) ProjectionMap must declare >=3 typed columns (operators query typed cols, not just RawJson)"
-        }
-    }
-
-    It 'no two entries share the same Stream name (uniqueness gate)' {
-        $names = @($script:Endpoints | ForEach-Object { $_.Stream })
-        $unique = @($names | Sort-Object -Unique)
-        $names.Count | Should -Be $unique.Count -Because 'each Stream name must be unique across the manifest'
-    }
-
-    It 'no two entries share the same Path + Method + Body (effective-path uniqueness)' {
-        # Different streams may share Path AND Method if their POST Body differs
-        # (e.g., XspmAttackPaths/XspmChokePoints/XspmTopTargets all POST to
-        # /apiproxy/mtp/xspmatlas/attacksurface/query with different body shapes
-        # — the body's `query.kind` field differentiates which response shape
-        # the endpoint returns).
-        $combos = @($script:Endpoints | ForEach-Object {
-            $method = if ($_.ContainsKey('Method')) { $_.Method } else { 'GET' }
-            $bodyHash = if ($_.ContainsKey('Body')) {
-                ($_.Body | ConvertTo-Json -Compress -Depth 10).GetHashCode().ToString()
-            } else { 'no-body' }
-            "$method $($_.Path) body=$bodyHash"
-        })
-        $unique = @($combos | Sort-Object -Unique)
-        $combos.Count | Should -Be $unique.Count -Because 'each (Path, Method, Body) combo must be unique'
-    }
-}
-
-Describe 'Manifest.Schema — Defaults block contract' {
-
-    It 'manifest exposes a Defaults block with the per-entry baseline fields' {
-        $script:Manifest.ContainsKey('Defaults') | Should -BeTrue -Because 'Get-XdrEndpointManifest layers per-entry overrides on top of Defaults'
-        $defaults = $script:Manifest.Defaults
-        # The Defaults block carries the per-entry baseline (cross-cutting fields
-        # that every Endpoint entry inherits unless explicitly overridden).
-        # Per-call HTTP defaults (Method/UserAgent/Headers/Timeout) live in
-        # Invoke-DefenderPortalRequest, NOT in the manifest data.
-        foreach ($key in 'IdProperty','Portal','SchemaSource') {
-            $defaults.ContainsKey($key) | Should -BeTrue -Because "Defaults must declare '$key' baseline (each entry inherits unless overridden)"
-        }
-    }
-}
-
-Describe 'Manifest.Schema — Optional-field contract' {
-
-    It 'every entry with UnwrapProperty has a non-empty string value' {
-        foreach ($e in $script:Endpoints) {
-            if ($e.ContainsKey('UnwrapProperty')) {
-                $e.UnwrapProperty | Should -Not -BeNullOrEmpty -Because "Stream=$($e.Stream) UnwrapProperty must be non-empty if declared"
-                ([string]$e.UnwrapProperty).Length | Should -BeGreaterThan 0
-            }
-        }
-    }
-
-    It 'every entry with SingleObjectAsRow=$true has no UnwrapProperty (mutually exclusive)' {
-        foreach ($e in $script:Endpoints) {
-            if ($e.ContainsKey('SingleObjectAsRow') -and $e.SingleObjectAsRow) {
-                $e.ContainsKey('UnwrapProperty') | Should -BeFalse -Because "Stream=$($e.Stream) cannot have both SingleObjectAsRow and UnwrapProperty"
-            }
-        }
-    }
-
-    It 'every entry with IdProperty has non-empty string array' {
-        foreach ($e in $script:Endpoints) {
-            if ($e.ContainsKey('IdProperty')) {
-                @($e.IdProperty).Count | Should -BeGreaterThan 0 -Because "Stream=$($e.Stream) IdProperty array must be non-empty"
-                foreach ($p in $e.IdProperty) {
-                    ([string]$p).Length | Should -BeGreaterThan 0 -Because "Stream=$($e.Stream) IdProperty entry must be non-empty string"
+    It 'every entry has the 7 mandatory fields' {
+        $required = @('EntryKey','Stream','Path','Tier','SubArea','Slug','Availability')
+        $missing = @()
+        foreach ($e in $script:Manifest.Endpoints) {
+            foreach ($f in $required) {
+                if (-not $e.ContainsKey($f) -or [string]::IsNullOrWhiteSpace([string]$e[$f])) {
+                    $missing += "$($e['EntryKey']) missing $f"
                 }
             }
+        }
+        $missing.Count | Should -Be 0 -Because ($missing -join '; ')
+    }
+
+    It 'every Stream follows Defender_<PascalSubArea>_CL convention (Rule 5)' {
+        $bad = @($script:Manifest.Endpoints | Where-Object {
+            $_['Stream'] -notmatch '^Defender_[A-Z][A-Za-z0-9]+_CL$'
+        })
+        $bad.Count | Should -Be 0 -Because (($bad | Select-Object -First 3 | ForEach-Object { $_['Stream'] }) -join '; ')
+    }
+
+    It 'every entry has Availability=live (Rule 23 — license-gating is runtime)' {
+        $nonLive = @($script:Manifest.Endpoints | Where-Object { $_['Availability'] -ne 'live' })
+        $nonLive.Count | Should -Be 0
+    }
+
+    It 'MaxPages cap matches Rule 14 per-sub-area' {
+        $expected = @{
+            'vulnerability_management' = 1000
+            'endpoint_devices'         = 200
+            'cloud_apps'               = 200
+            'identity'                 = 200
+            'exposure_management'      = 200
+        }
+        foreach ($sub in $expected.Keys) {
+            $sample = @($script:Manifest.Endpoints | Where-Object { $_['SubArea'] -eq $sub } | Select-Object -First 1)[0]
+            $sample['MaxPages'] | Should -Be $expected[$sub] -Because "$sub MaxPages cap per Rule 14"
+        }
+    }
+
+    It 'synthetic TenantContext entry present' {
+        $tc = @($script:Manifest.Endpoints | Where-Object { $_['EntryKey'] -eq 'portal_services::GetTenantContext' })
+        $tc.Count | Should -Be 1
+        $tc[0]['Path'] | Should -Match 'sccManagement/mgmt/TenantContext'
+    }
+
+    It 'Custom Collection path corrected to /mtp/mdeCustomCollection (NOT /mtp/customDataCollection)' {
+        $cc = @($script:Manifest.Endpoints | Where-Object { $_['Path'] -match 'CustomCollection|customDataCollection|mdeCustomCollection' })
+        $cc.Count | Should -BeGreaterThan 0
+        foreach ($e in $cc) {
+            $e['Path'] | Should -Match '/mtp/mdeCustomCollection'
+            $e['Path'] | Should -Not -Match '/mtp/customDataCollection'
         }
     }
 }

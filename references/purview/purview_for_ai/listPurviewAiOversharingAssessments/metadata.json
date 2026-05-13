@@ -1,0 +1,73 @@
+{
+  "portal": "purview",
+  "subArea": "purview_for_ai",
+  "slug": "listPurviewAiOversharingAssessments",
+  "operationId": "listPurviewAiOversharingAssessments",
+  "path": "/oversharing/api/v1/p4ai/assessment",
+  "methods": [
+    "get",
+    "get"
+  ],
+  "summary": "List Purview for AI oversharing assessments",
+  "sourceFile": "purview_for_ai.yml",
+  "capturedUtc": "2026-05-12T15:11:25.6040411Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "assessmentId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the oversharing assessment."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": "wrapper:value[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The unique identifier of the oversharing assessment.",
+    "type": "string",
+    "name": "assessmentId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

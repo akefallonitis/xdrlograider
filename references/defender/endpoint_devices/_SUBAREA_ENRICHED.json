@@ -1,0 +1,29 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "endpointCount": 48,
+  "paginationDistribution": {
+    "pageIndex0Based": 4,
+    "fromSize": 2,
+    "none": 41,
+    "pageIndex1Based": 1
+  },
+  "timeFilterEndpointCount": 0,
+  "topEntities": [
+    "Host.MdatpId",
+    "Host.FullName",
+    "Software.Version",
+    "Time.Generated",
+    "Host.RiskScore",
+    "Action.Id",
+    "Host.HealthStatus",
+    "Host.AadDeviceId"
+  ],
+  "cadenceSuggestion": "daily",
+  "productionScale": {
+    "VolumeLargeT": "10K-1M rows",
+    "RateLimitRisk": "HIGH on first poll",
+    "DeltaPollPriority": "critical"
+  },
+  "generatedUtc": "2026-05-13T07:21:38Z"
+}

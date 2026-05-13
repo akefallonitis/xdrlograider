@@ -1,0 +1,21 @@
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/{skillsetName}/skills:
+    get:
+      tags: [Builder]
+      summary: List skills for a skillset
+      description: |
+        Retrieves the skills exposed by a specific Security Copilot skillset. Confirmed live for many
+        skillsets, including `Entra`, `Sentinel`, `Purview`, `M365`, `NL2API.Assistant`,
+        `CodeExecutor`, `Investigation`, and `MCP.Sentinel`.
+      operationId: SecurityCopilotPortal.Skillsets.ListSkills
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/SkillsetName'
+        - $ref: '#/components/parameters/IncludeHidden'
+      responses:
+        '200':
+          description: Skillset skills returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'

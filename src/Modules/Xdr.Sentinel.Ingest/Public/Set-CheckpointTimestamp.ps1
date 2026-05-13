@@ -27,12 +27,35 @@ function Set-CheckpointTimestamp {
         [Parameter(Mandatory)] [string] $StorageAccountName,
         [string] $TableName = 'connectorCheckpoints',
         [Parameter(Mandatory)] [string] $StreamName,
-        [datetime] $Timestamp = [datetime]::UtcNow
+        [datetime] $Timestamp = [datetime]::UtcNow,
+
+        # Multi-cycle pagination resume (Phase A0.3). Writes page-index
+        # state for endpoints that exceed the Y1 10-min activity cap on
+        # first poll (vuln_management 1000 pages × 1s each = ~16 min).
+        # Caller may pass either, both, or neither.
+        [Nullable[int]] $LastCompletedPage,
+        [string] $PaginationToken,
+
+        # Reset both pagination fields to "complete" — caller signals
+        # that the multi-cycle resume is finished. Equivalent to passing
+        # LastCompletedPage=0 + PaginationToken=''.
+        [switch] $ClearPagination
     )
 
     try {
         $entity = @{
             LastPolledUtc = $Timestamp.ToString('o')
+        }
+        if ($ClearPagination) {
+            $entity.LastCompletedPage = 0
+            $entity.PaginationToken   = ''
+        } else {
+            if ($PSBoundParameters.ContainsKey('LastCompletedPage')) {
+                $entity.LastCompletedPage = [int]$LastCompletedPage
+            }
+            if ($PSBoundParameters.ContainsKey('PaginationToken')) {
+                $entity.PaginationToken = [string]$PaginationToken
+            }
         }
 
         Invoke-XdrStorageTableEntity `

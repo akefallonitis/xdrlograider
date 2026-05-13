@@ -1,0 +1,37 @@
+  /RequestApprovals/V2/BusinessFlows:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get request approval business flows (v2)
+      description: >-
+        Get request approval business flows (version 2).
+      operationId: RequestApprovalsV2.BusinessFlows.Get
+      parameters:
+        - $ref: common.yml#/components/parameters/nextLink
+        - $ref: common.yml#/components/parameters/top
+        - name: skip
+          description: The number of results to skip
+          in: query
+          schema:
+            type: integer
+            example: 10
+        - name: businessFlowScope
+          description: The scope of the business flow
+          in: query
+          schema:
+            type: string
+      tags: [General]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                propeties:
+                  businessFlows:
+                    type: array
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,95 @@
+  /EnterpriseApplications/{spId}/ServicePrincipalPermissions:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+      - name: consentType
+        in: query
+        description: >-
+          Which type of consents to return, `user` or `admin`.
+        schema:
+          type: string
+          enum: [user, admin]
+          example: user
+      - name: userObjectId
+        in: query
+        description: >-
+          The user for which to retrieve permission grants for.
+        schema:
+          $ref: common.yml#/components/schemas/userId
+    get:
+      summary: Get consented Enterprise Application permissions
+      description: >-
+        Get Enterprise Application (service principal) permissions
+        that have been consented within the organisation. Either by
+        `admin`, or `user`.
+      operationId: EnterpriseApplication.Permissions.Get
+      tags: [Service Principal]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    resourceName:
+                      type: string
+                      example: Microsoft Graph
+                    resourceAppId:
+                      type: string
+                      example: 5b538740-ddbd-42c6-bc28-15417ca8675f
+                    permissionType:
+                      type: string
+                      example: Delegated
+                    permissionDisplayName:
+                      type: string
+                      example: Sign in and read user profile
+                    permissionDescription:
+                      type: string
+                      example: Allows users to sign-in to the app, and allows the app to read the profile of signed-in users. It also allows the app to read basic company information of signed-in users.
+                    permissionId:
+                      type: string
+                      example: User.Read
+                    consentType:
+                      type: string
+                      example: Admin
+                    roleOrScopeClaim:
+                      type: string
+                      example: User.Read
+                    principalIds:
+                      type: array
+                      items:
+                        $ref: common.yml#/components/schemas/userId
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

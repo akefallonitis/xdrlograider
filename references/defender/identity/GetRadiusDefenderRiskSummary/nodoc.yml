@@ -1,0 +1,30 @@
+  /radius/api/radius/identities/getDefenderRiskSummary:
+    get:
+      summary: Get Defender risk summary
+      description: >-
+        Retrieve the risk-summary card for the selected identity.
+      operationId: Identity.GetRadiusDefenderRiskSummary
+      tags: [Identity]
+      parameters:
+        - name: identityId
+          in: query
+          required: true
+          description: The Defender identity identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - risk summary data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

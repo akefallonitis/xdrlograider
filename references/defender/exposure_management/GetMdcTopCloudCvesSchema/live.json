@@ -1,0 +1,92 @@
+{
+  "httpStatus": 200,
+  "successKind": "live",
+  "rowCount": 1,
+  "errorText": "",
+  "responseShape": "object",
+  "sample": {
+    "properties": {
+      "schemaId": "Dashboard_TopCloudCVEs",
+      "primaryColumnId": "cveName",
+      "columnDefinitions": [
+        {
+          "id": "cveName",
+          "dataType": "String",
+          "sourceDataType": "String",
+          "displayName": "Name",
+          "settings": {
+            "sortable": true,
+            "displayMode": "Visible",
+            "searchMode": "Always",
+            "weight": "Light"
+          }
+        },
+        {
+          "id": "severity",
+          "dataType": "cveSeverity",
+          "sourceDataType": "Dynamic",
+          "displayName": "Severity",
+          "settings": {
+            "sortable": true,
+            "sortableProperties": [
+              {
+                "propertyPath": "SeverityNumber",
+                "dataType": "Number"
+              }
+            ],
+            "displayMode": "Visible",
+            "searchMode": "OnlyIfProjected",
+            "weight": "Light"
+          }
+        },
+        {
+          "id": "cvssValue",
+          "dataType": "Number",
+          "sourceDataType": "Number",
+          "displayName": "CVSS",
+          "settings": {
+            "sortable": true,
+            "defaultSorting": {
+              "priority": 1,
+              "sortDirection": "Descending"
+            },
+            "displayMode": "Visible",
+            "searchMode": "OnlyIfProjected",
+            "weight": "Light"
+          }
+        },
+        {
+          "id": "exposedAssetsNumber",
+          "dataType": "Number",
+          "sourceDataType": "Number",
+          "displayName": "Exposed assets",
+          "settings": {
+            "sortable": true,
+            "defaultSorting": {
+              "priority": 2,
+              "sortDirection": "Descending"
+            },
+            "displayMode": "Visible",
+            "searchMode": "OnlyIfProjected",
+            "weight": "Light"
+          }
+        },
+        {
+          "id": "threats",
+          "dataType": "tags",
+          "sourceDataType": "Dynamic",
+          "displayName": "Exploits type",
+          "settings": {
+            "sortable": false,
+            "displayMode": "Visible",
+            "searchMode": "OnlyIfProjected",
+            "weight": "Light"
+          }
+        }
+      ],
+      "filterDefinitions": [],
+      "metricDefinitions": []
+    },
+    "type": "schemaResponse"
+  }
+}

@@ -1,0 +1,30 @@
+  /securityplatform/sentinelgraph/provisioning/checkTenant:
+    post:
+      summary: Check Sentinel provisioning
+      description: >-
+        Check whether the tenant has Sentinel provisioning configured
+        for the security platform data lake.
+      operationId: DataLake.CheckSentinelProvisioning
+      tags: [Data Lake]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - tenant provisioning check request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Sentinel provisioning status
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

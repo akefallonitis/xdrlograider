@@ -1,0 +1,65 @@
+{
+  "portal": "intune-autopatch",
+  "subArea": "openapi",
+  "slug": "Tenant.GetSetting",
+  "operationId": "IntuneAutopatch.Tenant.GetSetting",
+  "path": "/tenant-management/v1/TenantSetting",
+  "methods": [
+    "get",
+    "post"
+  ],
+  "summary": "Get a tenant setting",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:10.9037204Z",
+  "pagination": {
+    "style": "none",
+    "sizeParam": null,
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "endParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "plan",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Managed service plan identifier."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": true,
+    "description": "Managed service plan identifier.",
+    "type": "string",
+    "name": "plan"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

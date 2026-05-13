@@ -61,7 +61,9 @@ function Get-XdrManifestMandatoryFields {
     [CmdletBinding()]
     [OutputType([string[]])]
     param()
-    return @('Stream', 'Path', 'Tier', 'Category', 'Purpose', 'Availability')
+    # Phase 1 schema — EntryKey is the per-endpoint unique identifier;
+    # Stream identifies the DCR stream/table (shared across endpoints in a sub-area).
+    return @('EntryKey', 'Stream', 'Path', 'Tier', 'SubArea', 'Slug', 'Availability')
 }
 
 # Portal name -> client module name mapping.

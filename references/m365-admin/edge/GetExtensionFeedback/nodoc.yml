@@ -1,0 +1,24 @@
+  /fd/edgeenterpriseextensionsmanagement/api/extensions/extensionFeedback:
+    get:
+      summary: Get Edge extension feedback
+      description: >-
+        Retrieve extension feedback metadata surfaced by the Edge enterprise
+        extensions management experience.
+      operationId: Edge.GetExtensionFeedback
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Extension feedback payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

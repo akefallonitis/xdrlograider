@@ -1,0 +1,24 @@
+  /mtp/actionCenter/actioncenterui/tile:
+    get:
+      summary: Get action center tile summary
+      description: >-
+        Retrieve the Action Center tile summary data, including counts of
+        pending and completed actions.
+      operationId: ActionCenter.GetTileSummary
+      tags: [Action Center]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - action center tile summary
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

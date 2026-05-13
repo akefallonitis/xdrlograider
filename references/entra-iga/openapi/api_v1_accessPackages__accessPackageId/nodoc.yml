@@ -1,0 +1,14 @@
+  /api/v1/accessPackages/{accessPackageId}:
+    get:
+      tags: [Entitlement Management]
+      summary: Get a specific access package
+      parameters:
+        - name: accessPackageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Access package details

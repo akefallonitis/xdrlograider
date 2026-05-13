@@ -1,0 +1,509 @@
+{
+  "subArea": "portal_services",
+  "suggestedCadence": "weekly",
+  "endpointCount": 21,
+  "endpoints": [
+    {
+      "slug": "AggregateSubmissionDiesData",
+      "operationId": "PortalServices.AggregateSubmissionDiesData",
+      "path": "/di/Search/SubmissionDIESDataAggregation",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "StartTime",
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Tenant.Id",
+        "Time.Generated"
+      ],
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=StartTime/endParam=EndTime",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "AggregateThreatInstances",
+      "operationId": "PortalServices.AggregateThreatInstances",
+      "path": "/di/Aggregate/ThreatInstanceList",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "AggregateThreatProfileDetails",
+      "operationId": "PortalServices.AggregateThreatProfileDetails",
+      "path": "/di/Aggregate/ThreatProfileDetails",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "CheckAppGovernanceInsightsReady",
+      "operationId": "PortalServices.CheckAppGovernanceInsightsReady",
+      "path": "/m365appprotection/mapg-glsservice/compliance/istenantinsightsready",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "CheckAppGovernanceOnboarding",
+      "operationId": "PortalServices.CheckAppGovernanceOnboarding",
+      "path": "/m365appprotection/mapg-glsservice/compliance/istenantonboarded",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "CheckCompliancePermissions",
+      "operationId": "PortalServices.CheckCompliancePermissions",
+      "path": "/gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "FindCustomTag",
+      "operationId": "PortalServices.FindCustomTag",
+      "path": "/di/Find/CustomTag",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "FindTrialOffer",
+      "operationId": "PortalServices.FindTrialOffer",
+      "path": "/di/Find/TrialOffer",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetAttackSimUserCoverage",
+      "operationId": "PortalServices.GetAttackSimUserCoverage",
+      "path": "/astgws/AttackSimulator/api/v1/AdvanceReporting/chart/UserCoverage",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetMachineHealthStatus",
+      "operationId": "PortalServices.GetMachineHealthStatus",
+      "path": "/mtp/mdepDnH/reports/machineHealth/healthStatus",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.HealthStatus",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='data' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetMedeinaAuth",
+      "operationId": "PortalServices.GetMedeinaAuth",
+      "path": "/medeina/auth",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "GetOptimizeRecommendations",
+      "operationId": "PortalServices.GetOptimizeRecommendations",
+      "path": "/mtp/optimize/OptimizeRecommendation",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "GetSecurityCopilotTrial",
+      "operationId": "PortalServices.GetSecurityCopilotTrial",
+      "path": "/cdssecuritycopilot/trial",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "GetShellInfo",
+      "operationId": "PortalServices.GetShellInfo",
+      "path": "/shell/api/shell/shellinfo",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetSubscribedSkusGraph",
+      "operationId": "PortalServices.GetSubscribedSkusGraph",
+      "path": "/msgraph/v1.0/subscribedSkus",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 5,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Account.SamName",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=live (5 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetUserGraph",
+      "operationId": "PortalServices.GetUserGraph",
+      "path": "/msgraph/v1.0/users/{UserId}",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Account.AadId",
+        "Account.UPN"
+      ],
+      "parsingNotes": [
+        "PathTemplate — '/msgraph/v1.0/users/{UserId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetUserPreferences",
+      "operationId": "PortalServices.GetUserPreferences",
+      "path": "/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference",
+      "methods": [
+        "get",
+        "patch"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": "MDE_UserPreferences_CL",
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "GetUtcPreference",
+      "operationId": "PortalServices.GetUtcPreference",
+      "path": "/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/alwaysUseUtc",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "InvokeAdminCommand",
+      "operationId": "PortalServices.InvokeAdminCommand",
+      "path": "/admin/Beta/{tenantId}/InvokeCommand",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "no-live-pathparam",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "PathTemplate — '/admin/Beta/{tenantId}/InvokeCommand' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "ListUsersGraph",
+      "operationId": "PortalServices.ListUsersGraph",
+      "path": "/msgraph/v1.0/users",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 7,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Account.UPN",
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+        "LiveProbe=live (7 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "SearchSubmissionDiesData",
+      "operationId": "PortalServices.SearchSubmissionDiesData",
+      "path": "/di/Search/SubmissionDIESData",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "StartTime",
+      "suggestedCadence": "weekly",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Tenant.Id",
+        "Time.Generated"
+      ],
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=StartTime/endParam=EndTime",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    }
+  ],
+  "cntLive": 7,
+  "cntLiveEmpty": 1,
+  "cntError": 11,
+  "cntNoLive": 2,
+  "cntWithTimeFilter": 2,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Account.AadId",
+    "Account.SamName",
+    "Account.UPN",
+    "Host.HealthStatus",
+    "Software.Version",
+    "Tenant.Id",
+    "Time.Generated"
+  ],
+  "paginationStyles": [],
+  "valueProp": "Portal-side service state (rarely-changed; informational)"
+}

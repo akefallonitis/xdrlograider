@@ -7,11 +7,13 @@
     Author                = 'Alex Kefallonitis'
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
-    Description           = 'L1 portal-generic Sentinel ingest layer (DCE/DCR + Storage Table). Includes batch writer, heartbeat, checkpoint persistence, and DLQ. AppInsights helpers extracted to Xdr.Common.Telemetry (Phase J D''.22). Requires Az.Accounts at runtime (declared in src/requirements.psd1 for Function App; checked lazily for local dev).'
-    # Note: Az.Accounts is a runtime requirement loaded by Azure Functions managed dependencies
-    # via src/requirements.psd1. We do NOT declare it in RequiredModules so the module can
-    # be imported for unit tests even without Az installed locally; runtime calls fail with
-    # a clear error if Az.Accounts isn't present.
+    Description           = 'L1 portal-generic Sentinel ingest layer (DCE/DCR + Storage Table). Includes batch writer, heartbeat, checkpoint persistence, and DLQ. AppInsights helpers extracted to Xdr.Common.Telemetry (Phase J D''.22). Requires Az.Accounts at runtime; bundled in function-app.zip via the release pipeline (Y1 Linux Consumption does not support Managed Dependencies, so src/requirements.psd1 is intentionally empty).'
+    # Note: Az.Accounts is loaded at FA startup via profile.ps1 from the modules
+    # bundled into function-app.zip by the release workflow (pinned RequiredVersion
+    # in .github/workflows/release.yml). It is intentionally NOT declared in
+    # RequiredModules so the module can be imported for unit tests even without Az
+    # installed locally; runtime calls fail with a clear error if Az.Accounts is
+    # missing on the FA at execution time.
     # Phase J D'.22 (2026-05-04): Send-XdrAppInsights* helpers extracted to
     # Xdr.Common.Telemetry. This module declares it as a RequiredModule.
     RequiredModules       = @('Xdr.Common.Telemetry')
@@ -19,6 +21,7 @@
         'Send-ToLogAnalytics',
         'Write-Heartbeat',
         'Get-CheckpointTimestamp',
+        'Get-CheckpointState',
         'Set-CheckpointTimestamp',
         'Invoke-XdrStorageTableEntity',
         'Get-DcrImmutableIdForStream',

@@ -1,0 +1,125 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_configuration",
+  "slug": "ListDevicePolicies",
+  "operationId": "EndpointConfiguration.ListDevicePolicies",
+  "path": "/mtp/unifiedExperience/mde/configurationManagement/mem/device/{MachineId}/policies",
+  "methods": [
+    "get"
+  ],
+  "summary": "List device policy assignments",
+  "sourceFile": "endpoint_configuration.yml",
+  "capturedUtc": "2026-05-12T14:38:21.7721469Z",
+  "pagination": {
+    "tokenParam": null,
+    "style": "pageIndex1Based",
+    "sizeParam": "pageSize",
+    "defaults": {
+      "pageSize": "25"
+    },
+    "indexParam": "page"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "MachineId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Defender machine identifier for the device."
+    },
+    {
+      "Name": "aadDeviceId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Microsoft Entra device identifier when the device is Intune-managed."
+    },
+    {
+      "Name": "isManagedByMde",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "",
+      "Description": "Whether the device is managed directly by Defender for Endpoint."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/unifiedExperience/mde/configurationManagement/mem/device/{MachineId}/policies' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "Pagination=pageIndex1Based — index starts at 1",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The Defender machine identifier for the device.",
+      "type": "string",
+      "name": "MachineId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The Microsoft Entra device identifier when the device is Intune-managed.",
+      "type": "string",
+      "name": "aadDeviceId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "Whether the device is managed directly by Defender for Endpoint.",
+      "type": "boolean",
+      "name": "isManagedByMde"
+    },
+    {
+      "in": "query",
+      "default": "1",
+      "required": false,
+      "description": "Page number for paginated policy results.",
+      "type": "integer",
+      "name": "page"
+    },
+    {
+      "in": "query",
+      "default": "25",
+      "required": false,
+      "description": "Number of policy assignments to return.",
+      "type": "integer",
+      "name": "pageSize"
+    }
+  ],
+  "paginationStyle": "pageIndex1Based",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.AadDeviceId",
+    "Host.MdatpId"
+  ],
+  "cadenceSuggestion": "6h"
+}

@@ -1,0 +1,30 @@
+  /admin/api/agentusers/metrics/agents/risky:
+    get:
+      summary: Get risky agents
+      description: >-
+        Retrieve a list of agents flagged as risky based on usage metrics and security analysis.
+      operationId: Agents.GetRiskyAgents
+      tags: [Agents]
+      parameters:
+        - name: maxCount
+          in: query
+          description: Maximum number of risky agents to return. Use 0 for no limit.
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: List of risky agents. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

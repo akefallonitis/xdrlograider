@@ -1,0 +1,50 @@
+  /mtp/getMachine/machines:
+    get:
+      summary: Get endpoint device details
+      description: >-
+        Retrieve detailed information about a specific endpoint device
+        by its machine ID.
+      operationId: EndpointDevices.Get
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+        - name: idType
+          in: query
+          required: true
+          description: The type of identifier used.
+          schema:
+            type: string
+            enum: [SenseMachineId]
+            default: SenseMachineId
+        - name: readFromCache
+          in: query
+          description: Whether to read from cache.
+          schema:
+            type: boolean
+            default: true
+        - name: lookingBackIndays
+          in: query
+          description: Number of days to look back.
+          schema:
+            type: integer
+            default: 180
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetail'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

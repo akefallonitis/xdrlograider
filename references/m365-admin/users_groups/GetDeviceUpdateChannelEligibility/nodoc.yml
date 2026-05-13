@@ -1,0 +1,23 @@
+  /admin/api/users/deviceupdatechanneleligibility:
+    get:
+      summary: Get device update channel eligibility
+      description: >-
+        Retrieve device update channel eligibility information for users (Users > Active).
+      operationId: UsersGroups.GetDeviceUpdateChannelEligibility
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

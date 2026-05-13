@@ -1,0 +1,72 @@
+  /mtp/ndr/machines:
+    get:
+      summary: List endpoint devices
+      description: >-
+        Retrieve a paginated list of endpoint devices from the device inventory.
+        Supports filtering by low-fidelity devices and configurable lookback period.
+      operationId: EndpointDevices.List
+      tags: [Endpoint Devices]
+      parameters:
+        - name: hideLowFidelityDevices
+          in: query
+          description: Exclude low-fidelity (unmanaged) devices from results.
+          schema:
+            type: boolean
+            default: true
+        - name: lookingBackIndays
+          in: query
+          description: Number of days to look back for device activity.
+          schema:
+            type: integer
+            default: 30
+        - name: pageIndex
+          in: query
+          description: Page number (1-based).
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of devices per page.
+          schema:
+            type: integer
+            default: 25
+        - name: sortByField
+          in: query
+          description: Field to sort results by.
+          schema:
+            type: string
+            default: riskscore
+        - name: sortOrder
+          in: query
+          description: Sort direction.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+        - name: machineSearchPrefix
+          in: query
+          description: Filter devices by name prefix.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      machines:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Device'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

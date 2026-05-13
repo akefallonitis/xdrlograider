@@ -1,0 +1,215 @@
+{
+  "subArea": "dlp_devices",
+  "suggestedCadence": "unknown",
+  "endpointCount": 8,
+  "endpoints": [
+    {
+      "slug": "getDlpMachineCount",
+      "operationId": "getDlpMachineCount",
+      "path": "/mtp/ndr/dlpmachines/count",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "getDlpMachineFilters",
+      "operationId": "getDlpMachineFilters",
+      "path": "/mtp/ndr/dlpmachines/filters",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "getDlpMachinesSummaryStatus",
+      "operationId": "getDlpMachinesSummaryStatus",
+      "path": "/mtp/ndr/dlpmachines/summaryStatus",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "getEndpointDlpLogCollectionSettings",
+      "operationId": "getEndpointDlpLogCollectionSettings",
+      "path": "/edlp/dlpInternalApi/api/cloud/dlp/logCollectionsSetting",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "getMtpTenantContext",
+      "operationId": "getMtpTenantContext",
+      "path": "/mtp/sccManagement/mgmt/TenantContext",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Account.AadId",
+        "Tenant.Id"
+      ],
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "listDlpMachines",
+      "operationId": "listDlpMachines",
+      "path": "/mtp/ndr/dlpmachines",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "pageIndex-unknown",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 7,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Host.OsPlatform",
+        "Host.HealthStatus",
+        "Time.Generated",
+        "Host.FullName"
+      ],
+      "parsingNotes": [
+        "ResponseShape=Array — no UnwrapProperty; iterate top-level items",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live (7 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "listEndpointDlpLogCollections",
+      "operationId": "listEndpointDlpLogCollections",
+      "path": "/edlp/dlpInternalApi/api/cloud/dlp/logCollections/",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Host.MdatpId",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "queryIncidentAlerts",
+      "operationId": "queryIncidentAlerts",
+      "path": "/mtp/incidentQueue/incidents/alerts",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 415,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=error/415 — operator should check live response body for diagnosis"
+      ]
+    }
+  ],
+  "cntLive": 4,
+  "cntLiveEmpty": 0,
+  "cntError": 4,
+  "cntNoLive": 0,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 1,
+  "entitiesAvailable": [
+    "Account.AadId",
+    "Host.FullName",
+    "Host.HealthStatus",
+    "Host.MdatpId",
+    "Host.OsPlatform",
+    "Tenant.Id",
+    "Time.Generated"
+  ],
+  "paginationStyles": [
+    "pageIndex-unknown"
+  ],
+  "valueProp": "Endpoint DLP policy state + device coverage"
+}

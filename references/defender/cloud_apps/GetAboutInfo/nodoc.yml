@@ -1,0 +1,23 @@
+  /mcas/cas/api/about/info:
+    get:
+      summary: Get Cloud Apps tenant info
+      description: >-
+        Retrieve the Defender for Cloud Apps locale, region, and tenant metadata from
+        the About experience.
+      operationId: CloudApps.GetAboutInfo
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAboutInfoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

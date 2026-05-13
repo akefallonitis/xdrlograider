@@ -1,92 +1,82 @@
 function Set-XdrTierStateRow {
     <#
     .SYNOPSIS
-        Writes/upserts a per-stream tier-state row to Storage table XdrTierState.
+        Writes/upserts a per-sub-area state row to the XdrTierState storage table.
+        Producer side of the ConnectorHeartbeat chain (Rule 12).
 
     .DESCRIPTION
-        Called by Xdr-PollStream activity at its FINAL step (after Send-ToLogAnalytics
-        succeeds). The row is later aggregated by Connector-Heartbeat to populate
-        XdrConnectorHealth_CL with per-(Portal, Tier) StreamsSucceeded/RowsIngested
-        metrics — which the Sentinel data-connector card's connectivityCriteria
-        uses to flip the card to "Connected".
+        Called by each per-sub-area timer trigger at its FINAL step. ConnectorHeartbeat
+        reads the aggregate (Get-XdrTierStateAggregate) every 5 minutes to compose
+        the populated Notes JSON for XdrConnectorHealth_CL.
 
-        Per-stream granularity (PartitionKey=Tier, RowKey=Stream) lets Connector-Heartbeat
-        compute per-tier aggregates via a single Storage Table query.
+        Two parameter sets:
 
-        Activities CAN do non-deterministic work (Storage writes, current time) per
-        Microsoft Durable Functions docs. This is the architecturally-correct place
-        for the per-tier StreamsSucceeded signal.
+        ByProperties (Phase 1+):
+            Set-XdrTierStateRow -StorageAccountName ... -PartitionKey 'Defender' `
+                -RowKey 'action_center' -Properties @{ Tier='ActionCenter'; ... }
+            One row per <Portal>::<SubArea>; arbitrary columns via -Properties.
 
-    .PARAMETER StorageAccountName
-        FA's Storage account (same as connectorCheckpoints + xdrIngestDlq).
+        BySchema (pilot compat):
+            Set-XdrTierStateRow -StorageAccountName ... -Portal 'Defender' `
+                -Tier 'ActionCenter' -Stream 'Defender_ActionCenter_CL' `
+                -RowsIngested 5 -Reason 'live' -OperationId $opId
+            Pilot's per-stream signature; emits row with PartitionKey='Portal|Tier'
+            RowKey=Stream. Retained for backward compat; new code uses ByProperties.
 
-    .PARAMETER TableName
-        Storage table name. Default: 'XdrTierState'.
-
-    .PARAMETER Portal
-        Logical portal name (Defender / Entra / Purview / Intune). Stored as a
-        column for v0.2.0+ multi-portal aggregation.
-
-    .PARAMETER Tier
-        ActionCenter | XspmGraph | Configuration | Inventory | Maintenance.
-
-    .PARAMETER Stream
-        Stream identifier (e.g. 'MDE_ActionCenter_CL').
-
-    .PARAMETER RowsIngested
-        Number of rows successfully ingested.
-
-    .PARAMETER Success
-        Whether the per-stream poll succeeded.
-
-    .PARAMETER ErrorText
-        Error message if Success=$false; null otherwise.
-
-    .PARAMETER OperationId
-        Correlation/operation ID for stitching telemetry across timer→orch→activity→ingest.
+        Per Rule 6, the 4-value SuccessKind set is live/live-empty/rate-limited/error.
+        ‘tenant-gated’ retired (replaced by ‘error’ + LicenseHint per Rule 23).
 
     .OUTPUTS
         None. Side-effect: PUT row to Storage Table (upsert).
-
-    .EXAMPLE
-        Set-XdrTierStateRow -StorageAccountName 'xdrlrst' -Portal 'Defender' `
-            -Tier 'ActionCenter' -Stream 'MDE_ActionCenter_CL' `
-            -RowsIngested 5 -Success $true -OperationId $opId
     #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'ByProperties')]
     param(
         [Parameter(Mandatory)] [string] $StorageAccountName,
         [string] $TableName = 'XdrTierState',
-        [Parameter(Mandatory)] [ValidateSet('Defender','Entra','Purview','Intune')] [string] $Portal,
-        [Parameter(Mandatory)] [ValidateSet('ActionCenter','XspmGraph','Configuration','Inventory','Maintenance')] [string] $Tier,
-        [Parameter(Mandatory)] [string] $Stream,
-        [int] $RowsIngested = 0,
-        [bool] $Success = $true,
-        [string] $ErrorText = '',
-        [string] $OperationId = '',
 
-        # Section R++.A: truth-signal classification per Invoke-MDEEndpoint
-        # SuccessKind. Lets Connector-Heartbeat aggregator + connector-card
-        # query distinguish "tenant doesn't have feature" from "real failure"
-        # from "live but no rows this poll" from "live with rows".
-        [ValidateSet('live','live-empty','tenant-gated','error','')]
+        # ByProperties (Phase 1+ per-sub-area pattern)
+        [Parameter(Mandatory, ParameterSetName = 'ByProperties')] [string] $PartitionKey,
+        [Parameter(Mandatory, ParameterSetName = 'ByProperties')] [string] $RowKey,
+        [Parameter(Mandatory, ParameterSetName = 'ByProperties')] [hashtable] $Properties,
+
+        # BySchema (pilot compat — to be deprecated in v0.3.0)
+        [Parameter(Mandatory, ParameterSetName = 'BySchema')]
+        [ValidateSet('Defender','Entra','Purview','Intune')] [string] $Portal,
+        [Parameter(Mandatory, ParameterSetName = 'BySchema')]
+        [ValidateSet('ActionCenter','XspmGraph','Configuration','Inventory','Maintenance')] [string] $Tier,
+        [Parameter(Mandatory, ParameterSetName = 'BySchema')] [string] $Stream,
+        [Parameter(ParameterSetName = 'BySchema')] [int] $RowsIngested = 0,
+        [Parameter(ParameterSetName = 'BySchema')] [bool] $Success = $true,
+        [Parameter(ParameterSetName = 'BySchema')] [string] $ErrorText = '',
+        [Parameter(ParameterSetName = 'BySchema')] [string] $OperationId = '',
+        [Parameter(ParameterSetName = 'BySchema')]
+        [ValidateSet('live','live-empty','rate-limited','error','')]
         [string] $Reason = '',
-        [int] $HttpStatus = 0
+        [Parameter(ParameterSetName = 'BySchema')] [int] $HttpStatus = 0
     )
 
-    $entity = @{
-        PartitionKey  = "$Portal|$Tier"
-        RowKey        = $Stream
-        TimestampUtc  = ([DateTime]::UtcNow).ToString('o')
-        Portal        = $Portal
-        Tier          = $Tier
-        Stream        = $Stream
-        RowsIngested  = $RowsIngested
-        Success       = $Success
-        ErrorText     = $ErrorText
-        OperationId   = $OperationId
-        Reason        = $Reason
-        HttpStatus    = $HttpStatus
+    if ($PSCmdlet.ParameterSetName -eq 'ByProperties') {
+        $entity = @{
+            PartitionKey = $PartitionKey
+            RowKey       = $RowKey
+            TimestampUtc = ([DateTime]::UtcNow).ToString('o')
+        }
+        foreach ($k in $Properties.Keys) { $entity[$k] = $Properties[$k] }
+    } else {
+        $entity = @{
+            PartitionKey  = "$Portal|$Tier"
+            RowKey        = $Stream
+            TimestampUtc  = ([DateTime]::UtcNow).ToString('o')
+            Portal        = $Portal
+            Tier          = $Tier
+            Stream        = $Stream
+            RowsIngested  = $RowsIngested
+            Success       = $Success
+            ErrorText     = $ErrorText
+            OperationId   = $OperationId
+            Reason        = $Reason
+            HttpStatus    = $HttpStatus
+        }
     }
 
     # Reuse the existing Invoke-XdrStorageTableEntity helper which handles SAMI auth.

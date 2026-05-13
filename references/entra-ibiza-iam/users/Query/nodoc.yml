@@ -1,0 +1,154 @@
+  /Users:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Query users
+      description: >-
+        Query users from the directory, returning a list of user records.
+      operationId: User.Query
+      tags: [Users]
+      parameters:
+        - $ref: common.yml#/components/parameters/top
+        - $ref: common.yml#/components/parameters/nextLink
+        - $ref: common.yml#/components/parameters/searchText
+        - name: orderByThumnails
+          description: Switch to order by thumbnails
+          in: query
+          schema:
+            type: boolean
+        - name: maxThumbnailCount
+          description: The maximum number of thumbnails to return.
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: filterValue
+          in: query
+          description: pending.
+          schema:
+            type: string
+            nullable: true
+          example: All
+        - name: state
+          in: query
+          description: pending.
+          schema:
+            type: string
+            nullable: true
+          example: All
+        - name: adminUnit
+          in: query
+          description: The object ID of an Administrative Unit to filter results by.
+          schema:
+            type: string
+            nullable: true
+            format: uuid
+          example: e9351d4d-faeb-4051-b288-1b419672f990
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/user'
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+    delete:
+      summary: Delete users
+      description: >-
+        Delete users by providing a list of user Object IDs.
+      operationId: User.Delete
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/userId
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: common.yml#/components/schemas/userId
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: common.yml#/components/schemas/userId
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

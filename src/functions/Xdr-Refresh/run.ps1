@@ -41,6 +41,24 @@ if (-not $Starter) {
 
 $nowUtc = [DateTime]::UtcNow
 
+# Rule 15 stagger seed: deterministic per-partition offset modulo cadence.
+# Without stagger, all daily-cadence (Portal, Tier) advances align to
+# baseTime + cadence — at v0.2.0+ multi-portal, 4 portals × Inventory tier
+# would fire within the same 1-min window. SHA1(partitionKey)→uint32→mod
+# cadenceSeconds distributes NextRunUtc across the cadence window.
+function Get-XdrStaggerSeconds {
+    param([string]$PartitionKey, [int]$CadenceSeconds)
+    if ($CadenceSeconds -le 60) { return 0 }  # No stagger needed for short cadences
+    $sha = [System.Security.Cryptography.SHA1]::Create()
+    try {
+        $bytes = $sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($PartitionKey))
+        $uint = [BitConverter]::ToUInt32($bytes, 0)
+        return [int]($uint % [uint32]$CadenceSeconds)
+    } finally {
+        $sha.Dispose()
+    }
+}
+
 # Read the schedule rows. Each row's PartitionKey='Portal|Tier', RowKey='__schedule__'.
 $scheduleRows = @()
 try {
@@ -90,8 +108,10 @@ foreach ($portal in $enabledPortals) {
                 Write-Information "Xdr-Refresh: started orchestration $instanceId for $partitionKey"
                 $dispatchedCount++
 
-                # Update schedule row: nextRunUtc = now + cadence.
-                $nextNext = $nowUtc + $cadenceMap[$tier]
+                # Update schedule row: nextRunUtc = now + cadence + Rule 15 stagger offset.
+                $cadenceSec = [int]$cadenceMap[$tier].TotalSeconds
+                $staggerSec = Get-XdrStaggerSeconds -PartitionKey $partitionKey -CadenceSeconds $cadenceSec
+                $nextNext = $nowUtc + $cadenceMap[$tier] + [TimeSpan]::FromSeconds($staggerSec)
                 $scheduleEntity = @{
                     PartitionKey   = $partitionKey
                     RowKey         = '__schedule__'

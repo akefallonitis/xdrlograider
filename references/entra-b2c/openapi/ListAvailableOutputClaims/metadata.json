@@ -1,0 +1,58 @@
+{
+  "portal": "entra-b2c",
+  "subArea": "openapi",
+  "slug": "ListAvailableOutputClaims",
+  "operationId": "UserAttributes.ListAvailableOutputClaims",
+  "path": "/api/userAttribute/GetAvailableOutputClaimsList",
+  "methods": [
+    "get"
+  ],
+  "summary": "List available output claims for custom user attributes",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:14.0515007Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "sizeParam": null,
+    "defaults": {},
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "type": null,
+    "startParam": null,
+    "supported": false,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "$orderby",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional ordering applied to the returned claim definitions."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": false,
+    "description": "Optional ordering applied to the returned claim definitions.",
+    "type": "string",
+    "name": "$orderby"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

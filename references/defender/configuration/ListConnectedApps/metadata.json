@@ -1,0 +1,64 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "ListConnectedApps",
+  "operationId": "Configuration.ListConnectedApps",
+  "path": "/mtp/responseApiPortal/apps/all",
+  "methods": [
+    "get"
+  ],
+  "summary": "List connected apps",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:38:01.0518205Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_ConnectedApps_CL",
+    "v1Tier": "Configuration",
+    "v1Category": "Configuration and Settings",
+    "v1RawPath": "/apiproxy/mtp/responseApiPortal/apps/all"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Name"
+  ],
+  "cadenceSuggestion": "weekly"
+}

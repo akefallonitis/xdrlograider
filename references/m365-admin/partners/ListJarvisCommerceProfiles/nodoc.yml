@@ -1,0 +1,30 @@
+  /fd/jarvisCM/my-org/profiles:
+    get:
+      summary: List Jarvis commerce profiles
+      description: >-
+        Retrieve commerce-management profiles for the current organization as used
+        by the partner relationships experience.
+      operationId: Partners.ListJarvisCommerceProfiles
+      tags: [Partners]
+      parameters:
+        - name: type
+          in: query
+          description: Profile type filter applied by the commerce management service.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Jarvis commerce profile payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

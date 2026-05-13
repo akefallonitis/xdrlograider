@@ -1,0 +1,29 @@
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/details:
+    get:
+      summary: List email events for URL
+      description: >-
+        Return the email delivery details table shown on URL investigation
+        pages.
+      operationId: EntityPivots.ListUrlEmails
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+        - $ref: '#/components/parameters/FirstRowIndex'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/DeliveryAction'
+        - $ref: '#/components/parameters/OriginalDeliveryLocation'
+        - $ref: '#/components/parameters/LatestDeliveryLocation'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

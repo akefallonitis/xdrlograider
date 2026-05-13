@@ -1,0 +1,57 @@
+{
+  "portal": "defender",
+  "subArea": "exposure_management",
+  "slug": "GetPostureOversightMetricIds",
+  "operationId": "ExposureManagement.GetPostureOversightMetricIds",
+  "path": "/mtp/posture/oversight/metrics/ids",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get posture metric IDs",
+  "sourceFile": "exposure_management.yml",
+  "capturedUtc": "2026-05-12T14:39:31.6820636Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 142,
+    "errorText": "",
+    "responseShape": "wrapper:results[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live (142 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "1h"
+}

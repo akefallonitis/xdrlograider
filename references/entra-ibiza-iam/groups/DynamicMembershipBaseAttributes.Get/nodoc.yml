@@ -1,0 +1,19 @@
+  /Groups/GetSupportedDynamicMembershipBaseAttributes/{id}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: id
+        description: pending
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get dynamic membership base attribute
+      description: Get dynamic membership base attribute.
+      operationId: Group.DynamicMembershipBaseAttributes.Get
+      tags: [Groups]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,199 @@
+{
+  "subArea": "password_reset",
+  "suggestedCadence": "unknown",
+  "endpointCount": 8,
+  "endpoints": [
+    {
+      "slug": "ConditionalAccessPolicyInfo.List",
+      "operationId": "PasswordReset.ConditionalAccessPolicyInfo.List",
+      "path": "/PasswordReset/ListConditionalAccessPolicyInfo",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "Execute",
+      "operationId": "PasswordReset.Execute",
+      "path": "/PasswordReset/ResetPasswordByUpn",
+      "methods": [
+        "put"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Account.UPN",
+        "Software.Version"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "OnPremisesPasswordResetAvailable.Check",
+      "operationId": "PasswordReset.OnPremisesPasswordResetAvailable.Check",
+      "path": "/PasswordReset/IsOnPremisesPasswordResetAvailable",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "OnPremisesPasswordResetPolicies.Get",
+      "operationId": "PasswordReset.OnPremisesPasswordResetPolicies.Get",
+      "path": "/PasswordReset/OnPremisesPasswordResetPolicies",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "PasswordResetPolicies.Get",
+      "operationId": "PasswordReset.PasswordResetPolicies.Get",
+      "path": "/PasswordReset/PasswordResetPolicies",
+      "methods": [
+        "get",
+        "put"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "ResetPasswordByObjectIdAllowed.Check",
+      "operationId": "PasswordReset.ResetPasswordByObjectIdAllowed.Check",
+      "path": "/PasswordReset/IsResetPasswordByObjectIdAllowed",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Account.AadId",
+        "Account.UPN",
+        "Software.Version"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "ResetPasswordByUpnAllowed.Check",
+      "operationId": "PasswordReset.ResetPasswordByUpnAllowed.Check",
+      "path": "/PasswordReset/IsResetPasswordByUpnAllowed",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Account.UPN",
+        "Software.Version"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "WritebackConnectivityStatus.Check",
+      "operationId": "PasswordReset.WritebackConnectivityStatus.Check",
+      "path": "/PasswordReset/CheckWritebackConnectivityStatus",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 0,
+  "cntNoLive": 8,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Account.AadId",
+    "Account.UPN",
+    "Software.Version"
+  ],
+  "paginationStyles": [],
+  "valueProp": "SSPR config + reset history"
+}

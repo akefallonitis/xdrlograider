@@ -1,0 +1,51 @@
+  /mdc/views/inventory/ai-agents-v3/agents-current-count-by-platform-metrics:
+    post:
+      summary: Get AI agent counts by platform
+      description: >-
+        Retrieve the current AI-agent counts by platform for the Defender for Cloud
+        AI inventory experience.
+      operationId: Configuration.GetAiAgentCountsByPlatform
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                platforms:
+                  type: string
+                  description: Comma-separated AI platforms to include.
+                paging:
+                  type: object
+                  description: Paging settings for the metric query.
+              required:
+                - platforms
+                - paging
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AI-agent metric table response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

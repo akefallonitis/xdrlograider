@@ -1,0 +1,46 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "multifactor_authentication",
+  "slug": "Groups.List",
+  "operationId": "Mfa.Groups.List",
+  "path": "/MultiFactorAuthentication/Group",
+  "methods": [
+    "get"
+  ],
+  "summary": "List MFA groups",
+  "sourceFile": "multifactor_authentication.yml",
+  "capturedUtc": "2026-05-12T15:13:12.4861117Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 403,
+  "lastDiagnostic": "Unauthorized",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

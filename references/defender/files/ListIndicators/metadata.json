@@ -1,0 +1,88 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "ListIndicators",
+  "operationId": "Files.ListIndicators",
+  "path": "/mtp/papin/api/cloud/public/internal/indicators/getQuery",
+  "methods": [
+    "get"
+  ],
+  "summary": "Find matching file indicators",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:07.8036575Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "tiIndicator",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The file hash to search for in the indicator store."
+    },
+    {
+      "Name": "type",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Indicator entity type."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The file hash to search for in the indicator store.",
+      "type": "string",
+      "name": "tiIndicator"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "Indicator entity type.",
+      "type": "string",
+      "name": "type"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

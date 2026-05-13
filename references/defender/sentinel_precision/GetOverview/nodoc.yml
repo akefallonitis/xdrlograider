@@ -1,0 +1,46 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/overview:
+    post:
+      summary: Get Sentinel overview sections
+      description: >-
+        Retrieve selected overview sections for the Defender portal's Microsoft Sentinel
+        Precision experience. Observed live on the `/sentinel/precision` route with the
+        `DataConnectors` section, which returns connector activity, ingestion snapshots,
+        and unhealthy connector state for the attached Sentinel workspace.
+      operationId: SentinelPrecision.GetOverview
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: sections
+          in: query
+          description: Comma-separated overview sections to return.
+          schema:
+            type: string
+            default: DataConnectors
+          example: DataConnectors
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel overview resource.
+          schema:
+            type: string
+            default: '2022-09-01-preview'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SentinelOverviewRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelOverviewResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

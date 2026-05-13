@@ -1,0 +1,27 @@
+  /mtp/unifiedConnectors/public/connectors/checkrequirements:
+    get:
+      summary: Check unified connector requirements
+      description: >-
+        Retrieve workload activation and permission requirements for the unified connector
+        catalog.
+      operationId: Configuration.CheckUnifiedConnectorRequirements
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permissionStatus:
+                    type: object
+                    description: Permission status grouped by protection type.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

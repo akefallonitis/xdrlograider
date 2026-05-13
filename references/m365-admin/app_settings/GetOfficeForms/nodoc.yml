@@ -1,0 +1,47 @@
+  /admin/api/settings/apps/officeforms:
+    get:
+      summary: Get Microsoft Forms settings
+      description: >-
+        Retrieve the Microsoft Forms (Office Forms) application settings for the tenant.
+      operationId: AppSettings.GetOfficeForms
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Microsoft Forms settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Microsoft Forms settings
+      description: >-
+        Update the Microsoft Forms application settings for the tenant.
+      operationId: AppSettings.SetOfficeForms
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Forms settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,19 @@
+  /_api/TenantInformationCollection:
+    get:
+      tags: [Tenant]
+      summary: Get tenant information collection
+      description: |
+        Returns the multigeo tenant information surfaced by the SharePoint admin
+        center, including tenant, root-site, and MySite domains.
+      operationId: SharePointAdmin.GetTenantInformationCollection
+      responses:
+        '200':
+          description: Tenant information returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

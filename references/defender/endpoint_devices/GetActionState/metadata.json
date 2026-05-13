@@ -1,0 +1,90 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetActionState",
+  "operationId": "EndpointDevices.GetActionState",
+  "path": "/mtp/responseApiPortal/requests/machinestate",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get device response action state",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:39:10.3029459Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "machineId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Defender machine identifier."
+    },
+    {
+      "Name": "overrideCache",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "false",
+      "Description": "Whether the portal should bypass cached machine action state."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The Defender machine identifier.",
+      "type": "string",
+      "name": "machineId"
+    },
+    {
+      "in": "query",
+      "default": "false",
+      "required": false,
+      "description": "Whether the portal should bypass cached machine action state.",
+      "type": "boolean",
+      "name": "overrideCache"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Host.MdatpId"
+  ],
+  "cadenceSuggestion": "daily"
+}

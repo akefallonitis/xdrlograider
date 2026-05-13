@@ -1,0 +1,24 @@
+  /mtp/actionCenter/actioncenterui/pending-actions/pending-actions-summary:
+    get:
+      summary: Get pending actions summary
+      description: >-
+        Retrieve a summary of pending actions in the Action Center,
+        including counts by action type and status.
+      operationId: ActionCenter.GetPendingSummary
+      tags: [Action Center]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - pending actions summary data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

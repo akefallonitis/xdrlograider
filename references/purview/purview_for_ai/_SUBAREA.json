@@ -1,0 +1,348 @@
+{
+  "subArea": "purview_for_ai",
+  "suggestedCadence": "unknown",
+  "endpointCount": 14,
+  "endpoints": [
+    {
+      "slug": "getPurviewAiHubActionsStatus",
+      "operationId": "getPurviewAiHubActionsStatus",
+      "path": "/cpm/v1.0/Tenant/AIHubActionsStatus",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "getPurviewAiIrmTenantStatus",
+      "operationId": "getPurviewAiIrmTenantStatus",
+      "path": "/WdatpPublicApi/irm/tenant/status",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "getPurviewDefaultDataShareWorkspace",
+      "operationId": "getPurviewDefaultDataShareWorkspace",
+      "path": "/medeina/settings/datashare/defaultWorkspace",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "getPurviewForAiInsights",
+      "operationId": "getPurviewForAiInsights",
+      "path": "/di/find/PurviewForAI",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "startTime",
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Tenant.Id",
+        "Time.Generated"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=startTime/endParam=endTime",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "getPurviewForAiSettings",
+      "operationId": "getPurviewForAiSettings",
+      "path": "/di/find/PurviewForAISetting",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "listDspmAiAgents",
+      "operationId": "listDspmAiAgents",
+      "path": "/gws/dspmaimtapp/api/v1/Agents",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 415,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=error/415 — operator should check live response body for diagnosis"
+      ]
+    },
+    {
+      "slug": "listPurviewAgentDefinitions",
+      "operationId": "listPurviewAgentDefinitions",
+      "path": "/medeina/agentDefinitions",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Name",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "listPurviewAiOversharingAssessments",
+      "operationId": "listPurviewAiOversharingAssessments",
+      "path": "/oversharing/api/v1/p4ai/assessment",
+      "methods": [
+        "get",
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live-empty",
+      "liveHttpStatus": 200,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+      ]
+    },
+    {
+      "slug": "registerPurviewAiTenant",
+      "operationId": "registerPurviewAiTenant",
+      "path": "/oversharing/api/v1/p4ai/tenant/register",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    },
+    {
+      "slug": "searchDspmAiScenarios",
+      "operationId": "searchDspmAiScenarios",
+      "path": "/gws/dspmaimtapp/api/v1/scenariosearch",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 415,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=error/415 — operator should check live response body for diagnosis"
+      ]
+    },
+    {
+      "slug": "searchPurviewDataAssessmentsInsights",
+      "operationId": "searchPurviewDataAssessmentsInsights",
+      "path": "/di/search/PurviewDataAssessmentsInsights",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "startTime",
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Tenant.Id",
+        "Time.Generated"
+      ],
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=startTime/endParam=endTime",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "searchPurviewForAiActivityData",
+      "operationId": "searchPurviewForAiActivityData",
+      "path": "/di/search/PurviewForAIActivityData",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "startTime",
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 403,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Tenant.Id",
+        "Time.Generated"
+      ],
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=startTime/endParam=endTime",
+        "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+      ]
+    },
+    {
+      "slug": "validatePurviewAiFabricStoredSettings",
+      "operationId": "validatePurviewAiFabricStoredSettings",
+      "path": "/oversharing/api/v1/p4ai/tenantSettings/validateStored/fabric",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    },
+    {
+      "slug": "validatePurviewAiStoredSettings",
+      "operationId": "validatePurviewAiStoredSettings",
+      "path": "/oversharing/api/v1/p4ai/tenantSettings/validateStored",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 404,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+      ]
+    }
+  ],
+  "cntLive": 2,
+  "cntLiveEmpty": 1,
+  "cntError": 11,
+  "cntNoLive": 0,
+  "cntWithTimeFilter": 3,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Software.Name",
+    "Tenant.Id",
+    "Time.Generated"
+  ],
+  "paginationStyles": [],
+  "valueProp": "DSPM for AI + oversharing assessments + AI governance posture"
+}

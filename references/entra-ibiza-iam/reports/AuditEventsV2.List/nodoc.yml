@@ -1,0 +1,165 @@
+  /Reports/AuditEventsV2:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: List audit events (v2)
+      description: List audit events (version 2)
+      operationId: Reports.AuditEventsV2.List
+      tags: [Reports]
+      parameters:
+        - $ref: common.yml#/components/parameters/nextLink
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Event ID
+                          example: Directory_2b543b6d-e04b-4503-bcd1-5f2ae3041f43_9MSPE_52276570
+                        category:
+                          type: string
+                          description: The category of the event.
+                          example: RoleManagement
+                        correlationId:
+                          type: string
+                          description: The correlation ID of the event.
+                          format: uuid
+                          example: 2b543b6d-e04b-4503-bcd1-5f2ae3041f43
+                        result:
+                          type: string
+                          description: The event result.
+                          enum: [success, failure]
+                          example: success
+                        resultReason:
+                          type: string
+                          description: The reason for the event result.
+                          example: ''
+                        activityDisplayName:
+                          type: string
+                          description: Display name for the activity.
+                          example: Remove member from role
+                        activityDateTime:
+                          type: string
+                          description: The timestamp of the event.
+                          format: date-time
+                          example: 2024-06-08T15:24:41.4631178+00:00
+                        loggedByService:
+                          type: string
+                          description: The service that logged the event.
+                          example: Core Directory
+                        initiatedBy:
+                          type: object
+                          description: The principal that initiated the event.
+                          properties:
+                            user:
+                              type: object
+                              properties:
+                                id:
+                                  $ref: common.yml#/components/schemas/userId
+                                displayName:
+                                  type: string
+                                  description: The display name of the user.
+                                  nullable: true
+                                  example: null
+                                userPrincipalName:
+                                  $ref: common.yml#/components/schemas/userPrincipalName
+                                ipAddress:
+                                  type: string
+                                  description: The IP address from which the action was performed.
+                                  example: 1.1.1.1
+                                homeTenantId:
+                                  $ref: common.yml#/components/schemas/tenantId
+                                homeTenantName:
+                                  description: The name of the principal's home tenant (if external).
+                                  type: string
+                                  nullable: true
+                                  example: null
+                        userAgent:
+                          type: string
+                          description: The user agent used in the request.
+                          nullable: true
+                          example: true
+                        targetResources:
+                          type: object
+                          properties:
+                            id:
+                              $ref: common.yml#/components/schemas/objectId
+                            displayName:
+                              description: The display name of the resource.
+                              type: string
+                              nullable: true
+                              example: null
+                            type:
+                              description: The type of target.
+                              type: string
+                              enum: [User]
+                              example: User
+                            userPrincipalName:
+                              $ref: common.yml#/components/schemas/userPrincipalName
+                            groupType:
+                              type: string
+                              nullable: true
+                              example: null
+                            modifiedProperties:
+                              type: object
+                              properties:
+                                displayName:
+                                  description: The display name of the property.
+                                  type: string
+                                  example: Role.ObjectID
+                                oldValue:
+                                  description: The old value of the property.
+                                  type: string
+                                  nullable: true
+                                  example: "\"0d143a05-b222-45d6-aefc-faf2669a37c9\""
+                                newValue:
+                                  description: The new value of the property.
+                                  type: string
+                                  nullable: true
+                                  example: null
+                        additionalProperties:
+                          type: array
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

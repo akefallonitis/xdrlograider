@@ -1,0 +1,59 @@
+{
+  "portal": "defender",
+  "subArea": "portal_services",
+  "slug": "GetSubscribedSkusGraph",
+  "operationId": "PortalServices.GetSubscribedSkusGraph",
+  "path": "/msgraph/v1.0/subscribedSkus",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get subscribed SKUs via Graph proxy",
+  "sourceFile": "portal_services.yml",
+  "capturedUtc": "2026-05-12T14:42:11.9191298Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "weekly",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 5,
+    "errorText": "",
+    "responseShape": "wrapper:value[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)",
+    "LiveProbe=live (5 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.SamName"
+  ],
+  "cadenceSuggestion": "daily"
+}

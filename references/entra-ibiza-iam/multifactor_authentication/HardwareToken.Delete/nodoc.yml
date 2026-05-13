@@ -1,0 +1,14 @@
+  /MultiFactorAuthentication/HardwareToken/remove:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Remove MFA hardware token
+      description: >-
+        Remote MFA hardware token.
+      operationId: Mfa.HardwareToken.Delete
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

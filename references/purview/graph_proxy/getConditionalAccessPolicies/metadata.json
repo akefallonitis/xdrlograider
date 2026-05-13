@@ -1,0 +1,72 @@
+{
+  "portal": "purview",
+  "subArea": "graph_proxy",
+  "slug": "getConditionalAccessPolicies",
+  "operationId": "getConditionalAccessPolicies",
+  "path": "/msgraph/beta/identity/conditionalAccess/policies",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get conditional access policies",
+  "sourceFile": "graph_proxy.yml",
+  "capturedUtc": "2026-05-12T15:10:47.4088928Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "$filter",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "OData filter expression to narrow policies."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": "wrapper:value[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='value' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": false,
+    "description": "OData filter expression to narrow policies.",
+    "type": "string",
+    "name": "$filter"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": "$filter",
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

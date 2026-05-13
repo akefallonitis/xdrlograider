@@ -1,0 +1,60 @@
+  /MultiFactorAuthentication/TenantModel/LicenseKey:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: tenantName
+        description: The name of the tenant
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: hasMFALicense
+        description: Whether the tenant has MFA license
+        in: query
+        required: false
+        schema:
+          type: boolean
+    get:
+      summary: Get tenant MFA license key
+      description: >-
+        Get tenant MFA license key.
+      operationId: Mfa.LicenseKey.Get
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ABC123CBA321
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

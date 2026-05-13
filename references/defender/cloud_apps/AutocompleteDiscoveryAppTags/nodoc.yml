@@ -1,0 +1,23 @@
+  /mcas/cas/api/v1/autocomplete/discovery_app_tags:
+    get:
+      summary: Autocomplete discovery app tags
+      description: >-
+        Retrieve autocomplete suggestions for Cloud Discovery app tags.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.AutocompleteDiscoveryAppTags
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

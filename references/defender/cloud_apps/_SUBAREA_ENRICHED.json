@@ -1,0 +1,22 @@
+{
+  "portal": "defender",
+  "subArea": "cloud_apps",
+  "endpointCount": 92,
+  "paginationDistribution": {
+    "none": 92
+  },
+  "timeFilterEndpointCount": 0,
+  "topEntities": [
+    "Software.Version",
+    "Software.Name",
+    "Url.Path",
+    "Account.Sid"
+  ],
+  "cadenceSuggestion": "daily",
+  "productionScale": {
+    "VolumeLargeT": "10K+ audit/day",
+    "RateLimitRisk": "HIGH (MCAS audit)",
+    "DeltaPollPriority": "critical"
+  },
+  "generatedUtc": "2026-05-13T07:21:33Z"
+}

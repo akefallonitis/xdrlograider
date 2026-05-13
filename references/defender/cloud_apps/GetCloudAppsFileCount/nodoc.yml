@@ -1,0 +1,29 @@
+  /mcas/cas/api/v1/files/count:
+    post:
+      summary: Get Cloud Apps file count
+      description: >-
+        Return the Defender for Cloud Apps prevalence count for a file hash under a
+        selected malware policy. This call is used by the Defender file page.
+      operationId: Files.GetCloudAppsFileCount
+      tags: [CloudApps, Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: files.yml#/components/schemas/CloudAppsFileCountRequest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: files.yml#/components/schemas/CloudAppsFileCountResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,32 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectors:
+    get:
+      summary: List Sentinel data connectors
+      description: >-
+        Retrieve the Sentinel data connectors rendered by the Defender Precision
+        experience. Observed live returning both static connector cards and the concrete
+        `MicrosoftThreatProtection` connector resource with enabled alert and incident data types.
+      operationId: SentinelPrecision.ListDataConnectors
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel data connectors resource.
+          schema:
+            type: string
+            default: '2021-10-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelDataConnectorListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

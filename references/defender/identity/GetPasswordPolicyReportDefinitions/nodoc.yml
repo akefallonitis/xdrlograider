@@ -1,0 +1,23 @@
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/PasswordPolicies:
+    get:
+      summary: Get password policy report definitions
+      description: >-
+        Retrieve report definitions for password policy findings.
+      operationId: Identity.GetPasswordPolicyReportDefinitions
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password policy report definitions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

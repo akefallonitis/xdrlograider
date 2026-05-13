@@ -1,0 +1,90 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "ListFileSubmissions",
+  "operationId": "Configuration.ListFileSubmissions",
+  "path": "/mtp/CustomerSubmissionService/file/enterprise/query/{TenantId}",
+  "methods": [
+    "get"
+  ],
+  "summary": "List file submissions",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:37:58.6049679Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "TenantId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The Microsoft Entra tenant identifier."
+    },
+    {
+      "Name": "trackingId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional client tracking identifier added by the portal."
+    }
+  ],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/CustomerSubmissionService/file/enterprise/query/{TenantId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "The Microsoft Entra tenant identifier.",
+      "type": "string",
+      "name": "TenantId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional client tracking identifier added by the portal.",
+      "type": "string",
+      "name": "trackingId"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

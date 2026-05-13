@@ -1,0 +1,17 @@
+  /pods/{podId}/policystore/workspaces/{workspaceName}/workspacePolicy:
+    get:
+      tags: [Workspace]
+      summary: Get workspace policy document
+      description: Retrieves the workspace policy document used by the Manage workspaces page to show role and permission assignments.
+      operationId: SecurityCopilotPortal.WorkspacePolicy.Get
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/ApiVersion20240101Preview'
+      responses:
+        '200':
+          description: Workspace policy returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'

@@ -1,0 +1,52 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "claim_providers",
+  "slug": "List",
+  "operationId": "ClaimProvider.List",
+  "path": "/ClaimProviders",
+  "methods": [
+    "get",
+    "post",
+    "put",
+    "delete"
+  ],
+  "summary": "List claim provider",
+  "sourceFile": "claim_providers.yml",
+  "capturedUtc": "2026-05-12T15:13:11.9488263Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

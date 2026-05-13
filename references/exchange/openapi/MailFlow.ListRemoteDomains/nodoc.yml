@@ -1,0 +1,19 @@
+  /beta/RemoteDomain:
+    get:
+      tags: [MailFlow]
+      summary: List remote domains
+      description: |
+        Returns remote domain configuration surfaced by the Remote domains page, including
+        domain name, auto-reply behavior, forwarding settings, and NDR options.
+      operationId: ExchangeBeta.MailFlow.ListRemoteDomains
+      responses:
+        '200':
+          description: Remote domains returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

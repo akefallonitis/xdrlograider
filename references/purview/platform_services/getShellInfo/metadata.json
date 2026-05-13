@@ -1,0 +1,106 @@
+{
+  "portal": "purview",
+  "subArea": "platform_services",
+  "slug": "getShellInfo",
+  "operationId": "getShellInfo",
+  "path": "/shell/api/shell/shellinfo",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get portal shell info",
+  "sourceFile": "platform_services.yml",
+  "capturedUtc": "2026-05-12T15:11:06.8657417Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "CultureName",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The culture/locale name for localized content (e.g., en-US)."
+    },
+    {
+      "Name": "CurrentMainLinkId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The identifier of the currently active main navigation link."
+    },
+    {
+      "Name": "TrackingGuid",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "A GUID for tracking the shell info request."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The culture/locale name for localized content (e.g., en-US).",
+      "type": "string",
+      "name": "CultureName"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The identifier of the currently active main navigation link.",
+      "type": "string",
+      "name": "CurrentMainLinkId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "A GUID for tracking the shell info request.",
+      "type": "string",
+      "name": "TrackingGuid"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

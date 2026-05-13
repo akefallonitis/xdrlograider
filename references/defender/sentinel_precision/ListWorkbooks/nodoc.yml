@@ -1,0 +1,49 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/workbooks:
+    get:
+      summary: List Sentinel workbooks
+      description: >-
+        Retrieve workbook resources associated with the attached Sentinel workspace.
+        Observed live on the Defender Sentinel Workbooks page with a `sourceId`
+        filter and `category=sentinel`.
+      operationId: SentinelPrecision.ListWorkbooks
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - name: api-version
+          in: query
+          description: ARM API version for workbook resources.
+          schema:
+            type: string
+            default: '2018-06-17-preview'
+        - name: canFetchContent
+          in: query
+          description: Whether the workbook content should be expanded inline.
+          schema:
+            type: boolean
+            default: false
+        - name: $filter
+          in: query
+          description: ARM filter expression for the backing workspace source ID.
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Workbook category to return.
+          schema:
+            type: string
+            default: sentinel
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - workbook resource list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

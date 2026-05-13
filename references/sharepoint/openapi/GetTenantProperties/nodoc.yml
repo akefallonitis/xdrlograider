@@ -1,0 +1,22 @@
+  /_api/SPO.Tenant:
+    get:
+      tags: [Settings]
+      summary: Get selected SPO tenant properties
+      description: |
+        Returns selected tenant-level properties from the `SPO.Tenant` service.
+        Observed with projections such as `DelayDenyAddAndCustomizePagesEnforcement`
+        and `SyntexBillingSubscriptionSettings`.
+      operationId: SharePointAdmin.GetTenantProperties
+      parameters:
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: Selected tenant properties returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

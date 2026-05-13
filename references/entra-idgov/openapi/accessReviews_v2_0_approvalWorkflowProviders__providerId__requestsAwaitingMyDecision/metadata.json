@@ -1,0 +1,87 @@
+{
+  "portal": "entra-idgov",
+  "subArea": "openapi",
+  "slug": "accessReviews_v2_0_approvalWorkflowProviders__providerId__requestsAwaitingMyDecision",
+  "operationId": null,
+  "path": "/accessReviews/v2.0/approvalWorkflowProviders/aadroles/requestsAwaitingMyDecision",
+  "methods": [
+    "get"
+  ],
+  "summary": "List access review requests awaiting my decision",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:16.0663386Z",
+  "pagination": {
+    "sizeParam": "$count",
+    "tokenParam": null,
+    "style": "none",
+    "indexParam": null,
+    "defaults": {}
+  },
+  "timeFilter": {
+    "supported": false,
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "endParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "$select",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Comma-separated list of properties to include in the response."
+    },
+    {
+      "Name": "$orderby",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "OData ordering expression applied to the result set."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requestsAwaitingMyDecision' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "request-shape-error",
+  "lastHttpStatus": 400,
+  "lastDiagnostic": "Invalid partnerId guid 'aadroles' passed in",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Include the total count of matching access reviews.",
+      "type": "boolean",
+      "name": "$count"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Comma-separated list of properties to include in the response.",
+      "type": "string",
+      "name": "$select"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "OData ordering expression applied to the result set.",
+      "type": "string",
+      "name": "$orderby"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

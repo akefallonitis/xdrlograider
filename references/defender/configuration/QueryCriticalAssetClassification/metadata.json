@@ -1,0 +1,73 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "QueryCriticalAssetClassification",
+  "operationId": "Configuration.QueryCriticalAssetClassification",
+  "path": "/mtp/xspmatlas/assetrules/querybuilder/assets/{encodedRuleName}",
+  "methods": [
+    "get"
+  ],
+  "summary": "Query critical asset classification",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:37:11.5752947Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "encodedRuleName",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The URL-encoded rule name to query."
+    }
+  ],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/xspmatlas/assetrules/querybuilder/assets/{encodedRuleName}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The URL-encoded rule name to query.",
+    "type": "string",
+    "name": "encodedRuleName"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Url.Path"
+  ],
+  "cadenceSuggestion": "1h"
+}

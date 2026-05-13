@@ -1,0 +1,23 @@
+  /access-control/odata/v1/ScopeTags:
+    get:
+      tags: [Roles]
+      summary: Get scope tags for a permission
+      description: |
+        Returns scope tags applicable to a Windows Autopatch permission. Recovered from the roles
+        bundle and confirmed with a GET probe.
+      operationId: IntuneAutopatch.Roles.GetScopeTags
+      parameters:
+        - $ref: '#/components/parameters/permission'
+      responses:
+        '200':
+          description: Scope tags returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataStringCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

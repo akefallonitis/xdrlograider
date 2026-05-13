@@ -1,0 +1,24 @@
+  /mcas/cas/api/v1/lcnc_settings:
+    get:
+      summary: Get low-code no-code settings
+      description: >-
+        Retrieve low-code/no-code governance settings used by Defender for Cloud
+        Apps. Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetLcncSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

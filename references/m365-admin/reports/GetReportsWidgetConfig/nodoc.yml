@@ -1,0 +1,23 @@
+  /admin/api/reports/GetReportsWidgetConfig:
+    get:
+      summary: Get reports widget configuration
+      description: >-
+        Retrieve widget configuration for the usage reports dashboard layout (Reports > Usage).
+      operationId: Reports.GetReportsWidgetConfig
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

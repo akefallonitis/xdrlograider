@@ -1,0 +1,60 @@
+  /cometd/connect:
+    post:
+      tags: [RealtimeRelay]
+      summary: Poll the Viva Engage realtime relay
+      description: |
+        Long-poll Bayeux connect request sent after the relay handshake and subscriptions are in
+        place.
+      operationId: RealtimeRelay_PostConnect
+      security: []
+      servers:
+        - url: https://{relayHost}
+          description: Tenant- and user-scoped realtime relay host returned by the authenticated Viva Engage shell.
+          variables:
+            relayHost:
+              default: relay-instance.rt.yammer.com
+              description: Placeholder for the transient `*.rt.yammer.com` relay host returned by `RealtimeConnectionSettingsClients`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealtimeCometdEnvelope'
+            examples:
+              connectRequest:
+                summary: Relay connect long-poll
+                value:
+                  - id: "9"
+                    channel: /meta/connect
+                    connectionType: long-polling
+                    clientId: relay-client-id
+      x-nodoc-operation-context:
+        surface: Realtime long-poll
+        workflows:
+          - Complete the Bayeux handshake and any required subscriptions against the relay host returned by `RealtimeConnectionSettingsClients`.
+          - Post `/meta/connect` envelopes to `/cometd/connect` to maintain the realtime channel.
+        headerProfile: viva-engage-realtime-relay
+        availability:
+          level: tenant-conditional
+          notes:
+            - The captured connect requests continued the relay session without `Authorization` or cookie headers.
+            - The successful response returned relay advice such as reconnect timing on earlier connect cycles.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - The default Edge profile captured repeated successful `/meta/connect` long-polls after the relay subscriptions were established.
+      responses:
+        '200':
+          description: Successful relay connect response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealtimeCometdEnvelope'
+              examples:
+                connectResponse:
+                  summary: Successful relay connect response
+                  value:
+                    - channel: /meta/connect
+                      id: "9"
+                      successful: true

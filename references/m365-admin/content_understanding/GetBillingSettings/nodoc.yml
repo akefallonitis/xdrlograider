@@ -1,0 +1,34 @@
+  /admin/api/contentunderstanding/billingSettings:
+    get:
+      summary: Get content understanding billing settings
+      description: >-
+        Retrieve billing settings for Content Understanding services, including pay-as-you-go
+        configuration that complements the Syntex billing helpers.
+      operationId: ContentUnderstanding.GetBillingSettings
+      tags: [ContentUnderstanding]
+      x-nodoc-operation-context:
+        surface: Copilot > Settings > Content understanding
+        workflows:
+          - Open pay-as-you-go or Content Understanding settings and inspect billing configuration.
+        headerProfile: m365-admin-homepage
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals Content Understanding cmdlet.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Content Understanding billing settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

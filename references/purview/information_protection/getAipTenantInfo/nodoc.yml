@@ -1,0 +1,24 @@
+  /aip/api/TenantInfo:
+    get:
+      operationId: getAipTenantInfo
+      summary: Get Information Protection tenant info
+      description: >-
+        Retrieve Information Protection tenant metadata used by Purview's
+        Information protection scanner settings experience.
+      tags: [InformationProtection]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

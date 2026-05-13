@@ -1,0 +1,16 @@
+  /ClassicPolicies/Delete:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    delete:
+      summary: Delete classic policy
+      description: >-
+        Delete classic policy by object ID.
+      operationId: ClassicPolicies.Detail.Delete
+      tags: [Classic Policies]
+      requestBody:
+        $ref: 'common.yml#/components/requestBodies/unknownRequest'
+      responses:
+        '200':
+          $ref: 'common.yml#/components/responses/UnknownResponse'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

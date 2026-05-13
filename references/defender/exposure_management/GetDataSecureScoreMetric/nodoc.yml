@@ -1,0 +1,28 @@
+  /mtp/posture/oversight/metrics/category_data_secure_score:
+    get:
+      summary: Get data secure score metric
+      description: >-
+        Retrieve the category-specific secure score metric used by the Defender portal's
+        Exposure Management data tab.
+      operationId: ExposureManagement.GetDataSecureScoreMetric
+      tags: [Exposure Management]
+      parameters:
+        - name: fullData
+          in: query
+          description: Return the full metric history and recommendation payload.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostureSecureScoreMetric'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

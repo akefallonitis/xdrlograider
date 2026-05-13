@@ -1,0 +1,24 @@
+  /fd/msgraph/beta/deviceManagement:
+    get:
+      summary: Get device management root
+      description: >-
+        Retrieve the Microsoft Graph beta deviceManagement root used by the Edge
+        management experience.
+      operationId: GraphProxy.GetDeviceManagementRoot
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Device management root payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

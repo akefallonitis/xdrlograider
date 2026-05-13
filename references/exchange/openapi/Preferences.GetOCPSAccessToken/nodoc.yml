@@ -1,0 +1,18 @@
+  /beta/UserProfile/ExchangeAdminCenter.GetOCPSAccessToken():
+    get:
+      tags: [Preferences]
+      summary: Get an OCPS access token
+      description: |
+        Retrieves the OCPS token requested by the Exchange admin center shell during startup.
+      operationId: ExchangeBeta.Preferences.GetOCPSAccessToken
+      responses:
+        '200':
+          description: OCPS token payload returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

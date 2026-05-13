@@ -1,0 +1,106 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "GetProfile",
+  "operationId": "Files.GetProfile",
+  "path": "/mtp/detectionCyberProfile/api/detection/cyberprofileprovider/user/profiles/file",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get file cyber profile",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:00.61177Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "searchBy",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Selects which file hash field the `id` parameter contains."
+    },
+    {
+      "Name": "id",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The file hash to resolve."
+    },
+    {
+      "Name": "UseCyberProfileProviderService",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Feature flag sent by the current portal client."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "Selects which file hash field the `id` parameter contains.",
+      "type": "string",
+      "name": "searchBy"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The file hash to resolve.",
+      "type": "string",
+      "name": "id"
+    },
+    {
+      "in": "query",
+      "default": "true",
+      "required": false,
+      "description": "Feature flag sent by the current portal client.",
+      "type": "boolean",
+      "name": "UseCyberProfileProviderService"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Sha1",
+    "File.Sha256"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,83 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "GetActionResult",
+  "operationId": "EndpointDevices.GetActionResult",
+  "path": "/mtp/responseApiPortal/requests/{ActionId}",
+  "methods": [
+    "get",
+    "delete"
+  ],
+  "summary": "Get device action result",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:38:31.1492547Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "ActionId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the action."
+    },
+    {
+      "Name": "ActionId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The unique identifier of the action to stop."
+    }
+  ],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/responseApiPortal/requests/{ActionId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The unique identifier of the action.",
+    "type": "string",
+    "name": "ActionId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Action.Id",
+    "Host.MdatpId",
+    "Time.Generated"
+  ],
+  "cadenceSuggestion": "weekly"
+}

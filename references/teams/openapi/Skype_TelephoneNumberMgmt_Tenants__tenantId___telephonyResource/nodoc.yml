@@ -1,0 +1,23 @@
+  /Skype.TelephoneNumberMgmt/Tenants/{tenantId}/{telephonyResource}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: Get tenant telephone-number management resources
+      description: |
+        Generic tenant telephony route used by the Teams voice administration surface for KYC briefs,
+        phone-number tags, aggregation, and raw telephone-number inventory.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/TelephonyResource'
+        - $ref: '#/components/parameters/Locale'
+      responses:
+        '200':
+          description: Tenant telephony resource payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

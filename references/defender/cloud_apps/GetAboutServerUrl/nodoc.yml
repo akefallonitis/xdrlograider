@@ -1,0 +1,25 @@
+  /mcas/cas/api/about/server_url:
+    get:
+      summary: Get Cloud Apps portal URL
+      description: >-
+        Retrieve the tenant-specific Defender for Cloud Apps portal URL used by the
+        current environment.
+      operationId: CloudApps.GetAboutServerUrl
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uri
+                example: https://contoso.us2.portal.cloudappsecurity.com
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

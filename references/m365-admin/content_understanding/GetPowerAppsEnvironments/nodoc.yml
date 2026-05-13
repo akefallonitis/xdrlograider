@@ -1,0 +1,24 @@
+  /admin/api/contentunderstanding/powerAppsEnvironments:
+    get:
+      summary: Get Power Apps environments for content understanding
+      description: >-
+        Retrieve the Power Apps environment inventory surfaced by the Content Understanding
+        settings experience.
+      operationId: ContentUnderstanding.GetPowerAppsEnvironments
+      tags: [ContentUnderstanding]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Power Apps environment payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

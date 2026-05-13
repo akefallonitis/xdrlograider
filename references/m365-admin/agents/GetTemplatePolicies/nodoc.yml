@@ -1,0 +1,31 @@
+  /admin/api/agenttemplates/getpolicies:
+    get:
+      summary: Get agent template policies
+      description: >-
+        Retrieve policies governing agent templates in the tenant, including creation
+        and deployment permissions.
+      operationId: Agents.GetTemplatePolicies
+      tags: [Agents]
+      parameters:
+        - name: expand
+          in: query
+          description: Whether to expand policy details.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Agent template policies. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

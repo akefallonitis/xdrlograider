@@ -1,0 +1,35 @@
+  /api/v1/oauth2/aad_access_token:
+    get:
+      tags: [AuthHelpers]
+      summary: Probe Viva Engage AAD access-token state
+      description: |
+        Cross-host bearer-backed helper request issued during the authenticated Viva Engage admin
+        landing flow. The route appears to help the shell validate or refresh token state before
+        other admin calls proceed.
+      operationId: AuthHelpers_GetAadAccessToken
+      servers:
+        - url: https://api.engage.cloud.microsoft
+          description: Viva Engage cross-host token helper host
+      x-nodoc-operation-context:
+        surface: Admin shell bootstrap
+        workflows:
+          - Open `https://engage.cloud.microsoft/main/admin` and allow the shell bootstrap flow to initialize cross-host auth helpers after MSAL sign-in completes.
+        headerProfile: viva-engage-token-helper
+        availability:
+          level: tenant-conditional
+          notes:
+            - The authenticated landing capture observed this bearer-backed GET request without a request body.
+            - The browser aborted the helper response after headers were received, so the response body was not retained in the capture artifacts.
+            - The shipped bundle still constructs this route through Yammer-named helper code and can add `X-Yammer-ThirdPartyCookieBlocked` when that condition is detected.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - The helper request was captured directly from the default Edge profile during the authenticated admin landing flow.
+      responses:
+        '200':
+          description: Token-helper response observed, but response content was not retained by the capture after the browser aborted the request.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

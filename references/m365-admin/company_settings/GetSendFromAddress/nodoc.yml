@@ -1,0 +1,46 @@
+  /admin/api/Settings/company/sendfromaddress:
+    get:
+      summary: Get send-from address settings
+      description: >-
+        Retrieve the custom send-from email address settings for system notifications.
+      operationId: CompanySettings.GetSendFromAddress
+      tags: [CompanySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - send-from address settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set send-from address settings
+      description: >-
+        Update the custom send-from email address for system notifications.
+      operationId: CompanySettings.SetSendFromAddress
+      tags: [CompanySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - send-from address update body
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

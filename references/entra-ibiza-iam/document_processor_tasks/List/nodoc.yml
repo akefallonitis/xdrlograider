@@ -1,0 +1,13 @@
+  /DocumentProcessorTasks/ListTasks:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List document processor tasks
+      description: List document processor tasks.
+      operationId: DocumentProcessorTasks.List
+      tags: [Document Processor Tasks]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

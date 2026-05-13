@@ -1,0 +1,31 @@
+  /mcas/cas/api/v1/discovery/discovered_apps/categories:
+    post:
+      summary: List discovered app categories
+      description: >-
+        Retrieve category aggregates for the current discovered-apps query. Observed
+        live posting sort and stream context and returning `id`/`total` category buckets.
+      operationId: CloudApps.ListDiscoveredAppCategories
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - discovered app category aggregation query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered app category buckets
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

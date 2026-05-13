@@ -1,0 +1,24 @@
+  /mtp/autoIr/ui/properties:
+    get:
+      summary: Get automated investigation properties
+      description: >-
+        Retrieve the automated investigation and response (AIR) UI properties
+        and configuration settings.
+      operationId: Configuration.GetAutoIrProperties
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - automated investigation properties
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

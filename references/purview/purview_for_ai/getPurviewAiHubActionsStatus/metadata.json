@@ -1,0 +1,73 @@
+{
+  "portal": "purview",
+  "subArea": "purview_for_ai",
+  "slug": "getPurviewAiHubActionsStatus",
+  "operationId": "getPurviewAiHubActionsStatus",
+  "path": "/cpm/v1.0/Tenant/AIHubActionsStatus",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get AI Hub actions status",
+  "sourceFile": "purview_for_ai.yml",
+  "capturedUtc": "2026-05-12T15:11:16.8731263Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "tenantId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The tenant GUID used by the Purview for AI service."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 400",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": true,
+    "description": "The tenant GUID used by the Purview for AI service.",
+    "type": "string",
+    "name": "tenantId"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

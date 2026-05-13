@@ -1,0 +1,64 @@
+  /mtp/mdeTimelineExperience/ips/{IpAddress}/events:
+    get:
+      summary: Get IP timeline events
+      description: >-
+        Retrieve the event stream shown on IP entity pages.
+      operationId: EndpointDevices.GetIpTimelineEvents
+      tags: [Endpoint Devices]
+      parameters:
+        - name: IpAddress
+          in: path
+          required: true
+          description: The IP address shown on the entity page.
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          description: The inclusive start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          description: The inclusive end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: pageSize
+          in: query
+          description: The number of timeline rows to return.
+          schema:
+            type: integer
+            default: 200
+        - name: generateIdentityEvents
+          in: query
+          description: Include generated identity events in the timeline.
+          schema:
+            type: boolean
+        - name: includeIdentityEvents
+          in: query
+          description: Include identity events in the timeline response.
+          schema:
+            type: boolean
+        - name: correlationId
+          in: query
+          description: Correlation identifier supplied by the portal timeline client.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - IP timeline event data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

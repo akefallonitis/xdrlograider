@@ -1,0 +1,49 @@
+{
+  "portal": "security-copilot",
+  "subArea": "openapi",
+  "slug": "Provisioning.CreateWhatIf",
+  "operationId": "SecurityCopilotPortal.Provisioning.CreateWhatIf",
+  "path": "/provisioning/create",
+  "methods": [
+    "post"
+  ],
+  "summary": "Run Security Copilot create-capacity what-if",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:24.0901683Z",
+  "pagination": {
+    "defaults": {},
+    "tokenParam": null,
+    "indexParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "supported": false,
+    "endParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "CookieHost": "securitycopilot.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775",
+    "Status": "auth-research-needed",
+    "Method": "Get-EntraEstsAuth — $Config missing required fields; need different bootstrap"
+  },
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

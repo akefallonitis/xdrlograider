@@ -1,0 +1,129 @@
+{
+  "portal": "m365-admin",
+  "subArea": "purview",
+  "slug": "GetAIBaselineSummary",
+  "operationId": "Purview.GetAIBaselineSummary",
+  "path": "/fd/purview/apiproxy/cpm/v1.0/Tenant/AIBaselineSummary",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get AI baseline summary",
+  "sourceFile": "purview.yml",
+  "capturedUtc": "2026-05-12T15:13:26.0389877Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "tenantid",
+      "In": "header",
+      "Type": "string",
+      "Default": "",
+      "Description": "The tenant ID (Purview context header)."
+    },
+    {
+      "Name": "x-tid",
+      "In": "header",
+      "Type": "string",
+      "Default": "",
+      "Description": "The tenant ID (alternative Purview context header)."
+    },
+    {
+      "Name": "client-type",
+      "In": "header",
+      "Type": "string",
+      "Default": "purview",
+      "Description": "The client type."
+    },
+    {
+      "Name": "client-version",
+      "In": "header",
+      "Type": "string",
+      "Default": "1.0.2774.1",
+      "Description": "The client version."
+    },
+    {
+      "Name": "client-request-id",
+      "In": "header",
+      "Type": "string",
+      "Default": "",
+      "Description": "A unique request correlation ID."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "request-shape-error",
+  "lastHttpStatus": 400,
+  "lastDiagnostic": "expected 'Client-Type' and 'Client-Version' headers",
+  "parameters": [
+    {
+      "in": "header",
+      "default": null,
+      "required": false,
+      "description": "The tenant ID (Purview context header).",
+      "type": "string",
+      "name": "tenantid"
+    },
+    {
+      "in": "header",
+      "default": null,
+      "required": false,
+      "description": "The tenant ID (alternative Purview context header).",
+      "type": "string",
+      "name": "x-tid"
+    },
+    {
+      "in": "header",
+      "default": "purview",
+      "required": false,
+      "description": "The client type.",
+      "type": "string",
+      "name": "client-type"
+    },
+    {
+      "in": "header",
+      "default": "1.0.2774.1",
+      "required": false,
+      "description": "The client version.",
+      "type": "string",
+      "name": "client-version"
+    },
+    {
+      "in": "header",
+      "default": null,
+      "required": false,
+      "description": "A unique request correlation ID.",
+      "type": "string",
+      "name": "client-request-id"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version",
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "daily"
+}

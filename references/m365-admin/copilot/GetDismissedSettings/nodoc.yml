@@ -1,0 +1,23 @@
+  /admin/api/copilotsettings/settings/dismissed:
+    get:
+      summary: Get dismissed Copilot settings
+      description: >-
+        Retrieve the list of dismissed Copilot settings notifications and prompts (Copilot > Settings).
+      operationId: Copilot.GetDismissedSettings
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

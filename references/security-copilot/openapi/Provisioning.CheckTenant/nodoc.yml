@@ -1,0 +1,15 @@
+  /provisioning/checkTenant:
+    get:
+      tags: [Provisioning]
+      summary: Check Security Platform tenant eligibility
+      description: Retrieves the Security Platform tenant account type and tenant geo used during startup and provisioning decisions.
+      operationId: SecurityCopilotPortal.Provisioning.CheckTenant
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion20240301Preview'
+      responses:
+        '200':
+          description: Tenant provisioning context returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'

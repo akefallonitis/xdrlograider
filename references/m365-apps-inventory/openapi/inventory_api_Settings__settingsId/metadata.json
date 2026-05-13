@@ -1,0 +1,44 @@
+{
+  "portal": "m365-apps-inventory",
+  "subArea": "openapi",
+  "slug": "inventory_api_Settings__settingsId",
+  "operationId": null,
+  "path": "/inventory/api/Settings({settingsId})",
+  "methods": [
+    "patch"
+  ],
+  "summary": "Patch inventory settings by id",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:13:17.6392523Z",
+  "pagination": {
+    "defaults": {},
+    "style": "none",
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "endParam": null,
+    "type": null,
+    "supported": false,
+    "lookbackParam": null,
+    "startParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/inventory/api/Settings({settingsId})' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

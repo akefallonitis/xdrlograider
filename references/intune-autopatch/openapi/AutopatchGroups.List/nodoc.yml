@@ -1,0 +1,21 @@
+  /device/v2/autopatchGroups:
+    get:
+      tags: [AutopatchGroups]
+      summary: List Windows Autopatch groups
+      description: |
+        Returns Windows Autopatch group definitions and associated deployment groups. Confirmed
+        live on the Autopatch groups blade.
+      operationId: IntuneAutopatch.AutopatchGroups.List
+      responses:
+        '200':
+          description: Autopatch groups returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AutopatchGroup'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

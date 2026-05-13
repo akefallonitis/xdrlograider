@@ -1,0 +1,61 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "ListUnifiedRbacRoleDefinitions",
+  "operationId": "Configuration.ListUnifiedRbacRoleDefinitions",
+  "path": "/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions",
+  "methods": [
+    "get"
+  ],
+  "summary": "List unified RBAC role definitions",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:37:31.322577Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_UnifiedRbacRoles_CL",
+    "v1Tier": "Configuration",
+    "v1Category": "Configuration and Settings",
+    "v1RawPath": "/apiproxy/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions"
+  },
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 403 (Forbidden).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "6h"
+}

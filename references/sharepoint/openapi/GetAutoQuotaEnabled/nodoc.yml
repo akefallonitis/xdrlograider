@@ -1,0 +1,19 @@
+  /_api/TenantAdminSettings/AutoQuotaEnabled:
+    get:
+      tags: [Settings]
+      summary: Get auto quota setting
+      description: |
+        Returns the SharePoint admin setting that controls automatic storage
+        quota management.
+      operationId: SharePointAdmin.GetAutoQuotaEnabled
+      responses:
+        '200':
+          description: Auto quota setting returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharePointBooleanSetting'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

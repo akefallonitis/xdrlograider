@@ -1,0 +1,70 @@
+  /ApplicationInsights/ConsentedPermissionsData:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Application Insights application consented permissions.
+      description: >-
+        List Application Insights application consented permissions.
+      operationId: ApplicationInsights.ConsentedPermissionsData.List
+      tags: [Application Insights]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    scope:
+                      description: The name of the consented scope.
+                      type: string
+                      example: ChannelMessage.Send
+                    appName:
+                      description: The name of the application accessing the resource.
+                      type: string
+                      example: Miccrosoft Developer Sample Data Packs
+                    resource:
+                      description: The name of the consented resource.
+                      type: string
+                      example: Microsoft Graph
+                    isAdminConsented:
+                      description: Whether the permission is admin consented.
+                      type: boolean
+                      example: true
+                    isDelegated:
+                      description: Whether the permission is delegated.
+                      type: boolean
+                      example: true
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

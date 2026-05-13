@@ -1,0 +1,51 @@
+{
+  "portal": "exchange",
+  "subArea": "openapi",
+  "slug": "MailFlow.GetTransportRuleLastExecutionData",
+  "operationId": "ExchangeBeta.MailFlow.GetTransportRuleLastExecutionData",
+  "path": "/beta/MailflowReport/ExchangeAdminCenter.EtrLastExecutionData",
+  "methods": [
+    "get",
+    "get"
+  ],
+  "summary": "Get transport rule last-execution data",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:42:29.7111524Z",
+  "pagination": {
+    "style": "none",
+    "defaults": {},
+    "indexParam": null,
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "supported": false,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "out-of-scope-graph-covers",
+    "Method": "Microsoft Graph covers — out of portal-only scope"
+  },
+  "v1Manifest": null,
+  "xdrInternalsHint": "Get-XdrExchangeBetaMailFlow.GetTransportRuleLastExecutionData",
+  "defenderHarvester": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": "wrapper:value[]"
+  },
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

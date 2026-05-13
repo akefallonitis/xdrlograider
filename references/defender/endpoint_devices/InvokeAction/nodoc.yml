@@ -1,0 +1,60 @@
+  /mtp/responseApiPortal/requests/create:
+    post:
+      summary: Invoke device action
+      description: >-
+        Create a response action request for an endpoint device. Supports actions such as
+        full scan, quick scan, antivirus scan, network isolation, execution restriction,
+        automated investigation, policy sync, and collect investigation package.
+      operationId: EndpointDevices.InvokeAction
+      tags: [Endpoint Devices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machineId:
+                  description: The unique identifier of the device.
+                  type: string
+                type:
+                  description: The action type.
+                  type: string
+                  enum:
+                    - FullScan
+                    - QuickScan
+                    - AntiVirusScan
+                    - Isolate
+                    - Unisolate
+                    - RestrictExecution
+                    - UnrestrictExecution
+                    - AutomatedInvestigation
+                    - PolicySync
+                    - CollectInvestigationPackage
+                comment:
+                  description: An optional comment for the action.
+                  type: string
+              required:
+                - machineId
+                - type
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actionId:
+                    description: The unique identifier of the created action.
+                    type: string
+                  status:
+                    description: The status of the action.
+                    type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

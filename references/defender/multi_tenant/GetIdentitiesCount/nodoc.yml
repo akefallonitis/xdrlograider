@@ -1,0 +1,47 @@
+  /mtoapi/mdi/identity/userapiservice/identities/count:
+    post:
+      summary: Get MTO identities count
+      description: >-
+        Retrieve the total number of identities matching the supplied MTO filters.
+      operationId: MultiTenant.GetIdentitiesCount
+      tags: [Multi-Tenant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Filters:
+                  type: object
+                  description: Identity filter set.
+                SearchText:
+                  type: string
+                  description: Free-text search input.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: integer
+                    description: Total number of matching identities.
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

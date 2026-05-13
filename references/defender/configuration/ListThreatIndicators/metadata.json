@@ -1,0 +1,90 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "ListThreatIndicators",
+  "operationId": "Configuration.ListThreatIndicators",
+  "path": "/mtp/responseApiPortal/ti/indicators",
+  "methods": [
+    "get"
+  ],
+  "summary": "List custom threat indicators",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:38:02.4192806Z",
+  "pagination": {
+    "tokenParam": null,
+    "style": "pageIndex0Based",
+    "sizeParam": null,
+    "defaults": {},
+    "indexParam": "PageIndex"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "type",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Indicator type to return."
+    }
+  ],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_TenantAllowBlock_CL",
+    "v1Tier": "Configuration",
+    "v1Category": "Configuration and Settings",
+    "v1RawPath": "/apiproxy/mtp/responseApiPortal/ti/indicators"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Pagination=pageIndex0Based — index starts at 0 (some MS endpoints reject 0; verify per endpoint)",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Indicator type to return.",
+      "type": "string",
+      "name": "type"
+    },
+    {
+      "in": "query",
+      "default": "0",
+      "required": false,
+      "description": "The page index for pagination.",
+      "type": "integer",
+      "name": "PageIndex"
+    }
+  ],
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [
+    "Tenant.Id",
+    "Url.Path"
+  ],
+  "cadenceSuggestion": "weekly"
+}

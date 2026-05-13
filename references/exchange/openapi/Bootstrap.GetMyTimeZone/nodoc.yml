@@ -1,0 +1,18 @@
+  /beta/TimeZone/ExchangeAdminCenter.MyTimeZone:
+    get:
+      tags: [Bootstrap]
+      summary: Get the current user's Exchange time zone
+      description: |
+        Returns the caller's active time zone selection for the Exchange admin center.
+      operationId: ExchangeBeta.Bootstrap.GetMyTimeZone
+      responses:
+        '200':
+          description: Current Exchange time zone returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

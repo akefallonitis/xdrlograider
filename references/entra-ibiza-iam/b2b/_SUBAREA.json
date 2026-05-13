@@ -1,0 +1,85 @@
+{
+  "subArea": "b2b",
+  "suggestedCadence": "unknown",
+  "endpointCount": 3,
+  "endpoints": [
+    {
+      "slug": "B2BPolicy.Get",
+      "operationId": "Directories.B2BPolicy.Get",
+      "path": "/B2B/b2bpolicy",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "CustomIdentityProviders.List",
+      "operationId": "B2B.CustomIdentityProviders.List",
+      "path": "/B2B/customIdentityProviders",
+      "methods": [
+        "get",
+        "post",
+        "patch"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "MetadataFile.Get",
+      "operationId": "B2B.MetadataFile.Get",
+      "path": "/B2B/getMetadataFile",
+      "methods": [
+        "post"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 0,
+  "cntNoLive": 3,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Software.Version"
+  ],
+  "paginationStyles": [],
+  "valueProp": "B2B guest invitation + management state"
+}

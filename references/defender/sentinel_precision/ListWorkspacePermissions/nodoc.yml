@@ -1,0 +1,33 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/microsoft.authorization/permissions:
+    get:
+      summary: List Sentinel workspace permissions
+      description: >-
+        Retrieve effective ARM permissions for the attached Sentinel workspace.
+        Observed live across multiple Sentinel pages to determine whether the signed-in
+        user can manage workspace and content resources.
+      operationId: SentinelPrecision.ListWorkspacePermissions
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the permissions action.
+          schema:
+            type: string
+            default: '2018-01-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - effective permission list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

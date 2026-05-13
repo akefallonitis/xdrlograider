@@ -1,0 +1,71 @@
+{
+  "portal": "defender",
+  "subArea": "data_lake",
+  "slug": "ListQueryHistory",
+  "operationId": "DataLake.ListQueryHistory",
+  "path": "/securityplatform/lake/kql/query-history",
+  "methods": [
+    "get"
+  ],
+  "summary": "List KQL query history",
+  "sourceFile": "data_lake.yml",
+  "capturedUtc": "2026-05-12T14:38:11.1550542Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "querySource",
+      "In": "query",
+      "Type": "string",
+      "Default": "KUSTO_QUERY",
+      "Description": "The originating query experience to filter history by."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": "KUSTO_QUERY",
+    "required": false,
+    "description": "The originating query experience to filter history by.",
+    "type": "string",
+    "name": "querySource"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

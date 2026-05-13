@@ -1,0 +1,339 @@
+{
+  "portal": "purview",
+  "authChain": {
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775",
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com"
+  },
+  "capturedUtc": "2026-05-12T15:24:21.1876041Z",
+  "subAreaCount": 19,
+  "authFinding": {
+    "ImplementationModule": "Xdr.Defender.Auth — reuses for purview.microsoft.com",
+    "AuthMethod": "unattended-TOTP-or-passkey-cookie",
+    "AuthFlow": "OIDC form_post → sccauth+XSRF cookies (shares Defender ClientId 80ccca67-...)",
+    "Status": "live-verified-via-Get-EntraEstsAuth"
+  },
+  "subAreas": [
+    {
+      "subArea": "audit",
+      "endpointCount": 2,
+      "cntLive": 2,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [],
+      "paginationStyles": [],
+      "valueProp": "Unified audit log search history + audit enablement state — compliance backbone"
+    },
+    {
+      "subArea": "billing",
+      "endpointCount": 7,
+      "cntLive": 2,
+      "cntLiveEmpty": 0,
+      "cntError": 5,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Tenant.Id"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Purview billing config + license usage telemetry"
+    },
+    {
+      "subArea": "communication_compliance",
+      "endpointCount": 3,
+      "cntLive": 1,
+      "cntLiveEmpty": 0,
+      "cntError": 2,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Tenant.Id"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Communication compliance policy state + review history (eDiscovery for messaging)"
+    },
+    {
+      "subArea": "compliance_manager",
+      "endpointCount": 9,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 9,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.UPN"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Compliance assessments + control mapping + improvement actions"
+    },
+    {
+      "subArea": "copilot",
+      "endpointCount": 8,
+      "cntLive": 0,
+      "cntLiveEmpty": 1,
+      "cntError": 7,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Purview Copilot configuration state"
+    },
+    {
+      "subArea": "data_governance",
+      "endpointCount": 3,
+      "cntLive": 1,
+      "cntLiveEmpty": 0,
+      "cntError": 2,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Data Governance Services state + classification settings"
+    },
+    {
+      "subArea": "data_infrastructure",
+      "endpointCount": 24,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 24,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 2,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Tenant.Id",
+        "Time.Generated"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Entity discovery + asset search + lineage backbone"
+    },
+    {
+      "subArea": "data_security_investigations",
+      "endpointCount": 1,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 1,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [],
+      "paginationStyles": [],
+      "valueProp": "DSI cases + investigation telemetry"
+    },
+    {
+      "subArea": "dlp_devices",
+      "endpointCount": 8,
+      "cntLive": 4,
+      "cntLiveEmpty": 0,
+      "cntError": 4,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 1,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "Host.FullName",
+        "Host.HealthStatus",
+        "Host.MdatpId",
+        "Host.OsPlatform",
+        "Tenant.Id",
+        "Time.Generated"
+      ],
+      "paginationStyles": [
+        "pageIndex-unknown"
+      ],
+      "valueProp": "Endpoint DLP policy state + device coverage"
+    },
+    {
+      "subArea": "ediscovery",
+      "endpointCount": 6,
+      "cntLive": 0,
+      "cntLiveEmpty": 2,
+      "cntError": 4,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [],
+      "paginationStyles": [],
+      "valueProp": "eDiscovery cases + custodians + holds + exports — legal-hold audit trail"
+    },
+    {
+      "subArea": "exchange_admin",
+      "endpointCount": 1,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 0,
+      "cntNoLive": 1,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Tenant.Id"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Exchange admin bridge into Purview"
+    },
+    {
+      "subArea": "governance_services",
+      "endpointCount": 6,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 6,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [],
+      "paginationStyles": [],
+      "valueProp": "Authorization + DLM + classification framework state"
+    },
+    {
+      "subArea": "graph_proxy",
+      "endpointCount": 8,
+      "cntLive": 4,
+      "cntLiveEmpty": 2,
+      "cntError": 2,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.SamName",
+        "File.Path"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Microsoft Graph proxy used by Purview portal"
+    },
+    {
+      "subArea": "information_protection",
+      "endpointCount": 2,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 2,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [],
+      "paginationStyles": [],
+      "valueProp": "Sensitivity labels + retention policies — info-protection posture"
+    },
+    {
+      "subArea": "insider_risk",
+      "endpointCount": 5,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 1,
+      "cntNoLive": 4,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 1,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Tenant.Id"
+      ],
+      "paginationStyles": [
+        "offsetLimit"
+      ],
+      "valueProp": "Insider risk policies + cases + scoring — behavioral risk telemetry"
+    },
+    {
+      "subArea": "openapi",
+      "endpointCount": 8,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 8,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [],
+      "paginationStyles": [],
+      "valueProp": "Aggregated Purview operations across sub-areas (catalog-level)"
+    },
+    {
+      "subArea": "platform_services",
+      "endpointCount": 10,
+      "cntLive": 4,
+      "cntLiveEmpty": 2,
+      "cntError": 4,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Version"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Shell + IRIS + Azure Purview platform state"
+    },
+    {
+      "subArea": "purview_for_ai",
+      "endpointCount": 14,
+      "cntLive": 2,
+      "cntLiveEmpty": 1,
+      "cntError": 11,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 3,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Software.Name",
+        "Tenant.Id",
+        "Time.Generated"
+      ],
+      "paginationStyles": [],
+      "valueProp": "DSPM for AI + oversharing assessments + AI governance posture"
+    },
+    {
+      "subArea": "sharepoint",
+      "endpointCount": 2,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 2,
+      "cntNoLive": 0,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [],
+      "paginationStyles": [],
+      "valueProp": "SharePoint integration state inside Purview"
+    }
+  ],
+  "authPattern": {
+    "nodocOfficialName": "Portal session cookies",
+    "transport": "cookie",
+    "browserAcquired": false,
+    "unattendedTotpCompatible": true,
+    "cookies": [
+      "sccauth",
+      "XSRF-TOKEN"
+    ],
+    "headers": [
+      "X-XSRF-TOKEN"
+    ],
+    "note": null,
+    "postmanCollection": "..\\..\\xdrlograider\\.internal\\nodoc-reference\\postman\\collections\\purview.collection.json",
+    "nodocReference": "https://nodoc.nathanmcnulty.com/getting-started"
+  }
+}

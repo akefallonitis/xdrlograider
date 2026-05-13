@@ -1,0 +1,22 @@
+  /tenant-management/v2/AdminActionsV/actionStatus:
+    get:
+      tags: [Tenant]
+      summary: Get tenant admin action status
+      description: |
+        Returns the current state for a submitted Windows Autopatch tenant admin action.
+        Confirmed live from the client broker install flow, which polled
+        `adminAction=ClientBrokerInstall` after submission and returned `Failed`.
+      operationId: IntuneAutopatch.Tenant.GetAdminActionStatus
+      parameters:
+        - $ref: '#/components/parameters/adminAction'
+      responses:
+        '200':
+          description: Admin action state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminActionStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

@@ -1,0 +1,56 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "request_approvals",
+  "slug": "BusinessFlows.Get",
+  "operationId": "RequestApprovalsV2.BusinessFlows.Get",
+  "path": "/RequestApprovals/V2/BusinessFlows",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get request approval business flows (v2)",
+  "sourceFile": "request_approvals.yml",
+  "capturedUtc": "2026-05-12T15:13:12.7957045Z",
+  "pagination": {
+    "tokenParam": "skip",
+    "indexParam": null,
+    "style": "offsetLimit",
+    "sizeParam": null,
+    "defaults": {}
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "businessFlowScope",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The scope of the business flow"
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Pagination=offsetLimit — accumulate offset by pageSize",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

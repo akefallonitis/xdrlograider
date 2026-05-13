@@ -1,0 +1,32 @@
+  /mtp/deviceManagement/osVersions:
+    get:
+      summary: List OS version friendly names
+      description: >-
+        Retrieve a list of operating system versions with their friendly names
+        as found across the endpoint device inventory.
+      operationId: EndpointDevices.ListOsVersions
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    osVersion:
+                      description: The OS version string.
+                      type: string
+                    friendlyName:
+                      description: The friendly display name.
+                      type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

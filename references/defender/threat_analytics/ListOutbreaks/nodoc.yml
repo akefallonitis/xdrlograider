@@ -1,0 +1,44 @@
+  /mtp/threatAnalyticsAPI/outbreaks:
+    get:
+      summary: List threat analytics outbreaks
+      description: >-
+        Retrieve a paginated list of threat analytics reports and outbreaks.
+        Threat analytics provides expert analysis of emerging threats and
+        their potential impact on the organization.
+      operationId: ThreatAnalytics.ListOutbreaks
+      tags: [Threat Analytics]
+      parameters:
+        - name: pageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 0
+        - name: pageSize
+          in: query
+          description: The number of results per page.
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      outbreaks:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Outbreak'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

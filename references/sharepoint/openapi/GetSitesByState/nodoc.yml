@@ -1,0 +1,46 @@
+  /_api/SPO.Tenant/GetSitesByState:
+    post:
+      tags: [Sites]
+      summary: Get sites by state
+      description: |
+        Returns site records matching the requested SharePoint site-state values.
+        Observed on the Active sites and Deleted sites pages.
+      operationId: SharePointAdmin.GetSitesByState
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteStatesRequest'
+      x-nodoc-operation-context:
+        surface: Active sites / Deleted sites
+        workflows:
+          - Open the Active sites or Deleted sites pages and request the site inventory for the selected state set.
+        headerProfile: sharepoint-admin-write
+        requestShapes:
+          - name: site-state-filter
+            contentType: application/json
+            bodyKind: state-array
+            notes: The request body carries the site states the portal wants to enumerate from the internal tenant helper.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated SharePoint Active sites and Deleted sites browsing.
+      responses:
+        '200':
+          description: Site-state results returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

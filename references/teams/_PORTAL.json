@@ -1,0 +1,51 @@
+{
+  "portal": "teams",
+  "authChain": {
+    "ClientId": "12128f48-ec9e-42f0-b203-ea49fb6af367",
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth + TAC cookies",
+    "CookieHost": "admin.teams.microsoft.com"
+  },
+  "capturedUtc": "2026-05-12T15:24:21.8817878Z",
+  "subAreaCount": 1,
+  "authFinding": {
+    "ImplementationModule": "Xdr.Teams.Auth (v0.2.0g)",
+    "AuthMethod": "unattended-TOTP-or-passkey-cookie",
+    "AuthFlow": "OIDC form_post → TAC cookies",
+    "Status": "auth-verified; per-path API hosts override (research-gap for v0.2.0g)"
+  },
+  "subAreas": [
+    {
+      "subArea": "openapi",
+      "endpointCount": 98,
+      "cntLive": 0,
+      "cntLiveEmpty": 0,
+      "cntError": 68,
+      "cntNoLive": 30,
+      "cntWithTimeFilter": 0,
+      "cntWithPagination": 0,
+      "suggestedCadence": "unknown",
+      "entitiesAvailable": [
+        "Account.AadId",
+        "Software.Version",
+        "Tenant.Id",
+        "Url.Path"
+      ],
+      "paginationStyles": [],
+      "valueProp": "Teams admin: policies (messaging/meeting/calling/app), users, devices, calling plan inventory"
+    }
+  ],
+  "authPattern": {
+    "nodocOfficialName": "Portal bearer tokens + regional discovery",
+    "transport": "bearer",
+    "browserAcquired": true,
+    "unattendedTotpCompatible": false,
+    "cookies": null,
+    "headers": [
+      "Authorization: Bearer"
+    ],
+    "note": "Browser-acquired bearer per service host; same-origin /api/log + resolver calls map tenant to regional backend",
+    "postmanCollection": "..\\..\\xdrlograider\\.internal\\nodoc-reference\\postman\\collections\\teams.collection.json",
+    "nodocReference": "https://nodoc.nathanmcnulty.com/getting-started"
+  }
+}

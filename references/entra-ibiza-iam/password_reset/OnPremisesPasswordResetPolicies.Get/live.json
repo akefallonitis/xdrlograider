@@ -1,0 +1,12 @@
+{
+  "portal": "entra-ibiza-iam",
+  "path": "/PasswordReset/OnPremisesPasswordResetPolicies",
+  "method": "GET",
+  "finalUrl": "https://main.iam.ad.ext.azure.com/api/PasswordReset/OnPremisesPasswordResetPolicies",
+  "httpStatus": 403,
+  "successKind": "tenant-gated",
+  "diagnostic": "forbidden",
+  "contentLen": 653,
+  "rawSample": "{\"ClassName\":\"Microsoft.Portal.Framework.Exceptions.ClientException\",\"Message\":\"Get on premises password reset policy forbidden\",\"Data\":{},\"HResult\":-2146233088,\"XMsServerRequestId\":null,\"Source\":\"Microsoft.ActiveDirectory.PortalExtension.ADExtension\",\"HttpStatusCode\":403,\"ClientData\":{\"errorCode\":\"FeatureNotAvailable\",\"localizedErrorDetails\":null,\"operationResults\":null,\"timeStampUtc\":\"2026-05-13T07:17:35.5553969Z\",\"clientRequestId\":\"5915b5cb-9c19-4056-b383-52f2de190383\",\"internalTransactionId\":\"ed4256fc-aeac-412f-96c6-02920db1fee9\",\"tenantId\":null,\"userObjectId\":\"9b0a5108-6952-4fc7-941a-133004153bda\",\"exceptionType\":\"AuthenticationException\"}}",
+  "capturedUtc": "2026-05-13T07:17:34Z"
+}

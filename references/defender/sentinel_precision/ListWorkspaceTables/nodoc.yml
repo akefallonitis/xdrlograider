@@ -1,0 +1,33 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables:
+    get:
+      summary: List Sentinel workspace tables
+      description: >-
+        Retrieve Log Analytics tables for the attached Sentinel workspace. Observed
+        live on the Sentinel Search experience, returning table schema and retention
+        metadata for the workspace catalog.
+      operationId: SentinelPrecision.ListWorkspaceTables
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the tables collection.
+          schema:
+            type: string
+            default: '2021-12-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - workspace table catalog
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

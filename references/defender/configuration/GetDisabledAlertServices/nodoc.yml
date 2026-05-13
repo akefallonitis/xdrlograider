@@ -1,0 +1,31 @@
+  /mtp/alertsApiService/workloads/disabled:
+    get:
+      summary: Get disabled alert service settings
+      description: >-
+        Retrieve the list of disabled alert service workloads, showing which
+        alert sources have been disabled in the tenant configuration.
+      operationId: Configuration.GetDisabledAlertServices
+      tags: [Configuration]
+      parameters:
+        - name: includeDetails
+          in: query
+          description: Whether to include detailed workload information.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - disabled workload configuration
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

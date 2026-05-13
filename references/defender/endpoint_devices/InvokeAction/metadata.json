@@ -1,0 +1,60 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_devices",
+  "slug": "InvokeAction",
+  "operationId": "EndpointDevices.InvokeAction",
+  "path": "/mtp/responseApiPortal/requests/create",
+  "methods": [
+    "post"
+  ],
+  "summary": "Invoke device action",
+  "sourceFile": "endpoint_devices.yml",
+  "capturedUtc": "2026-05-12T14:38:31.1434658Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 415,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 415 (Unsupported Media Type).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=error/415 — operator should check live response body for diagnosis"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "write",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Action.Id",
+    "Host.MdatpId"
+  ],
+  "cadenceSuggestion": "weekly"
+}

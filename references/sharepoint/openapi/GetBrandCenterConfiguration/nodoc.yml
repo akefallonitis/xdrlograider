@@ -1,0 +1,19 @@
+  /_api/SPO.Tenant/GetBrandCenterConfiguration:
+    get:
+      tags: [Settings]
+      summary: Get Brand Center configuration
+      description: |
+        Returns the Brand Center configuration used by the SharePoint admin
+        center settings experience.
+      operationId: SharePointAdmin.GetBrandCenterConfiguration
+      responses:
+        '200':
+          description: Brand Center configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

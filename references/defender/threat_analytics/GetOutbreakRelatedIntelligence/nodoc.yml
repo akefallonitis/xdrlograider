@@ -1,0 +1,32 @@
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/relatedIntelligence:
+    get:
+      summary: Get outbreak related intelligence
+      description: >-
+        Retrieve related intelligence and linked content shown on a Threat Analytics
+        report detail page.
+      operationId: ThreatAnalytics.GetOutbreakRelatedIntelligence
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak related intelligence
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

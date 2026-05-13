@@ -1,0 +1,21 @@
+  /Skype.TelephoneNumberMgmt/tenants/{tenantId}/voice-users/{userId}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: Get Teams voice-user number management details
+      description: |
+        Per-user telephone-number management route observed from Teams voice user detail pages.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Voice-user telephony payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

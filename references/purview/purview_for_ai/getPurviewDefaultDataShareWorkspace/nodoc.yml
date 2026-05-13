@@ -1,0 +1,31 @@
+  /medeina/settings/datashare/defaultWorkspace:
+    get:
+      operationId: getPurviewDefaultDataShareWorkspace
+      summary: Get Purview default Copilot workspace
+      description: >-
+        Retrieve the default Medeina workspace used by Purview AI experiences
+        when data sharing is enabled.
+      tags: [PurviewForAI]
+      parameters:
+        - name: sourceName
+          in: query
+          required: false
+          description: The Purview source identifier used by the workspace query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

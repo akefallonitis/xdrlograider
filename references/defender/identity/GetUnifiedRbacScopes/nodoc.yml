@@ -1,0 +1,23 @@
+  /aatp/api/unifiedrbac/scopes:
+    get:
+      summary: Get unified RBAC scopes
+      description: >-
+        Retrieve unified RBAC scopes for Defender for Identity. Discovered on Identity Settings > Health issues notifications page.
+      operationId: Identity.GetUnifiedRbacScopes
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

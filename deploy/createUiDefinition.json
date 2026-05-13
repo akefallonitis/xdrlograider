@@ -1,0 +1,206 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "config": {
+      "isWizard": true,
+      "basics": {
+        "description": "Deploys the XdrLogRaider Defender XDR portal-only telemetry connector for Microsoft Sentinel. Requires an existing Sentinel-enabled Log Analytics workspace.",
+        "subscription": { "constraints": { "validations": [] } },
+        "resourceGroup": { "allowExisting": true }
+      }
+    },
+    "basics": [
+      {
+        "name": "projectPrefix",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Project prefix",
+        "defaultValue": "xdrlr",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z][a-z0-9]{2,11}$",
+          "validationMessage": "3-12 lowercase alphanumeric characters, starting with a letter."
+        }
+      },
+      {
+        "name": "env",
+        "type": "Microsoft.Common.DropDown",
+        "label": "Environment tag",
+        "defaultValue": "prod",
+        "constraints": {
+          "allowedValues": [
+            { "label": "dev",     "value": "dev" },
+            { "label": "staging", "value": "staging" },
+            { "label": "prod",    "value": "prod" }
+          ],
+          "required": true
+        }
+      }
+    ],
+    "steps": [
+      {
+        "name": "workspaceStep",
+        "label": "Sentinel workspace",
+        "elements": [
+          {
+            "name": "workspaceText",
+            "type": "Microsoft.Common.TextBlock",
+            "options": {
+              "text": "Select the existing Sentinel-enabled Log Analytics workspace that will receive ingested rows."
+            }
+          },
+          {
+            "name": "existingWorkspaceId",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Log Analytics workspace",
+            "resourceType": "Microsoft.OperationalInsights/workspaces",
+            "options": { "filter": { "subscription": "onBasics", "location": "all" } }
+          }
+        ]
+      },
+      {
+        "name": "authStep",
+        "label": "Service account & auth",
+        "elements": [
+          {
+            "name": "serviceAccountUpn",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Service account UPN",
+            "toolTip": "Read-only service account that authenticates to security.microsoft.com. Must have Sentinel Reader + Defender XDR read role.",
+            "constraints": {
+              "required": true,
+              "regex": "^[^@]+@[^@]+\\.[^@]+$",
+              "validationMessage": "Enter a valid UPN (e.g. svc-defender-reader@contoso.com)."
+            }
+          },
+          {
+            "name": "authMethod",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Auth method",
+            "defaultValue": "credentials_totp",
+            "toolTip": "credentials_totp uses password + TOTP seed; passkey uses a FIDO2 passkey JSON blob.",
+            "constraints": {
+              "allowedValues": [
+                { "label": "Password + TOTP", "value": "credentials_totp" },
+                { "label": "Passkey",         "value": "passkey" }
+              ],
+              "required": true
+            }
+          },
+          {
+            "name": "credentialsBox",
+            "type": "Microsoft.Common.Section",
+            "label": "Password + TOTP secrets (optional — can be uploaded to Key Vault later)",
+            "visible": "[equals(steps('authStep').authMethod, 'credentials_totp')]",
+            "elements": [
+              {
+                "name": "servicePassword",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": { "password": "Service account password", "confirmPassword": "Confirm password" },
+                "constraints": { "required": false },
+                "options": { "hideConfirmation": true }
+              },
+              {
+                "name": "totpSeed",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": { "password": "TOTP Base32 seed", "confirmPassword": "Confirm TOTP" },
+                "constraints": { "required": false },
+                "options": { "hideConfirmation": true }
+              }
+            ]
+          },
+          {
+            "name": "passkeyBox",
+            "type": "Microsoft.Common.Section",
+            "label": "Passkey secret (optional — can be uploaded to Key Vault later)",
+            "visible": "[equals(steps('authStep').authMethod, 'passkey')]",
+            "elements": [
+              {
+                "name": "passkeyJson",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": { "password": "Passkey JSON blob", "confirmPassword": "Confirm passkey" },
+                "constraints": { "required": false },
+                "options": { "hideConfirmation": true }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "advancedStep",
+        "label": "Advanced",
+        "elements": [
+          {
+            "name": "planSku",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Function App plan SKU",
+            "defaultValue": "Y1 — Linux Consumption (pay-per-execution, recommended default)",
+            "toolTip": "Y1 (Consumption) is the cost-optimal default: ~$0 idle + per-execution cost; 10-min execution cap is handled by per-sub-area timers + MaxPages caps + LastCompletedPage checkpoint resume. Pick EP1+ (ElasticPremium, ~$144/mo for EP1, 60-min execution) only when the vulnerability_management first-poll (5M+ rows on a 100K-user tenant) actually breaches the Y1 10-min cap.",
+            "constraints": {
+              "allowedValues": [
+                { "label": "Y1 — Linux Consumption (pay-per-execution, recommended default)", "value": "Y1" },
+                { "label": "EP1 — Linux Premium · 210 ACU · 3.5 GB · always-on",              "value": "EP1" },
+                { "label": "EP2 — Linux Premium · 420 ACU · 7 GB · always-on",                "value": "EP2" },
+                { "label": "EP3 — Linux Premium · 840 ACU · 14 GB · always-on",               "value": "EP3" }
+              ],
+              "required": true
+            }
+          },
+          {
+            "name": "retentionInDays",
+            "type": "Microsoft.Common.Slider",
+            "label": "Workspace table retention (days)",
+            "defaultValue": 90,
+            "min": 30,
+            "max": 730,
+            "showStepMarkers": true,
+            "toolTip": "Per-table retention in the Log Analytics workspace."
+          },
+          {
+            "name": "githubRepo",
+            "type": "Microsoft.Common.TextBox",
+            "label": "GitHub repo (owner/name)",
+            "defaultValue": "akefallonitis/xdrlograider",
+            "constraints": {
+              "required": true,
+              "regex": "^[^/]+/[^/]+$",
+              "validationMessage": "owner/name format required."
+            }
+          },
+          {
+            "name": "releaseTag",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Release tag (or ‘latest’)",
+            "defaultValue": "latest",
+            "constraints": { "required": true }
+          },
+          {
+            "name": "deployRoleAssignments",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Create role assignments to the Function App's managed identity",
+            "defaultValue": true,
+            "toolTip": "ON (default): ARM creates 3 role assignments to the FA's SAMI (KV Secrets User on Key Vault, Storage Table Data Contributor on Storage, RG-scoped Monitoring Metrics Publisher). Requires the deploying identity to have User Access Administrator or Owner. OFF: skips role assignments — for tenants where the deploying identity has only Contributor. Operator runs `az role assignment create` manually for the 3 grants after deploy succeeds."
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "projectPrefix":        "[basics('projectPrefix')]",
+      "env":                  "[basics('env')]",
+      "connectorLocation":    "[location()]",
+      "existingWorkspaceId":  "[steps('workspaceStep').existingWorkspaceId.id]",
+      "workspaceLocation":    "[steps('workspaceStep').existingWorkspaceId.location]",
+      "serviceAccountUpn":    "[steps('authStep').serviceAccountUpn]",
+      "authMethod":           "[steps('authStep').authMethod]",
+      "planSku":              "[steps('advancedStep').planSku]",
+      "retentionInDays":      "[int(steps('advancedStep').retentionInDays)]",
+      "githubRepo":           "[steps('advancedStep').githubRepo]",
+      "releaseTag":           "[steps('advancedStep').releaseTag]",
+      "deployRoleAssignments":"[steps('advancedStep').deployRoleAssignments]",
+      "servicePassword":      "[coalesce(steps('authStep').credentialsBox.servicePassword, '')]",
+      "totpSeed":             "[coalesce(steps('authStep').credentialsBox.totpSeed, '')]",
+      "passkeyJson":          "[coalesce(steps('authStep').passkeyBox.passkeyJson, '')]"
+    }
+  }
+}

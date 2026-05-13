@@ -1,0 +1,59 @@
+  /admin/api/DirsyncManagement/manage:
+    get:
+      summary: Get directory sync management
+      description: >-
+        Retrieve directory synchronization management status, warnings, and support
+        links for the tenant's Entra Connect configuration.
+      operationId: Misc.GetDirSyncManagement
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  IsDirSyncEnabled:
+                    type: boolean
+                  IsFederated:
+                    type: boolean
+                  IsPasswordSyncEnabled:
+                    type: boolean
+                  IsSyncNormal:
+                    type: boolean
+                  IsPasswordSyncNormal:
+                    type: boolean
+                  CompanyName:
+                    type: string
+                  DirSyncClientVersion:
+                    type: string
+                  DirSyncClientMachineName:
+                    type: string
+                  DirSyncLastSyncTime:
+                    type: string
+                  PasswordSyncLastSyncTime:
+                    type: string
+                  VerifiedDomainCount:
+                    type: integer
+                  UnverifiedDomainCount:
+                    type: integer
+                  CDNUrls:
+                    type: object
+                    additionalProperties:
+                      type: string
+                  TroubleShootUrl:
+                    type: string
+                  DirSyncObjectErrorsUrl:
+                    type: string
+                  DomainsPageUrl:
+                    type: string
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,18 @@
+  /beta/PublicFolderMailbox:
+    get:
+      tags: [Folders]
+      summary: List public folder mailboxes
+      description: |
+        Returns the public folder mailbox inventory surfaced by the Public folders page.
+      operationId: ExchangeBeta.Folders.ListPublicFolderMailboxes
+      responses:
+        '200':
+          description: Public folder mailboxes returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

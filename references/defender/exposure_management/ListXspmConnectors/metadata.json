@@ -1,0 +1,62 @@
+{
+  "portal": "defender",
+  "subArea": "exposure_management",
+  "slug": "ListXspmConnectors",
+  "operationId": "ExposureManagement.ListXspmConnectors",
+  "path": "/mtp/XspmConnectors/connectors/getAllConnectors",
+  "methods": [
+    "get"
+  ],
+  "summary": "List XSPM connectors",
+  "sourceFile": "exposure_management.yml",
+  "capturedUtc": "2026-05-12T14:40:00.0303544Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_XspmConnectors_CL",
+    "v1Tier": "XspmGraph",
+    "v1Category": "Exposure Management (XSPM)",
+    "v1RawPath": "/apiproxy/mtp/XspmConnectors/connectors/getAllConnectors"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": "wrapper:results[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live-empty — endpoint works, tenant has no data of this type (boundary-marker row only)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "1h"
+}

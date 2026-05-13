@@ -1,0 +1,19 @@
+  /beta/MailUserIC:
+    get:
+      tags: [Objects]
+      summary: List high-volume email mail users
+      description: |
+        Returns the mail-user collection used by the High volume email page. The observed tenant
+        response was an empty OData collection.
+      operationId: ExchangeBeta.Objects.ListMailUsersIC
+      responses:
+        '200':
+          description: Mail users returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

@@ -1,0 +1,42 @@
+  /mdi/identity/userapiservice/serviceAccounts:
+    post:
+      summary: List service accounts
+      description: >-
+        Retrieve service accounts from the newer user API service grid.
+      operationId: Identity.ListServiceAccountsV2
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PageSize:
+                  type: integer
+                  description: Number of rows to return.
+                Skip:
+                  type: integer
+                  description: Number of rows to skip.
+                Filters:
+                  type: object
+                  description: Service account filters.
+                IncludeAccountActivity:
+                  type: boolean
+                  description: Include the latest activity projections.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - service accounts list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

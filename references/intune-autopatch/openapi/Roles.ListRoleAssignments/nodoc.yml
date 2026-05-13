@@ -1,0 +1,25 @@
+  /access-control/odata/v1/RoleAssignments:
+    get:
+      tags: [Roles]
+      summary: List role assignments
+      description: |
+        Lists Windows Autopatch role assignments for a specific role definition. The bundle
+        requires `$filter=RoleId eq {roleDefinitionId}`; probing without it returns
+        `400 Please provide RoleId in $filter`.
+      operationId: IntuneAutopatch.Roles.ListRoleAssignments
+      parameters:
+        - $ref: '#/components/parameters/roleAssignmentsFilter'
+        - $ref: '#/components/parameters/orderBy'
+      responses:
+        '200':
+          description: Role assignments returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataGenericCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

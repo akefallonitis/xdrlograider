@@ -1,0 +1,23 @@
+  /astgws/AttackSimulator/api/v1/AdvanceReporting/chart/NRT/RepeatOffender:
+    get:
+      summary: Get repeat offender chart data (NRT)
+      description: >-
+        Retrieve near real-time (NRT) repeat offender chart data for attack simulation advance reporting. Discovered on Attack Simulator > Advance Reporting page.
+      operationId: AttackSimulator.GetRepeatOffenderChartNRT
+      tags: [AttackSimulator]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

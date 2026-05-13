@@ -1,0 +1,24 @@
+  /api/v1.0/offers/{offerId}:
+    servers:
+      - url: https://monet.teams.microsoft.com
+        description: Teams add-on monetization backend
+    get:
+      tags: [TeamsMonetization]
+      summary: Get a Teams add-on monetization offer
+      description: |
+        Offer detail route observed from Teams add-on licensing pages. Some captured offer identifiers
+        returned `404 Not Found`, which suggests the route family is live but the requested offer may not
+        be available in the current tenant or region.
+      parameters:
+        - $ref: '#/components/parameters/OfferId'
+      responses:
+        '200':
+          description: Offer detail payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

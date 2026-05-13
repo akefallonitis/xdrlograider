@@ -1,0 +1,60 @@
+{
+  "portal": "defender",
+  "subArea": "endpoint_configuration",
+  "slug": "ListCustomCollectionRules",
+  "operationId": "EndpointConfiguration.ListCustomCollectionRules",
+  "path": "/mtp/mdeCustomCollection/rules",
+  "methods": [
+    "get",
+    "post"
+  ],
+  "summary": "List custom data collection rules",
+  "sourceFile": "endpoint_configuration.yml",
+  "capturedUtc": "2026-05-12T14:38:15.9792835Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": null,
+    "successKind": "unprobed-pending",
+    "rowCount": 0,
+    "errorText": "Path corrected 2026-05-13 from /mtp/customDataCollection/rules to /mtp/mdeCustomCollection/rules per XDRInternals canonical. Awaiting re-probe.",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PATH CORRECTED 2026-05-13: nodoc YAML documented /mtp/customDataCollection/rules (returned 404) but XDRInternals canonical source uses /mtp/mdeCustomCollection/rules (matches working schema endpoint /mtp/mdeCustomCollection/model). Same auth (sccauth+XSRF via apiproxy).",
+    "Method=GET (rules list) + POST (create — write, excluded from manifest)",
+    "DeltaPoll=NOT supported — daily-cadence full-snapshot",
+    "Cmdlet reference: Get-XdrEndpointConfigurationCustomCollectionRule (XDRInternals)",
+    "Optimistic concurrency: PUT requires echoing updateKey + version from prior GET"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,41 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "classic_policies",
+  "slug": "Detail.Delete",
+  "operationId": "ClassicPolicies.Detail.Delete",
+  "path": "/ClassicPolicies/Delete",
+  "methods": [
+    "delete"
+  ],
+  "summary": "Delete classic policy",
+  "sourceFile": "classic_policies.yml",
+  "capturedUtc": "2026-05-12T15:13:11.9673938Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

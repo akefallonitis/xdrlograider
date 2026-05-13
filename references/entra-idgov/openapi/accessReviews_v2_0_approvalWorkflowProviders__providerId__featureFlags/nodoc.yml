@@ -1,0 +1,21 @@
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags:
+    get:
+      tags: [Configuration]
+      summary: Get feature flags for a provider
+      description: |
+        Retrieves the feature flags configuration for the specified provider.
+        Used by the portal to determine which UI features are enabled.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+      responses:
+        '200':
+          description: Feature flags configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessReviewFeatureFlagsResponse'
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('F40AE6A6-7BFC-4ABF-9E2A-63120C21A538')/featureFlags/$entity"
+                sqlOutage: false
+                emergencyRAE: none
+                isArFusionAuthorative: false

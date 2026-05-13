@@ -1,0 +1,31 @@
+  /mdi/identity/userapiservice/devices:
+    post:
+      summary: List user devices
+      description: >-
+        Retrieve the devices associated with a resolved identity on the user
+        entity page.
+      operationId: Identity.ListUserDevices
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - user device grid request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user devices
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

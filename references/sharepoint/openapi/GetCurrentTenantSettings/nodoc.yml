@@ -1,0 +1,19 @@
+  /_api/SP_TenantSettings_Current:
+    get:
+      tags: [Tenant]
+      summary: Get current tenant settings summary
+      description: |
+        Returns the current SharePoint tenant settings object as surfaced by the
+        admin center bootstrap flow.
+      operationId: SharePointAdmin.GetCurrentTenantSettings
+      responses:
+        '200':
+          description: Current tenant settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

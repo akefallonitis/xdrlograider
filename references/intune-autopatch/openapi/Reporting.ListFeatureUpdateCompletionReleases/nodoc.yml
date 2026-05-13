@@ -1,0 +1,28 @@
+  /reporting/reports/v2/windowsFeatureUpdates/completion/releases:
+    post:
+      tags: [Reporting]
+      summary: List feature update completion-by-release rows
+      description: |
+        Returns release-level completion rows and nested phase completion details for Windows
+        feature updates. The route was recovered from the report bundle and confirmed with a safe
+        probe.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateCompletionReleases
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdateCompletionReleasesRequest'
+      responses:
+        '200':
+          description: Feature update completion rows returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdateCompletionReleasesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

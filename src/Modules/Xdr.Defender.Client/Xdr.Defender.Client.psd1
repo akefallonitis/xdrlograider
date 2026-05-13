@@ -7,23 +7,19 @@
     Author                = 'Alex Kefallonitis'
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
-    Description           = 'L3 Defender-portal manifest dispatcher. Per-stream Invoke-MDEEndpoint backed by the endpoints.manifest.psd1 catalogue (64 streams; 63 live + 1 deprecated; across 5 cadence tiers: ActionCenter 10m / XspmGraph 1h / Configuration 6h / Inventory 24h / Maintenance 7d, all read-only). Builds on the L2 Xdr.Defender.Auth cookie-exchange layer.'
+    Description           = 'L3 Defender-portal manifest dispatcher. Per-stream Invoke-MDEEndpoint backed by manifests/defender.psd1 (492 read endpoints across 18 sub-areas, all GET-shaped, manifest-driven cadence/pagination/projection). Builds on the L2 Xdr.Defender.Auth sccauth+XSRF cookie-exchange layer. Includes Custom Collection cmdlets and Get-DefenderTenantContext for dynamic regionality.'
     RequiredModules       = @('Xdr.Defender.Auth', 'Xdr.Common.Manifest')
-    # Public surface: single dispatcher + truth-signal accessor + 3 underlying
-    # helpers exported for v0.2.0 multi-portal extensibility (Entra/Purview/
-    # Intune wrapper modules can re-use the projection + response-expansion
-    # logic without reimplementing). Stream names live in endpoints.manifest.psd1
-    # so adding/retiring an endpoint is a one-line manifest change.
-    # Manifest loader (Get-XdrEndpointManifest) lives in Xdr.Common.Manifest.
     FunctionsToExport     = @(
         'Invoke-MDEEndpoint',
         'Invoke-MDETierPoll',
-        'Invoke-TierPollWithHeartbeat',
         'Invoke-MDEPortalEndpoint',
         'ConvertTo-MDEIngestRow',
         'Expand-MDEResponse',
-        # Section R++.A: truth-signal side-channel for activity callers.
-        'Get-MDEEndpointLastResult'
+        'Get-MDEEndpointLastResult',
+        'Get-XdrCustomCollectionRule',
+        'Get-XdrCustomCollectionRuleById',
+        'Get-XdrCustomCollectionModel',
+        'Get-DefenderTenantContext'
     )
     CmdletsToExport       = @()
     VariablesToExport     = @()
@@ -33,7 +29,7 @@
             Tags         = @('Defender', 'MDE', 'XDR', 'Portal', 'Endpoints')
             LicenseUri   = 'https://github.com/akefallonitis/xdrlograider/blob/main/LICENSE'
             ProjectUri   = 'https://github.com/akefallonitis/xdrlograider'
-            ReleaseNotes = 'v0.1.0 GA: 65 Defender XDR portal-only streams (PerEntityFanout + PerPlatformFanout + Pagination architectures), live-captured fixtures, runtime SuccessKind classification (live / live-empty / tenant-gated / error), Headers + UnwrapProperty + IdProperty + SyntheticEntityId manifest schema, ProjectionMap with $tostring/$toint/$tobool/$todatetime/$json type casts. Part of XdrLogRaider v0.1.0 GA.'
+            ReleaseNotes = 'v0.1.0 GA: 492 Defender XDR portal-only read endpoints across 18 sub-areas; 4-value SuccessKind (live / live-empty / rate-limited / error) with LicenseHint for licence-blocked streams; corrected /mtp/mdeCustomCollection/rules path; Get-DefenderTenantContext dynamic regionality; ProjectionMap with $tostring/$toint/$tobool/$todatetime/$json type casts; manifest-driven cadence + pagination + per-entity fanout.'
         }
     }
 }

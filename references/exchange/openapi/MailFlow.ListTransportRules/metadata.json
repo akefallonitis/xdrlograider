@@ -1,0 +1,53 @@
+{
+  "portal": "exchange",
+  "subArea": "openapi",
+  "slug": "MailFlow.ListTransportRules",
+  "operationId": "ExchangeBeta.MailFlow.ListTransportRules",
+  "path": "/beta/TransportRule",
+  "methods": [
+    "get",
+    "get",
+    "get",
+    "get"
+  ],
+  "summary": "List transport rules",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:42:28.6167707Z",
+  "pagination": {
+    "style": "none",
+    "defaults": {},
+    "indexParam": null,
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "supported": false,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "out-of-scope-graph-covers",
+    "Method": "Microsoft Graph covers — out of portal-only scope"
+  },
+  "v1Manifest": null,
+  "xdrInternalsHint": "Get-XdrExchangeBetaMailFlow.ListTransportRules",
+  "defenderHarvester": null,
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live-empty",
+    "rowCount": 0,
+    "errorText": "",
+    "responseShape": "wrapper:value[]"
+  },
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

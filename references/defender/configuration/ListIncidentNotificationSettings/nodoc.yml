@@ -1,0 +1,25 @@
+  /mtp/papin/api/cloud/public/internal/IncidentNotificationSettingsV2:
+    get:
+      summary: List incident notification settings
+      description: >-
+        Retrieve the Defender XDR incident email-notification rules shown on
+        the Settings > Email notifications experience.
+      operationId: Configuration.ListIncidentNotificationSettings
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncidentNotificationSetting'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

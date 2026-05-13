@@ -1,0 +1,18 @@
+  /beta/TimeZone:
+    get:
+      tags: [Bootstrap]
+      summary: List available Exchange time zones
+      description: |
+        Returns the time zone values used by Exchange settings and localized report experiences.
+      operationId: ExchangeBeta.Bootstrap.ListTimeZones
+      responses:
+        '200':
+          description: Exchange time zones returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

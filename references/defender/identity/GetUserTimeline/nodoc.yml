@@ -1,0 +1,35 @@
+  /mdi/identity/userapiservice/user/timeline:
+    get:
+      summary: Get user timeline
+      description: >-
+        Retrieve the activity timeline for a specific user from Defender for Identity,
+        including sign-in events, lateral movement, and suspicious activities.
+      operationId: Identity.GetUserTimeline
+      tags: [Identity]
+      parameters:
+        - name: accountName
+          in: query
+          description: The user account name.
+          schema:
+            type: string
+        - name: accountDomain
+          in: query
+          description: The account domain.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - timeline event data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

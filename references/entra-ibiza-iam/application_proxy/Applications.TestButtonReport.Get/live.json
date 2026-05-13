@@ -1,0 +1,12 @@
+{
+  "portal": "entra-ibiza-iam",
+  "path": "/ApplicationProxy/Applications/TestButtonReport",
+  "method": "GET",
+  "finalUrl": "https://main.iam.ad.ext.azure.com/api/ApplicationProxy/Applications/TestButtonReport",
+  "httpStatus": 400,
+  "successKind": "request-shape-error",
+  "diagnostic": "Graph call failed with httpCode=BadRequest, errorCode=Request_UnsupportedQuery, errorMessage=Unsupported or invalid query filter clause specified for property 'appId' of resource 'Application'., reason=Bad Request, correlationId = 8776c9d9-40a5-4a04-9fe1-19d669a515db, response = {\\",
+  "contentLen": 1238,
+  "rawSample": "{\"ClassName\":\"Microsoft.Portal.Framework.Exceptions.ClientException\",\"Message\":\"Graph call failed with httpCode=BadRequest, errorCode=Request_UnsupportedQuery, errorMessage=Unsupported or invalid query filter clause specified for property 'appId' of resource 'Application'., reason=Bad Request, correlationId = 8776c9d9-40a5-4a04-9fe1-19d669a515db, response = {\\\"odata.error\\\":{\\\"code\\\":\\\"Request_UnsupportedQuery\\\",\\\"message\\\":{\\\"lang\\\":\\\"en\\\",\\\"value\\\":\\\"Unsupported or invalid query filter clause specified for property 'appId' of resource 'Application'.\\\"},\\\"requestId\\\":\\\"34c0e6d5-f346-49d2-957d-9275f6e08063\\\",\\\"date\\\":\\\"2026-05-13T07:17:07\\\"}}\",\"Data\":{},\"HResult\":-2146233088,\"XMsServerRequestId\":null,\"Source\":null,\"HttpStatusCode\":400,\"ClientData\":{\"errorCode\":\"Request_UnsupportedQuery\",\"localizedErrorDetails\":{\"errorDetail\":\"Unsupported or invalid query filter clause specified for property 'appId' of resource 'Application'.\"},\"operationResults\":null,\"timeStampUtc\":\"2026-05-13T07:17:07.1595118Z\",\"clientRequestId\":\"8776c9d9-40a5-4a04-9fe1-19d669a515db\",\"internalTransactionId\":\"506fdd2e-b84f-4003-9f83-35d45cdcca7b\",\"tenantId\":null,\"userObjectId\":\"9b0a5108-6952-4fc7-941a-133004153bda\",\"exceptionType\":\"AADGraphException\"}}",
+  "capturedUtc": "2026-05-13T07:17:06Z"
+}

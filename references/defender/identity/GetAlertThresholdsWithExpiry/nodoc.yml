@@ -1,0 +1,24 @@
+  /aatp/api/alertthresholds/withExpiry:
+    get:
+      summary: Get alert thresholds with expiry
+      description: >-
+        Retrieve the alert threshold configuration including expiry dates
+        for Defender for Identity.
+      operationId: Identity.GetAlertThresholdsWithExpiry
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - alert thresholds with expiry data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -25,6 +25,16 @@ $sw = [System.Diagnostics.Stopwatch]::StartNew()
 $portal      = [string]$ActivityInput.Portal
 $tier        = [string]$ActivityInput.Tier
 $streamName  = [string]$ActivityInput.StreamName
+# Phase A1: EntryKey is the unique manifest dispatch key (`<sub_area>::<slug>`).
+# StreamName (workspace table) is shared across many EntryKeys within a sub-area
+# — only EntryKey uniquely identifies one endpoint. Fall back to StreamName for
+# legacy callers (pre-A1 orchestrators), but log a deprecation warning so we
+# can remove the fallback in v0.2.0.
+$entryKey    = [string]$ActivityInput.EntryKey
+if ([string]::IsNullOrWhiteSpace($entryKey)) {
+    Write-Warning "Xdr-PollStream: ActivityInput missing EntryKey; falling back to StreamName='$streamName'. Orchestrator should pass EntryKey explicitly (Phase A1)."
+    $entryKey = $streamName
+}
 # Section R B-4: OperationId propagation. Falls back to a per-activity GUID if
 # orchestrator didn't supply one (legacy callers).
 $opId        = [string]$ActivityInput.OperationId
@@ -103,11 +113,21 @@ try {
     # The activity is best-effort: if checkpoint read fails, fall back to no
     # filter (Get-CheckpointTimestamp returns DateTime.MinValue on first run).
     $manifest = Get-XdrEndpointManifest -Portal Defender
-    $manifestEntry = $manifest[$streamName]
+    # Phase A1: lookup by EntryKey (unique per endpoint), not StreamName (shared
+    # across many endpoints in a sub-area). EntryKey is the canonical dispatch key.
+    $manifestEntry = $manifest[$entryKey]
+    if (-not $manifestEntry) {
+        # Fallback: try StreamName (legacy/transition).
+        $manifestEntry = $manifest[$streamName]
+        if ($manifestEntry) {
+            Write-Warning "Xdr-PollStream: manifest lookup fell back to StreamName='$streamName' (no EntryKey='$entryKey' match)"
+        }
+    }
     $hasFromDateFilter = $manifestEntry -and
                          $manifestEntry.ContainsKey('Filter') -and
                          [string]$manifestEntry.Filter -eq 'fromDate'
-    $invokeArgs = @{ Session = $session; Stream = $streamName }
+    # Use EntryKey for Invoke-MDEEndpoint dispatch (ByEntryKey param set).
+    $invokeArgs = @{ Session = $session; EntryKey = $entryKey }
     if ($hasFromDateFilter) {
         $checkpointFromUtc = Get-CheckpointTimestamp `
             -StorageAccountName $config.StorageAccountName `
@@ -212,7 +232,9 @@ try {
 
         # Step 3: iterate entities, call per-entity, aggregate rows.
         $aggregated = @()
-        $entityResults = @{ live = 0; 'live-empty' = 0; 'tenant-gated' = 0; error = 0 }
+        # Rule 6: 4-value SuccessKind set (tenant-gated retired per Rule 23 —
+        # license-blocked endpoints stay 'error' with LicenseHint populated).
+        $entityResults = @{ live = 0; 'live-empty' = 0; 'rate-limited' = 0; error = 0 }
         foreach ($eid in $entityIds) {
             $entityArgs = @{} + $invokeArgs
             $entityArgs['PathParams'] = @{ $pathParamName = $eid }
@@ -310,17 +332,47 @@ try {
             $streamName, $freshRows.Count, $platforms.Count, (($platformResults.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ', '))
     } else {
         # Standard single-call path (no fanout).
+        # Phase A0.3: multi-cycle pagination resume. Read checkpoint state — if a
+        # prior cycle hit per-cycle cap with PaginationExhausted=false, resume
+        # at LastCompletedPage+1. Otherwise default StartFromPage=1.
+        $hasPagination = $manifestEntry -and $manifestEntry.ContainsKey('Pagination') -and $manifestEntry.Pagination
+        if ($hasPagination) {
+            try {
+                $ckptState = Get-CheckpointState `
+                    -StorageAccountName $config.StorageAccountName `
+                    -StreamName         $streamName `
+                    -TableName          $config.CheckpointTable
+                if ($ckptState.LastCompletedPage -gt 0) {
+                    $invokeArgs['StartFromPage'] = ($ckptState.LastCompletedPage + 1)
+                    Write-Information ("Xdr-PollStream {0}: resuming pagination at page {1}" -f $streamName, $invokeArgs['StartFromPage'])
+                }
+                # Y1 10-min activity cap → bound per-cycle pages. PageSize=200 × 50 pages ≈ 50s
+                # network + processing, well under cap. vuln_management with 1000-page first
+                # poll spreads across 20 cycles. Operator can tune via $env if needed.
+                $cycleCap = 50
+                if ($env:XDR_MAX_PAGES_PER_CYCLE) {
+                    try { $cycleCap = [int]$env:XDR_MAX_PAGES_PER_CYCLE } catch { }
+                }
+                $invokeArgs['MaxPagesPerCycle'] = $cycleCap
+            } catch {
+                Write-Warning ("Xdr-PollStream {0}: checkpoint state read failed (continuing without resume): {1}" -f $streamName, $_.Exception.Message)
+            }
+        }
         # Invoke-MDEEndpoint returns object[] of DCE-ready rows (NOT a wrapper).
         # Defensive null filter (Section R++++++): strip $null elements that
         # could otherwise bomb Send-ToLogAnalytics GetByteCount.
         $freshRows = @(@(Invoke-MDEEndpoint @invokeArgs) | Where-Object { $null -ne $_ })
     }
 
-    # Section R++.A: read truth-signal side-channel for Set-XdrTierStateRow.
-    # Distinguishes 'live' (rows landed) | 'live-empty' (200, no rows — legitimate)
-    # | 'tenant-gated' (4xx — license/scope absent) | 'error' (5xx/network).
-    # Used by Connector-Heartbeat aggregator + connector-card UX to NOT flag
-    # tenant-gated as failures.
+    # Section R++.A + Rule 6 (tenant-gated retired per Rule 23): read truth-signal
+    # side-channel for Set-XdrTierStateRow. 4-value SuccessKind set:
+    #   live         — rows landed
+    #   live-empty   — 200, no rows (legitimate)
+    #   rate-limited — 429 (apiproxy throttling; circuit-breaker handles)
+    #   error        — 5xx/network OR 401/403/404 with LicenseHint populated
+    #                  (license-blocked is a configuration signal, not a defect)
+    # Connector-Heartbeat aggregator reads + connector-card UX never flags
+    # license-blocked as a failure (LicenseHint surfaces the SKU operator needs).
     $endpointResult = Get-MDEEndpointLastResult
     $successKind = if ($endpointResult) { [string]$endpointResult.SuccessKind } else { 'live-empty' }
     $httpStatus  = if ($endpointResult) { [int]$endpointResult.HttpStatus }    else { 0 }
@@ -397,29 +449,67 @@ try {
         }
     }
 
-    # Section R + R++.A: final-step write to XdrTierState so Connector-Heartbeat
-    # aggregates per-(Portal,Tier) StreamsSucceeded for the connector card.
-    # Section R++.A: pass Reason + HttpStatus from the side-channel so the
-    # heartbeat aggregator can distinguish tenant-gated streams from real failures.
-    # Success classification:
+    # Phase A0.3: pagination-state checkpoint write. Independent of fromDate
+    # filter — applies to any paginated stream (e.g. vuln_management 1000-page
+    # first poll). When PaginationExhausted=false, write LastCompletedPage so
+    # next cycle resumes at LastCompletedPage+1. When PaginationExhausted=true,
+    # ClearPagination so the next cycle starts from page 1 (fresh poll).
+    if ($successKind -in 'live','live-empty' -and $endpointResult -and
+        $endpointResult.PSObject.Properties['PaginationExhausted']) {
+        try {
+            if ($endpointResult.PaginationExhausted) {
+                Set-CheckpointTimestamp `
+                    -StorageAccountName $config.StorageAccountName `
+                    -StreamName         $streamName `
+                    -TableName          $config.CheckpointTable `
+                    -ClearPagination | Out-Null
+            } else {
+                Set-CheckpointTimestamp `
+                    -StorageAccountName $config.StorageAccountName `
+                    -StreamName         $streamName `
+                    -TableName          $config.CheckpointTable `
+                    -LastCompletedPage  ([int]$endpointResult.LastCompletedPage) | Out-Null
+                Write-Information ("Xdr-PollStream {0}: pagination NOT exhausted; checkpointed page {1} for next-cycle resume" -f $streamName, $endpointResult.LastCompletedPage)
+            }
+        } catch {
+            Write-Warning ("Xdr-PollStream {0}: pagination checkpoint write failed: {1}" -f $streamName, $_.Exception.Message)
+        }
+    }
+
+    # Phase A1: Section R + R++.A — final-step write to XdrTierState via
+    # ByProperties form (PartitionKey=<Portal>, RowKey=<EntryKey>) so
+    # Connector-Heartbeat reads per-sub-area state by EntryKey lookup. LicenseHint
+    # propagation (Rule 23) — license-blocked endpoints stay SuccessKind='error'
+    # but operators see WHY via LicenseHint column.
+    # Success classification (Rule 6):
     #   live + live-empty -> Success=$true (poll completed cleanly)
-    #   tenant-gated      -> Success=$true (legitimate; not a failure but not a poll either)
+    #   rate-limited      -> Success=$true (transient; circuit-breaker handles)
     #   error             -> Success=$false (real failure; surfaces in card + alert)
     $tierStateSuccess = ($successKind -ne 'error')
+    $licenseHint = if ($endpointResult -and $endpointResult.PSObject.Properties['LicenseHint']) {
+        [string]$endpointResult.LicenseHint
+    } else { '' }
+    $tierStateProps = @{
+        Tier              = $tier
+        Stream            = $streamName
+        SuccessKind       = $successKind
+        HttpStatus        = $httpStatus
+        LicenseHint       = $licenseHint
+        Success           = $tierStateSuccess
+        ErrorText         = $endpointErr
+        OperationId       = $opId
+        RowsIngested      = $rowsIngested
+        LatencyMs         = [int]$sw.ElapsedMilliseconds
+        LastRunUtc        = ([DateTime]::UtcNow).ToString('o')
+    }
     try {
         Set-XdrTierStateRow `
             -StorageAccountName $config.StorageAccountName `
-            -Portal             $portal `
-            -Tier               $tier `
-            -Stream             $streamName `
-            -RowsIngested       $rowsIngested `
-            -Success            $tierStateSuccess `
-            -ErrorText          $endpointErr `
-            -OperationId        $opId `
-            -Reason             $successKind `
-            -HttpStatus         $httpStatus
+            -PartitionKey       $portal `
+            -RowKey             $entryKey `
+            -Properties         $tierStateProps
     } catch {
-        Write-Warning ("Xdr-PollStream: Set-XdrTierStateRow failed for {0}: {1}" -f $streamName, $_.Exception.Message)
+        Write-Warning ("Xdr-PollStream: Set-XdrTierStateRow ByProperties failed for {0}: {1}" -f $entryKey, $_.Exception.Message)
     }
 
     $sw.Stop()
@@ -460,22 +550,28 @@ try {
     $sw.Stop()
     $errMsg = $_.Exception.Message
 
-    # Best-effort tier-state write: record the failure so Connector-Heartbeat aggregates correctly.
-    # Section R++.A: Reason='error' marks this row as a real failure (vs tenant-gated).
-    # Defensive: do NOT pass empty Stream — Set-XdrTierStateRow has Mandatory ValidateNotNullOrEmpty
-    # which throws under outer-catch error path (W1). If $streamName is unset, skip the write.
-    if (-not [string]::IsNullOrWhiteSpace($streamName)) {
+    # Best-effort tier-state write via ByProperties (Phase A1): record the failure
+    # so Connector-Heartbeat aggregates correctly. SuccessKind='error' marks this
+    # row as a real failure. Defensive: skip if EntryKey is unset.
+    if (-not [string]::IsNullOrWhiteSpace($entryKey)) {
         try {
             Set-XdrTierStateRow `
                 -StorageAccountName $config.StorageAccountName `
-                -Portal             $portal `
-                -Tier               $tier `
-                -Stream             $streamName `
-                -RowsIngested       0 `
-                -Success            $false `
-                -ErrorText          $errMsg `
-                -OperationId        $opId `
-                -Reason             'error'
+                -PartitionKey       $portal `
+                -RowKey             $entryKey `
+                -Properties         @{
+                    Tier         = $tier
+                    Stream       = $streamName
+                    SuccessKind  = 'error'
+                    HttpStatus   = 0
+                    LicenseHint  = ''
+                    Success      = $false
+                    ErrorText    = $errMsg
+                    OperationId  = $opId
+                    RowsIngested = 0
+                    LatencyMs    = [int]$sw.ElapsedMilliseconds
+                    LastRunUtc   = ([DateTime]::UtcNow).ToString('o')
+                }
         } catch {
             # Silent — already in error path.
         }

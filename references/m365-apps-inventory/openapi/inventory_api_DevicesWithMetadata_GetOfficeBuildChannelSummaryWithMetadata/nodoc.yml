@@ -1,0 +1,16 @@
+  /inventory/api/DevicesWithMetadata/GetOfficeBuildChannelSummaryWithMetadata:
+    get:
+      tags: [Devices]
+      summary: Get Office build channel summary with metadata
+      description: Returns inventory rollups by servicing channel, including metadata for the Inventory page.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Channel summary collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'

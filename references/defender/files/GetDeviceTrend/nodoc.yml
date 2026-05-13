@@ -1,0 +1,32 @@
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/trend:
+    get:
+      summary: Get file device trend
+      description: Return the device trend chart shown on the Defender file page.
+      operationId: Files.GetDeviceTrend
+      tags: [Files]
+      parameters:
+        - name: entityId
+          in: query
+          required: true
+          description: The SHA-256 of the file on unified file pages.
+          schema:
+            type: string
+        - name: daysToLookBack
+          in: query
+          description: The trend lookback window, in days.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDeviceTrendResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

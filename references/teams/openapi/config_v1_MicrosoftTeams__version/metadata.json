@@ -1,0 +1,59 @@
+{
+  "portal": "teams",
+  "subArea": "openapi",
+  "slug": "config_v1_MicrosoftTeams__version",
+  "operationId": null,
+  "path": "/config/v1/MicrosoftTeams/{version}",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Microsoft Teams config payload",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:12:49.2489828Z",
+  "pagination": {
+    "defaults": {},
+    "style": "none",
+    "tokenParam": null,
+    "sizeParam": null,
+    "indexParam": null
+  },
+  "timeFilter": {
+    "type": null,
+    "startParam": null,
+    "lookbackParam": null,
+    "endParam": null,
+    "supported": false
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "CookieHost": "admin.teams.microsoft.com",
+    "ClientId": "12128f48-ec9e-42f0-b203-ea49fb6af367",
+    "Method": "Get-EntraEstsAuth + TAC cookies"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "path-template; requires fanout",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/config/v1/MicrosoftTeams/{version}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version",
+    "Url.Path"
+  ],
+  "cadenceSuggestion": "daily"
+}

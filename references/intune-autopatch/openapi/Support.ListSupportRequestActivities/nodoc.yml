@@ -1,0 +1,22 @@
+  /support/odata/v1/supportRequests('{supportRequestId}')/activities:
+    get:
+      tags: [Support]
+      summary: List support request activities
+      description: |
+        Returns the activity/discussion feed for a Windows Autopatch support request. The path was
+        recovered from the Support requests bundle; a live GET was not exercised in this tenant
+        because no support request IDs were available.
+      operationId: IntuneAutopatch.Support.ListSupportRequestActivities
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      responses:
+        '200':
+          description: Support request activities returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequestActivityCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

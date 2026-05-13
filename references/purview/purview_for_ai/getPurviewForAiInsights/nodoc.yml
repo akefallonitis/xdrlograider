@@ -1,0 +1,52 @@
+  /di/find/PurviewForAI:
+    get:
+      operationId: getPurviewForAiInsights
+      summary: Get Purview for AI insight data
+      description: >-
+        Retrieve Purview for AI insight cards and scenario aggregates for the
+        requested time range.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The tenant GUID used by the Purview for AI service.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression used to select the requested AI scenario.
+          schema:
+            type: string
+        - name: startTime
+          in: query
+          required: false
+          description: The start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: false
+          description: The end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

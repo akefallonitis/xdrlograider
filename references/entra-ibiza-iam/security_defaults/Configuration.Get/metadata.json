@@ -1,0 +1,45 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "security_defaults",
+  "slug": "Configuration.Get",
+  "operationId": "SecurityDefaults.Configuration.Get",
+  "path": "/SecurityDefaults/Configuration",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Security Defaults configuration",
+  "sourceFile": "security_defaults.yml",
+  "capturedUtc": "2026-05-12T15:13:12.8447707Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "6h"
+}

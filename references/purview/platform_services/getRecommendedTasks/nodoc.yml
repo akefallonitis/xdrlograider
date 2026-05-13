@@ -1,0 +1,25 @@
+  /purviewplatform/api/v1/insight/RecommendedTasks:
+    get:
+      operationId: getRecommendedTasks
+      summary: Get recommended tasks
+      description: >-
+        Retrieve recommended tasks from the Purview Platform. Returns a list of
+        recommended configuration tasks for the tenant based on current protection
+        status. Discovered on Information Protection > Default Labels page.
+      tags: [PlatformServices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

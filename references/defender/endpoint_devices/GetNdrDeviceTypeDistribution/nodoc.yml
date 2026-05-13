@@ -1,0 +1,23 @@
+  /mtp/ndr/machines/deviceTypeDistribution:
+    get:
+      summary: Get NDR device type distribution
+      description: >-
+        Retrieve the distribution of device types across the organization. Discovered on Cloud Apps Dashboard page.
+      operationId: EndpointDevices.GetNdrDeviceTypeDistribution
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

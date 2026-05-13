@@ -1,0 +1,19 @@
+  /support/v1/tenants/getSupportEntitlementInfo:
+    get:
+      tags: [Support]
+      summary: Get support entitlement info
+      description: |
+        Returns support entitlement information for the current tenant. Recovered from the support
+        bundles and confirmed with a GET probe.
+      operationId: IntuneAutopatch.Support.GetEntitlementInfo
+      responses:
+        '200':
+          description: Support entitlement information returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

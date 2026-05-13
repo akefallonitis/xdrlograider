@@ -1,0 +1,26 @@
+  /api/ths/api/v1/hierarchies/{tenantId}/operations:
+    servers:
+      - url: https://teams.cloud.microsoft
+        description: Teams workforce hierarchy backend
+    get:
+      tags: [TeamsHierarchy]
+      summary: List workforce hierarchy operations
+      description: |
+        Workforce hierarchy route discovered from planning and operations pages. The retained tenant
+        returned `404 Not Found`, which suggests the hierarchy feature was unavailable in the current
+        tenant.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Workforce hierarchy operations payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # reports.office.com/private/intraTenantConfig

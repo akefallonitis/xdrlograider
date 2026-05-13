@@ -1,0 +1,26 @@
+  /fd/IC3Config/Skype.Policy/configurations/TeamsClientConfiguration:
+    get:
+      summary: Get Teams client configuration policy
+      description: >-
+        Retrieve the tenant-scoped Teams client configuration policy used by the
+        admin center to hydrate Teams interoperability and content-sharing settings.
+      operationId: AppSettings.GetTeamsClientConfiguration
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Teams client configuration policy record. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

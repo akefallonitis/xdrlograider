@@ -1,0 +1,15 @@
+  /serviceProfile/v1.0/ServiceProfileAggregator/tenantServicingExclusionWindows:
+    get:
+      tags: [Servicing Profiles]
+      summary: Get tenant servicing exclusion windows
+      description: Returns tenant-wide servicing exclusion windows used by advanced Cloud Update scheduling.
+      responses:
+        '200':
+          description: Tenant exclusion windows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericObject'
+              example: []

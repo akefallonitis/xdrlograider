@@ -1,0 +1,112 @@
+{
+  "portal": "defender",
+  "subArea": "exposure_management",
+  "slug": "ListPostureOversightMetrics",
+  "operationId": "ExposureManagement.ListPostureOversightMetrics",
+  "path": "/mtp/posture/oversight/metrics",
+  "methods": [
+    "get"
+  ],
+  "summary": "List posture oversight metrics",
+  "sourceFile": "exposure_management.yml",
+  "capturedUtc": "2026-05-12T14:39:30.9801758Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "initiativeId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Filter metrics for a specific initiative ID."
+    },
+    {
+      "Name": "highlights",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Include highlight metadata."
+    },
+    {
+      "Name": "fullData",
+      "In": "query",
+      "Type": "boolean",
+      "Default": "true",
+      "Description": "Return the full data set rather than a reduced summary."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_PostureMetrics_CL",
+    "v1Tier": "XspmGraph",
+    "v1Category": "Exposure Management (XSPM)",
+    "v1RawPath": "/apiproxy/mtp/posture/oversight/metrics"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 10,
+    "errorText": "",
+    "responseShape": "wrapper:results[]"
+  },
+  "parsingNotes": [
+    "ResponseShape=Wrapper — UnwrapProperty='results' for projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=live (10 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Filter metrics for a specific initiative ID.",
+      "type": "string",
+      "name": "initiativeId"
+    },
+    {
+      "in": "query",
+      "default": "true",
+      "required": false,
+      "description": "Include highlight metadata.",
+      "type": "boolean",
+      "name": "highlights"
+    },
+    {
+      "in": "query",
+      "default": "true",
+      "required": false,
+      "description": "Return the full data set rather than a reduced summary.",
+      "type": "boolean",
+      "name": "fullData"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version",
+    "Tenant.Id"
+  ],
+  "cadenceSuggestion": "1h"
+}

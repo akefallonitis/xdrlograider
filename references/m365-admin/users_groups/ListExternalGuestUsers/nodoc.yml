@@ -1,0 +1,30 @@
+  /admin/api/users/ListExternalGuestUsers:
+    post:
+      summary: List external guest users
+      description: >-
+        Retrieve a list of external guest users in the tenant (Users > Guest).
+      operationId: UsersGroups.ListExternalGuestUsers
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,62 @@
+{
+  "portal": "defender",
+  "subArea": "configuration",
+  "slug": "GetIntuneOnboardingStatus",
+  "operationId": "Configuration.GetIntuneOnboardingStatus",
+  "path": "/mtp/responseApiPortal/onboarding/intune/status",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get Intune onboarding status",
+  "sourceFile": "configuration.yml",
+  "capturedUtc": "2026-05-12T14:37:23.7709075Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "6h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_IntuneConnection_CL",
+    "v1Tier": "Configuration",
+    "v1Category": "Configuration and Settings",
+    "v1RawPath": "/apiproxy/mtp/responseApiPortal/onboarding/intune/status"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 6h cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "weekly"
+}

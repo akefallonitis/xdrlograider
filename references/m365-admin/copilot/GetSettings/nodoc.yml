@@ -1,0 +1,24 @@
+  /admin/api/copilotsettings/settings:
+    get:
+      summary: Get Copilot settings
+      description: >-
+        Retrieve the general Copilot settings for the tenant including feature enablement
+        and configuration options.
+      operationId: Copilot.GetSettings
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: General Copilot settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,20 @@
+  /api/v1/clientHealth/clientHealthIssues:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: List Teams client health issues
+      description: |
+        Client health issue inventory observed from `Teams client health`.
+      responses:
+        '200':
+          description: Client health issues payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

@@ -29,20 +29,11 @@ function Get-XdrTierCadenceMap {
     [OutputType([hashtable])]
     param()
 
-    # TEMPORARY COMPRESSED CADENCE (post-deploy audit window 2026-05-12):
-    # All tiers compressed to 5 min so every stream attempts within 1-2 cycles.
-    # Plan AMEND-2 BINDING: REVERT to production values BEFORE v0.1.0 tag.
-    # Production values (preserved in comment):
-    #   ActionCenter  = 10 min   (response-action audit, high churn)
-    #   XspmGraph     = 1 hour   (exposure graph snapshots)
-    #   Configuration = 6 hours  (policy + posture state)
-    #   Inventory     = 1 day    (asset/identity inventory)
-    #   Maintenance   = 7 days   (rare-change ops state)
     return @{
-        ActionCenter  = [TimeSpan]::FromMinutes(5)
-        XspmGraph     = [TimeSpan]::FromMinutes(5)
-        Configuration = [TimeSpan]::FromMinutes(5)
-        Inventory     = [TimeSpan]::FromMinutes(5)
-        Maintenance   = [TimeSpan]::FromMinutes(5)
+        ActionCenter  = [TimeSpan]::FromMinutes(10)
+        XspmGraph     = [TimeSpan]::FromHours(1)
+        Configuration = [TimeSpan]::FromHours(6)
+        Inventory     = [TimeSpan]::FromDays(1)
+        Maintenance   = [TimeSpan]::FromDays(7)
     }
 }

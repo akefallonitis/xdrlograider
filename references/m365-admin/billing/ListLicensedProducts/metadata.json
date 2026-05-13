@@ -1,0 +1,65 @@
+{
+  "portal": "m365-admin",
+  "subArea": "billing",
+  "slug": "ListLicensedProducts",
+  "operationId": "Billing.ListLicensedProducts",
+  "path": "/fd/m365licensing/v3/licensedProducts",
+  "methods": [
+    "get"
+  ],
+  "summary": "List licensed products",
+  "sourceFile": "billing.yml",
+  "capturedUtc": "2026-05-12T15:13:25.2269997Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "allotmentSourceOwnerType",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Owner type used to scope the licensed product allotment view."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": false,
+    "description": "Owner type used to scope the licensed product allotment view.",
+    "type": "string",
+    "name": "allotmentSourceOwnerType"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Name"
+  ],
+  "cadenceSuggestion": "daily"
+}

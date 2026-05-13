@@ -1,0 +1,37 @@
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/settings/{settingName}:
+    get:
+      summary: Get Sentinel workspace setting
+      description: >-
+        Retrieve a Sentinel workspace setting exposed through the Defender Precision
+        experience. Observed live with `EntityAnalytics` and `Ueba`. Newly attached
+        workspaces can return `404 NotFound` for `Ueba` before that setting is provisioned.
+      operationId: SentinelPrecision.GetSetting
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/SentinelSettingName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel settings resource.
+          schema:
+            type: string
+            default: '2022-04-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelSettingResource'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          description: Setting not found for this workspace.
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ErrorResponse

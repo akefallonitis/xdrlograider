@@ -1,0 +1,862 @@
+{
+  "httpStatus": 200,
+  "successKind": "live",
+  "rowCount": 3,
+  "errorText": "",
+  "responseShape": "array",
+  "sample": {
+    "items": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "isStatic": true,
+        "kind": "restApiPoller",
+        "version": "1.1.1",
+        "versionStage": "active",
+        "versionChangeLog": [
+          "Fetch User details of federated users"
+        ],
+        "displayName": "CyberArk Identity",
+        "description": "This connector ingests **Users and Roles** from the CyberArk Identity platform into Microsoft Defender using a codeless connector.",
+        "provider": {
+          "name": "CyberArk Identity",
+          "url": "https://www.cyberark.com/"
+        },
+        "supportedBy": {
+          "name": "Microsoft",
+          "url": null
+        },
+        "supportedProtectionTypes": [
+          "mdi"
+        ],
+        "supportedCredentialsKinds": [
+          "oAuth2_ClientCredentials"
+        ],
+        "isMultiInstancesSupported": true,
+        "instanceSchema": {
+          "type": "object",
+          "properties": {
+            "displayName": {
+              "description": "Your connector instance's display name.",
+              "type": "string"
+            },
+            "credentials": {
+              "description": "The credentials to use for retrieving data for this connector instance.",
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "description": "The type of credentials. Must be 'saved' for this object.",
+                      "type": "string",
+                      "enum": [
+                        "saved"
+                      ]
+                    },
+                    "description": {
+                      "description": "Optional description of the credentials.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "credentialsId": {
+                      "description": "The internal GUID of the saved credentials.",
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "credentialsId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "description": "The type of credentials. Must be 'OAuth2ClientCredentials' for this object.",
+                      "type": "string",
+                      "enum": [
+                        "oAuth2_ClientCredentials"
+                      ]
+                    },
+                    "description": {
+                      "description": "Optional description of the credentials.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "clientId": {
+                      "description": "The OAuth username for authentication.",
+                      "type": "string"
+                    },
+                    "clientSecret": {
+                      "description": "The OAuth user's password to use for authentication.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "clientId",
+                    "clientSecret"
+                  ]
+                }
+              ]
+            },
+            "properties": {
+              "type": "object",
+              "properties": {
+                "domainName": {
+                  "description": "CyberArk Identity endpoint",
+                  "type": "string"
+                },
+                "subdomain": {
+                  "description": "Privilege Cloud service endpoint",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "domainName",
+                "subdomain"
+              ]
+            },
+            "protectionTypesProperties": {
+              "type": "object",
+              "properties": {
+                "mdi": {
+                  "type": "object",
+                  "properties": {
+                    "isEnabled": {
+                      "description": "Enable MDI protection.",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "isEnabled"
+                  ]
+                }
+              },
+              "anyOf": [
+                {
+                  "properties": {
+                    "mdi": {
+                      "properties": {
+                        "isEnabled": {
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "isEnabled"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "displayName",
+            "credentials",
+            "properties",
+            "protectionTypesProperties"
+          ]
+        },
+        "requiredPermissions": [],
+        "uiDefinition": {
+          "icon": {
+            "kind": "static",
+            "name": "CyberArk"
+          },
+          "uiEntities": [
+            {
+              "kind": "container",
+              "name": "Wizard",
+              "properties": {
+                "title": "Connect a CyberArk Identity and Privilege Cloud Connector",
+                "description": "The [CyberArk Identity and Privilege Cloud](https://www.cyberark.com/) data connector provides the capability to ingest data from CyberArk Identity and Privilege Cloud APIs into Microsoft Defender. ",
+                "uiEntities": [
+                  {
+                    "name": "InstanceConfigMultipleInstances",
+                    "kind": "instanceConfig",
+                    "properties": {
+                      "multipleInstances": true,
+                      "title": "Connect a connector",
+                      "uiEntities": [
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=Connector name; required=True; instanceSchemaRef=displayName}"
+                        },
+                        {
+                          "kind": "divider",
+                          "properties": ""
+                        },
+                        {
+                          "kind": "infoSection",
+                          "properties": "@{label=Connector details; description=Before connecting to CyberArk Identity, you will need to have domain name, OAuth Client ID and OAuth Client password.}"
+                        },
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=CyberArk Identity Endpoint; placeholder=For example, my-domain.id.cyberark.cloud; required=True; instanceSchemaRef=properties.domainName}"
+                        },
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=Privilege Cloud service endpoint; placeholder=For example, my-subdomain.privilegecloud.cyberark.cloud; required=True; instanceSchemaRef=properties.subdomain}"
+                        },
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=OAuth username; type=string; required=True; instanceSchemaRef=credentials.clientId}"
+                        },
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=OAuth password; type=password; required=True; instanceSchemaRef=credentials.clientSecret}"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "kind": "protectionTypesConfig",
+                    "name": "ProtectionTypesPage",
+                    "properties": {
+                      "title": "Select protection types",
+                      "mdi": {
+                        "kind": "container",
+                        "properties": {
+                          "title": "Identity",
+                          "description": "Microsoft Defender for Identity",
+                          "uiEntities": ""
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "prerequisites": [],
+        "tenantId": "45f52f35-73d5-4066-8378-fe506ee90fb1",
+        "status": {
+          "connectionState": "disconnected",
+          "operationalStatus": {
+            "state": "unknown",
+            "changeTime": null
+          }
+        },
+        "instancesCount": 0,
+        "instances": [],
+        "operations": null,
+        "changeDetails": null
+      },
+      {
+        "id": "f23e747c-c466-4229-9ff3-02bd08da3d9f",
+        "isStatic": true,
+        "kind": "restApiPoller",
+        "version": "1.0.2",
+        "versionStage": "active",
+        "versionChangeLog": [
+          "Remove groupsUsersRoles connection config"
+        ],
+        "displayName": "Okta Single Sign-On",
+        "description": "The [Okta Single Sign-On (SSO)](https://www.okta.com/products/single-sign-on/) data connector enables seamless integration of Okta data into Microsoft Sentinel by ingesting event logs via Okta APIs. This ingestion process leverages Data Collection Rules (DCRs) with [ingestion-time transformations](https://docs.microsoft.com/azure/azure-monitor/logs/custom-logs-overview) to ensure efficient and structured data flow. Additionally, it allows ingestion of Okta users, groups, roles, and system logs to Microsoft Defender for Identity to provide comprehensive identity protection for Okta which includes identity posture, threat detection, investigation, and response for identity threats in your Okta environment.",
+        "provider": {
+          "name": "Okta",
+          "url": "support@okta.com"
+        },
+        "supportedBy": {
+          "name": "Microsoft",
+          "url": null
+        },
+        "supportedProtectionTypes": [
+          "siem",
+          "mdi"
+        ],
+        "supportedCredentialsKinds": [
+          "apiKey"
+        ],
+        "isMultiInstancesSupported": true,
+        "instanceSchema": {
+          "type": "object",
+          "properties": {
+            "displayName": {
+              "description": "Your connector instance's display name.",
+              "type": "string",
+              "maxLength": 120
+            },
+            "credentials": {
+              "description": "The credentials to use for retrieving data for this connector instance.",
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "description": "The type of credentials. Must be 'saved' for this object.",
+                      "type": "string",
+                      "enum": [
+                        "saved"
+                      ]
+                    },
+                    "description": {
+                      "description": "Optional description of the credentials.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "credentialsId": {
+                      "description": "The internal GUID of the saved credentials.",
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "credentialsId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "description": "The type of credentials. Must be 'apiKey' for this object.",
+                      "type": "string",
+                      "enum": [
+                        "apiKey"
+                      ]
+                    },
+                    "description": {
+                      "description": "Optional description of the credentials.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "apiKey": {
+                      "description": "The Okta account's API key to use for authentication.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "apiKey"
+                  ]
+                }
+              ]
+            },
+            "properties": {
+              "type": "object",
+              "properties": {
+                "domainName": {
+                  "description": "Your OktaSSO account domain name (e.g., myDomain.okta.com) - you can retrieve it from the OktaSSO portal",
+                  "type": "string",
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "domainName"
+              ]
+            },
+            "protectionTypesProperties": {
+              "type": "object",
+              "properties": {
+                "siem": {
+                  "type": "object",
+                  "properties": {
+                    "isEnabled": {
+                      "description": "Enable SIEM protection.",
+                      "type": "boolean"
+                    },
+                    "workspaceId": {
+                      "description": "LogAnalytics workspace ID associated with your Microsoft Sentinel product (onboarded to Defender USX).",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "dataCollectionEndpoint": {
+                      "description": "Log analytics data collection endpoint (use the 'logsIngestion' from your DCE resource; e.g., https://unifiedconnectordatacollectionendpoint-1acu.eastus-1.ppe.ingest.monitor.azure.com)",
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "dataCollectionRuleImmutableId": {
+                      "description": "Log analytics data collection rule immutable id (use the 'immutableId' field from your DCR resource; format is: 'dcr-{uuid}', for example: 'dcr-a5b14cfc77164374bb4dbf41772d73e3').",
+                      "type": "string",
+                      "pattern": "^dcr-[0-9a-fA-F]{32}$"
+                    }
+                  },
+                  "required": [
+                    "isEnabled"
+                  ],
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "isEnabled": "@{const=True}"
+                        }
+                      },
+                      "then": {
+                        "required": [
+                          "workspaceId",
+                          "dataCollectionEndpoint",
+                          "dataCollectionRuleImmutableId"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "mdi": {
+                  "type": "object",
+                  "properties": {
+                    "isEnabled": {
+                      "description": "Enable MDI protection.",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "isEnabled"
+                  ]
+                }
+              },
+              "anyOf": [
+                {
+                  "properties": {
+                    "siem": {
+                      "properties": {
+                        "isEnabled": {
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "isEnabled"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "mdi": {
+                      "properties": {
+                        "isEnabled": {
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "isEnabled"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "displayName",
+            "credentials",
+            "properties",
+            "protectionTypesProperties"
+          ]
+        },
+        "requiredPermissions": [
+          {
+            "name": "Okta API Token",
+            "kind": "custom",
+            "protectionTypes": [
+              "siem",
+              "mdi"
+            ],
+            "description": "Okta API Token. See the documentation for Okta System Log API (https://developer.okta.com/docs/reference/api/system-log/)."
+          },
+          {
+            "provider": "microsoft.operationalinsights/workspaces",
+            "scope": "workspace",
+            "actions": [
+              "read",
+              "write"
+            ],
+            "kind": "azureRbac",
+            "protectionTypes": [
+              "siem"
+            ],
+            "description": "read and write permissions on the log analytics workspace selected"
+          }
+        ],
+        "uiDefinition": {
+          "icon": {
+            "kind": "static",
+            "name": "Okta"
+          },
+          "uiEntities": [
+            {
+              "kind": "container",
+              "name": "Wizard",
+              "properties": {
+                "title": "Connect an Okta SSO connector",
+                "description": "The [Okta Single Sign-On (SSO)](https://www.okta.com/products/single-sign-on/) data connector enables seamless integration of Okta data into Microsoft Sentinel and Microsoft Defender for Identity by ingesting identity related information and event logs via Okta APIs. For Microsoft Sentinel it allows ingestion of event logs leveraging leverages Data Collection Rules (DCRs) with [ingestion-time transformations](https://docs.microsoft.com/azure/azure-monitor/logs/custom-logs-overview) to ensure efficient and structured data flow. For Microsoft Defender for Identity it allows ingestion of Okta users, groups, roles, and system logs to Microsoft Defender for Identity to provide comprehensive identity protection for Okta which includes identity posture, threat detection, investigation, and response for identity threats in your Okta environment.",
+                "uiEntities": [
+                  {
+                    "name": "InstanceConfigMultipleInstances",
+                    "kind": "instanceConfig",
+                    "properties": {
+                      "multipleInstances": true,
+                      "title": "Connect a connector",
+                      "uiEntities": [
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=Connector name; required=True; instanceSchemaRef=displayName}"
+                        },
+                        {
+                          "kind": "divider",
+                          "properties": ""
+                        },
+                        {
+                          "kind": "infoSection",
+                          "properties": "@{label=Connector details; description=In order to connect to an Okta account, you will require a domain name and an active API key. This solution has dependencies on some Defender solutions that might either be in Preview or might result in additional ingestion or operational costs.}"
+                        },
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=Domain name; placeholder=For example, my-project.okta.com; required=True; instanceSchemaRef=properties.domainName}"
+                        },
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=API Key; type=password; required=True; instanceSchemaRef=credentials.apiKey}"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "kind": "protectionTypesConfig",
+                    "name": "ProtectionTypesPage",
+                    "properties": {
+                      "title": "Select protection types",
+                      "siem": {
+                        "kind": "container",
+                        "properties": {
+                          "title": "SIEM",
+                          "description": "Sentinel",
+                          "logAnalyticsTables": "OktaSystemLogs",
+                          "uiEntities": ""
+                        }
+                      },
+                      "mdi": {
+                        "kind": "container",
+                        "properties": {
+                          "title": "Identity",
+                          "description": "Microsoft Defender for Identity",
+                          "uiEntities": ""
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "prerequisites": [
+          {
+            "armTemplate": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "location": {
+                  "type": "string",
+                  "defaultValue": "eastus"
+                },
+                "workspaceResourceId": {
+                  "type": "string"
+                },
+                "dataCollectionEndpointId": {
+                  "type": "string"
+                }
+              },
+              "resources": [
+                {
+                  "name": "oktaSystemLogsDCR",
+                  "type": "Microsoft.Insights/dataCollectionRules",
+                  "apiVersion": "2021-09-01-preview",
+                  "location": "[parameters('location')]",
+                  "properties": {
+                    "destinations": {
+                      "logAnalytics": [
+                        {
+                          "workspaceResourceId": "[parameters('workspaceResourceId')]",
+                          "name": "clv2ws1"
+                        }
+                      ]
+                    },
+                    "dataFlows": [
+                      {
+                        "streams": [
+                          "Microsoft-OktaSystemLogs"
+                        ],
+                        "destinations": [
+                          "clv2ws1"
+                        ]
+                      }
+                    ],
+                    "dataCollectionEndpointId": "[parameters('dataCollectionEndpointId')]"
+                  }
+                }
+              ]
+            },
+            "kind": "armTemplate",
+            "protectionTypes": [
+              "siem"
+            ],
+            "description": "An ARM template to create a LogAnalytics data collection rule. This will be used to ingest data into your workspace."
+          }
+        ],
+        "tenantId": "45f52f35-73d5-4066-8378-fe506ee90fb1",
+        "status": {
+          "connectionState": "disconnected",
+          "operationalStatus": {
+            "state": "unknown",
+            "changeTime": null
+          }
+        },
+        "instancesCount": 0,
+        "instances": [],
+        "operations": null,
+        "changeDetails": null
+      },
+      {
+        "id": "67faaaaf-d530-4ba9-94c8-26f359664287",
+        "isStatic": true,
+        "kind": "restApiPoller",
+        "version": "1.0.0",
+        "versionStage": "active",
+        "versionChangeLog": [
+          "Initial version"
+        ],
+        "displayName": "SailPoint Identity Security Cloud",
+        "description": "This connector ingests Users, Roles and Events from SailPoint Identity Security Cloud into Microsoft Defender.",
+        "provider": {
+          "name": "SailPoint",
+          "url": "https://www.sailpoint.com/"
+        },
+        "supportedBy": {
+          "name": "Microsoft",
+          "url": null
+        },
+        "supportedProtectionTypes": [
+          "mdi"
+        ],
+        "supportedCredentialsKinds": [
+          "oAuth2_ClientCredentials"
+        ],
+        "isMultiInstancesSupported": true,
+        "instanceSchema": {
+          "type": "object",
+          "properties": {
+            "displayName": {
+              "description": "Your connector instance's display name.",
+              "type": "string",
+              "maxLength": 120
+            },
+            "credentials": {
+              "description": "The credentials to use for retrieving data for this connector instance.",
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "description": "The type of credentials. Must be 'saved' for this object.",
+                      "type": "string",
+                      "enum": [
+                        "saved"
+                      ]
+                    },
+                    "description": {
+                      "description": "Optional description of the credentials.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "credentialsId": {
+                      "description": "The internal GUID of the saved credentials.",
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "credentialsId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "description": "The type of credentials. Must be 'oAuth2_ClientCredentials' for this object.",
+                      "type": "string",
+                      "enum": [
+                        "oAuth2_ClientCredentials"
+                      ]
+                    },
+                    "description": {
+                      "description": "Optional description of the credentials.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "clientId": {
+                      "description": "The OAuth Client ID for SailPoint API authentication.",
+                      "type": "string"
+                    },
+                    "clientSecret": {
+                      "description": "The OAuth Client Secret for SailPoint API authentication.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "clientId",
+                    "clientSecret"
+                  ]
+                }
+              ]
+            },
+            "properties": {
+              "type": "object",
+              "properties": {
+                "apiDomain": {
+                  "description": "Your SailPoint API domain (e.g., 'ta-partner19947.api.identitynow-demo.com')",
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "apiDomain"
+              ]
+            },
+            "protectionTypesProperties": {
+              "type": "object",
+              "properties": {
+                "mdi": {
+                  "type": "object",
+                  "properties": {
+                    "isEnabled": {
+                      "description": "Enable MDI protection.",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "isEnabled"
+                  ]
+                }
+              },
+              "anyOf": [
+                {
+                  "properties": {
+                    "mdi": {
+                      "properties": {
+                        "isEnabled": {
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "isEnabled"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "displayName",
+            "credentials",
+            "properties",
+            "protectionTypesProperties"
+          ]
+        },
+        "requiredPermissions": [],
+        "uiDefinition": {
+          "icon": {
+            "kind": "static",
+            "name": "SailPoint"
+          },
+          "uiEntities": [
+            {
+              "kind": "container",
+              "name": "Wizard",
+              "properties": {
+                "title": "Connect a SailPoint Identity Security Cloud connector",
+                "description": "The SailPoint Identity Security Cloud data connector provides the capability to ingest identity data from SailPoint APIs into Microsoft Defender for Identity. This includes users, roles, and events.",
+                "uiEntities": [
+                  {
+                    "name": "InstanceConfigMultipleInstances",
+                    "kind": "instanceConfig",
+                    "properties": {
+                      "multipleInstances": true,
+                      "title": "Connect a connector",
+                      "uiEntities": [
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=Connector name; required=True; instanceSchemaRef=displayName}"
+                        },
+                        {
+                          "kind": "divider",
+                          "properties": ""
+                        },
+                        {
+                          "kind": "infoSection",
+                          "properties": "@{label=Connector details; description=To connect to SailPoint Identity Security Cloud, you will need your tenant name and OAuth2 credentials with appropriate API access permissions.}"
+                        },
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=API Domain; placeholder=For example, my-domain.api.identitynow.com; required=True; instanceSchemaRef=properties.apiDomain}"
+                        },
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=Client ID; type=string; required=True; instanceSchemaRef=credentials.clientId}"
+                        },
+                        {
+                          "kind": "textbox",
+                          "properties": "@{label=Client Secret; type=password; required=True; instanceSchemaRef=credentials.clientSecret}"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "kind": "protectionTypesConfig",
+                    "name": "ProtectionTypesPage",
+                    "properties": {
+                      "title": "Select protection types",
+                      "mdi": {
+                        "kind": "container",
+                        "properties": {
+                          "title": "Identity",
+                          "description": "Microsoft Defender for Identity",
+                          "uiEntities": ""
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "prerequisites": [],
+        "tenantId": "45f52f35-73d5-4066-8378-fe506ee90fb1",
+        "status": {
+          "connectionState": "disconnected",
+          "operationalStatus": {
+            "state": "unknown",
+            "changeTime": null
+          }
+        },
+        "instancesCount": 0,
+        "instances": [],
+        "operations": null,
+        "changeDetails": null
+      }
+    ],
+    "totalRows": 3,
+    "truncatedTo": 5
+  }
+}

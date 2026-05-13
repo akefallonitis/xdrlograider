@@ -1,0 +1,46 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "policies",
+  "slug": "CheckPolicyCountUnderMaxAllowedLimit",
+  "operationId": "Policies.CheckPolicyCountUnderMaxAllowedLimit",
+  "path": "/Policies/PolicyCountUnderMaxAllowedLimit",
+  "methods": [
+    "get"
+  ],
+  "summary": "Check if policy count is under max allowed limit",
+  "sourceFile": "policies.yml",
+  "capturedUtc": "2026-05-12T15:13:12.6879253Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "tenant-gated",
+  "lastHttpStatus": 401,
+  "lastDiagnostic": "license/RBAC",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

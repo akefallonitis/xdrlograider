@@ -1,0 +1,30 @@
+  /fd/addins/api/recommendations/appRecommendations:
+    get:
+      summary: Get app recommendations
+      description: >-
+        Retrieve recommended apps based on tenant usage patterns and configuration.
+      operationId: IntegratedApps.GetRecommendations
+      tags: [IntegratedApps]
+      parameters:
+        - name: appRecommendationType
+          in: query
+          description: Type of recommendation to retrieve.
+          schema:
+            type: string
+            default: PopularApps
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: App recommendations. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

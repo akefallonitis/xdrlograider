@@ -1,0 +1,73 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "ListVerdicts",
+  "operationId": "Files.ListVerdicts",
+  "path": "/mtp/files/files/{Sha256}/FileVerdict",
+  "methods": [
+    "get"
+  ],
+  "summary": "List file verdicts",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:00.6246071Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "Sha256",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "The SHA-256 of the file."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/mtp/files/files/{Sha256}/FileVerdict' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "path",
+    "default": null,
+    "required": true,
+    "description": "The SHA-256 of the file.",
+    "type": "string",
+    "name": "Sha256"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Sha256"
+  ],
+  "cadenceSuggestion": "daily"
+}

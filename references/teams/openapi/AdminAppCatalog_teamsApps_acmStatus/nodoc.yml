@@ -1,0 +1,18 @@
+  /AdminAppCatalog/teamsApps/acmStatus:
+    servers:
+      - url: https://substrate.office.com
+        description: Teams app catalog backend
+    get:
+      tags: [AppCatalog]
+      summary: Get Teams app catalog migration status
+      description: |
+        Returns app catalog migration, admin alignment, and ACM UI state for the current tenant.
+      responses:
+        '200':
+          description: App catalog status payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsAppCatalogStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

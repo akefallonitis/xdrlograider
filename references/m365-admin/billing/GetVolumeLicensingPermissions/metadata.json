@@ -1,0 +1,65 @@
+{
+  "portal": "m365-admin",
+  "subArea": "billing",
+  "slug": "GetVolumeLicensingPermissions",
+  "operationId": "Billing.GetVolumeLicensingPermissions",
+  "path": "/fd/storeForBusinessMgmt/bd-prod/agreements/vlpermissions",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get volume licensing permissions",
+  "sourceFile": "billing.yml",
+  "capturedUtc": "2026-05-12T15:13:25.233318Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "api-version",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "API version requested by the Store for Business agreement service."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": {
+    "in": "query",
+    "default": null,
+    "required": false,
+    "description": "API version requested by the Store for Business agreement service.",
+    "type": "string",
+    "name": "api-version"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,19 @@
+  /access-control/odata/v1/EffectivePermissions:
+    get:
+      tags: [Roles]
+      summary: Get effective permissions
+      description: |
+        Returns the caller's effective Windows Autopatch permissions. Confirmed live from the
+        roles blade.
+      operationId: IntuneAutopatch.Roles.GetEffectivePermissions
+      responses:
+        '200':
+          description: Effective permissions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataStringCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

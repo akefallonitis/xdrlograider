@@ -1,0 +1,91 @@
+{
+  "portal": "defender",
+  "subArea": "portal_services",
+  "slug": "GetUserGraph",
+  "operationId": "PortalServices.GetUserGraph",
+  "path": "/msgraph/v1.0/users/{UserId}",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get user via Graph proxy",
+  "sourceFile": "portal_services.yml",
+  "capturedUtc": "2026-05-12T14:42:02.5207964Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "UserId",
+      "In": "path",
+      "Type": "string",
+      "Default": "",
+      "Description": "User identifier passed to Graph, such as a UPN or object ID."
+    },
+    {
+      "Name": "$select",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Comma-separated Graph fields to project in the response."
+    }
+  ],
+  "suggestedCadence": "weekly",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 0,
+    "successKind": "no-live-pathparam",
+    "rowCount": 0,
+    "errorText": "endpoint has path params {…}; probe skipped (requires fanout)",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "PathTemplate — '/msgraph/v1.0/users/{UserId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: weekly cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "path",
+      "default": null,
+      "required": true,
+      "description": "User identifier passed to Graph, such as a UPN or object ID.",
+      "type": "string",
+      "name": "UserId"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Comma-separated Graph fields to project in the response.",
+      "type": "string",
+      "name": "$select"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Account.AadId",
+    "Account.UPN"
+  ],
+  "cadenceSuggestion": "daily"
+}

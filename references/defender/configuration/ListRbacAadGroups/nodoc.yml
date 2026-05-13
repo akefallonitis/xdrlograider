@@ -1,0 +1,24 @@
+  /mtp/rbacManagementApi/rbac/aad_groups:
+    get:
+      summary: List RBAC Entra groups
+      description: >-
+        Retrieve the Microsoft Entra groups available to the Defender RBAC
+        management experience.
+      operationId: Configuration.ListRbacAadGroups
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - RBAC Entra groups response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

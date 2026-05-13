@@ -1,0 +1,19 @@
+  /access-control/odata/v1/ResourceOperations:
+    get:
+      tags: [Roles]
+      summary: List resource operations
+      description: |
+        Lists Windows Autopatch resource operations and verbs. Recovered from the
+        `modernworkplace` bundles and confirmed with a GET probe.
+      operationId: IntuneAutopatch.Roles.ListResourceOperations
+      responses:
+        '200':
+          description: Resource operations returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceOperationCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

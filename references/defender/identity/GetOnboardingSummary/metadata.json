@@ -1,0 +1,62 @@
+{
+  "portal": "defender",
+  "subArea": "identity",
+  "slug": "GetOnboardingSummary",
+  "operationId": "Identity.GetOnboardingSummary",
+  "path": "/mtp/siamApi/Onboarding",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get SIAM onboarding summary",
+  "sourceFile": "identity.yml",
+  "capturedUtc": "2026-05-12T14:41:48.8466518Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "daily",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": {
+    "v1Stream": "MDE_DeviceControlPolicy_CL",
+    "v1Tier": "Inventory",
+    "v1Category": "Endpoint Configuration",
+    "v1RawPath": "/apiproxy/mtp/siamApi/Onboarding"
+  },
+  "live": {
+    "httpStatus": 200,
+    "successKind": "live",
+    "rowCount": 1,
+    "errorText": "",
+    "responseShape": "object"
+  },
+  "parsingNotes": [
+    "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: daily cadence × full inventory)",
+    "LiveProbe=live (1 rows) — production-grade data flow"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

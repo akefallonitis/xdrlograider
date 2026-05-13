@@ -1,0 +1,60 @@
+  /mtp/ndr/machines/commandExport:
+    get:
+      summary: Export NDR machine inventory
+      description: >-
+        Export the filtered Defender NDR machine inventory as CSV from the device
+        inventory experience.
+      operationId: EndpointDevices.ExportNdrMachines
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machinesApiServiceMigration
+          in: query
+          description: Whether the portal is using the migrated machines API service.
+          schema:
+            type: boolean
+            default: true
+        - name: deviceCategories
+          in: query
+          description: Device-category filter applied to the export.
+          schema:
+            type: string
+        - name: lookingBackIndays
+          in: query
+          description: Number of days of NDR history to include.
+          schema:
+            type: integer
+            default: 30
+        - name: paginationGuid
+          in: query
+          description: Pagination cursor. The portal currently sends undefined when absent.
+          schema:
+            type: string
+            nullable: true
+        - name: sortOrder
+          in: query
+          description: Sort direction for the export.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+            default: Descending
+        - name: sortByField
+          in: query
+          description: Field used to sort the export.
+          schema:
+            type: string
+            default: riskscore
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

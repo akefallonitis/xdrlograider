@@ -1,0 +1,51 @@
+  /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams:
+    get:
+      summary: List cloud app discovery uploaded streams
+      description: >-
+        Retrieve uploaded stream sources exposed by the security data discovery
+        Graph beta API, proxied through the M365 Admin Center.
+      operationId: GraphProxy.ListCloudAppDiscoveryUploadedStreams
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        displayName:
+                          type: string
+                        createdDateTime:
+                          type: string
+                          format: date-time
+                        lastDataReceivedDateTime:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        lastModifiedDateTime:
+                          type: string
+                          format: date-time
+                        logDataProvider:
+                          type: string
+                        logFileCount:
+                          type: integer
+                      additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

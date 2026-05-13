@@ -1,0 +1,46 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "application_sso",
+  "slug": "FederatedSsoConfigV4.Update",
+  "operationId": "ApplicationSso.FederatedSsoConfigV4.Update",
+  "path": "/ApplicationSso/{spId}/FederatedSsoConfigV4/{appId}",
+  "methods": [
+    "get"
+  ],
+  "summary": "Update Application SSO federated SSO config (v4)",
+  "sourceFile": "application_sso.yml",
+  "capturedUtc": "2026-05-12T15:13:11.7700888Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "PathTemplate — '/ApplicationSso/{spId}/FederatedSsoConfigV4/{appId}' has {placeholders}; v2 manifest needs PerEntityFanout or path-param resolution",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

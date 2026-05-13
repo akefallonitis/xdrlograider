@@ -1,0 +1,22 @@
+  /mtp/posture/oversight/recommendations/aggregated:
+    get:
+      summary: Get aggregated posture recommendations
+      description: >-
+        Retrieve aggregated posture oversight recommendations grouped by category or metric.
+        Bundle-discovered; direct GET probing returned a contextual 500 without page-specific parameters.
+      operationId: ExposureManagement.GetPostureOversightRecommendationsAggregated
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Aggregated recommendations — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.

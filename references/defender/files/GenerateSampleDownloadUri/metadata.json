@@ -1,0 +1,136 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "GenerateSampleDownloadUri",
+  "operationId": "Files.GenerateSampleDownloadUri",
+  "path": "/mtp/responseApiPortal/sampledownloadrequest/generatedownloaduri/V2",
+  "methods": [
+    "get"
+  ],
+  "summary": "Generate file download URI",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:07.1670705Z",
+  "pagination": {
+    "defaults": {},
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "sha",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "SHA-1 or SHA-256 of the file to download."
+    },
+    {
+      "Name": "filename",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Filename to embed in the generated download package."
+    },
+    {
+      "Name": "requestorComment",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Analyst-provided justification shown in sample request history."
+    },
+    {
+      "Name": "zipPassword",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Password the portal applies to the generated ZIP package."
+    },
+    {
+      "Name": "tenantIds",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional multi-tenant context."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 403 (Forbidden).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=403 — RBAC scope or feature license absent in lab tenant"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "semantic-override",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "SHA-1 or SHA-256 of the file to download.",
+      "type": "string",
+      "name": "sha"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "Filename to embed in the generated download package.",
+      "type": "string",
+      "name": "filename"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "Analyst-provided justification shown in sample request history.",
+      "type": "string",
+      "name": "requestorComment"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "Password the portal applies to the generated ZIP package.",
+      "type": "string",
+      "name": "zipPassword"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional multi-tenant context.",
+      "type": "string",
+      "name": "tenantIds"
+    }
+  ],
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Name",
+    "Url.Path"
+  ],
+  "cadenceSuggestion": "weekly"
+}

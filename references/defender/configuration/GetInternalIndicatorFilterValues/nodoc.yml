@@ -1,0 +1,24 @@
+  /mtp/papin/api/cloud/public/internal/indicators/filterValues:
+    get:
+      summary: Get internal indicator filter values
+      description: >-
+        Retrieve the available filter values for the internal email and collaboration
+        indicator management views in the Defender portal.
+      operationId: Configuration.GetInternalIndicatorFilterValues
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - internal indicator filter values
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

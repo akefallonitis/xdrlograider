@@ -1,0 +1,121 @@
+{
+  "portal": "sharepoint",
+  "catalogue": {
+    "postmanCollection": "sharepoint-admin.collection.json",
+    "nodocDir": "nodoc-sharepoint-admin",
+    "specPaths": 1,
+    "openApiServerUrls": "https://{tenant}-admin.sharepoint.com"
+  },
+  "authModel": {
+    "requiredHeaders": [
+      "x-requestdigest: <ContextInfo>",
+      "SdkVersion",
+      "odata-version"
+    ],
+    "portalHost": "{tenant}-admin.sharepoint.com",
+    "apiHost": null,
+    "cookieNames": [
+      "FedAuth",
+      "rtFa"
+    ],
+    "audience": "(cookie-based)",
+    "apiHosts": null,
+    "requiredQueryParams": null,
+    "bucket": "A-cookie+digest",
+    "audienceName": null,
+    "clientId": "TBD-discover-from-tenant-admin-spo-bundle"
+  },
+  "postmanFindings": {
+    "auth": {
+      "type": "apikey",
+      "apikey": [
+        {
+          "type": "any",
+          "value": "FedAuth",
+          "key": "key"
+        },
+        {
+          "type": "any",
+          "value": "{{apiKey}}",
+          "key": "value"
+        },
+        {
+          "type": "any",
+          "value": "header",
+          "key": "in"
+        }
+      ]
+    },
+    "variables": {
+      "baseUrl": "https://{{tenant}}-admin.sharepoint.com",
+      "principalName": "nathan@contoso.com",
+      "tenant": "contoso",
+      "propertyName": "a2307c5a-76df-4513-b575-0537842c1d8b_BoxServiceAccount_freKey",
+      "siteId": "cf3fa8f9-75a4-4ce3-80e4-1b2257f042e7"
+    },
+    "sampleHeaders": {
+      "Accept": "application/json"
+    },
+    "sampleRequestName": "Get tenant admin endpoint map"
+  },
+  "unattendedAuth": {
+    "totpSupported": true,
+    "estsauthpersistent": {
+      "useForSilentRenewal": "/oauth2/v2.0/authorize?prompt=none uses ESTSAUTHPERSISTENT for SSO, mints fresh code without TOTP",
+      "lifetime": "90 days",
+      "description": "Microsoft KMSI cookie issued at LoginOptions=1 via Resolve-EntraInterruptPage"
+    },
+    "passkeySupported": true,
+    "sccauthNote": "sccauth cookie itself is ~1h life. Renew via silent /authorize+prompt=none using ESTSAUTHPERSISTENT (not via fresh TOTP every cycle).",
+    "reauthCadence": {
+      "comparedToV1": "v1 does full TOTP-MFA every 50 min (sccauth ~1h life). v2 keeps ESTSAUTHPERSISTENT 90d, silent renewal between bootstraps.",
+      "steadyState": "Refresh access_token every ~50 min via refresh_token (NO TOTP)",
+      "bootstrap": "Once per portal per ~85 days (TOTP or Passkey)"
+    },
+    "refreshToken": {
+      "grant": "POST /oauth2/v2.0/token grant_type=refresh_token",
+      "originHeader": "Required for SPA client_id types per AADSTS9002327",
+      "lifetime": "~90 days (mirrors KMSI)",
+      "description": "Issued when scope contains offline_access; renews access_token silently"
+    },
+    "conditionalAccess": {
+      "requireMfa": "TOTP and Passkey both pass",
+      "requireCompliantDevice": "Both FAIL; operator must exclude SA from this policy",
+      "requirePhishingResistantMfa": "TOTP FAILS; Passkey passes (FIDO2 satisfies)",
+      "blockLegacyAuth": "Both pass (modern flow)",
+      "requireHybridJoin": "Both FAIL; operator must exclude SA from this policy"
+    }
+  },
+  "unattendedStatus": "auth-chain-pattern-known; tenant-host + digest pending",
+  "kvSecretSchema": {
+    "secrets": [
+      {
+        "required": true,
+        "purpose": "Service account UPN",
+        "name": "sharepoint-upn"
+      },
+      {
+        "required": "CredentialsTotp method only",
+        "purpose": "SA password",
+        "name": "sharepoint-password"
+      },
+      {
+        "required": "CredentialsTotp method only",
+        "purpose": "Base32 TOTP secret",
+        "name": "sharepoint-totp"
+      },
+      {
+        "required": "Passkey method only",
+        "purpose": "JSON {upn,credentialId,privateKeyPem,rpId}",
+        "name": "sharepoint-passkey"
+      },
+      {
+        "required": "Steady-state polling",
+        "purpose": "Long-lived refresh_token (Bearer portals)",
+        "name": "sharepoint-refresh"
+      }
+    ],
+    "description": "Per-portal KV secrets following v1's mde-portal-* pattern"
+  },
+  "generatedUtc": "2026-05-12T16:20:55Z"
+}

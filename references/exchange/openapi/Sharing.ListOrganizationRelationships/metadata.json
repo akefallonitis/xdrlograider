@@ -1,0 +1,51 @@
+{
+  "portal": "exchange",
+  "subArea": "openapi",
+  "slug": "Sharing.ListOrganizationRelationships",
+  "operationId": "ExchangeBeta.Sharing.ListOrganizationRelationships",
+  "path": "/beta/OrganizationRelationship",
+  "methods": [
+    "get",
+    "get"
+  ],
+  "summary": "List organization relationships",
+  "sourceFile": "openapi.yml",
+  "capturedUtc": "2026-05-12T15:42:42.0710738Z",
+  "pagination": {
+    "style": "none",
+    "defaults": {},
+    "indexParam": null,
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "lookbackParam": null,
+    "startParam": null,
+    "type": null,
+    "supported": false,
+    "endParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "out-of-scope-graph-covers",
+    "Method": "Microsoft Graph covers — out of portal-only scope"
+  },
+  "v1Manifest": null,
+  "xdrInternalsHint": "Get-XdrExchangeBetaSharing.ListOrganizationRelationships",
+  "defenderHarvester": null,
+  "live": {
+    "httpStatus": 403,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 403",
+    "responseShape": null
+  },
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

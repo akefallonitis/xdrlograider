@@ -1,0 +1,131 @@
+{
+  "subArea": "purview",
+  "suggestedCadence": "unknown",
+  "endpointCount": 5,
+  "endpoints": [
+    {
+      "slug": "GetAIBaselineSummary",
+      "operationId": "Purview.GetAIBaselineSummary",
+      "path": "/fd/purview/apiproxy/cpm/v1.0/Tenant/AIBaselineSummary",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Software.Version",
+        "Tenant.Id"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetDlpPolicies",
+      "operationId": "Purview.GetDlpPolicies",
+      "path": "/fd/purview/apiproxy/di/find/DlpCompliancePolicy",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetNexusBootInfo",
+      "operationId": "Purview.GetNexusBootInfo",
+      "path": "/fd/purview/api/boot/getNexusBootInfo",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    },
+    {
+      "slug": "GetPurviewForAI",
+      "operationId": "Purview.GetPurviewForAI",
+      "path": "/fd/purview/apiproxy/di/find/PurviewForAI",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": true,
+      "timeFilterParam": "startTime",
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": [
+        "Tenant.Id",
+        "Time.Generated"
+      ],
+      "parsingNotes": [
+        "DeltaPoll=supported — wire LastPolledUtc state in Storage Table; pass via startParam=startTime/endParam=endTime"
+      ]
+    },
+    {
+      "slug": "GetSensitiveInfoTypes",
+      "operationId": "Purview.GetSensitiveInfoTypes",
+      "path": "/fd/purview/apiproxy/di/find/DlpSensitiveInformationType",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "no-live",
+      "liveHttpStatus": 0,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Tenant.Id",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+      ]
+    }
+  ],
+  "cntLive": 0,
+  "cntLiveEmpty": 0,
+  "cntError": 0,
+  "cntNoLive": 5,
+  "cntWithTimeFilter": 1,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Software.Version",
+    "Tenant.Id",
+    "Time.Generated"
+  ],
+  "paginationStyles": [],
+  "valueProp": "Purview integration surfaces from admin center"
+}

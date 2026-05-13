@@ -1,0 +1,38 @@
+  /mtp/rbacGroupAssignment/machineRbacGroupAssignments/{DeviceId}:
+    get:
+      summary: Get device RBAC group assignments
+      description: >-
+        Retrieve the RBAC group assignments for a specific endpoint device.
+      operationId: EndpointDevices.GetRbacGroups
+      tags: [Endpoint Devices]
+      parameters:
+        - name: DeviceId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rbacGroupId:
+                      description: The RBAC group identifier.
+                      type: string
+                    rbacGroupName:
+                      description: The RBAC group name.
+                      type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

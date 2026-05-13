@@ -1,0 +1,31 @@
+  /mdi/identity/userapiservice/actions/byAccounts:
+    post:
+      summary: Get account actions
+      description: >-
+        Retrieve the remediation and investigation actions available for the
+        supplied identity accounts.
+      operationId: Identity.GetActionsByAccounts
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - account action lookup payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - account actions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

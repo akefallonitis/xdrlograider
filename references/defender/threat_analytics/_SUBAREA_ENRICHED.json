@@ -1,0 +1,22 @@
+{
+  "portal": "defender",
+  "subArea": "threat_analytics",
+  "endpointCount": 20,
+  "paginationDistribution": {
+    "pageIndex0Based": 1,
+    "none": 19
+  },
+  "timeFilterEndpointCount": 0,
+  "topEntities": [
+    "Host.RiskScore",
+    "Url.Path",
+    "Url.Domain"
+  ],
+  "cadenceSuggestion": "6h",
+  "productionScale": {
+    "VolumeLargeT": "100-1K",
+    "RateLimitRisk": "LOW",
+    "DeltaPollPriority": "low"
+  },
+  "generatedUtc": "2026-05-13T07:21:48Z"
+}

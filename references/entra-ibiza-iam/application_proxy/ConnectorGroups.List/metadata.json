@@ -1,0 +1,65 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "application_proxy",
+  "slug": "ConnectorGroups.List",
+  "operationId": "ApplicationProxy.ConnectorGroups.List",
+  "path": "/ApplicationProxy/ConnectorGroups",
+  "methods": [
+    "get",
+    "post"
+  ],
+  "summary": "List Application Proxy connector groups",
+  "sourceFile": "application_proxy.yml",
+  "capturedUtc": "2026-05-12T15:13:11.7007075Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "appId",
+      "In": "query",
+      "Type": "",
+      "Default": "",
+      "Description": "The Application ID (client ID) of the application."
+    },
+    {
+      "Name": "appId",
+      "In": "query",
+      "Type": "",
+      "Default": "",
+      "Description": "The Application ID (client ID) of the application."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "lastSuccessKind": "live",
+  "lastHttpStatus": 200,
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "File.Name",
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,31 @@
+  /mtp/ndr/machines/{MachineId}/InterceptingMachines:
+    get:
+      summary: Get NDR intercepting machines
+      description: >-
+        Retrieve machines currently intercepting or proxying traffic for the
+        selected NDR machine.
+      operationId: EndpointDevices.GetNdrInterceptingMachines
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - intercepting machine details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

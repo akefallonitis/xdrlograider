@@ -1,0 +1,30 @@
+  /gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes:
+    post:
+      summary: Check compliance permissions
+      description: >-
+        Check whether the specified permissions with scopes are allowed
+        by the compliance authorization server.
+      operationId: PortalServices.CheckCompliancePermissions
+      tags: [Portal Services]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - permission check request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - permission check result
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,53 @@
+  /mtp/sentinelOnboarding/sentinel/workspaces/eligibleForOnboarding:
+    post:
+      summary: List eligible Sentinel workspaces
+      description: >-
+        Retrieve the Microsoft Sentinel workspaces that are eligible for onboarding from
+        the Defender portal's unified connector experience.
+      operationId: Configuration.ListEligibleSentinelWorkspaces
+      tags: [Configuration]
+      parameters:
+        - name: useRealTime
+          in: query
+          description: Whether the portal should bypass cached onboarding metadata.
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscriptions:
+                  type: array
+                  description: Azure subscription identifiers to inspect for eligible workspaces.
+                  items:
+                    type: string
+              required:
+                - subscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workspaces:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - eligible Sentinel workspace
+                  skipToken:
+                    type: string
+                    nullable: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

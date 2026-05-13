@@ -1,0 +1,20 @@
+  /tenant-management/v1/Enrollment/Starter/featureEnablementStatus:
+    get:
+      tags: [Tenant]
+      summary: Get starter feature enablement status
+      description: |
+        Returns tenant onboarding, Autopatch enablement, and subscription summary details for the
+        Starter plan. Confirmed live on many tenant-administration blades and validated again with
+        a GET probe.
+      operationId: IntuneAutopatch.Tenant.GetFeatureEnablementStatus
+      responses:
+        '200':
+          description: Starter feature enablement status returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureEnablementStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

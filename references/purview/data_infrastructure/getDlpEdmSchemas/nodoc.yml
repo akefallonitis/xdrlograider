@@ -1,0 +1,32 @@
+  /di/find/DlpEdmSchema:
+    get:
+      operationId: getDlpEdmSchemas
+      summary: Get DLP Exact Data Match schemas
+      description: >-
+        Retrieve DLP Exact Data Match (EDM) schemas from the Data Infrastructure service.
+        EDM schemas define structured data patterns for precise sensitive data detection.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,31 @@
+  /admin/api/offerrec/offer/{id}:
+    get:
+      summary: Get offer recommendation
+      description: >-
+        Retrieve a specific offer recommendation by ID, including upgrade
+        and cross-sell recommendations from Microsoft.
+      operationId: Misc.GetOfferRecommendation
+      tags: [Miscellaneous]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The offer recommendation identifier (e.g., 48, 49).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Offer recommendation details. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

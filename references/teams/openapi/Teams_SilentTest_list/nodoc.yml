@@ -1,0 +1,24 @@
+  /Teams.SilentTest/list:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsSilentTests]
+      summary: List Silent Tests
+      description: |
+        Silent Tests inventory route reached from `Analytics & reports > Silent Tests`. The retained
+        tenant returned `404 Not Found`, which suggests the route family is real but unavailable in the
+        current tenant or feature slice.
+      responses:
+        '200':
+          description: Silent Tests inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # monitoringplatform.teams.microsoft.com/api

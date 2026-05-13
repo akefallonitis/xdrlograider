@@ -1,0 +1,44 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "document_processor_tasks",
+  "slug": "TaskFile.Upload",
+  "operationId": "DocumentProcessorTasks.TaskFile.Upload",
+  "path": "/DocumentProcessorTasks/UploadTaskFile",
+  "methods": [
+    "post"
+  ],
+  "summary": "Upload document processor task file",
+  "sourceFile": "document_processor_tasks.yml",
+  "capturedUtc": "2026-05-12T15:13:12.2087066Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

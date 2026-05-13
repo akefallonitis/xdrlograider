@@ -1,0 +1,22 @@
+  /private/intraTenantConfig/host:
+    servers:
+      - url: https://reports.office.com
+        description: Reports bootstrap host
+    get:
+      tags: [ReportsBootstrap]
+      summary: Resolve the report UX host for the tenant
+      description: |
+        Report bootstrap endpoint used before the Teams admin center calls `reportsncu.office.com`.
+      parameters:
+        - $ref: '#/components/parameters/TenantIdLowerQuery'
+      responses:
+        '200':
+          description: Report host bootstrap result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportsHostResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # reportsncu.office.com/internal/ux

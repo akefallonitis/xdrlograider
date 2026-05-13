@@ -1,0 +1,15 @@
+  /amer/api/reports/v1.0/flw/usage:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    get:
+      tags: [TeamsFrontline]
+      summary: Get Frontline usage summary
+      description: |
+        Frontline usage summary route observed from `Frontline > Usage insights`. The retained tenant
+        returned `204 No Content`.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

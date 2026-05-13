@@ -1,0 +1,33 @@
+  /api/authsvc/v1.0/users/region:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    post:
+      tags: [TeamsCore]
+      summary: Resolve the current user's Teams region and partition
+      description: |
+        Regional bootstrap call used by the Teams admin center before it talks to partitioned
+        `teams.microsoft.com/api/mt/part/{partition}` routes and related regional services.
+      x-nodoc-operation-context:
+        surface: Portal bootstrap
+        workflows:
+          - Open a Teams admin center route that needs partitioned teams.microsoft.com services before the shell fans out to regional backends.
+        headerProfile: teams-service-bearer
+        availability:
+          level: user-context
+          notes:
+            - The returned region and partition values are specific to the signed-in Teams admin and drive later partitioned service calls.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified during authenticated Teams admin bootstrap before partitioned teams.microsoft.com and related regional service calls.
+      responses:
+        '200':
+          description: Region and partition metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsRegionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

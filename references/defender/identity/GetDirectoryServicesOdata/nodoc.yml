@@ -1,0 +1,23 @@
+  /aatp/odata/directoryServices:
+    get:
+      summary: Get directory services accounts
+      description: >-
+        Retrieve directory services account configurations using the OData endpoint. Discovered on Identity Settings > Directory services accounts page.
+      operationId: Identity.GetDirectoryServicesOdata
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

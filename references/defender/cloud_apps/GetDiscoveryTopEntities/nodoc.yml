@@ -1,0 +1,25 @@
+  /mcas/cas/api/v1/discovery/top_entities:
+    get:
+      summary: Get top discovered entities
+      description: >-
+        Retrieve the top entities for the selected Cloud Discovery stream,
+        entity type, and timeframe. Discovered during the Defender for Cloud
+        Apps full-nav capture.
+      operationId: CloudApps.GetDiscoveryTopEntities
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

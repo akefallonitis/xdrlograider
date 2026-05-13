@@ -1,0 +1,31 @@
+  /mdi/identity/userapiservice/ispms:
+    post:
+      summary: Get identity ISPM data
+      description: >-
+        Retrieve Identity Security Posture Management (ISPM) data associated
+        with the supplied accounts.
+      operationId: Identity.GetIspmData
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - ISPM lookup payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identity ISPM data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,85 @@
+{
+  "subArea": "data_governance",
+  "suggestedCadence": "unknown",
+  "endpointCount": 3,
+  "endpoints": [
+    {
+      "slug": "getClassificationTypesV2",
+      "operationId": "getClassificationTypesV2",
+      "path": "/dgs/item/GetTypesV2",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 500,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": "Software.Version",
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+      ]
+    },
+    {
+      "slug": "getDataGovernanceTypeAggregates",
+      "operationId": "getDataGovernanceTypeAggregates",
+      "path": "/dgs/aggregate/GetTypeAggregates",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "error",
+      "liveHttpStatus": 400,
+      "liveRowCount": 0,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+      ]
+    },
+    {
+      "slug": "getTenantLicense",
+      "operationId": "getTenantLicense",
+      "path": "/dgs/Item/GetTenantLicense",
+      "methods": [
+        "get"
+      ],
+      "paginationStyle": "none",
+      "timeFilterSupported": false,
+      "timeFilterParam": null,
+      "suggestedCadence": "unknown",
+      "liveSuccessKind": "live",
+      "liveHttpStatus": 200,
+      "liveRowCount": 1,
+      "v1Stream": null,
+      "xdrInternalsCmdlet": "",
+      "entities": null,
+      "parsingNotes": [
+        "ResponseShape=SingleObject — use SingleObjectAsRow=true in v2 projection",
+        "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+        "LiveProbe=live (1 rows) — production-grade data flow"
+      ]
+    }
+  ],
+  "cntLive": 1,
+  "cntLiveEmpty": 0,
+  "cntError": 2,
+  "cntNoLive": 0,
+  "cntWithTimeFilter": 0,
+  "cntWithPagination": 0,
+  "entitiesAvailable": [
+    "Software.Version"
+  ],
+  "paginationStyles": [],
+  "valueProp": "Data Governance Services state + classification settings"
+}

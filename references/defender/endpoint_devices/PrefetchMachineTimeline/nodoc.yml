@@ -1,0 +1,64 @@
+  /mtp/mdeTimelineExperience/machines/{MachineId}/prefetch:
+    post:
+      summary: Prefetch machine timeline
+      description: >-
+        Warm the machine timeline cache for the requested time range before the
+        event grid loads timeline rows.
+      operationId: EndpointDevices.PrefetchMachineTimeline
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+        - name: machineId
+          in: query
+          description: Redundant machine identifier currently sent by the portal.
+          schema:
+            type: string
+        - name: machineDnsName
+          in: query
+          description: The machine DNS name echoed by the current portal client.
+          schema:
+            type: string
+            nullable: true
+        - name: fromDate
+          in: query
+          description: The inclusive start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          description: The inclusive end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: generateIdentityEvents
+          in: query
+          description: Include generated identity events in the prefetch request.
+          schema:
+            type: boolean
+        - name: supportMdiOnlyEvents
+          in: query
+          description: Include MDI-only timeline events when supported.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - timeline prefetch result
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

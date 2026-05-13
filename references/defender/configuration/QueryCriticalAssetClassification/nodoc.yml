@@ -1,0 +1,31 @@
+  /mtp/xspmatlas/assetrules/querybuilder/assets/{encodedRuleName}:
+    get:
+      summary: Query critical asset classification
+      description: >-
+        Execute a critical asset classification rule query to preview
+        which assets would be classified.
+      operationId: Configuration.QueryCriticalAssetClassification
+      tags: [Configuration]
+      parameters:
+        - name: encodedRuleName
+          in: path
+          required: true
+          description: The URL-encoded rule name to query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - matched assets
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

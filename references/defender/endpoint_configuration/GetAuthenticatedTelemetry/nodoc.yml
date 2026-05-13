@@ -1,0 +1,26 @@
+  /mtp/deviceManagement/configuration/AuthenticatedTelemetry:
+    get:
+      summary: Get authenticated telemetry configuration
+      description: >-
+        Retrieve the authenticated telemetry configuration setting for endpoints.
+      operationId: EndpointConfiguration.GetAuthenticatedTelemetry
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    description: Whether authenticated telemetry is enabled.
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

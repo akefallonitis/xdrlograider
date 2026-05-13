@@ -1,0 +1,27 @@
+  /provisioning/create:
+    post:
+      tags: [Provisioning]
+      summary: Run Security Copilot create-capacity what-if
+      description: |
+        Triggers the initial Security Platform provisioning preflight used by the create-capacity flow.
+        In the captured run this was opened from the startup dialog and then canceled before submission;
+        the request body was `{}` and the response body was the literal string `OperationWhatIfSuccess`.
+      operationId: SecurityCopilotPortal.Provisioning.CreateWhatIf
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion20240301Preview'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            example: {}
+      responses:
+        '200':
+          description: The provisioning preflight completed successfully.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OperationWhatIfSuccess

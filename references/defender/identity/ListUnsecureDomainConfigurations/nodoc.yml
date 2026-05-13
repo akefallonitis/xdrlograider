@@ -1,0 +1,29 @@
+  /aatp/api/ispmReports/UnsecureDomainConfigurations:
+    get:
+      summary: List unsecure domain configurations
+      description: >-
+        Retrieve insecure Active Directory domain-configuration findings surfaced by the
+        Defender for Identity posture dashboard.
+      operationId: Identity.ListUnsecureDomainConfigurations
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  IspmReportEntries:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - insecure domain configuration finding
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

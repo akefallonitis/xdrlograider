@@ -1,0 +1,21 @@
+  /inventory/api/OfficeApplications:
+    get:
+      tags: [Devices]
+      summary: List Office applications
+      description: Returns inventoried Office application rollups. The hidden collection endpoint was confirmed through a token-backed probe and returned an empty collection in the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Office application inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'

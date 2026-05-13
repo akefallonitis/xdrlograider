@@ -1,0 +1,23 @@
+  /di/Find/CustomTag:
+    get:
+      summary: Find custom tags
+      description: >-
+        Find custom tags configured in the Defender portal.
+      operationId: PortalServices.FindCustomTag
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - custom tags data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

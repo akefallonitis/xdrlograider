@@ -1,0 +1,54 @@
+{
+  "portal": "entra-ibiza-iam",
+  "subArea": "request_approvals",
+  "slug": "PolicyTemplate.Create",
+  "operationId": "RequestApprovalsV2.PolicyTemplate.Create",
+  "path": "/RequestApprovals/V2/PolicyTemplates",
+  "methods": [
+    "post"
+  ],
+  "summary": "Create request approval policy template (v2)",
+  "sourceFile": "request_approvals.yml",
+  "capturedUtc": "2026-05-12T15:13:12.8047192Z",
+  "pagination": {
+    "defaults": {},
+    "sizeParam": null,
+    "indexParam": null,
+    "tokenParam": null,
+    "style": "none"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "supported": false,
+    "lookbackParam": null,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "type",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The type of policy template"
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": null,
+  "v1Manifest": null,
+  "parsingNotes": [
+    "Method=POST — likely needs request body (often a filter object); review nodoc requestBody",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": null,
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

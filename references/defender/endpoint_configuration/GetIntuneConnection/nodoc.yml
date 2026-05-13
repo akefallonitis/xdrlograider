@@ -1,0 +1,26 @@
+  /mtp/deviceManagement/configuration/IntuneConnection:
+    get:
+      summary: Get Intune connection configuration
+      description: >-
+        Retrieve the Microsoft Intune connection configuration for Defender for Endpoint.
+      operationId: EndpointConfiguration.GetIntuneConnection
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    description: Whether the Intune connection is enabled.
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

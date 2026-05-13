@@ -1,0 +1,28 @@
+  /mtp/files/files/{Sha256}/FileVerdict:
+    get:
+      summary: List file verdicts
+      description: >-
+        Return the file verdict entries shown in the File verdict card on the Defender
+        file page.
+      operationId: Files.ListVerdicts
+      tags: [Files]
+      parameters:
+        - name: Sha256
+          in: path
+          required: true
+          description: The SHA-256 of the file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileVerdictListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

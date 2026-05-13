@@ -1,0 +1,31 @@
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions:
+    get:
+      summary: List unified RBAC role definitions
+      description: >-
+        Retrieve the unified RBAC role definitions shown on the Defender security
+        permissions page.
+      operationId: Configuration.ListUnifiedRbacRoleDefinitions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - unified RBAC role definition
+                  isPartial:
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

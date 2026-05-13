@@ -1,0 +1,64 @@
+{
+  "portal": "defender",
+  "subArea": "exposure_management",
+  "slug": "GetRecommendations",
+  "operationId": "ExposureManagement.GetRecommendations",
+  "path": "/mtp/exposureManagement/recommendations",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get exposure recommendations",
+  "sourceFile": "exposure_management.yml",
+  "capturedUtc": "2026-05-12T14:39:48.1655047Z",
+  "pagination": {
+    "tokenParam": null,
+    "style": "pageIndex0Based",
+    "sizeParam": null,
+    "defaults": {},
+    "indexParam": "pageIndex"
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 404,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 404 (Unknown api endpoint).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Pagination=pageIndex0Based — index starts at 0 (some MS endpoints reject 0; verify per endpoint)",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=404 — endpoint may be MDI-license-gated OR Microsoft renamed/retired the path"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": {
+    "in": "query",
+    "default": "0",
+    "required": false,
+    "description": "The page index for pagination.",
+    "type": "integer",
+    "name": "pageIndex"
+  },
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "1h"
+}

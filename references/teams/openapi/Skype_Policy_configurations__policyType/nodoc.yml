@@ -1,0 +1,25 @@
+  /Skype.Policy/configurations/{policyType}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsPolicyConfigurations]
+      summary: Get Teams policy or configuration inventory
+      description: |
+        Generic policy-configuration route observed across meeting, calling, channels, targeting, network,
+        federation, external access, guest access, and voice-management pages. Examples included
+        `TeamsMeetingPolicy`, `TeamsCallingPolicy`, `OnlinePSTNGateway`, `OnlineVoiceRoute`,
+        `TeamsUpgradePolicy`, `TenantNetworkRegion`, and `TenantTrustedIPAddress`.
+      parameters:
+        - $ref: '#/components/parameters/PolicyType'
+      responses:
+        '200':
+          description: Policy or configuration inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

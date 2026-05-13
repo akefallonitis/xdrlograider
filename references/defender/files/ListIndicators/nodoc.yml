@@ -1,0 +1,35 @@
+  /mtp/papin/api/cloud/public/internal/indicators/getQuery:
+    get:
+      summary: Find matching file indicators
+      description: >-
+        Query existing tenant indicators for the file hashes shown under the file page's
+        **Manage indicator** action.
+      operationId: Files.ListIndicators
+      tags: [Files]
+      parameters:
+        - name: tiIndicator
+          in: query
+          required: true
+          description: The file hash to search for in the indicator store.
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: true
+          description: Indicator entity type.
+          schema:
+            type: string
+            enum: [files]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileIndicatorsResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

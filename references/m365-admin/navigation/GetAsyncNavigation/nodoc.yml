@@ -1,0 +1,22 @@
+  /admin/api/navigation/async:
+    get:
+      summary: Get async navigation items
+      description: >-
+        Retrieve asynchronously loaded navigation items for the admin portal.
+      operationId: Navigation.GetAsyncNavigation
+      tags: [Navigation]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/AsyncNavigationResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

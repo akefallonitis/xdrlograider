@@ -1,0 +1,82 @@
+{
+  "portal": "purview",
+  "subArea": "insider_risk",
+  "slug": "listInsiderRiskAppConnectors",
+  "operationId": "listInsiderRiskAppConnectors",
+  "path": "/mcas/cas/api/v1/app_connectors/",
+  "methods": [
+    "get"
+  ],
+  "summary": "List Defender for Cloud Apps connectors",
+  "sourceFile": "insider_risk.yml",
+  "capturedUtc": "2026-05-12T15:10:53.4334916Z",
+  "pagination": {
+    "style": "offsetLimit",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": "skip"
+  },
+  "timeFilter": {
+    "supported": false,
+    "startParam": null,
+    "endParam": null,
+    "type": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "filters",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Serialized filter payload applied by the app connector query."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "Status": "live-verified-20260512",
+    "Method": "Get-EntraEstsAuth (shares Defender ClientId)",
+    "CookieHost": "compliance.microsoft.com",
+    "ClientId": "80ccca67-54bd-44ab-8625-4b79c4dc7775"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 500,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "HTTP 500",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "Pagination=offsetLimit — accumulate offset by pageSize",
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+    "LiveProbe=5xx — transient Microsoft-side; retry-on-cadence will recover"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "unknown",
+  "readSemanticsReason": "no-prefix-match",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Serialized filter payload applied by the app connector query.",
+      "type": "string",
+      "name": "filters"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "The number of connector records to skip.",
+      "type": "integer",
+      "name": "skip"
+    }
+  ],
+  "paginationStyle": "topSkip",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "daily"
+}

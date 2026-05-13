@@ -1,0 +1,65 @@
+{
+  "portal": "m365-admin",
+  "subArea": "miscellaneous",
+  "slug": "GetARMBillingAccounts",
+  "operationId": "Misc.GetARMBillingAccounts",
+  "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts",
+  "methods": [
+    "get"
+  ],
+  "summary": "Get ARM billing accounts",
+  "sourceFile": "miscellaneous.yml",
+  "capturedUtc": "2026-05-12T15:13:25.8727618Z",
+  "pagination": {
+    "style": "none",
+    "indexParam": null,
+    "defaults": {},
+    "sizeParam": null,
+    "tokenParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "endParam": null,
+    "lookbackParam": null,
+    "supported": false,
+    "type": null
+  },
+  "otherParameters": [
+    {
+      "Name": "api-version",
+      "In": "query",
+      "Type": "string",
+      "Default": "'2020-05-01'",
+      "Description": "ARM API version."
+    }
+  ],
+  "suggestedCadence": "unknown",
+  "authChain": {
+    "ClientId": "4765445b-32c6-49b0-83e6-1d93765276ca",
+    "Status": "auth-research-needed",
+    "CookieHost": "admin.microsoft.com",
+    "Method": "Get-EntraEstsAuth — $Config parser fails; need MSAL/PKCE flow research"
+  },
+  "v1Manifest": null,
+  "parsingNotes": "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: unknown cadence × full inventory)",
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "lastSuccessKind": "live-empty",
+  "lastHttpStatus": 200,
+  "parameters": {
+    "in": "query",
+    "default": "2020-05-01",
+    "required": false,
+    "description": "ARM API version.",
+    "type": "string",
+    "name": "api-version"
+  },
+  "paginationStyle": "none",
+  "timeFilterParams": null,
+  "entities": [
+    "Software.Version"
+  ],
+  "cadenceSuggestion": "daily"
+}

@@ -1,0 +1,44 @@
+  /beta/OrganizationRelationship:
+    get:
+      tags: [Sharing]
+      summary: List organization relationships
+      description: |
+        Returns organization relationships surfaced by the Organization sharing page.
+      operationId: ExchangeBeta.Sharing.ListOrganizationRelationships
+      responses:
+        '200':
+          description: Organization relationships returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/OrganizationRelationship('{organizationRelationshipId}')":
+    get:
+      tags: [Sharing]
+      summary: Get organization relationship details
+      description: |
+        Returns a single organization relationship entity loaded by the Organization sharing
+        detail blade.
+      operationId: ExchangeBeta.Sharing.GetOrganizationRelationship
+      parameters:
+        - $ref: '#/components/parameters/organizationRelationshipId'
+      responses:
+        '200':
+          description: Organization relationship returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'

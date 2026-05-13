@@ -1,0 +1,21 @@
+  /api/mt/part/{partition}/beta/admin/apps/appAccessRequests:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: List Teams app access requests
+      description: |
+        Returns Teams app access requests from the partitioned Teams admin backend. Observed from the
+        dashboard widget area after the region and partition were resolved.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      responses:
+        '200':
+          description: App access request collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppAccessRequestsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

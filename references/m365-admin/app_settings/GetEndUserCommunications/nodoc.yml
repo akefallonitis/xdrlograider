@@ -1,0 +1,23 @@
+  /admin/api/settings/apps/EndUserCommunications:
+    get:
+      summary: Get end user communications settings
+      description: >-
+        Retrieve the Microsoft communication to users settings for the tenant (Org Settings > Microsoft communication to users).
+      operationId: AppSettings.GetEndUserCommunications
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

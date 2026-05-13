@@ -1,0 +1,30 @@
+  /fd/m365licensing/v3/licensedProducts:
+    get:
+      summary: List licensed products
+      description: >-
+        Retrieve the licensed product inventory shown by the subscriptions experience,
+        including products allocated by the requested owner type.
+      operationId: Billing.ListLicensedProducts
+      tags: [Billing]
+      parameters:
+        - name: allotmentSourceOwnerType
+          in: query
+          description: Owner type used to scope the licensed product allotment view.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Licensed product inventory payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

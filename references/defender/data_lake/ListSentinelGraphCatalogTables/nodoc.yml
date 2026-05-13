@@ -1,0 +1,48 @@
+  /securityplatform/sentinelgraph/catalog/tables:
+    get:
+      summary: List Sentinel graph catalog tables
+      description: >-
+        Retrieve the Defender portal's Sentinel graph table catalog, including table
+        metadata and parquet/Kusto schema details used by the lake explorer.
+      operationId: DataLake.ListSentinelGraphCatalogTables
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        tableType:
+                          type: string
+                        provisioningState:
+                          type: string
+                        parquetSchema:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                        kustoSchema:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                      additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

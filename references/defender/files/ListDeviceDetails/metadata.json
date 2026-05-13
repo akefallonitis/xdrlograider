@@ -1,0 +1,158 @@
+{
+  "portal": "defender",
+  "subArea": "files",
+  "slug": "ListDeviceDetails",
+  "operationId": "Files.ListDeviceDetails",
+  "path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/details",
+  "methods": [
+    "get"
+  ],
+  "summary": "List devices for file",
+  "sourceFile": "files.yml",
+  "capturedUtc": "2026-05-12T14:40:03.4669274Z",
+  "pagination": {
+    "tokenParam": null,
+    "style": "none",
+    "sizeParam": "pageSize",
+    "defaults": {
+      "pageSize": "50"
+    },
+    "indexParam": null
+  },
+  "timeFilter": {
+    "startParam": null,
+    "supported": false,
+    "type": null,
+    "endParam": null,
+    "lookbackParam": null
+  },
+  "otherParameters": [
+    {
+      "Name": "entityId",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "The SHA-256 of the file on unified file pages."
+    },
+    {
+      "Name": "daysToLookBack",
+      "In": "query",
+      "Type": "integer",
+      "Default": "7",
+      "Description": "The device-observation lookback window, in days."
+    },
+    {
+      "Name": "firstRowIndex",
+      "In": "query",
+      "Type": "integer",
+      "Default": "1",
+      "Description": "The 1-based row index used by the device details grid."
+    },
+    {
+      "Name": "RiskScores",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional risk-score filter values."
+    },
+    {
+      "Name": "ExposureScores",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional exposure-score filter values."
+    },
+    {
+      "Name": "OsPlatformFriendlyNames",
+      "In": "query",
+      "Type": "string",
+      "Default": "",
+      "Description": "Optional OS-platform filter values."
+    }
+  ],
+  "suggestedCadence": "1h",
+  "authChain": {
+    "Method": "sccauth+XSRF",
+    "CookieHost": "security.microsoft.com",
+    "Module": "Xdr.Defender.Auth",
+    "Status": "live"
+  },
+  "v1Manifest": null,
+  "live": {
+    "httpStatus": 400,
+    "successKind": "error",
+    "rowCount": 0,
+    "errorText": "Response status code does not indicate success: 400 (Bad Request).",
+    "responseShape": null
+  },
+  "parsingNotes": [
+    "DeltaPoll=NOT supported — every poll re-fetches full snapshot (cost: 1h cadence × full inventory)",
+    "LiveProbe=400 — usually license-gated (e.g., TvmPremium/MDI/MCAS absent); operators with full licenses will see different result"
+  ],
+  "operationalReference": null,
+  "historicalReference": null,
+  "readSemantics": "read",
+  "readSemanticsReason": "prefix-explicit",
+  "parameters": [
+    {
+      "in": "query",
+      "default": null,
+      "required": true,
+      "description": "The SHA-256 of the file on unified file pages.",
+      "type": "string",
+      "name": "entityId"
+    },
+    {
+      "in": "query",
+      "default": "7",
+      "required": false,
+      "description": "The device-observation lookback window, in days.",
+      "type": "integer",
+      "name": "daysToLookBack"
+    },
+    {
+      "in": "query",
+      "default": "1",
+      "required": false,
+      "description": "The 1-based row index used by the device details grid.",
+      "type": "integer",
+      "name": "firstRowIndex"
+    },
+    {
+      "in": "query",
+      "default": "50",
+      "required": false,
+      "description": "The maximum number of device rows to return.",
+      "type": "integer",
+      "name": "pageSize"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional risk-score filter values.",
+      "type": "string",
+      "name": "RiskScores"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional exposure-score filter values.",
+      "type": "string",
+      "name": "ExposureScores"
+    },
+    {
+      "in": "query",
+      "default": null,
+      "required": false,
+      "description": "Optional OS-platform filter values.",
+      "type": "string",
+      "name": "OsPlatformFriendlyNames"
+    }
+  ],
+  "paginationStyle": "pageIndex0Based",
+  "timeFilterParams": null,
+  "entities": [],
+  "cadenceSuggestion": "weekly"
+}

@@ -1,0 +1,36 @@
+  /mdi/identity/userapiservice/serviceAccounts/filterOptions:
+    post:
+      summary: Get service account filter options
+      description: >-
+        Retrieve filter-option values for service account columns.
+      operationId: Identity.GetServiceAccountFilterOptions
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                KeyColumn:
+                  type: string
+                  description: The backing key column to aggregate.
+                ValueColumn:
+                  type: string
+                  description: The projected display column to return.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - service account filter options
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

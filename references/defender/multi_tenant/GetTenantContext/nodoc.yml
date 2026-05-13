@@ -1,0 +1,61 @@
+  /mtoapi/mtp/sccManagement/mgmt/TenantContext:
+    get:
+      summary: Get MTO tenant context
+      description: >-
+        Retrieve the multi-tenant-wrapped Defender tenant bootstrap used across
+        the MTO portal. The response includes the selected tenant context plus
+        per-tenant execution metadata for the current MTO selection.
+      operationId: MultiTenant.GetTenantContext
+      tags: [Multi-Tenant]
+      parameters:
+        - name: realTime
+          in: query
+          description: Whether to fetch real-time context instead of cached data.
+          schema:
+            type: boolean
+            default: false
+      x-nodoc-operation-context:
+        surface: Multi-tenant shell
+        workflows:
+          - Load MTO pages that need the selected tenant bootstrap before rendering cross-tenant Defender data.
+        authProfile: defender-mto-tenant-context
+        requestShapes:
+          - name: cached-or-realtime-bootstrap
+            bodyKind: none
+            optionalParameters:
+              - realTime
+            notes: Use the realTime flag when the portal needs an uncached tenant bootstrap refresh.
+        availability:
+          level: user-context
+          notes:
+            - Returned tenant bootstrap state depends on the current MTO selection and the operator's allowed tenant scope.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    description: >-
+                      MTO-wrapped Defender tenant bootstrap, including environment,
+                      workload activation, directory roles, and MTP permission state.
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                    description: Indicates the response came from the MTO wrapper.
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -1,0 +1,46 @@
+  /mdi/identity/userapiservice/serviceaccount/entities:
+    post:
+      summary: List service accounts
+      description: >-
+        Retrieve a list of service account entities from Defender for Identity.
+        Service accounts are automatically identified based on usage patterns.
+      operationId: Identity.ListServiceAccounts
+      tags: [Identity]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria for service accounts.
+                  type: object
+                pageIndex:
+                  description: The page index for pagination.
+                  type: integer
+                pageSize:
+                  description: The number of results per page.
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      entities:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - service account details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
