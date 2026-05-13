@@ -159,6 +159,51 @@ Describe 'Get-XdrAuthFromKeyVault — TOTP + Passkey secret loading (mocked KV)'
     }
 }
 
+Describe 'Get-XdrAuthFromKeyVault — TTL cache + Force bypass (rule 23 401-rotation)' {
+    BeforeAll {
+        $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+        Import-Module (Join-Path $script:RepoRoot 'src/Modules/Xdr.Common.Auth/Xdr.Common.Auth.psd1') -Force
+    }
+
+    It 'caches the second call within TTL — KV is hit ONCE only' {
+        $script:KvCalls = 0
+        Mock Get-AzKeyVaultSecret -ModuleName Xdr.Common.Auth {
+            param($VaultName, $Name, [switch]$AsPlainText)
+            $script:KvCalls++
+            switch ($Name) {
+                'cache-test-totp-upn'      { 'svc-cache@x.com' }
+                'cache-test-totp-password' { 'pw' }
+                'cache-test-totp-totp'     { 'JBSWY3DPEHPK3PXP' }
+                default                    { '' }
+            }
+        }
+        $cred1 = Get-XdrAuthFromKeyVault -VaultUri 'https://x-cache-test.vault.azure.net' -SecretPrefix 'cache-test-totp' -AuthMethod 'CredentialsTotp'
+        $cred2 = Get-XdrAuthFromKeyVault -VaultUri 'https://x-cache-test.vault.azure.net' -SecretPrefix 'cache-test-totp' -AuthMethod 'CredentialsTotp'
+        $cred1.upn | Should -Be $cred2.upn
+        # Each call fetches 3 secrets (upn, password, totp). First call = 3 fetches.
+        # Second call = cache hit; KV is NOT contacted again.
+        $script:KvCalls | Should -Be 3
+    }
+
+    It '-Force bypasses the cache and re-fetches from KV (used on 401 rotation per Rule 23)' {
+        $script:KvCalls = 0
+        Mock Get-AzKeyVaultSecret -ModuleName Xdr.Common.Auth {
+            param($VaultName, $Name, [switch]$AsPlainText)
+            $script:KvCalls++
+            switch ($Name) {
+                'force-test-totp-upn'      { 'svc-force@x.com' }
+                'force-test-totp-password' { 'pw' }
+                'force-test-totp-totp'     { 'JBSWY3DPEHPK3PXP' }
+                default                    { '' }
+            }
+        }
+        $null = Get-XdrAuthFromKeyVault -VaultUri 'https://x-force-test.vault.azure.net' -SecretPrefix 'force-test-totp' -AuthMethod 'CredentialsTotp'
+        $null = Get-XdrAuthFromKeyVault -VaultUri 'https://x-force-test.vault.azure.net' -SecretPrefix 'force-test-totp' -AuthMethod 'CredentialsTotp' -Force
+        # First call = 3 fetches; second call with -Force bypasses cache = 3 more fetches.
+        $script:KvCalls | Should -Be 6
+    }
+}
+
 Describe 'Xdr.Common.Auth — Private fns: Complete-TotpMfa-SharePoint exists' {
     BeforeAll {
         $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path

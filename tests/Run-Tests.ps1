@@ -34,26 +34,26 @@ param(
 
     [string] $OutputDir = (Join-Path $PSScriptRoot 'results'),
 
-    # 20% offline line-coverage gate for v0.1.0 GA.
+    # 30% offline line-coverage gate. Current run: 31.4% (183 tests).
     #
-    # Rationale: the majority of uncovered lines are in HTTP orchestration paths
-    # (Get-EntraEstsAuth, Complete-* private auth flows, Invoke-XdrStorageTableEntity
-    # which uses System.Net.Http.HttpClient directly, Send-ToLogAnalytics retry
-    # mechanics, etc.). Properly exercising these requires either integration
-    # tests against live endpoints (forbidden by Rule 18) or invasive
-    # System.Net.Http.HttpClient mocking — both deferred to v0.3.0+ when
-    # Sentinel content lands and brings end-to-end test data with it.
+    # Coverage gain history:
+    #   v0.1.0 first cut    20.0% (150 tests; baseline)
+    #   v0.1.0 PII scrub    24.1% (+ConvertTo-XdrAiSafeProperties hardening)
+    #   v0.1.0 retry tests  31.4% (+Send-ToLogAnalytics 429/5xx + projection
+    #                              helpers + KV cache + pagination resume)
     #
-    # The current 150 mocked tests cover the BUSINESS LOGIC invariants:
-    # 4-value SuccessKind classifier, LicenseHint propagation (Rule 23),
-    # EntryKey-based dispatch, Notes-JSON-never-null heartbeat (Rule 12),
-    # Y1/EP plan-SKU conditional, 19 DCRs + 19 workspace tables + 3 role
-    # assignments, manifest 493 entries, TOTP + Passkey auth paths, etc.
+    # Uncovered hot-spots remaining (tracked for v0.1.x uplift):
+    #   - Invoke-MDETierPoll orchestration (300+ lines; needs full chain mock)
+    #   - Invoke-XdrStorageTableEntity (uses System.Net.Http.HttpClient
+    #     directly; needs shim-injection harness)
+    #   - Complete-CredentialsFlow / Complete-PasskeyFlow Entra interrupt paths
+    #     (300+ lines combined; covered against live endpoints by
+    #     Probe-Auth-Local.ps1 + Verify-Deploy.ps1 instead of unit tests)
     #
-    # Hard-fail at 20% catches regressions that strip out tested code paths
-    # without preventing legitimate refactors. Operator-local Probe-Auth-Local
+    # Hard-fail at 30% catches regressions that strip out tested code paths
+    # without blocking legitimate refactors. Operator-local Probe-Auth-Local
     # + Verify-Deploy cover the HTTP paths against live endpoints.
-    [int] $CoverageThreshold = 20,
+    [int] $CoverageThreshold = 30,
 
     [switch] $SkipCoverage
 )

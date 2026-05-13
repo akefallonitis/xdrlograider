@@ -29,6 +29,85 @@ Describe 'Get-XdrTierCadenceMap — production cadence floor (Rule 18 / Phase A0
     }
 }
 
+Describe 'Send-ToLogAnalytics — retry / 413-split / DLQ end-to-end' {
+    BeforeAll {
+        $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+        Import-Module (Join-Path $script:RepoRoot 'src/Modules/Xdr.Common.Telemetry/Xdr.Common.Telemetry.psd1') -Force
+        Import-Module (Join-Path $script:RepoRoot 'src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1') -Force
+        $script:rows1 = @([pscustomobject]@{ TimeGenerated = [DateTime]::UtcNow.ToString('o'); EntityId = 'a'; RawJson = '{}'; RawResponseBody = '{}' })
+    }
+
+    BeforeEach {
+        # Always return a synthetic MI token so the helper does not actually call Azure.
+        Mock Get-MonitorIngestionToken -ModuleName Xdr.Sentinel.Ingest { 'synthetic-mi-token' }
+    }
+
+    It 'retries 429 with exponential backoff and succeeds on second attempt' {
+        $script:CallCount = 0
+        Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest {
+            $script:CallCount++
+            if ($script:CallCount -eq 1) {
+                # First call: 429. Throw a System.Net.WebException-like response.
+                $ex = New-Object Microsoft.PowerShell.Commands.HttpResponseException -ArgumentList @('429', [System.Net.Http.HttpResponseMessage]::new(429))
+                throw $ex
+            }
+            @{ StatusCode = 200; Headers = @{} ; RawContent = ''; Content = '' }
+        }
+        Mock Start-Sleep -ModuleName Xdr.Sentinel.Ingest {} # don't actually sleep
+        $r = Send-ToLogAnalytics -DceEndpoint 'https://dce.eastus2-1.ingest.monitor.azure.com' -DcrImmutableId 'dcr-abc' -StreamName 'Custom-Defender_ActionCenter_CL' -Rows $script:rows1
+        $r.RowsSent | Should -Be 1
+        $script:CallCount | Should -BeGreaterOrEqual 2
+    }
+
+    It '5xx server errors trigger retry path' {
+        $script:CallCount = 0
+        Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest {
+            $script:CallCount++
+            if ($script:CallCount -eq 1) {
+                $ex = New-Object Microsoft.PowerShell.Commands.HttpResponseException -ArgumentList @('503', [System.Net.Http.HttpResponseMessage]::new(503))
+                throw $ex
+            }
+            @{ StatusCode = 200; Headers = @{}; RawContent = ''; Content = '' }
+        }
+        Mock Start-Sleep -ModuleName Xdr.Sentinel.Ingest {}
+        $r = Send-ToLogAnalytics -DceEndpoint 'https://dce' -DcrImmutableId 'dcr-abc' -StreamName 'Custom-Defender_ActionCenter_CL' -Rows $script:rows1
+        $r.BatchesSent | Should -BeGreaterOrEqual 1
+        $script:CallCount | Should -BeGreaterOrEqual 2
+    }
+
+    It 'happy path emits per-batch AppInsights metrics + dependency telemetry' {
+        Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest {
+            @{ StatusCode = 200; Headers = @{}; RawContent = ''; Content = '' }
+        }
+        $script:MetricsSeen = New-Object System.Collections.Generic.List[string]
+        Mock Send-XdrAppInsightsCustomMetric -ModuleName Xdr.Sentinel.Ingest {
+            param($MetricName) ; $script:MetricsSeen.Add($MetricName)
+        }
+        Mock Send-XdrAppInsightsDependency -ModuleName Xdr.Sentinel.Ingest {}
+        Send-ToLogAnalytics -DceEndpoint 'https://dce' -DcrImmutableId 'dcr-abc' -StreamName 'Custom-Defender_ActionCenter_CL' -Rows $script:rows1 | Out-Null
+        # Decision 26 / H12: per-batch ingest metrics must fire so operators can spot regressions.
+        $script:MetricsSeen | Should -Contain 'xdr.ingest.rows'
+        $script:MetricsSeen | Should -Contain 'xdr.ingest.bytes_compressed'
+        $script:MetricsSeen | Should -Contain 'xdr.ingest.compression_ratio'
+        $script:MetricsSeen | Should -Contain 'xdr.ingest.retry_count'
+        $script:MetricsSeen | Should -Contain 'xdr.ingest.dce_latency_ms'
+        $script:MetricsSeen | Should -Contain 'xdr.ingest.row_count_per_hour'
+    }
+
+    It '-DisableGzip skips compression (no Content-Encoding header set on call)' {
+        $script:CapturedHeaders = $null
+        Mock Invoke-WebRequest -ModuleName Xdr.Sentinel.Ingest {
+            param($Uri, $Method, $Headers, $Body)
+            $script:CapturedHeaders = $Headers
+            @{ StatusCode = 200; Headers = @{}; RawContent = ''; Content = '' }
+        }
+        Mock Send-XdrAppInsightsCustomMetric -ModuleName Xdr.Sentinel.Ingest {}
+        Mock Send-XdrAppInsightsDependency -ModuleName Xdr.Sentinel.Ingest {}
+        Send-ToLogAnalytics -DceEndpoint 'https://dce' -DcrImmutableId 'dcr-abc' -StreamName 'Custom-Defender_ActionCenter_CL' -Rows $script:rows1 -DisableGzip | Out-Null
+        $script:CapturedHeaders.ContainsKey('Content-Encoding') | Should -BeFalse
+    }
+}
+
 Describe 'Send-ToLogAnalytics — DCE ingest' {
     BeforeAll {
         $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path

@@ -126,4 +126,60 @@ Describe 'Invoke-MDEEndpoint dispatcher (mocked Invoke-MDEPortalEndpoint)' {
             $r2.HttpStatus | Should -Be 503
         }
     }
+
+    Context 'Pagination resume — Phase A0.3 multi-cycle (vuln_management 1000-page first poll Y1-safe)' {
+        BeforeEach {
+            # Find an EntryKey with paginated style + NO PathParams (so we don't need
+            # -PathParams for the test).
+            $manifest = Get-XdrEndpointManifest -Portal Defender
+            $script:PageKey = ($manifest.GetEnumerator() | Where-Object {
+                $_.Value -is [System.Collections.IDictionary] -and
+                $_.Value.ContainsKey('Pagination') -and $_.Value.Pagination -and
+                [string]$_.Value.Pagination.Style -ne 'none' -and
+                (-not $_.Value.ContainsKey('PathParams') -or -not $_.Value.PathParams -or $_.Value.PathParams.Count -eq 0)
+            } | Select-Object -First 1).Key
+            $script:PageKey | Should -Not -BeNullOrEmpty
+        }
+
+        It 'StartFromPage > 1 issues the first call with pageIndex set to that page (resume from checkpoint)' {
+            $script:CapturedPaths = New-Object System.Collections.Generic.List[string]
+            Mock Invoke-MDEPortalEndpoint -ModuleName Xdr.Defender.Client {
+                param($Session, $Path, $Method, $Body, $AdditionalHeaders)
+                $script:CapturedPaths.Add($Path)
+                # Return short page so loop exits quickly (partial fill = last page).
+                @{ Success = $true; Data = @([pscustomobject]@{ id = 'x' }); HttpStatus = 200 }
+            }
+            $null = Invoke-MDEEndpoint -Session $script:Session -EntryKey $script:PageKey -StartFromPage 7
+            # First captured path should contain pageIndex=7 (not pageIndex=1)
+            $first = $script:CapturedPaths[0]
+            $first | Should -Match 'pageIndex=7' -Because 'resume must start at the checkpointed page, not the first page'
+        }
+
+        It 'MaxPagesPerCycle bounds the per-activity page count for Y1 timeout safety' {
+            $script:CallCount = 0
+            Mock Invoke-MDEPortalEndpoint -ModuleName Xdr.Defender.Client {
+                $script:CallCount++
+                # Always return a full page so pagination keeps going.
+                $items = @()
+                for ($i = 0; $i -lt 200; $i++) { $items += [pscustomobject]@{ id = "row-$i" } }
+                @{ Success = $true; Data = $items; HttpStatus = 200 }
+            }
+            $null = Invoke-MDEEndpoint -Session $script:Session -EntryKey $script:PageKey -MaxPagesPerCycle 3
+            # Initial fetch + at most 2 follow-up paged fetches (3 total inside cycle cap)
+            $script:CallCount | Should -BeLessOrEqual 3
+            # Should signal pagination NOT exhausted (more pages remain, capped by cycle limit)
+            $r = Get-MDEEndpointLastResult
+            $r.PaginationExhausted | Should -BeFalse -Because 'cycle cap stopped pagination early; remaining pages must resume next activity invocation'
+        }
+
+        It 'partial page (< pageSize) signals PaginationExhausted=true (no more pages)' {
+            Mock Invoke-MDEPortalEndpoint -ModuleName Xdr.Defender.Client {
+                # Return a small (partial) page on first call — pagination should NOT loop
+                @{ Success = $true; Data = @([pscustomobject]@{ id = 'only-row' }); HttpStatus = 200 }
+            }
+            $null = Invoke-MDEEndpoint -Session $script:Session -EntryKey $script:PageKey
+            $r = Get-MDEEndpointLastResult
+            $r.PaginationExhausted | Should -BeTrue
+        }
+    }
 }
