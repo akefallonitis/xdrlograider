@@ -164,6 +164,10 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          # tag_name must be set explicitly when this workflow is triggered by
+          # workflow_dispatch: github.ref points at the branch (refs/heads/main)
+          # not the tag, so the action can't infer the release tag on its own.
+          tag_name: ${{ steps.ver.outputs.tag }}
           name: XdrLogRaider ${{ steps.ver.outputs.tag }}
           body: |
             XdrLogRaider Defender XDR portal-only telemetry connector.
