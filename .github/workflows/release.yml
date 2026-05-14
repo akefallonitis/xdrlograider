@@ -56,8 +56,12 @@ jobs:
             [[ "$TAG" =~ ^v ]] || { echo "::error::version must start with 'v' (got: $TAG)"; exit 1; }
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git tag -a "$TAG" -m "$TAG"
-            git push origin "$TAG"
+            # Force-update the tag in case it already exists (re-release path).
+            # The pilot v0.1.0 contract is "stable tag, refreshed artifacts" —
+            # operators tracking 'releases/latest' get the newest signed build
+            # without a version bump.
+            git tag -fa "$TAG" -m "$TAG"
+            git push --force origin "$TAG"
             echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           else
             echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
