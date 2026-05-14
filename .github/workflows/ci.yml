@@ -20,7 +20,7 @@ jobs:
     name: Secret scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
@@ -31,7 +31,7 @@ jobs:
     name: PSScriptAnalyzer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -48,7 +48,7 @@ jobs:
     name: Pester unit + ARM + KQL
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -65,7 +65,7 @@ jobs:
     name: ARM-TTK + custom validators
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -118,7 +118,7 @@ jobs:
     name: Generated artifacts up-to-date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'

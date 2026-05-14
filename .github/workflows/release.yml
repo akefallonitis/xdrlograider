@@ -53,7 +53,7 @@ jobs:
     # this workflow (workflow_run is event-completion based, not result-based).
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           # For workflow_run, check out the exact commit ci.yml just validated
