@@ -534,6 +534,11 @@ $resources.Add([ordered]@{
         siteConfig = [ordered]@{
             linuxFxVersion = 'POWERSHELL|7.4'
             ftpsState      = 'Disabled'
+            # Explicit TLS 1.2 minimum (Azure platform default but make it visible
+            # for security review). 1.3 would also work but some Az PS module
+            # versions still negotiate 1.2 against KV/Storage; pin to 1.2 floor.
+            minTlsVersion  = '1.2'
+            http20Enabled  = $true
             appSettings    = $faSettingsArray
         }
     }

@@ -139,9 +139,9 @@ $modulesPath = Join-Path $PSScriptRoot 'Modules'
 #                                    reintroduces L2/L3 portal modules (Entra /
 #                                    Purview / Intune) with real bodies.
 #
-# v0.1.0 GA scope (per user 2026-05-05): pure Defender connector. v0.2.0 adds
-# multi-portal expansion + FA multi-tenancy support together.
-# See .claude/plans/immutable-splashing-waffle.md for details.
+# v0.1.0 GA scope: pure Defender XDR portal-internal-telemetry connector
+# (single-portal). v0.2.0 adds multi-portal expansion (Entra/Purview/Intune)
+# + MSSP multi-tenancy together via additive manifests + L2/L3 module pairs.
 
 $coreModules = @(
     'Xdr.Common.Auth',

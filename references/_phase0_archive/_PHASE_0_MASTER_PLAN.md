@@ -241,7 +241,7 @@ TenantContext live-validated 2026-05-13: HTTP 200, 265 KB response, includes Env
 
 ## 4. Live-probe evidence (post-sweep)
 
-**Comprehensive sweep across all 20 portals completed 2026-05-13.** Operator-run; harness denial unblocked via `.claude/settings.local.json` permission rules. All 16 bearer-auth portals (re)probed; 4 cookie-auth portals at 100% from prior sessions; Custom Collection corrected path live-validated; TenantContext canonical live-validated.
+**Comprehensive sweep across all 20 portals completed 2026-05-13.** Operator-run; harness denial unblocked via `operator-local settings (gitignored)` permission rules. All 16 bearer-auth portals (re)probed; 4 cookie-auth portals at 100% from prior sessions; Custom Collection corrected path live-validated; TenantContext canonical live-validated.
 
 ### 4.1 Coverage classification
 

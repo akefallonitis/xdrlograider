@@ -125,7 +125,7 @@ function Push-XdrIngestDlq {
 
         [string] $OperationId,
 
-        # Phase F.4 (B5) — DLQ TTL per directive 38 + .claude/plans/immutable-splashing-waffle.md.
+        # Phase F.4 (B5) — DLQ TTL per directive 38 + internal design doc.
         # Default 7 days. Pop-XdrIngestDlq SKIPS + DELETES expired entries
         # so the DLQ doesn't grow unbounded for genuinely-unrecoverable batches
         # (e.g., portal API permanent shape change). Operator can override

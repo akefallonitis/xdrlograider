@@ -36,7 +36,7 @@
 
 ## 1. Locked requirements (mirror of memory — authoritative)
 
-Source of truth: `~/.claude/projects/C--Users-alkef-Desktop-Repos/memory/feedback_microsoft_defender_sentinel_architect.md`.
+Source of truth: `internal architectural reference`.
 
 | Locked rule | Value |
 |---|---|

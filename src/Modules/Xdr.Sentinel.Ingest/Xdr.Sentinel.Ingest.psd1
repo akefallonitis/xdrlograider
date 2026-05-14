@@ -61,7 +61,7 @@
             Tags         = @('LogAnalytics', 'DCE', 'DCR', 'Sentinel')
             LicenseUri   = 'https://github.com/akefallonitis/xdrlograider/blob/main/LICENSE'
             ProjectUri   = 'https://github.com/akefallonitis/xdrlograider'
-            ReleaseNotes = 'v0.1.0 GA: forward-compat Xdr* aliases added (Send-XdrToLogAnalytics, Get-XdrCheckpointTimestamp, Set-XdrCheckpointTimestamp, Get-XdrDcrImmutableIdForStream) per Phase A.2 in .claude/plans/immutable-splashing-waffle.md. Legacy names retained for v0.1.0 GA scope.'
+            ReleaseNotes = 'v0.1.0 GA: forward-compat Xdr* aliases added (Send-XdrToLogAnalytics, Get-XdrCheckpointTimestamp, Set-XdrCheckpointTimestamp, Get-XdrDcrImmutableIdForStream). Legacy names retained for v0.1.0 GA scope; will deprecate via -WarningAction in v0.2.0.'
         }
     }
 }

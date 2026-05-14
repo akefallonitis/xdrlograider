@@ -6,7 +6,7 @@
 #      `StreamsSucceeded > 0` — these rows flip the card to "Connected" as soon
 #      as ANY tier successfully ingests at least one stream.
 #
-# Per .claude/plans/immutable-splashing-waffle.md Section R.
+# Per internal design doc Section R.
 
 param($Timer)
 

@@ -1,0 +1,31 @@
+# Dependabot keeps GitHub Actions versions current.
+# PowerShell modules (Az.Accounts/KeyVault/Storage) are pinned in release.yml
+# at specific RequiredVersion values — those bumps are intentionally manual
+# because they affect the FA runtime bundle in function-app.zip and need
+# integration-level testing before they ship. Dependabot only covers the
+# action versions (actions/checkout, softprops/action-gh-release, sigstore/
+# cosign-installer, anchore/sbom-action, gitleaks/gitleaks-action) so security
+# patches on the build infrastructure land within a week of release.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: "deps(actions)"
+    # Group minor + patch action bumps into a single PR per week to keep
+    # noise low (security PRs still open individually).
+    groups:
+      github-actions-minor:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch

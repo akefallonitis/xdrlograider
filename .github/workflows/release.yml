@@ -190,6 +190,27 @@ jobs:
           echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           echo "iso=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
+      - name: Delete existing GitHub Release (force fresh published_at on refresh)
+        # GitHub's release.published_at field is set on FIRST publish and never
+        # updates when the same release's artifacts are replaced via softprops
+        # action-gh-release. Result: the homepage "Releases" widget shows a
+        # stale "X hours ago" timestamp even though artifacts were rebuilt
+        # minutes ago. The only way to refresh published_at is to delete the
+        # release and create a new one with the same tag. We keep the tag in
+        # place (--cleanup-tag omitted) so the immediately-following softprops
+        # Publish step reattaches to the existing tag. The tag itself was
+        # already force-updated earlier (steps.ver) to point at HEAD.
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          gh release delete "${{ steps.ver.outputs.tag }}" \
+              --repo "${{ github.repository }}" \
+              --yes 2>&1 | head -3
+          # No-op exit code on "release not found" (first run, fresh tag).
+          exit 0
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -199,15 +220,19 @@ jobs:
           # tag on its own.
           tag_name: ${{ steps.ver.outputs.tag }}
           name: XdrLogRaider ${{ steps.ver.outputs.tag }}
+          # make_latest forces this release to be the "Latest" badge on the
+          # repo homepage (so re-published releases stay at the top).
+          make_latest: 'true'
           body: |
             XdrLogRaider Defender XDR portal-only telemetry connector.
 
             **Last refreshed: ${{ steps.meta.outputs.iso }}** (commit `${{ steps.meta.outputs.sha }}`)
 
-            > GitHub's "published" timestamp on this page reflects the FIRST
-            > release of this tag — the artifacts themselves are continuously
-            > refreshed on every green main-branch CI run (stable-tag contract).
-            > Trust the "Last refreshed" line above + the individual asset dates.
+            > Stable-tag contract: this release is delete-and-recreated on every
+            > green main-branch CI run, so the "published X ago" badge on the
+            > GitHub homepage always reflects the latest refresh (no stale
+            > timestamp). The v0.1.0 tag itself is force-updated to point at
+            > the same commit that just passed CI.
 
             Deploy via the one-click ARM button in the README, or via
             `az deployment group create` using the included parameters.json.

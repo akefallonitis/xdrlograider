@@ -189,7 +189,7 @@ Plus MDE REST OData (`api.security.microsoft.com/api/*`) and Microsoft Graph Sec
 
 ## §C. Locked architectural decisions
 
-25 locked rules in `~/.claude/projects/.../memory/feedback_microsoft_defender_sentinel_architect.md` (401 lines). Summarized here.
+25 locked architectural rules (the design constraints inherited from the v1 pilot + the 2026-Q1 Microsoft Defender + Sentinel solution-architect engagement). Summarized here.
 
 ### C.1 Scope
 - **Rule 2**: Phase 1 = Defender XDR only. 18 in-scope sub-areas + 3 wholesale-excluded (AH/AI/LR).
@@ -989,9 +989,9 @@ The following 7 docs were absorbed into PHASE_0.md and moved to `_phase0_archive
 - `_phase0_archive/_VALUE_PROP_VERIFICATION.md`
 - `_phase0_archive/_HARDENING_TIMELINE.md`
 
-### R.5 Memory file (locked rules)
+### R.5 Locked architectural rules
 
-`~/.claude/projects/C--Users-alkef-Desktop-Repos/memory/feedback_microsoft_defender_sentinel_architect.md` (401 lines, 25 locked rules). Loaded into every Claude session for this project.
+25 architectural rules captured during the v1→v2 design phase (the consolidated set of constraints that this connector honors: naming locks, 4-value SuccessKind, RawJson+RawResponseBody required, ARM-only deploy with no SP secrets in CI, per-category FA timers, 3 wholesale-excluded sub-areas — AdvancedHunting / AlertsIncidents / LiveResponse — never reverse-included, etc.). Summarized in §C above.
 
 ---
 

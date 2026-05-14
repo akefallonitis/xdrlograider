@@ -10,7 +10,7 @@
 # in activities — never in the orchestrator body. Per Microsoft Durable
 # Functions PowerShell pattern: keep orchestrator deterministic + minimal.
 #
-# Per .claude/plans/immutable-splashing-waffle.md Section 2.A.
+# Per internal design doc Section 2.A.
 
 param($Context)
 

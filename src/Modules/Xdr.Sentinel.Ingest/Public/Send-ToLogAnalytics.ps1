@@ -387,7 +387,7 @@ function Send-ToLogAnalytics {
                         # regression + ProjectionMap mis-config row multiplication).
                         Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.row_count_per_hour' -Value ([double]$batch.Count) -Properties $metricProps -OperationId $DlqOperationId
 
-                        # Phase M (R3) per directive 33 + .claude/plans/immutable-splashing-waffle.md:
+                        # Phase M (R3) per directive 33 + internal design doc:
                         # Per-batch partial-success rate. For successful batches this is 1.0 (all rows
                         # accepted). DCE 207 multi-status responses where a subset of rows fail would
                         # surface < 1.0 (Microsoft Logs Ingestion API returns 207 with per-row errors
@@ -395,7 +395,7 @@ function Send-ToLogAnalytics {
                         # batch; this metric is the operator hook for future per-row error visibility.
                         Send-XdrAppInsightsCustomMetric -MetricName 'xdr.ingest.row_success_rate' -Value 1.0 -Properties $metricProps -OperationId $DlqOperationId
 
-                        # Phase M (R4) per directive 33 + .claude/plans/immutable-splashing-waffle.md:
+                        # Phase M (R4) per directive 33 + internal design doc:
                         # Freshness SLI = age of the FIRST row in the batch when ingested. For event-stream
                         # tiers (ActionCenter) this measures portal-to-DCE latency; for snapshot-replace
                         # tiers (Configuration/Inventory/Maintenance) this is poll-cycle freshness.

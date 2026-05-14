@@ -9,7 +9,7 @@
 # Activities CAN be non-deterministic (KV reads, portal API calls, current
 # time, exception handling, Storage writes) — only orchestrators must be deterministic.
 #
-# Per .claude/plans/immutable-splashing-waffle.md Section R.
+# Per internal design doc Section R.
 #
 # CRITICAL: The activity parameter MUST NOT be named '$Input' — that name
 # shadows PowerShell's automatic $Input variable (the pipeline enumerator).

@@ -264,6 +264,6 @@ When user confirms, Phase 1 begins with:
 | 15 portals × N endpoints | Fresh live.json files from this session's sweep |
 | `references/_CATALOGUE_INDEX.md` · `_LIVE_AUDIT_REPORT.md` · `_FULL_CATALOGUE.md` | Regenerated post-sweep |
 | `references/defender/_AUTH_RESEARCH.json` | No change (auth chain stable) |
-| `.claude/settings.local.json` | Probe permissions added (operator-side, gitignored) |
+| `operator-local settings (gitignored)` | Probe permissions added (operator-side, gitignored) |
 | `tools/Probe-DefenderCookiePaths.ps1` | NEW — minimal cookie-portal probe for corrected paths |
 | `tools/Probe-PortalEndpoints-V2.ps1` | UNCHANGED — used for 16 bearer portals |
