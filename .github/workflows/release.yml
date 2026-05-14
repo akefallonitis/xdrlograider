@@ -212,7 +212,7 @@ jobs:
           exit 0
 
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           # tag_name must be set explicitly when this workflow is triggered by
           # workflow_dispatch or workflow_run: github.ref points at the branch
