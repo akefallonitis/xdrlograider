@@ -14,13 +14,23 @@ name: release
 on:
   push:
     tags: [ 'v*' ]
+  # Auto-refresh v0.1.0 release whenever ci.yml passes on main. This is
+  # the "fix-as-we-go" path: a fix lands on main → ci.yml runs → if green,
+  # this workflow fires and rebuilds the v0.1.0 release artifacts so
+  # releases/latest/download/* always reflects the current main HEAD.
+  # The release.yml job force-updates the v0.1.0 tag to point at the same
+  # commit that just passed CI, then re-publishes the cosign-signed bundle.
+  workflow_run:
+    workflows: [ "ci" ]
+    branches: [ main ]
+    types: [ completed ]
   # Manual release from the GitHub Actions UI. Maintainer goes to
   # Actions → release → Run workflow → enters version (e.g. v0.1.1) →
   # workflow creates the tag at the chosen ref + builds + signs + publishes.
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release tag (must match v*; e.g. v0.1.1)'
+        description: 'Release tag (must match v*; e.g. v0.1.1). For auto-refresh of an existing tag (stable-tag contract), use v0.1.0.'
         required: true
         type: string
       ref:
@@ -38,34 +48,45 @@ jobs:
   release:
     name: Build + cosign-sign + publish
     runs-on: ubuntu-latest
-    # CI gates already ran on every push to main; tags fire only on commits
-    # that already passed CI (main is the tag target).
+    # Gate: when triggered by workflow_run, only proceed if ci.yml conclusion
+    # is 'success'. Without this guard, every ci.yml FAILURE would also fire
+    # this workflow (workflow_run is event-completion based, not result-based).
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.ref || github.ref }}
+          # For workflow_run, check out the exact commit ci.yml just validated
+          # (not whatever main happens to be now — could have advanced).
+          ref: ${{ github.event.workflow_run.head_sha || inputs.ref || github.ref }}
 
-      - name: Resolve version + create tag on manual dispatch
+      - name: Resolve version + create-or-update tag
         id: ver
         shell: bash
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             TAG="${{ inputs.version }}"
-            [[ "$TAG" =~ ^v ]] || { echo "::error::version must start with 'v' (got: $TAG)"; exit 1; }
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            # Force-update the tag in case it already exists (re-release path).
-            # The pilot v0.1.0 contract is "stable tag, refreshed artifacts" —
-            # operators tracking 'releases/latest' get the newest signed build
-            # without a version bump.
-            git tag -fa "$TAG" -m "$TAG"
-            git push --force origin "$TAG"
-            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            # Stable-tag contract: auto-refresh path always retags v0.1.0 until
+            # a real breaking change requires a bump. Change this literal when
+            # the next minor/major lands.
+            TAG="v0.1.0"
           else
+            # push:tags path — TAG is the pushed ref itself.
             echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          [[ "$TAG" =~ ^v ]] || { echo "::error::version must start with 'v' (got: $TAG)"; exit 1; }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # Force-update the tag in case it already exists (re-release path).
+          # The pilot v0.1.0 contract is "stable tag, refreshed artifacts" —
+          # operators tracking 'releases/latest' get the newest signed build
+          # without a version bump.
+          git tag -fa "$TAG" -m "$TAG ($(git rev-parse --short HEAD))"
+          git push --force origin "$TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Install Az modules into bundle layout
         shell: pwsh
@@ -161,22 +182,38 @@ jobs:
           [[ -f dist/sbom.spdx.json ]] && cosign sign-blob --yes --output-signature dist/sbom.spdx.json.sig --output-certificate dist/sbom.spdx.json.cert dist/sbom.spdx.json || true
           ls -la dist/
 
+      - name: Compute build metadata for release body
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "iso=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           # tag_name must be set explicitly when this workflow is triggered by
-          # workflow_dispatch: github.ref points at the branch (refs/heads/main)
-          # not the tag, so the action can't infer the release tag on its own.
+          # workflow_dispatch or workflow_run: github.ref points at the branch
+          # (refs/heads/main) not the tag, so the action can't infer the release
+          # tag on its own.
           tag_name: ${{ steps.ver.outputs.tag }}
           name: XdrLogRaider ${{ steps.ver.outputs.tag }}
           body: |
             XdrLogRaider Defender XDR portal-only telemetry connector.
 
-            Deploy via one-click ARM from the repo's deploy/ folder, or via
-            the Azure CLI `deployment` workflow against the included parameters.json.
+            **Last refreshed: ${{ steps.meta.outputs.iso }}** (commit `${{ steps.meta.outputs.sha }}`)
 
-            All artifacts in this release are signed with Sigstore cosign
-            keyless OIDC (Fulcio short-lived cert + Rekor transparency log).
+            > GitHub's "published" timestamp on this page reflects the FIRST
+            > release of this tag — the artifacts themselves are continuously
+            > refreshed on every green main-branch CI run (stable-tag contract).
+            > Trust the "Last refreshed" line above + the individual asset dates.
+
+            Deploy via the one-click ARM button in the README, or via
+            `az deployment group create` using the included parameters.json.
+
+            All artifacts are signed with Sigstore cosign keyless OIDC (Fulcio
+            short-lived cert + Rekor transparency log).
             Verify with: `cosign verify-blob --certificate <file>.cert --signature <file>.sig <file>`.
           files: |
             dist/function-app.zip

@@ -42,9 +42,16 @@ Describe '.github/workflows invariants (Rule 18)' {
     }
 
     It 'NO live online testing in CI (no deployment commands in workflows)' {
-        $script:AllContent | Should -Not -Match 'az deployment group (create|what-if)'
-        $script:AllContent | Should -Not -Match 'Probe-Auth-Local'
-        $script:AllContent | Should -Not -Match 'Verify-Deploy'
+        # Strip YAML comments (# ...) and the release-body markdown block (under
+        # `body: |`) before checking. References to `az deployment group ...` in
+        # comments or release notes are documentation, not actual invocations.
+        $stripped = $script:AllContent -replace '(?m)^\s*#.*$', ''
+        # Strip the release.yml body: |...files: block where we explain operator
+        # commands in markdown. The body ends at the next top-level key (files:).
+        $stripped = $stripped -replace '(?s)body:\s*\|.*?files:', 'body: | <stripped>\nfiles:'
+        $stripped | Should -Not -Match 'az deployment group (create|what-if)' -Because 'no actual deployment commands should run from CI workflows (Rule 18)'
+        $stripped | Should -Not -Match 'Probe-Auth-Local'
+        $stripped | Should -Not -Match 'Verify-Deploy'
     }
 
     It 'NO Claude / AI / tool-attribution strings' {
@@ -87,6 +94,26 @@ Describe '.github/workflows invariants (Rule 18)' {
         $rel | Should -Match "Az\.Accounts.*5\.4\.0"
         $rel | Should -Match "Az\.KeyVault.*6\.4\.3"
         $rel | Should -Match "Az\.Storage.*7\.5\.0"
+    }
+
+    It 'release.yml auto-refreshes the stable tag on every green main-branch CI (workflow_run trigger)' {
+        # Stable-tag contract: every green ci.yml on main triggers release.yml,
+        # which retags v0.1.0 at HEAD and re-publishes signed artifacts so
+        # releases/latest/download/* always reflects the current main HEAD.
+        $rel = Get-Content -Raw (Join-Path $script:RepoRoot '.github' 'workflows' 'release.yml')
+        $rel | Should -Match 'workflow_run:'                       -Because 'auto-refresh requires workflow_run trigger'
+        $rel | Should -Match 'workflows:\s*\[\s*"ci"\s*\]'         -Because 'workflow_run must reference ci.yml by name'
+        $rel | Should -Match "workflow_run\.conclusion\s*==\s*'success'" -Because 'must gate on conclusion=success to avoid firing on CI failure'
+    }
+
+    It 'release.yml emits a "Last refreshed" marker in the release body so operators see the rebuild date' {
+        # GitHub does NOT update release.published_at when artifacts are
+        # re-uploaded under the same tag. Without a body marker, operators
+        # cannot tell from the page UI which build of v0.1.0 they are seeing.
+        $rel = Get-Content -Raw (Join-Path $script:RepoRoot '.github' 'workflows' 'release.yml')
+        $rel | Should -Match 'Last refreshed'
+        $rel | Should -Match 'steps\.meta\.outputs\.iso'
+        $rel | Should -Match 'steps\.meta\.outputs\.sha'
     }
 
     It 'NO V2 / ClientV2 / AuthV2 module references in workflows' {
