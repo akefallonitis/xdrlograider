@@ -155,7 +155,12 @@ $variables = [ordered]@{
     funcName = "[concat(parameters('projectPrefix'), '-fn-', variables('suffix'))]"
     planName = "[concat(parameters('projectPrefix'), '-plan-', variables('suffix'))]"
     kvName   = "[concat(parameters('projectPrefix'), '-kv-', variables('suffix'))]"
-    stName   = "[toLower(substring(concat(parameters('projectPrefix'), 'st', variables('suffix')), 0, 18))]"
+    # Storage account name must be 3-24 chars lowercase alphanumeric. projectPrefix
+    # is 3-12 chars (param constraint), suffix is 6 chars, plus literal 'st' (2) =
+    # 11-20 chars total — always within the 3-24 limit, so no truncation needed.
+    # (Older revisions truncated to 18 chars but that throws when the concat is
+    # shorter than 18: ARM substring requires length <= string length.)
+    stName   = "[toLower(concat(parameters('projectPrefix'), 'st', variables('suffix')))]"
     dceName  = "[concat(parameters('projectPrefix'), '-dce-', variables('suffix'))]"
     dcrName  = "[concat(parameters('projectPrefix'), '-dcr')]"
     aiName   = "[concat(parameters('projectPrefix'), '-ai-', variables('suffix'))]"
@@ -484,6 +489,11 @@ $faAppSettings = [ordered]@{
     XDR_INGEST_DLQ_TABLE_NAME                = 'xdrIngestDlq'
     TENANT_ID                                = "[subscription().tenantId]"
     KV_CACHE_TTL_MINUTES                     = '60'
+    # Phase A0.3 multi-cycle pagination resume — bounds pages-per-activity-cycle
+    # so vuln_management 1000-page first poll spreads across ~20 cycles inside
+    # the Y1 10-min activity cap. Code default (Xdr-PollStream/run.ps1:352) is
+    # 50; this app setting lets operators tune without redeploying the zip.
+    XDR_MAX_PAGES_PER_CYCLE                  = '50'
     APPLICATIONINSIGHTS_TELEMETRY_SAMPLING_EXCLUDED_TYPES = 'AuthChain.AADSTSError;AuthChain.RateLimited;AuthChain.BoundaryMarker'
 }
 
@@ -497,6 +507,14 @@ $faDependsOn = @(
     "[resourceId('Microsoft.Insights/components', variables('aiName'))]"
     "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]"
     "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    # Explicit dependency on the customTables nested deployment (cross-RG into
+    # the workspace RG). Currently transitive via DCRs but ARM evaluates nested
+    # deployment dependencies separately — without this, FA cold-start can race
+    # the table creation and the first ingest cycle 404s on the DCE side.
+    # Use the literal name form (same as DCR dependsOn pattern in this template)
+    # — resourceId('Microsoft.Resources/deployments', ...) does not resolve for
+    # cross-scope nested deployments and fails ARM validation.
+    "[concat('customTables-', variables('suffix'))]"
 )
 foreach ($inner in $dcrInnerExprs) {
     $faDependsOn += "[resourceId('Microsoft.Insights/dataCollectionRules', $inner)]"

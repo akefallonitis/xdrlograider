@@ -130,6 +130,102 @@ Describe 'mainTemplate.json invariants' {
         $script:T.variables.connectorBuildId | Should -Match "parameters\('releaseTag'\)"
     }
 
+    It 'XDR_MAX_PAGES_PER_CYCLE env var wired in FA appSettings (Phase A0.3 pagination resume)' {
+        $fa = $script:T.resources | Where-Object { $_.type -eq 'Microsoft.Web/sites' }
+        $names = @($fa[0].properties.siteConfig.appSettings | ForEach-Object { $_.name })
+        $names | Should -Contain 'XDR_MAX_PAGES_PER_CYCLE'
+        $cap = $fa[0].properties.siteConfig.appSettings | Where-Object { $_.name -eq 'XDR_MAX_PAGES_PER_CYCLE' }
+        # Default 50 (operator can tune without redeploying the zip)
+        $cap.value | Should -Be '50'
+    }
+
+    It 'FA dependsOn the customTables nested deployment (race-free first ingest)' {
+        # ARM nested deployment dependencies use the literal name form (matches the
+        # DCR dependsOn pattern in this template). resourceId('Microsoft.Resources/
+        # deployments', ...) fails template validation for in-template nested deploys.
+        $fa = $script:T.resources | Where-Object { $_.type -eq 'Microsoft.Web/sites' }
+        $deps = @($fa[0].dependsOn)
+        ($deps | Where-Object { $_ -match "customTables-" }).Count |
+            Should -BeGreaterOrEqual 1 -Because "FA cold-start must not race the workspace-table creation"
+    }
+
+    It 'all in-template nested-deployment dependsOn use literal-name form (NOT resourceId)' {
+        # Regression: ARM rejects `resourceId('Microsoft.Resources/deployments', X)`
+        # for in-template nested deploys with "InvalidTemplate: not defined in the
+        # template" — only literal-name form `concat('X-', variables('suffix'))` works.
+        # This test scans every resource's dependsOn and fails if it references a
+        # nested deployment via resourceId().
+        foreach ($r in $script:T.resources) {
+            foreach ($d in @($r.dependsOn)) {
+                if (-not $d) { continue }
+                $isResourceIdNestedDep = ($d -match "resourceId\(\s*'Microsoft\.Resources/deployments'")
+                $isResourceIdNestedDep | Should -BeFalse -Because "resource $($r.name) dependsOn '$d' uses resourceId Microsoft.Resources/deployments form — ARM rejects this for in-template nested deploys; use literal name concat form instead"
+            }
+        }
+    }
+
+    It 'no ARM substring(concat(...), 0, N) where N > min possible string length (regression: stName overflow)' {
+        # Regression: `substring(concat('xdrlr','st','<6char>'), 0, 18)` fails because
+        # concat is 13 chars but substring asks for 18. ARM substring throws when
+        # length > actual string length. This test inspects every variable for the
+        # substring(concat(...), 0, N) pattern and validates N <= min(possible concat length).
+
+        # Paren-balanced extractor: given an expression and the start index of an opening
+        # paren, return the substring between that paren and its matching close paren.
+        function Get-BalancedParen {
+            param([string] $Text, [int] $OpenIdx)
+            $depth = 0
+            for ($i = $OpenIdx; $i -lt $Text.Length; $i++) {
+                $c = $Text[$i]
+                if ($c -eq '(') { $depth++ }
+                elseif ($c -eq ')') {
+                    $depth--
+                    if ($depth -eq 0) { return $Text.Substring($OpenIdx + 1, $i - $OpenIdx - 1) }
+                }
+            }
+            return $null
+        }
+
+        $vars = $script:T.variables.PSObject.Properties
+        foreach ($v in $vars) {
+            $expr = [string]$v.Value
+            # Find any "substring(concat(...), 0, N)" pattern (optionally wrapped in toLower/toUpper/etc.).
+            $substringIdx = $expr.IndexOf('substring(concat(')
+            if ($substringIdx -lt 0) { continue }
+            $afterSubstring = $expr.Substring($substringIdx + 'substring('.Length)
+            $concatIdx = $afterSubstring.IndexOf('concat(')
+            if ($concatIdx -ne 0) { continue }  # not directly wrapping concat
+            $concatOpenAbsIdx = $substringIdx + 'substring('.Length + 'concat'.Length
+            $concatArgs = Get-BalancedParen -Text $expr -OpenIdx $concatOpenAbsIdx
+            if (-not $concatArgs) { continue }
+            # After concat's closing paren, parse ", 0, N)"
+            $afterConcatIdx = $concatOpenAbsIdx + $concatArgs.Length + 2  # +2 for ( and )
+            $tail = $expr.Substring($afterConcatIdx)
+            if ($tail -match "^,\s*0\s*,\s*(\d+)\)") {
+                $sliceLen = [int]$matches[1]
+                # Compute MIN concat length: for each arg compute the smallest length it can be.
+                $argTokens = $concatArgs -split ",(?=(?:[^']*'[^']*')*[^']*$)"  # split commas not inside quotes
+                $minLen = 0
+                foreach ($tok in $argTokens) {
+                    $tok = $tok.Trim()
+                    if ($tok -match "^'([^']*)'$") {
+                        $minLen += $matches[1].Length
+                    } elseif ($tok -match "parameters\('([^']+)'\)") {
+                        $pName = $matches[1]
+                        $pMin = $script:T.parameters.$pName.minLength
+                        if (-not $pMin) { $pMin = 1 }
+                        $minLen += [int]$pMin
+                    } elseif ($tok -match "variables\('suffix'\)") {
+                        $minLen += 6  # per substring(uniqueString, 0, 6) in stName chain
+                    } else {
+                        $minLen += 1  # conservative lower bound for unknown
+                    }
+                }
+                $minLen | Should -BeGreaterOrEqual $sliceLen -Because "variable '$($v.Name)' uses substring(concat(...), 0, $sliceLen) but min possible concat length is $minLen chars — ARM substring throws at deploy time when length > string length"
+            }
+        }
+    }
+
     It 'XdrConnectorHealth_CL workspace table declares 11 typed cols (Decision 15 / H13)' {
         $nested = $script:T.resources | Where-Object { $_.type -eq 'Microsoft.Resources/deployments' -and $_.name -match 'customTables' }
         $health = $nested.properties.template.resources |

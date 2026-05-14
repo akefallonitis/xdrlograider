@@ -18,7 +18,7 @@ function Invoke-MDEEndpoint {
           - Fail-safe return: always returns an array; ,@() on any failure.
 
         Does NOT do: retry logic (Send-ToLogAnalytics does), checkpoint I/O
-        (Invoke-MDETierPoll does), session reuse (caller owns the session).
+        (Xdr-PollStream activity does), session reuse (caller owns the session).
 
     .PARAMETER Session
         PortalSession from Connect-DefenderPortal.

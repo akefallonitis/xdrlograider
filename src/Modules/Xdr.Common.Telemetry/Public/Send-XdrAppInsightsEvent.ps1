@@ -17,9 +17,9 @@
 #   * OperationId        — pass through $CorrelationId from the auth chain so
 #                          AI's end-to-end transaction view stitches across
 #                          Connect-DefenderPortal -> Invoke-DefenderPortalRequest
-#                          -> Invoke-MDETierPoll. Generates a fresh GUID if not
-#                          supplied so logs always carry an op id (single-call
-#                          correlation still works in dev/test).
+#                          -> Xdr-PollStream activity. Generates a fresh GUID if
+#                          not supplied so logs always carry an op id (single-
+#                          call correlation still works in dev/test).
 #   * Cloud_RoleName     — $env:WEBSITE_SITE_NAME (Function App name)
 #   * Cloud_RoleInstance — $env:WEBSITE_INSTANCE_ID (worker GUID)
 #   * XdrLogRaiderVersion — read once at first call from the Ingest module

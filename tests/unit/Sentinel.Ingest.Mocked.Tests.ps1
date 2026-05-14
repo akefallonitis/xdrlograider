@@ -401,3 +401,81 @@ Describe 'Set-CheckpointTimestamp / Push-XdrIngestDlq — basic Storage Table wr
         $script:Captured.entity.Reason | Should -Match '413'
     }
 }
+
+Describe 'Get-XdrCircuitBreakerNextState — Decision 18 state machine' {
+    BeforeAll {
+        $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+        Import-Module (Join-Path $script:RepoRoot 'src/Modules/Xdr.Common.Telemetry/Xdr.Common.Telemetry.psd1') -Force
+        Import-Module (Join-Path $script:RepoRoot 'src/Modules/Xdr.Sentinel.Ingest/Xdr.Sentinel.Ingest.psd1') -Force
+        $script:fixedUtc = [datetime]::Parse('2026-05-13T12:00:00Z').ToUniversalTime()
+    }
+
+    It 'success-class kinds (live/live-empty/rate-limited) reset counter to 0 and keep breaker closed' {
+        foreach ($kind in @('live','live-empty','rate-limited')) {
+            $r = Get-XdrCircuitBreakerNextState -PriorConsecutiveErrors 2 -SuccessKind $kind -CurrentUtc $script:fixedUtc
+            $r.ConsecutiveErrors | Should -Be 0 -Because "kind=$kind should reset"
+            $r.CircuitState      | Should -Be 'closed' -Because "kind=$kind should keep breaker closed"
+            $r.CooldownUntilUtc  | Should -Be '' -Because "kind=$kind should clear cooldown"
+        }
+    }
+
+    It 'rate-limited specifically does NOT trip even at PriorConsecutiveErrors=2 (transient, not a failure)' {
+        $r = Get-XdrCircuitBreakerNextState -PriorConsecutiveErrors 2 -SuccessKind 'rate-limited' -CurrentUtc $script:fixedUtc
+        $r.CircuitState | Should -Be 'closed'
+    }
+
+    It '1st error increments counter to 1, breaker stays closed' {
+        $r = Get-XdrCircuitBreakerNextState -PriorConsecutiveErrors 0 -SuccessKind 'error' -CurrentUtc $script:fixedUtc
+        $r.ConsecutiveErrors | Should -Be 1
+        $r.CircuitState      | Should -Be 'closed'
+        $r.CooldownUntilUtc  | Should -Be ''
+    }
+
+    It '2nd consecutive error increments counter to 2, breaker still closed' {
+        $r = Get-XdrCircuitBreakerNextState -PriorConsecutiveErrors 1 -SuccessKind 'error' -CurrentUtc $script:fixedUtc
+        $r.ConsecutiveErrors | Should -Be 2
+        $r.CircuitState      | Should -Be 'closed'
+    }
+
+    It '3rd consecutive error TRIPS breaker open and sets CooldownUntilUtc = now + 30 min' {
+        $r = Get-XdrCircuitBreakerNextState -PriorConsecutiveErrors 2 -SuccessKind 'error' -CurrentUtc $script:fixedUtc
+        $r.ConsecutiveErrors | Should -Be 3
+        $r.CircuitState      | Should -Be 'open'
+        $r.CooldownUntilUtc  | Should -Not -BeNullOrEmpty
+        # Parse with RoundtripKind so the 'Z' suffix in the helper's 'o' format
+        # is honored as UTC instead of being shifted to local time.
+        $cooldown = [datetime]::Parse($r.CooldownUntilUtc, $null, [System.Globalization.DateTimeStyles]::RoundtripKind)
+        ($cooldown.ToUniversalTime() - $script:fixedUtc).TotalMinutes | Should -Be 30
+    }
+
+    It 'beyond threshold (error while already open) re-arms cooldown with fresh 30 min' {
+        $r = Get-XdrCircuitBreakerNextState -PriorConsecutiveErrors 5 -SuccessKind 'error' -CurrentUtc $script:fixedUtc
+        $r.ConsecutiveErrors | Should -Be 6
+        $r.CircuitState      | Should -Be 'open'
+        $cooldown = [datetime]::Parse($r.CooldownUntilUtc, $null, [System.Globalization.DateTimeStyles]::RoundtripKind)
+        ($cooldown.ToUniversalTime() - $script:fixedUtc).TotalMinutes | Should -Be 30
+    }
+
+    It 'success after breaker tripped (half-open recovery) resets counter to 0' {
+        # Half-open semantics: breaker was open + cooldown expired -> orchestrator/activity allow
+        # one trial poll. If it succeeds, counter resets and breaker closes.
+        $r = Get-XdrCircuitBreakerNextState -PriorConsecutiveErrors 3 -SuccessKind 'live' -CurrentUtc $script:fixedUtc
+        $r.ConsecutiveErrors | Should -Be 0
+        $r.CircuitState      | Should -Be 'closed'
+        $r.CooldownUntilUtc  | Should -Be ''
+    }
+
+    It 'honors -TripThreshold + -CooldownMinutes overrides' {
+        $r = Get-XdrCircuitBreakerNextState -PriorConsecutiveErrors 1 -SuccessKind 'error' `
+            -CurrentUtc $script:fixedUtc -TripThreshold 2 -CooldownMinutes 60
+        $r.ConsecutiveErrors | Should -Be 2
+        $r.CircuitState      | Should -Be 'open'
+        $cooldown = [datetime]::Parse($r.CooldownUntilUtc, $null, [System.Globalization.DateTimeStyles]::RoundtripKind)
+        ($cooldown.ToUniversalTime() - $script:fixedUtc).TotalMinutes | Should -Be 60
+    }
+
+    It 'rejects invalid SuccessKind via ValidateSet' {
+        { Get-XdrCircuitBreakerNextState -PriorConsecutiveErrors 0 -SuccessKind 'tenant-gated' } |
+            Should -Throw '*ValidateSet*'
+    }
+}

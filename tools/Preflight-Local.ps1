@@ -49,12 +49,12 @@ function Add-Section { param([string]$Name, [string]$Status, [string]$Detail = '
 Push-Location $repoRoot
 try {
     # ---- 1) Pester all-offline ----
-    Write-Host "`n=== 1/8 Pester all-offline ===" -ForegroundColor Cyan
+    Write-Host "`n=== 1/9 Pester all-offline ===" -ForegroundColor Cyan
     & pwsh -NoProfile -File ./tests/Run-Tests.ps1 -Category all-offline 2>&1 | Out-Null
     Add-Section -Name '1. Pester all-offline' -Status $(if ($LASTEXITCODE -eq 0) { 'OK' } else { 'FAIL' })
 
     # ---- 2) PSScriptAnalyzer ----
-    Write-Host "`n=== 2/8 PSScriptAnalyzer ===" -ForegroundColor Cyan
+    Write-Host "`n=== 2/9 PSScriptAnalyzer ===" -ForegroundColor Cyan
     if (Get-Module -ListAvailable -Name PSScriptAnalyzer) {
         $r = Invoke-ScriptAnalyzer -Path . -Recurse -Settings .config/PSScriptAnalyzerSettings.psd1 -ErrorAction SilentlyContinue
         $errs = @($r | Where-Object Severity -eq 'Error')
@@ -64,7 +64,7 @@ try {
     }
 
     # ---- 3) Custom validators ----
-    Write-Host "`n=== 3/8 Custom validators ===" -ForegroundColor Cyan
+    Write-Host "`n=== 3/9 Custom validators ===" -ForegroundColor Cyan
     & pwsh -NoProfile -File ./tools/Validate-Manifest.ps1 2>&1 | Out-Null
     $mfOk = ($LASTEXITCODE -eq 0)
     & pwsh -NoProfile -File ./tools/Validate-ArmJson.ps1 2>&1 | Out-Null
@@ -72,7 +72,7 @@ try {
     Add-Section -Name '3. Custom validators (Manifest + ARM)' -Status $(if ($mfOk -and $armOk) { 'OK' } else { 'FAIL' })
 
     # ---- 4) gitleaks HEAD ----
-    Write-Host "`n=== 4/8 gitleaks HEAD ===" -ForegroundColor Cyan
+    Write-Host "`n=== 4/9 gitleaks HEAD ===" -ForegroundColor Cyan
     if (Get-Command gitleaks -ErrorAction SilentlyContinue) {
         $glOut = gitleaks detect --redact --no-banner --exit-code 0 2>&1
         $hasLeaks = ($glOut -match 'leaks found')
@@ -82,7 +82,7 @@ try {
     }
 
     # ---- 5) Sentinel Content Hub compliance ----
-    Write-Host "`n=== 5/8 Sentinel Content Hub compliance ===" -ForegroundColor Cyan
+    Write-Host "`n=== 5/9 Sentinel Content Hub compliance ===" -ForegroundColor Cyan
     Import-Module Pester -MinimumVersion 5.5.0 -Force
     $cfg = New-PesterConfiguration
     $cfg.Run.Path = 'tests/arm/SentinelContent.MinimalLock.Tests.ps1'
@@ -92,7 +92,7 @@ try {
     Add-Section -Name '5. Sentinel Content Hub' -Status $(if ($r.FailedCount -eq 0) { 'OK' } else { 'FAIL' }) -Detail "$($r.PassedCount) passed / $($r.FailedCount) failed"
 
     # ---- 6) Schema consistency (build round-trip — deterministic regeneration) ----
-    Write-Host "`n=== 6/8 Schema consistency (build round-trip) ===" -ForegroundColor Cyan
+    Write-Host "`n=== 6/9 Schema consistency (build round-trip) ===" -ForegroundColor Cyan
     # Post-Phase-A1: only generator-emitted artifacts are tracked. The 4 Durable
     # function dirs (Xdr-Refresh / Xdr-PollOrchestrator / Xdr-PollStream /
     # Connector-Heartbeat) are hand-authored source-of-truth — Build-FunctionApp
@@ -132,7 +132,7 @@ try {
     Add-Section -Name '6. Schema consistency (round-trip deterministic)' -Status $(if ($diffs.Count -eq 0) { 'OK' } else { 'FAIL' }) -Detail ($diffs -join '; ')
 
     # ---- 7) Deploy-flow integrity (ARM-TTK if available) ----
-    Write-Host "`n=== 7/8 Deploy-flow integrity ===" -ForegroundColor Cyan
+    Write-Host "`n=== 7/9 Deploy-flow integrity ===" -ForegroundColor Cyan
     if (Get-Module -ListAvailable -Name arm-ttk -ErrorAction SilentlyContinue) {
         try {
             Import-Module arm-ttk -ErrorAction Stop
@@ -146,8 +146,54 @@ try {
         Add-Section -Name '7. ARM-TTK' -Status 'SKIP' -Detail 'ARM-TTK not installed locally (CI gate covers — run: git clone https://github.com/Azure/arm-ttk /tmp/arm-ttk)'
     }
 
+    # ---- 7b) az deployment group validate (catches ARM expression-evaluation
+    # bugs that the JSON-shape Pester suite cannot — e.g. substring length
+    # mismatch, malformed dependsOn references, parameter type errors.
+    # Skipped when az CLI is missing or operator isn't logged in. NOT a CI gate
+    # (CI is offline-only per Rule 18) — operator runs this locally before deploy. ----
+    Write-Host "`n=== 7b/9 az deployment validate (operator-local online) ===" -ForegroundColor Cyan
+    $azCmd = Get-Command az -ErrorAction SilentlyContinue
+    if (-not $azCmd) {
+        Add-Section -Name '7b. az deployment validate' -Status 'SKIP' -Detail 'az CLI not installed (Azure CLI required for ARM expression evaluation gate)'
+    } else {
+        $acct = & az account show --query id -o tsv 2>$null
+        if (-not $acct) {
+            Add-Section -Name '7b. az deployment validate' -Status 'SKIP' -Detail 'az not logged in — run `az login` to enable this gate (catches substring/length/dependsOn bugs that Pester cannot)'
+        } else {
+            # Use the operator's CURRENT context (subscription + RG). If they have
+            # an XDRLR_PREFLIGHT_RG env var pointing at a test RG, use that;
+            # otherwise prompt-skip with a clear message.
+            $vRg = $env:XDRLR_PREFLIGHT_RG
+            $vWs = $env:XDRLR_PREFLIGHT_WORKSPACE_ID
+            if (-not $vRg -or -not $vWs) {
+                Add-Section -Name '7b. az deployment validate' -Status 'SKIP' -Detail 'Set $env:XDRLR_PREFLIGHT_RG + $env:XDRLR_PREFLIGHT_WORKSPACE_ID to enable; example: $env:XDRLR_PREFLIGHT_RG=''XDRLOGRAIDER''; $env:XDRLR_PREFLIGHT_WORKSPACE_ID=''/subscriptions/.../resourceGroups/sentinel-rg/providers/Microsoft.OperationalInsights/workspaces/<ws>'''
+            } else {
+                try {
+                    $vOut = & az deployment group validate `
+                        --resource-group $vRg `
+                        --template-file ./deploy/mainTemplate.json `
+                        --parameters projectPrefix=xdrlr env=prod workspaceLocation=westeurope `
+                        --parameters serviceAccountUpn=xdrlogreader@example.com `
+                        --parameters authMethod=credentials_totp `
+                        --parameters existingWorkspaceId=$vWs `
+                        --parameters githubRepo=akefallonitis/xdrlograider `
+                        --parameters releaseTag=latest `
+                        --parameters deployRoleAssignments=false 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Add-Section -Name '7b. az deployment validate' -Status 'OK' -Detail "Template validated cleanly against RG '$vRg' (no expression-eval errors)"
+                    } else {
+                        $errLine = ($vOut -split "`n" | Where-Object { $_ -match 'ERROR|InvalidTemplate' } | Select-Object -First 1)
+                        Add-Section -Name '7b. az deployment validate' -Status 'FAIL' -Detail $errLine
+                    }
+                } catch {
+                    Add-Section -Name '7b. az deployment validate' -Status 'FAIL' -Detail "Validate threw: $_"
+                }
+            }
+        }
+    }
+
     # ---- 8) Online live audit (opt-in) ----
-    Write-Host "`n=== 8/8 Online live audit (opt-in) ===" -ForegroundColor Cyan
+    Write-Host "`n=== 8/9 Online live audit (opt-in) ===" -ForegroundColor Cyan
     if ($IncludeOnline) {
         if (Test-Path ./tools/Probe-Auth-Local.ps1) {
             & pwsh -NoProfile -File ./tools/Probe-Auth-Local.ps1 2>&1 | Out-Null

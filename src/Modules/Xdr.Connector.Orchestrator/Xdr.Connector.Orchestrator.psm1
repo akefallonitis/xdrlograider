@@ -9,9 +9,13 @@
 #
 # Operators using the L4 surface call:
 #     Connect-XdrPortal -Portal 'Defender' -Method ... -Credential ...
-#     Invoke-XdrTierPoll -Tier P0 -Portal 'Defender' -Session $s -Config $c
 #     Test-XdrPortalAuth -Portal 'Defender' -Method ... -Credential ...
 #     Get-XdrPortalManifest -Portal 'Defender'
+#
+# Per-tier polling lives in the Xdr-PollOrchestrator Durable function (fans out
+# Xdr-PollStream activities) — the L4 router only handles auth + manifest +
+# health surfaces. v0.2.0 multi-portal: add a (Portal) field to the orchestrator
+# input + a routing branch here for the per-portal auth/manifest calls.
 #
 # Internally each call looks up the -Portal value in $script:PortalRoutes
 # and dispatches into the appropriate L2/L3 function. Adding a new portal
@@ -34,7 +38,6 @@ $script:PortalRoutes = @{
         ClientModule  = 'Xdr.Defender.Client'
         ConnectFn     = 'Connect-DefenderPortal'
         TestFn        = 'Test-DefenderPortalAuth'
-        TierPollFn    = 'Invoke-MDETierPoll'
         ManifestFn    = 'Get-XdrEndpointManifest'   # invoked with -Portal $portalName
         DefaultHost   = 'security.microsoft.com'
         Status        = 'live'                      # v0.1.0 GA — production
@@ -225,7 +228,6 @@ function Test-XdrConnectorConfig {
 
 Export-ModuleMember -Function @(
     'Connect-XdrPortal',
-    'Invoke-XdrTierPoll',
     'Test-XdrPortalAuth',
     'Get-XdrPortalManifest',
     # v0.1.0 GA Phase A.3.6 helpers:

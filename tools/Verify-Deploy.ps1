@@ -68,7 +68,7 @@ function Add-Phase { param([int]$Number, [string]$Name, [string]$Status, [string
 }
 
 # ---- 1) ARM resources present ----
-Write-Host "`n=== Phase 1/14 ARM resources ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 1/15 ARM resources ===" -ForegroundColor Cyan
 $resources = az resource list -g $ResourceGroup --query "[].{Type:type,Name:name}" 2>$null | ConvertFrom-Json
 $required = @{
     'Microsoft.Web/sites'                       = 1
@@ -89,7 +89,7 @@ foreach ($k in $required.Keys) {
 Add-Phase -Number 1 -Name 'ARM resources present' -Status $(if ($missing.Count -eq 0) { 'OK' } else { 'FAIL' }) -Detail ($missing -join '; ')
 
 # ---- 2) Workspace tables ----
-Write-Host "`n=== Phase 2/14 Workspace tables ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 2/15 Workspace tables ===" -ForegroundColor Cyan
 $ws = az resource list -g $WorkspaceResourceGroup --resource-type Microsoft.OperationalInsights/workspaces --query "[0].name" -o tsv 2>$null
 if ($ws) {
     $tables = az monitor log-analytics workspace table list -g $WorkspaceResourceGroup --workspace-name $ws --query "[?starts_with(name, 'Defender_') || name == 'XdrConnectorHealth_CL'].name" -o tsv 2>$null
@@ -100,7 +100,7 @@ if ($ws) {
 }
 
 # ---- 3) Sentinel solution + connector card ----
-Write-Host "`n=== Phase 3/14 Sentinel solution + connector ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 3/15 Sentinel solution + connector ===" -ForegroundColor Cyan
 $connectorExists = $false
 try {
     $r = az rest --method get --url "https://management.azure.com/subscriptions/$($account.id)/resourceGroups/$WorkspaceResourceGroup/providers/Microsoft.OperationalInsights/workspaces/$ws/providers/Microsoft.SecurityInsights/dataConnectors?api-version=2023-02-01-preview" 2>$null | ConvertFrom-Json
@@ -109,7 +109,7 @@ try {
 Add-Phase -Number 3 -Name 'Sentinel solution + dataConnector card' -Status $(if ($connectorExists) { 'OK' } else { 'FAIL' })
 
 # ---- 4) KV + SAMI ----
-Write-Host "`n=== Phase 4/14 KV + SAMI ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 4/15 KV + SAMI ===" -ForegroundColor Cyan
 $fa = az resource list -g $ResourceGroup --resource-type Microsoft.Web/sites --query "[0].name" -o tsv 2>$null
 $kv = az resource list -g $ResourceGroup --resource-type Microsoft.KeyVault/vaults --query "[0].name" -o tsv 2>$null
 $samiPrincipalId = $null
@@ -119,7 +119,7 @@ if ($fa) {
 Add-Phase -Number 4 -Name 'KV + SAMI' -Status $(if ($samiPrincipalId) { 'OK' } else { 'FAIL' }) -Detail "FA=$fa KV=$kv SAMI=$samiPrincipalId"
 
 # ---- 5/6) Heartbeat liveness ----
-Write-Host "`n=== Phase 5-6/14 Heartbeat ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 5-6/15 Heartbeat ===" -ForegroundColor Cyan
 $hbLast10m = $null
 $hbHrCount = 0
 if ($ws) {
@@ -134,7 +134,7 @@ Add-Phase -Number 5 -Name 'Heartbeat fired last 10 min' -Status $(if ($hbLast10m
 Add-Phase -Number 6 -Name 'Heartbeat continuous last 1h (>=5)' -Status $(if ($hbHrCount -ge 5) { 'OK' } else { 'FAIL' }) -Detail "Count=$hbHrCount"
 
 # ---- 7) Rate-limited cycles ----
-Write-Host "`n=== Phase 7/14 Rate-limited cycles ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 7/15 Rate-limited cycles ===" -ForegroundColor Cyan
 $rateCount = 0
 if ($ws) {
     try {
@@ -145,7 +145,7 @@ if ($ws) {
 Add-Phase -Number 7 -Name 'Rate-limited cycles (last 1h) = 0' -Status $(if ($rateCount -eq 0) { 'OK' } else { 'FAIL' }) -Detail "Count=$rateCount"
 
 # ---- 8) Per-stream liveness ----
-Write-Host "`n=== Phase 8/14 Per-stream liveness ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 8/15 Per-stream liveness ===" -ForegroundColor Cyan
 $drySubs = @()
 if ($ws) {
     foreach ($pascal in @('ActionCenter','AttackSimulator','CloudApps','Configuration','DataLake','EndpointConfiguration','EndpointDevices','EntityPivots','ExposureManagement','Files','Identity','MultiTenant','PortalServices','SecureScore','SentinelPrecision','Streaming','ThreatAnalytics','VulnerabilityManagement')) {
@@ -158,7 +158,7 @@ if ($ws) {
 Add-Phase -Number 8 -Name 'Per-sub-area liveness (24h)' -Status $(if ($drySubs.Count -eq 0) { 'OK' } else { 'FAIL' }) -Detail "Dry: $($drySubs -join ', ')"
 
 # ---- 9) App Insights health ----
-Write-Host "`n=== Phase 9/14 App Insights ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 9/15 App Insights ===" -ForegroundColor Cyan
 $ai = az resource list -g $ResourceGroup --resource-type Microsoft.Insights/components --query "[0].name" -o tsv 2>$null
 $aiExceptions = 0
 if ($ai) {
@@ -170,14 +170,14 @@ if ($ai) {
 Add-Phase -Number 9 -Name 'App Insights health (no FATAL in 1h)' -Status $(if ($aiExceptions -eq 0) { 'OK' } else { 'FAIL' }) -Detail "FATAL count=$aiExceptions"
 
 # ---- 10) DCR ingestion path ----
-Write-Host "`n=== Phase 10/14 DCR ingestion ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 10/15 DCR ingestion ===" -ForegroundColor Cyan
 $dce = az resource list -g $ResourceGroup --resource-type Microsoft.Insights/dataCollectionEndpoints --query "[0].name" -o tsv 2>$null
 $dcrs = az resource list -g $ResourceGroup --resource-type Microsoft.Insights/dataCollectionRules --query "[].name" -o tsv 2>$null
 $dcrCount = if ($dcrs) { @($dcrs -split "`n").Count } else { 0 }
 Add-Phase -Number 10 -Name 'DCR + DCE present' -Status $(if ($dcrCount -eq 19 -and $dce) { 'OK' } else { 'FAIL' }) -Detail "DCE=$dce · DCRs=$dcrCount"
 
 # ---- 11) Drift consistency ----
-Write-Host "`n=== Phase 11/14 Manifest ↔ DCR drift ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 11/15 Manifest ↔ DCR drift ===" -ForegroundColor Cyan
 $expectedStreams = @('ActionCenter','AttackSimulator','CloudApps','Configuration','DataLake','EndpointConfiguration','EndpointDevices','EntityPivots','ExposureManagement','Files','Identity','MultiTenant','PortalServices','SecureScore','SentinelPrecision','Streaming','ThreatAnalytics','VulnerabilityManagement')
 # Each DCR name ends with -<dashed-subarea>; check coverage
 $mappedSubs = @()
@@ -199,7 +199,7 @@ Add-Phase -Number 11 -Name 'Manifest ↔ DCR consistency' -Status $(if ($drift -
 # Heartbeat fired in Phase 5-6 is the authoritative end-to-end functional gate; this
 # phase WARNs (does not FAIL) on count=0 because the operator may have legitimate
 # reasons to defer RA creation.
-Write-Host "`n=== Phase 12/14 SAMI role assignments ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 12/15 SAMI role assignments ===" -ForegroundColor Cyan
 $ra = $null
 if ($samiPrincipalId) {
     $ra = az role assignment list --assignee $samiPrincipalId --all 2>$null | ConvertFrom-Json
@@ -217,7 +217,7 @@ $raDetail = "Count=$raCount" + $(if ($raCount -eq 0) {
 Add-Phase -Number 12 -Name 'SAMI role assignments (3 expected; 0 OK if deployRoleAssignments=false)' -Status $raStatus -Detail $raDetail
 
 # ---- 13) Circuit-breaker states (NEW Phase 1) ----
-Write-Host "`n=== Phase 13/14 Circuit-breaker states ===" -ForegroundColor Cyan
+Write-Host "`n=== Phase 13/15 Circuit-breaker states ===" -ForegroundColor Cyan
 $openCount = 0
 if ($ws) {
     try {
@@ -227,8 +227,29 @@ if ($ws) {
 }
 Add-Phase -Number 13 -Name 'Circuit-breaker states (no Open)' -Status $(if ($openCount -eq 0) { 'OK' } else { 'FAIL' }) -Detail "Open circuits=$openCount"
 
-# ---- 14) Emit markdown report ----
-Write-Host "`n=== Phase 14/14 Markdown report ===" -ForegroundColor Cyan
+# ---- 14) Cold-start budget probe (Plan §8.6 H8) ----
+# Reads ColdStartUtc + first heartbeat TimeGenerated from XdrConnectorHealth_CL
+# and asserts the gap is < 60s — proves cold-start + module imports + manifest
+# load + auth chain init all fit under the Y1 10-min activity cap with margin.
+Write-Host "`n=== Phase 14/15 Cold-start budget (< 60s) ===" -ForegroundColor Cyan
+$coldStartLatencyMs = $null
+if ($ws) {
+    try {
+        $coldQuery = "XdrConnectorHealth_CL | where TimeGenerated > ago(1h) | where isnotnull(ColdStartUtc) | project FirstFireUtc = TimeGenerated, ColdStartUtc = todatetime(ColdStartUtc) | extend LatencyMs = datetime_diff('millisecond', FirstFireUtc, ColdStartUtc) | where LatencyMs > 0 | top 1 by FirstFireUtc asc | project LatencyMs"
+        $r = az monitor log-analytics query -w $ws --analytics-query $coldQuery 2>$null | ConvertFrom-Json
+        if ($r.tables[0].rows.Count -gt 0) { $coldStartLatencyMs = [int]$r.tables[0].rows[0][0] }
+    } catch {}
+}
+if ($null -eq $coldStartLatencyMs) {
+    Add-Phase -Number 14 -Name 'Cold-start latency (< 60s)' -Status 'SKIP' -Detail 'No ColdStartUtc surfaced in XdrConnectorHealth_CL yet (Heartbeat fn must populate ColdStartUtc col before this gate is meaningful)'
+} elseif ($coldStartLatencyMs -lt 60000) {
+    Add-Phase -Number 14 -Name 'Cold-start latency (< 60s)' -Status 'OK' -Detail "First fire ${coldStartLatencyMs}ms after profile.ps1 boot"
+} else {
+    Add-Phase -Number 14 -Name 'Cold-start latency (< 60s)' -Status 'FAIL' -Detail "Cold-start took ${coldStartLatencyMs}ms - exceeds 60s budget; investigate Az.* import time, manifest size, IMDS retry path"
+}
+
+# ---- 15) Emit markdown report ----
+Write-Host "`n=== Phase 15/15 Markdown report ===" -ForegroundColor Cyan
 $utc = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ')
 $md = New-Object System.Text.StringBuilder
 [void]$md.AppendLine("# XdrLogRaider Verify-Deploy Report ($utc)")
@@ -250,6 +271,6 @@ if ($fail.Count -eq 0) {
 }
 $mdPath = Join-Path $OutputDir "verify-deploy-$utc.md"
 [System.IO.File]::WriteAllText($mdPath, $md.ToString(), [System.Text.UTF8Encoding]::new($false))
-Add-Phase -Number 14 -Name 'Markdown report' -Status 'OK' -Detail $mdPath
+Add-Phase -Number 15 -Name 'Markdown report' -Status 'OK' -Detail $mdPath
 
 if ($fail.Count -gt 0) { exit 1 } else { exit 0 }

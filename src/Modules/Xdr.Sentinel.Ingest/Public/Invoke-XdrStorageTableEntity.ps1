@@ -96,7 +96,16 @@ function Invoke-XdrStorageTableEntity {
         [hashtable] $Entity = $null,
 
         # Query-only: OData $filter expression (e.g., "RowKey eq '__schedule__'").
-        [string] $Filter
+        [string] $Filter,
+
+        # H4 (Plan §8.6): Optimistic concurrency for Upsert. When set, the PUT
+        # becomes an Update Entity (conditional on the entity's current etag) so
+        # a concurrent writer that advanced the row first causes a 412 response
+        # instead of a silent overwrite. On 412, the function returns the literal
+        # string 'ETAG_MISMATCH' so callers can distinguish "lost the race" from
+        # other failures and skip without erroring. Pass the etag value verbatim
+        # from a prior Get/Query response (e.g., "W/`"datetime'2026-05-13T...'`"").
+        [string] $IfMatch
     )
 
     # Validate per-operation requirements.
@@ -155,7 +164,11 @@ function Invoke-XdrStorageTableEntity {
     $null = $req.Headers.TryAddWithoutValidation('Authorization', "Bearer $token")
     $null = $req.Headers.TryAddWithoutValidation('x-ms-version', '2020-12-06')
     $null = $req.Headers.TryAddWithoutValidation('x-ms-date', [datetime]::UtcNow.ToString('R'))
-    $null = $req.Headers.TryAddWithoutValidation('Accept', 'application/json;odata=nometadata')
+    # H4: switch to minimalmetadata so query/get responses include the per-entity
+    # odata.etag field needed for optimistic-concurrency Upsert. Slightly larger
+    # payload than nometadata but the etag is the only way to support If-Match.
+    $accept = if ($Operation -in 'Query','Get') { 'application/json;odata=minimalmetadata' } else { 'application/json;odata=nometadata' }
+    $null = $req.Headers.TryAddWithoutValidation('Accept', $accept)
 
     if ($Operation -eq 'Delete') {
         # If-Match: '*' = unconditional delete. Required by REST contract.
@@ -172,8 +185,13 @@ function Invoke-XdrStorageTableEntity {
         $bodyJson = ($Entity | ConvertTo-Json -Compress -Depth 5)
         $req.Content = [System.Net.Http.StringContent]::new(
             $bodyJson, [System.Text.Encoding]::UTF8, 'application/json')
-        # CRITICAL: NO If-Match header on Upsert. With If-Match: '*' the PUT
+        # CRITICAL: NO If-Match header on bare Upsert. With If-Match: '*' the PUT
         # becomes Update Entity which 404s if the row doesn't exist yet.
+        # When the caller passes -IfMatch <etag>, we intentionally OPT IN to the
+        # Update Entity semantics (H4 optimistic concurrency).
+        if ($IfMatch) {
+            $null = $req.Headers.TryAddWithoutValidation('If-Match', $IfMatch)
+        }
     }
 
     if ($Operation -eq 'CreateTable') {
@@ -196,6 +214,13 @@ function Invoke-XdrStorageTableEntity {
         # Query 404 means "table doesn't exist yet" — return empty array, caller decides.
         if ($Operation -eq 'Query' -and $resp.StatusCode -eq [System.Net.HttpStatusCode]::NotFound) {
             return @()
+        }
+        # H4: 412 PreconditionFailed on an If-Match Upsert means a concurrent
+        # writer advanced the row first — return the literal 'ETAG_MISMATCH'
+        # sentinel so callers can distinguish "lost the race" (expected at scale-out)
+        # from "real error" (network/auth/etc).
+        if ($Operation -eq 'Upsert' -and $IfMatch -and $resp.StatusCode -eq [System.Net.HttpStatusCode]::PreconditionFailed) {
+            return 'ETAG_MISMATCH'
         }
 
         if (-not $resp.IsSuccessStatusCode) {

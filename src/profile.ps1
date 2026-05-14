@@ -19,11 +19,35 @@ $global:XdrLogRaiderColdStartUtc = [datetime]::UtcNow
 # ----------------------------------------------------------------------------
 if ($env:MSI_SECRET) {
     Disable-AzContextAutosave -Scope Process | Out-Null
-    try {
-        $null = Connect-AzAccount -Identity -ErrorAction Stop
-        Write-Information "profile.ps1: connected to Azure with Managed Identity"
-    } catch {
-        Write-Warning "profile.ps1: Connect-AzAccount -Identity FAILED: $_. Azure-side operations (KV reads, DCE ingest, checkpoint writes) will fail until resolved."
+    # P2a: 3-attempt SAMI auth with exponential backoff. The IMDS endpoint
+    # occasionally 5xx's on cold-start (especially the first invocation after
+    # a Y1 scale event) — a single failure used to fall through with a Warning,
+    # which allowed the timer body to proceed even though KV/Storage/DCE calls
+    # would all 401 downstream. Now: 3 attempts, then if all fail we THROW so
+    # profile.ps1 never completes and the FA worker is recycled by the runtime.
+    $maxAttempts = 3
+    $authSucceeded = $false
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+        try {
+            $null = Connect-AzAccount -Identity -ErrorAction Stop
+            Write-Information "profile.ps1: connected to Azure with Managed Identity (attempt $attempt)"
+            $authSucceeded = $true
+            break
+        } catch {
+            $err = $_
+            if ($attempt -eq $maxAttempts) {
+                # All retries exhausted — terminating error so the worker is
+                # recycled instead of starting a timer body that can't authenticate.
+                throw "profile.ps1: Connect-AzAccount -Identity FAILED after $maxAttempts attempts. Last error: $($err.Exception.Message). Function App SAMI is not provisioned or IMDS is unreachable; do NOT proceed."
+            }
+            $backoffSec = [Math]::Pow(2, $attempt - 1) * 2  # 2s, 4s
+            Write-Warning "profile.ps1: Connect-AzAccount -Identity attempt $attempt/$maxAttempts FAILED: $($err.Exception.Message); retrying in ${backoffSec}s"
+            Start-Sleep -Seconds $backoffSec
+        }
+    }
+    if (-not $authSucceeded) {
+        # Defensive: above loop should have thrown. Belt-and-braces guard.
+        throw "profile.ps1: SAMI auth chain exited without success or throw — refusing to continue"
     }
 }
 
@@ -105,17 +129,15 @@ $modulesPath = Join-Path $PSScriptRoot 'Modules'
 #                                  Send-XdrToLogAnalytics / Get-XdrCheckpointTimestamp /
 #                                  Set-XdrCheckpointTimestamp / Get-XdrDcrImmutableIdForStream)
 #   L2 Xdr.Defender.Auth       — Defender-specific cookie exchange (sccauth + XSRF-TOKEN)
-#   L3 Xdr.Defender.Client     — Defender-portal manifest dispatcher (endpoints + tier polls)
-#                                 (v0.1.0 GA Phase A.2: forward-compat Xdr* aliases for
-#                                  Get-XdrEndpointManifest / Expand-XdrResponse /
-#                                  ConvertTo-XdrIngestRow / Invoke-XdrEndpoint /
-#                                  Invoke-DefenderTierPoll)
+#   L3 Xdr.Defender.Client     — Defender-portal manifest dispatcher (per-EntryKey
+#                                 Invoke-MDEEndpoint + projection helpers +
+#                                 Get-DefenderTenantContext + Custom Collection cmdlets)
 #   L4 Xdr.Connector.Orchestrator — top-level routing surface (Connect-XdrPortal +
-#                                    Invoke-XdrTierPoll + Test-XdrPortalAuth +
-#                                    Get-XdrPortalManifest + Get-XdrConnectorHealth +
-#                                    Test-XdrConnectorConfig). v0.1.0 GA = single-portal
-#                                    (Defender). v0.2.0 reintroduces L2/L3 portal
-#                                    modules (Entra/Purview/Intune) with real bodies.
+#                                    Test-XdrPortalAuth + Get-XdrPortalManifest +
+#                                    Get-XdrConnectorHealth + Test-XdrConnectorConfig).
+#                                    v0.1.0 GA = single-portal (Defender). v0.2.0
+#                                    reintroduces L2/L3 portal modules (Entra /
+#                                    Purview / Intune) with real bodies.
 #
 # v0.1.0 GA scope (per user 2026-05-05): pure Defender connector. v0.2.0 adds
 # multi-portal expansion + FA multi-tenancy support together.

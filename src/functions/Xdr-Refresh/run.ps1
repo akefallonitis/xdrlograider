@@ -96,6 +96,56 @@ foreach ($portal in $enabledPortals) {
         }
 
         if ($shouldFire) {
+            # H4 optimistic concurrency (Plan §8.6): ADVANCE the schedule row
+            # FIRST (with If-Match: <etag>), THEN dispatch the orchestration only
+            # if the advance succeeded. Without this, two Xdr-Refresh ticks
+            # racing on FA scale-out can BOTH see nextRunUtc <= now and BOTH
+            # dispatch the orchestration — double-fire. Advance-first ordering
+            # means at most one dispatcher per (Portal, Tier) per tick;
+            # PollOrchestrator + PollStream are already replay-safe but this
+            # eliminates the wasted activity-cost burst.
+            #
+            # First-run seed (no prior row) skips If-Match — there's no etag to
+            # compare against; race is bounded to one extra dispatch on first
+            # tick after deploy, harmless.
+            $cadenceSec = [int]$cadenceMap[$tier].TotalSeconds
+            $staggerSec = Get-XdrStaggerSeconds -PartitionKey $partitionKey -CadenceSeconds $cadenceSec
+            $nextNext = $nowUtc + $cadenceMap[$tier] + [TimeSpan]::FromSeconds($staggerSec)
+            $newOperationId = ([Guid]::NewGuid().ToString())
+            $scheduleEntity = @{
+                PartitionKey   = $partitionKey
+                RowKey         = '__schedule__'
+                Portal         = $portal
+                Tier           = $tier
+                LastDispatchedUtc = $nowUtc.ToString('o')
+                NextRunUtc     = $nextNext.ToString('o')
+                LastOperationId = $newOperationId
+            }
+            $rowEtag = if ($row -and $row.PSObject.Properties['odata.etag']) { [string]$row.'odata.etag' } else { '' }
+            $advanceResult = $null
+            try {
+                $advanceArgs = @{
+                    StorageAccountName = $storageAccount
+                    TableName          = 'XdrTierState'
+                    PartitionKey       = $partitionKey
+                    RowKey             = '__schedule__'
+                    Operation          = 'Upsert'
+                    Entity             = $scheduleEntity
+                }
+                if ($rowEtag) { $advanceArgs['IfMatch'] = $rowEtag }
+                $advanceResult = Invoke-XdrStorageTableEntity @advanceArgs
+            } catch {
+                Write-Warning ("Xdr-Refresh: schedule-row advance failed for {0}: {1}" -f $partitionKey, $_.Exception.Message)
+                continue
+            }
+            if ($advanceResult -eq 'ETAG_MISMATCH') {
+                # Another Xdr-Refresh instance advanced this row in this tick.
+                # That instance owns the dispatch; we skip silently. This is
+                # expected behavior at FA scale-out, not an error.
+                Write-Information "Xdr-Refresh: $partitionKey advance lost the race (concurrent dispatcher won this tick)"
+                continue
+            }
+            # Schedule advanced successfully — we now own the dispatch slot.
             try {
                 $instanceId = Start-NewOrchestration -DurableClient $Starter `
                     -FunctionName 'Xdr-PollOrchestrator' `
@@ -103,33 +153,28 @@ foreach ($portal in $enabledPortals) {
                         Portal       = $portal
                         Tier         = $tier
                         FunctionName = 'Xdr-Refresh'
-                        OperationId  = ([Guid]::NewGuid().ToString())
+                        OperationId  = $newOperationId
                     }
                 Write-Information "Xdr-Refresh: started orchestration $instanceId for $partitionKey"
                 $dispatchedCount++
-
-                # Update schedule row: nextRunUtc = now + cadence + Rule 15 stagger offset.
-                $cadenceSec = [int]$cadenceMap[$tier].TotalSeconds
-                $staggerSec = Get-XdrStaggerSeconds -PartitionKey $partitionKey -CadenceSeconds $cadenceSec
-                $nextNext = $nowUtc + $cadenceMap[$tier] + [TimeSpan]::FromSeconds($staggerSec)
-                $scheduleEntity = @{
-                    PartitionKey   = $partitionKey
-                    RowKey         = '__schedule__'
-                    Portal         = $portal
-                    Tier           = $tier
-                    LastDispatchedUtc = $nowUtc.ToString('o')
-                    NextRunUtc     = $nextNext.ToString('o')
-                    LastInstanceId = $instanceId
+                # Best-effort: stamp the LastInstanceId on the schedule row.
+                # If this second Upsert fails (e.g. transient Storage 5xx), the
+                # schedule is still advanced and the orchestration is running —
+                # operator can correlate via OperationId in AppInsights.
+                $scheduleEntity['LastInstanceId'] = $instanceId
+                try {
+                    Invoke-XdrStorageTableEntity `
+                        -StorageAccountName $storageAccount `
+                        -TableName          'XdrTierState' `
+                        -PartitionKey       $partitionKey `
+                        -RowKey             '__schedule__' `
+                        -Operation          'Upsert' `
+                        -Entity             $scheduleEntity | Out-Null
+                } catch {
+                    Write-Warning ("Xdr-Refresh: LastInstanceId stamp failed (orchestration $instanceId is running): {0}" -f $_.Exception.Message)
                 }
-                Invoke-XdrStorageTableEntity `
-                    -StorageAccountName $storageAccount `
-                    -TableName          'XdrTierState' `
-                    -PartitionKey       $partitionKey `
-                    -RowKey             '__schedule__' `
-                    -Operation          'Upsert' `
-                    -Entity             $scheduleEntity | Out-Null
             } catch {
-                Write-Warning ("Xdr-Refresh: failed to dispatch {0}: {1}" -f $partitionKey, $_.Exception.Message)
+                Write-Warning ("Xdr-Refresh: schedule advanced but orchestration start FAILED for {0}: {1} — next tick will retry" -f $partitionKey, $_.Exception.Message)
             }
         }
     }

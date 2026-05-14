@@ -35,6 +35,8 @@
         'Get-XdrTierCadenceMap',
         'Set-XdrTierStateRow',
         'Get-XdrTierStateAggregate',
+        # Decision 18 circuit-breaker pure state-machine helper.
+        'Get-XdrCircuitBreakerNextState',
         # Architecture I (Plan R++++++++++ 2026-05-08): tenant capability cache
         # populated daily on Inventory cadence by Connector-Heartbeat from
         # MDE_TenantContext_CL. WARNING-ONLY per Plan AMEND-1 #5 — never used to

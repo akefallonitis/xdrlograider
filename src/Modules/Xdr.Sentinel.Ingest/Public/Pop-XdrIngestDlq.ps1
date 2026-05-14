@@ -128,7 +128,7 @@ function Pop-XdrIngestDlq {
           BatchSizeBytes     [int]      uncompressed bytes (for SLA dashboards)
 
     .EXAMPLE
-        # In Invoke-MDETierPoll, before polling fresh:
+        # In Xdr-PollStream activity, before polling fresh (DLQ drain step):
         $pending = Pop-XdrIngestDlq -StorageAccountName $sa -StreamName "Custom-$stream" -MaxBatches 5
         foreach ($entry in $pending) {
             try {

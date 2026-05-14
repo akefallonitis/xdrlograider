@@ -11,7 +11,6 @@
     RequiredModules       = @('Xdr.Defender.Auth', 'Xdr.Common.Manifest')
     FunctionsToExport     = @(
         'Invoke-MDEEndpoint',
-        'Invoke-MDETierPoll',
         'Invoke-MDEPortalEndpoint',
         'ConvertTo-MDEIngestRow',
         'Expand-MDEResponse',

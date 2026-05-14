@@ -105,8 +105,8 @@
               "query": "union withsource=Table Defender_*_CL | where TimeGenerated > ago(24h) | summarize Total=count(), Errors=countif(SuccessKind == \"error\") by Table, Endpoint | extend ErrorPct = round(100.0 * Errors / Total, 2) | order by ErrorPct desc"
             },
             {
-              "description": "Open circuit-breakers (sub-areas in error cooldown)",
-              "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(15m) | top 1 by TimeGenerated desc | mv-expand Notes.perStream | where Notes_perStream.circuitState == \"open\" | project SubArea = Notes_perStream.subArea, CircuitState = Notes_perStream.circuitState, CooldownUntilUtc = Notes_perStream.cooldownUntilUtc"
+              "description": "Open circuit-breakers (aggregate count from latest heartbeat)",
+              "query": "XdrConnectorHealth_CL | where TimeGenerated > ago(15m) | top 1 by TimeGenerated desc | extend OpenCircuits = toint(parse_json(Notes).openCircuits) | project TimeGenerated, OpenCircuits, DlqDepth = toint(parse_json(Notes).dlqDepth), FatalError = tostring(parse_json(Notes).fatalError)"
             }
           ],
           "dataTypes": [

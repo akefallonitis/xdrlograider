@@ -152,7 +152,7 @@
     "funcName": "[concat(parameters('projectPrefix'), '-fn-', variables('suffix'))]",
     "planName": "[concat(parameters('projectPrefix'), '-plan-', variables('suffix'))]",
     "kvName": "[concat(parameters('projectPrefix'), '-kv-', variables('suffix'))]",
-    "stName": "[toLower(substring(concat(parameters('projectPrefix'), 'st', variables('suffix')), 0, 18))]",
+    "stName": "[toLower(concat(parameters('projectPrefix'), 'st', variables('suffix')))]",
     "dceName": "[concat(parameters('projectPrefix'), '-dce-', variables('suffix'))]",
     "dcrName": "[concat(parameters('projectPrefix'), '-dcr')]",
     "aiName": "[concat(parameters('projectPrefix'), '-ai-', variables('suffix'))]",
@@ -3057,6 +3057,10 @@
               "value": "60"
             },
             {
+              "name": "XDR_MAX_PAGES_PER_CYCLE",
+              "value": "50"
+            },
+            {
               "name": "APPLICATIONINSIGHTS_TELEMETRY_SAMPLING_EXCLUDED_TYPES",
               "value": "AuthChain.AADSTSError;AuthChain.RateLimited;AuthChain.BoundaryMarker"
             }
@@ -3069,6 +3073,7 @@
         "[resourceId('Microsoft.Insights/components', variables('aiName'))]",
         "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
         "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "[concat('customTables-', variables('suffix'))]",
         "[resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrName'), '-action-center'))]",
         "[resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrName'), '-attack-simulator'))]",
         "[resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrName'), '-cloud-apps'))]",

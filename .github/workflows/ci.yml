@@ -73,9 +73,19 @@ jobs:
           git clone --depth=1 https://github.com/Azure/arm-ttk.git /tmp/arm-ttk
           Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
           # v0.1.0: ARM-TTK runs as warning-only (lint findings surfaced in CI logs
-          # but do not block). Substantive deploy correctness is gated by
-          # Validate-ArmJson + Pester arm/ + Secret scan + Generated artifacts —
-          # all hard-fail. ARM-TTK iterative cleanup tracked for v0.1.x.
+          # but do not block). Substantive deploy correctness is gated by:
+          #   - Validate-ArmJson (custom static checks)
+          #   - Pester tests/arm/ — includes regression tests for:
+          #       * 'no ARM substring(concat(...), 0, N) where N > min concat length'
+          #         (would have caught the stName(0,18) → 13-char-concat deploy crash)
+          #       * 'all in-template nested-deployment dependsOn use literal-name form
+          #         NOT resourceId' (would have caught the FA→customTables ref bug)
+          #   - Secret scan (gitleaks)
+          #   - Generated artifacts up-to-date (determinism)
+          # All four hard-fail. Operators get full ARM expression evaluation via
+          # `tools/Preflight-Local.ps1` section 7b (az deployment group validate)
+          # — runs in the operator's own subscription, can't run in CI by Rule 18
+          # (no Azure OIDC for deploy in CI). ARM-TTK iterative cleanup tracked for v0.1.x.
           #
           # Wrapped in try/catch with ErrorAction Continue so Test-AzTemplate's
           # internal Write-Error calls (one per failing test) do NOT trip the

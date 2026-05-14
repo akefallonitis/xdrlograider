@@ -7,7 +7,7 @@
     Author                = 'Alex Kefallonitis'
     CompanyName           = 'Community'
     Copyright             = '(c) 2026 Alex Kefallonitis and contributors. MIT License.'
-    Description           = 'L4 portal-routing dispatcher. Provides a single -Portal-keyed entry point (Connect-XdrPortal, Invoke-XdrTierPoll, Test-XdrPortalAuth, Get-XdrPortalManifest) plus v0.1.0 GA helpers Get-XdrConnectorHealth + Test-XdrConnectorConfig. Routes to the right L2 auth + L3 client modules based on an internal portal-routing table. v0.1.0 GA: Defender = live (single-portal). v0.2.0 reintroduces Entra/Purview/Intune modules with real bodies + FA multi-tenancy support.'
+    Description           = 'L4 portal-routing dispatcher. Provides a single -Portal-keyed entry point (Connect-XdrPortal, Test-XdrPortalAuth, Get-XdrPortalManifest) plus v0.1.0 GA helpers Get-XdrConnectorHealth + Test-XdrConnectorConfig. Routes to the right L2 auth + L3 client modules based on an internal portal-routing table. v0.1.0 GA: Defender = live (single-portal). v0.2.0 reintroduces Entra/Purview/Intune modules with real bodies + FA multi-tenancy support.'
     RequiredModules       = @(
         'Xdr.Common.Auth',
         'Xdr.Common.Manifest',
@@ -18,7 +18,6 @@
     )
     FunctionsToExport     = @(
         'Connect-XdrPortal',
-        'Invoke-XdrTierPoll',
         'Test-XdrPortalAuth',
         'Get-XdrPortalManifest',
         # v0.1.0 GA Phase A.3.6 helpers:

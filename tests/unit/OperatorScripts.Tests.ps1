@@ -15,9 +15,12 @@ Describe 'tools/Preflight-Local.ps1 invariants' {
         $errs.Count | Should -Be 0
     }
 
-    It 'has 8 numbered sections (matches plan §10)' {
-        $headers = [regex]::Matches($script:Content, '===\s*\d+/8\s+[^=]+===')
-        $headers.Count | Should -Be 8
+    It 'has 9 numbered sections (8 sections + 7b az validate)' {
+        # Sections are headered "=== N/9 ..." or "=== Nb/9 ..." (7b is the
+        # operator-local ARM-expression-eval gate added to catch substring/
+        # dependsOn bugs the offline JSON-shape Pester cannot).
+        $headers = [regex]::Matches($script:Content, '===\s*[\dab]+/9\s+[^=]+===')
+        $headers.Count | Should -Be 9
     }
 
     It 'is offline-by-default — -IncludeOnline opt-in for section 8' {
@@ -30,13 +33,19 @@ Describe 'tools/Preflight-Local.ps1 invariants' {
         $script:Content | Should -Match 'preflight-\$utc\.json'
     }
 
-    It 'does NOT invoke az login / az deployment / Connect-AzAccount (no online ops without opt-in)' {
-        # Goal: no actual Azure commands invoked in the default offline path.
-        # Strip block comments <#...#> and single-line # comments, then check.
+    It 'does NOT invoke Connect-AzAccount in the default offline path (no online ops without opt-in)' {
+        # Connect-AzAccount is the v0.1.0-banned online op. `az login` and
+        # `az deployment group` ARE allowed in section 7b — that section is
+        # the operator-local ARM-expression-eval gate, and az-CLI is
+        # explicitly checked + skipped when missing/logged-out. Strip block +
+        # line comments first so the boundary checks don't trip on docs.
         $stripped = $script:Content -replace '(?s)<#.*?#>', '' -replace '(?m)^\s*#.*$', ''
-        $stripped | Should -Not -Match '(?<!\w)az login(?!\w)'
-        $stripped | Should -Not -Match '(?<!\w)az deployment\s+group'
         $stripped | Should -Not -Match '(?<!\w)Connect-AzAccount(?!\w)'
+    }
+
+    It 'section 7b is gated on env vars (XDRLR_PREFLIGHT_RG + WORKSPACE_ID) so default run stays offline' {
+        $script:Content | Should -Match 'XDRLR_PREFLIGHT_RG'
+        $script:Content | Should -Match 'XDRLR_PREFLIGHT_WORKSPACE_ID'
     }
 }
 
@@ -82,10 +91,10 @@ Describe 'tools/Verify-Deploy.ps1 invariants' {
         $errs.Count | Should -Be 0
     }
 
-    It 'has 14 numbered phases (Rule 12 + plan §10)' {
-        # Match either single-phase `Phase 7/14` or combined `Phase 5-6/14` headers
-        $phaseHdrs = [regex]::Matches($script:Content, '===\s+Phase\s+[\d\-]+/14')
-        $phaseHdrs.Count | Should -BeGreaterOrEqual 13   # Phase 5+6 may share one header (heartbeat)
+    It 'has 15 numbered phases (14 + cold-start budget probe; Plan §8.6 H8)' {
+        # Match either single-phase `Phase 7/15` or combined `Phase 5-6/15` headers
+        $phaseHdrs = [regex]::Matches($script:Content, '===\s+Phase\s+[\d\-]+/15')
+        $phaseHdrs.Count | Should -BeGreaterOrEqual 14   # Phase 5+6 may share one header (heartbeat)
     }
 
     It 'requires az login session (operator-local, never CI)' {

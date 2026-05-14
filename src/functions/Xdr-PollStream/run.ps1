@@ -79,6 +79,79 @@ if ($missingConfig.Count -gt 0) {
 $dlqDrained = 0
 $dlqEntries = @()
 
+# Decision 18 circuit-breaker state — initialized at function scope so the
+# catch block (~line 549) can still read $priorConsecutiveErrors when the try
+# body throws after the prior-row read. Defaults survive a read failure.
+$priorConsecutiveErrors = 0
+$priorCircuitState      = 'closed'
+
+# Per-stream circuit-breaker pre-flight. Read the prior XdrTierState row so we
+# can (a) skip the poll entirely when CircuitState='open' and CooldownUntilUtc
+# hasn't expired, and (b) chain ConsecutiveErrors across cycles (Decision 18:
+# 3 consecutive errors -> open + 30-min cooldown). When cooldown expires the
+# next cycle's attempt is implicitly half-open — a single trial whose result
+# re-classifies the breaker: success -> closed (reset), error -> open again
+# with fresh cooldown. The orchestrator already does a tier-level pre-flight
+# (skip whole fan-out when ALL streams open); this is the per-stream gate.
+try {
+    $priorRow = Invoke-XdrStorageTableEntity `
+        -StorageAccountName $config.StorageAccountName `
+        -TableName          'XdrTierState' `
+        -PartitionKey       $portal `
+        -RowKey             $entryKey `
+        -Operation          'Get'
+} catch {
+    $priorRow = $null
+    Write-Warning ("Xdr-PollStream {0}: prior tier-state read failed (continuing without circuit-breaker context): {1}" -f $entryKey, $_.Exception.Message)
+}
+if ($priorRow) {
+    if ($priorRow.PSObject.Properties['ConsecutiveErrors']) {
+        try { $priorConsecutiveErrors = [int]$priorRow.ConsecutiveErrors } catch { $priorConsecutiveErrors = 0 }
+    }
+    if ($priorRow.PSObject.Properties['CircuitState']) {
+        $priorCircuitState = [string]$priorRow.CircuitState
+    }
+    if ($priorCircuitState -eq 'open') {
+        $cooldownExpired = $true
+        if ($priorRow.PSObject.Properties['CooldownUntilUtc'] -and $priorRow.CooldownUntilUtc) {
+            try {
+                $cu = [DateTime]::Parse([string]$priorRow.CooldownUntilUtc)
+                $cooldownExpired = ($cu -le [DateTime]::UtcNow)
+            } catch { $cooldownExpired = $true }
+        }
+        if (-not $cooldownExpired) {
+            Write-Information ("Xdr-PollStream {0}: circuit-breaker OPEN (cooldown until {1}); skipping poll" -f $entryKey, $priorRow.CooldownUntilUtc)
+            if (Get-Command -Name Send-XdrAppInsightsCustomEvent -ErrorAction SilentlyContinue) {
+                try {
+                    Send-XdrAppInsightsCustomEvent -EventName 'xdr.poll.skip.circuit_open' `
+                        -OperationId $opId `
+                        -Properties @{
+                            Stream            = $streamName
+                            EntryKey          = $entryKey
+                            Tier              = $tier
+                            Portal            = $portal
+                            ConsecutiveErrors = $priorConsecutiveErrors
+                            CooldownUntilUtc  = [string]$priorRow.CooldownUntilUtc
+                        }
+                } catch { }
+            }
+            $sw.Stop()
+            return @{
+                StreamName    = $streamName
+                Tier          = $tier
+                Portal        = $portal
+                RowsIngested  = 0
+                LatencyMs     = [int]$sw.ElapsedMilliseconds
+                Success       = $true
+                Error         = $null
+                DlqDrained    = 0
+                OperationId   = $opId
+                SkippedReason = 'circuit-open'
+            }
+        }
+    }
+}
+
 try {
     # Auth — Connect-DefenderPortal caches session per FA instance for ~50 min.
     $authBundle = Get-XdrAuthFromKeyVault `
@@ -489,6 +562,15 @@ try {
     $licenseHint = if ($endpointResult -and $endpointResult.PSObject.Properties['LicenseHint']) {
         [string]$endpointResult.LicenseHint
     } else { '' }
+    # Decision 18 circuit-breaker state machine. Pure helper handles the rules:
+    #   live / live-empty / rate-limited -> counter resets, breaker closed
+    #   error                            -> counter increments; trip at 3
+    # The 'rate-limited' case explicitly does NOT count as a failure because
+    # apiproxy throttling is transient and Send-ToLogAnalytics retries 429s.
+    $cbNext = Get-XdrCircuitBreakerNextState `
+        -PriorConsecutiveErrors $priorConsecutiveErrors `
+        -SuccessKind            $successKind
+
     $tierStateProps = @{
         Tier              = $tier
         Stream            = $streamName
@@ -501,6 +583,9 @@ try {
         RowsIngested      = $rowsIngested
         LatencyMs         = [int]$sw.ElapsedMilliseconds
         LastRunUtc        = ([DateTime]::UtcNow).ToString('o')
+        ConsecutiveErrors = $cbNext.ConsecutiveErrors
+        CircuitState      = $cbNext.CircuitState
+        CooldownUntilUtc  = $cbNext.CooldownUntilUtc
     }
     try {
         Set-XdrTierStateRow `
@@ -514,9 +599,8 @@ try {
 
     $sw.Stop()
 
-    # Section R++.A W9: re-add per-stream AppMetrics (regression — emit-path lived
-    # in old Invoke-MDETierPoll which Section R replaced). Operators rely on these
-    # for the ConnectorHealth workbook freshness panels + cost-budget alerts.
+    # Per-stream AppMetrics. Operators rely on these for the ConnectorHealth
+    # workbook freshness panels + cost-budget alerts (Decision 26 observability).
     if (Get-Command -Name Send-XdrAppInsightsCustomMetric -ErrorAction SilentlyContinue) {
         try {
             Send-XdrAppInsightsCustomMetric `
@@ -551,8 +635,12 @@ try {
     $errMsg = $_.Exception.Message
 
     # Best-effort tier-state write via ByProperties (Phase A1): record the failure
-    # so Connector-Heartbeat aggregates correctly. SuccessKind='error' marks this
-    # row as a real failure. Defensive: skip if EntryKey is unset.
+    # so Connector-Heartbeat aggregates correctly. Defensive: skip if EntryKey is unset.
+    # Decision 18 circuit-breaker: chain ConsecutiveErrors from the prior-row
+    # read at function entry; helper trips the breaker at 3.
+    $cbNext = Get-XdrCircuitBreakerNextState `
+        -PriorConsecutiveErrors $priorConsecutiveErrors `
+        -SuccessKind            'error'
     if (-not [string]::IsNullOrWhiteSpace($entryKey)) {
         try {
             Set-XdrTierStateRow `
@@ -560,17 +648,20 @@ try {
                 -PartitionKey       $portal `
                 -RowKey             $entryKey `
                 -Properties         @{
-                    Tier         = $tier
-                    Stream       = $streamName
-                    SuccessKind  = 'error'
-                    HttpStatus   = 0
-                    LicenseHint  = ''
-                    Success      = $false
-                    ErrorText    = $errMsg
-                    OperationId  = $opId
-                    RowsIngested = 0
-                    LatencyMs    = [int]$sw.ElapsedMilliseconds
-                    LastRunUtc   = ([DateTime]::UtcNow).ToString('o')
+                    Tier              = $tier
+                    Stream            = $streamName
+                    SuccessKind       = 'error'
+                    HttpStatus        = 0
+                    LicenseHint       = ''
+                    Success           = $false
+                    ErrorText         = $errMsg
+                    OperationId       = $opId
+                    RowsIngested      = 0
+                    LatencyMs         = [int]$sw.ElapsedMilliseconds
+                    LastRunUtc        = ([DateTime]::UtcNow).ToString('o')
+                    ConsecutiveErrors = $cbNext.ConsecutiveErrors
+                    CircuitState      = $cbNext.CircuitState
+                    CooldownUntilUtc  = $cbNext.CooldownUntilUtc
                 }
         } catch {
             # Silent — already in error path.

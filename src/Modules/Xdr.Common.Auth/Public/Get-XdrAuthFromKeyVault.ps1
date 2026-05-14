@@ -15,9 +15,11 @@ function Get-XdrAuthFromKeyVault {
           <prefix>-sccauth     (DirectCookies; Defender-specific cookie name)
           <prefix>-xsrf        (DirectCookies; Defender-specific cookie name)
 
-        Default `-SecretPrefix = 'mde-portal'` for v0.1.0 GA scope with
-        v0.1.0-beta deployments. v0.2.0 multi-portal deployments will use distinct
-        prefixes per portal (e.g., `purview-portal`, `intune-portal`).
+        Default `-SecretPrefix = 'defender'` matches v0.1.0 GA ARM template
+        provisioning (`defender-upn`, `defender-password`, `defender-totp`,
+        `defender-passkey`, `defender-auth-method`). v0.2.0 multi-portal
+        deployments will pass distinct prefixes per portal (e.g. `purview`,
+        `intune`, `entra`).
 
         v0.1.0 GA first publish — TTL CACHE (production-readiness gate):
           Pre-fix: secrets fetched on every call. KV throttles tenant-wide
@@ -85,7 +87,7 @@ function Get-XdrAuthFromKeyVault {
     [OutputType([hashtable])]
     param(
         [Parameter(Mandatory)] [string] $VaultUri,
-        [string] $SecretPrefix = 'mde-portal',
+        [string] $SecretPrefix = 'defender',
         [Parameter(Mandatory)]
         [ValidateSet('CredentialsTotp', 'Passkey', 'DirectCookies', 'credentials_totp', 'passkey', 'direct_cookies')]
         [string] $AuthMethod,

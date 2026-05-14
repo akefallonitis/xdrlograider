@@ -43,12 +43,15 @@ param(
     #                              helpers + KV cache + pagination resume)
     #
     # Uncovered hot-spots remaining (tracked for v0.1.x uplift):
-    #   - Invoke-MDETierPoll orchestration (300+ lines; needs full chain mock)
     #   - Invoke-XdrStorageTableEntity (uses System.Net.Http.HttpClient
     #     directly; needs shim-injection harness)
     #   - Complete-CredentialsFlow / Complete-PasskeyFlow Entra interrupt paths
     #     (300+ lines combined; covered against live endpoints by
     #     Probe-Auth-Local.ps1 + Verify-Deploy.ps1 instead of unit tests)
+    #   - Xdr-PollOrchestrator / Xdr-PollStream / Connector-Heartbeat Durable
+    #     function bodies (Durable Task runtime is non-trivial to mock; the
+    #     module-level units they call ARE covered, and the wiring is verified
+    #     by FunctionApp.Scaffold.Tests + Verify-Deploy phase assertions).
     #
     # Hard-fail at 30% catches regressions that strip out tested code paths
     # without blocking legitimate refactors. Operator-local Probe-Auth-Local

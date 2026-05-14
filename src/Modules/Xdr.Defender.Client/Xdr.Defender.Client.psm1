@@ -1,18 +1,19 @@
 # Xdr.Defender.Client — L3 Defender XDR portal-only telemetry client
 #
-# Architecture (v1.0):
-#   endpoints.manifest.psd1         single catalogue of 52 streams (Tier, Path, Filter, IdProperty)
+# Architecture (v0.1.0 GA):
+#   endpoints.manifest.psd1         scriptblock-eval manifest of 492 endpoints across 18 sub-areas
+#                                     (each entry carries Tier, Path, Filter, IdProperty, Pagination,
+#                                     PerEntityFanout, PerPlatformFanout, ProjectionMap)
 #   Endpoints/_EndpointHelpers.ps1  shared helpers:
 #                                     Get-XdrEndpointManifest -Portal Defender  (cached manifest loader)
 #                                     Invoke-MDEPortalEndpoint (structured HTTP wrapper)
 #                                     ConvertTo-MDEIngestRow   (row normaliser)
 #                                     Expand-MDEResponse       (response flattener)
-#   Public/Invoke-MDEEndpoint.ps1   single per-stream dispatcher
-#   Public/Invoke-MDETierPoll.ps1   per-tier loop used by the 7 scheduled timer functions
+#   Public/Invoke-MDEEndpoint.ps1   per-EntryKey dispatcher (used by the Xdr-PollStream activity)
 #
-# Callers use exactly one entry point:
-#   - Scheduled tier polling:     Invoke-MDETierPoll  -Session $s -Tier 'P0' -Config $c
-#   - Direct single-stream call:  Invoke-MDEEndpoint  -Session $s -Stream 'MDE_PUAConfig_CL' [-FromUtc $since]
+# The 4 Durable functions own scheduling + tier fan-out + heartbeat — Xdr-PollStream
+# calls Invoke-MDEEndpoint directly with the EntryKey supplied by Xdr-PollOrchestrator
+# (which reads the manifest for the (Portal, Tier) burst). No per-tier loop here.
 #
 # Scope: READ-ONLY. No action-triggering endpoints. All entries are HTTP GETs.
 
@@ -52,7 +53,6 @@ foreach ($file in $publicFiles) {
 
 Export-ModuleMember -Function @(
     'Invoke-MDEEndpoint',
-    'Invoke-MDETierPoll',
     'Invoke-MDEPortalEndpoint',
     'ConvertTo-MDEIngestRow',
     'Expand-MDEResponse',
