@@ -159,6 +159,116 @@ Describe 'Get-XdrAuthFromKeyVault — TOTP + Passkey secret loading (mocked KV)'
     }
 }
 
+Describe 'Get-XdrAuthFromKeyVault — empty-secret validation (silent-failure prevention)' {
+    # Pre-deploy audit risk: when a KV secret EXISTS but its value is BLANK
+    # (operator forgot to fill the wizard input, or rotation set empty), the
+    # auth chain used to proceed with empty credentials and fail silently at
+    # portal sign-in — the connector would loop forever with no clear signal.
+    # These tests lock the fail-fast contract: empty secret values throw a
+    # clear, actionable error naming the offending secret + remediation cmd.
+    BeforeAll {
+        $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path
+        Import-Module (Join-Path $script:RepoRoot 'src/Modules/Xdr.Common.Auth/Xdr.Common.Auth.psd1') -Force
+    }
+
+    It 'CredentialsTotp: throws when password secret is empty' {
+        Mock Get-AzKeyVaultSecret -ModuleName Xdr.Common.Auth {
+            param($VaultName, $Name, [switch]$AsPlainText)
+            switch ($Name) {
+                'defender-upn'      { 'svc@contoso.com' }
+                'defender-password' { '' }                 # the empty one
+                'defender-totp'     { 'JBSWY3DPEHPK3PXP' }
+                default             { 'x' }
+            }
+        }
+        { Get-XdrAuthFromKeyVault `
+            -VaultUri 'https://x.vault.azure.net' `
+            -SecretPrefix 'defender' `
+            -AuthMethod 'CredentialsTotp' `
+            -Force } | Should -Throw '*defender-password*empty*'
+    }
+
+    It 'CredentialsTotp: throws when totp secret is empty (named with corrected -totp suffix)' {
+        Mock Get-AzKeyVaultSecret -ModuleName Xdr.Common.Auth {
+            param($VaultName, $Name, [switch]$AsPlainText)
+            switch ($Name) {
+                'defender-upn'      { 'svc@contoso.com' }
+                'defender-password' { 'P@ssw0rd!' }
+                'defender-totp'     { '   ' }              # whitespace-only counts as empty
+                default             { 'x' }
+            }
+        }
+        { Get-XdrAuthFromKeyVault `
+            -VaultUri 'https://x.vault.azure.net' `
+            -SecretPrefix 'defender' `
+            -AuthMethod 'CredentialsTotp' `
+            -Force } | Should -Throw '*defender-totp*empty*'
+    }
+
+    It 'CredentialsTotp: throws when upn secret is empty' {
+        Mock Get-AzKeyVaultSecret -ModuleName Xdr.Common.Auth {
+            param($VaultName, $Name, [switch]$AsPlainText)
+            switch ($Name) {
+                'defender-upn'      { '' }
+                'defender-password' { 'P@ssw0rd!' }
+                'defender-totp'     { 'JBSWY3DPEHPK3PXP' }
+                default             { 'x' }
+            }
+        }
+        { Get-XdrAuthFromKeyVault `
+            -VaultUri 'https://x.vault.azure.net' `
+            -SecretPrefix 'defender' `
+            -AuthMethod 'CredentialsTotp' `
+            -Force } | Should -Throw '*defender-upn*empty*'
+    }
+
+    It 'Passkey: throws when passkey JSON is empty/blank' {
+        Mock Get-AzKeyVaultSecret -ModuleName Xdr.Common.Auth {
+            param($VaultName, $Name, [switch]$AsPlainText)
+            if ($Name -match 'passkey$') { '' } else { 'x' }
+        }
+        { Get-XdrAuthFromKeyVault `
+            -VaultUri 'https://x.vault.azure.net' `
+            -SecretPrefix 'defender' `
+            -AuthMethod 'Passkey' `
+            -Force } | Should -Throw
+    }
+
+    It 'Passkey: throws when passkey JSON lacks upn field' {
+        Mock Get-AzKeyVaultSecret -ModuleName Xdr.Common.Auth {
+            param($VaultName, $Name, [switch]$AsPlainText)
+            if ($Name -match 'passkey$') { '{"rpId":"login.microsoft.com","credentialId":"c"}' }  # no upn
+            else { 'x' }
+        }
+        { Get-XdrAuthFromKeyVault `
+            -VaultUri 'https://x.vault.azure.net' `
+            -SecretPrefix 'defender' `
+            -AuthMethod 'Passkey' `
+            -Force } | Should -Throw '*passkey*upn*'
+    }
+
+    It 'error message includes the az keyvault secret set remediation command' {
+        Mock Get-AzKeyVaultSecret -ModuleName Xdr.Common.Auth {
+            param($VaultName, $Name, [switch]$AsPlainText)
+            switch ($Name) {
+                'defender-password' { '' }
+                default             { 'x' }
+            }
+        }
+        try {
+            Get-XdrAuthFromKeyVault `
+                -VaultUri 'https://x.vault.azure.net' `
+                -SecretPrefix 'defender' `
+                -AuthMethod 'CredentialsTotp' `
+                -Force
+            throw 'should have thrown'
+        } catch {
+            $_.Exception.Message | Should -Match 'az keyvault secret set'
+            $_.Exception.Message | Should -Match 'defender-password'
+        }
+    }
+}
+
 Describe 'Get-XdrAuthFromKeyVault — TTL cache + Force bypass (rule 23 401-rotation)' {
     BeforeAll {
         $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..')).Path

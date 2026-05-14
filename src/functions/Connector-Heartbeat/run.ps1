@@ -62,15 +62,23 @@ try {
         }
 
         # Count open circuits across XdrTierState per-sub-area rows.
+        # v0.1.0 GA: single portal ('Defender'). v0.2.0 multi-portal aggregation
+        # loops over $enabledPortals (matches Xdr-Refresh:29). Today the
+        # hardcoded literal is the same single-portal scope that Xdr-Refresh
+        # uses; when v0.2.0 lands, both Xdr-Refresh AND this block accept the
+        # array — fully portal-agnostic with a single seed list change.
         try {
-            $allStateRows = Get-XdrTierStateAggregate `
-                -StorageAccountName $config.StorageAccountName `
-                -PartitionKey       'Defender'
-            if ($allStateRows -is [System.Collections.IDictionary]) {
-                foreach ($k in $allStateRows.Keys) {
-                    $r = $allStateRows[$k]
-                    $cs = if ($r.PSObject.Properties['CircuitState']) { [string]$r.CircuitState } else { '' }
-                    if ($cs -eq 'open') { $openCircuits++ }
+            $enabledPortals = @('Defender')  # v0.2.0: += 'Entra','Purview','Intune'
+            foreach ($portal in $enabledPortals) {
+                $allStateRows = Get-XdrTierStateAggregate `
+                    -StorageAccountName $config.StorageAccountName `
+                    -PartitionKey       $portal
+                if ($allStateRows -is [System.Collections.IDictionary]) {
+                    foreach ($k in $allStateRows.Keys) {
+                        $r = $allStateRows[$k]
+                        $cs = if ($r.PSObject.Properties['CircuitState']) { [string]$r.CircuitState } else { '' }
+                        if ($cs -eq 'open') { $openCircuits++ }
+                    }
                 }
             }
         } catch {

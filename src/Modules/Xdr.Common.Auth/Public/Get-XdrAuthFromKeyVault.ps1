@@ -200,10 +200,20 @@ function Get-XdrAuthFromKeyVault {
             }
             'Passkey' {
                 $passkeyJson = Get-AzKeyVaultSecret -VaultName $vaultName -Name "$SecretPrefix-passkey" -AsPlainText -ErrorAction Stop
-                $passkey = $passkeyJson | ConvertFrom-Json -ErrorAction Stop
-                @{
-                    upn     = $passkey.upn
-                    passkey = $passkey
+                if ([string]::IsNullOrWhiteSpace($passkeyJson)) {
+                    # Empty-secret case handled by the validation block below;
+                    # short-circuit here to avoid ConvertFrom-Json throwing on empty input.
+                    @{ upn = ''; passkey = $null }
+                } else {
+                    $passkey = $passkeyJson | ConvertFrom-Json -ErrorAction Stop
+                    # StrictMode-safe property access: if .upn is missing on the
+                    # JSON object, downstream validation throws a clear error
+                    # instead of StrictMode's generic "property cannot be found".
+                    $upnFromPasskey = if ($passkey.PSObject.Properties['upn']) { [string]$passkey.upn } else { '' }
+                    @{
+                        upn     = $upnFromPasskey
+                        passkey = $passkey
+                    }
                 }
             }
             'DirectCookies' {
@@ -234,6 +244,61 @@ function Get-XdrAuthFromKeyVault {
                 }
         }
         throw
+    }
+
+    # Non-empty validation (Agent-1 audit risk #9): Get-AzKeyVaultSecret returns
+    # empty string when a secret EXISTS but its value is blank (e.g., operator
+    # uploaded a blank value via the createUiDefinition wizard, or rotation set
+    # an empty value). Without this guard, the auth chain proceeds with empty
+    # credentials, fails silently at portal sign-in, and the connector loops
+    # forever with no obvious operator signal. Fail fast here with a clear,
+    # actionable error that names the offending KV secret.
+    $requiredFields = switch ($method) {
+        'CredentialsTotp' { @('upn','password','totpBase32') }
+        'Passkey'         { @('upn') }   # passkey object validated below
+        'DirectCookies'   { @('upn','sccauth','xsrfToken') }
+    }
+    foreach ($f in $requiredFields) {
+        if ([string]::IsNullOrWhiteSpace([string]$result[$f])) {
+            $secretName = switch ($f) {
+                'totpBase32' { "$SecretPrefix-totp" }
+                'xsrfToken'  { "$SecretPrefix-xsrf" }
+                default      { "$SecretPrefix-$f" }
+            }
+            # NOTE: do NOT wrap shell commands in backticks inside a double-quoted
+            # PowerShell string — backtick is the PS escape char and silently eats
+            # the following character (e.g. `az becomes az → 'z'). Use plain text.
+            $msg = "Key Vault secret '$secretName' is empty (vault $VaultUri). " +
+                   "Upload a value via Azure Portal or run: " +
+                   "az keyvault secret set --vault-name <kv> --name $secretName --value '<value>'. " +
+                   "Auth method '$method' requires: $($requiredFields -join ', ')."
+            if (Get-Command -Name Send-XdrAppInsightsTrace -ErrorAction SilentlyContinue) {
+                Send-XdrAppInsightsTrace -Message $msg -SeverityLevel 'Error' `
+                    -OperationId $OperationId `
+                    -Properties @{
+                        VaultUri     = $VaultUri
+                        SecretPrefix = $SecretPrefix
+                        AuthMethod   = $method
+                        Phase        = 'kv-secret-validate'
+                        MissingField = $f
+                        SecretName   = $secretName
+                    }
+            }
+            throw $msg
+        }
+    }
+    # Passkey-specific deep validation: JSON must have at least .upn + credential payload.
+    if ($method -eq 'Passkey') {
+        if (-not $result.passkey -or -not $result.passkey.upn) {
+            $msg = "Key Vault secret '$SecretPrefix-passkey' must be a JSON object with at minimum {upn, credential}. " +
+                   "Got blank or malformed payload. Vault $VaultUri."
+            if (Get-Command -Name Send-XdrAppInsightsTrace -ErrorAction SilentlyContinue) {
+                Send-XdrAppInsightsTrace -Message $msg -SeverityLevel 'Error' `
+                    -OperationId $OperationId `
+                    -Properties @{ VaultUri = $VaultUri; SecretPrefix = $SecretPrefix; Phase = 'kv-passkey-validate' }
+            }
+            throw $msg
+        }
     }
 
     # Populate cache (or refresh expiry on existing key).
