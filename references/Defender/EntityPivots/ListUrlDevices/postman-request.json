@@ -1,0 +1,47 @@
+{
+  "EntryKey": "EntityPivots::entitypivots-listurldevices",
+  "Slug": "ListUrlDevices",
+  "SubArea": "EntityPivots",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/cloudPivot/cloud/pivot/portal/url/device/details",
+  "PostmanPath": "/mtp/cloudPivot/cloud/pivot/portal/url/device/details",
+  "PostmanName": "List devices for URL",
+  "PostmanAncestor": "mtp / cloudPivot / cloud / pivot / portal / url / device / details",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "entityId"
+    },
+    {
+      "Value": "7",
+      "Key": "daysToLookBack"
+    },
+    {
+      "Value": "1",
+      "Key": "firstRowIndex"
+    },
+    {
+      "Value": "50",
+      "Key": "pageSize"
+    },
+    {
+      "Value": "string",
+      "Key": "RiskScores"
+    },
+    {
+      "Value": "string",
+      "Key": "ExposureScores"
+    },
+    {
+      "Value": "string",
+      "Key": "OsPlatformFriendlyNames"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.6669084Z"
+}

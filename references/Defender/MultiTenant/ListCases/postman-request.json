@@ -1,0 +1,27 @@
+{
+  "EntryKey": "MultiTenant::multitenant-listcases",
+  "Slug": "ListCases",
+  "SubArea": "MultiTenant",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtoapi/mtp/CaseManagement/be/cases",
+  "PostmanPath": "/mtoapi/mtp/CaseManagement/be/cases",
+  "PostmanName": "List MTO cases",
+  "PostmanAncestor": "mtoapi / mtp / CaseManagement / be / cases",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "$orderby"
+    },
+    {
+      "Value": "29f1a892-cb1f-bfdd-d2d6-25a87914ef25",
+      "Key": "paginationGuid"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.2537825Z"
+}

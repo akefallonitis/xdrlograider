@@ -1,0 +1,25 @@
+{
+  "EntryKey": "EndpointConfiguration::endpointconfiguration-listmanageddeviceusers",
+  "Slug": "ListManagedDeviceUsers",
+  "SubArea": "EndpointConfiguration",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices/{ManagedDeviceId}/users",
+  "PostmanPath": "/mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices/:ManagedDeviceId/users",
+  "PostmanName": "List managed device users",
+  "PostmanAncestor": "mtp / unifiedExperience / mde / configurationManagement / mem / proxy / deviceManagement / managedDevices / {ManagedDeviceId} / users",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "id,displayName,userPrincipalName",
+      "Key": "$select"
+    }
+  ],
+  "Variables": {
+    "ManagedDeviceId": "string"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4032394Z"
+}

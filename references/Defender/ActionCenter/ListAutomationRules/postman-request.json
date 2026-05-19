@@ -1,0 +1,25 @@
+{
+  "EntryKey": "ActionCenter::actioncenter-listautomationrules",
+  "Slug": "ListAutomationRules",
+  "SubArea": "ActionCenter",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/automation/internal/automation/{TenantId}/automationRules",
+  "PostmanPath": "/mtp/automation/internal/automation/:TenantId/automationRules",
+  "PostmanName": "List automation rules",
+  "PostmanAncestor": "mtp / automation / internal / automation / {TenantId} / automationRules",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "100",
+      "Key": "pageSize"
+    }
+  ],
+  "Variables": {
+    "TenantId": "b718c95f-acc5-21b0-4358-7b91878a62b0"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:42.6482661Z"
+}

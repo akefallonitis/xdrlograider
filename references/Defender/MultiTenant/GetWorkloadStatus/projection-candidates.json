@@ -1,0 +1,34 @@
+[
+  {
+    "ColumnName": "tenantId",
+    "DslOp": "$tostring",
+    "Path": "tenantId",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isActivated",
+    "DslOp": "$tobool",
+    "Path": "workloads.isActivated",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lastUpdated",
+    "DslOp": "$todatetime",
+    "Path": "workloads.lastUpdated",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "workloadName",
+    "DslOp": "$tostring",
+    "Path": "workloads.workloadName",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

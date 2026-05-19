@@ -1,0 +1,43 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getlatestips",
+  "Slug": "GetLatestIps",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/getLatestMachineIpsByIds/LatestMachineIpsByIds",
+  "PostmanPath": "/mtp/getLatestMachineIpsByIds/LatestMachineIpsByIds",
+  "PostmanName": "Get latest device IP addresses",
+  "PostmanAncestor": "mtp / getLatestMachineIpsByIds / LatestMachineIpsByIds",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "isUnifiedDevicePage"
+    },
+    {
+      "Value": "string",
+      "Key": "machineId"
+    },
+    {
+      "Value": "SenseMachineId",
+      "Key": "idType"
+    },
+    {
+      "Value": "01/19/1961 02:01:20",
+      "Key": "lastSeen"
+    },
+    {
+      "Value": "string",
+      "Key": "senseMachineId"
+    },
+    {
+      "Value": "string",
+      "Key": "computerDnsName"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4781589Z"
+}

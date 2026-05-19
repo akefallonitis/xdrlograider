@@ -1,0 +1,27 @@
+{
+  "EntryKey": "Files::files-listindicators",
+  "Slug": "ListIndicators",
+  "SubArea": "Files",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/papin/api/cloud/public/internal/indicators/getQuery",
+  "PostmanPath": "/mtp/papin/api/cloud/public/internal/indicators/getQuery",
+  "PostmanName": "Find matching file indicators",
+  "PostmanAncestor": "mtp / papin / api / cloud / public / internal / indicators / getQuery",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "tiIndicator"
+    },
+    {
+      "Value": "files",
+      "Key": "type"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8843643Z"
+}

@@ -1,0 +1,24 @@
+{
+  "EntryKey": "Configuration::configuration-setpreviewfeatures",
+  "Slug": "SetPreviewFeatures",
+  "SubArea": "Configuration",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/settings/SavePreviewExperienceSetting",
+  "PostmanPath": "/mtp/settings/SavePreviewExperienceSetting",
+  "PostmanName": "Set preview features",
+  "PostmanAncestor": "mtp / settings / SavePreviewExperienceSetting",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"isOptedIn\": false\n}",
+  "Query": [
+    {
+      "Value": "MtpContext",
+      "Key": "context"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.3063503Z"
+}

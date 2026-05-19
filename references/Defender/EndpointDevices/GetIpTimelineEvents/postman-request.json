@@ -1,0 +1,45 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getiptimelineevents",
+  "Slug": "GetIpTimelineEvents",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/mdeTimelineExperience/ips/{IpAddress}/events",
+  "PostmanPath": "/mtp/mdeTimelineExperience/ips/:IpAddress/events",
+  "PostmanName": "Get IP timeline events",
+  "PostmanAncestor": "mtp / mdeTimelineExperience / ips / {IpAddress} / events",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "01/19/1961 02:01:20",
+      "Key": "fromDate"
+    },
+    {
+      "Value": "01/19/1961 02:01:20",
+      "Key": "toDate"
+    },
+    {
+      "Value": "200",
+      "Key": "pageSize"
+    },
+    {
+      "Value": "true",
+      "Key": "generateIdentityEvents"
+    },
+    {
+      "Value": "true",
+      "Key": "includeIdentityEvents"
+    },
+    {
+      "Value": "6f371e9a-3aa5-6277-3f1e-56a06623826d",
+      "Key": "correlationId"
+    }
+  ],
+  "Variables": {
+    "IpAddress": "string"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4702277Z"
+}

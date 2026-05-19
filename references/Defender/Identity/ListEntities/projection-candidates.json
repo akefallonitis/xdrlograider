@@ -1,0 +1,42 @@
+[
+  {
+    "ColumnName": "totalCount",
+    "DslOp": "$tolong",
+    "Path": "totalCount",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "entities[].id",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "displayName",
+    "DslOp": "$tostring",
+    "Path": "entities[].displayName",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "entityType",
+    "DslOp": "$tostring",
+    "Path": "entities[].entityType",
+    "KqlType": "string",
+    "SampleValue": "ServiceAccount",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "riskScore",
+    "DslOp": "$tostring",
+    "Path": "entities[].riskScore",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  }
+]

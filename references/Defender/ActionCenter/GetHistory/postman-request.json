@@ -1,0 +1,43 @@
+{
+  "EntryKey": "ActionCenter::actioncenter-gethistory",
+  "Slug": "GetHistory",
+  "SubArea": "ActionCenter",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/actionCenter/actioncenterui/history-actions",
+  "PostmanPath": "/mtp/actionCenter/actioncenterui/history-actions",
+  "PostmanName": "Get action center history",
+  "PostmanAncestor": "mtp / actionCenter / actioncenterui / history-actions",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "5159",
+      "Key": "$skip"
+    },
+    {
+      "Value": "5159",
+      "Key": "$top"
+    },
+    {
+      "Value": "50",
+      "Key": "pageSize"
+    },
+    {
+      "Value": "0",
+      "Key": "pageIndex"
+    },
+    {
+      "Value": "string",
+      "Key": "sortByField"
+    },
+    {
+      "Value": "Ascending",
+      "Key": "sortOrder"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:42.6232821Z"
+}

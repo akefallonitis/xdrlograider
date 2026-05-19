@@ -1,0 +1,27 @@
+{
+  "EntryKey": "Identity::identity-getusertimeline",
+  "Slug": "GetUserTimeline",
+  "SubArea": "Identity",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mdi/identity/userapiservice/user/timeline",
+  "PostmanPath": "/mdi/identity/userapiservice/user/timeline",
+  "PostmanName": "Get user timeline",
+  "PostmanAncestor": "mdi / identity / userapiservice / user / timeline",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "accountName"
+    },
+    {
+      "Value": "string",
+      "Key": "accountDomain"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.1416060Z"
+}

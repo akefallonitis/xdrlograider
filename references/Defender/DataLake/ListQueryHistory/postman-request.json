@@ -1,0 +1,23 @@
+{
+  "EntryKey": "DataLake::datalake-listqueryhistory",
+  "Slug": "ListQueryHistory",
+  "SubArea": "DataLake",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/securityplatform/lake/kql/query-history",
+  "PostmanPath": "/securityplatform/lake/kql/query-history",
+  "PostmanName": "List KQL query history",
+  "PostmanAncestor": "securityplatform / lake / kql / query-history",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "KUSTO_QUERY",
+      "Key": "querySource"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.3337160Z"
+}

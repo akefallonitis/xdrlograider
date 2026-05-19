@@ -1,0 +1,28 @@
+{
+  "EntryKey": "Configuration::configuration-getaiagentsdiscoveredovertime",
+  "Slug": "GetAiAgentsDiscoveredOverTime",
+  "SubArea": "Configuration",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mdc/views/inventory/ai-agents-v3/agents-discovered-overtime",
+  "PostmanPath": "/mdc/views/inventory/ai-agents-v3/agents-discovered-overtime",
+  "PostmanName": "Get AI agents discovered over time",
+  "PostmanAncestor": "mdc / views / inventory / ai-agents-v3 / agents-discovered-overtime",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"daysAgo\": \"string\",\n  \"platforms\": \"string\",\n  \"paging\": {}\n}",
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "c"
+    },
+    {
+      "Value": "string",
+      "Key": "v"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.1176100Z"
+}

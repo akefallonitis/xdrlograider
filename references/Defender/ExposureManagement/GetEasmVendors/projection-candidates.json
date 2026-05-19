@@ -1,0 +1,23 @@
+[
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "results[].id",
+    "KqlType": "string",
+    "SampleValue": "41798"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "results[].name",
+    "KqlType": "string",
+    "SampleValue": "Amgen Inc."
+  },
+  {
+    "ColumnName": "recordsCount",
+    "DslOp": "$tolong",
+    "Path": "recordsCount",
+    "KqlType": "long",
+    "SampleValue": "20"
+  }
+]

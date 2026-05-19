@@ -1,0 +1,19 @@
+{
+  "EntryKey": "MultiTenant::multitenant-listidentities",
+  "Slug": "ListIdentities",
+  "SubArea": "MultiTenant",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtoapi/mdi/identity/userapiservice/identities",
+  "PostmanPath": "/mtoapi/mdi/identity/userapiservice/identities",
+  "PostmanName": "List MTO identities",
+  "PostmanAncestor": "mtoapi / mdi / identity / userapiservice / identities",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"PageSize\": 6257,\n  \"Skip\": 792,\n  \"SortBy\": {},\n  \"Filters\": {},\n  \"SearchText\": \"string\"\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.2608135Z"
+}

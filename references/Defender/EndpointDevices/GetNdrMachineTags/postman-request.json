@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getndrmachinetags",
+  "Slug": "GetNdrMachineTags",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/ndr/machines/machineTags",
+  "PostmanPath": "/mtp/ndr/machines/machineTags",
+  "PostmanName": "Get NDR machine tags",
+  "PostmanAncestor": "mtp / ndr / machines / machineTags",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "senseMachineId"
+    },
+    {
+      "Value": "string",
+      "Key": "tenantIds"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5171243Z"
+}

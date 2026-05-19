@@ -1,0 +1,28 @@
+{
+  "EntryKey": "Configuration::configuration-getaiagentcountsbyplatform",
+  "Slug": "GetAiAgentCountsByPlatform",
+  "SubArea": "Configuration",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mdc/views/inventory/ai-agents-v3/agents-current-count-by-platform-metrics",
+  "PostmanPath": "/mdc/views/inventory/ai-agents-v3/agents-current-count-by-platform-metrics",
+  "PostmanName": "Get AI agent counts by platform",
+  "PostmanAncestor": "mdc / views / inventory / ai-agents-v3 / agents-current-count-by-platform-metrics",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"platforms\": \"string\",\n  \"paging\": {}\n}",
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "c"
+    },
+    {
+      "Value": "string",
+      "Key": "v"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.1136932Z"
+}

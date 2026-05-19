@@ -1,0 +1,724 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": { "name": "xdrlograider", "version": "0.1.0" }
+  },
+  "parameters": {
+    "projectPrefix":          { "type": "string",  "defaultValue": "xdrlr",                "metadata": { "description": "3-12 char alphanumeric prefix for resource names." } },
+    "location":               { "type": "string",  "defaultValue": "[resourceGroup().location]" },
+    "workspaceResourceId":    { "type": "string",                                            "metadata": { "description": "Full ARM resource ID of the Sentinel-enabled Log Analytics workspace." } },
+    "workspaceLocation":      { "type": "string",                                            "metadata": { "description": "Region of the workspace (used for the DCE — DCE region must match workspace region)." } },
+    "serviceAccountUpn":      { "type": "string",                                            "metadata": { "description": "Dedicated Defender XDR service account UPN (e.g., svc-xdrlr@contoso.onmicrosoft.com)." } },
+    "serviceAccountPassword": { "type": "securestring",                                      "metadata": { "description": "Password for the service account (stored in Key Vault, never in deployment history)." } },
+    "serviceAccountTotpSecret": { "type": "securestring",                                    "metadata": { "description": "Base32 TOTP seed for the service account." } },
+    "serviceAccountAuthMethod": { "type": "string",  "defaultValue": "CredentialsTotp", "allowedValues": [ "CredentialsTotp", "Passkey" ], "metadata": { "description": "φ.AUTH.6b · MFA method · CredentialsTotp (default · TOTP) or Passkey (ECDSA-P256 WebAuthn · requires serviceAccountPasskeyPem)." } },
+    "serviceAccountPasskeyPem":{ "type": "securestring", "defaultValue": "", "metadata": { "description": "φ.AUTH.6b · ECDSA-P256 PEM private key for SA Passkey · required if serviceAccountAuthMethod=Passkey · empty otherwise." } },
+    "githubRepo":             { "type": "string",  "defaultValue": "akefallonitis/xdrlograider" },
+    "releaseTag":             { "type": "string",  "defaultValue": "latest" },
+    "connectorVersion":       { "type": "string",  "defaultValue": "0.1.0" },
+    "planSku":                { "type": "string",  "defaultValue": "Y1", "allowedValues": [ "Y1", "EP1", "EP2", "EP3" ] },
+    "deployRoleAssignments":  { "type": "bool",    "defaultValue": true,                    "metadata": { "description": "Set to false if the deploying identity lacks User Access Administrator; then run tools/Grant-Post-Deploy-Rbac.ps1." } }
+  },
+  "variables": {
+    "uniqueSuffix":     "[toLower(uniqueString(resourceGroup().id, parameters('projectPrefix')))]",
+    "functionAppName":  "[toLower(concat(parameters('projectPrefix'), '-fa-', take(variables('uniqueSuffix'), 6)))]",
+    "planName":         "[toLower(concat(parameters('projectPrefix'), '-plan-', take(variables('uniqueSuffix'), 6)))]",
+    "storageName":      "[toLower(concat(parameters('projectPrefix'), 'sa', take(variables('uniqueSuffix'), 8)))]",
+    "keyVaultName":     "[toLower(concat(parameters('projectPrefix'), '-kv-', take(variables('uniqueSuffix'), 6)))]",
+    "appInsightsName":  "[toLower(concat(parameters('projectPrefix'), '-ai-', take(variables('uniqueSuffix'), 6)))]",
+    "dceName":          "[toLower(concat(parameters('projectPrefix'), '-dce-', take(variables('uniqueSuffix'), 6)))]",
+    "dcrHealthName":    "[toLower(concat(parameters('projectPrefix'), '-dcr-health-', take(variables('uniqueSuffix'), 6)))]",
+    "dcrDefenderPrefix": "[toLower(concat(parameters('projectPrefix'), '-dcr-defender-'))]",
+    "packageUrl":       "[if(equals(parameters('releaseTag'), 'latest'), uri(concat('https://github.com/', parameters('githubRepo'), '/releases/latest/download/'), 'function-app.zip'), uri(concat('https://github.com/', parameters('githubRepo'), '/releases/download/', parameters('releaseTag'), '/'), 'function-app.zip'))]",
+    "kvSecretsUserRoleId":              "4633458b-17de-408a-b874-0445c86b69e6",
+    "monitoringMetricsPublisherRoleId": "3913510d-42f4-4e42-8a64-420c390055eb",
+    "storageTableDataContributorRoleId": "0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3",
+    "storageBlobDataOwnerRoleId":       "b7e6dc6d-f1e8-4753-8033-0f276bb0955b",
+    "storageQueueDataContributorRoleId": "974c5e8b-45b9-4653-ba55-5f855dd0fb88",
+    "planSkuTier": "[if(equals(parameters('planSku'), 'Y1'), 'Dynamic', 'ElasticPremium')]",
+    "storageEndpointSuffix": "[environment().suffixes.storage]",
+    "commonTags": {
+      "ConnectorName":    "XdrLogRaider",
+      "ConnectorVersion": "[parameters('connectorVersion')]",
+      "Component":        "DefenderXdrConnector",
+      "ManagedBy":        "XdrLogRaider-Solution-V3",
+      "Repo":             "akefallonitis/xdrlograider"
+    },
+    "defenderRowSchema": [
+      { "name": "TimeGenerated",    "type": "datetime" },
+      { "name": "Portal",           "type": "string"   },
+      { "name": "SubArea",          "type": "string"   },
+      { "name": "Slug",             "type": "string"   },
+      { "name": "Endpoint",         "type": "string"   },
+      { "name": "SuccessKind",      "type": "string"   },
+      { "name": "StatusCode",       "type": "int"      },
+      { "name": "LicenseHint",      "type": "string"   },
+      { "name": "IngestionMode",    "type": "string"   },
+      { "name": "ConnectorVersion", "type": "string"   },
+      { "name": "CorrelationId",    "type": "string"   },
+      { "name": "ProjectedData",    "type": "dynamic"  },
+      { "name": "RawJson",          "type": "dynamic"  }
+    ],
+    "healthRowSchema": [
+      { "name": "TimeGenerated",    "type": "datetime" },
+      { "name": "Status",           "type": "string"   },
+      { "name": "Portal",           "type": "string"   },
+      { "name": "Note",             "type": "string"   },
+      { "name": "ConnectorVersion", "type": "string"   },
+      { "name": "SourceSystem",     "type": "string"   },
+      { "name": "Endpoint",         "type": "string"   },
+      { "name": "SuccessKind",      "type": "string"   },
+      { "name": "SentLastCycle",    "type": "int"      },
+      { "name": "FailedLastCycle",  "type": "int"      },
+      { "name": "CircuitOpen",      "type": "boolean"  },
+      { "name": "ReauthCount",      "type": "int"      },
+      { "name": "SkippedThisCycle", "type": "int"      },
+      { "name": "Capabilities",     "type": "dynamic"  },
+      { "name": "OpenCircuits",     "type": "dynamic"  }
+    ],
+    "workspaceSubId":   "[split(parameters('workspaceResourceId'), '/')[2]]",
+    "workspaceRgName":  "[split(parameters('workspaceResourceId'), '/')[4]]",
+    "workspaceName":    "[split(parameters('workspaceResourceId'), '/')[8]]",
+    "tablesDeployName": "[concat('xdrlr-tables-', uniqueString(parameters('workspaceResourceId'), parameters('projectPrefix')))]",
+    "defenderSubAreas": [
+      "ActionCenter", "AppGovernance", "AttackSimulator", "CloudApps", "Configuration",
+      "DataLake", "EndpointConfiguration", "EndpointDevices", "EntityPivots",
+      "ExposureManagement", "Files", "Identity", "MultiTenant", "PortalServices",
+      "SecureScore", "SentinelPrecision", "Streaming", "ThreatAnalytics", "VulnerabilityManagement"
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2024-01-01",
+      "name": "[variables('storageName')]",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": { "name": "Standard_LRS" },
+      "tags": "[variables('commonTags')]",
+      "properties": {
+        "minimumTlsVersion": "TLS1_2",
+        "supportsHttpsTrafficOnly": true,
+        "allowBlobPublicAccess": false,
+        "//comment_allowSharedKeyAccess": "ITER4 B2 · Y1 Linux Consumption uses platform-managed WEBSITE_CONTENTAZUREFILECONNECTIONSTRING (requires shared key) for content share mount. EP+ plans support identity-only · so allowSharedKeyAccess=false. Gated on planSku.",
+        "allowSharedKeyAccess": "[if(equals(parameters('planSku'),'Y1'), bool('true'), bool('false'))]",
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices",
+      "apiVersion": "2024-01-01",
+      "name": "[concat(variables('storageName'), '/default')]",
+      "dependsOn": [ "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]" ],
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+      "apiVersion": "2024-01-01",
+      "name": "[concat(variables('storageName'), '/default/XdrTenantCapabilities')]",
+      "dependsOn": [ "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('storageName'), 'default')]" ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+      "apiVersion": "2024-01-01",
+      "name": "[concat(variables('storageName'), '/default/XdrCheckpoint')]",
+      "dependsOn": [ "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('storageName'), 'default')]" ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+      "apiVersion": "2024-01-01",
+      "name": "[concat(variables('storageName'), '/default/XdrIngestDlq')]",
+      "dependsOn": [ "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('storageName'), 'default')]" ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+      "apiVersion": "2024-01-01",
+      "name": "[concat(variables('storageName'), '/default/XdrTierState')]",
+      "dependsOn": [ "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('storageName'), 'default')]" ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2024-11-01",
+      "name": "[variables('keyVaultName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('commonTags')]",
+      "properties": {
+        "tenantId": "[subscription().tenantId]",
+        "sku": { "family": "A", "name": "standard" },
+        "enableRbacAuthorization": true,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 7,
+        "enablePurgeProtection": null,
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-11-01",
+      "name": "[concat(variables('keyVaultName'), '/defender-upn')]",
+      "properties": { "value": "[parameters('serviceAccountUpn')]" },
+      "dependsOn": [ "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]" ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-11-01",
+      "name": "[concat(variables('keyVaultName'), '/defender-password')]",
+      "properties": { "value": "[parameters('serviceAccountPassword')]" },
+      "dependsOn": [ "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]" ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-11-01",
+      "name": "[concat(variables('keyVaultName'), '/defender-totp')]",
+      "properties": { "value": "[parameters('serviceAccountTotpSecret')]" },
+      "dependsOn": [ "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]" ]
+    },
+    {
+      "comments": "φ.AUTH.6b · Passkey · auth-method selector secret (CredentialsTotp | Passkey)",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-11-01",
+      "name": "[concat(variables('keyVaultName'), '/defender-auth-method')]",
+      "properties": { "value": "[parameters('serviceAccountAuthMethod')]" },
+      "dependsOn": [ "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]" ]
+    },
+    {
+      "comments": "φ.AUTH.6b · Passkey · ECDSA-P256 PEM secret (empty when AuthMethod=CredentialsTotp)",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2024-11-01",
+      "name": "[concat(variables('keyVaultName'), '/defender-passkey-pem')]",
+      "properties": { "value": "[parameters('serviceAccountPasskeyPem')]" },
+      "dependsOn": [ "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]" ]
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('appInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "tags": "[variables('commonTags')]",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[parameters('workspaceResourceId')]",
+        "IngestionMode": "LogAnalytics",
+        "DisableLocalAuth": false,
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionEndpoints",
+      "apiVersion": "2023-03-11",
+      "name": "[variables('dceName')]",
+      "location": "[parameters('workspaceLocation')]",
+      "tags": "[variables('commonTags')]",
+      "properties": {
+        "networkAcls": { "publicNetworkAccess": "Enabled" }
+      }
+    },
+    {
+      "comments": "ITER5 · Pre-create 20 custom Log Analytics tables (1 health + 19 per-sub-area) via cross-RG nested deployment scoped to the workspace's RG. Operator's identity needs 'Log Analytics Contributor' role on the workspace RG. Without this, DCRs reject deploy with 'InvalidOutputTable · table not available for destination'.",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[variables('tablesDeployName')]",
+      "subscriptionId": "[variables('workspaceSubId')]",
+      "resourceGroup": "[variables('workspaceRgName')]",
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": { "scope": "inner" },
+        "parameters": {
+          "workspaceName":     { "value": "[variables('workspaceName')]" },
+          "defenderSubAreas":  { "value": "[variables('defenderSubAreas')]" },
+          "defenderRowSchema": { "value": "[variables('defenderRowSchema')]" },
+          "healthRowSchema":   { "value": "[variables('healthRowSchema')]" }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "workspaceName":     { "type": "string" },
+            "defenderSubAreas":  { "type": "array"  },
+            "defenderRowSchema": { "type": "array"  },
+            "healthRowSchema":   { "type": "array"  }
+          },
+          "resources": [
+            {
+              "comments": "Health table · 15 cols including OpenCircuits (Π11.4g) · Analytics plan · 30-day retention",
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspaceName'), '/XdrConnectorHealth_CL')]",
+              "properties": {
+                "schema": {
+                  "name": "XdrConnectorHealth_CL",
+                  "columns": "[parameters('healthRowSchema')]"
+                },
+                "plan": "Analytics",
+                "retentionInDays": 30
+              }
+            },
+            {
+              "comments": "19 per-sub-area Defender_<SubArea>_CL tables via copy loop · 13-col schema (ProjectedData primary R-A · RawJson companion · 64KB cap)",
+              "type": "Microsoft.OperationalInsights/workspaces/tables",
+              "apiVersion": "2022-10-01",
+              "copy": {
+                "name": "defenderTableLoop",
+                "count": "[length(parameters('defenderSubAreas'))]"
+              },
+              "name": "[concat(parameters('workspaceName'), '/Defender_', parameters('defenderSubAreas')[copyIndex()], '_CL')]",
+              "properties": {
+                "schema": {
+                  "name": "[concat('Defender_', parameters('defenderSubAreas')[copyIndex()], '_CL')]",
+                  "columns": "[parameters('defenderRowSchema')]"
+                },
+                "plan": "Analytics",
+                "retentionInDays": 30
+              }
+            }
+          ],
+          "outputs": {
+            "tablesCreated": {
+              "type": "int",
+              "value": "[add(length(parameters('defenderSubAreas')), 1)]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "comments": "φ.B · Health DCR · single stream for XdrConnectorHealth heartbeats (1 row/cycle)",
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2023-03-11",
+      "name": "[variables('dcrHealthName')]",
+      "location": "[parameters('workspaceLocation')]",
+      "kind": "Direct",
+      "tags": "[variables('commonTags')]",
+      "properties": {
+        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "streamDeclarations": {
+          "Custom-XdrConnectorHealth_CL": {
+            "columns": [
+              { "name": "TimeGenerated",    "type": "datetime" },
+              { "name": "Status",           "type": "string"   },
+              { "name": "Portal",           "type": "string"   },
+              { "name": "Note",             "type": "string"   },
+              { "name": "ConnectorVersion", "type": "string"   },
+              { "name": "SourceSystem",     "type": "string"   },
+              { "name": "Endpoint",         "type": "string"   },
+              { "name": "SuccessKind",      "type": "string"   },
+              { "name": "SentLastCycle",    "type": "int"      },
+              { "name": "FailedLastCycle",  "type": "int"      },
+              { "name": "CircuitOpen",      "type": "boolean"  },
+              { "name": "ReauthCount",      "type": "int"      },
+              { "name": "SkippedThisCycle", "type": "int"      },
+              { "name": "Capabilities",     "type": "dynamic"  },
+              { "name": "OpenCircuits",     "type": "dynamic"  }
+            ]
+          }
+        },
+        "destinations": {
+          "logAnalytics": [ { "workspaceResourceId": "[parameters('workspaceResourceId')]", "name": "LADest" } ]
+        },
+        "dataFlows": [
+          {
+            "streams":      [ "Custom-XdrConnectorHealth_CL" ],
+            "destinations": [ "LADest" ],
+            "outputStream": "Custom-XdrConnectorHealth_CL",
+            "transformKql": "source"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "[resourceId('Microsoft.Resources/deployments', variables('tablesDeployName'))]"
+      ]
+    },
+    {
+      "comments": "φ.B · Per-sub-area Defender DCRs · ARM copy loop · 19 DCRs from manifest SubArea list (D-7)",
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2023-03-11",
+      "copy": {
+        "name": "defenderSubAreaDcrLoop",
+        "count": "[length(variables('defenderSubAreas'))]"
+      },
+      "name": "[concat(variables('dcrDefenderPrefix'), toLower(variables('defenderSubAreas')[copyIndex()]))]",
+      "location": "[parameters('workspaceLocation')]",
+      "kind": "Direct",
+      "tags": "[variables('commonTags')]",
+      "properties": {
+        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "streamDeclarations": {
+          "[concat('Custom-Defender_', variables('defenderSubAreas')[copyIndex()], '_CL')]": {
+            "columns": "[variables('defenderRowSchema')]"
+          }
+        },
+        "destinations": {
+          "logAnalytics": [ { "workspaceResourceId": "[parameters('workspaceResourceId')]", "name": "LADest" } ]
+        },
+        "dataFlows": [
+          {
+            "streams":      [ "[concat('Custom-Defender_', variables('defenderSubAreas')[copyIndex()], '_CL')]" ],
+            "destinations": [ "LADest" ],
+            "outputStream": "[concat('Custom-Defender_', variables('defenderSubAreas')[copyIndex()], '_CL')]",
+            "transformKql": "source"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "[resourceId('Microsoft.Resources/deployments', variables('tablesDeployName'))]"
+      ]
+    },
+    {
+      "comments": "ITER5 C6 · Content Hub visibility · Microsoft.OperationalInsights workspaces/providers/contentPackages V3 resource (apiVersion 2023-04-01-preview · kind=Solution · contentSchemaVersion=3.0.0). Connector-only for v0.1.0 (analytic rules + workbooks empty · per Microsoft 1P precedent · Defender for IoT / M365 IRM / AAD all shipped V1.0 connector-only). Operator gets the solution card in workspace Content Hub for installable/upgrade UX.",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[concat('xdrlr-contentpkg-', uniqueString(parameters('workspaceResourceId'), parameters('projectPrefix')))]",
+      "subscriptionId": "[variables('workspaceSubId')]",
+      "resourceGroup": "[variables('workspaceRgName')]",
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": { "scope": "inner" },
+        "parameters": {
+          "workspaceName":     { "value": "[variables('workspaceName')]" },
+          "connectorVersion":  { "value": "[parameters('connectorVersion')]" }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "workspaceName":    { "type": "string" },
+            "connectorVersion": { "type": "string" }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/contentPackages",
+              "apiVersion": "2023-04-01-preview",
+              "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/XdrLogRaider')]",
+              "properties": {
+                "version": "[parameters('connectorVersion')]",
+                "kind": "Solution",
+                "contentSchemaVersion": "3.0.0",
+                "displayName": "XdrLogRaider · Defender XDR portal-internal connector",
+                "publisherDisplayName": "XdrLogRaider",
+                "descriptionHtml": "Microsoft Sentinel data connector for Defender XDR portal-internal /apiproxy/ telemetry (Action Center · CloudApps · Exposure Management · Identity · Threat Analytics · etc.). Operator-curated · no Microsoft SLA on the /apiproxy/ surface. v0.1.0 ships connector-only · analytic rules + workbooks in v0.2.0.",
+                "contentKind": "Solution",
+                "source": { "kind": "Solution", "name": "XdrLogRaider", "sourceId": "xdrlograider.xdrlograider-sentinel-solution" },
+                "author": { "name": "Alex Kefallonitis", "email": "al.kefallonitis@gmail.com" },
+                "support": { "name": "XdrLogRaider Community", "email": "al.kefallonitis@gmail.com", "tier": "Community", "link": "https://github.com/akefallonitis/xdrlograider/issues" },
+                "dependencies": { "operator": "AND", "criteria": [
+                  { "kind": "DataConnector", "contentId": "XdrLogRaiderInternal", "version": "[parameters('connectorVersion')]" }
+                ]},
+                "firstPublishDate": "2026-05-18",
+                "lastPublishDate":  "2026-05-20",
+                "providers":  [ "XdrLogRaider" ],
+                "categories": { "domains": [ "Security - Threat Protection", "Security - Cloud Security", "Security - Information Protection" ], "verticals": [] }
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', variables('tablesDeployName'))]"
+      ]
+    },
+    {
+      "comments": "ITER6 M4 Path A · Sentinel Connector Card · Microsoft.OperationalInsights workspaces/providers/dataConnectorDefinitions (V3 · kind=Customizable). Without this · standalone 'Deploy to Azure' button works but no card appears in workspace Data connectors list. Content Hub install path also benefits since the card definition is in the same template. Operator sees XdrLogRaider in Sentinel UI within minutes of deploy.",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[concat('xdrlr-connector-card-', uniqueString(parameters('workspaceResourceId'), parameters('projectPrefix')))]",
+      "subscriptionId": "[variables('workspaceSubId')]",
+      "resourceGroup": "[variables('workspaceRgName')]",
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": { "scope": "inner" },
+        "parameters": {
+          "workspaceName": { "value": "[variables('workspaceName')]" }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "workspaceName": { "type": "string" }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectorDefinitions",
+              "apiVersion": "2023-04-01-preview",
+              "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/XdrLogRaiderInternal')]",
+              "kind": "Customizable",
+              "properties": {
+                "connectorUiConfig": {
+                  "id": "XdrLogRaiderInternal",
+                  "title": "XdrLogRaider — Defender XDR portal-internal",
+                  "publisher": "XdrLogRaider",
+                  "descriptionMarkdown": "Sentinel data connector that harvests the `security.microsoft.com/apiproxy/*` surface Microsoft does not publicly document. Operator-curated · no Microsoft SLA. v0.1.0 ships connector + sample queries only · analytic rules + workbooks in v0.2.0.",
+                  "graphQueriesTableName": "XdrConnectorHealth_CL",
+                  "graphQueries": [
+                    { "metricName": "Heartbeat (last 24h)", "legend": "Health pings", "baseQuery": "XdrConnectorHealth_CL" },
+                    { "metricName": "Defender sub-area rows (last 24h)", "legend": "Per-sub-area telemetry", "baseQuery": "union withsource=TableName isfuzzy=true Defender_*_CL" }
+                  ],
+                  "sampleQueries": [
+                    { "description": "EndpointDevices · DeviceTimeline events", "query": "Defender_EndpointDevices_CL | where Slug contains 'timeline' | top 50 by TimeGenerated desc" },
+                    { "description": "ActionCenter · pending action queue", "query": "Defender_ActionCenter_CL | where Slug == 'actioncenter-listpending' | top 50 by TimeGenerated desc" },
+                    { "description": "ExposureManagement · ASR chokepoints", "query": "Defender_ExposureManagement_CL | where Slug contains 'chokepoint' | top 50 by TimeGenerated desc" },
+                    { "description": "Health · auth-fatal events 12h", "query": "XdrConnectorHealth_CL | where Status == 'AuthFatal' and TimeGenerated > ago(12h) | order by TimeGenerated desc" }
+                  ],
+                  "dataTypes": [
+                    { "name": "XdrConnectorHealth_CL",                  "lastDataReceivedQuery": "XdrConnectorHealth_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_ActionCenter_CL",              "lastDataReceivedQuery": "Defender_ActionCenter_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_AppGovernance_CL",             "lastDataReceivedQuery": "Defender_AppGovernance_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_AttackSimulator_CL",           "lastDataReceivedQuery": "Defender_AttackSimulator_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_CloudApps_CL",                 "lastDataReceivedQuery": "Defender_CloudApps_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_Configuration_CL",             "lastDataReceivedQuery": "Defender_Configuration_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_DataLake_CL",                  "lastDataReceivedQuery": "Defender_DataLake_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_EndpointConfiguration_CL",     "lastDataReceivedQuery": "Defender_EndpointConfiguration_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_EndpointDevices_CL",           "lastDataReceivedQuery": "Defender_EndpointDevices_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_EntityPivots_CL",              "lastDataReceivedQuery": "Defender_EntityPivots_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_ExposureManagement_CL",        "lastDataReceivedQuery": "Defender_ExposureManagement_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_Files_CL",                     "lastDataReceivedQuery": "Defender_Files_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_Identity_CL",                  "lastDataReceivedQuery": "Defender_Identity_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_MultiTenant_CL",               "lastDataReceivedQuery": "Defender_MultiTenant_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_PortalServices_CL",            "lastDataReceivedQuery": "Defender_PortalServices_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_SecureScore_CL",               "lastDataReceivedQuery": "Defender_SecureScore_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_SentinelPrecision_CL",         "lastDataReceivedQuery": "Defender_SentinelPrecision_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_Streaming_CL",                 "lastDataReceivedQuery": "Defender_Streaming_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_ThreatAnalytics_CL",           "lastDataReceivedQuery": "Defender_ThreatAnalytics_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+                    { "name": "Defender_VulnerabilityManagement_CL",   "lastDataReceivedQuery": "Defender_VulnerabilityManagement_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
+                  ],
+                  "connectivityCriterias": [
+                    {
+                      "type": "IsConnectedQuery",
+                      "value": [
+                        "XdrConnectorHealth_CL | where Portal == 'Defender' and TimeGenerated > ago(15m) | take 1",
+                        "union withsource=TableName isfuzzy=true Defender_*_CL | where TimeGenerated > ago(1h) and SuccessKind == 'live' | summarize hits=count() | where hits > 0",
+                        "XdrConnectorHealth_CL | where Status == 'AuthFatal' and TimeGenerated > ago(4h) | summarize fatals=count() | where fatals == 0",
+                        "union withsource=TableName isfuzzy=true Defender_*_CL | where TimeGenerated > ago(1h) | summarize WithPD=countif(isnotempty(ProjectedData)), Total=count() | extend Pct=iff(Total>0, round(100.0*WithPD/Total,1), 0.0) | where Pct >= 20.0"
+                      ]
+                    }
+                  ],
+                  "availability": { "status": 1, "isPreview": true },
+                  "permissions": {
+                    "resourceProvider": [
+                      { "provider": "Microsoft.OperationalInsights/workspaces", "permissionsDisplayText": "Read and write permissions on the workspace are required.", "providerDisplayName": "Workspace", "scope": "Workspace", "requiredPermissions": { "write": true, "read": true, "delete": true } }
+                    ],
+                    "customs": [
+                      { "name": "Microsoft Defender XDR service account", "description": "Dedicated SA in your Entra tenant with **Security Reader** + **Microsoft Defender Analyst**, Conditional-Access-exempt for unattended TOTP/Passkey sign-in." }
+                    ]
+                  },
+                  "instructionSteps": [
+                    { "title": "1. Service account", "description": "Create a dedicated Entra user. Grant **Security Reader + Microsoft Defender Analyst**. Set MFA to TOTP (or Passkey ECDSA-P256) and capture the seed. **Conditional Access exemption from interactive-MFA / device-compliance is required**." },
+                    { "title": "2. Deploy", "description": "Use the **Deploy to Azure** button OR `az deployment group create`. Provide the workspace ARM ID, SA UPN, password, and TOTP seed (or Passkey PEM)." },
+                    { "title": "3. Verify", "description": "Within ~20 min the heartbeat lands in `XdrConnectorHealth_CL` and the card flips **Connected**. Tables surface in both legacy Azure portal Sentinel UI and the unified Microsoft Defender XDR portal." }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', variables('tablesDeployName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2024-04-01",
+      "name": "[variables('planName')]",
+      "location": "[parameters('location')]",
+      "kind": "linux",
+      "sku": { "name": "[parameters('planSku')]", "tier": "[variables('planSkuTier')]" },
+      "tags": "[variables('commonTags')]",
+      "properties": { "reserved": true }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2024-04-01",
+      "name": "[variables('functionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp,linux",
+      "identity": { "type": "SystemAssigned" },
+      "tags": "[variables('commonTags')]",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+        "httpsOnly": true,
+        "reserved": true,
+        "siteConfig": {
+          "linuxFxVersion": "POWERSHELL|7.4",
+          "ftpsState": "Disabled",
+          "minTlsVersion": "1.2",
+          "appSettings": [
+            { "name": "FUNCTIONS_WORKER_RUNTIME",         "value": "powershell" },
+            { "name": "FUNCTIONS_WORKER_RUNTIME_VERSION", "value": "7.4" },
+            { "name": "FUNCTIONS_EXTENSION_VERSION",      "value": "~4" },
+            { "name": "AzureWebJobsStorage__accountName", "value": "[variables('storageName')]" },
+            { "name": "AzureWebJobsStorage__credential",  "value": "managedidentity" },
+            { "//comment_AzureWebJobsStorage": "ITER4 B2 · Y1 Linux Consumption fallback · platform requires shared-key for content share when identity-based is half-supported. EP+ ignores this (identity-based fully works) · Y1 uses this. Conditional value via reference+listKeys at deploy.",
+              "name": "AzureWebJobsStorage",
+              "value": "[if(equals(parameters('planSku'),'Y1'), concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage), '')]"
+            },
+            { "//comment_WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "ITER4 B2 · Y1 only · platform-managed content share for Functions runtime metadata",
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[if(equals(parameters('planSku'),'Y1'), concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage), '')]"
+            },
+            { "//comment_WEBSITE_CONTENTSHARE": "ITER4 B2 · Y1 only · file share name for content storage",
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[if(equals(parameters('planSku'),'Y1'), toLower(variables('functionAppName')), '')]"
+            },
+            { "name": "APPLICATIONINSIGHTS_CONNECTION_STRING", "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName'))).ConnectionString]" },
+            { "name": "WEBSITE_RUN_FROM_PACKAGE",         "value": "[variables('packageUrl')]" },
+            { "name": "KEYVAULT_NAME",                    "value": "[variables('keyVaultName')]" },
+            { "name": "DCE_ENDPOINT",                     "value": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]" },
+            { "name": "DCR_IMMUTABLE_ID",                 "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrHealthName')), '2023-03-11').immutableId]" },
+            { "name": "DCR_IMMUTABLE_ID_MAP",             "value": "[concat('[{\"subArea\":\"ActionCenter\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'actioncenter')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_ActionCenter_CL\"},{\"subArea\":\"AppGovernance\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'appgovernance')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_AppGovernance_CL\"},{\"subArea\":\"AttackSimulator\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'attacksimulator')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_AttackSimulator_CL\"},{\"subArea\":\"CloudApps\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'cloudapps')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_CloudApps_CL\"},{\"subArea\":\"Configuration\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'configuration')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_Configuration_CL\"},{\"subArea\":\"DataLake\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'datalake')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_DataLake_CL\"},{\"subArea\":\"EndpointConfiguration\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'endpointconfiguration')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_EndpointConfiguration_CL\"},{\"subArea\":\"EndpointDevices\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'endpointdevices')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_EndpointDevices_CL\"},{\"subArea\":\"EntityPivots\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'entitypivots')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_EntityPivots_CL\"},{\"subArea\":\"ExposureManagement\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'exposuremanagement')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_ExposureManagement_CL\"},{\"subArea\":\"Files\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'files')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_Files_CL\"},{\"subArea\":\"Identity\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'identity')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_Identity_CL\"},{\"subArea\":\"MultiTenant\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'multitenant')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_MultiTenant_CL\"},{\"subArea\":\"PortalServices\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'portalservices')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_PortalServices_CL\"},{\"subArea\":\"SecureScore\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'securescore')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_SecureScore_CL\"},{\"subArea\":\"SentinelPrecision\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'sentinelprecision')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_SentinelPrecision_CL\"},{\"subArea\":\"Streaming\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'streaming')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_Streaming_CL\"},{\"subArea\":\"ThreatAnalytics\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'threatanalytics')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_ThreatAnalytics_CL\"},{\"subArea\":\"VulnerabilityManagement\",\"immutableId\":\"', reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), 'vulnerabilitymanagement')), '2023-03-11').immutableId, '\",\"streamName\":\"Custom-Defender_VulnerabilityManagement_CL\"}]')]" },
+            { "name": "MANIFEST_PATH",                    "value": "/home/site/wwwroot/manifests/defender.psd1" },
+            { "name": "CONNECTOR_VERSION",                "value": "[parameters('connectorVersion')]" },
+            { "name": "STORAGE_ACCOUNT_NAME",             "value": "[variables('storageName')]" },
+            { "name": "AZURE_TENANT_ID",                  "value": "[subscription().tenantId]" },
+            { "//comment_WORKSPACE_RESOURCE_ID":          "P4 · workspace-context PathParam resolver · run.ps1 parses this 5-tuple at cold-start to fill {subscriptionId, resourceGroupName, workspaceName, workspaceId, tenantId} in entry path-params.",
+              "name": "WORKSPACE_RESOURCE_ID",            "value": "[parameters('workspaceResourceId')]" },
+            { "name": "WORKSPACE_CUSTOMER_ID",            "value": "[reference(parameters('workspaceResourceId'), '2022-10-01').customerId]" },
+            { "name": "APPINSIGHTS_PROFILERFEATURE_VERSION",  "value": "1.0.0" },
+            { "name": "APPINSIGHTS_SNAPSHOTFEATURE_VERSION",  "value": "1.0.0" },
+            { "name": "XDT_MicrosoftApplicationInsights_Mode","value": "recommended" },
+            { "name": "DiagnosticServices_EXTENSION_VERSION", "value": "~3" },
+            { "name": "InstrumentationEngine_EXTENSION_VERSION", "value": "disabled" },
+            { "name": "SnapshotDebugger_EXTENSION_VERSION",     "value": "disabled" },
+            { "name": "XDT_MicrosoftApplicationInsights_BaseExtensions", "value": "disabled" }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrHealthName'))]",
+        "defenderSubAreaDcrLoop"
+      ]
+    },
+    {
+      "comments": "Π11 NOD-1 · identity-based AzureWebJobsStorage requires FA SAMI as Storage Blob Data Owner on the SA",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, variables('functionAppName'), 'storage-blob-data-owner')]",
+      "condition": "[parameters('deployRoleAssignments')]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+      "properties": {
+        "principalId":      "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2023-12-01', 'Full').identity.principalId]",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('storageBlobDataOwnerRoleId'))]",
+        "principalType":    "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+      ]
+    },
+    {
+      "comments": "Π11 NOD-1 · identity-based AzureWebJobsStorage requires FA SAMI as Storage Queue Data Contributor on the SA",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, variables('functionAppName'), 'storage-queue-data-contributor')]",
+      "condition": "[parameters('deployRoleAssignments')]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+      "properties": {
+        "principalId":      "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2023-12-01', 'Full').identity.principalId]",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('storageQueueDataContributorRoleId'))]",
+        "principalType":    "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, variables('functionAppName'), 'kv-secrets-user')]",
+      "condition": "[parameters('deployRoleAssignments')]",
+      "scope": "[concat('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
+      "properties": {
+        "principalId":      "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2023-12-01', 'Full').identity.principalId]",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('kvSecretsUserRoleId'))]",
+        "principalType":    "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ]
+    },
+    {
+      "comments": "φ.B · Monitoring Metrics Publisher on HEALTH DCR · FA SAMI writes XdrConnectorHealth heartbeats",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, variables('functionAppName'), 'monitoring-metrics-publisher-health')]",
+      "condition": "[parameters('deployRoleAssignments')]",
+      "scope": "[concat('Microsoft.Insights/dataCollectionRules/', variables('dcrHealthName'))]",
+      "properties": {
+        "principalId":      "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2023-12-01', 'Full').identity.principalId]",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('monitoringMetricsPublisherRoleId'))]",
+        "principalType":    "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrHealthName'))]"
+      ]
+    },
+    {
+      "comments": "φ.B · Monitoring Metrics Publisher on 19 per-sub-area Defender DCRs · ARM copy loop",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "copy": {
+        "name": "defenderSubAreaRbacLoop",
+        "count": "[length(variables('defenderSubAreas'))]"
+      },
+      "name": "[guid(resourceGroup().id, variables('functionAppName'), 'mmp-defender-', variables('defenderSubAreas')[copyIndex()])]",
+      "condition": "[parameters('deployRoleAssignments')]",
+      "scope": "[concat('Microsoft.Insights/dataCollectionRules/', variables('dcrDefenderPrefix'), toLower(variables('defenderSubAreas')[copyIndex()]))]",
+      "properties": {
+        "principalId":      "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2023-12-01', 'Full').identity.principalId]",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('monitoringMetricsPublisherRoleId'))]",
+        "principalType":    "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "defenderSubAreaDcrLoop"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, variables('functionAppName'), 'storage-table-data-contributor')]",
+      "condition": "[parameters('deployRoleAssignments')]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+      "properties": {
+        "principalId":      "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2023-12-01', 'Full').identity.principalId]",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('storageTableDataContributorRoleId'))]",
+        "principalType":    "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "functionAppName":         { "type": "string", "value": "[variables('functionAppName')]" },
+    "keyVaultName":            { "type": "string", "value": "[variables('keyVaultName')]" },
+    "dceEndpoint":             { "type": "string", "value": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]" },
+    "dcrHealthImmutableId":    { "type": "string", "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrHealthName')), '2023-03-11').immutableId]" },
+    "dcrDefenderImmutableIdMap": {
+      "type": "array",
+      "metadata": { "description": "φ.B · per-sub-area DCR immutableId map · run.ps1 uses DCR_IMMUTABLE_ID_MAP app setting · this output exposes for verify/smoke tools" },
+      "copy": {
+        "count": "[length(variables('defenderSubAreas'))]",
+        "input": {
+          "subArea":     "[variables('defenderSubAreas')[copyIndex()]]",
+          "immutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(variables('dcrDefenderPrefix'), toLower(variables('defenderSubAreas')[copyIndex()]))), '2023-03-11').immutableId]",
+          "streamName":  "[concat('Custom-Defender_', variables('defenderSubAreas')[copyIndex()], '_CL')]"
+        }
+      }
+    },
+    "appInsightsName":         { "type": "string", "value": "[variables('appInsightsName')]" }
+  }
+}

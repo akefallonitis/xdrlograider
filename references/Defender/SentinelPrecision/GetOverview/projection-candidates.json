@@ -1,0 +1,34 @@
+[
+  {
+    "ColumnName": "TotalVolume",
+    "DslOp": "$tostring",
+    "Path": "DataConnectors.data.TotalVolume",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isFromCache",
+    "DslOp": "$tobool",
+    "Path": "DataConnectors.isFromCache",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "dataQueryTime",
+    "DslOp": "$todatetime",
+    "Path": "DataConnectors.dataQueryTime",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "sectionKind",
+    "DslOp": "$tostring",
+    "Path": "DataConnectors.sectionKind",
+    "KqlType": "string",
+    "SampleValue": "DataConnectors",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

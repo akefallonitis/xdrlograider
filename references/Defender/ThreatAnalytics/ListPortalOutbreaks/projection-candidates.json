@@ -1,0 +1,72 @@
+[
+  {
+    "ColumnName": "Id",
+    "DslOp": "$tostring",
+    "Path": "[].Id",
+    "KqlType": "string",
+    "SampleValue": "a0843dd6-dd39-4baa-9124-b76b0452c1a8"
+  },
+  {
+    "ColumnName": "DisplayName",
+    "DslOp": "$tostring",
+    "Path": "[].DisplayName",
+    "KqlType": "string",
+    "SampleValue": "OSINT Profile: SHub Reaper macOS Stealer Spoofs Apple, Google, and Microsoft in a Single Attack Chain"
+  },
+  {
+    "ColumnName": "CreatedOn",
+    "DslOp": "$todatetime",
+    "Path": "[].CreatedOn",
+    "KqlType": "datetime",
+    "SampleValue": "05/19/2026 19:09:38"
+  },
+  {
+    "ColumnName": "StartedOn",
+    "DslOp": "$todatetime",
+    "Path": "[].StartedOn",
+    "KqlType": "datetime",
+    "SampleValue": "05/19/2026 18:26:36"
+  },
+  {
+    "ColumnName": "LastUpdatedOn",
+    "DslOp": "$todatetime",
+    "Path": "[].LastUpdatedOn",
+    "KqlType": "datetime",
+    "SampleValue": "05/19/2026 19:09:38"
+  },
+  {
+    "ColumnName": "Severity",
+    "DslOp": "$tolong",
+    "Path": "[].Severity",
+    "KqlType": "long",
+    "SampleValue": "2"
+  },
+  {
+    "ColumnName": "OutbreakOverviewContent",
+    "DslOp": "$tostring",
+    "Path": "[].OutbreakOverviewContent",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "ReportType",
+    "DslOp": "$tostring",
+    "Path": "[].ReportType",
+    "KqlType": "string",
+    "SampleValue": "ToolOrTechnique"
+  },
+  {
+    "ColumnName": "LastVisitTime",
+    "DslOp": "$tostring",
+    "Path": "[].LastVisitTime",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "IsVNext",
+    "DslOp": "$tobool",
+    "Path": "[].IsVNext",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  }
+]

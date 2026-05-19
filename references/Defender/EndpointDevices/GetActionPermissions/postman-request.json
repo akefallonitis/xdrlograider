@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getactionpermissions",
+  "Slug": "GetActionPermissions",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/responseApiPortal/requests/permissions",
+  "PostmanPath": "/mtp/responseApiPortal/requests/permissions",
+  "PostmanName": "Get device response action permissions",
+  "PostmanAncestor": "mtp / responseApiPortal / requests / permissions",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "machineId"
+    },
+    {
+      "Value": "string",
+      "Key": "tenantIds"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4271446Z"
+}

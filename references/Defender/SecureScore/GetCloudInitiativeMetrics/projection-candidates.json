@@ -1,0 +1,90 @@
+[
+  {
+    "ColumnName": "type",
+    "DslOp": "$tostring",
+    "Path": "recommendationsByCompletionStatus.type",
+    "KqlType": "string",
+    "SampleValue": "metricsResponse",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "recommendationsByCompletionStatus.properties.aggregations.id",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "value",
+    "DslOp": "$tolong",
+    "Path": "recommendationsByCompletionStatus.properties.aggregations.value",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "type",
+    "DslOp": "$tostring",
+    "Path": "overtimeMetrics.type",
+    "KqlType": "string",
+    "SampleValue": "overtimeMetricsResponse",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "values",
+    "DslOp": "$todouble",
+    "Path": "overtimeMetrics.properties.overtimeMetrics.RecommendationByRiskAndWorkload.values",
+    "KqlType": "real",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "dates",
+    "DslOp": "$todatetime",
+    "Path": "overtimeMetrics.properties.overtimeMetrics.RecommendationByRiskAndWorkload.dates",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "values",
+    "DslOp": "$todouble",
+    "Path": "overtimeMetrics.properties.overtimeMetrics.secureScoreOverTime.values",
+    "KqlType": "real",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "dates",
+    "DslOp": "$todatetime",
+    "Path": "overtimeMetrics.properties.overtimeMetrics.secureScoreOverTime.dates",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "type",
+    "DslOp": "$tostring",
+    "Path": "environmentsInformation.type",
+    "KqlType": "string",
+    "SampleValue": "metricsResponse",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "environmentsInformation.properties.aggregations.id",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "value",
+    "DslOp": "$tolong",
+    "Path": "environmentsInformation.properties.aggregations.value",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

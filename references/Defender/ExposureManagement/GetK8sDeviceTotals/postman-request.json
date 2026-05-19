@@ -1,0 +1,27 @@
+{
+  "EntryKey": "ExposureManagement::exposuremanagement-getk8sdevicetotals",
+  "Slug": "GetK8sDeviceTotals",
+  "SubArea": "ExposureManagement",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/k8s/machines/deviceTotals",
+  "PostmanPath": "/mtp/k8s/machines/deviceTotals",
+  "PostmanName": "Get Kubernetes device totals",
+  "PostmanAncestor": "mtp / k8s / machines / deviceTotals",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "30",
+      "Key": "lookingBackIndays"
+    },
+    {
+      "Value": "false",
+      "Key": "hideLowFidelityDevices"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.7026133Z"
+}

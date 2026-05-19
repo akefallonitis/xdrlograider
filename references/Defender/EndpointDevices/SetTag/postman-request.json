@@ -1,0 +1,19 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-settag",
+  "Slug": "SetTag",
+  "SubArea": "EndpointDevices",
+  "Method": "PATCH",
+  "ManifestPath": "/apiproxy/mtp/machineTag/machineTag",
+  "PostmanPath": "/mtp/machineTag/machineTag",
+  "PostmanName": "Set device tag",
+  "PostmanAncestor": "mtp / machineTag / machineTag",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"machineId\": \"string\",\n  \"tag\": \"string\",\n  \"action\": \"Add\"\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5917780Z"
+}

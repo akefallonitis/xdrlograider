@@ -1,0 +1,19 @@
+{
+  "EntryKey": "ThreatAnalytics::threatanalytics-updateoutbreakuserstate",
+  "Slug": "UpdateOutbreakUserState",
+  "SubArea": "ThreatAnalytics",
+  "Method": "PATCH",
+  "ManifestPath": "/apiproxy/mtp/threatAnalytics/outbreaks/userState",
+  "PostmanPath": "/mtp/threatAnalytics/outbreaks/userState",
+  "PostmanName": "Update outbreak user state",
+  "PostmanAncestor": "mtp / threatAnalytics / outbreaks / userState",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "[\n  {\n    \"IsFavorite\": false,\n    \"LastVisitTime\": \"2007-11-16T19:53:57.919Z\",\n    \"OutbreakId\": \"string\"\n  },\n  {\n    \"IsFavorite\": true,\n    \"LastVisitTime\": \"2017-08-07T22:28:18.064Z\",\n    \"OutbreakId\": \"string\"\n  }\n]",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.4746346Z"
+}

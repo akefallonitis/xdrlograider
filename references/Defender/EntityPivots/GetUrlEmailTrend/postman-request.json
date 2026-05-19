@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EntityPivots::entitypivots-geturlemailtrend",
+  "Slug": "GetUrlEmailTrend",
+  "SubArea": "EntityPivots",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/cloudPivot/cloud/pivot/portal/url/email/trend",
+  "PostmanPath": "/mtp/cloudPivot/cloud/pivot/portal/url/email/trend",
+  "PostmanName": "Get URL email trend",
+  "PostmanAncestor": "mtp / cloudPivot / cloud / pivot / portal / url / email / trend",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "entityId"
+    },
+    {
+      "Value": "30",
+      "Key": "daysToLookBack"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.6441399Z"
+}

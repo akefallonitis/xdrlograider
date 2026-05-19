@@ -1,0 +1,23 @@
+{
+  "EntryKey": "Files::files-getthreatreputation",
+  "Slug": "GetThreatReputation",
+  "SubArea": "Files",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/threatAnalyticsIndicators/stix/oneti/reputation/fileHash",
+  "PostmanPath": "/mtp/threatAnalyticsIndicators/stix/oneti/reputation/fileHash",
+  "PostmanName": "Get file hash reputation",
+  "PostmanAncestor": "mtp / threatAnalyticsIndicators / stix / oneti / reputation / fileHash",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "query"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8699545Z"
+}

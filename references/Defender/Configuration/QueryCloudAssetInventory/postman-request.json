@@ -1,0 +1,28 @@
+{
+  "EntryKey": "Configuration::configuration-querycloudassetinventory",
+  "Slug": "QueryCloudAssetInventory",
+  "SubArea": "Configuration",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mdc/views/inventory/assets",
+  "PostmanPath": "/mdc/views/inventory/assets",
+  "PostmanName": "Query cloud asset inventory",
+  "PostmanAncestor": "mdc / views / inventory / assets",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"schemaId\": \"string\",\n  \"schemaParameters\": {\n    \"key_0\": false\n  },\n  \"paging\": {}\n}",
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "c"
+    },
+    {
+      "Value": "string",
+      "Key": "v"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.2877688Z"
+}

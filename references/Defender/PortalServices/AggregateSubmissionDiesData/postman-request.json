@@ -1,0 +1,32 @@
+{
+  "EntryKey": "PortalServices::portalservices-aggregatesubmissiondiesdata",
+  "Slug": "AggregateSubmissionDiesData",
+  "SubArea": "PortalServices",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/di/Search/SubmissionDIESDataAggregation",
+  "PostmanPath": "/di/Search/SubmissionDIESDataAggregation",
+  "PostmanName": "Aggregate report submission data",
+  "PostmanAncestor": "di / Search / SubmissionDIESDataAggregation",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{}",
+  "Query": [
+    {
+      "Value": "82f86578-d5e5-cbef-8916-12ba2789f1ab",
+      "Key": "tenantid"
+    },
+    {
+      "Value": "09/30/1989 17:50:22",
+      "Key": "StartTime"
+    },
+    {
+      "Value": "09/30/1989 17:50:22",
+      "Key": "EndTime"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.2794504Z"
+}

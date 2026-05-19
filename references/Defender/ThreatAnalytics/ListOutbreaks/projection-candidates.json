@@ -1,0 +1,82 @@
+[
+  {
+    "ColumnName": "totalCount",
+    "DslOp": "$tolong",
+    "Path": "totalCount",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "outbreaks[].id",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "title",
+    "DslOp": "$tostring",
+    "Path": "outbreaks[].title",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "description",
+    "DslOp": "$tostring",
+    "Path": "outbreaks[].description",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "severity",
+    "DslOp": "$tostring",
+    "Path": "outbreaks[].severity",
+    "KqlType": "string",
+    "SampleValue": "Critical",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "publishedDate",
+    "DslOp": "$todatetime",
+    "Path": "outbreaks[].publishedDate",
+    "KqlType": "datetime",
+    "SampleValue": "08/27/1994 15:19:46",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "lastUpdatedDate",
+    "DslOp": "$todatetime",
+    "Path": "outbreaks[].lastUpdatedDate",
+    "KqlType": "datetime",
+    "SampleValue": "10/20/2023 15:31:40",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "impactedDevices",
+    "DslOp": "$tolong",
+    "Path": "outbreaks[].impactedDevices",
+    "KqlType": "long",
+    "SampleValue": "1544",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "exposedDevices",
+    "DslOp": "$tolong",
+    "Path": "outbreaks[].exposedDevices",
+    "KqlType": "long",
+    "SampleValue": "9144",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "mitigatedDevices",
+    "DslOp": "$tolong",
+    "Path": "outbreaks[].mitigatedDevices",
+    "KqlType": "long",
+    "SampleValue": "8337",
+    "Provenance": "nodoc-postman-response"
+  }
+]

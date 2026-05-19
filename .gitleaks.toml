@@ -1,0 +1,62 @@
+# gitleaks config — XdrLogRaider
+# Tests are 100% mocked offline · all "secrets" in tests/unit/ are operator-curated
+# synthetic fixtures used to verify Write-XdrTelemetry redaction · JWT-shape strings
+# for Auth.BearerTriad form-post parsers · RFC 6238 example TOTP seeds · etc.
+# Real test invariant is that these fixtures do NOT leak into emitted output
+# (asserted via Should-Not-Match · gitleaks would flag them but they're never live values).
+
+title = "xdrlograider"
+
+[allowlist]
+  description = "Synthetic fixtures · example env file · operator-curated unit-test mock data"
+  paths = [
+    '''^tests/fixtures/synthetic/.*''',
+    '''^tests/\.env\.local\.example$''',
+    # Π11 · CI fix · unit tests intentionally include fake secret-shaped fixture strings
+    # (JWT prefixes · TOTP seeds · PEM markers · auth-code shapes · API-key prefixes)
+    # to exercise parsers + redaction logic. All test files import only from src/ modules
+    # with explicit mock setup · no live HTTP · no real secrets.
+    '''^tests/unit/.*\.Tests\.ps1$''',
+    '''^tests/integration/.*\.Tests\.ps1$''',
+    # ITER10 · operator-curated catalogue fixture data · Postman placeholder GUIDs/tokens
+    # injected as canonical sample request shapes. Operator probe-derived · NOT live secrets.
+    # gitleaks regex incorrectly matches Postman sample GUIDs as sourcegraph-access-token.
+    '''^manifests/defender\.psd1$''',
+    '''^manifests/purview\.psd1$''',
+    '''^manifests/entra\.psd1$''',
+    '''^manifests/intune\.psd1$''',
+    '''^manifests/securitycopilot\.psd1$''',
+    # Capture-EndpointSchemas debug output strings contain redacted-token examples that
+    # gitleaks misclassifies. Tool reads live HTTP · output is operator-curated.
+    '''^tools/Capture-EndpointSchemas\.ps1$''',
+    # references/Defender/<sub>/<slug>/postman-request.json carries Postman sample values
+    '''^references/Defender/.*/postman-request\.json$''',
+    # ITER10 · Grant-Post-Deploy-Rbac contains Azure BUILT-IN role definition GUIDs
+    # (KvSecretsUser/MMP/StorageBlobDataOwner/etc) which are PUBLIC well-known IDs ·
+    # gitleaks misclassifies them as generic-api-key.
+    '''^tools/Grant-Post-Deploy-Rbac\.ps1$''',
+  ]
+  # Inline allow common test-fixture sentinel values (defence in depth · catches accidental
+  # use of these mock strings outside the tests/ path-allowlist above).
+  regexTarget = "line"
+  regexes = [
+    '''JBSWY3DPEHPK3PXP''',                            # RFC 6238 TOTP test seed
+    '''fake-sccauth-value''',
+    '''fake-xsrf-value''',
+    '''sk_live_abc123''',                              # obvious test-data prefix
+    '''eyJ0eXAiOiJKV1Qi\.\.\.''',                       # truncated JWT shape
+    '''-----BEGIN PRIVATE KEY-----\.\.\.''',           # truncated PEM marker
+    '''1\.MR\.5j7Q\.\.\.''',                           # truncated refresh-token shape
+    '''eyJhbGciOiJSUzI1NiJ9\.\.\.''',                  # truncated id_token shape
+    '''0\.AbCDEfGhIjKlMnOpQrStUvWxYz1234567890_test-code-value''',  # auth-code fixture
+    # Azure built-in role definition GUIDs (PUBLIC · documented at learn.microsoft.com/azure/role-based-access-control/built-in-roles)
+    '''4633458b-17de-408a-b874-0445c86b69e6''',  # Key Vault Secrets User
+    '''3913510d-42f4-4e42-8a64-420c390055eb''',  # Monitoring Metrics Publisher
+    '''0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3''',  # Storage Table Data Contributor
+    '''b7e6dc6d-f1e8-4753-8033-0f276bb0955b''',  # Storage Blob Data Owner
+    '''974c5e8b-45b9-4653-ba55-5f855dd0fb88''',  # Storage Queue Data Contributor
+  ]
+
+# Inherit gitleaks default ruleset
+[extend]
+useDefault = true

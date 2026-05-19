@@ -1,0 +1,74 @@
+[
+  {
+    "ColumnName": "completedTenants",
+    "DslOp": "$tostring",
+    "Path": "metadata.completedTenants",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "paginationGuid",
+    "DslOp": "$tostring",
+    "Path": "metadata.paginationGuid",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "originalIndex",
+    "DslOp": "$tolong",
+    "Path": "metadata.chosenItems.originalIndex",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "nextPagePointer",
+    "DslOp": "$tostring",
+    "Path": "metadata.chosenItems.nextPagePointer",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isLastItemInPage",
+    "DslOp": "$tobool",
+    "Path": "metadata.chosenItems.isLastItemInPage",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "originalPagePointer",
+    "DslOp": "$tostring",
+    "Path": "metadata.chosenItems.originalPagePointer",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "identifier",
+    "DslOp": "$tostring",
+    "Path": "metadata.chosenItems.identifier",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isResultBase64Encoded",
+    "DslOp": "$tobool",
+    "Path": "metadata.isResultBase64Encoded",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isMtoResponse",
+    "DslOp": "$tobool",
+    "Path": "isMtoResponse",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

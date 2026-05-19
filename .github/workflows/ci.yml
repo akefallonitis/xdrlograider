@@ -1,0 +1,172 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Π11 · CI hygiene additions
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Tier 1 ONLY (offline mocks · fixture replay · PSSA · ARM-TTK). No service-principal
+# secret · no `az` call · no live probe. T2/T3/T4 are local-only operator gates
+# (run from tests/.env.local on the operator's laptop).
+
+jobs:
+  anti-bloat-gate:
+    name: anti-bloat-gate (forbidden paths and stray .md)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - name: Reject forbidden directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail=0
+
+          # Forbidden top-level directories. Methodology / process / handoff /
+          # supplement / phase / reference document classes accumulated across
+          # prior iterations; not in the public connector repo.
+          # NOTE · references/ is INTENTIONALLY KEPT (operator decision · ships
+          # PII-free Phase 0 artefacts for contributor research at
+          # references/Defender/<sub>/<slug>/*.json · 1500+ files · operator-curated).
+          for dir in docs supplements phases; do
+            if [ -d "$dir" ]; then
+              echo "FORBIDDEN: top-level directory '$dir' exists. Connector repo ships only deploy/src/tests/tools/Package/manifests/references."
+              fail=1
+            fi
+          done
+
+          # tests/loop/ specifically — autonomous-loop methodology dir not in connector repo.
+          if [ -d "tests/loop" ]; then
+            echo "FORBIDDEN: tests/loop/ directory exists. Connector repo ships only Pester unit + integration tests."
+            fail=1
+          fi
+
+          # Forbidden top-level files. CHANGELOG.md was deleted because release
+          # notes live in GitHub Releases (auto-generated on tag).
+          for f in CHANGELOG.md MASTER-HANDOFF.md MASTER-PLAN.md; do
+            if [ -f "$f" ]; then
+              echo "FORBIDDEN: file '$f' exists. Plan rule: only README.md as .md in the repo."
+              fail=1
+            fi
+          done
+
+          # Glob patterns that historically grew unbounded.
+          if compgen -G "phase-*.md" > /dev/null || compgen -G "supplement-*.md" > /dev/null || compgen -G "audit-*.md" > /dev/null; then
+            echo "FORBIDDEN: phase-*.md, supplement-*.md, or audit-*.md files exist."
+            fail=1
+          fi
+
+          # Universal rule: every TRACKED .md file in the repo MUST be README.md.
+          # Use git ls-files (not find) so we ignore gitignored content (references/_external/
+          # has vendor READMEs that we DON'T track but CI's find would surface).
+          stray=$(git ls-files '*.md' | grep -v '^README\.md$' || true)
+          if [ -n "$stray" ]; then
+            echo "FORBIDDEN: tracked .md files outside README.md detected:"
+            echo "$stray"
+            echo "Plan rule: only README.md may exist as a tracked .md file. Release notes live in GitHub Releases; full operator runbook intentionally remains in README.md."
+            fail=1
+          fi
+
+          # references/ scope check: directory IS allowed (PII-free Phase 0 artefacts)
+          # BUT the tenant-data subset MUST stay gitignored (gitignore enforces · CI verifies).
+          # Reject any tenant-data file accidentally tracked.
+          tracked_tenant_data=$(git ls-files 'references/Defender/**/live.json' 'references/Defender/**/schema.json' 'references/Defender/**/entities.json' 2>/dev/null || true)
+          if [ -n "$tracked_tenant_data" ]; then
+            echo "FORBIDDEN: tenant-data file(s) tracked in references/Defender/ (must be gitignored per operator-PII policy):"
+            echo "$tracked_tenant_data"
+            fail=1
+          fi
+
+          if [ "$fail" -ne 0 ]; then exit 1; fi
+          echo "anti-bloat-gate: pass"
+
+  secret-scan:
+    name: secret-scan (gitleaks)
+    runs-on: ubuntu-latest
+    needs: anti-bloat-gate
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7  # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  tier1-unit:
+    name: tier1-unit (Pester + PSSA + ARM-TTK offline)
+    runs-on: ubuntu-latest
+    needs: anti-bloat-gate
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Cache PowerShell modules
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        with:
+          path: ~/.local/share/powershell/Modules
+          key: psmodules-${{ runner.os }}-pester-pssa-yaml-v1
+
+      - name: Install PowerShell deps
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Get-Module -ListAvailable Pester | Where-Object Version -ge '5.5.0')) {
+              Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck -MinimumVersion 5.5.0
+          }
+          if (-not (Get-Module -ListAvailable PSScriptAnalyzer)) {
+              Install-Module PSScriptAnalyzer -Scope CurrentUser -Force -SkipPublisherCheck
+          }
+          Get-Module -ListAvailable Pester, PSScriptAnalyzer | Select-Object Name, Version
+
+      # S-4 · L-1 → V-1 ordering gate (warn-only in CI)
+      # Replay tests (tests/unit/E2E.Replay.<Portal>.Tests.ps1) require L-1 live-probe
+      # fixtures (tests/fixtures/live/<portal>/auth.json) on disk. Since fixtures are
+      # gitignored, CI never has them — this gate's value is DOCUMENTING the dependency
+      # so local operators run pwsh tools/Probe-Auth-Local.ps1 -Portal All before V-1.
+      - name: L-1 to V-1 ordering gate (warn-only)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $portalPattern = '^E2E\.Replay\.(Defender|Purview|Entra|Intune|SecurityCopilot)\.Tests\.ps1$'
+          $replayTests = Get-ChildItem -Path tests/unit -Filter 'E2E.Replay.*.Tests.ps1' -ErrorAction SilentlyContinue
+          if (-not $replayTests) {
+            Write-Host "L-1 to V-1 gate: no replay tests found yet (expected pre-V-1 phase). Skipping check." -ForegroundColor Cyan
+            exit 0
+          }
+          $warnings = @()
+          foreach ($t in $replayTests) {
+            if ($t.Name -match $portalPattern) {
+              $portal = $Matches[1]
+              $authFixture = "tests/fixtures/live/$portal/auth.json"
+              if (-not (Test-Path $authFixture)) {
+                $warnings += "  WARN $($t.Name) requires $authFixture (run pwsh tools/Probe-Auth-Local.ps1 -Portal $portal)"
+              }
+            }
+          }
+          if ($warnings.Count -gt 0) {
+            Write-Host "L-1 to V-1 ordering: $($warnings.Count) replay tests have missing L-1 fixtures (gitignored · CI cannot supply them)" -ForegroundColor Yellow
+            $warnings | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
+            Write-Host ""
+            Write-Host "This is expected in CI (fixtures gitignored). Local operators must run L-1 probe before V-1 replay tests can pass with live data." -ForegroundColor Yellow
+          } else {
+            Write-Host "L-1 to V-1 ordering: all replay tests have fixtures on disk OR target portals without committed fixtures · pass." -ForegroundColor Green
+          }
+          # Warn-only · always exit 0
+          exit 0
+
+      - name: Run Tier 1 (offline)
+        shell: pwsh
+        run: pwsh -NoProfile -File ./tests/Run-Tests.ps1 -Tier 1 -FailFast

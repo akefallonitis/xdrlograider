@@ -1,0 +1,34 @@
+[
+  {
+    "ColumnName": "FileName",
+    "DslOp": "$tostring",
+    "Path": "Results.FileName",
+    "KqlType": "string",
+    "SampleValue": "System.Xml.XDocument.dll",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "Prevalence",
+    "DslOp": "$tolong",
+    "Path": "Results.Prevalence",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "FirstSeen",
+    "DslOp": "$todatetime",
+    "Path": "Results.FirstSeen",
+    "KqlType": "datetime",
+    "SampleValue": "2026-03-31T00:20:47.622266Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "LastSeen",
+    "DslOp": "$todatetime",
+    "Path": "Results.LastSeen",
+    "KqlType": "datetime",
+    "SampleValue": "2026-03-31T00:20:47.622266Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

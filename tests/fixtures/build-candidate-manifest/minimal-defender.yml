@@ -1,0 +1,18 @@
+# Minimal nodoc-shaped openapi YAML fixture for Build-CandidateManifest Pester tests.
+# Covers 3 operations across 3 tags to exercise: TagMap · DropSubAreas · DropPathRegex · DropOpIdRegex
+paths:
+  /mtp/management/tenant/context:
+    get:
+      operationId: TenantContext.Get
+      tags: [Portal Services]
+      summary: Tenant context endpoint · health probe canonical
+  /mtp/advanced-hunting/run:
+    post:
+      operationId: AdvancedHunting.Run
+      tags: [Advanced Hunting]
+      summary: Should be DROPPED by Memory Rule 2 (Defender wholesale-excluded)
+  /msgraph/v1.0/security/alerts:
+    get:
+      operationId: GraphProxy.Alerts.List
+      tags: [Alerts]
+      summary: Should be DROPPED by DropPathRegex (graph proxy)

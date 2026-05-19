@@ -1,0 +1,26 @@
+{
+  "Name": "XdrLogRaider",
+  "Author": "Alex Kefallonitis - al.kefallonitis@gmail.com",
+  "Logo": "https://raw.githubusercontent.com/akefallonitis/xdrlograider/v0.1.0/Package/Logo/logo.svg",
+  "Description": "The **XdrLogRaider** Microsoft Sentinel solution provides a data connector that harvests the `security.microsoft.com/apiproxy/*` Microsoft Defender XDR portal-internal surface (Action Center, Configuration, Endpoint Devices, Identity, Multi-Tenant, Secure Score, etc.) that Microsoft does not publicly document. Unattended Service Account TOTP/Passkey sign-in. **No Microsoft SLA** on the /apiproxy/ surface — operator-curated · breaking changes possible. v0.1.0 ships connector + sample queries only · analytic rules + workbooks in v0.2.0.",
+  "BasePath": "../",
+  "Version": "1.0.0",
+  "Metadata": "Package/SolutionMetadata.json",
+  "TemplateSpec": true,
+  "Is1PConnector": false,
+  "PublisherId": "xdrlograider",
+  "OfferId": "xdrlograider-sentinel-solution",
+  "ProviderName": ["XdrLogRaider"],
+  "StaticDataConnectorIds": [ "XdrLogRaiderInternal" ],
+  "DataConnectors": [
+    "deploy/sentinelContent.json"
+  ],
+  "AnalyticalRules": [],
+  "HuntingQueries": [],
+  "Parsers": [],
+  "Workbooks": [],
+  "Playbooks": [],
+  "Watchlists": [],
+  "Dependencies": {},
+  "ContentSchemaVersion": "3.0.0"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "ColumnName": "category",
+    "DslOp": "$tostring",
+    "Path": "results.category",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "subCategories",
+    "DslOp": "$tostring",
+    "Path": "results.subCategories",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "recordsCount",
+    "DslOp": "$tolong",
+    "Path": "recordsCount",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

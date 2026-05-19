@@ -1,0 +1,19 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-setrbacgroup",
+  "Slug": "SetRbacGroup",
+  "SubArea": "EndpointDevices",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/rbacGroupAssignment/updateMachineRbacGroupAssignments",
+  "PostmanPath": "/mtp/rbacGroupAssignment/updateMachineRbacGroupAssignments",
+  "PostmanName": "Set device RBAC group",
+  "PostmanAncestor": "mtp / rbacGroupAssignment / updateMachineRbacGroupAssignments",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"machineId\": \"string\",\n  \"rbacGroupId\": \"string\"\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5878404Z"
+}

@@ -1,0 +1,23 @@
+{
+  "EntryKey": "Files::files-getdeepanalysisstatus",
+  "Slug": "GetDeepAnalysisStatus",
+  "SubArea": "Files",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/mdeDeepAnalysis/api/DeepAnalysisRequest",
+  "PostmanPath": "/mtp/mdeDeepAnalysis/api/DeepAnalysisRequest",
+  "PostmanName": "Get deep analysis request state",
+  "PostmanAncestor": "mtp / mdeDeepAnalysis / api / DeepAnalysisRequest",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "sha1"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8406279Z"
+}

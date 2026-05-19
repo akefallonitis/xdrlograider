@@ -1,0 +1,194 @@
+[
+  {
+    "ColumnName": "fileMonitoringEnabled",
+    "DslOp": "$tobool",
+    "Path": "fileMonitoringEnabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "ignoreExternalAzIP",
+    "DslOp": "$tobool",
+    "Path": "ignoreExternalAzIP",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "allowAzIP",
+    "DslOp": "$tobool",
+    "Path": "allowAzIP",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "managedDevicesCrl",
+    "DslOp": "$tobool",
+    "Path": "managedDevicesCrl",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "showSuffixDisclaimer",
+    "DslOp": "$tobool",
+    "Path": "showSuffixDisclaimer",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "customWarnURL",
+    "DslOp": "$tostring",
+    "Path": "customWarnURL",
+    "KqlType": "string",
+    "SampleValue": "https://notification.contoso.com/warn",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "enforceSessionProxy",
+    "DslOp": "$tobool",
+    "Path": "enforceSessionProxy",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "enableBypassSuffix",
+    "DslOp": "$tobool",
+    "Path": "enableBypassSuffix",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "appControlEnabled",
+    "DslOp": "$tobool",
+    "Path": "appControlEnabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "rmsDecryptAllConsented",
+    "DslOp": "$tobool",
+    "Path": "rmsDecryptAllConsented",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "quarantineUserNotification",
+    "DslOp": "$tostring",
+    "Path": "quarantineUserNotification",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "MASKED_SUBJECT",
+    "DslOp": "$tostring",
+    "Path": "emailMaskPolicyOptions.MASKED_SUBJECT",
+    "KqlType": "string",
+    "SampleValue": "CONSOLE2_GENERAL_SETTINGS_EMAIL_MASK_POLICIES_NAME_MASKED_SUBJECT",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "ONLY_ID",
+    "DslOp": "$tostring",
+    "Path": "emailMaskPolicyOptions.ONLY_ID",
+    "KqlType": "string",
+    "SampleValue": "CONSOLE2_GENERAL_SETTINGS_EMAIL_MASK_POLICIES_NAME_ONLY_ID",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "FULL_CONTENT",
+    "DslOp": "$tostring",
+    "Path": "emailMaskPolicyOptions.FULL_CONTENT",
+    "KqlType": "string",
+    "SampleValue": "CONSOLE2_GENERAL_SETTINGS_EMAIL_MASK_POLICIES_NAME_FULL_CONTENT",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "mdatpGlobalBypassDurationHours",
+    "DslOp": "$tostring",
+    "Path": "mdatpGlobalBypassDurationHours",
+    "KqlType": "string",
+    "SampleValue": "8",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "blockAppsURL",
+    "DslOp": "$tostring",
+    "Path": "blockAppsURL",
+    "KqlType": "string",
+    "SampleValue": "https://notification.contoso.com/block",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "allowAzureSecurityIntegration",
+    "DslOp": "$tobool",
+    "Path": "allowAzureSecurityIntegration",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "allowScopedAdminsInMTP",
+    "DslOp": "$tobool",
+    "Path": "allowScopedAdminsInMTP",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "adminViewUsers",
+    "DslOp": "$tostring",
+    "Path": "adminViewUsers",
+    "KqlType": "string",
+    "SampleValue": "nathan@contoso.com",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "quarantineSiteId",
+    "DslOp": "$tostring",
+    "Path": "quarantineSiteId",
+    "KqlType": "string",
+    "SampleValue": "64f8e4e9210b40482c53f315",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "orgDisplayName",
+    "DslOp": "$tostring",
+    "Path": "orgDisplayName",
+    "KqlType": "string",
+    "SampleValue": "Contoso",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "mdatpGlobalSeverityLevel",
+    "DslOp": "$tolong",
+    "Path": "mdatpGlobalSeverityLevel",
+    "KqlType": "long",
+    "SampleValue": "3",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "environmentName",
+    "DslOp": "$tostring",
+    "Path": "environmentName",
+    "KqlType": "string",
+    "SampleValue": "Contoso",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "emailMaskPolicy",
+    "DslOp": "$tostring",
+    "Path": "emailMaskPolicy",
+    "KqlType": "string",
+    "SampleValue": "MASKED_SUBJECT",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

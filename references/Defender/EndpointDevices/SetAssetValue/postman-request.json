@@ -1,0 +1,19 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-setassetvalue",
+  "Slug": "SetAssetValue",
+  "SubArea": "EndpointDevices",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/assetvalue/machineAssetValue",
+  "PostmanPath": "/mtp/assetvalue/machineAssetValue",
+  "PostmanName": "Set device asset value",
+  "PostmanAncestor": "mtp / assetvalue / machineAssetValue",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"machineId\": \"string\",\n  \"assetValue\": \"High\"\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5760625Z"
+}

@@ -1,0 +1,27 @@
+{
+  "EntryKey": "Identity::identity-getmanager",
+  "Slug": "GetManager",
+  "SubArea": "Identity",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mdi/identity/userapiservice/manager",
+  "PostmanPath": "/mdi/identity/userapiservice/manager",
+  "PostmanName": "Get user manager",
+  "PostmanAncestor": "mdi / identity / userapiservice / manager",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "managerAd"
+    },
+    {
+      "Value": "6f371e9a-3aa5-6277-3f1e-56a06623826d",
+      "Key": "userAad"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.9924435Z"
+}

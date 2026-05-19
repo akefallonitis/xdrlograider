@@ -1,0 +1,27 @@
+{
+  "EntryKey": "Files::files-getdevicetrend",
+  "Slug": "GetDeviceTrend",
+  "SubArea": "Files",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/cloudPivot/cloud/pivot/portal/file/device/trend",
+  "PostmanPath": "/mtp/cloudPivot/cloud/pivot/portal/file/device/trend",
+  "PostmanName": "Get file device trend",
+  "PostmanAncestor": "mtp / cloudPivot / cloud / pivot / portal / file / device / trend",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "entityId"
+    },
+    {
+      "Value": "30",
+      "Key": "daysToLookBack"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8529663Z"
+}

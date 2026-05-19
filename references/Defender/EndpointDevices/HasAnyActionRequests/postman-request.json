@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-hasanyactionrequests",
+  "Slug": "HasAnyActionRequests",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/responseApiPortal/requests/machine/any",
+  "PostmanPath": "/mtp/responseApiPortal/requests/machine/any",
+  "PostmanName": "Check for any device response actions",
+  "PostmanAncestor": "mtp / responseApiPortal / requests / machine / any",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "machineId"
+    },
+    {
+      "Value": "string",
+      "Key": "tenantIds"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5455699Z"
+}

@@ -1,0 +1,19 @@
+{
+  "EntryKey": "EndpointConfiguration::endpointconfiguration-setadvancedfeatures",
+  "Slug": "SetAdvancedFeatures",
+  "SubArea": "EndpointConfiguration",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/settings/SaveAdvancedFeaturesSetting",
+  "PostmanPath": "/mtp/settings/SaveAdvancedFeaturesSetting",
+  "PostmanName": "Set advanced features settings",
+  "PostmanAncestor": "mtp / settings / SaveAdvancedFeaturesSetting",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"automatedInvestigation\": false,\n  \"liveResponse\": false,\n  \"liveResponseUnsignedScriptExecution\": true,\n  \"liveResponseForServers\": true,\n  \"customNetworkIndicators\": true,\n  \"tamperProtection\": false,\n  \"showUserDetails\": true,\n  \"skypeForBusinessIntegration\": false,\n  \"officeIntegration\": false,\n  \"microsoftThreatExperts\": true,\n  \"webContentFiltering\": true,\n  \"deviceDiscovery\": true,\n  \"previewExperience\": false,\n  \"microsoftIntunConnection\": false,\n  \"endpointDlpEnabled\": false,\n  \"authenticatedTelemetry\": false\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4093433Z"
+}

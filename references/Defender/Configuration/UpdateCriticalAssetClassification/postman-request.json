@@ -1,0 +1,19 @@
+{
+  "EntryKey": "Configuration::configuration-updatecriticalassetclassification",
+  "Slug": "UpdateCriticalAssetClassification",
+  "SubArea": "Configuration",
+  "Method": "PUT",
+  "ManifestPath": "/apiproxy/mtp/xspmatlas/assetrules",
+  "PostmanPath": "/mtp/xspmatlas/assetrules",
+  "PostmanName": "Update critical asset classification",
+  "PostmanAncestor": "mtp / xspmatlas / assetrules",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"ruleName\": \"string\",\n  \"query\": \"string\",\n  \"criticalityLevel\": 6232,\n  \"description\": \"string\"\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.3097146Z"
+}

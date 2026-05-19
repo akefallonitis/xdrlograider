@@ -1,0 +1,33 @@
+{
+  "EntryKey": "Files::files-getvirustotalreport",
+  "Slug": "GetVirusTotalReport",
+  "SubArea": "Files",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/files/files/{Sha256}/virustotal",
+  "PostmanPath": "/mtp/files/files/:Sha256/virustotal",
+  "PostmanName": "Get VirusTotal report",
+  "PostmanAncestor": "mtp / files / files / {Sha256} / virustotal",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "fileIdentifier"
+    },
+    {
+      "Value": "true",
+      "Key": "UseVirusTotalFromEntityPagesService"
+    },
+    {
+      "Value": "null",
+      "Key": "tenantIds"
+    }
+  ],
+  "Variables": {
+    "Sha256": "string"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8730405Z"
+}

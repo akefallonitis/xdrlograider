@@ -1,0 +1,23 @@
+[
+  {
+    "ColumnName": "assetType",
+    "DslOp": "$tostring",
+    "Path": "schema[].assetType",
+    "KqlType": "string",
+    "SampleValue": "Devices"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "schema[].properties[].name",
+    "KqlType": "string",
+    "SampleValue": "Asset Value"
+  },
+  {
+    "ColumnName": "propertyType",
+    "DslOp": "$tostring",
+    "Path": "schema[].properties[].propertyType",
+    "KqlType": "string",
+    "SampleValue": "ClosedList"
+  }
+]

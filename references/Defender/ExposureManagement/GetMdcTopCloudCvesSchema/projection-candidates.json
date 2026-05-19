@@ -1,0 +1,79 @@
+[
+  {
+    "ColumnName": "schemaId",
+    "DslOp": "$tostring",
+    "Path": "properties.schemaId",
+    "KqlType": "string",
+    "SampleValue": "Dashboard_TopCloudCVEs"
+  },
+  {
+    "ColumnName": "primaryColumnId",
+    "DslOp": "$tostring",
+    "Path": "properties.primaryColumnId",
+    "KqlType": "string",
+    "SampleValue": "cveName"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "properties.columnDefinitions[].id",
+    "KqlType": "string",
+    "SampleValue": "cveName"
+  },
+  {
+    "ColumnName": "dataType",
+    "DslOp": "$tostring",
+    "Path": "properties.columnDefinitions[].dataType",
+    "KqlType": "string",
+    "SampleValue": "String"
+  },
+  {
+    "ColumnName": "sourceDataType",
+    "DslOp": "$tostring",
+    "Path": "properties.columnDefinitions[].sourceDataType",
+    "KqlType": "string",
+    "SampleValue": "String"
+  },
+  {
+    "ColumnName": "displayName",
+    "DslOp": "$tostring",
+    "Path": "properties.columnDefinitions[].displayName",
+    "KqlType": "string",
+    "SampleValue": "Name"
+  },
+  {
+    "ColumnName": "sortable",
+    "DslOp": "$tobool",
+    "Path": "properties.columnDefinitions[].settings.sortable",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "displayMode",
+    "DslOp": "$tostring",
+    "Path": "properties.columnDefinitions[].settings.displayMode",
+    "KqlType": "string",
+    "SampleValue": "Visible"
+  },
+  {
+    "ColumnName": "searchMode",
+    "DslOp": "$tostring",
+    "Path": "properties.columnDefinitions[].settings.searchMode",
+    "KqlType": "string",
+    "SampleValue": "Always"
+  },
+  {
+    "ColumnName": "weight",
+    "DslOp": "$tostring",
+    "Path": "properties.columnDefinitions[].settings.weight",
+    "KqlType": "string",
+    "SampleValue": "Light"
+  },
+  {
+    "ColumnName": "type",
+    "DslOp": "$tostring",
+    "Path": "type",
+    "KqlType": "string",
+    "SampleValue": "schemaResponse"
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EntityPivots::entitypivots-getdomaindeviceprevalence",
+  "Slug": "GetDomainDevicePrevalence",
+  "SubArea": "EntityPivots",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/cloudPivot/cloud/pivot/portal/domain/device/prevalence",
+  "PostmanPath": "/mtp/cloudPivot/cloud/pivot/portal/domain/device/prevalence",
+  "PostmanName": "Get domain device prevalence",
+  "PostmanAncestor": "mtp / cloudPivot / cloud / pivot / portal / domain / device / prevalence",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "entityId"
+    },
+    {
+      "Value": "30",
+      "Key": "daysToLookBack"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.6073730Z"
+}

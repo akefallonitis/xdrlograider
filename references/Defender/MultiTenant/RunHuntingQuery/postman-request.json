@@ -1,0 +1,21 @@
+{
+  "EntryKey": "MultiTenant::multitenant-runhuntingquery",
+  "Slug": "RunHuntingQuery",
+  "SubArea": "MultiTenant",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtoapi/tenants/{TenantId}/huntingQueries/run",
+  "PostmanPath": "/mtoapi/tenants/:TenantId/huntingQueries/run",
+  "PostmanName": "Run cross-tenant hunting query",
+  "PostmanAncestor": "mtoapi / tenants / {TenantId} / huntingQueries / run",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"query\": \"string\",\n  \"timespan\": \"string\"\n}",
+  "Query": [],
+  "Variables": {
+    "TenantId": "6f371e9a-3aa5-6277-3f1e-56a06623826d"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.2751973Z"
+}

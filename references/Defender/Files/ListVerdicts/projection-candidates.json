@@ -1,0 +1,26 @@
+[
+  {
+    "ColumnName": "Count",
+    "DslOp": "$tolong",
+    "Path": "Count",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "ThreatName",
+    "DslOp": "$tostring",
+    "Path": "FileVerdicts[].ThreatName",
+    "KqlType": "string",
+    "SampleValue": "Trojan:Win32/Example",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "RelatedAlertsCount",
+    "DslOp": "$tolong",
+    "Path": "FileVerdicts[].RelatedAlertsCount",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  }
+]

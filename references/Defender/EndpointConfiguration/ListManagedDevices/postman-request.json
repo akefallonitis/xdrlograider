@@ -1,0 +1,31 @@
+{
+  "EntryKey": "EndpointConfiguration::endpointconfiguration-listmanageddevices",
+  "Slug": "ListManagedDevices",
+  "SubArea": "EndpointConfiguration",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices",
+  "PostmanPath": "/mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices",
+  "PostmanName": "Resolve Intune managed device",
+  "PostmanAncestor": "mtp / unifiedExperience / mde / configurationManagement / mem / proxy / deviceManagement / managedDevices",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "$filter"
+    },
+    {
+      "Value": "1",
+      "Key": "$top"
+    },
+    {
+      "Value": "id",
+      "Key": "$select"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4000089Z"
+}

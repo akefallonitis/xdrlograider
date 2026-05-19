@@ -1,0 +1,226 @@
+[
+  {
+    "ColumnName": "Id",
+    "DslOp": "$tostring",
+    "Path": "Items[].Id",
+    "KqlType": "string",
+    "SampleValue": "a0843dd6-dd39-4baa-9124-b76b0452c1a8"
+  },
+  {
+    "ColumnName": "DisplayName",
+    "DslOp": "$tostring",
+    "Path": "Items[].DisplayName",
+    "KqlType": "string",
+    "SampleValue": "OSINT Profile: SHub Reaper macOS Stealer Spoofs Apple, Google, and Microsoft in a Single Attack Chain"
+  },
+  {
+    "ColumnName": "LastUpdatedOn",
+    "DslOp": "$todatetime",
+    "Path": "Items[].LastUpdatedOn",
+    "KqlType": "datetime",
+    "SampleValue": "05/19/2026 19:09:38"
+  },
+  {
+    "ColumnName": "CreatedOn",
+    "DslOp": "$todatetime",
+    "Path": "Items[].CreatedOn",
+    "KqlType": "datetime",
+    "SampleValue": "05/19/2026 19:09:38"
+  },
+  {
+    "ColumnName": "StartedOn",
+    "DslOp": "$todatetime",
+    "Path": "Items[].StartedOn",
+    "KqlType": "datetime",
+    "SampleValue": "05/19/2026 18:26:36"
+  },
+  {
+    "ColumnName": "ImpactedDevicesCount",
+    "DslOp": "$tolong",
+    "Path": "Items[].ImpactedEntitiesCount.ImpactedDevicesCount",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "HasDevicesDefinition",
+    "DslOp": "$tostring",
+    "Path": "Items[].ImpactedEntitiesCount.HasDevicesDefinition",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "ImpactedMailboxesCount",
+    "DslOp": "$tolong",
+    "Path": "Items[].ImpactedEntitiesCount.ImpactedMailboxesCount",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "HasMailboxesDefinition",
+    "DslOp": "$tostring",
+    "Path": "Items[].ImpactedEntitiesCount.HasMailboxesDefinition",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "ImpactedUsersCount",
+    "DslOp": "$tolong",
+    "Path": "Items[].ImpactedEntitiesCount.ImpactedUsersCount",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "ImpactedCloudAppsCount",
+    "DslOp": "$tolong",
+    "Path": "Items[].ImpactedEntitiesCount.ImpactedCloudAppsCount",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "ImpactedCloudResourcesCount",
+    "DslOp": "$tolong",
+    "Path": "Items[].ImpactedEntitiesCount.ImpactedCloudResourcesCount",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "ImpactedAIAgentsCount",
+    "DslOp": "$tolong",
+    "Path": "Items[].ImpactedEntitiesCount.ImpactedAIAgentsCount",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "ActiveAlertsCount",
+    "DslOp": "$tolong",
+    "Path": "Items[].AlertsCount.ActiveAlertsCount",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "ResolvedAlertsCount",
+    "DslOp": "$tolong",
+    "Path": "Items[].AlertsCount.ResolvedAlertsCount",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "OutbreakId",
+    "DslOp": "$tostring",
+    "Path": "Items[].UserState.OutbreakId",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000"
+  },
+  {
+    "ColumnName": "LastVisitTime",
+    "DslOp": "$tostring",
+    "Path": "Items[].UserState.LastVisitTime",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "IsFavorite",
+    "DslOp": "$tobool",
+    "Path": "Items[].UserState.IsFavorite",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "ReportType",
+    "DslOp": "$tostring",
+    "Path": "Items[].ReportType",
+    "KqlType": "string",
+    "SampleValue": "ToolOrTechnique"
+  },
+  {
+    "ColumnName": "ExposureSeverity",
+    "DslOp": "$tostring",
+    "Path": "Items[].ExposureSeverity",
+    "KqlType": "string",
+    "SampleValue": "None"
+  },
+  {
+    "ColumnName": "ExposureScore",
+    "DslOp": "$tolong",
+    "Path": "Items[].ExposureScore",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "ExposedDevices",
+    "DslOp": "$tolong",
+    "Path": "Items[].ExposedDevices",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "ScaExposedDevices",
+    "DslOp": "$tolong",
+    "Path": "Items[].ScaExposedDevices",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "VaExposedDevices",
+    "DslOp": "$tolong",
+    "Path": "Items[].VaExposedDevices",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "AllCvesAreNotSupported",
+    "DslOp": "$tobool",
+    "Path": "Items[].AllCvesAreNotSupported",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "CveAndScidNotDefined",
+    "DslOp": "$tobool",
+    "Path": "Items[].CveAndScidNotDefined",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "CveNotDefined",
+    "DslOp": "$tobool",
+    "Path": "Items[].CveNotDefined",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "ScidNotDefined",
+    "DslOp": "$tobool",
+    "Path": "Items[].ScidNotDefined",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "IsTaVNext",
+    "DslOp": "$tobool",
+    "Path": "Items[].IsTaVNext",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "DevicesCalculationStatus",
+    "DslOp": "$tostring",
+    "Path": "DevicesCalculationStatus",
+    "KqlType": "string",
+    "SampleValue": "Calculated"
+  },
+  {
+    "ColumnName": "MailboxesCalculationStatus",
+    "DslOp": "$tostring",
+    "Path": "MailboxesCalculationStatus",
+    "KqlType": "string",
+    "SampleValue": "Skipped"
+  },
+  {
+    "ColumnName": "ThreatExposureCalculationStatus",
+    "DslOp": "$tostring",
+    "Path": "ThreatExposureCalculationStatus",
+    "KqlType": "string",
+    "SampleValue": "Calculated"
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getmachinemarkedevents",
+  "Slug": "GetMachineMarkedEvents",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/getMachineMarkedEvents/machines/{MachineId}/eventMarks",
+  "PostmanPath": "/mtp/getMachineMarkedEvents/machines/:MachineId/eventMarks",
+  "PostmanName": "Get machine marked events",
+  "PostmanAncestor": "mtp / getMachineMarkedEvents / machines / {MachineId} / eventMarks",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "machineId"
+    },
+    {
+      "Value": "string",
+      "Key": "senseMachineId"
+    },
+    {
+      "Value": "string",
+      "Key": "computerDnsName"
+    },
+    {
+      "Value": "string",
+      "Key": "tenantIds"
+    },
+    {
+      "Value": "string",
+      "Key": "armId"
+    }
+  ],
+  "Variables": {
+    "MachineId": "string"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4888730Z"
+}

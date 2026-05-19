@@ -1,0 +1,19 @@
+{
+  "EntryKey": "Files::files-querythreatanalyticsoutbreaks",
+  "Slug": "QueryThreatAnalyticsOutbreaks",
+  "SubArea": "Files",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/threatAnalyticsIndicators/stix/outbreaks/indicators/outbreaks/query",
+  "PostmanPath": "/mtp/threatAnalyticsIndicators/stix/outbreaks/indicators/outbreaks/query",
+  "PostmanName": "Query threat analytics outbreaks for file hash",
+  "PostmanAncestor": "mtp / threatAnalyticsIndicators / stix / outbreaks / indicators / outbreaks / query",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"condition\": {\n    \"stixObjectType\": \"indicator\",\n    \"conditionConnective\": \"And\",\n    \"clauses\": [\n      {\n        \"field\": \"pattern\",\n        \"operator\": \"StringContains\",\n        \"values\": [\n          \"FC513B434751BB1A1D748344DB287718DADCBA9F90BCA54D0579699B5131CFCA\"\n        ]\n      },\n      {\n        \"field\": \"pattern\",\n        \"operator\": \"StringContains\",\n        \"values\": [\n          \"FC513B434751BB1A1D748344DB287718DADCBA9F90BCA54D0579699B5131CFCA\"\n        ]\n      }\n    ],\n    \"isUnconditional\": false\n  },\n  \"sortBy\": {\n    \"field\": \"lastUpdatedTimeUtc\",\n    \"direction\": \"DESC\"\n  },\n  \"minPageSize\": 100,\n  \"maxPageSize\": 100\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8966609Z"
+}

@@ -1,0 +1,23 @@
+{
+  "EntryKey": "Configuration::configuration-getdisabledalertservices",
+  "Slug": "GetDisabledAlertServices",
+  "SubArea": "Configuration",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/alertsApiService/workloads/disabled",
+  "PostmanPath": "/mtp/alertsApiService/workloads/disabled",
+  "PostmanName": "Get disabled alert service settings",
+  "PostmanAncestor": "mtp / alertsApiService / workloads / disabled",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "includeDetails"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.1640743Z"
+}

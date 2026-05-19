@@ -1,0 +1,202 @@
+[
+  {
+    "ColumnName": "_id",
+    "DslOp": "$tostring",
+    "Path": "data[]._id",
+    "KqlType": "string",
+    "SampleValue": "63db26067e008a733a79613d",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "data[].id",
+    "KqlType": "string",
+    "SampleValue": "000000200000000000000000",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "target",
+    "DslOp": "$tolong",
+    "Path": "data[].target",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "type",
+    "DslOp": "$tolong",
+    "Path": "data[].type",
+    "KqlType": "long",
+    "SampleValue": "2",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "data[].name",
+    "KqlType": "string",
+    "SampleValue": "External users",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "template",
+    "DslOp": "$tostring",
+    "Path": "data[].nameTemplate.template",
+    "KqlType": "string",
+    "SampleValue": "SAGE_BUILTIN_TAG_EXTERNAL_USER_NAME",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "parameters",
+    "DslOp": "$tostring",
+    "Path": "data[].nameTemplate.parameters",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "description",
+    "DslOp": "$tostring",
+    "Path": "data[].description",
+    "KqlType": "string",
+    "SampleValue": "Either a user who is not a member of any of the managed domains you configured in General settings or a third-party app",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "template",
+    "DslOp": "$tostring",
+    "Path": "data[].descriptionTemplate.template",
+    "KqlType": "string",
+    "SampleValue": "SAGE_BUILTIN_TAG_EXTERNAL_USER_NAME",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "parameters",
+    "DslOp": "$tostring",
+    "Path": "data[].descriptionTemplate.parameters",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "visibility",
+    "DslOp": "$tolong",
+    "Path": "data[].visibility",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "status",
+    "DslOp": "$tolong",
+    "Path": "data[].status",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "usersCount",
+    "DslOp": "$tolong",
+    "Path": "data[].usersCount",
+    "KqlType": "long",
+    "SampleValue": "862",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "lastScannedBySage",
+    "DslOp": "$tolong",
+    "Path": "data[].lastScannedBySage",
+    "KqlType": "long",
+    "SampleValue": "1775067898835",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "lastUpdatedTimestamp",
+    "DslOp": "$todouble",
+    "Path": "data[].lastUpdatedTimestamp",
+    "KqlType": "real",
+    "SampleValue": "1769885561135.07",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "shouldNotify",
+    "DslOp": "$tobool",
+    "Path": "data[].shouldNotify",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "createdBy",
+    "DslOp": "$tostring",
+    "Path": "data[].createdBy",
+    "KqlType": "string",
+    "SampleValue": "nathan@contoso.com",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "deletionStatus",
+    "DslOp": "$tolong",
+    "Path": "data[].deletionStatus",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "appId",
+    "DslOp": "$tolong",
+    "Path": "data[].appId",
+    "KqlType": "long",
+    "SampleValue": "11161",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "appId",
+    "DslOp": "$tolong",
+    "Path": "data[].source.appId",
+    "KqlType": "long",
+    "SampleValue": "11161",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "type",
+    "DslOp": "$tolong",
+    "Path": "data[].source.type",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "groupType",
+    "DslOp": "$tolong",
+    "Path": "data[].source.groupType",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "groupId",
+    "DslOp": "$tostring",
+    "Path": "data[].source.groupId",
+    "KqlType": "string",
+    "SampleValue": "62463dca-3025-4a93-b444-000b3eaa35e8",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "_tid",
+    "DslOp": "$tolong",
+    "Path": "data[]._tid",
+    "KqlType": "long",
+    "SampleValue": "79819259",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "successfullyImportedBySage",
+    "DslOp": "$tobool",
+    "Path": "data[].successfullyImportedBySage",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  }
+]

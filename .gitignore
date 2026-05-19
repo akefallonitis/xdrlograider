@@ -1,0 +1,82 @@
+# Operator secrets — NEVER commit
+tests/.env.local
+tests/.env.local.*
+!tests/.env.local.example
+
+# Operator-local ARM parameter files (contain secrets · UPN/password/TOTP/passkey-pem)
+# ITER11 HIGH2 · sample claims this is ignored but it wasn't · explicit exclusion now.
+deploy/parameters.local.json
+deploy/parameters.*.local.json
+parameters.local.json
+parameters.*.local.json
+
+# Live captures (operator-tenant data; possibly sensitive)
+tests/fixtures/live/**/*
+!tests/fixtures/live/.gitkeep
+!tests/fixtures/live/**/.gitkeep
+
+# Iteration results (LIVE-PROOF.json etc.)
+tests/results/
+
+# References · operator-curated research vault.
+# Public repo SHIPS PII-free Phase 0 build artefacts (metadata · pagination ·
+# time-filter · projection-candidates · postman-request · schema-fingerprint)
+# so future contributors can audit provenance / re-derive without operator's
+# tenant access. Excludes only the tenant-data files + operator-local research.
+
+# Vendor research (nodoc · XDRInternals · DefenderHarvester) · operator-curated
+references/_external/
+
+# Operator-local cross-correlation indices (build-time helpers · regenerable)
+references/_index/
+
+# v0.3.0 scaffold portals · empty stubs (kept gitignored until activated)
+references/Entra/
+references/Intune/
+references/Purview/
+references/SecurityCopilot/
+
+# Per-endpoint tenant-data files (operator-lab-tenant responses · contain
+# OrgId · feature flags · environment info · MUST NOT ship publicly)
+references/Defender/*/*/live.json
+references/Defender/*/*/schema.json
+references/Defender/*/*/entities.json
+
+# Operator-local manifests audit artefacts · regenerable at CI by tools/Validate-*
+# at gate-time. NOT pre-committed (paths in these contain operator's local repo
+# location · would leak PII).
+manifests/_gate-*.json
+manifests/_projection-coverage.json
+manifests/_step5-audit.json
+manifests/_step7-classification.json
+
+# Build artefacts
+bin/
+obj/
+*.zip
+*.sig
+*.pem
+
+# PowerShell / Pester
+.vscode/
+*.psproj
+TestResults/
+coverage.xml
+coverage.*.xml
+pester.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+*.swp
+*~
+.idea/
+
+# Azure Functions local
+local.settings.json
+bin/
+obj/
+dist/

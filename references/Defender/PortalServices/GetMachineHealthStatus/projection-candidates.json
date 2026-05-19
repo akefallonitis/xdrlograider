@@ -1,0 +1,23 @@
+[
+  {
+    "ColumnName": "dimensionName",
+    "DslOp": "$tostring",
+    "Path": "dimensionName",
+    "KqlType": "string",
+    "SampleValue": "healthStatus"
+  },
+  {
+    "ColumnName": "date",
+    "DslOp": "$todatetime",
+    "Path": "data[].date",
+    "KqlType": "datetime",
+    "SampleValue": "05/19/2026 03:00:00"
+  },
+  {
+    "ColumnName": "Inactive",
+    "DslOp": "$tolong",
+    "Path": "data[].values.Inactive",
+    "KqlType": "long",
+    "SampleValue": "12"
+  }
+]

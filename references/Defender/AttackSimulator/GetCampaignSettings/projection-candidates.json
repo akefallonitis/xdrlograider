@@ -1,0 +1,51 @@
+[
+  {
+    "ColumnName": "isEnabled",
+    "DslOp": "$tobool",
+    "Path": "organizationInsightsSettings.isEnabled",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "threshold",
+    "DslOp": "$tolong",
+    "Path": "repeatOffenderSettings.threshold",
+    "KqlType": "long",
+    "SampleValue": "2"
+  },
+  {
+    "ColumnName": "isEnabled",
+    "DslOp": "$tobool",
+    "Path": "userReminderSettings.isEnabled",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "isEnabled",
+    "DslOp": "$tobool",
+    "Path": "userSusceptibilitySettings.isEnabled",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "trainingNotificationSettings",
+    "DslOp": "$tostring",
+    "Path": "trainingNotificationSettings",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "trainingReAssignmentThreshold",
+    "DslOp": "$tolong",
+    "Path": "trainingDedupSettings.trainingReAssignmentThreshold",
+    "KqlType": "long",
+    "SampleValue": "90"
+  },
+  {
+    "ColumnName": "eTag",
+    "DslOp": "$tostring",
+    "Path": "eTag",
+    "KqlType": "string",
+    "SampleValue": "null"
+  }
+]

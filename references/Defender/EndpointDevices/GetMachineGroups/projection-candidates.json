@@ -1,0 +1,93 @@
+[
+  {
+    "ColumnName": "MachineGroupId",
+    "DslOp": "$tolong",
+    "Path": "items[].MachineGroupId",
+    "KqlType": "long",
+    "SampleValue": "15"
+  },
+  {
+    "ColumnName": "Name",
+    "DslOp": "$tostring",
+    "Path": "items[].Name",
+    "KqlType": "string",
+    "SampleValue": " sevenkingdoms domain"
+  },
+  {
+    "ColumnName": "Description",
+    "DslOp": "$tostring",
+    "Path": "items[].Description",
+    "KqlType": "string",
+    "SampleValue": ""
+  },
+  {
+    "ColumnName": "AutoRemediationLevel",
+    "DslOp": "$tolong",
+    "Path": "items[].AutoRemediationLevel",
+    "KqlType": "long",
+    "SampleValue": "1"
+  },
+  {
+    "ColumnName": "Priority",
+    "DslOp": "$tolong",
+    "Path": "items[].Priority",
+    "KqlType": "long",
+    "SampleValue": "1"
+  },
+  {
+    "ColumnName": "LastUpdated",
+    "DslOp": "$todatetime",
+    "Path": "items[].LastUpdated",
+    "KqlType": "datetime",
+    "SampleValue": "02/18/2025 12:09:03"
+  },
+  {
+    "ColumnName": "IsUnassignedMachineGroup",
+    "DslOp": "$tobool",
+    "Path": "items[].IsUnassignedMachineGroup",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "MachineCount",
+    "DslOp": "$tolong",
+    "Path": "items[].MachineCount",
+    "KqlType": "long",
+    "SampleValue": "3"
+  },
+  {
+    "ColumnName": "OperatorType",
+    "DslOp": "$tolong",
+    "Path": "items[].GroupRules[].OperatorType",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "Property",
+    "DslOp": "$tolong",
+    "Path": "items[].GroupRules[].Property",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "PropertyValue",
+    "DslOp": "$tostring",
+    "Path": "items[].GroupRules[].PropertyValue",
+    "KqlType": "string",
+    "SampleValue": ""
+  },
+  {
+    "ColumnName": "containsAadGroupNames",
+    "DslOp": "$tobool",
+    "Path": "containsAadGroupNames",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "containsMachineGroupCount",
+    "DslOp": "$tobool",
+    "Path": "containsMachineGroupCount",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  }
+]

@@ -1,0 +1,261 @@
+[
+  {
+    "ColumnName": "context",
+    "DslOp": "$tostring",
+    "Path": "@odata.context",
+    "KqlType": "string",
+    "SampleValue": "http://security.microsoft.com/api/tvm/security/$metadata#SecureScoreControlProfilesV2"
+  },
+  {
+    "ColumnName": "actionType",
+    "DslOp": "$tostring",
+    "Path": "value[].actionType",
+    "KqlType": "string",
+    "SampleValue": "Config"
+  },
+  {
+    "ColumnName": "actionUrl",
+    "DslOp": "$tostring",
+    "Path": "value[].actionUrl",
+    "KqlType": "string",
+    "SampleValue": "https://learn.microsoft.com/en-us/microsoft-365/admin/manage/manage-addins-in-the-admin-center?view=o365-worldwide"
+  },
+  {
+    "ColumnName": "controlCategory",
+    "DslOp": "$tostring",
+    "Path": "value[].controlCategory",
+    "KqlType": "string",
+    "SampleValue": "Identity"
+  },
+  {
+    "ColumnName": "title",
+    "DslOp": "$tostring",
+    "Path": "value[].title",
+    "KqlType": "string",
+    "SampleValue": "Ensure 'User owned apps and services' is restricted"
+  },
+  {
+    "ColumnName": "deprecated",
+    "DslOp": "$tobool",
+    "Path": "value[].deprecated",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "implementationCost",
+    "DslOp": "$tostring",
+    "Path": "value[].implementationCost",
+    "KqlType": "string",
+    "SampleValue": "Unknown"
+  },
+  {
+    "ColumnName": "lastModifiedDateTime",
+    "DslOp": "$tostring",
+    "Path": "value[].lastModifiedDateTime",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "dateAdded",
+    "DslOp": "$tostring",
+    "Path": "value[].dateAdded",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "dateRemoved",
+    "DslOp": "$tostring",
+    "Path": "value[].dateRemoved",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "maxScore",
+    "DslOp": "$todouble",
+    "Path": "value[].maxScore",
+    "KqlType": "real",
+    "SampleValue": "3"
+  },
+  {
+    "ColumnName": "rank",
+    "DslOp": "$tolong",
+    "Path": "value[].rank",
+    "KqlType": "long",
+    "SampleValue": "10"
+  },
+  {
+    "ColumnName": "remediation",
+    "DslOp": "$tostring",
+    "Path": "value[].remediation",
+    "KqlType": "string",
+    "SampleValue": "<p>To prohibit users installing Office Store add-ins and starting 365 trials:</p> <ol> <li>Navigate to <em>Microsoft 365 admin center</em> <a href=\"https://admin.microsoft.com\">https://admin.microsoft…"
+  },
+  {
+    "ColumnName": "remediationImpact",
+    "DslOp": "$tostring",
+    "Path": "value[].remediationImpact",
+    "KqlType": "string",
+    "SampleValue": "Implementation of this change will impact both end users and administrators. End users will not be able to install add-ins that they may want to install."
+  },
+  {
+    "ColumnName": "service",
+    "DslOp": "$tostring",
+    "Path": "value[].service",
+    "KqlType": "string",
+    "SampleValue": "Admincenter"
+  },
+  {
+    "ColumnName": "tier",
+    "DslOp": "$tostring",
+    "Path": "value[].tier",
+    "KqlType": "string",
+    "SampleValue": "Core"
+  },
+  {
+    "ColumnName": "userImpact",
+    "DslOp": "$tostring",
+    "Path": "value[].userImpact",
+    "KqlType": "string",
+    "SampleValue": "Unknown"
+  },
+  {
+    "ColumnName": "userAffected",
+    "DslOp": "$tostring",
+    "Path": "value[].userAffected",
+    "KqlType": "string",
+    "SampleValue": "AllUsers"
+  },
+  {
+    "ColumnName": "isEmergencyControl",
+    "DslOp": "$tobool",
+    "Path": "value[].isEmergencyControl",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "isCustomControl",
+    "DslOp": "$tobool",
+    "Path": "value[].isCustomControl",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "baseControl",
+    "DslOp": "$tostring",
+    "Path": "value[].baseControl",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "instanceName",
+    "DslOp": "$tostring",
+    "Path": "value[].instanceName",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "hasLowAccuracy",
+    "DslOp": "$tobool",
+    "Path": "value[].hasLowAccuracy",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "value[].id",
+    "KqlType": "string",
+    "SampleValue": "admincenter_owned_apps_and_services"
+  },
+  {
+    "ColumnName": "azureTenantId",
+    "DslOp": "$tostring",
+    "Path": "value[].azureTenantId",
+    "KqlType": "string",
+    "SampleValue": "45f52f35-73d5-4066-8378-fe506ee90fb1"
+  },
+  {
+    "ColumnName": "assignedTo",
+    "DslOp": "$tostring",
+    "Path": "value[].controlStateUpdates[].assignedTo",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "comment",
+    "DslOp": "$tostring",
+    "Path": "value[].controlStateUpdates[].comment",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "state",
+    "DslOp": "$tostring",
+    "Path": "value[].controlStateUpdates[].state",
+    "KqlType": "string",
+    "SampleValue": "Default"
+  },
+  {
+    "ColumnName": "updatedBy",
+    "DslOp": "$tostring",
+    "Path": "value[].controlStateUpdates[].updatedBy",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "updatedDateTime",
+    "DslOp": "$tostring",
+    "Path": "value[].controlStateUpdates[].updatedDateTime",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "userDefinedScore",
+    "DslOp": "$tostring",
+    "Path": "value[].controlStateUpdates[].userDefinedScore",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "value[].learnMoreResources[].name",
+    "KqlType": "string",
+    "SampleValue": "https://learn.microsoft.com/en-us/microsoft-365/admin/manage/manage-addins-in-the-admin-center?view=o365-worldwide"
+  },
+  {
+    "ColumnName": "url",
+    "DslOp": "$tostring",
+    "Path": "value[].learnMoreResources[].url",
+    "KqlType": "string",
+    "SampleValue": "https://learn.microsoft.com/en-us/microsoft-365/admin/manage/manage-addins-in-the-admin-center?view=o365-worldwide"
+  },
+  {
+    "ColumnName": "provider",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.provider",
+    "KqlType": "string",
+    "SampleValue": "SecureScore"
+  },
+  {
+    "ColumnName": "providerVersion",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.providerVersion",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "subProvider",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.subProvider",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "vendor",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.vendor",
+    "KqlType": "string",
+    "SampleValue": "Microsoft"
+  }
+]

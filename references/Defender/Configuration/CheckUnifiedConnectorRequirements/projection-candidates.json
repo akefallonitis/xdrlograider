@@ -1,0 +1,58 @@
+[
+  {
+    "ColumnName": "isWorkloadActive",
+    "DslOp": "$tobool",
+    "Path": "permissionStatus.protectionTypes.siem.status.isWorkloadActive",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "permissionLevel",
+    "DslOp": "$tostring",
+    "Path": "permissionStatus.protectionTypes.siem.status.permissionLevel",
+    "KqlType": "string",
+    "SampleValue": "none"
+  },
+  {
+    "ColumnName": "isWorkloadActive",
+    "DslOp": "$tobool",
+    "Path": "permissionStatus.protectionTypes.mdi.status.isWorkloadActive",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "permissionLevel",
+    "DslOp": "$tostring",
+    "Path": "permissionStatus.protectionTypes.mdi.status.permissionLevel",
+    "KqlType": "string",
+    "SampleValue": "none"
+  },
+  {
+    "ColumnName": "isWorkloadActive",
+    "DslOp": "$tobool",
+    "Path": "permissionStatus.protectionTypes.msem.status.isWorkloadActive",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "permissionLevel",
+    "DslOp": "$tostring",
+    "Path": "permissionStatus.protectionTypes.msem.status.permissionLevel",
+    "KqlType": "string",
+    "SampleValue": "read"
+  },
+  {
+    "ColumnName": "isWorkloadActive",
+    "DslOp": "$tobool",
+    "Path": "permissionStatus.protectionTypes.mdc.status.isWorkloadActive",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "permissionLevel",
+    "DslOp": "$tostring",
+    "Path": "permissionStatus.protectionTypes.mdc.status.permissionLevel",
+    "KqlType": "string",
+    "SampleValue": "read"
+  }
+]

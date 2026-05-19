@@ -1,0 +1,205 @@
+[
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "value[].id",
+    "KqlType": "string",
+    "SampleValue": "b6256226-8ca0-480a-be18-70d10dadb76a"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "value[].name",
+    "KqlType": "string",
+    "SampleValue": "Email Quarantined Notification"
+  },
+  {
+    "ColumnName": "description",
+    "DslOp": "$tostring",
+    "Path": "value[].description",
+    "KqlType": "string",
+    "SampleValue": "A phish attack implementing Email Quarantined Notification"
+  },
+  {
+    "ColumnName": "attackType",
+    "DslOp": "$tostring",
+    "Path": "value[].attackType",
+    "KqlType": "string",
+    "SampleValue": "Social"
+  },
+  {
+    "ColumnName": "platform",
+    "DslOp": "$tostring",
+    "Path": "value[].platform",
+    "KqlType": "string",
+    "SampleValue": "Email"
+  },
+  {
+    "ColumnName": "isAutomated",
+    "DslOp": "$tostring",
+    "Path": "value[].isAutomated",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "status",
+    "DslOp": "$tostring",
+    "Path": "value[].status",
+    "KqlType": "string",
+    "SampleValue": "Ready"
+  },
+  {
+    "ColumnName": "source",
+    "DslOp": "$tostring",
+    "Path": "value[].source",
+    "KqlType": "string",
+    "SampleValue": "Global"
+  },
+  {
+    "ColumnName": "language",
+    "DslOp": "$tostring",
+    "Path": "value[].language",
+    "KqlType": "string",
+    "SampleValue": "en"
+  },
+  {
+    "ColumnName": "predictedCompromiseRate",
+    "DslOp": "$todouble",
+    "Path": "value[].predictedCompromiseRate",
+    "KqlType": "real",
+    "SampleValue": "37"
+  },
+  {
+    "ColumnName": "complexity",
+    "DslOp": "$tostring",
+    "Path": "value[].complexity",
+    "KqlType": "string",
+    "SampleValue": "Medium"
+  },
+  {
+    "ColumnName": "technique",
+    "DslOp": "$tostring",
+    "Path": "value[].technique",
+    "KqlType": "string",
+    "SampleValue": "CredentialHarvesting"
+  },
+  {
+    "ColumnName": "createdBy",
+    "DslOp": "$tostring",
+    "Path": "value[].createdBy",
+    "KqlType": "string",
+    "SampleValue": "Microsoft"
+  },
+  {
+    "ColumnName": "createdTime",
+    "DslOp": "$todatetime",
+    "Path": "value[].createdTime",
+    "KqlType": "datetime",
+    "SampleValue": "08/05/2020 20:09:07"
+  },
+  {
+    "ColumnName": "lastModifiedBy",
+    "DslOp": "$tostring",
+    "Path": "value[].lastModifiedBy",
+    "KqlType": "string",
+    "SampleValue": "Microsoft"
+  },
+  {
+    "ColumnName": "lastModifiedTime",
+    "DslOp": "$todatetime",
+    "Path": "value[].lastModifiedTime",
+    "KqlType": "datetime",
+    "SampleValue": "01/12/2024 06:54:25"
+  },
+  {
+    "ColumnName": "payloadDetail",
+    "DslOp": "$tostring",
+    "Path": "value[].payloadDetail",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "payloadStatistics",
+    "DslOp": "$tostring",
+    "Path": "value[].payloadStatistics",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "payloadTheme",
+    "DslOp": "$tostring",
+    "Path": "value[].payloadTheme",
+    "KqlType": "string",
+    "SampleValue": "Quarantine"
+  },
+  {
+    "ColumnName": "payloadBrand",
+    "DslOp": "$tostring",
+    "Path": "value[].payloadBrand",
+    "KqlType": "string",
+    "SampleValue": "Microsoft"
+  },
+  {
+    "ColumnName": "payloadIndustry",
+    "DslOp": "$tostring",
+    "Path": "value[].payloadIndustry",
+    "KqlType": "string",
+    "SampleValue": "IT"
+  },
+  {
+    "ColumnName": "isCurrentEvent",
+    "DslOp": "$tobool",
+    "Path": "value[].isCurrentEvent",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "isControversial",
+    "DslOp": "$tobool",
+    "Path": "value[].isControversial",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "tenantsImpacted",
+    "DslOp": "$tolong",
+    "Path": "value[].tenantsImpacted",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "missedPercentage",
+    "DslOp": "$todouble",
+    "Path": "value[].missedPercentage",
+    "KqlType": "real",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "_etag",
+    "DslOp": "$tostring",
+    "Path": "value[]._etag",
+    "KqlType": "string",
+    "SampleValue": "\"8514024d-0000-0100-0000-65a0e2200000\""
+  },
+  {
+    "ColumnName": "tenantFlightingIds",
+    "DslOp": "$tostring",
+    "Path": "value[].tenantFlightingIds",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "nextLink",
+    "DslOp": "$tostring",
+    "Path": "odata.nextLink",
+    "KqlType": "string",
+    "SampleValue": "?$skiptoken=%5b%7b%22token%22%3a%22%2bRID%3a%7eRT5xAN8ZRvtEBAAAAAAAAA%3d%3d%23RT%3a1%23TRC%3a1000%23ISV%3a2%23IEO%3a65551%23QCF%3a8%23FPC%3aAgEAAAA0AEEE8P9CQ%2f8H4P97Q%2f9%2fkpX8%2f%2b%2fU186bPA85f%2f…"
+  },
+  {
+    "ColumnName": "count",
+    "DslOp": "$tostring",
+    "Path": "odata.count",
+    "KqlType": "string",
+    "SampleValue": "null"
+  }
+]

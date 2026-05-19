@@ -1,0 +1,24 @@
+{
+  "EntryKey": "Configuration::configuration-listeligiblesentinelworkspaces",
+  "Slug": "ListEligibleSentinelWorkspaces",
+  "SubArea": "Configuration",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/sentinelOnboarding/sentinel/workspaces/eligibleForOnboarding",
+  "PostmanPath": "/mtp/sentinelOnboarding/sentinel/workspaces/eligibleForOnboarding",
+  "PostmanName": "List eligible Sentinel workspaces",
+  "PostmanAncestor": "mtp / sentinelOnboarding / sentinel / workspaces / eligibleForOnboarding",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"subscriptions\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "useRealTime"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.2438140Z"
+}

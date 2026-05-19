@@ -1,0 +1,27 @@
+{
+  "EntryKey": "Files::files-getdeviceprevalence",
+  "Slug": "GetDevicePrevalence",
+  "SubArea": "Files",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/cloudPivot/cloud/pivot/portal/file/device/prevalence",
+  "PostmanPath": "/mtp/cloudPivot/cloud/pivot/portal/file/device/prevalence",
+  "PostmanName": "Get file device prevalence",
+  "PostmanAncestor": "mtp / cloudPivot / cloud / pivot / portal / file / device / prevalence",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "entityId"
+    },
+    {
+      "Value": "30",
+      "Key": "daysToLookBack"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8462956Z"
+}

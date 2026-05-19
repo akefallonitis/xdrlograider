@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getlatestactionrequest",
+  "Slug": "GetLatestActionRequest",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/responseApiPortal/requests/latest",
+  "PostmanPath": "/mtp/responseApiPortal/requests/latest",
+  "PostmanName": "Get latest device response action",
+  "PostmanAncestor": "mtp / responseApiPortal / requests / latest",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "machineId"
+    },
+    {
+      "Value": "string",
+      "Key": "tenantIds"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4740581Z"
+}

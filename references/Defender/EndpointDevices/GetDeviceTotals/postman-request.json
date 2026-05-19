@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getdevicetotals",
+  "Slug": "GetDeviceTotals",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/ndr/machines/deviceTotals",
+  "PostmanPath": "/mtp/ndr/machines/deviceTotals",
+  "PostmanName": "Get device totals",
+  "PostmanAncestor": "mtp / ndr / machines / deviceTotals",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "hideLowFidelityDevices"
+    },
+    {
+      "Value": "30",
+      "Key": "lookingBackIndays"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4664017Z"
+}

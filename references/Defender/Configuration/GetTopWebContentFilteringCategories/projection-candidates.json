@@ -1,0 +1,50 @@
+[
+  {
+    "ColumnName": "UpdateTime",
+    "DslOp": "$todatetime",
+    "Path": "UpdateTime",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "Name",
+    "DslOp": "$tostring",
+    "Path": "TopParentCategories.Name",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "ActivityDeltaPercentage",
+    "DslOp": "$todouble",
+    "Path": "TopParentCategories.ActivityDeltaPercentage",
+    "KqlType": "real",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "IsDeltaPercentageValid",
+    "DslOp": "$tobool",
+    "Path": "TopParentCategories.IsDeltaPercentageValid",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "TotalAccessRequests",
+    "DslOp": "$tolong",
+    "Path": "TopParentCategories.TotalAccessRequests",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "TotalBlockedCount",
+    "DslOp": "$tolong",
+    "Path": "TopParentCategories.TotalBlockedCount",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

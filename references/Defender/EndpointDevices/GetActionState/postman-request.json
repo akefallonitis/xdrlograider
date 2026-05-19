@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getactionstate",
+  "Slug": "GetActionState",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/responseApiPortal/requests/machinestate",
+  "PostmanPath": "/mtp/responseApiPortal/requests/machinestate",
+  "PostmanName": "Get device response action state",
+  "PostmanAncestor": "mtp / responseApiPortal / requests / machinestate",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "machineId"
+    },
+    {
+      "Value": "false",
+      "Key": "overrideCache"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4338463Z"
+}

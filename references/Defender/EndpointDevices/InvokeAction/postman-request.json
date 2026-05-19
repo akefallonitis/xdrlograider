@@ -1,0 +1,19 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-invokeaction",
+  "Slug": "InvokeAction",
+  "SubArea": "EndpointDevices",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/responseApiPortal/requests/create",
+  "PostmanPath": "/mtp/responseApiPortal/requests/create",
+  "PostmanName": "Invoke device action",
+  "PostmanAncestor": "mtp / responseApiPortal / requests / create",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"machineId\": \"string\",\n  \"type\": \"QuickScan\",\n  \"comment\": \"string\"\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5485530Z"
+}

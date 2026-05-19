@@ -1,0 +1,31 @@
+{
+  "EntryKey": "Files::files-getprofile",
+  "Slug": "GetProfile",
+  "SubArea": "Files",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/detectionCyberProfile/api/detection/cyberprofileprovider/user/profiles/file",
+  "PostmanPath": "/mtp/detectionCyberProfile/api/detection/cyberprofileprovider/user/profiles/file",
+  "PostmanName": "Get file cyber profile",
+  "PostmanAncestor": "mtp / detectionCyberProfile / api / detection / cyberprofileprovider / user / profiles / file",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "Sha256",
+      "Key": "searchBy"
+    },
+    {
+      "Value": "82d330861950d594c415efaa33fe388b50d7cfbf",
+      "Key": "id"
+    },
+    {
+      "Value": "true",
+      "Key": "UseCyberProfileProviderService"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8572148Z"
+}

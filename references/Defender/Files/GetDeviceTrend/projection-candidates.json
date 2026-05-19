@@ -1,0 +1,26 @@
+[
+  {
+    "ColumnName": "Count",
+    "DslOp": "$tolong",
+    "Path": "Items.Count",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "Date",
+    "DslOp": "$todatetime",
+    "Path": "Items.Date",
+    "KqlType": "datetime",
+    "SampleValue": "2026-03-31T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "AggregationType",
+    "DslOp": "$tolong",
+    "Path": "AggregationType",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

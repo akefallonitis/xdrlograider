@@ -1,0 +1,130 @@
+[
+  {
+    "ColumnName": "SendOncePerIncident",
+    "DslOp": "$tobool",
+    "Path": "SendOncePerIncident",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "AlertSeverities",
+    "DslOp": "$tolong",
+    "Path": "Rules.AlertSeverities",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "RuleOrder",
+    "DslOp": "$tolong",
+    "Path": "Rules.RuleOrder",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "AlertSeverities",
+    "DslOp": "$tolong",
+    "Path": "AlertSeverities",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "Name",
+    "DslOp": "$tostring",
+    "Path": "Name",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "Description",
+    "DslOp": "$tostring",
+    "Path": "Description",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "Recipients",
+    "DslOp": "$tostring",
+    "Path": "Recipients",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "LastUpdateTime",
+    "DslOp": "$todatetime",
+    "Path": "LastUpdateTime",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "AllRbacGroups",
+    "DslOp": "$tobool",
+    "Path": "AllRbacGroups",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "CreationTime",
+    "DslOp": "$todatetime",
+    "Path": "CreationTime",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "IncidentNotificationsSettingId",
+    "DslOp": "$tolong",
+    "Path": "IncidentNotificationsSettingId",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "CreatedBy",
+    "DslOp": "$tostring",
+    "Path": "CreatedBy",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "IsReadOnly",
+    "DslOp": "$tobool",
+    "Path": "IsReadOnly",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "FormatOptions",
+    "DslOp": "$tolong",
+    "Path": "FormatOptions",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "RbacGroupIds",
+    "DslOp": "$tostring",
+    "Path": "RbacGroupIds",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "RulesReadOnly",
+    "DslOp": "$tobool",
+    "Path": "RulesReadOnly",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

@@ -1,0 +1,107 @@
+[
+  {
+    "ColumnName": "TotalThreatRequiresAction",
+    "DslOp": "$tolong",
+    "Path": "TotalThreatRequiresAction",
+    "KqlType": "long",
+    "SampleValue": "1104"
+  },
+  {
+    "ColumnName": "OutbreakId",
+    "DslOp": "$tostring",
+    "Path": "ThreatsExposure[].OutbreakId",
+    "KqlType": "string",
+    "SampleValue": "7c3f4546-8786-413b-a0e7-682670862c91"
+  },
+  {
+    "ColumnName": "Name",
+    "DslOp": "$tostring",
+    "Path": "ThreatsExposure[].Name",
+    "KqlType": "string",
+    "SampleValue": "Activity Profile: Vulnerability threat landscape, October to December 2025"
+  },
+  {
+    "ColumnName": "ExposureScore",
+    "DslOp": "$tolong",
+    "Path": "ThreatsExposure[].ExposureScore",
+    "KqlType": "long",
+    "SampleValue": "54"
+  },
+  {
+    "ColumnName": "CreatedOn",
+    "DslOp": "$todatetime",
+    "Path": "ThreatsExposure[].CreatedOn",
+    "KqlType": "datetime",
+    "SampleValue": "01/14/2026 22:26:21"
+  },
+  {
+    "ColumnName": "ThreatExposureCalculationStatus",
+    "DslOp": "$tostring",
+    "Path": "ThreatExposureCalculationStatus",
+    "KqlType": "string",
+    "SampleValue": "Calculated"
+  },
+  {
+    "ColumnName": "TotalActiveThreats",
+    "DslOp": "$tolong",
+    "Path": "TotalActiveThreats",
+    "KqlType": "long",
+    "SampleValue": "2"
+  },
+  {
+    "ColumnName": "OutbreakId",
+    "DslOp": "$tostring",
+    "Path": "CurrentAlertsCount[].OutbreakId",
+    "KqlType": "string",
+    "SampleValue": "9ce0ac71-e104-4e59-9d46-2a8e2cac5a1d"
+  },
+  {
+    "ColumnName": "Name",
+    "DslOp": "$tostring",
+    "Path": "CurrentAlertsCount[].Name",
+    "KqlType": "string",
+    "SampleValue": "Technique Profile: Antivirus tampering"
+  },
+  {
+    "ColumnName": "ActiveAlertsCount",
+    "DslOp": "$tolong",
+    "Path": "CurrentAlertsCount[].ActiveAlertsCount",
+    "KqlType": "long",
+    "SampleValue": "43"
+  },
+  {
+    "ColumnName": "ResolvedAlertsCount",
+    "DslOp": "$tolong",
+    "Path": "CurrentAlertsCount[].ResolvedAlertsCount",
+    "KqlType": "long",
+    "SampleValue": "40"
+  },
+  {
+    "ColumnName": "LastUpdatedOn",
+    "DslOp": "$todatetime",
+    "Path": "CurrentAlertsCount[].LastUpdatedOn",
+    "KqlType": "datetime",
+    "SampleValue": "06/08/2023 09:02:00"
+  },
+  {
+    "ColumnName": "AlertsCount",
+    "DslOp": "$tostring",
+    "Path": "AlertsCount",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "DevicesCalculationStatus",
+    "DslOp": "$tostring",
+    "Path": "DevicesCalculationStatus",
+    "KqlType": "string",
+    "SampleValue": "Calculated"
+  },
+  {
+    "ColumnName": "MailboxesCalculationStatus",
+    "DslOp": "$tostring",
+    "Path": "MailboxesCalculationStatus",
+    "KqlType": "string",
+    "SampleValue": "Skipped"
+  }
+]

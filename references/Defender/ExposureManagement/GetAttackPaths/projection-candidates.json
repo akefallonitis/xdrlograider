@@ -1,0 +1,66 @@
+[
+  {
+    "ColumnName": "totalCount",
+    "DslOp": "$tolong",
+    "Path": "totalCount",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "data[].id",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "data[].name",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "description",
+    "DslOp": "$tostring",
+    "Path": "data[].description",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "riskLevel",
+    "DslOp": "$tostring",
+    "Path": "data[].riskLevel",
+    "KqlType": "string",
+    "SampleValue": "Medium",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "entryPointCount",
+    "DslOp": "$tolong",
+    "Path": "data[].entryPointCount",
+    "KqlType": "long",
+    "SampleValue": "5832",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "targetCount",
+    "DslOp": "$tolong",
+    "Path": "data[].targetCount",
+    "KqlType": "long",
+    "SampleValue": "8553",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "nodeCount",
+    "DslOp": "$tolong",
+    "Path": "data[].nodeCount",
+    "KqlType": "long",
+    "SampleValue": "8058",
+    "Provenance": "nodoc-postman-response"
+  }
+]

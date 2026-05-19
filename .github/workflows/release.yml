@@ -1,0 +1,266 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: write       # create GitHub Release + upload artifacts
+  id-token: write       # cosign keyless OIDC signing
+
+# Π11 · concurrency block · prevent simultaneous tag-push races on same tag
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false   # don't cancel an in-flight release on operator re-tag · let it finish
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30   # Π11 · cap cosign Fulcio outage / network hangs (6h default)
+    steps:
+      # Π11.5f · third-party actions pinned to immutable SHAs (supply-chain hardening)
+      # Refresh via tools/Update-PinnedSHAs.ps1 periodically (monthly · or when action releases new major)
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          fetch-depth: 0   # include all tags for changelog
+
+      # PowerShell 7.4+ is pre-installed on ubuntu-latest runners (no install step required).
+      # Verify via `pwsh -v` to fail fast if a future runner image drops PS 7.4.
+      - name: Verify PowerShell 7.4 available
+        shell: bash
+        run: |
+          if ! command -v pwsh > /dev/null; then
+            echo "::error::pwsh not found on runner"
+            exit 1
+          fi
+          pwsh -NoProfile -Command '$PSVersionTable.PSVersion'
+
+      # Π11.5c · cache PowerShell modules (~30s saved per CI run)
+      - name: Cache PowerShell modules
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        with:
+          path: ~/.local/share/powershell/Modules
+          key: psmodules-${{ runner.os }}-pester-pssa-yaml-v1
+
+      - name: Install required modules
+        shell: pwsh
+        run: |
+          if (-not (Get-Module -ListAvailable Pester | Where-Object Version -ge '5.5.0')) {
+              Install-Module Pester -Force -SkipPublisherCheck -Scope CurrentUser
+          }
+          if (-not (Get-Module -ListAvailable PSScriptAnalyzer)) {
+              Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          }
+          if (-not (Get-Module -ListAvailable powershell-yaml)) {
+              Install-Module powershell-yaml -Force -Scope CurrentUser
+          }
+
+      - name: Run Tier-1 unit tests (gate)
+        shell: pwsh
+        run: |
+          ./tests/Run-Tests.ps1 -Tier 1
+
+      - name: Validate ARM template (explicit ARM-TTK · SB-1)
+        shell: pwsh
+        run: |
+          # Plan ε.D (SB-1): explicit ARM-TTK gate in release.yml · cannot rely
+          # on Tier-1 silent-skip when arm-ttk not installed locally.
+          $ttkDir = Join-Path $env:RUNNER_TEMP 'arm-ttk'
+          if (-not (Test-Path $ttkDir)) {
+              git clone --depth 1 https://github.com/Azure/arm-ttk.git $ttkDir
+          }
+          $ttkModule = Join-Path $ttkDir 'arm-ttk' 'arm-ttk.psd1'
+          if (-not (Test-Path $ttkModule)) {
+              throw "arm-ttk module not found at $ttkModule after clone"
+          }
+          # ARM-TTK reports findings via Write-Error (non-terminating by design). Run
+          # Test-AzTemplate in an isolated PowerShell instance so its error stream is
+          # contained · we only care about the result objects (each carries its own
+          # .Errors collection). Same pattern as tests/unit/Arm.Ttk.Tests.ps1.
+          $ps = [PowerShell]::Create().AddScript({
+              param($Module, $Path)
+              Import-Module $Module -Force
+              $ErrorActionPreference = 'SilentlyContinue'
+              Test-AzTemplate -TemplatePath $Path -ErrorAction SilentlyContinue 2>$null
+          }).AddArgument($ttkModule).AddArgument('./deploy/')
+          try {
+              $results = @($ps.Invoke())
+          } finally {
+              $ps.Dispose()
+          }
+          $failures = @($results | Where-Object { -not $_.Passed })
+          # Plan §6 Gate · allow-listed false-positives (operator-documented · matches
+          # tests/unit/Arm.Ttk.Tests.ps1 $script:AcceptedTtkRules so local T1 + CI agree)
+          $allowed = @(
+              'apiVersions Should Be Recent',
+              'apiVersions Should Be Recent In Reference Functions',
+              'IDs Should Be Derived From ResourceIDs'
+          )
+          $real = @($failures | Where-Object { $_.Name -notin $allowed })
+          if ($real.Count -gt 0) {
+              $real | ForEach-Object { Write-Host "ARM-TTK FAIL: $($_.Name) · $($_.File.Name): $($_.Errors -join '; ')" -ForegroundColor Red }
+              throw "ARM-TTK gate failed: $($real.Count) violation(s) outside allow-list"
+          }
+          Write-Host "ARM-TTK explicit gate: PASSED ($($results.Count) checks · $($failures.Count) allow-listed)" -ForegroundColor Green
+
+      - name: Validate module contracts (no drift)
+        shell: pwsh
+        run: |
+          ./tools/Validate-ModuleContracts.ps1
+
+      - name: Build Function App zip (BUNDLE Az modules · CRIT1 fix)
+        shell: pwsh
+        # CRIT1 (ITER11 audit): host.json has managedDependency:false · profile.ps1 does
+        # Import-Module Az.Accounts at FA cold-start · without -BundleAz, Az modules are NOT
+        # in the zip and Import-Module THROWS · worker dies before first heartbeat. Y1 Linux
+        # Consumption does NOT provide Az globally · zip MUST bundle them.
+        # Versions pinned in src/requirements.psd1 (Az.Accounts=5.4.0, Az.KeyVault=6.4.3).
+        run: |
+          ./tools/Build-FunctionAppZip.ps1 -OutputPath ./bin/function-app.zip -BundleAz
+
+      # Π10 · Drift guard · fail CI if Build-FA auto-rewrote deploy/mainTemplate.json
+      # (Build-FunctionAppZip auto-syncs ARM defenderSubAreas variable from manifest.
+      #  ARM-TTK validates the PRE-build template above; if Build-FA modifies the file
+      #  on disk, that change is unvalidated by ARM-TTK.)
+      - name: Drift guard · ARM template unchanged after Build-FA
+        shell: bash
+        run: |
+          if ! git diff --quiet -- deploy/mainTemplate.json; then
+            echo "::error::Build-FunctionAppZip mutated deploy/mainTemplate.json mid-CI"
+            git diff -- deploy/mainTemplate.json | head -50
+            exit 1
+          fi
+          echo "ARM template unchanged after Build-FA · drift guard PASS"
+
+      # φ.I · Build Sentinel Solution V3 package (marketplace-submittable scaffold)
+      - name: Build Sentinel Solution V3 package
+        shell: pwsh
+        run: |
+          ./tools/Build-SolutionPackage.ps1 -OutputDir ./dist
+          $zip = Get-ChildItem ./dist/*.zip -ErrorAction Stop | Select-Object -First 1
+          if (-not $zip) { throw "Build-SolutionPackage produced no zip in ./dist" }
+          Write-Host "  Solution V3 zip: $($zip.Name) · $([math]::Round($zip.Length/1KB,1))KB"
+
+      # Π11.5b · SBOM generation (SPDX format · marketplace expects · supply-chain hygiene)
+      # ITER11 HIGH5 · artifact-name MUST match the file we ship below to avoid duplicate
+      # release-asset upload (action auto-attaches under artifact-name when run on tag-push).
+      # Prior config produced BOTH sbom.spdx.json (manual copy below) AND xdrlograider-sbom.spdx.json
+      # (auto-attached) · operators saw 2 SBOMs in release · canonical = sbom.spdx.json only.
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0
+        with:
+          path: .
+          artifact-name: sbom.spdx.json
+          format: spdx-json
+          output-file: ${{ github.workspace }}/sbom.spdx.json
+
+      - name: Pack deploy artefacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          cp deploy/mainTemplate.json out/
+          cp deploy/createUiDefinition.json out/
+          cp deploy/sentinelContent.json out/
+          cp deploy/parameters.sample.json out/
+          cp bin/function-app.zip out/
+          # φ.I · Solution V3 package zip · Π10 · fail-on-missing (was silent || true)
+          if ! ls dist/*.zip >/dev/null 2>&1; then
+            echo "::error::No dist/*.zip found · Build-SolutionPackage step did not produce a zip"
+            exit 1
+          fi
+          cp dist/*.zip out/
+          # Π11.5b · stage SBOM
+          if [ -f "${{ github.workspace }}/sbom.spdx.json" ]; then
+            cp "${{ github.workspace }}/sbom.spdx.json" out/
+            echo "SBOM staged: $(wc -c < out/sbom.spdx.json) bytes"
+          fi
+          ls -la out/
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9  # v3
+        with:
+          cosign-release: 'v2.2.0'
+
+      # Π11.5e · sign artefacts FIRST · then build SHA256SUMS · then sign SHA256SUMS itself
+      # This way: (1) sig/pem files exist · (2) checksums file includes sig/pem hashes ·
+      # (3) verifier path: `cosign verify-blob SHA256SUMS.txt.sig` + `sha256sum -c SHA256SUMS.txt`
+      - name: Sign artefacts (keyless OIDC)
+        shell: bash
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          set -euo pipefail
+          for f in out/*.json out/*.zip; do
+            cosign sign-blob --yes --output-signature "${f}.sig" --output-certificate "${f}.pem" "$f"
+          done
+
+      - name: Generate SHA256SUMS (includes sig/pem)
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd out && sha256sum *.json *.zip *.sig *.pem > SHA256SUMS.txt)
+          cat out/SHA256SUMS.txt
+
+      - name: Sign SHA256SUMS.txt itself
+        shell: bash
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          set -euo pipefail
+          cosign sign-blob --yes \
+            --output-signature out/SHA256SUMS.txt.sig \
+            --output-certificate out/SHA256SUMS.txt.pem \
+            out/SHA256SUMS.txt
+          ls -la out/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: XdrLogRaider ${{ github.ref_name }}
+          body: |
+            ## XdrLogRaider ${{ github.ref_name }}
+
+            Microsoft Sentinel data connector for Defender XDR portal-internal `/apiproxy/` telemetry.
+
+            Click the **Deploy to Azure** button in the README to deploy, or run:
+
+            ```
+            az deployment group create --resource-group <rg> \
+              --template-file mainTemplate.json \
+              --parameters @parameters.local.json
+            ```
+
+            See `parameters.sample.json` for the parameter shape.
+
+            ### Artefacts
+            All artefacts are cosign-keyless-OIDC signed. Verify chain:
+
+            ```bash
+            # 1. Verify the SHA256SUMS file is authentic
+            cosign verify-blob \
+              --certificate SHA256SUMS.txt.pem \
+              --signature SHA256SUMS.txt.sig \
+              --certificate-identity-regexp '^https://github\.com/akefallonitis/xdrlograider/\.github/workflows/release\.yml@refs/tags/v[0-9]+\.[0-9]+\.[0-9]+' \
+              --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+              SHA256SUMS.txt
+
+            # 2. Verify every artefact matches its checksum
+            sha256sum -c SHA256SUMS.txt
+            ```
+
+            ### Marketplace + supply-chain
+            - SBOM: `sbom.spdx.json` (SPDX format)
+            - V3 marketplace zip: `XdrLogRaider-1.0.0.zip`
+            - All third-party GitHub Actions pinned to immutable SHAs
+          files: |
+            out/*.json
+            out/*.zip
+            out/SHA256SUMS.txt
+            out/*.sig
+            out/*.pem
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}

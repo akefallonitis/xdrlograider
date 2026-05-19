@@ -1,0 +1,43 @@
+{
+  "EntryKey": "ActionCenter::actioncenter-getpending",
+  "Slug": "GetPending",
+  "SubArea": "ActionCenter",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/actionCenter/actioncenterui/pending-actions",
+  "PostmanPath": "/mtp/actionCenter/actioncenterui/pending-actions",
+  "PostmanName": "Get pending actions",
+  "PostmanAncestor": "mtp / actionCenter / actioncenterui / pending-actions",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "5159",
+      "Key": "$skip"
+    },
+    {
+      "Value": "5159",
+      "Key": "$top"
+    },
+    {
+      "Value": "50",
+      "Key": "pageSize"
+    },
+    {
+      "Value": "0",
+      "Key": "pageIndex"
+    },
+    {
+      "Value": "string",
+      "Key": "sortByField"
+    },
+    {
+      "Value": "Ascending",
+      "Key": "sortOrder"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:42.6319630Z"
+}

@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getmachinegroups",
+  "Slug": "GetMachineGroups",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/rbacManagementApi/rbac/machine_groups",
+  "PostmanPath": "/mtp/rbacManagementApi/rbac/machine_groups",
+  "PostmanName": "Get machine groups (RBAC)",
+  "PostmanAncestor": "mtp / rbacManagementApi / rbac / machine_groups",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "addAadGroupNames"
+    },
+    {
+      "Value": "true",
+      "Key": "addMachineGroupCount"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4859875Z"
+}

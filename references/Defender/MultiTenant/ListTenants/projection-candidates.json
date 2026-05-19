@@ -1,0 +1,50 @@
+[
+  {
+    "ColumnName": "tenantAadEnvironment",
+    "DslOp": "$tolong",
+    "Path": "tenantInfoList.tenantAadEnvironment",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lostAccess",
+    "DslOp": "$tobool",
+    "Path": "tenantInfoList.lostAccess",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "tenantId",
+    "DslOp": "$tostring",
+    "Path": "tenantInfoList.tenantId",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "selected",
+    "DslOp": "$tobool",
+    "Path": "tenantInfoList.selected",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "tenantInfoList.name",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "addedOn",
+    "DslOp": "$todatetime",
+    "Path": "tenantInfoList.addedOn",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

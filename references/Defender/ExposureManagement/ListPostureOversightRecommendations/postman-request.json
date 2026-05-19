@@ -1,0 +1,47 @@
+{
+  "EntryKey": "ExposureManagement::exposuremanagement-listpostureoversightrecommendations",
+  "Slug": "ListPostureOversightRecommendations",
+  "SubArea": "ExposureManagement",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/posture/oversight/recommendations",
+  "PostmanPath": "/mtp/posture/oversight/recommendations",
+  "PostmanName": "List posture oversight recommendations",
+  "PostmanAncestor": "mtp / posture / oversight / recommendations",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "calculationId"
+    },
+    {
+      "Value": "asc",
+      "Key": "sort.sortDirection"
+    },
+    {
+      "Value": "string",
+      "Key": "sort.sortByField"
+    },
+    {
+      "Value": "1",
+      "Key": "pagination.pageNumber"
+    },
+    {
+      "Value": "25",
+      "Key": "pagination.numberOfPageRecords"
+    },
+    {
+      "Value": "false",
+      "Key": "highlights"
+    },
+    {
+      "Value": "<Error: Not supported in OAS>",
+      "Key": "filters"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8014831Z"
+}

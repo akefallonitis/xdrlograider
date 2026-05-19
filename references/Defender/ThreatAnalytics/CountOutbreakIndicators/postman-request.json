@@ -1,0 +1,21 @@
+{
+  "EntryKey": "ThreatAnalytics::threatanalytics-countoutbreakindicators",
+  "Slug": "CountOutbreakIndicators",
+  "SubArea": "ThreatAnalytics",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/count",
+  "PostmanPath": "/mtp/threatAnalyticsIndicators/stix/outbreaks/:OutbreakId/indicators/count",
+  "PostmanName": "Count outbreak indicators",
+  "PostmanAncestor": "mtp / threatAnalyticsIndicators / stix / outbreaks / {OutbreakId} / indicators / count",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"key_0\": \"string\"\n}",
+  "Query": [],
+  "Variables": {
+    "OutbreakId": "be35d041-028b-a6a3-8ae9-643790d335ec"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.3987879Z"
+}

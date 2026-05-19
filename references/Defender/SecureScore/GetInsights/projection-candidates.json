@@ -1,0 +1,65 @@
+[
+  {
+    "ColumnName": "context",
+    "DslOp": "$tostring",
+    "Path": "@odata.context",
+    "KqlType": "string",
+    "SampleValue": "http://security.microsoft.com/api/tvm/security/$metadata#SecureScoreInsights"
+  },
+  {
+    "ColumnName": "createdDate",
+    "DslOp": "$todatetime",
+    "Path": "value[].createdDate",
+    "KqlType": "datetime",
+    "SampleValue": "05/19/2026 00:00:00"
+  },
+  {
+    "ColumnName": "tenantCount",
+    "DslOp": "$tolong",
+    "Path": "value[].tenantCount",
+    "KqlType": "long",
+    "SampleValue": "4297056"
+  },
+  {
+    "ColumnName": "averageScore",
+    "DslOp": "$todouble",
+    "Path": "value[].averageScore",
+    "KqlType": "real",
+    "SampleValue": "60.6"
+  },
+  {
+    "ColumnName": "initiative",
+    "DslOp": "$tostring",
+    "Path": "value[].initiative",
+    "KqlType": "string",
+    "SampleValue": "BEC_CredentialHarvest"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "value[].id",
+    "KqlType": "string",
+    "SampleValue": "All_BEC_CredentialHarvest"
+  },
+  {
+    "ColumnName": "pillarName",
+    "DslOp": "$tostring",
+    "Path": "value[].pillarInsights[].pillarName",
+    "KqlType": "string",
+    "SampleValue": "Identity"
+  },
+  {
+    "ColumnName": "scoreTotal",
+    "DslOp": "$todouble",
+    "Path": "value[].pillarInsights[].scoreTotal",
+    "KqlType": "real",
+    "SampleValue": "85610021.06"
+  },
+  {
+    "ColumnName": "maxScoreTotal",
+    "DslOp": "$todouble",
+    "Path": "value[].pillarInsights[].maxScoreTotal",
+    "KqlType": "real",
+    "SampleValue": "133020464"
+  }
+]

@@ -1,0 +1,210 @@
+[
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "items.name",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "description",
+    "DslOp": "$tostring",
+    "Path": "items.description",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lastSyncedOn",
+    "DslOp": "$todatetime",
+    "Path": "items.lastSyncedOn",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lastSyncedBy",
+    "DslOp": "$tostring",
+    "Path": "items.lastSyncedBy",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "items.templates.name",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "items.templates.id",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "type",
+    "DslOp": "$tostring",
+    "Path": "items.templates.type",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "items.id",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "targetTenantId",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.targetTenantId",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "syncStatus",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.syncStatus",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "sourceTenantId",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.sourceTenantId",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lastSyncedOn",
+    "DslOp": "$todatetime",
+    "Path": "items.syncUnitStatuses.lastSyncedOn",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lastSyncedBy",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.lastSyncedBy",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "templateName",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.templateName",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "assignmentId",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.assignmentId",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "errorType",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.errorType",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "contentType",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.contentType",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "targetContentId",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.targetContentId",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "templateId",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.templateId",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "items.syncUnitStatuses.id",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "createdBy",
+    "DslOp": "$tostring",
+    "Path": "items.createdBy",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "targetTenantIdsWithoutRelationship",
+    "DslOp": "$tolong",
+    "Path": "items.targetTenantIdsWithoutRelationship",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isVariablePerTemplate",
+    "DslOp": "$tobool",
+    "Path": "items.isVariablePerTemplate",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "eTag",
+    "DslOp": "$tostring",
+    "Path": "items.eTag",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "targetTenantIds",
+    "DslOp": "$tostring",
+    "Path": "items.targetTenantIds",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "createdOn",
+    "DslOp": "$todatetime",
+    "Path": "items.createdOn",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "ColumnName": "AzureSsoAccountOldPasswords",
+    "DslOp": "$tostring",
+    "Path": "ActiveDirectory.AzureSsoAccountOldPasswords",
+    "KqlType": "string",
+    "SampleValue": "Change password for Entra seamless SSO account"
+  },
+  {
+    "ColumnName": "BuiltinAdministratorAccountWithOldPassword",
+    "DslOp": "$tostring",
+    "Path": "ActiveDirectory.BuiltinAdministratorAccountWithOldPassword",
+    "KqlType": "string",
+    "SampleValue": "Change password of built-in domain Administrator account"
+  },
+  {
+    "ColumnName": "BuiltinKrbtgtAccountWithOldPassword",
+    "DslOp": "$tostring",
+    "Path": "ActiveDirectory.BuiltinKrbtgtAccountWithOldPassword",
+    "KqlType": "string",
+    "SampleValue": "Change password for krbtgt account"
+  },
+  {
+    "ColumnName": "DomainControllersWithOldPassword",
+    "DslOp": "$tostring",
+    "Path": "ActiveDirectory.DomainControllersWithOldPassword",
+    "KqlType": "string",
+    "SampleValue": "Change Domain Controller computer account old password"
+  },
+  {
+    "ColumnName": "EntraConnectAccountsOldPasswords",
+    "DslOp": "$tostring",
+    "Path": "ActiveDirectory.EntraConnectAccountsOldPasswords",
+    "KqlType": "string",
+    "SampleValue": "Rotate password for Entra Connect AD DS Connector account"
+  },
+  {
+    "ColumnName": "GroupManagedServiceAccountWithUnrecommendedPasswordChangeInterval",
+    "DslOp": "$tostring",
+    "Path": "ActiveDirectory.GroupManagedServiceAccountWithUnrecommendedPasswordChangeInterval",
+    "KqlType": "string",
+    "SampleValue": "Set a valid password rotation interval for gMSA"
+  },
+  {
+    "ColumnName": "SingleManagedServiceAccountsWithOldPassword",
+    "DslOp": "$tostring",
+    "Path": "ActiveDirectory.SingleManagedServiceAccountsWithOldPassword",
+    "KqlType": "string",
+    "SampleValue": "Rotate old password for sMSA and set up valid rotation interval in the GPO"
+  },
+  {
+    "ColumnName": "SensitiveAccountWithOldPassword",
+    "DslOp": "$tostring",
+    "Path": "Okta.SensitiveAccountWithOldPassword",
+    "KqlType": "string",
+    "SampleValue": "Change password for Okta privileged User accounts"
+  }
+]

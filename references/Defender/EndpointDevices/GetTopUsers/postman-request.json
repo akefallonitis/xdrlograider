@@ -1,0 +1,47 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-gettopusers",
+  "Slug": "GetTopUsers",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/getTopUsersByIds/TopUsersByIds",
+  "PostmanPath": "/mtp/getTopUsersByIds/TopUsersByIds",
+  "PostmanName": "Get top users for device",
+  "PostmanAncestor": "mtp / getTopUsersByIds / TopUsersByIds",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "isUnifiedDevicePage"
+    },
+    {
+      "Value": "string",
+      "Key": "machineId"
+    },
+    {
+      "Value": "string",
+      "Key": "senseMachineId"
+    },
+    {
+      "Value": "string",
+      "Key": "computerDnsName"
+    },
+    {
+      "Value": "string",
+      "Key": "tenantIds"
+    },
+    {
+      "Value": "string",
+      "Key": "armId"
+    },
+    {
+      "Value": "30",
+      "Key": "lookingBackIndays"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5389284Z"
+}

@@ -1,0 +1,163 @@
+[
+  {
+    "ColumnName": "context",
+    "DslOp": "$tostring",
+    "Path": "@odata.context",
+    "KqlType": "string",
+    "SampleValue": "http://security.microsoft.com/api/tvm/security/$metadata#SecureScoresV2"
+  },
+  {
+    "ColumnName": "activeUserCount",
+    "DslOp": "$tolong",
+    "Path": "value[].activeUserCount",
+    "KqlType": "long",
+    "SampleValue": "5"
+  },
+  {
+    "ColumnName": "createdDateTime",
+    "DslOp": "$todatetime",
+    "Path": "value[].createdDateTime",
+    "KqlType": "datetime",
+    "SampleValue": "05/19/2026 00:00:00"
+  },
+  {
+    "ColumnName": "currentScore",
+    "DslOp": "$todouble",
+    "Path": "value[].currentScore",
+    "KqlType": "real",
+    "SampleValue": "413.18"
+  },
+  {
+    "ColumnName": "licensedUserCount",
+    "DslOp": "$tolong",
+    "Path": "value[].licensedUserCount",
+    "KqlType": "long",
+    "SampleValue": "0"
+  },
+  {
+    "ColumnName": "maxScore",
+    "DslOp": "$todouble",
+    "Path": "value[].maxScore",
+    "KqlType": "real",
+    "SampleValue": "1115"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "value[].id",
+    "KqlType": "string",
+    "SampleValue": "45f52f35-73d5-4066-8378-fe506ee90fb1_2026-05-19"
+  },
+  {
+    "ColumnName": "azureTenantId",
+    "DslOp": "$tostring",
+    "Path": "value[].azureTenantId",
+    "KqlType": "string",
+    "SampleValue": "45f52f35-73d5-4066-8378-fe506ee90fb1"
+  },
+  {
+    "ColumnName": "currentScoreInPercentage",
+    "DslOp": "$todouble",
+    "Path": "value[].currentScoreInPercentage",
+    "KqlType": "real",
+    "SampleValue": "37.04"
+  },
+  {
+    "ColumnName": "controlCategory",
+    "DslOp": "$tostring",
+    "Path": "value[].controlScores[].controlCategory",
+    "KqlType": "string",
+    "SampleValue": "Identity"
+  },
+  {
+    "ColumnName": "controlName",
+    "DslOp": "$tostring",
+    "Path": "value[].controlScores[].controlName",
+    "KqlType": "string",
+    "SampleValue": "IntegratedApps"
+  },
+  {
+    "ColumnName": "description",
+    "DslOp": "$tostring",
+    "Path": "value[].controlScores[].description",
+    "KqlType": "string",
+    "SampleValue": "To reduce the risk of malicious applications attempting to trick users into granting them access to your organization's data, we recommend that you allow user consent only for applications that have b…"
+  },
+  {
+    "ColumnName": "score",
+    "DslOp": "$todouble",
+    "Path": "value[].controlScores[].score",
+    "KqlType": "real",
+    "SampleValue": "4"
+  },
+  {
+    "ColumnName": "IsApplicable",
+    "DslOp": "$tostring",
+    "Path": "value[].controlScores[].IsApplicable",
+    "KqlType": "string",
+    "SampleValue": "true"
+  },
+  {
+    "ColumnName": "lastSynced",
+    "DslOp": "$todatetime",
+    "Path": "value[].controlScores[].lastSynced",
+    "KqlType": "datetime",
+    "SampleValue": "05/16/2026 01:50:52"
+  },
+  {
+    "ColumnName": "implementationStatus",
+    "DslOp": "$tostring",
+    "Path": "value[].controlScores[].implementationStatus",
+    "KqlType": "string",
+    "SampleValue": "You have a user consent policy in place."
+  },
+  {
+    "ColumnName": "on",
+    "DslOp": "$tostring",
+    "Path": "value[].controlScores[].on",
+    "KqlType": "string",
+    "SampleValue": "true"
+  },
+  {
+    "ColumnName": "scoreInPercentage",
+    "DslOp": "$todouble",
+    "Path": "value[].controlScores[].scoreInPercentage",
+    "KqlType": "real",
+    "SampleValue": "100"
+  },
+  {
+    "ColumnName": "source",
+    "DslOp": "$tostring",
+    "Path": "value[].controlScores[].source",
+    "KqlType": "string",
+    "SampleValue": "ingestion"
+  },
+  {
+    "ColumnName": "provider",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.provider",
+    "KqlType": "string",
+    "SampleValue": "SecureScore"
+  },
+  {
+    "ColumnName": "providerVersion",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.providerVersion",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "subProvider",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.subProvider",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "vendor",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.vendor",
+    "KqlType": "string",
+    "SampleValue": "Microsoft"
+  }
+]

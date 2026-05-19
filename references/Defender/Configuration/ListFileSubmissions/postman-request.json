@@ -1,0 +1,25 @@
+{
+  "EntryKey": "Configuration::configuration-listfilesubmissions",
+  "Slug": "ListFileSubmissions",
+  "SubArea": "Configuration",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/CustomerSubmissionService/file/enterprise/query/{TenantId}",
+  "PostmanPath": "/mtp/CustomerSubmissionService/file/enterprise/query/:TenantId",
+  "PostmanName": "List file submissions",
+  "PostmanAncestor": "mtp / CustomerSubmissionService / file / enterprise / query / {TenantId}",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "b718c95f-acc5-21b0-4358-7b91878a62b0",
+      "Key": "trackingId"
+    }
+  ],
+  "Variables": {
+    "TenantId": "b718c95f-acc5-21b0-4358-7b91878a62b0"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.2478173Z"
+}

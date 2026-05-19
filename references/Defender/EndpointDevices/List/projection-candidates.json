@@ -1,0 +1,74 @@
+[
+  {
+    "ColumnName": "totalCount",
+    "DslOp": "$tolong",
+    "Path": "totalCount",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "machineId",
+    "DslOp": "$tostring",
+    "Path": "machines[].machineId",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "computerDnsName",
+    "DslOp": "$tostring",
+    "Path": "machines[].computerDnsName",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "osPlatform",
+    "DslOp": "$tostring",
+    "Path": "machines[].osPlatform",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "osVersion",
+    "DslOp": "$tostring",
+    "Path": "machines[].osVersion",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "healthStatus",
+    "DslOp": "$tostring",
+    "Path": "machines[].healthStatus",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "riskScore",
+    "DslOp": "$tostring",
+    "Path": "machines[].riskScore",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "exposureLevel",
+    "DslOp": "$tostring",
+    "Path": "machines[].exposureLevel",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "lastSeen",
+    "DslOp": "$todatetime",
+    "Path": "machines[].lastSeen",
+    "KqlType": "datetime",
+    "SampleValue": "04/21/2010 06:35:46",
+    "Provenance": "nodoc-postman-response"
+  }
+]

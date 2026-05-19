@@ -1,0 +1,43 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-exportndrmachines",
+  "Slug": "ExportNdrMachines",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/ndr/machines/commandExport",
+  "PostmanPath": "/mtp/ndr/machines/commandExport",
+  "PostmanName": "Export NDR machine inventory",
+  "PostmanAncestor": "mtp / ndr / machines / commandExport",
+  "Headers": {
+    "Accept": "text/csv"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "machinesApiServiceMigration"
+    },
+    {
+      "Value": "string",
+      "Key": "deviceCategories"
+    },
+    {
+      "Value": "30",
+      "Key": "lookingBackIndays"
+    },
+    {
+      "Value": "string",
+      "Key": "paginationGuid"
+    },
+    {
+      "Value": "Descending",
+      "Key": "sortOrder"
+    },
+    {
+      "Value": "riskscore",
+      "Key": "sortByField"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4170820Z"
+}

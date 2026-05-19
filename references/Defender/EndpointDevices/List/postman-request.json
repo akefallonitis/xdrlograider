@@ -1,0 +1,47 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-list",
+  "Slug": "List",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/ndr/machines",
+  "PostmanPath": "/mtp/ndr/machines",
+  "PostmanName": "List endpoint devices",
+  "PostmanAncestor": "mtp / ndr / machines",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "hideLowFidelityDevices"
+    },
+    {
+      "Value": "30",
+      "Key": "lookingBackIndays"
+    },
+    {
+      "Value": "1",
+      "Key": "pageIndex"
+    },
+    {
+      "Value": "25",
+      "Key": "pageSize"
+    },
+    {
+      "Value": "riskscore",
+      "Key": "sortByField"
+    },
+    {
+      "Value": "Ascending",
+      "Key": "sortOrder"
+    },
+    {
+      "Value": "string",
+      "Key": "machineSearchPrefix"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5526140Z"
+}

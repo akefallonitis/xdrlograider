@@ -1,0 +1,35 @@
+{
+  "EntryKey": "MultiTenant::multitenant-listhuntingqueries",
+  "Slug": "ListHuntingQueries",
+  "SubArea": "MultiTenant",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtoapi/mtp/huntingService/queries/",
+  "PostmanPath": "/mtoapi/mtp/huntingService/queries/",
+  "PostmanName": "List MTO hunting queries",
+  "PostmanAncestor": "mtoapi / mtp / huntingService / queries",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "scheduled",
+      "Key": "type"
+    },
+    {
+      "Value": "e7229291-adbd-3cc2-bb45-395236dea5f0",
+      "Key": "tenantIds[]"
+    },
+    {
+      "Value": "e7229291-adbd-3cc2-bb45-395236dea5f0",
+      "Key": "tenantIds[]"
+    },
+    {
+      "Value": "false",
+      "Key": "includeUsxQueries"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.2573108Z"
+}

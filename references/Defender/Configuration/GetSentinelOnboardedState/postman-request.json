@@ -1,0 +1,23 @@
+{
+  "EntryKey": "Configuration::configuration-getsentinelonboardedstate",
+  "Slug": "GetSentinelOnboardedState",
+  "SubArea": "Configuration",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/sentinelOnboarding/sentinel/workspaces/isOnboarded",
+  "PostmanPath": "/mtp/sentinelOnboarding/sentinel/workspaces/isOnboarded",
+  "PostmanName": "Get Sentinel onboarding state",
+  "PostmanAncestor": "mtp / sentinelOnboarding / sentinel / workspaces / isOnboarded",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "useRealTime"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.2029869Z"
+}

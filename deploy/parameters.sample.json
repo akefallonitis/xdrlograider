@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "_comment": "Sample parameters file for XdrLogRaider v0.1.0. Copy to parameters.local.json, fill SA creds, then deploy via: az deployment group create --resource-group <rg> --template-file mainTemplate.json --parameters @parameters.local.json. NEVER commit parameters.local.json — gitignored.",
+  "parameters": {
+    "projectPrefix": {
+      "value": "xdrlr",
+      "_help": "1-6 lowercase alphanumeric prefix for all resource names · default 'xdrlr'."
+    },
+    "location": {
+      "value": "westeurope",
+      "_help": "Azure region for the connector resource group. Match your Sentinel workspace region for lowest cross-region egress."
+    },
+    "workspaceResourceId": {
+      "value": "/subscriptions/<subId>/resourceGroups/<workspaceRg>/providers/Microsoft.OperationalInsights/workspaces/<workspaceName>",
+      "_help": "Full ARM ID of the Sentinel-enabled Log Analytics workspace. Required."
+    },
+    "workspaceLocation": {
+      "value": "westeurope",
+      "_help": "Location of the workspace · used for DCR association."
+    },
+    "serviceAccountUpn": {
+      "value": "svc-xdrlr@yourtenant.onmicrosoft.com",
+      "_help": "Dedicated Entra user for the connector. MUST have Security Reader + Microsoft Defender Analyst roles. Conditional-Access-exempted for unattended TOTP sign-in."
+    },
+    "serviceAccountPassword": {
+      "value": "REPLACE-WITH-SECURE-PASSWORD",
+      "_help": "SA password. NEVER commit · use az keyvault secret show or pass via -p '<password>' at deploy time. Stored in deployed Key Vault."
+    },
+    "serviceAccountTotpSecret": {
+      "value": "JBSWY3DPEHPK3PXP",
+      "_help": "Base32 TOTP seed from SA's authenticator setup. Capture during MFA-enrollment QR. Stored in deployed Key Vault. Set to '' if AuthMethod=Passkey."
+    },
+    "serviceAccountAuthMethod": {
+      "value": "CredentialsTotp",
+      "_help": "MFA method · 'CredentialsTotp' (default) or 'Passkey'. Operator must enrol the SA accordingly. If Passkey · serviceAccountPasskeyPem REQUIRED below."
+    },
+    "serviceAccountPasskeyPem": {
+      "value": "",
+      "_help": "ECDSA-P256 PEM private key for SA WebAuthn passkey (begins with '-----BEGIN PRIVATE KEY-----'). REQUIRED when serviceAccountAuthMethod=Passkey · ignored when CredentialsTotp. Register the corresponding public key via mysignins.microsoft.com prior to deploy."
+    },
+    "githubRepo": {
+      "value": "akefallonitis/xdrlograider",
+      "_help": "Owner/repo for cosign keyless OIDC + release-tag traceability. Used in AppInsights customDimensions."
+    },
+    "releaseTag": {
+      "value": "v0.1.0",
+      "_help": "Git tag of the release being deployed. Validated against githubRepo at runtime for tampering detection."
+    },
+    "connectorVersion": {
+      "value": "0.1.0",
+      "_help": "Connector SemVer. Emitted in every row's ConnectorVersion column for downstream filtering."
+    },
+    "planSku": {
+      "value": "Y1",
+      "_help": "Function App plan SKU. Y1 = Consumption (recommended) · EP1 = Elastic Premium (for higher SLA)."
+    },
+    "deployRoleAssignments": {
+      "value": true,
+      "_help": "Set $false if deploying identity lacks User Access Administrator · then run tools/Grant-Post-Deploy-Rbac.ps1 separately."
+    }
+  }
+}

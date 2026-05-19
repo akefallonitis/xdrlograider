@@ -1,0 +1,130 @@
+[
+  {
+    "ColumnName": "isSessionProxySupported",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isSessionProxySupported",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isConfigured",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isConfigured",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isConnected",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isConnected",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isApiConnectable",
+    "DslOp": "$tobool",
+    "Path": "data[].isApiConnectable",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "category",
+    "DslOp": "$tostring",
+    "Path": "data[].category",
+    "KqlType": "string",
+    "SampleValue": "SAASDB_CATEGORY_COLLABORATION",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isOfficeApp",
+    "DslOp": "$tobool",
+    "Path": "data[].isOfficeApp",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "appName",
+    "DslOp": "$tostring",
+    "Path": "data[].appName",
+    "KqlType": "string",
+    "SampleValue": "Microsoft 365",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "appId",
+    "DslOp": "$tolong",
+    "Path": "data[].appId",
+    "KqlType": "long",
+    "SampleValue": "11161",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "instanceName",
+    "DslOp": "$tostring",
+    "Path": "data[].instanceName",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isConnected",
+    "DslOp": "$tobool",
+    "Path": "data[].discovery.isConnected",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "data[].name",
+    "KqlType": "string",
+    "SampleValue": "Microsoft 365",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isEnabled",
+    "DslOp": "$tobool",
+    "Path": "data[].api.isEnabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "usersCount",
+    "DslOp": "$tolong",
+    "Path": "data[].api.usersCount",
+    "KqlType": "long",
+    "SampleValue": "898",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isConnected",
+    "DslOp": "$tobool",
+    "Path": "data[].api.isConnected",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "creator",
+    "DslOp": "$tostring",
+    "Path": "data[].api.creator",
+    "KqlType": "string",
+    "SampleValue": "user@contoso.com",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "_id",
+    "DslOp": "$tostring",
+    "Path": "data[]._id",
+    "KqlType": "string",
+    "SampleValue": "63dd5f272b9cbba7bb29d703",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getdatasensitivity",
+  "Slug": "GetDataSensitivity",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/getDataSensitivity/machines/{MachineId}/dataSensitivity",
+  "PostmanPath": "/mtp/getDataSensitivity/machines/:MachineId/dataSensitivity",
+  "PostmanName": "Get machine data sensitivity",
+  "PostmanAncestor": "mtp / getDataSensitivity / machines / {MachineId} / dataSensitivity",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "id"
+    },
+    {
+      "Value": "string",
+      "Key": "tenantIds"
+    }
+  ],
+  "Variables": {
+    "MachineId": "string"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4590856Z"
+}

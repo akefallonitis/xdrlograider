@@ -1,0 +1,79 @@
+[
+  {
+    "ColumnName": "context",
+    "DslOp": "$tostring",
+    "Path": "@odata.context",
+    "KqlType": "string",
+    "SampleValue": "https://security.microsoft.com/api/$metadata#DataExportSettings"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "value[].id",
+    "KqlType": "string",
+    "SampleValue": "SentinelExportSettings-sentinel-workspace"
+  },
+  {
+    "ColumnName": "designatedTenantId",
+    "DslOp": "$tostring",
+    "Path": "value[].designatedTenantId",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "eventHubProperties",
+    "DslOp": "$tostring",
+    "Path": "value[].eventHubProperties",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "storageAccountProperties",
+    "DslOp": "$tostring",
+    "Path": "value[].storageAccountProperties",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "workspaceResourceId",
+    "DslOp": "$tostring",
+    "Path": "value[].workspaceProperties.workspaceResourceId",
+    "KqlType": "string",
+    "SampleValue": "/subscriptions/112e7a93-8364-4e7a-a694-2404d68ce2a3/resourceGroups/sentinel-workspace/providers/Microsoft.OperationalInsights/workspaces/sentinel-workspace"
+  },
+  {
+    "ColumnName": "subscriptionId",
+    "DslOp": "$tostring",
+    "Path": "value[].workspaceProperties.subscriptionId",
+    "KqlType": "string",
+    "SampleValue": "112e7a93-8364-4e7a-a694-2404d68ce2a3"
+  },
+  {
+    "ColumnName": "resourceGroup",
+    "DslOp": "$tostring",
+    "Path": "value[].workspaceProperties.resourceGroup",
+    "KqlType": "string",
+    "SampleValue": "sentinel-workspace"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "value[].workspaceProperties.name",
+    "KqlType": "string",
+    "SampleValue": "sentinel-workspace"
+  },
+  {
+    "ColumnName": "category",
+    "DslOp": "$tostring",
+    "Path": "value[].logs[].category",
+    "KqlType": "string",
+    "SampleValue": "AdvancedHunting-DeviceInfo"
+  },
+  {
+    "ColumnName": "enabled",
+    "DslOp": "$tobool",
+    "Path": "value[].logs[].enabled",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  }
+]

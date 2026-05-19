@@ -1,0 +1,182 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "config": {
+      "isWizard": true,
+      "basics": {
+        "description": "**XdrLogRaider** — Sentinel data connector for Microsoft Defender XDR portal-internal telemetry (`/apiproxy/`). Defender-only in v0.1.0; multi-portal in v0.2.0+.",
+        "location": {
+          "label": "Region",
+          "visible": true
+        }
+      },
+      "resourceGroup": {
+        "allowExisting": true
+      }
+    },
+    "basics": [
+      {
+        "name": "projectPrefix",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Project prefix",
+        "defaultValue": "xdrlr",
+        "toolTip": "3-12 char alphanumeric prefix for all resource names.",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z][a-z0-9]{2,11}$",
+          "validationMessage": "3-12 lowercase alphanumerics, starting with a letter."
+        },
+        "visible": true
+      }
+    ],
+    "steps": [
+      {
+        "name": "workspaceStep",
+        "label": "Sentinel workspace",
+        "elements": [
+          {
+            "name": "infoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Info",
+              "text": "Select the Log Analytics workspace that has Microsoft Sentinel enabled. DCR + DCE will be region-aligned with the workspace; the Function App may live in any region."
+            }
+          },
+          {
+            "name": "workspace",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Log Analytics workspace",
+            "toolTip": "Select the Sentinel-enabled Log Analytics workspace where Defender_*_CL tables will land. The DCR and DCE will be region-aligned with this workspace.",
+            "resourceType": "Microsoft.OperationalInsights/workspaces",
+            "options": { "filter": { "subscription": "onBasics", "location": "all" } }
+          }
+        ]
+      },
+      {
+        "name": "authStep",
+        "label": "Service account",
+        "elements": [
+          {
+            "name": "infoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Warning",
+              "text": "Provide a DEDICATED service account with Security Reader + Microsoft Defender Analyst. Exempt the SA from interactive-MFA / device-compliance Conditional Access policies (TOTP IS the MFA factor)."
+            }
+          },
+          {
+            "name": "upn",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Service account UPN",
+            "toolTip": "Full UPN, e.g. svc-xdrlr@contoso.onmicrosoft.com",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+              "validationMessage": "Enter a valid UPN."
+            }
+          },
+          {
+            "name": "password",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": { "password": "Service account password", "confirmPassword": "Confirm password" },
+            "toolTip": "The dedicated SA's password. Stored in the connector's Key Vault; never persisted in deployment history.",
+            "constraints": { "required": true }
+          },
+          {
+            "name": "authMethod",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "MFA method",
+            "defaultValue": "CredentialsTotp",
+            "toolTip": "CredentialsTotp = SA uses TOTP from authenticator app. Passkey = SA uses ECDSA-P256 WebAuthn (zero-TOTP burns · KMSI 90d cookies still apply · PEM key must be registered via mysignins.microsoft.com).",
+            "constraints": {
+              "allowedValues": [
+                { "label": "CredentialsTotp (recommended)", "value": "CredentialsTotp" },
+                { "label": "Passkey (ECDSA-P256 WebAuthn)", "value": "Passkey" }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "totp",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": { "password": "TOTP base32 seed", "confirmPassword": "Confirm seed" },
+            "toolTip": "Base32 secret from the SA's authenticator app (Security info → Microsoft Authenticator → 'Set up another way → Phone app' reveals the seed). REQUIRED when MFA method is CredentialsTotp.",
+            "constraints": {
+              "required": "[equals(steps('authStep').authMethod, 'CredentialsTotp')]"
+            },
+            "visible": "[equals(steps('authStep').authMethod, 'CredentialsTotp')]"
+          },
+          {
+            "name": "passkeyPem",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": { "password": "Passkey ECDSA-P256 PEM private key", "confirmPassword": "Confirm PEM" },
+            "toolTip": "PEM-encoded ECDSA-P256 private key for the SA's WebAuthn passkey (begins with '-----BEGIN PRIVATE KEY-----'). REQUIRED when MFA method is Passkey.",
+            "constraints": {
+              "required": "[equals(steps('authStep').authMethod, 'Passkey')]"
+            },
+            "visible": "[equals(steps('authStep').authMethod, 'Passkey')]"
+          }
+        ]
+      },
+      {
+        "name": "advancedStep",
+        "label": "Advanced",
+        "elements": [
+          {
+            "name": "planSku",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Function App plan SKU",
+            "defaultValue": "Y1 (Consumption)",
+            "toolTip": "Y1 = pay-per-execution ($0 idle). EP1+ = always-on; use for tenants where 10-min timeout is too tight.",
+            "constraints": {
+              "allowedValues": [
+                { "label": "Y1 (Consumption)", "value": "Y1" },
+                { "label": "EP1",              "value": "EP1" },
+                { "label": "EP2",              "value": "EP2" },
+                { "label": "EP3",              "value": "EP3" }
+              ]
+            }
+          },
+          {
+            "name": "releaseTag",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Release tag",
+            "defaultValue": "latest",
+            "toolTip": "GitHub Release tag — leave 'latest' to auto-follow newest release (FA auto-pulls on cold-restart via /releases/latest/download/), or pin to v0.x.y for reproducible deploys.",
+            "constraints": {
+              "required": true,
+              "regex": "^(latest|v[0-9]+\\.[0-9]+\\.[0-9]+(-[A-Za-z0-9.]+)?)$",
+              "validationMessage": "Use 'latest' or a SemVer tag like 'v0.0.2'."
+            }
+          },
+          {
+            "name": "deployRoleAssignments",
+            "type": "Microsoft.Common.CheckBox",
+            "label": "Deploy role assignments (requires User Access Administrator on this RG)",
+            "defaultValue": true,
+            "toolTip": "Uncheck if you only have Contributor; then run tools/Grant-Post-Deploy-Rbac.ps1 with a UAA-holding identity."
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "projectPrefix":             "[basics('projectPrefix')]",
+      "location":                  "[location()]",
+      "workspaceResourceId":       "[steps('workspaceStep').workspace.id]",
+      "workspaceLocation":         "[steps('workspaceStep').workspace.location]",
+      "serviceAccountUpn":         "[steps('authStep').upn]",
+      "serviceAccountPassword":    "[steps('authStep').password]",
+      "serviceAccountTotpSecret":  "[coalesce(steps('authStep').totp, '')]",
+      "serviceAccountAuthMethod":  "[steps('authStep').authMethod]",
+      "serviceAccountPasskeyPem":  "[coalesce(steps('authStep').passkeyPem, '')]",
+      "planSku":                   "[steps('advancedStep').planSku]",
+      "releaseTag":                "[steps('advancedStep').releaseTag]",
+      "deployRoleAssignments":     "[steps('advancedStep').deployRoleAssignments]"
+    }
+  }
+}

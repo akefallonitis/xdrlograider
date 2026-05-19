@@ -1,0 +1,65 @@
+[
+  {
+    "ColumnName": "context",
+    "DslOp": "$tostring",
+    "Path": "@odata.context",
+    "KqlType": "string",
+    "SampleValue": "http://security.microsoft.com/api/tvm/security/$metadata#SecureScoreTenantProfile"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "value[].id",
+    "KqlType": "string",
+    "SampleValue": "45f52f35-73d5-4066-8378-fe506ee90fb1"
+  },
+  {
+    "ColumnName": "goodScore",
+    "DslOp": "$tostring",
+    "Path": "value[].secureScoreZone.goodScore",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "badScore",
+    "DslOp": "$tostring",
+    "Path": "value[].secureScoreZone.badScore",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "createdBy",
+    "DslOp": "$tostring",
+    "Path": "value[].secureScoreZone.createdBy",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "createdDateTime",
+    "DslOp": "$tostring",
+    "Path": "value[].secureScoreZone.createdDateTime",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "uniqueName",
+    "DslOp": "$tostring",
+    "Path": "value[].tenantBenchmarks[].uniqueName",
+    "KqlType": "string",
+    "SampleValue": "Users_1_100"
+  },
+  {
+    "ColumnName": "isDefaultBenchmark",
+    "DslOp": "$tobool",
+    "Path": "value[].tenantBenchmarks[].isDefaultBenchmark",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "isBenchmarkValid",
+    "DslOp": "$tobool",
+    "Path": "value[].tenantBenchmarks[].isBenchmarkValid",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  }
+]

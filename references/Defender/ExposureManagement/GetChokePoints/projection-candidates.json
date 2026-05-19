@@ -1,0 +1,50 @@
+[
+  {
+    "ColumnName": "totalCount",
+    "DslOp": "$tolong",
+    "Path": "totalCount",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "data[].id",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "data[].name",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "assetType",
+    "DslOp": "$tostring",
+    "Path": "data[].assetType",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "attackPathCount",
+    "DslOp": "$tolong",
+    "Path": "data[].attackPathCount",
+    "KqlType": "long",
+    "SampleValue": "803",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "riskLevel",
+    "DslOp": "$tostring",
+    "Path": "data[].riskLevel",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  }
+]

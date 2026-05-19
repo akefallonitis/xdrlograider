@@ -1,0 +1,82 @@
+[
+  {
+    "ColumnName": "totalCount",
+    "DslOp": "$tolong",
+    "Path": "totalCount",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "actionId",
+    "DslOp": "$tostring",
+    "Path": "actions[].actionId",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "actionType",
+    "DslOp": "$tostring",
+    "Path": "actions[].actionType",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "status",
+    "DslOp": "$tostring",
+    "Path": "actions[].status",
+    "KqlType": "string",
+    "SampleValue": "Completed",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "entityType",
+    "DslOp": "$tostring",
+    "Path": "actions[].entityType",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "entityName",
+    "DslOp": "$tostring",
+    "Path": "actions[].entityName",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "investigationId",
+    "DslOp": "$tostring",
+    "Path": "actions[].investigationId",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "createdBy",
+    "DslOp": "$tostring",
+    "Path": "actions[].createdBy",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "createdDateTime",
+    "DslOp": "$todatetime",
+    "Path": "actions[].createdDateTime",
+    "KqlType": "datetime",
+    "SampleValue": "05/07/1967 11:48:13",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "completedDateTime",
+    "DslOp": "$todatetime",
+    "Path": "actions[].completedDateTime",
+    "KqlType": "datetime",
+    "SampleValue": "07/13/1987 06:31:16",
+    "Provenance": "nodoc-postman-response"
+  }
+]

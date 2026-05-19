@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EntityPivots::entitypivots-geturlemailprevalence",
+  "Slug": "GetUrlEmailPrevalence",
+  "SubArea": "EntityPivots",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/cloudPivot/cloud/pivot/portal/url/email/prevalence",
+  "PostmanPath": "/mtp/cloudPivot/cloud/pivot/portal/url/email/prevalence",
+  "PostmanName": "Get URL email prevalence",
+  "PostmanAncestor": "mtp / cloudPivot / cloud / pivot / portal / url / email / prevalence",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "entityId"
+    },
+    {
+      "Value": "30",
+      "Key": "daysToLookBack"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.6399020Z"
+}

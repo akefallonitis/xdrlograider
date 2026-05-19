@@ -1,0 +1,90 @@
+[
+  {
+    "ColumnName": "DisabledReason",
+    "DslOp": "$tolong",
+    "Path": "DisabledReason",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "ActionType",
+    "DslOp": "$tolong",
+    "Path": "ActionType",
+    "KqlType": "long",
+    "SampleValue": "2",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "IsEnabled",
+    "DslOp": "$tobool",
+    "Path": "IsEnabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "RequestorComment",
+    "DslOp": "$tostring",
+    "Path": "SampleRequestHistory.RequestorComment",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "OrgId",
+    "DslOp": "$tostring",
+    "Path": "SampleRequestHistory.OrgId",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "Sha1",
+    "DslOp": "$tostring",
+    "Path": "SampleRequestHistory.Sha1",
+    "KqlType": "string",
+    "SampleValue": "82d330861950d594c415efaa33fe388b50d7cfbf",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "Requestor",
+    "DslOp": "$tostring",
+    "Path": "SampleRequestHistory.Requestor",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "CreationTime",
+    "DslOp": "$todatetime",
+    "Path": "SampleRequestHistory.CreationTime",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "LastUpdateTime",
+    "DslOp": "$todatetime",
+    "Path": "SampleRequestHistory.LastUpdateTime",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "Status",
+    "DslOp": "$tolong",
+    "Path": "SampleRequestHistory.Status",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "RequestGuid",
+    "DslOp": "$tostring",
+    "Path": "SampleRequestHistory.RequestGuid",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "EntryKey": "Configuration::configuration-listthreatindicators",
+  "Slug": "ListThreatIndicators",
+  "SubArea": "Configuration",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/responseApiPortal/ti/indicators",
+  "PostmanPath": "/mtp/responseApiPortal/ti/indicators",
+  "PostmanName": "List custom threat indicators",
+  "PostmanAncestor": "mtp / responseApiPortal / ti / indicators",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "url",
+      "Key": "type"
+    },
+    {
+      "Value": "0",
+      "Key": "PageIndex"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.2631681Z"
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "ColumnName": "Title",
+    "DslOp": "$tostring",
+    "Path": "Entra.SelfServicePasswordReset.Title",
+    "KqlType": "string",
+    "SampleValue": "Ensure 'Self service password reset enabled' is set to 'All'"
+  },
+  {
+    "ColumnName": "CurrentStatus",
+    "DslOp": "$tobool",
+    "Path": "Entra.SelfServicePasswordReset.CurrentStatus",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "LastSynced",
+    "DslOp": "$todatetime",
+    "Path": "Entra.SelfServicePasswordReset.LastSynced",
+    "KqlType": "datetime",
+    "SampleValue": "05/16/2026 01:50:52"
+  },
+  {
+    "ColumnName": "Title",
+    "DslOp": "$tostring",
+    "Path": "Entra.PWAgePolicyNew.Title",
+    "KqlType": "string",
+    "SampleValue": "Ensure the 'Password expiration policy' is set to 'Set passwords to never expire (recommended)'"
+  },
+  {
+    "ColumnName": "CurrentStatus",
+    "DslOp": "$tobool",
+    "Path": "Entra.PWAgePolicyNew.CurrentStatus",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "LastSynced",
+    "DslOp": "$todatetime",
+    "Path": "Entra.PWAgePolicyNew.LastSynced",
+    "KqlType": "datetime",
+    "SampleValue": "05/16/2026 01:50:52"
+  }
+]

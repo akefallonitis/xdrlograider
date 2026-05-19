@@ -1,0 +1,58 @@
+[
+  {
+    "ColumnName": "createdTimestamp",
+    "DslOp": "$todatetime",
+    "Path": "results.createdTimestamp",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "tenantId",
+    "DslOp": "$tostring",
+    "Path": "results.tenantId",
+    "KqlType": "string",
+    "SampleValue": "00000000-0000-0000-0000-000000000000",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "eventType",
+    "DslOp": "$tostring",
+    "Path": "results.eventType",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "eventTime",
+    "DslOp": "$todatetime",
+    "Path": "results.eventTime",
+    "KqlType": "datetime",
+    "SampleValue": "2026-01-01T00:00:00Z",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isGlobal",
+    "DslOp": "$tobool",
+    "Path": "results.isGlobal",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "results.id",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "recordsCount",
+    "DslOp": "$tolong",
+    "Path": "recordsCount",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

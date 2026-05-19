@@ -1,0 +1,19 @@
+{
+  "EntryKey": "EndpointConfiguration::endpointconfiguration-createcustomcollectionrule",
+  "Slug": "CreateCustomCollectionRule",
+  "SubArea": "EndpointConfiguration",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/customDataCollection/rules",
+  "PostmanPath": "/mtp/customDataCollection/rules",
+  "PostmanName": "Create custom data collection rule",
+  "PostmanAncestor": "mtp / customDataCollection / rules",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"id\": \"string\",\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"isEnabled\": true,\n  \"query\": \"string\",\n  \"frequency\": \"string\"\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.3410266Z"
+}

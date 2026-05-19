@@ -1,0 +1,530 @@
+[
+  {
+    "ColumnName": "_id",
+    "DslOp": "$tostring",
+    "Path": "data[]._id",
+    "KqlType": "string",
+    "SampleValue": "656938b8c9325a5a1eeafb1a",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "_tid",
+    "DslOp": "$tolong",
+    "Path": "data[]._tid",
+    "KqlType": "long",
+    "SampleValue": "79819259",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "appId",
+    "DslOp": "$tolong",
+    "Path": "data[].appId",
+    "KqlType": "long",
+    "SampleValue": "2146486212",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_0",
+    "DslOp": "$tolong",
+    "Path": "data[].aadInfo.key_0",
+    "KqlType": "long",
+    "SampleValue": "3331",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_1",
+    "DslOp": "$tostring",
+    "Path": "data[].aadInfo.key_1",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "lastEnabled",
+    "DslOp": "$todatetime",
+    "Path": "data[].accessControl.lastEnabled",
+    "KqlType": "datetime",
+    "SampleValue": "12/01/2023 01:36:56",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "protocolType",
+    "DslOp": "$tolong",
+    "Path": "data[].accessControl.protocolType",
+    "KqlType": "long",
+    "SampleValue": "1",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "status",
+    "DslOp": "$tolong",
+    "Path": "data[].accessControl.status",
+    "KqlType": "long",
+    "SampleValue": "3",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "category",
+    "DslOp": "$tostring",
+    "Path": "data[].category",
+    "KqlType": "string",
+    "SampleValue": "SAASDB_CATEGORY_DATA_ANALYTICS",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_0",
+    "DslOp": "$todouble",
+    "Path": "data[].config.key_0",
+    "KqlType": "real",
+    "SampleValue": "9569.1564895156",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_1",
+    "DslOp": "$tobool",
+    "Path": "data[].config.key_1",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_2",
+    "DslOp": "$todouble",
+    "Path": "data[].config.key_2",
+    "KqlType": "real",
+    "SampleValue": "2731.90518610918",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "data[].name",
+    "KqlType": "string",
+    "SampleValue": "Azure Data Explorer - General",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "saasId",
+    "DslOp": "$tolong",
+    "Path": "data[].saasId",
+    "KqlType": "long",
+    "SampleValue": "51140",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_0",
+    "DslOp": "$tolong",
+    "Path": "data[].customData.key_0",
+    "KqlType": "long",
+    "SampleValue": "4316",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_1",
+    "DslOp": "$tostring",
+    "Path": "data[].customData.key_1",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "saasdbVersion",
+    "DslOp": "$tostring",
+    "Path": "data[].saasdbVersion",
+    "KqlType": "string",
+    "SampleValue": "1774941059",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "last_viewed",
+    "DslOp": "$todouble",
+    "Path": "data[].last_viewed",
+    "KqlType": "real",
+    "SampleValue": "1764918010214.14",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "appId",
+    "DslOp": "$tolong",
+    "Path": "data[].app.appId",
+    "KqlType": "long",
+    "SampleValue": "11161",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "data[].app.name",
+    "KqlType": "string",
+    "SampleValue": "Microsoft 365",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "_id",
+    "DslOp": "$tostring",
+    "Path": "data[].app._id",
+    "KqlType": "string",
+    "SampleValue": "63dd5f272b9cbba7bb29d703",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "instanceName",
+    "DslOp": "$tostring",
+    "Path": "data[].app.instanceName",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "category",
+    "DslOp": "$tostring",
+    "Path": "data[].app.category",
+    "KqlType": "string",
+    "SampleValue": "SAASDB_CATEGORY_COLLABORATION",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "hasWarnings",
+    "DslOp": "$tobool",
+    "Path": "data[].app.api.hasWarnings",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "statusTemplateMessage",
+    "DslOp": "$tostring",
+    "Path": "data[].app.api.statusTemplateMessage",
+    "KqlType": "string",
+    "SampleValue": "CONSOLE2_APP_CONNECTORS_STATUS_WARNING",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isConnected",
+    "DslOp": "$tobool",
+    "Path": "data[].app.api.isConnected",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "usersCount",
+    "DslOp": "$tolong",
+    "Path": "data[].app.api.usersCount",
+    "KqlType": "long",
+    "SampleValue": "898",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "creator",
+    "DslOp": "$tostring",
+    "Path": "data[].app.api.creator",
+    "KqlType": "string",
+    "SampleValue": "nathan@contoso.com",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isEnabled",
+    "DslOp": "$tobool",
+    "Path": "data[].app.api.isEnabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "lastConnected",
+    "DslOp": "$tolong",
+    "Path": "data[].app.api.lastConnected",
+    "KqlType": "long",
+    "SampleValue": "1773702127907",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "disabledBy",
+    "DslOp": "$tostring",
+    "Path": "data[].app.api.disabledBy",
+    "KqlType": "string",
+    "SampleValue": "console",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isSSPMEnabled",
+    "DslOp": "$tobool",
+    "Path": "data[].app.api.isSSPMEnabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "status",
+    "DslOp": "$tolong",
+    "Path": "data[].app.proxy.status",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "inDeployment",
+    "DslOp": "$tobool",
+    "Path": "data[].app.proxy.inDeployment",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isConnected",
+    "DslOp": "$tobool",
+    "Path": "data[].app.proxy.isConnected",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isInProxyPolicy",
+    "DslOp": "$tostring",
+    "Path": "data[].app.proxy.isInProxyPolicy",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isSuspended",
+    "DslOp": "$tobool",
+    "Path": "data[].app.proxy.isSuspended",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isConfigured",
+    "DslOp": "$tobool",
+    "Path": "data[].app.proxy.isConfigured",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isConfiguredInAAD",
+    "DslOp": "$tobool",
+    "Path": "data[].app.proxy.isConfiguredInAAD",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isSessionProxySupported",
+    "DslOp": "$tobool",
+    "Path": "data[].app.proxy.isSessionProxySupported",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isAppStatusEnabled",
+    "DslOp": "$tobool",
+    "Path": "data[].app.proxy.isAppStatusEnabled",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isSessionProxyDisabled",
+    "DslOp": "$tobool",
+    "Path": "data[].app.proxy.isSessionProxyDisabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "lastConnected",
+    "DslOp": "$todatetime",
+    "Path": "data[].app.proxy.lastConnected",
+    "KqlType": "datetime",
+    "SampleValue": "02/16/2023 20:21:54",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "proxySettings",
+    "DslOp": "$tostring",
+    "Path": "data[].app.proxy.proxySettings",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isOIDCBasedProtocol",
+    "DslOp": "$tobool",
+    "Path": "data[].app.proxy.isOIDCBasedProtocol",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isConnected",
+    "DslOp": "$tobool",
+    "Path": "data[].app.discovery.isConnected",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isOfficeApp",
+    "DslOp": "$tobool",
+    "Path": "data[].app.isOfficeApp",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isApiConnectable",
+    "DslOp": "$tobool",
+    "Path": "data[].app.isApiConnectable",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "aadInfo",
+    "DslOp": "$tostring",
+    "Path": "data[].app.aadInfo",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "lastUsed",
+    "DslOp": "$tostring",
+    "Path": "data[].app.lastUsed",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_0",
+    "DslOp": "$tostring",
+    "Path": "data[].app.customData.key_0",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_1",
+    "DslOp": "$todouble",
+    "Path": "data[].app.customData.key_1",
+    "KqlType": "real",
+    "SampleValue": "6402.68289611215",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_2",
+    "DslOp": "$tobool",
+    "Path": "data[].app.customData.key_2",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_3",
+    "DslOp": "$tostring",
+    "Path": "data[].app.customData.key_3",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "isCustomApp",
+    "DslOp": "$tobool",
+    "Path": "data[].app.isCustomApp",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_0",
+    "DslOp": "$todouble",
+    "Path": "data[].app.securityConfiguration.key_0",
+    "KqlType": "real",
+    "SampleValue": "4949.41036566734",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_1",
+    "DslOp": "$tolong",
+    "Path": "data[].app.securityConfiguration.key_1",
+    "KqlType": "long",
+    "SampleValue": "8743",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "appIdentityRealm",
+    "DslOp": "$tolong",
+    "Path": "data[].app.appIdentityRealm",
+    "KqlType": "long",
+    "SampleValue": "11394",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "appName",
+    "DslOp": "$tostring",
+    "Path": "data[].app.appName",
+    "KqlType": "string",
+    "SampleValue": "Microsoft 365",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "apiConnected",
+    "DslOp": "$tostring",
+    "Path": "data[].app.apiConnected",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "proxied",
+    "DslOp": "$tostring",
+    "Path": "data[].app.proxied",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "protected",
+    "DslOp": "$tostring",
+    "Path": "data[].app.protected",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "appName",
+    "DslOp": "$tostring",
+    "Path": "data[].appName",
+    "KqlType": "string",
+    "SampleValue": "Azure Data Explorer",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "apiConnected",
+    "DslOp": "$tostring",
+    "Path": "data[].apiConnected",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "proxied",
+    "DslOp": "$tobool",
+    "Path": "data[].proxied",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "protected",
+    "DslOp": "$tobool",
+    "Path": "data[].protected",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  }
+]

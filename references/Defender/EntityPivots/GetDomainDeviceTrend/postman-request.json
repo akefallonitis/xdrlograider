@@ -1,0 +1,27 @@
+{
+  "EntryKey": "EntityPivots::entitypivots-getdomaindevicetrend",
+  "Slug": "GetDomainDeviceTrend",
+  "SubArea": "EntityPivots",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/cloudPivot/cloud/pivot/portal/domain/device/trend",
+  "PostmanPath": "/mtp/cloudPivot/cloud/pivot/portal/domain/device/trend",
+  "PostmanName": "Get domain device trend",
+  "PostmanAncestor": "mtp / cloudPivot / cloud / pivot / portal / domain / device / trend",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "entityId"
+    },
+    {
+      "Value": "30",
+      "Key": "daysToLookBack"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.6134454Z"
+}

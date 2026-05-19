@@ -1,0 +1,47 @@
+{
+  "EntryKey": "EntityPivots::entitypivots-listdomainemails",
+  "Slug": "ListDomainEmails",
+  "SubArea": "EntityPivots",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/cloudPivot/cloud/pivot/portal/domain/email/details",
+  "PostmanPath": "/mtp/cloudPivot/cloud/pivot/portal/domain/email/details",
+  "PostmanName": "List email events for domain",
+  "PostmanAncestor": "mtp / cloudPivot / cloud / pivot / portal / domain / email / details",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "entityId"
+    },
+    {
+      "Value": "30",
+      "Key": "daysToLookBack"
+    },
+    {
+      "Value": "1",
+      "Key": "firstRowIndex"
+    },
+    {
+      "Value": "50",
+      "Key": "pageSize"
+    },
+    {
+      "Value": "string",
+      "Key": "deliveryAction"
+    },
+    {
+      "Value": "string",
+      "Key": "originalDeliveryLocation"
+    },
+    {
+      "Value": "string",
+      "Key": "latestDeliveryLocation"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.6598322Z"
+}

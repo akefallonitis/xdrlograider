@@ -1,0 +1,66 @@
+[
+  {
+    "ColumnName": "_id",
+    "DslOp": "$tostring",
+    "Path": "data[]._id",
+    "KqlType": "string",
+    "SampleValue": "5a53410867a58f2d1714c4b4",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "filterType",
+    "DslOp": "$tolong",
+    "Path": "data[].filterType",
+    "KqlType": "long",
+    "SampleValue": "2",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "nameTemplate",
+    "DslOp": "$tostring",
+    "Path": "data[].nameTemplate",
+    "KqlType": "string",
+    "SampleValue": "CONSOLE2_QUERIES_DISCOVERED_APPS_WEAK_AUTHENTICATION",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "queryType",
+    "DslOp": "$tolong",
+    "Path": "data[].queryType",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "createdBy",
+    "DslOp": "$tostring",
+    "Path": "data[].createdBy",
+    "KqlType": "string",
+    "SampleValue": "adallom",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_0",
+    "DslOp": "$tobool",
+    "Path": "data[].consoleFilters.key_0",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_1",
+    "DslOp": "$tostring",
+    "Path": "data[].consoleFilters.key_1",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "data[].name",
+    "KqlType": "string",
+    "SampleValue": "Enterprise cloud apps that have weak authentication",
+    "Provenance": "nodoc-postman-response"
+  }
+]

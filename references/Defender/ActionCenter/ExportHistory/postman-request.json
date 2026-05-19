@@ -1,0 +1,47 @@
+{
+  "EntryKey": "ActionCenter::actioncenter-exporthistory",
+  "Slug": "ExportHistory",
+  "SubArea": "ActionCenter",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/actionCenter/actioncenterui/history-actions/export",
+  "PostmanPath": "/mtp/actionCenter/actioncenterui/history-actions/export",
+  "PostmanName": "Export action center history",
+  "PostmanAncestor": "mtp / actionCenter / actioncenterui / history-actions / export",
+  "Headers": {
+    "Accept": "text/csv"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "sortByField"
+    },
+    {
+      "Value": "Descending",
+      "Key": "sortOrder"
+    },
+    {
+      "Value": "history",
+      "Key": "type"
+    },
+    {
+      "Value": "1",
+      "Key": "pageIndex"
+    },
+    {
+      "Value": "9",
+      "Key": "pageSize"
+    },
+    {
+      "Value": "05/28/1998 18:39:24",
+      "Key": "toDate"
+    },
+    {
+      "Value": "05/28/1998 18:39:24",
+      "Key": "fromDate"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:42.5878287Z"
+}

@@ -1,0 +1,100 @@
+[
+  {
+    "ColumnName": "context",
+    "DslOp": "$tostring",
+    "Path": "@odata.context",
+    "KqlType": "string",
+    "SampleValue": "http://security.microsoft.com/api/tvm/security/$metadata#SecureScoreSecurityInitiativesV2"
+  },
+  {
+    "ColumnName": "Name",
+    "DslOp": "$tostring",
+    "Path": "value[].Name",
+    "KqlType": "string",
+    "SampleValue": "Microsoft Secure Score"
+  },
+  {
+    "ColumnName": "Category",
+    "DslOp": "$tostring",
+    "Path": "value[].Category",
+    "KqlType": "string",
+    "SampleValue": "Industry Benchmark"
+  },
+  {
+    "ColumnName": "Description",
+    "DslOp": "$tostring",
+    "Path": "value[].Description",
+    "KqlType": "string",
+    "SampleValue": "Microsoft Secure Score"
+  },
+  {
+    "ColumnName": "DefaultGrouping",
+    "DslOp": "$tostring",
+    "Path": "value[].DefaultGrouping",
+    "KqlType": "string",
+    "SampleValue": "NistFunction"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "value[].id",
+    "KqlType": "string",
+    "SampleValue": "securescore"
+  },
+  {
+    "ColumnName": "azureTenantId",
+    "DslOp": "$tostring",
+    "Path": "value[].azureTenantId",
+    "KqlType": "string",
+    "SampleValue": "45f52f35-73d5-4066-8378-fe506ee90fb1"
+  },
+  {
+    "ColumnName": "Id",
+    "DslOp": "$tostring",
+    "Path": "value[].Subgroups[].Id",
+    "KqlType": "string",
+    "SampleValue": "default"
+  },
+  {
+    "ColumnName": "SubgroupContext",
+    "DslOp": "$tostring",
+    "Path": "value[].Subgroups[].SubgroupContext",
+    "KqlType": "string",
+    "SampleValue": "default"
+  },
+  {
+    "ColumnName": "DisplayName",
+    "DslOp": "$tostring",
+    "Path": "value[].Subgroups[].DisplayName",
+    "KqlType": "string",
+    "SampleValue": "default"
+  },
+  {
+    "ColumnName": "provider",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.provider",
+    "KqlType": "string",
+    "SampleValue": "SecureScore"
+  },
+  {
+    "ColumnName": "providerVersion",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.providerVersion",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "subProvider",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.subProvider",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "vendor",
+    "DslOp": "$tostring",
+    "Path": "value[].vendorInformation.vendor",
+    "KqlType": "string",
+    "SampleValue": "Microsoft"
+  }
+]

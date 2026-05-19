@@ -1,0 +1,37 @@
+{
+  "EntryKey": "EndpointConfiguration::endpointconfiguration-listdevicepolicies",
+  "Slug": "ListDevicePolicies",
+  "SubArea": "EndpointConfiguration",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/unifiedExperience/mde/configurationManagement/mem/device/{MachineId}/policies",
+  "PostmanPath": "/mtp/unifiedExperience/mde/configurationManagement/mem/device/:MachineId/policies",
+  "PostmanName": "List device policy assignments",
+  "PostmanAncestor": "mtp / unifiedExperience / mde / configurationManagement / mem / device / {MachineId} / policies",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "aadDeviceId"
+    },
+    {
+      "Value": "true",
+      "Key": "isManagedByMde"
+    },
+    {
+      "Value": "1",
+      "Key": "page"
+    },
+    {
+      "Value": "25",
+      "Key": "pageSize"
+    }
+  ],
+  "Variables": {
+    "MachineId": "string"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.3968028Z"
+}

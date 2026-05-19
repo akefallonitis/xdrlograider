@@ -1,0 +1,266 @@
+[
+  {
+    "ColumnName": "isOIDCBasedProtocol",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isOIDCBasedProtocol",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "proxySettings",
+    "DslOp": "$tostring",
+    "Path": "data[].proxy.proxySettings",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "status",
+    "DslOp": "$tolong",
+    "Path": "data[].proxy.status",
+    "KqlType": "long",
+    "SampleValue": "0",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isSessionProxyDisabled",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isSessionProxyDisabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isInProxyPolicy",
+    "DslOp": "$tostring",
+    "Path": "data[].proxy.isInProxyPolicy",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isAppStatusEnabled",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isAppStatusEnabled",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isConfigured",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isConfigured",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "inDeployment",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.inDeployment",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lastConnected",
+    "DslOp": "$tostring",
+    "Path": "data[].proxy.lastConnected",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isSessionProxySupported",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isSessionProxySupported",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isConfiguredInAAD",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isConfiguredInAAD",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isSuspended",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isSuspended",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isConnected",
+    "DslOp": "$tobool",
+    "Path": "data[].proxy.isConnected",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "data[].name",
+    "KqlType": "string",
+    "SampleValue": "Microsoft 365",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isApiConnectable",
+    "DslOp": "$tobool",
+    "Path": "data[].isApiConnectable",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "appId",
+    "DslOp": "$tolong",
+    "Path": "data[].appId",
+    "KqlType": "long",
+    "SampleValue": "11161",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "instanceName",
+    "DslOp": "$tostring",
+    "Path": "data[].instanceName",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "category",
+    "DslOp": "$tostring",
+    "Path": "data[].category",
+    "KqlType": "string",
+    "SampleValue": "SAASDB_CATEGORY_COLLABORATION",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "appName",
+    "DslOp": "$tostring",
+    "Path": "data[].appName",
+    "KqlType": "string",
+    "SampleValue": "Microsoft 365",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "_id",
+    "DslOp": "$tostring",
+    "Path": "data[]._id",
+    "KqlType": "string",
+    "SampleValue": "63dd5f272b9cbba7bb29d703",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "aadInfo",
+    "DslOp": "$tostring",
+    "Path": "data[].aadInfo",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isConnected",
+    "DslOp": "$tobool",
+    "Path": "data[].discovery.isConnected",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isOfficeApp",
+    "DslOp": "$tobool",
+    "Path": "data[].isOfficeApp",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isCustomApp",
+    "DslOp": "$tobool",
+    "Path": "data[].isCustomApp",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lastUsed",
+    "DslOp": "$tostring",
+    "Path": "data[].lastUsed",
+    "KqlType": "string",
+    "SampleValue": "null",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isEnabled",
+    "DslOp": "$tobool",
+    "Path": "data[].api.isEnabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "usersCount",
+    "DslOp": "$tolong",
+    "Path": "data[].api.usersCount",
+    "KqlType": "long",
+    "SampleValue": "898",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isConnected",
+    "DslOp": "$tobool",
+    "Path": "data[].api.isConnected",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lastConnected",
+    "DslOp": "$tolong",
+    "Path": "data[].api.lastConnected",
+    "KqlType": "long",
+    "SampleValue": "1773702127907",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "disabledBy",
+    "DslOp": "$tostring",
+    "Path": "data[].api.disabledBy",
+    "KqlType": "string",
+    "SampleValue": "console",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "lastCheckTime",
+    "DslOp": "$tolong",
+    "Path": "data[].api.lastCheckTime",
+    "KqlType": "long",
+    "SampleValue": "1775347859564",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "isSSPMEnabled",
+    "DslOp": "$tobool",
+    "Path": "data[].api.isSSPMEnabled",
+    "KqlType": "bool",
+    "SampleValue": "True",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "creator",
+    "DslOp": "$tostring",
+    "Path": "data[].api.creator",
+    "KqlType": "string",
+    "SampleValue": "user@contoso.com",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

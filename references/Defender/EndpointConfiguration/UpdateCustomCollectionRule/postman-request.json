@@ -1,0 +1,21 @@
+{
+  "EntryKey": "EndpointConfiguration::endpointconfiguration-updatecustomcollectionrule",
+  "Slug": "UpdateCustomCollectionRule",
+  "SubArea": "EndpointConfiguration",
+  "Method": "PUT",
+  "ManifestPath": "/apiproxy/mtp/customDataCollection/rules/{RuleId}",
+  "PostmanPath": "/mtp/customDataCollection/rules/:RuleId",
+  "PostmanName": "Update custom data collection rule",
+  "PostmanAncestor": "mtp / customDataCollection / rules / {RuleId}",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"id\": \"string\",\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"isEnabled\": true,\n  \"query\": \"string\",\n  \"frequency\": \"string\"\n}",
+  "Query": [],
+  "Variables": {
+    "RuleId": "string"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.4123080Z"
+}

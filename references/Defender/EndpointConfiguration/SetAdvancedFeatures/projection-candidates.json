@@ -1,0 +1,18 @@
+[
+  {
+    "ColumnName": "code",
+    "DslOp": "$tostring",
+    "Path": "error.code",
+    "KqlType": "string",
+    "SampleValue": "BadRequest",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "message",
+    "DslOp": "$tostring",
+    "Path": "error.message",
+    "KqlType": "string",
+    "SampleValue": "The request is invalid.",
+    "Provenance": "nodoc-postman-response"
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-setexclusionstate",
+  "Slug": "SetExclusionState",
+  "SubArea": "EndpointDevices",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/machineExclusionState/updateMachineExclusionState",
+  "PostmanPath": "/mtp/machineExclusionState/updateMachineExclusionState",
+  "PostmanName": "Set device exclusion state",
+  "PostmanAncestor": "mtp / machineExclusionState / updateMachineExclusionState",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"machineId\": \"string\",\n  \"isExcluded\": true\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5846023Z"
+}

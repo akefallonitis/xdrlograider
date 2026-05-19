@@ -1,0 +1,31 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getndrdevicetotalcount",
+  "Slug": "GetNdrDeviceTotalCount",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/ndr/machines/deviceTotalCount",
+  "PostmanPath": "/mtp/ndr/machines/deviceTotalCount",
+  "PostmanName": "Get NDR device total count",
+  "PostmanAncestor": "mtp / ndr / machines / deviceTotalCount",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "180",
+      "Key": "lookingBackIndays"
+    },
+    {
+      "Value": "string",
+      "Key": "deviceRoles"
+    },
+    {
+      "Value": "string",
+      "Key": "deviceRoleConfidence"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5013097Z"
+}

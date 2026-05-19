@@ -1,0 +1,27 @@
+{
+  "EntryKey": "ThreatAnalytics::threatanalytics-listoutbreaks",
+  "Slug": "ListOutbreaks",
+  "SubArea": "ThreatAnalytics",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/threatAnalyticsAPI/outbreaks",
+  "PostmanPath": "/mtp/threatAnalyticsAPI/outbreaks",
+  "PostmanName": "List threat analytics outbreaks",
+  "PostmanAncestor": "mtp / threatAnalyticsAPI / outbreaks",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "0",
+      "Key": "pageIndex"
+    },
+    {
+      "Value": "50",
+      "Key": "pageSize"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.4599232Z"
+}

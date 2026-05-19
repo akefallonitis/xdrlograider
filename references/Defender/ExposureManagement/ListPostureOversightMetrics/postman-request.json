@@ -1,0 +1,31 @@
+{
+  "EntryKey": "ExposureManagement::exposuremanagement-listpostureoversightmetrics",
+  "Slug": "ListPostureOversightMetrics",
+  "SubArea": "ExposureManagement",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/posture/oversight/metrics",
+  "PostmanPath": "/mtp/posture/oversight/metrics",
+  "PostmanName": "List posture oversight metrics",
+  "PostmanAncestor": "mtp / posture / oversight / metrics",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "initiativeId"
+    },
+    {
+      "Value": "true",
+      "Key": "highlights"
+    },
+    {
+      "Value": "true",
+      "Key": "fullData"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.7977440Z"
+}

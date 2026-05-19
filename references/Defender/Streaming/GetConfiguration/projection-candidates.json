@@ -1,0 +1,34 @@
+[
+  {
+    "ColumnName": "isEnabled",
+    "DslOp": "$tobool",
+    "Path": "isEnabled",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "eventTypes",
+    "DslOp": "$tostring",
+    "Path": "destinations.eventTypes",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "resourceId",
+    "DslOp": "$tostring",
+    "Path": "destinations.resourceId",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "destinationType",
+    "DslOp": "$tostring",
+    "Path": "destinations.destinationType",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

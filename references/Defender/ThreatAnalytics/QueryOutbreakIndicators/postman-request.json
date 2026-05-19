@@ -1,0 +1,21 @@
+{
+  "EntryKey": "ThreatAnalytics::threatanalytics-queryoutbreakindicators",
+  "Slug": "QueryOutbreakIndicators",
+  "SubArea": "ThreatAnalytics",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/query",
+  "PostmanPath": "/mtp/threatAnalyticsIndicators/stix/outbreaks/:OutbreakId/indicators/query",
+  "PostmanName": "Query outbreak indicators",
+  "PostmanAncestor": "mtp / threatAnalyticsIndicators / stix / outbreaks / {OutbreakId} / indicators / query",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"key_0\": 2166.886263073904\n}",
+  "Query": [],
+  "Variables": {
+    "OutbreakId": "be35d041-028b-a6a3-8ae9-643790d335ec"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.4714013Z"
+}

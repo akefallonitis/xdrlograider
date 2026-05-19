@@ -1,0 +1,19 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-setcriticalitylevel",
+  "Slug": "SetCriticalityLevel",
+  "SubArea": "EndpointDevices",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/assetvalue/setCriticalityLevel",
+  "PostmanPath": "/mtp/assetvalue/setCriticalityLevel",
+  "PostmanName": "Set device criticality level",
+  "PostmanAncestor": "mtp / assetvalue / setCriticalityLevel",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"machineId\": \"string\",\n  \"criticalityLevel\": 845\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5802704Z"
+}

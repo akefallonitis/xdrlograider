@@ -1,0 +1,65 @@
+[
+  {
+    "ColumnName": "context",
+    "DslOp": "$tostring",
+    "Path": "@odata.context",
+    "KqlType": "string",
+    "SampleValue": "https://appg-afd-prd-wus-gpe3h3ayavehddc9.z01.azurefd.net/compliance/$metadata#istenantonboarded/$entity"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "id",
+    "KqlType": "string",
+    "SampleValue": "e0405796-3699-4b92-96f5-8047bcab0090"
+  },
+  {
+    "ColumnName": "tenantId",
+    "DslOp": "$tostring",
+    "Path": "tenantId",
+    "KqlType": "string",
+    "SampleValue": "45f52f35-73d5-4066-8378-fe506ee90fb1"
+  },
+  {
+    "ColumnName": "forestName",
+    "DslOp": "$tostring",
+    "Path": "forestName",
+    "KqlType": "string",
+    "SampleValue": "eop-eur05"
+  },
+  {
+    "ColumnName": "isTenantOnboarded",
+    "DslOp": "$tobool",
+    "Path": "isTenantOnboarded",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "isFirstLoginForCurrentUser",
+    "DslOp": "$tobool",
+    "Path": "isFirstLoginForCurrentUser",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "isRegionSupported",
+    "DslOp": "$tobool",
+    "Path": "isRegionSupported",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  },
+  {
+    "ColumnName": "toggleStatus",
+    "DslOp": "$tostring",
+    "Path": "toggleStatus",
+    "KqlType": "string",
+    "SampleValue": "off"
+  },
+  {
+    "ColumnName": "hasConsentToExportData",
+    "DslOp": "$tostring",
+    "Path": "hasConsentToExportData",
+    "KqlType": "string",
+    "SampleValue": "Unknown"
+  }
+]

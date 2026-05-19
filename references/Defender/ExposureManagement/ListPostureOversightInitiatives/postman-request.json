@@ -1,0 +1,43 @@
+{
+  "EntryKey": "ExposureManagement::exposuremanagement-listpostureoversightinitiatives",
+  "Slug": "ListPostureOversightInitiatives",
+  "SubArea": "ExposureManagement",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/posture/oversight/initiatives",
+  "PostmanPath": "/mtp/posture/oversight/initiatives",
+  "PostmanName": "List posture oversight initiatives",
+  "PostmanAncestor": "mtp / posture / oversight / initiatives",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "true",
+      "Key": "highlights"
+    },
+    {
+      "Value": "90",
+      "Key": "daysAgo"
+    },
+    {
+      "Value": "<Error: Not supported in OAS>",
+      "Key": "initiativeTypes"
+    },
+    {
+      "Value": "string",
+      "Key": "calculationId"
+    },
+    {
+      "Value": "1",
+      "Key": "pagination.pageNumber"
+    },
+    {
+      "Value": "10",
+      "Key": "pagination.numberOfPageRecords"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.7938798Z"
+}

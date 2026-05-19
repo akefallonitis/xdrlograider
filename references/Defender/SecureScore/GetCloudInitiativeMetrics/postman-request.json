@@ -1,0 +1,28 @@
+{
+  "EntryKey": "SecureScore::securescore-getcloudinitiativemetrics",
+  "Slug": "GetCloudInitiativeMetrics",
+  "SubArea": "SecureScore",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mdc/views/secureScore/cloudInitiativeMetrics",
+  "PostmanPath": "/mdc/views/secureScore/cloudInitiativeMetrics",
+  "PostmanName": "Get cloud initiative secure score metrics",
+  "PostmanAncestor": "mdc / views / secureScore / cloudInitiativeMetrics",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"startDateTime\": \"2026-03-27T05:51:56.116Z\"\n}",
+  "Query": [
+    {
+      "Value": "en-us",
+      "Key": "c"
+    },
+    {
+      "Value": "1.0.2797.1",
+      "Key": "v"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.3525250Z"
+}

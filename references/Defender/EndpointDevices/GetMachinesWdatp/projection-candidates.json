@@ -1,0 +1,233 @@
+[
+  {
+    "ColumnName": "context",
+    "DslOp": "$tostring",
+    "Path": "@odata.context",
+    "KqlType": "string",
+    "SampleValue": "https://security.microsoft.com/api/$metadata#Machines"
+  },
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "value[].id",
+    "KqlType": "string",
+    "SampleValue": "0dd605557e8c2fb95de56c6beff3f92a92004215"
+  },
+  {
+    "ColumnName": "mergedIntoMachineId",
+    "DslOp": "$tostring",
+    "Path": "value[].mergedIntoMachineId",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "isPotentialDuplication",
+    "DslOp": "$tobool",
+    "Path": "value[].isPotentialDuplication",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "isExcluded",
+    "DslOp": "$tobool",
+    "Path": "value[].isExcluded",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "exclusionReason",
+    "DslOp": "$tostring",
+    "Path": "value[].exclusionReason",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "computerDnsName",
+    "DslOp": "$tostring",
+    "Path": "value[].computerDnsName",
+    "KqlType": "string",
+    "SampleValue": "desktop-pi22b2e"
+  },
+  {
+    "ColumnName": "firstSeen",
+    "DslOp": "$todatetime",
+    "Path": "value[].firstSeen",
+    "KqlType": "datetime",
+    "SampleValue": "04/01/2026 09:10:36"
+  },
+  {
+    "ColumnName": "lastSeen",
+    "DslOp": "$todatetime",
+    "Path": "value[].lastSeen",
+    "KqlType": "datetime",
+    "SampleValue": "04/01/2026 12:20:28"
+  },
+  {
+    "ColumnName": "osPlatform",
+    "DslOp": "$tostring",
+    "Path": "value[].osPlatform",
+    "KqlType": "string",
+    "SampleValue": "Windows10"
+  },
+  {
+    "ColumnName": "osProcessor",
+    "DslOp": "$tostring",
+    "Path": "value[].osProcessor",
+    "KqlType": "string",
+    "SampleValue": "x64"
+  },
+  {
+    "ColumnName": "version",
+    "DslOp": "$tostring",
+    "Path": "value[].version",
+    "KqlType": "string",
+    "SampleValue": "22H2"
+  },
+  {
+    "ColumnName": "lastIpAddress",
+    "DslOp": "$tostring",
+    "Path": "value[].lastIpAddress",
+    "KqlType": "string",
+    "SampleValue": "192.168.23.128"
+  },
+  {
+    "ColumnName": "lastExternalIpAddress",
+    "DslOp": "$tostring",
+    "Path": "value[].lastExternalIpAddress",
+    "KqlType": "string",
+    "SampleValue": "87.203.92.158"
+  },
+  {
+    "ColumnName": "agentVersion",
+    "DslOp": "$tostring",
+    "Path": "value[].agentVersion",
+    "KqlType": "string",
+    "SampleValue": "10.8804.19045.6456"
+  },
+  {
+    "ColumnName": "osBuild",
+    "DslOp": "$tolong",
+    "Path": "value[].osBuild",
+    "KqlType": "long",
+    "SampleValue": "19045"
+  },
+  {
+    "ColumnName": "healthStatus",
+    "DslOp": "$tostring",
+    "Path": "value[].healthStatus",
+    "KqlType": "string",
+    "SampleValue": "Inactive"
+  },
+  {
+    "ColumnName": "deviceValue",
+    "DslOp": "$tostring",
+    "Path": "value[].deviceValue",
+    "KqlType": "string",
+    "SampleValue": "Normal"
+  },
+  {
+    "ColumnName": "rbacGroupId",
+    "DslOp": "$tolong",
+    "Path": "value[].rbacGroupId",
+    "KqlType": "long",
+    "SampleValue": "13"
+  },
+  {
+    "ColumnName": "rbacGroupName",
+    "DslOp": "$tostring",
+    "Path": "value[].rbacGroupName",
+    "KqlType": "string",
+    "SampleValue": "UnassignedGroup"
+  },
+  {
+    "ColumnName": "riskScore",
+    "DslOp": "$tostring",
+    "Path": "value[].riskScore",
+    "KqlType": "string",
+    "SampleValue": "None"
+  },
+  {
+    "ColumnName": "exposureLevel",
+    "DslOp": "$tostring",
+    "Path": "value[].exposureLevel",
+    "KqlType": "string",
+    "SampleValue": "High"
+  },
+  {
+    "ColumnName": "isAadJoined",
+    "DslOp": "$tobool",
+    "Path": "value[].isAadJoined",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "aadDeviceId",
+    "DslOp": "$tostring",
+    "Path": "value[].aadDeviceId",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "onboardingStatus",
+    "DslOp": "$tostring",
+    "Path": "value[].onboardingStatus",
+    "KqlType": "string",
+    "SampleValue": "Onboarded"
+  },
+  {
+    "ColumnName": "osArchitecture",
+    "DslOp": "$tostring",
+    "Path": "value[].osArchitecture",
+    "KqlType": "string",
+    "SampleValue": "64-bit"
+  },
+  {
+    "ColumnName": "managedBy",
+    "DslOp": "$tostring",
+    "Path": "value[].managedBy",
+    "KqlType": "string",
+    "SampleValue": "Unknown"
+  },
+  {
+    "ColumnName": "managedByStatus",
+    "DslOp": "$tostring",
+    "Path": "value[].managedByStatus",
+    "KqlType": "string",
+    "SampleValue": "Unknown"
+  },
+  {
+    "ColumnName": "ipAddress",
+    "DslOp": "$tostring",
+    "Path": "value[].ipAddresses[].ipAddress",
+    "KqlType": "string",
+    "SampleValue": "192.168.23.128"
+  },
+  {
+    "ColumnName": "macAddress",
+    "DslOp": "$tostring",
+    "Path": "value[].ipAddresses[].macAddress",
+    "KqlType": "string",
+    "SampleValue": "000C297E20B0"
+  },
+  {
+    "ColumnName": "type",
+    "DslOp": "$tostring",
+    "Path": "value[].ipAddresses[].type",
+    "KqlType": "string",
+    "SampleValue": "Ethernet"
+  },
+  {
+    "ColumnName": "operationalStatus",
+    "DslOp": "$tostring",
+    "Path": "value[].ipAddresses[].operationalStatus",
+    "KqlType": "string",
+    "SampleValue": "Up"
+  },
+  {
+    "ColumnName": "vmMetadata",
+    "DslOp": "$tostring",
+    "Path": "value[].vmMetadata",
+    "KqlType": "string",
+    "SampleValue": "null"
+  }
+]

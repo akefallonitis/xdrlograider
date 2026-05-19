@@ -1,0 +1,28 @@
+{
+  "EntryKey": "Configuration::configuration-getcloudoverviewmetrics",
+  "Slug": "GetCloudOverviewMetrics",
+  "SubArea": "Configuration",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mdc/views/overview/overviewMetrics",
+  "PostmanPath": "/mdc/views/overview/overviewMetrics",
+  "PostmanName": "Get cloud overview metrics",
+  "PostmanAncestor": "mdc / views / overview / overviewMetrics",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"startDateTime\": \"2021-12-22T00:00:32.398Z\"\n}",
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "c"
+    },
+    {
+      "Value": "string",
+      "Key": "v"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.1527894Z"
+}

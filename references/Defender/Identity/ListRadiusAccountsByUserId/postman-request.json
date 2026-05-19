@@ -1,0 +1,19 @@
+{
+  "EntryKey": "Identity::identity-listradiusaccountsbyuserid",
+  "Slug": "ListRadiusAccountsByUserId",
+  "SubArea": "Identity",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/radius/api/radius/identities/accountsByUserId",
+  "PostmanPath": "/radius/api/radius/identities/accountsByUserId",
+  "PostmanName": "List Radius accounts by user ID",
+  "PostmanAncestor": "radius / api / radius / identities / accountsByUserId",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"PageSize\": 9855,\n  \"userId\": \"string\"\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:44.1712650Z"
+}

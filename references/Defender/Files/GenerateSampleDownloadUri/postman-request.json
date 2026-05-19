@@ -1,0 +1,39 @@
+{
+  "EntryKey": "Files::files-generatesampledownloaduri",
+  "Slug": "GenerateSampleDownloadUri",
+  "SubArea": "Files",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/responseApiPortal/sampledownloadrequest/generatedownloaduri/V2",
+  "PostmanPath": "/mtp/responseApiPortal/sampledownloadrequest/generatedownloaduri/V2",
+  "PostmanName": "Generate file download URI",
+  "PostmanAncestor": "mtp / responseApiPortal / sampledownloadrequest / generatedownloaduri / V2",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "sha"
+    },
+    {
+      "Value": "string",
+      "Key": "filename"
+    },
+    {
+      "Value": "string",
+      "Key": "requestorComment"
+    },
+    {
+      "Value": "string",
+      "Key": "zipPassword"
+    },
+    {
+      "Value": "null",
+      "Key": "tenantIds"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8248193Z"
+}

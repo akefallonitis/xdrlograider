@@ -1,0 +1,51 @@
+[
+  {
+    "ColumnName": "id",
+    "DslOp": "$tostring",
+    "Path": "value[].id",
+    "KqlType": "string",
+    "SampleValue": "CredentialHarvesting"
+  },
+  {
+    "ColumnName": "technique",
+    "DslOp": "$tostring",
+    "Path": "value[].technique",
+    "KqlType": "string",
+    "SampleValue": "CredentialHarvesting"
+  },
+  {
+    "ColumnName": "recommendationType",
+    "DslOp": "$tostring",
+    "Path": "value[].recommendationType",
+    "KqlType": "string",
+    "SampleValue": "Static"
+  },
+  {
+    "ColumnName": "payloadId",
+    "DslOp": "$tostring",
+    "Path": "value[].payloadId",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "payloadName",
+    "DslOp": "$tostring",
+    "Path": "value[].payloadName",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "nextLink",
+    "DslOp": "$tostring",
+    "Path": "odata.nextLink",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "count",
+    "DslOp": "$tostring",
+    "Path": "odata.count",
+    "KqlType": "string",
+    "SampleValue": "null"
+  }
+]

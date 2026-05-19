@@ -1,0 +1,58 @@
+[
+  {
+    "ColumnName": "count",
+    "DslOp": "$tolong",
+    "Path": "count",
+    "KqlType": "long",
+    "SampleValue": "3703",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "name",
+    "DslOp": "$tostring",
+    "Path": "items[].name",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "tableType",
+    "DslOp": "$tostring",
+    "Path": "items[].tableType",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "provisioningState",
+    "DslOp": "$tostring",
+    "Path": "items[].provisioningState",
+    "KqlType": "string",
+    "SampleValue": "string",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_0",
+    "DslOp": "$todouble",
+    "Path": "items[].parquetSchema[].key_0",
+    "KqlType": "real",
+    "SampleValue": "4223.30036559304",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_1",
+    "DslOp": "$tolong",
+    "Path": "items[].parquetSchema[].key_1",
+    "KqlType": "long",
+    "SampleValue": "3197",
+    "Provenance": "nodoc-postman-response"
+  },
+  {
+    "ColumnName": "key_0",
+    "DslOp": "$tolong",
+    "Path": "items[].kustoSchema[].key_0",
+    "KqlType": "long",
+    "SampleValue": "4586",
+    "Provenance": "nodoc-postman-response"
+  }
+]

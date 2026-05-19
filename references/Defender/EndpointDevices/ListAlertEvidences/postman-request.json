@@ -1,0 +1,51 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-listalertevidences",
+  "Slug": "ListAlertEvidences",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/alertsApiService/Evidences/device/Alerts",
+  "PostmanPath": "/mtp/alertsApiService/Evidences/device/Alerts",
+  "PostmanName": "List device alert evidences",
+  "PostmanAncestor": "mtp / alertsApiService / Evidences / device / Alerts",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "6",
+      "Key": "status"
+    },
+    {
+      "Value": "string",
+      "Key": "WcdMachineId"
+    },
+    {
+      "Value": "string",
+      "Key": "ComputerDnsName"
+    },
+    {
+      "Value": "string",
+      "Key": "MachineId"
+    },
+    {
+      "Value": "string",
+      "Key": "tenantIds"
+    },
+    {
+      "Value": "180",
+      "Key": "lookBackInDays"
+    },
+    {
+      "Value": "severity",
+      "Key": "sortByField"
+    },
+    {
+      "Value": "Descending",
+      "Key": "sortOrder"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5556753Z"
+}

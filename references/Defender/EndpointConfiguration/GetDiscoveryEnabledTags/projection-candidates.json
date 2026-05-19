@@ -1,0 +1,26 @@
+[
+  {
+    "ColumnName": "Name",
+    "DslOp": "$tostring",
+    "Path": "EnabledTagsForScan.Name",
+    "KqlType": "string",
+    "SampleValue": "sample-string",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "IsTagEnabledForScan",
+    "DslOp": "$tobool",
+    "Path": "EnabledTagsForScan.IsTagEnabledForScan",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  },
+  {
+    "ColumnName": "IsAllDevicesEnabled",
+    "DslOp": "$tobool",
+    "Path": "IsAllDevicesEnabled",
+    "KqlType": "bool",
+    "SampleValue": "False",
+    "Provenance": "nodoc-openapi-schema-example"
+  }
+]

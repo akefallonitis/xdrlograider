@@ -1,0 +1,47 @@
+{
+  "EntryKey": "EntityPivots::entitypivots-listdomainclicks",
+  "Slug": "ListDomainClicks",
+  "SubArea": "EntityPivots",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/details",
+  "PostmanPath": "/mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/details",
+  "PostmanName": "List domain click events",
+  "PostmanAncestor": "mtp / cloudPivot / cloud / pivot / portal / domainClick / email / click / details",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "entityId"
+    },
+    {
+      "Value": "30",
+      "Key": "daysToLookBack"
+    },
+    {
+      "Value": "1",
+      "Key": "firstRowIndex"
+    },
+    {
+      "Value": "50",
+      "Key": "pageSize"
+    },
+    {
+      "Value": "string",
+      "Key": "ActionType"
+    },
+    {
+      "Value": "string",
+      "Key": "ThreatTypes"
+    },
+    {
+      "Value": "string",
+      "Key": "DetectionMethods"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.6512060Z"
+}

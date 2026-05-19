@@ -1,0 +1,25 @@
+{
+  "EntryKey": "EndpointDevices::endpointdevices-getndrmachineexclusiondetails",
+  "Slug": "GetNdrMachineExclusionDetails",
+  "SubArea": "EndpointDevices",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/ndr/machines/{MachineId}/exclusionDetails",
+  "PostmanPath": "/mtp/ndr/machines/:MachineId/exclusionDetails",
+  "PostmanName": "Get NDR machine exclusion details",
+  "PostmanAncestor": "mtp / ndr / machines / {MachineId} / exclusionDetails",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "string",
+      "Key": "senseMachineId"
+    }
+  ],
+  "Variables": {
+    "MachineId": "string"
+  },
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.5127066Z"
+}

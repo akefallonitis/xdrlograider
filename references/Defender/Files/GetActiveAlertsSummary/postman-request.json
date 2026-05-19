@@ -1,0 +1,35 @@
+{
+  "EntryKey": "Files::files-getactivealertssummary",
+  "Slug": "GetActiveAlertsSummary",
+  "SubArea": "Files",
+  "Method": "GET",
+  "ManifestPath": "/apiproxy/mtp/activeAlertsSummary/activeAlertsSummary",
+  "PostmanPath": "/mtp/activeAlertsSummary/activeAlertsSummary",
+  "PostmanName": "Get active alert summary for file",
+  "PostmanAncestor": "mtp / activeAlertsSummary / activeAlertsSummary",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": null,
+  "Query": [
+    {
+      "Value": "180",
+      "Key": "lookingBackInDays"
+    },
+    {
+      "Value": "string",
+      "Key": "Sha1"
+    },
+    {
+      "Value": "string",
+      "Key": "Sha256"
+    },
+    {
+      "Value": "null",
+      "Key": "tenantIds"
+    }
+  ],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8284022Z"
+}

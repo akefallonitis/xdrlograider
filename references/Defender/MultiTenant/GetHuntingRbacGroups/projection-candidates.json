@@ -1,0 +1,30 @@
+[
+  {
+    "ColumnName": "paginationGuid",
+    "DslOp": "$tostring",
+    "Path": "metadata.paginationGuid",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "chosenItems",
+    "DslOp": "$tostring",
+    "Path": "metadata.chosenItems",
+    "KqlType": "string",
+    "SampleValue": "null"
+  },
+  {
+    "ColumnName": "isResultBase64Encoded",
+    "DslOp": "$tobool",
+    "Path": "metadata.isResultBase64Encoded",
+    "KqlType": "bool",
+    "SampleValue": "False"
+  },
+  {
+    "ColumnName": "isMtoResponse",
+    "DslOp": "$tobool",
+    "Path": "isMtoResponse",
+    "KqlType": "bool",
+    "SampleValue": "True"
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "EntryKey": "ExposureManagement::exposuremanagement-queryattacksurface",
+  "Slug": "QueryAttackSurface",
+  "SubArea": "ExposureManagement",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mtp/xspmatlas/attacksurface/query",
+  "PostmanPath": "/mtp/xspmatlas/attacksurface/query",
+  "PostmanName": "Query attack surface graph",
+  "PostmanAncestor": "mtp / xspmatlas / attacksurface / query",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"query\": \"Nodes | extend isCloud = EntityIds contains \\\"AwsResourceName\\\" | extend isCritical = Properties.criticalityLevel.criticalityLevel < 4 | summarize criticalCloudAssets = countif(isCloud and isCritical)\",\n  \"ApiVersion\": \"v2\"\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.8139997Z"
+}

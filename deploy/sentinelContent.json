@@ -1,0 +1,135 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": { "type": "string", "metadata": { "description": "Sentinel-enabled Log Analytics workspace short name." } }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectorDefinitions",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/XdrLogRaiderInternal')]",
+      "kind": "Customizable",
+      "properties": {
+        "connectorUiConfig": {
+          "id": "XdrLogRaiderInternal",
+          "title": "XdrLogRaider — Defender XDR portal-internal",
+          "publisher": "XdrLogRaider",
+          "descriptionMarkdown": "Sentinel data connector that harvests the `security.microsoft.com/apiproxy/*` surface Microsoft does not publicly document (Action Center, Configuration, Endpoint Devices, Identity, Multi-Tenant, Secure Score, etc.) using operator-authorised SA TOTP/Passkey sign-in. Card freshness driven by 5-min `XdrConnectorHealth_CL` heartbeat.",
+          "graphQueriesTableName": "XdrConnectorHealth_CL",
+          "graphQueries": [
+            {
+              "metricName": "Heartbeat (last 24h)",
+              "legend": "Health pings",
+              "baseQuery": "XdrConnectorHealth_CL"
+            },
+            {
+              "metricName": "Defender sub-area rows (last 24h)",
+              "legend": "Per-sub-area telemetry",
+              "baseQuery": "union withsource=TableName isfuzzy=true Defender_*_CL"
+            }
+          ],
+          "sampleQueries": [
+            {
+              "description": "EndpointDevices · DeviceTimeline events (10m cadence)",
+              "query": "Defender_EndpointDevices_CL | where Slug startswith 'endpointdevices-' and Slug contains 'timeline' | top 50 by TimeGenerated desc | project TimeGenerated, Slug, StatusCode, ProjectedData.DeviceId, ProjectedData.UserPrincipalName, RawJson"
+            },
+            {
+              "description": "ActionCenter · pending action queue (10m cadence)",
+              "query": "Defender_ActionCenter_CL | where Slug == 'actioncenter-listpending' | top 50 by TimeGenerated desc | project TimeGenerated, Slug, StatusCode, ProjectedData, RawJson"
+            },
+            {
+              "description": "ExposureManagement · ASR attack-path chokepoints",
+              "query": "Defender_ExposureManagement_CL | where Slug contains 'attacksurface' or Slug contains 'chokepoint' | top 50 by TimeGenerated desc | project TimeGenerated, Slug, StatusCode, ProjectedData, RawJson"
+            },
+            {
+              "description": "Identity · auth events + cloud identity queries",
+              "query": "Defender_Identity_CL | top 50 by TimeGenerated desc | project TimeGenerated, Slug, StatusCode, ProjectedData.UserPrincipalName, ProjectedData.IpAddress, RawJson"
+            },
+            {
+              "description": "Configuration · suppression rules + critical asset classification",
+              "query": "Defender_Configuration_CL | where Slug contains 'suppression' or Slug contains 'criticalasset' | top 50 by TimeGenerated desc | project TimeGenerated, Slug, StatusCode, ProjectedData, RawJson"
+            },
+            {
+              "description": "VulnerabilityManagement · CVE remediation backlog",
+              "query": "Defender_VulnerabilityManagement_CL | top 50 by TimeGenerated desc | project TimeGenerated, Slug, StatusCode, ProjectedData, RawJson"
+            },
+            {
+              "description": "SecureScore · posture drift (24h cadence)",
+              "query": "Defender_SecureScore_CL | top 20 by TimeGenerated desc | project TimeGenerated, Slug, StatusCode, ProjectedData, RawJson"
+            },
+            {
+              "description": "Health · auth-fatal events last 12h (connector outage signal)",
+              "query": "XdrConnectorHealth_CL | where Status == 'AuthFatal' and TimeGenerated > ago(12h) | order by TimeGenerated desc"
+            }
+          ],
+          "dataTypes": [
+            { "name": "XdrConnectorHealth_CL",                  "lastDataReceivedQuery": "XdrConnectorHealth_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_ActionCenter_CL",              "lastDataReceivedQuery": "Defender_ActionCenter_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_AppGovernance_CL",             "lastDataReceivedQuery": "Defender_AppGovernance_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_AttackSimulator_CL",           "lastDataReceivedQuery": "Defender_AttackSimulator_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_CloudApps_CL",                 "lastDataReceivedQuery": "Defender_CloudApps_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_Configuration_CL",             "lastDataReceivedQuery": "Defender_Configuration_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_DataLake_CL",                  "lastDataReceivedQuery": "Defender_DataLake_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_EndpointConfiguration_CL",     "lastDataReceivedQuery": "Defender_EndpointConfiguration_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_EndpointDevices_CL",           "lastDataReceivedQuery": "Defender_EndpointDevices_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_EntityPivots_CL",              "lastDataReceivedQuery": "Defender_EntityPivots_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_ExposureManagement_CL",        "lastDataReceivedQuery": "Defender_ExposureManagement_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_Files_CL",                     "lastDataReceivedQuery": "Defender_Files_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_Identity_CL",                  "lastDataReceivedQuery": "Defender_Identity_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_MultiTenant_CL",               "lastDataReceivedQuery": "Defender_MultiTenant_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_PortalServices_CL",            "lastDataReceivedQuery": "Defender_PortalServices_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_SecureScore_CL",               "lastDataReceivedQuery": "Defender_SecureScore_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_SentinelPrecision_CL",         "lastDataReceivedQuery": "Defender_SentinelPrecision_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_Streaming_CL",                 "lastDataReceivedQuery": "Defender_Streaming_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_ThreatAnalytics_CL",           "lastDataReceivedQuery": "Defender_ThreatAnalytics_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" },
+            { "name": "Defender_VulnerabilityManagement_CL",   "lastDataReceivedQuery": "Defender_VulnerabilityManagement_CL | summarize Time = max(TimeGenerated) | where isnotempty(Time)" }
+          ],
+          "connectivityCriterias": [
+            {
+              "type": "IsConnectedQuery",
+              "value": [
+                "XdrConnectorHealth_CL | where Portal == 'Defender' and TimeGenerated > ago(15m) | take 1",
+                "union withsource=TableName isfuzzy=true Defender_*_CL | where TimeGenerated > ago(1h) and SuccessKind == 'live' | summarize hits=count() | where hits > 0",
+                "XdrConnectorHealth_CL | where Status == 'AuthFatal' and TimeGenerated > ago(4h) | summarize fatals=count() | where fatals == 0",
+                "union withsource=TableName isfuzzy=true Defender_*_CL | where TimeGenerated > ago(1h) | summarize WithPD=countif(isnotempty(ProjectedData)), Total=count() | extend Pct=iff(Total>0, round(100.0*WithPD/Total,1), 0.0) | where Pct >= 20.0"
+              ]
+            }
+          ],
+          "availability": { "status": 1, "isPreview": true },
+          "permissions": {
+            "resourceProvider": [
+              {
+                "provider": "Microsoft.OperationalInsights/workspaces",
+                "permissionsDisplayText": "Read and write permissions on the workspace are required.",
+                "providerDisplayName": "Workspace",
+                "scope": "Workspace",
+                "requiredPermissions": { "write": true, "read": true, "delete": true }
+              }
+            ],
+            "customs": [
+              {
+                "name": "Microsoft Defender XDR service account",
+                "description": "Dedicated SA in your Entra tenant with **Security Reader** + **Microsoft Defender Analyst**, Conditional-Access-exempt for unattended TOTP/Passkey sign-in."
+              }
+            ]
+          },
+          "instructionSteps": [
+            {
+              "title": "1. Service account",
+              "description": "Create a dedicated Entra user (e.g. `svc-xdrlr@<tenant>.onmicrosoft.com`). Grant **Security Reader + Microsoft Defender Analyst**. Set MFA to TOTP (or Passkey ECDSA-P256) and capture the base32 seed (or PEM). **Conditional Access exemption from interactive-MFA / device-compliance is required** — audit this exemption quarterly per your security policy."
+            },
+            {
+              "title": "2. Deploy",
+              "description": "Use the **Deploy to Azure** button in the README, or `az deployment group create` with `deploy/mainTemplate.json` + `deploy/createUiDefinition.json`. Provide the workspace ARM ID, SA UPN, password, and TOTP seed (or Passkey PEM). The Function App uses identity-based AzureWebJobsStorage (full SAMI posture · adds ~30-60s to cold-start)."
+            },
+            {
+              "title": "3. Verify",
+              "description": "Within ~20 min the heartbeat lands in `XdrConnectorHealth_CL` and the connector card flips **Connected**. Tables surface in **both** the legacy Azure portal Sentinel UI **and** the new unified Microsoft Defender XDR portal (Sentinel-in-Defender · July 2025+) · same KQL works in both. Run `tools/Smoke-E2E.ps1 -ResourceGroup <rg>` to confirm AC-1..AC-10 and the first TenantContext row is queryable.\n\n**Note**: The `/apiproxy/` surface is portal-internal · **no Microsoft SLA** · breaking changes possible. Azure portal Sentinel UI retires March 31, 2027 · queries continue to work in the unified Defender XDR portal."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

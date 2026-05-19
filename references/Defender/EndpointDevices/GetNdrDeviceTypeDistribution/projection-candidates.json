@@ -1,0 +1,30 @@
+[
+  {
+    "ColumnName": "DeviceCategory",
+    "DslOp": "$tostring",
+    "Path": "[].DeviceCategory",
+    "KqlType": "string",
+    "SampleValue": "Endpoint"
+  },
+  {
+    "ColumnName": "DeviceType",
+    "DslOp": "$tostring",
+    "Path": "[].DeviceType",
+    "KqlType": "string",
+    "SampleValue": "Workstation"
+  },
+  {
+    "ColumnName": "DeviceTypeCount",
+    "DslOp": "$tolong",
+    "Path": "[].DeviceTypeCount",
+    "KqlType": "long",
+    "SampleValue": "7"
+  },
+  {
+    "ColumnName": "HighValueAssetTotal",
+    "DslOp": "$tolong",
+    "Path": "[].HighValueAssetTotal",
+    "KqlType": "long",
+    "SampleValue": "0"
+  }
+]

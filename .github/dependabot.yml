@@ -1,0 +1,28 @@
+# ITER11 audit · supply-chain hygiene
+# Weekly check for newer SHAs of pinned GitHub Actions · auto-opens PR with
+# update-spec for actions/checkout · actions/cache · sigstore/cosign-installer
+# · anchore/sbom-action · softprops/action-gh-release · gitleaks/gitleaks-action.
+# Operator reviews PR · runs tools/Update-PinnedSHAs.ps1 if needed · merges.
+#
+# Reference: https://docs.github.com/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Athens"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    # Group all action updates into a single PR to reduce noise
+    groups:
+      github-actions:
+        patterns:
+          - "*"

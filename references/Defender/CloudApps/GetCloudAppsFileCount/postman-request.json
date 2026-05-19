@@ -1,0 +1,19 @@
+{
+  "EntryKey": "CloudApps::files-getcloudappsfilecount",
+  "Slug": "GetCloudAppsFileCount",
+  "SubArea": "CloudApps",
+  "Method": "POST",
+  "ManifestPath": "/apiproxy/mcas/cas/api/v1/files/count",
+  "PostmanPath": "/mcas/cas/api/v1/files/count",
+  "PostmanName": "Get Cloud Apps file count",
+  "PostmanAncestor": "mcas / cas / api / v1 / files / count",
+  "Headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "Body": "{\n  \"filters\": {\n    \"sha256\": {\n      \"eq\": [\n        \"string\",\n        \"string\"\n      ]\n    },\n    \"policy\": {\n      \"cabinetmatchedrulesequals\": [\n        \"string\",\n        \"string\"\n      ]\n    }\n  }\n}",
+  "Query": [],
+  "Variables": {},
+  "Provenance": "nodoc-postman",
+  "DerivedAt": "2026-05-18T15:25:43.0956978Z"
+}
