@@ -22,7 +22,7 @@ jobs:
       # Π11.5f · third-party actions pinned to immutable SHAs (supply-chain hardening)
       # Refresh via tools/Update-PinnedSHAs.ps1 periodically (monthly · or when action releases new major)
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           fetch-depth: 0   # include all tags for changelog
 
@@ -39,7 +39,7 @@ jobs:
 
       # Π11.5c · cache PowerShell modules (~30s saved per CI run)
       - name: Cache PowerShell modules
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
           path: ~/.local/share/powershell/Modules
           key: psmodules-${{ runner.os }}-pester-pssa-yaml-v1
@@ -180,7 +180,7 @@ jobs:
           ls -la out/
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9  # v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac  # v3
         with:
           cosign-release: 'v2.2.0'
 
@@ -217,7 +217,7 @@ jobs:
           ls -la out/
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # v3.0.0
         with:
           tag_name: ${{ github.ref_name }}
           name: XdrLogRaider ${{ github.ref_name }}
