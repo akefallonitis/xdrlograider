@@ -1,0 +1,178 @@
+{
+  "operationCount": 19,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/sampledownloadrequest/generatedownloaduri/V2",
+      "OperationId": "Files.GenerateSampleDownloadUri",
+      "Summary": "Generate file download URI",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/remediation/permission",
+      "OperationId": "Files.GetRemediationPermission",
+      "Summary": "Get file remediation permission",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/details",
+      "OperationId": "Files.ListDeviceDetails",
+      "Summary": "List devices for file",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/detectionCyberProfile/api/detection/cyberprofileprovider/user/profiles/file",
+      "OperationId": "Files.GetProfile",
+      "Summary": "Get file cyber profile",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdeDeepAnalysis/api/DeepAnalysisRequest",
+      "OperationId": "Files.GetDeepAnalysisStatus",
+      "Summary": "Get deep analysis request state",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/threatAnalyticsIndicators/stix/outbreaks/indicators/outbreaks/query",
+      "OperationId": "Files.QueryThreatAnalyticsOutbreaks",
+      "Summary": "Query threat analytics outbreaks for file hash",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalyticsIndicators/stix/oneti/reputation/fileHash",
+      "OperationId": "Files.GetThreatReputation",
+      "Summary": "Get file hash reputation",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/files/files/{Sha256}/FileVerdict",
+      "OperationId": "Files.ListVerdicts",
+      "Summary": "List file verdicts",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdeEntitiesExperience/files/{Sha256}/content",
+      "OperationId": "Files.GetContentAnalysis",
+      "Summary": "Get unified file content analysis",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/papin/api/cloud/public/internal/indicators/getQuery",
+      "OperationId": "Files.ListIndicators",
+      "Summary": "Find matching file indicators",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/fileNamesBySha2",
+      "OperationId": "Files.ListObservedNames",
+      "Summary": "List observed file names",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/responseApiPortal/sampledownloadrequest/createcollectionrequest",
+      "OperationId": "Files.CreateSampleCollectionRequest",
+      "Summary": "Create file collection request",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/trend",
+      "OperationId": "Files.GetDeviceTrend",
+      "Summary": "Get file device trend",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/cloudPivot/cloud/pivot/portal/file/device/prevalence",
+      "OperationId": "Files.GetDevicePrevalence",
+      "Summary": "Get file device prevalence",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdeEntitiesExperience/files/{Sha256}/capabilities",
+      "OperationId": "Files.GetCapabilities",
+      "Summary": "Get file page capabilities",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/sampledownloadrequest/state",
+      "OperationId": "Files.GetSampleDownloadState",
+      "Summary": "Get file collect or download state",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/huntingService/goHunt/File",
+      "OperationId": "Files.GoHunt",
+      "Summary": "Generate file hunting pivot",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/files/files/{Sha256}/virustotal",
+      "OperationId": "Files.GetVirusTotalReport",
+      "Summary": "Get VirusTotal report",
+      "Tags": [
+        "Files"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/activeAlertsSummary/activeAlertsSummary",
+      "OperationId": "Files.GetActiveAlertsSummary",
+      "Summary": "Get active alert summary for file",
+      "Tags": [
+        "Files"
+      ]
+    }
+  ],
+  "category": "files",
+  "portal": "nodoc-defender-xdr"
+}

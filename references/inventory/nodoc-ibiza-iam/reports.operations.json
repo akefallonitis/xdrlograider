@@ -1,0 +1,97 @@
+{
+  "operationCount": 10,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/Reports/AuditActivityTypesV2",
+      "OperationId": "Reports.AuditActivityTypesV2.Get",
+      "Summary": "Get report Audit Activity types (V2)",
+      "Tags": [
+        "Reports"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Reports/UsersActivitySummary",
+      "OperationId": "Reports.UserActivitySummary.Get",
+      "Summary": "Get users activity summary",
+      "Tags": [
+        "Reports"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/Reports/AuditEventsV2",
+      "OperationId": "Reports.AuditEventsV2.List",
+      "Summary": "List audit events (v2)",
+      "Tags": [
+        "Reports"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Reports/ServicePrincipals/{spId}",
+      "OperationId": "Reports.ServicePrincipal.Get",
+      "Summary": "Get basic details about service principal",
+      "Tags": [
+        "Reports"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Reports/AuditActivityTypes",
+      "OperationId": "Reports.AuditActivityTypes.Get",
+      "Summary": "Get report Audit Activity types",
+      "Tags": [
+        "Reports"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/Reports/SignInEventsV2",
+      "OperationId": "Reports.SignInEventsV2.Get",
+      "Summary": "Get sign-in events (v2)",
+      "Tags": [
+        "Reports"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Reports/{reportId}",
+      "OperationId": "Reports.Get",
+      "Summary": "Get report by ID",
+      "Tags": [
+        "Reports"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Reports/GroupsActivitySummary",
+      "OperationId": "Reports.GroupActivitySummary.Get",
+      "Summary": "Get groups activity summary",
+      "Tags": [
+        "Reports"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Reports/Groups/{groupId}",
+      "OperationId": "Reports.Group.Get",
+      "Summary": "Get basic details about group",
+      "Tags": [
+        "Reports"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Reports/Users/{userId}",
+      "OperationId": "Reports.Users.Get",
+      "Summary": "Get basic details about User",
+      "Tags": [
+        "Reports"
+      ]
+    }
+  ],
+  "category": "reports",
+  "portal": "nodoc-ibiza-iam"
+}

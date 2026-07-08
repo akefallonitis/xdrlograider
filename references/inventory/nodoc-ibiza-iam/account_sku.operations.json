@@ -1,0 +1,169 @@
+{
+  "operationCount": 18,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/AccountSkus",
+      "OperationId": "AccountSkus.List",
+      "Summary": "List account SKUs",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/AccountSkus/Group/{groupId}/Reprocess",
+      "OperationId": "AccountSkus.Group.Reprocess",
+      "Summary": "Reprocess group license assignment",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/AccountSkus/CreateTrial",
+      "OperationId": "AccountSkus.Trial.Create",
+      "Summary": "Create license trial",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AccountSkus/GroupsWithLicensingErrors",
+      "OperationId": "AccountSkus.Group.Error.List",
+      "Summary": "List groups with licensing errors",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/TenantSkuInfo",
+      "OperationId": "TenantSkuInfo.Get",
+      "Summary": "Get Tenant SKU information.",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/AccountSkus/Remove",
+      "OperationId": "AccountSkus.Remove",
+      "Summary": "Remove account SKU assignments to users or groups.",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AccountSkus/GroupAssignments",
+      "OperationId": "AccountSkus.Group.List",
+      "Summary": "List group licence assignments",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/AccountSkus/Update",
+      "OperationId": "AccountSkus.Update",
+      "Summary": "Update account SKU assignments for users or groups.",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/ViralSku/delete",
+      "OperationId": "ViralSubscription.Delete",
+      "Summary": "Delete Viral Subscription",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/AccountSkus/AssignUpdateRemove",
+      "OperationId": "AccountSkus.AssignUpdateRemove",
+      "Summary": "Assign, update, or remove account SKU assignments to users or groups",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/Licenses/DirectoryMembersImageUrlFromIds",
+      "OperationId": "Licences.DirectoryMembersImageUrlFromIds.Get",
+      "Summary": "Get directory member image URLs from IDs.",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AccountSkus/Group/{groupId}",
+      "OperationId": "AccountSkus.Group.Get",
+      "Summary": "Get group licence assignments",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ViralSubscriptions",
+      "OperationId": "ViralSubscription.Get",
+      "Summary": "List Viral Subscriptions",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AccountSkus/Group/{groupId}/AssignmentErrors",
+      "OperationId": "AccountSkus.Group.Errors.Get",
+      "Summary": "Get group licence assignment errors",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/AccountSkus/User/{userId}/Reprocess",
+      "OperationId": "AccountSkus.User.Reprocess",
+      "Summary": "Reprocess user license assignment.",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AccountSkus/UserAssignments",
+      "OperationId": "AccountSkus.User.List",
+      "Summary": "List user licence assignments.",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/AccountSkus/Assign",
+      "OperationId": "AccountSkus.Assign",
+      "Summary": "Assign account SKUs",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AccountSkus/User/{userId}",
+      "OperationId": "AccountSkus.user.Get",
+      "Summary": "Get user licence assignments.",
+      "Tags": [
+        "Licensing"
+      ]
+    }
+  ],
+  "category": "account_sku",
+  "portal": "nodoc-ibiza-iam"
+}

@@ -1,0 +1,592 @@
+{
+  "operationCount": 65,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/BillingPolicies",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_BillingPolicies",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/BillingPolicies",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/entitlements/Log/trends",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_Log_trends",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/Log/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSSessions",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_MCSSessions",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSSessions",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/licenseRequests/all",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_licenseRequests_all",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/licenseRequests/all",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSMessages",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_MCSMessages",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSMessages",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/entitlements/Database/trends",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_Database_trends",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/Database/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/entitlements/extension",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_extension",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/extension",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/FinOpsLicensing/GetLicenseSummaryV2",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetLicenseSummaryV2",
+      "Summary": "GET /v1.0/tenants/{tenantId}/FinOpsLicensing/GetLicenseSummaryV2",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsFile",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_FinOpsFile",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsFile",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/File",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_File",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/File",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/capacityTypes/MCSSessions/trends",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_capacityTypes_MCSSessions_trends",
+      "Summary": "GET /v1.0/tenants/{tenantId}/capacityTypes/MCSSessions/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseSummary",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_productCategories_PowerApps_userSubscribedLicenseSummary",
+      "Summary": "GET /v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseSummary",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/entitlements/FinOpsFile",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_FinOpsFile",
+      "Summary": "GET /v2.0/tenants/{tenantId}/entitlements/FinOpsFile",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/entitlements/File",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_File",
+      "Summary": "GET /v2.0/tenants/{tenantId}/entitlements/File",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing/Count",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetUsersExemptFromLicensing_Count",
+      "Summary": "GET /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing/Count",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1/tenants/{tenantId}/allocationsV2/sum",
+      "OperationId": "Licensing_get_v0_1_tenants_tenantId_allocationsV2_sum",
+      "Summary": "GET /v0.1/tenants/{tenantId}/allocationsV2/sum",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/TenantCapacity",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_TenantCapacity",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/TenantCapacity",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/trends",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_trends",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlements/File",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_File",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlements/File",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlements/MCSSessions",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_MCSSessions",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlements/MCSSessions",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/product",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_snapshot_product",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/product",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/BillingPolicies/getEnvironmentMap",
+      "OperationId": "Licensing_post_v0_1_alpha_tenants_tenantId_BillingPolicies_getEnvironmentMap",
+      "Summary": "POST /v0.1-alpha/tenants/{tenantId}/BillingPolicies/getEnvironmentMap",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/TenantConsumptionReport/GetAllReports",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_TenantConsumptionReport_GetAllReports",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/TenantConsumptionReport/GetAllReports",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Database",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_Database",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Database",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/AppPass",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_AppPass",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/AppPass",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseTrends",
+      "OperationId": "Licensing_post_v1_0_tenants_tenantId_productCategories_PowerApps_userSubscribedLicenseTrends",
+      "Summary": "POST /v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseTrends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlements/Database",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_Database",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlements/Database",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/entitlements/File/trends",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_File_trends",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/File/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsDatabase/trends",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_FinOpsDatabase_trends",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsDatabase/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/v1.0/tenants/{tenantId}/FinOpsLicensing/GetUserLicenseDetailsV2",
+      "OperationId": "Licensing_post_v1_0_tenants_tenantId_FinOpsLicensing_GetUserLicenseDetailsV2",
+      "Summary": "POST /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUserLicenseDetailsV2",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetAppPassEnvironments",
+      "OperationId": "Licensing_post_v1_0_tenants_tenantId_ManagedEnvironment_PowerApps_GetAppPassEnvironments",
+      "Summary": "POST /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetAppPassEnvironments",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/entitlements/MCSMessages",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages",
+      "Summary": "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/capacityTypes/MCSMessages/trends",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_capacityTypes_MCSMessages_trends",
+      "Summary": "GET /v1.0/tenants/{tenantId}/capacityTypes/MCSMessages/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetComplianceSummary",
+      "OperationId": "Licensing_post_v1_0_tenants_tenantId_ManagedEnvironment_PowerAutomate_GetComplianceSummary",
+      "Summary": "POST /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetComplianceSummary",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetLicenseSummary",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_PowerAutomate_GetLicenseSummary",
+      "Summary": "GET /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetLicenseSummary",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/v0.1/tenants/{tenantId}/allocationsV2/overage/getmany",
+      "OperationId": "Licensing_post_v0_1_tenants_tenantId_allocationsV2_overage_getmany",
+      "Summary": "POST /v0.1/tenants/{tenantId}/allocationsV2/overage/getmany",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsDatabase",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_FinOpsDatabase",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsDatabase",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlements/MCSMessages",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_MCSMessages",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlements/MCSMessages",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/licensing/tenants/{tenantId}/UserPerFlowCapacitySource/UserContextSummary",
+      "OperationId": "Licensing_get_licensing_tenants_tenantId_UserPerFlowCapacitySource_UserContextSummary",
+      "Summary": "GET /licensing/tenants/{tenantId}/UserPerFlowCapacitySource/UserContextSummary",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/Downloads/getAll/EntitlementConsumptionTenantDetailsReport",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_Downloads_getAll_EntitlementConsumptionTenantDetailsReport",
+      "Summary": "GET /v1.0/tenants/{tenantId}/Downloads/getAll/EntitlementConsumptionTenantDetailsReport",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetUsersExemptFromLicensing",
+      "Summary": "GET /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/TenantLicenseModel",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_TenantLicenseModel",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/TenantLicenseModel",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/v0.1/tenants/{tenantId}/allocationsV2/getmany",
+      "OperationId": "Licensing_post_v0_1_tenants_tenantId_allocationsV2_getmany",
+      "Summary": "POST /v0.1/tenants/{tenantId}/allocationsV2/getmany",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsFile/trends",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_FinOpsFile_trends",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsFile/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetLicenseSummary",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_PowerApps_GetLicenseSummary",
+      "Summary": "GET /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetLicenseSummary",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/BillingPolicies",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_BillingPolicies",
+      "Summary": "GET /v2.0/tenants/{tenantId}/BillingPolicies",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlements/AppPass",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_AppPass",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlements/AppPass",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/recommendations/PowerAppsUnderlicensedUsers",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_recommendations_PowerAppsUnderlicensedUsers",
+      "Summary": "GET /v1.0/tenants/{tenantId}/recommendations/PowerAppsUnderlicensedUsers",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAnonymous/trends",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_environments_capacityTypes_PowerPagesAnonymous_trends",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAnonymous/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/entitlements/MCSSessions",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSSessions",
+      "Summary": "GET /v2.0/tenants/{tenantId}/entitlements/MCSSessions",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Log",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_Log",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Log",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/entitlements/FinOpsDatabase",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_FinOpsDatabase",
+      "Summary": "GET /v2.0/tenants/{tenantId}/entitlements/FinOpsDatabase",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/CurrencyReports",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_CurrencyReports",
+      "Summary": "GET /v1.0/tenants/{tenantId}/CurrencyReports",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/entitlements/Log",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_Log",
+      "Summary": "GET /v2.0/tenants/{tenantId}/entitlements/Log",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/licensing/tenants/{tenantId}/UserPerFlowCapacitySource/TenantContextSummary",
+      "OperationId": "Licensing_get_licensing_tenants_tenantId_UserPerFlowCapacitySource_TenantContextSummary",
+      "Summary": "GET /licensing/tenants/{tenantId}/UserPerFlowCapacitySource/TenantContextSummary",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/CurrencyReports",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_CurrencyReports",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/CurrencyReports",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlements/Log",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_Log",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlements/Log",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/entitlements/Database",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_Database",
+      "Summary": "GET /v2.0/tenants/{tenantId}/entitlements/Database",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/ManagedEnvironment/GetAllProductSkus",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_GetAllProductSkus",
+      "Summary": "GET /v1.0/tenants/{tenantId}/ManagedEnvironment/GetAllProductSkus",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAuthenticated/trends",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_environments_capacityTypes_PowerPagesAuthenticated_trends",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAuthenticated/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/entitlements/AppPass",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_AppPass",
+      "Summary": "GET /v2.0/tenants/{tenantId}/entitlements/AppPass",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v1.0/tenants/{tenantId}/Downloads/getAll/PowerAppsTenantLicenseDetailsDownload",
+      "OperationId": "Licensing_get_v1_0_tenants_tenantId_Downloads_getAll_PowerAppsTenantLicenseDetailsDownload",
+      "Summary": "GET /v1.0/tenants/{tenantId}/Downloads/getAll/PowerAppsTenantLicenseDetailsDownload",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlements/FinOpsDatabase",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_FinOpsDatabase",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlements/FinOpsDatabase",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v2.0/tenants/{tenantId}/environments/entitlements/FinOpsFile",
+      "OperationId": "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_FinOpsFile",
+      "Summary": "GET /v2.0/tenants/{tenantId}/environments/entitlements/FinOpsFile",
+      "Tags": [
+        "Licensing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/v0.1-alpha/tenants/{tenantId}/entitlements/AppPass/trends",
+      "OperationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_AppPass_trends",
+      "Summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/AppPass/trends",
+      "Tags": [
+        "Licensing"
+      ]
+    }
+  ],
+  "category": "licensing",
+  "portal": "nodoc-power-platform"
+}

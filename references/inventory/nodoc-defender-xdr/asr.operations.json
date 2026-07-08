@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/mtp/tvm/analytics/asrconfiguration/MachineSecurityStates",
+      "OperationId": "Asr.MachineSecurityStates",
+      "Summary": "Get per-machine ASR rule configuration state",
+      "Tags": [
+        "Attack Surface Reduction"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/tvm/analytics/asrconfiguration/configurationstates",
+      "OperationId": "Asr.configurationstates",
+      "Summary": "Get fleet-wide ASR rule configuration statistics",
+      "Tags": [
+        "Attack Surface Reduction"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdepasrdetections/m365/reporting/asrinsights/AsrDetections",
+      "OperationId": "Asr.AsrDetections",
+      "Summary": "Get ASR detection events",
+      "Tags": [
+        "Attack Surface Reduction"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdepasrdetections/m365/reporting/asrinsights/AsrDetectionsTrend",
+      "OperationId": "Asr.AsrDetectionsTrend",
+      "Summary": "Get ASR detection trend aggregation",
+      "Tags": [
+        "Attack Surface Reduction"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdepasrdetections/m365/reporting/asrinsights/TopFiles",
+      "OperationId": "Asr.TopFiles",
+      "Summary": "Get top files impacted by ASR detections",
+      "Tags": [
+        "Attack Surface Reduction"
+      ]
+    }
+  ],
+  "category": "exposure_management",
+  "portal": "nodoc-defender-xdr"
+}

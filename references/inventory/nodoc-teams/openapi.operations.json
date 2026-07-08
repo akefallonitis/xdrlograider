@@ -1,0 +1,898 @@
+{
+  "operationCount": 99,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/api/v1/mta/TenantclusterLookup",
+      "OperationId": null,
+      "Summary": "Resolve the monitoring platform cluster for the tenant",
+      "Tags": [
+        "MonitoringPlatform"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/data/noam/RunQueryDashboard",
+      "OperationId": null,
+      "Summary": "Run a CQD dashboard query",
+      "Tags": [
+        "TeamsCQDData"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/DeploymentTeams",
+      "OperationId": null,
+      "Summary": "Get deployment team records",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AdminAppCatalog/teamsApps/{catalogAppId}/appAssignments",
+      "OperationId": null,
+      "Summary": "List Teams app catalog assignments for an app",
+      "Tags": [
+        "AppCatalog"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.VerticalPackaging/package",
+      "OperationId": null,
+      "Summary": "Get Teams vertical packaging metadata",
+      "Tags": [
+        "TeamsTemplates"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt/part/{partition}/beta/users/appsCatalog",
+      "OperationId": null,
+      "Summary": "Get the current user's Teams apps catalog view",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.TelephoneNumberMgmt/tenants/{tenantId}/voice-users/{userId}",
+      "OperationId": null,
+      "Summary": "Get Teams voice-user number management details",
+      "Tags": [
+        "TeamsTelephony"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/amer/api/reports/v1.0/flw/usage/metadata",
+      "OperationId": null,
+      "Summary": "Get Frontline usage metadata",
+      "Tags": [
+        "TeamsFrontline"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt/part/{partition}/beta/users/tenantWideAppsSettings",
+      "OperationId": null,
+      "Summary": "Get tenant-wide Teams apps settings",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.User/users",
+      "OperationId": null,
+      "Summary": "List Teams user records",
+      "Tags": [
+        "TeamsUsers"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/internal/ux/getTeamsPremiumV2ActiveUserCounts",
+      "OperationId": null,
+      "Summary": "Get Teams Premium active user counts",
+      "Tags": [
+        "ReportsUx"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/userpreference",
+      "OperationId": null,
+      "Summary": "Get Teams admin dashboard preferences",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/api/v1/userpreference",
+      "OperationId": null,
+      "Summary": "Update Teams admin dashboard preferences",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/haslicense",
+      "OperationId": null,
+      "Summary": "Check monetization license state",
+      "Tags": [
+        "RegionalVAMonetization"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1.0/offers/{offerId}",
+      "OperationId": null,
+      "Summary": "Get a Teams add-on monetization offer",
+      "Tags": [
+        "TeamsMonetization"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1.0/assets",
+      "OperationId": null,
+      "Summary": "List Teams add-on monetization assets",
+      "Tags": [
+        "TeamsMonetization"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt//beta/me/engagementSurfaces",
+      "OperationId": null,
+      "Summary": "Get admin engagement surface state",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.Ncs/civicAddresses/filters",
+      "OperationId": null,
+      "Summary": "List civic address filters",
+      "Tags": [
+        "InterfacesRecords"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/amer/api/v1/Security/Rules/InactiveTeams/View-Details",
+      "OperationId": null,
+      "Summary": "View inactive Teams rule details",
+      "Tags": [
+        "TeamsCollaborationInsights"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/NetworkPlans/getplansintenant",
+      "OperationId": null,
+      "Summary": "List tenant network plans",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.TelephoneNumberMgmt/tenants/{tenantId}/port-out-pin",
+      "OperationId": null,
+      "Summary": "Get the tenant port-out PIN",
+      "Tags": [
+        "TeamsTelephony"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt/part/{partition}/beta/admin/tenantStagedApps",
+      "OperationId": null,
+      "Summary": "List tenant staged Teams apps",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/amer/api/v1.0/settings",
+      "OperationId": null,
+      "Summary": "Get Frontline orchestration settings",
+      "Tags": [
+        "TeamsFrontline"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.TelephoneNumberMgmt/Tenants/{tenantId}/telephone-number-aggregation",
+      "OperationId": null,
+      "Summary": "Get tenant telephone number aggregation",
+      "Tags": [
+        "TeamsTelephony"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/hasActiveCapabilities",
+      "OperationId": null,
+      "Summary": "Check active virtual appointments capabilities",
+      "Tags": [
+        "RegionalVAMonetization"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/usersettings",
+      "OperationId": null,
+      "Summary": "Get saved Teams admin grid settings",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.OperatorConnect/operators",
+      "OperationId": null,
+      "Summary": "List Operator Connect operators",
+      "Tags": [
+        "TeamsTelephony"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/regionalDomainNameForTenant",
+      "OperationId": null,
+      "Summary": "Resolve the virtual appointments monetization regional host",
+      "Tags": [
+        "VAMonetizationResolver"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/mta/rule",
+      "OperationId": null,
+      "Summary": "List Teams monitoring rules",
+      "Tags": [
+        "RegionalMonitoring"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/devices/summary",
+      "OperationId": null,
+      "Summary": "Get the Teams device inventory summary",
+      "Tags": [
+        "TeamsDeviceManagement"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/virtualvisits/aggregaterecords",
+      "OperationId": null,
+      "Summary": "Query virtual visits aggregate records",
+      "Tags": [
+        "RegionalEhrConnector"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/devices",
+      "OperationId": null,
+      "Summary": "List Teams devices",
+      "Tags": [
+        "TeamsDeviceManagement"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.OperatorConnect/operator-consents",
+      "OperationId": null,
+      "Summary": "List Operator Connect consents",
+      "Tags": [
+        "TeamsTelephony"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/api/mt/part/{partition}//beta/me/engagementSurfaces/displayed",
+      "OperationId": null,
+      "Summary": "Mark an admin engagement surface as displayed",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.Artifacts/meetingTemplate/admin/descriptions",
+      "OperationId": null,
+      "Summary": "List Teams meeting template descriptions",
+      "Tags": [
+        "TeamsTemplates"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/user/IsAdminForVirtualVisitsAnalytics",
+      "OperationId": null,
+      "Summary": "Check whether the current admin can view virtual visits analytics",
+      "Tags": [
+        "RegionalEhrConnector"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.VoiceApps/auto-attendants/count",
+      "OperationId": null,
+      "Summary": "Get the Teams auto attendant count",
+      "Tags": [
+        "TeamsVoiceApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.Cpc/languagesSupported",
+      "OperationId": null,
+      "Summary": "List Teams CPC supported languages",
+      "Tags": [
+        "TeamsCpc"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/DeploymentTasks/getdefault",
+      "OperationId": null,
+      "Summary": "Get default Teams deployment tasks",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.Cpc/users/{userId}",
+      "OperationId": null,
+      "Summary": "Get Teams common area phone user details",
+      "Tags": [
+        "TeamsCpc"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/mt/part/{partition}/beta/users/apps/store",
+      "OperationId": null,
+      "Summary": "Query the Teams app store from the admin center",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/clientHealth/clientHealthUserDevices",
+      "OperationId": null,
+      "Summary": "List Teams client health user devices",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt/part/{partition}//beta/me/engagementSurfaces",
+      "OperationId": null,
+      "Summary": "Get regional admin engagement surface state",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.TelephoneNumberMgmt/tenants/{tenantId}/country/{countryCode}/{briefType}",
+      "OperationId": null,
+      "Summary": "Get country-specific Teams telephony briefs",
+      "Tags": [
+        "TeamsTelephony"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.VoiceApps/callqueues/count",
+      "OperationId": null,
+      "Summary": "Get the Teams call queue count",
+      "Tags": [
+        "TeamsVoiceApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.PlatformService/v2/ApplicationInstances",
+      "OperationId": null,
+      "Summary": "List Teams application instances",
+      "Tags": [
+        "TeamsCpc"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.VoiceApps/shared-call-queue-history",
+      "OperationId": null,
+      "Summary": "Get shared call queue history",
+      "Tags": [
+        "TeamsVoiceApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/private/intraTenantConfig/host",
+      "OperationId": null,
+      "Summary": "Resolve the report UX host for the tenant",
+      "Tags": [
+        "ReportsBootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.Policy/configurations/{policyType}/configuration/{policyName}",
+      "OperationId": null,
+      "Summary": "Get a named Teams policy configuration instance",
+      "Tags": [
+        "TeamsPolicyConfigurations"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.Templates/api/teamtemplates/v1.0/{localeCode}",
+      "OperationId": null,
+      "Summary": "List Teams team templates",
+      "Tags": [
+        "TeamsTemplates"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Realtime.Analytics/Users/{userId}/CommunicationsSummary/{lookbackDays}",
+      "OperationId": null,
+      "Summary": "Get Teams user communications summary",
+      "Tags": [
+        "TeamsRealtimeAnalytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.User/users/{userId}",
+      "OperationId": null,
+      "Summary": "Get a Teams user record",
+      "Tags": [
+        "TeamsUsers"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt/part/{partition}/beta/admin/apps/appAccessRequests",
+      "OperationId": null,
+      "Summary": "List Teams app access requests",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/regionalDomainNameForTenant",
+      "OperationId": null,
+      "Summary": "Resolve the virtual visits regional host for the tenant",
+      "Tags": [
+        "EhrConnectorResolver"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/internal/ux/getTeamsAppUsageDetail",
+      "OperationId": null,
+      "Summary": "Get Teams app usage detail",
+      "Tags": [
+        "ReportsUx"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/amer/api/v1.0/managementUnits",
+      "OperationId": null,
+      "Summary": "List Frontline management units",
+      "Tags": [
+        "TeamsFrontline"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/amer/api/v1.0/orchestrationStatus",
+      "OperationId": null,
+      "Summary": "Get the Frontline orchestration status",
+      "Tags": [
+        "TeamsFrontline"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/Persona/GetAll",
+      "OperationId": null,
+      "Summary": "List Teams admin personas",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/internal/ux/getTeamsPremiumV2UserDetail",
+      "OperationId": null,
+      "Summary": "Get Teams Premium user detail",
+      "Tags": [
+        "ReportsUx"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AdminAppCatalog/teamsApps",
+      "OperationId": null,
+      "Summary": "List Teams app catalog entries",
+      "Tags": [
+        "AppCatalog"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/amer/api/reports/v1.0/flw/orchestration/usage",
+      "OperationId": null,
+      "Summary": "Query Frontline orchestration usage",
+      "Tags": [
+        "TeamsFrontline"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/clientHealth/clientHealthTopIssues",
+      "OperationId": null,
+      "Summary": "List top Teams client health issues",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/repository/tenant/dataservice",
+      "OperationId": null,
+      "Summary": "Resolve the tenant CQD data service host",
+      "Tags": [
+        "CQD"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/tags/enroll",
+      "OperationId": null,
+      "Summary": "List Teams device enrollment tags",
+      "Tags": [
+        "TeamsDeviceManagement"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/ths/api/v1/hierarchies/{tenantId}/operations",
+      "OperationId": null,
+      "Summary": "List workforce hierarchy operations",
+      "Tags": [
+        "TeamsHierarchy"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.Policy/configurations/{policyType}",
+      "OperationId": null,
+      "Summary": "Get Teams policy or configuration inventory",
+      "Tags": [
+        "TeamsPolicyConfigurations"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/mt/part/{partition}/beta/users/useraggregatesettings",
+      "OperationId": null,
+      "Summary": "Update Teams admin user aggregate settings",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2.0/billing-accounts",
+      "OperationId": null,
+      "Summary": "List Teams add-on billing accounts",
+      "Tags": [
+        "TeamsMonetization"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt/part/{partition}/beta/admin/apps/{catalogAppId}/appAccessRequests",
+      "OperationId": null,
+      "Summary": "Get app-specific Teams app access requests",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.Policy/assignments/operationsall",
+      "OperationId": null,
+      "Summary": "List Teams policy assignment operations",
+      "Tags": [
+        "TeamsPolicyAssignments"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/config/v1/MicrosoftTeams/{version}",
+      "OperationId": null,
+      "Summary": "Get Microsoft Teams config payload",
+      "Tags": [
+        "TeamsConfig"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/config/v1/Skype/{version}",
+      "OperationId": null,
+      "Summary": "Get Skype and virtual visits config payload",
+      "Tags": [
+        "TeamsConfig"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AdminAppCatalog/teamsApps/acmStatus",
+      "OperationId": null,
+      "Summary": "Get Teams app catalog migration status",
+      "Tags": [
+        "AppCatalog"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/tenants/{tenantId}",
+      "OperationId": null,
+      "Summary": "Get Teams device management tenant metadata",
+      "Tags": [
+        "TeamsDeviceManagement"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.TelephoneNumberMgmt/Tenants/{tenantId}/{telephonyResource}",
+      "OperationId": null,
+      "Summary": "Get tenant telephone-number management resources",
+      "Tags": [
+        "TeamsTelephony"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/v1/MoPo/metaData",
+      "OperationId": null,
+      "Summary": "Get Teams device management metadata",
+      "Tags": [
+        "TeamsDeviceManagement"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/internal/ux/getTeamsPremiumV2MeetingCounts",
+      "OperationId": null,
+      "Summary": "Get Teams Premium meeting counts",
+      "Tags": [
+        "ReportsUx"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/clientHealth/clientHealthIssues",
+      "OperationId": null,
+      "Summary": "List Teams client health issues",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.VoiceApps/auto-attendants",
+      "OperationId": null,
+      "Summary": "List Teams auto attendants",
+      "Tags": [
+        "TeamsVoiceApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.Cpc/bridges",
+      "OperationId": null,
+      "Summary": "List Teams CPC bridges",
+      "Tags": [
+        "TeamsCpc"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/clientHealth/clientHealthDetails",
+      "OperationId": null,
+      "Summary": "Get Teams client health details",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/authsvc/v1.0/users/region",
+      "OperationId": null,
+      "Summary": "Resolve the current user's Teams region and partition",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt/part/{partition}/beta/admin/deviceStoreSetting",
+      "OperationId": null,
+      "Summary": "Get Teams device store settings",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt/part/{partition}/beta/admin/tenantSharedChannelsSettings",
+      "OperationId": null,
+      "Summary": "Get tenant shared channel settings",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.Tenant/tenants",
+      "OperationId": null,
+      "Summary": "Get the current Teams tenant record",
+      "Tags": [
+        "InterfacesRecords"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/clientHealth/clientHealthUpdateStatus",
+      "OperationId": null,
+      "Summary": "Get Teams client health update status",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/amer/api/reports/v1.0/flw/usage",
+      "OperationId": null,
+      "Summary": "Get Frontline usage summary",
+      "Tags": [
+        "TeamsFrontline"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.VoiceApps/schedules",
+      "OperationId": null,
+      "Summary": "List Teams voice-app schedules",
+      "Tags": [
+        "TeamsVoiceApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/jobs",
+      "OperationId": null,
+      "Summary": "List Teams tags jobs",
+      "Tags": [
+        "Tags"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.Ncs/locations/filters",
+      "OperationId": null,
+      "Summary": "List Teams location filters",
+      "Tags": [
+        "InterfacesRecords"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/log",
+      "OperationId": null,
+      "Summary": "Record Teams admin portal shell telemetry",
+      "Tags": [
+        "AdminTeamsPortal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/amer/api/v1.0/hybridTeams/deployedLocationsCount",
+      "OperationId": null,
+      "Summary": "Get the Frontline deployed locations count",
+      "Tags": [
+        "TeamsFrontline"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Skype.User/users/{userId}/policies",
+      "OperationId": null,
+      "Summary": "Get Teams user policy assignments",
+      "Tags": [
+        "TeamsUserPolicies"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/v1/CartService/carts",
+      "OperationId": null,
+      "Summary": "Create a Teams add-on purchase cart",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.SilentTest/list",
+      "OperationId": null,
+      "Summary": "List Silent Tests",
+      "Tags": [
+        "TeamsSilentTests"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Teams.VoiceApps/callqueues",
+      "OperationId": null,
+      "Summary": "List Teams call queues",
+      "Tags": [
+        "TeamsVoiceApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/ContentManagementService/BannerApps",
+      "OperationId": null,
+      "Summary": "List Teams banner apps",
+      "Tags": [
+        "RegionalAdmin"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/mt/part/{partition}/beta/admin/getAgentSettingsForTAC",
+      "OperationId": null,
+      "Summary": "Get Teams admin center agent settings",
+      "Tags": [
+        "TeamsCore"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/data/noam/DataUpload/AllTenantDataFiles",
+      "OperationId": null,
+      "Summary": "List CQD tenant data upload files",
+      "Tags": [
+        "TeamsCQDData"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-teams"
+}

@@ -1,0 +1,79 @@
+{
+  "operationCount": 8,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/aedmcc/ediscovery/v1/getEDiscoveryRolesMapping",
+      "OperationId": "getEdiscoveryRolesMapping",
+      "Summary": "Get eDiscovery roles mapping",
+      "Tags": [
+        "eDiscovery"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/aedmcc/ediscovery/v1/setViewState",
+      "OperationId": "setEdiscoveryViewState",
+      "Summary": "Set eDiscovery view state",
+      "Tags": [
+        "eDiscovery"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aedmcc/ediscovery/v1/tenantSettings",
+      "OperationId": "getEdiscoveryTenantSettings",
+      "Summary": "Get eDiscovery tenant settings",
+      "Tags": [
+        "eDiscovery"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aedmcc/ediscovery/v1/getFavorites",
+      "OperationId": "getEdiscoveryFavorites",
+      "Summary": "Get eDiscovery favorites",
+      "Tags": [
+        "eDiscovery"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aedmcc/ediscovery/v1/purviewcases('{caseId}')",
+      "OperationId": "getPurviewEdiscoveryCase",
+      "Summary": "Get a specific Purview eDiscovery case",
+      "Tags": [
+        "eDiscovery"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aedmcc/ediscovery/v1/purviewcases",
+      "OperationId": "listPurviewEdiscoveryCases",
+      "Summary": "List all Purview eDiscovery cases",
+      "Tags": [
+        "eDiscovery"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aedmcc/ediscovery/v1/cases('{caseId}')/setting",
+      "OperationId": "getEdiscoveryCaseSettings",
+      "Summary": "Get case settings",
+      "Tags": [
+        "eDiscovery"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aedmcc/ediscovery/v1/getViewState",
+      "OperationId": "getEdiscoveryViewState",
+      "Summary": "Get eDiscovery view state",
+      "Tags": [
+        "eDiscovery"
+      ]
+    }
+  ],
+  "category": "ediscovery",
+  "portal": "nodoc-purview"
+}

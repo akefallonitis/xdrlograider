@@ -1,0 +1,830 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "CloudApps",
+    "TableName": "Defender_CloudApps_CL",
+    "StreamName": "Custom-Defender_CloudApps_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 30,
+    "TotalColumnCount": 39,
+    "OperationCount": 9,
+    "OperationKeys": [
+      "AppGovernanceListPolicies",
+      "CloudAppsListPolicies",
+      "GetAppConnectorsLastActivity",
+      "GetDataEncryptionSettings",
+      "GetLcncSettings",
+      "GetMailSettings",
+      "GetPolicy",
+      "GetPolicyInsights",
+      "GetSettings"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_CloudApps_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "encryptDataAtRest",
+            "type": "string"
+          },
+          {
+            "name": "tenantEmailJson",
+            "type": "string"
+          },
+          {
+            "name": "adminViewUsersJson",
+            "type": "string"
+          },
+          {
+            "name": "allowAzIP",
+            "type": "string"
+          },
+          {
+            "name": "allowAzureSecurityIntegration",
+            "type": "string"
+          },
+          {
+            "name": "allowScopedAdminsInMTP",
+            "type": "string"
+          },
+          {
+            "name": "appControlEnabled",
+            "type": "string"
+          },
+          {
+            "name": "blockAppsURL",
+            "type": "string"
+          },
+          {
+            "name": "customWarnURL",
+            "type": "string"
+          },
+          {
+            "name": "domainsJson",
+            "type": "string"
+          },
+          {
+            "name": "emailMaskPolicy",
+            "type": "string"
+          },
+          {
+            "name": "emailMaskPolicyOptionsJson",
+            "type": "string"
+          },
+          {
+            "name": "enableBypassSuffix",
+            "type": "string"
+          },
+          {
+            "name": "enforceSessionProxy",
+            "type": "string"
+          },
+          {
+            "name": "environmentName",
+            "type": "string"
+          },
+          {
+            "name": "fileMonitoringEnabled",
+            "type": "string"
+          },
+          {
+            "name": "fileMonitoringJson",
+            "type": "string"
+          },
+          {
+            "name": "ignoreExternalAzIP",
+            "type": "string"
+          },
+          {
+            "name": "logoFilePath",
+            "type": "string"
+          },
+          {
+            "name": "managedDevicesCrl",
+            "type": "string"
+          },
+          {
+            "name": "mdatpGlobalBypassDurationHours",
+            "type": "string"
+          },
+          {
+            "name": "mdatpGlobalSeverityLevel",
+            "type": "string"
+          },
+          {
+            "name": "orgDisplayName",
+            "type": "string"
+          },
+          {
+            "name": "ProxywebPagesCustomizationJson",
+            "type": "string"
+          },
+          {
+            "name": "quarantineSiteId",
+            "type": "string"
+          },
+          {
+            "name": "quarantineSiteJson",
+            "type": "string"
+          },
+          {
+            "name": "quarantineUserNotification",
+            "type": "string"
+          },
+          {
+            "name": "rmsDecryptAllConsented",
+            "type": "string"
+          },
+          {
+            "name": "showSuffixDisclaimer",
+            "type": "string"
+          },
+          {
+            "name": "signOutTime",
+            "type": "string"
+          }
+        ],
+        "name": "Defender_CloudApps_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-cloudapps-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_CloudApps_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-CloudApps-dest"
+          ],
+          "outputStream": "Custom-Defender_CloudApps_CL",
+          "streams": [
+            "Custom-Defender_CloudApps_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-CloudApps-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_CloudApps_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "encryptDataAtRest",
+              "type": "string"
+            },
+            {
+              "name": "tenantEmailJson",
+              "type": "string"
+            },
+            {
+              "name": "adminViewUsersJson",
+              "type": "string"
+            },
+            {
+              "name": "allowAzIP",
+              "type": "string"
+            },
+            {
+              "name": "allowAzureSecurityIntegration",
+              "type": "string"
+            },
+            {
+              "name": "allowScopedAdminsInMTP",
+              "type": "string"
+            },
+            {
+              "name": "appControlEnabled",
+              "type": "string"
+            },
+            {
+              "name": "blockAppsURL",
+              "type": "string"
+            },
+            {
+              "name": "customWarnURL",
+              "type": "string"
+            },
+            {
+              "name": "domainsJson",
+              "type": "string"
+            },
+            {
+              "name": "emailMaskPolicy",
+              "type": "string"
+            },
+            {
+              "name": "emailMaskPolicyOptionsJson",
+              "type": "string"
+            },
+            {
+              "name": "enableBypassSuffix",
+              "type": "string"
+            },
+            {
+              "name": "enforceSessionProxy",
+              "type": "string"
+            },
+            {
+              "name": "environmentName",
+              "type": "string"
+            },
+            {
+              "name": "fileMonitoringEnabled",
+              "type": "string"
+            },
+            {
+              "name": "fileMonitoringJson",
+              "type": "string"
+            },
+            {
+              "name": "ignoreExternalAzIP",
+              "type": "string"
+            },
+            {
+              "name": "logoFilePath",
+              "type": "string"
+            },
+            {
+              "name": "managedDevicesCrl",
+              "type": "string"
+            },
+            {
+              "name": "mdatpGlobalBypassDurationHours",
+              "type": "string"
+            },
+            {
+              "name": "mdatpGlobalSeverityLevel",
+              "type": "string"
+            },
+            {
+              "name": "orgDisplayName",
+              "type": "string"
+            },
+            {
+              "name": "ProxywebPagesCustomizationJson",
+              "type": "string"
+            },
+            {
+              "name": "quarantineSiteId",
+              "type": "string"
+            },
+            {
+              "name": "quarantineSiteJson",
+              "type": "string"
+            },
+            {
+              "name": "quarantineUserNotification",
+              "type": "string"
+            },
+            {
+              "name": "rmsDecryptAllConsented",
+              "type": "string"
+            },
+            {
+              "name": "showSuffixDisclaimer",
+              "type": "string"
+            },
+            {
+              "name": "signOutTime",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-cloudapps-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-cloudapps-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_CloudApps_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_CloudApps_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_CloudApps_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "encryptDataAtRest",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantEmailJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "adminViewUsersJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "allowAzIP",
+                    "type": "string"
+                  },
+                  {
+                    "name": "allowAzureSecurityIntegration",
+                    "type": "string"
+                  },
+                  {
+                    "name": "allowScopedAdminsInMTP",
+                    "type": "string"
+                  },
+                  {
+                    "name": "appControlEnabled",
+                    "type": "string"
+                  },
+                  {
+                    "name": "blockAppsURL",
+                    "type": "string"
+                  },
+                  {
+                    "name": "customWarnURL",
+                    "type": "string"
+                  },
+                  {
+                    "name": "domainsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "emailMaskPolicy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "emailMaskPolicyOptionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "enableBypassSuffix",
+                    "type": "string"
+                  },
+                  {
+                    "name": "enforceSessionProxy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "environmentName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "fileMonitoringEnabled",
+                    "type": "string"
+                  },
+                  {
+                    "name": "fileMonitoringJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ignoreExternalAzIP",
+                    "type": "string"
+                  },
+                  {
+                    "name": "logoFilePath",
+                    "type": "string"
+                  },
+                  {
+                    "name": "managedDevicesCrl",
+                    "type": "string"
+                  },
+                  {
+                    "name": "mdatpGlobalBypassDurationHours",
+                    "type": "string"
+                  },
+                  {
+                    "name": "mdatpGlobalSeverityLevel",
+                    "type": "string"
+                  },
+                  {
+                    "name": "orgDisplayName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ProxywebPagesCustomizationJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "quarantineSiteId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "quarantineSiteJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "quarantineUserNotification",
+                    "type": "string"
+                  },
+                  {
+                    "name": "rmsDecryptAllConsented",
+                    "type": "string"
+                  },
+                  {
+                    "name": "showSuffixDisclaimer",
+                    "type": "string"
+                  },
+                  {
+                    "name": "signOutTime",
+                    "type": "string"
+                  }
+                ],
+                "name": "Defender_CloudApps_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-cloudapps-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_CloudApps_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-CloudApps-dest"
+                  ],
+                  "outputStream": "Custom-Defender_CloudApps_CL",
+                  "streams": [
+                    "Custom-Defender_CloudApps_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-CloudApps-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_CloudApps_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "encryptDataAtRest",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantEmailJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "adminViewUsersJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "allowAzIP",
+                      "type": "string"
+                    },
+                    {
+                      "name": "allowAzureSecurityIntegration",
+                      "type": "string"
+                    },
+                    {
+                      "name": "allowScopedAdminsInMTP",
+                      "type": "string"
+                    },
+                    {
+                      "name": "appControlEnabled",
+                      "type": "string"
+                    },
+                    {
+                      "name": "blockAppsURL",
+                      "type": "string"
+                    },
+                    {
+                      "name": "customWarnURL",
+                      "type": "string"
+                    },
+                    {
+                      "name": "domainsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "emailMaskPolicy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "emailMaskPolicyOptionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "enableBypassSuffix",
+                      "type": "string"
+                    },
+                    {
+                      "name": "enforceSessionProxy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "environmentName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "fileMonitoringEnabled",
+                      "type": "string"
+                    },
+                    {
+                      "name": "fileMonitoringJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ignoreExternalAzIP",
+                      "type": "string"
+                    },
+                    {
+                      "name": "logoFilePath",
+                      "type": "string"
+                    },
+                    {
+                      "name": "managedDevicesCrl",
+                      "type": "string"
+                    },
+                    {
+                      "name": "mdatpGlobalBypassDurationHours",
+                      "type": "string"
+                    },
+                    {
+                      "name": "mdatpGlobalSeverityLevel",
+                      "type": "string"
+                    },
+                    {
+                      "name": "orgDisplayName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ProxywebPagesCustomizationJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "quarantineSiteId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "quarantineSiteJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "quarantineUserNotification",
+                      "type": "string"
+                    },
+                    {
+                      "name": "rmsDecryptAllConsented",
+                      "type": "string"
+                    },
+                    {
+                      "name": "showSuffixDisclaimer",
+                      "type": "string"
+                    },
+                    {
+                      "name": "signOutTime",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

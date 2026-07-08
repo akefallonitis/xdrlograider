@@ -1,0 +1,2334 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "Operations",
+    "TableName": "Defender_Operations_CL",
+    "StreamName": "Custom-Defender_Operations_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 124,
+    "TotalColumnCount": 133,
+    "OperationCount": 9,
+    "OperationKeys": [
+      "GetHistory",
+      "GetConfiguration",
+      "GetEffectiveTenantGroup",
+      "GetPending",
+      "GetTenantContext",
+      "GetWorkloadStatus",
+      "ListAssignments",
+      "ListAutomationRules",
+      "ListTenantGroups"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_Operations_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "ActionAutomationType",
+            "type": "string"
+          },
+          {
+            "name": "ActionDecision",
+            "type": "string"
+          },
+          {
+            "name": "ActionId",
+            "type": "string"
+          },
+          {
+            "name": "ActionSource",
+            "type": "string"
+          },
+          {
+            "name": "ActionStatus",
+            "type": "string"
+          },
+          {
+            "name": "ActionType",
+            "type": "string"
+          },
+          {
+            "name": "AdditionalFieldsJson",
+            "type": "string"
+          },
+          {
+            "name": "Comment",
+            "type": "string"
+          },
+          {
+            "name": "ComputerName",
+            "type": "string"
+          },
+          {
+            "name": "DecidedBy",
+            "type": "string"
+          },
+          {
+            "name": "EndTime",
+            "type": "string"
+          },
+          {
+            "name": "EntityType",
+            "type": "string"
+          },
+          {
+            "name": "EventTime",
+            "type": "datetime"
+          },
+          {
+            "name": "InvestigationId",
+            "type": "string"
+          },
+          {
+            "name": "MachineId",
+            "type": "string"
+          },
+          {
+            "name": "Product",
+            "type": "string"
+          },
+          {
+            "name": "RelatedEntitiesJson",
+            "type": "string"
+          },
+          {
+            "name": "StartTime",
+            "type": "datetime"
+          },
+          {
+            "name": "UserPrincipalName",
+            "type": "string"
+          },
+          {
+            "name": "destinationsJson",
+            "type": "string"
+          },
+          {
+            "name": "isEnabled",
+            "type": "string"
+          },
+          {
+            "name": "allTenantsCount",
+            "type": "string"
+          },
+          {
+            "name": "creationTime",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "etag_x",
+            "type": "string"
+          },
+          {
+            "name": "exposedTargetTenantsInfoJson",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "lastUpdated",
+            "type": "string"
+          },
+          {
+            "name": "lastUpdatedByUpn",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "tenantGroupId",
+            "type": "string"
+          },
+          {
+            "name": "tenantId_x",
+            "type": "string"
+          },
+          {
+            "name": "ttl",
+            "type": "string"
+          },
+          {
+            "name": "type_x",
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "type": "string"
+          },
+          {
+            "name": "AadIpMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "AatpIntegrationEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "AatpWorkspaceExists",
+            "type": "boolean"
+          },
+          {
+            "name": "AccountMode",
+            "type": "long"
+          },
+          {
+            "name": "AccountType",
+            "type": "string"
+          },
+          {
+            "name": "ActiveMtpWorkloadsJson",
+            "type": "string"
+          },
+          {
+            "name": "AdIotIntegrationStatus",
+            "type": "string"
+          },
+          {
+            "name": "AdminMisconduct",
+            "type": "string"
+          },
+          {
+            "name": "AllowedActions",
+            "type": "long"
+          },
+          {
+            "name": "AuthInfoJson",
+            "type": "string"
+          },
+          {
+            "name": "AutomatedIrLiveResponse",
+            "type": "boolean"
+          },
+          {
+            "name": "DataCenter",
+            "type": "string"
+          },
+          {
+            "name": "DirRolesJson",
+            "type": "string"
+          },
+          {
+            "name": "DlpMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "EnvironmentName",
+            "type": "string"
+          },
+          {
+            "name": "ExcludeSentinelAlertsFromXDRCorrelation",
+            "type": "string"
+          },
+          {
+            "name": "ExposedSentinelWorkspacesJson",
+            "type": "string"
+          },
+          {
+            "name": "FeaturesJson",
+            "type": "string"
+          },
+          {
+            "name": "GeoRegion",
+            "type": "string"
+          },
+          {
+            "name": "HasFinishedPostOnboardingForSmb",
+            "type": "boolean"
+          },
+          {
+            "name": "HasMachineGroups",
+            "type": "boolean"
+          },
+          {
+            "name": "IotFlavor",
+            "type": "string"
+          },
+          {
+            "name": "IrmMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "IsAadIpActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsAutomatedIrEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "IsBilbaoTenant",
+            "type": "boolean"
+          },
+          {
+            "name": "IsDeceptionEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "IsDeleted",
+            "type": "boolean"
+          },
+          {
+            "name": "IsDexLicense",
+            "type": "boolean"
+          },
+          {
+            "name": "IsDlpActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsEnhancedTelemetryEnabled",
+            "type": "string"
+          },
+          {
+            "name": "IsEvaluationEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "IsExposedToAllMachineGroups",
+            "type": "boolean"
+          },
+          {
+            "name": "IsIrmActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsIsolationExclusionOptIn",
+            "type": "boolean"
+          },
+          {
+            "name": "IsItpActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsMapgActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsMdatpActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsMdatpLicenseExpired",
+            "type": "boolean"
+          },
+          {
+            "name": "IsMdcActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsMdiActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsMtpEligible",
+            "type": "boolean"
+          },
+          {
+            "name": "IsOatpActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsOnboardingComplete",
+            "type": "boolean"
+          },
+          {
+            "name": "IsPermittedOnboarding",
+            "type": "boolean"
+          },
+          {
+            "name": "IsSecurityCopilotHasLicense",
+            "type": "boolean"
+          },
+          {
+            "name": "IsSentinelActive",
+            "type": "boolean"
+          },
+          {
+            "name": "IsSiemEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "IsSuspended",
+            "type": "boolean"
+          },
+          {
+            "name": "IsTvmEligible",
+            "type": "boolean"
+          },
+          {
+            "name": "IsTvmEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "IsTvmOnboardingComplete",
+            "type": "boolean"
+          },
+          {
+            "name": "IsTvmPremiumDfsP2Enabled",
+            "type": "boolean"
+          },
+          {
+            "name": "ItpMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "KustoHotStorageInDays",
+            "type": "long"
+          },
+          {
+            "name": "MagellanOptOut",
+            "type": "boolean"
+          },
+          {
+            "name": "MapgMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "MdatpMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "MdcMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "MdeFlavor",
+            "type": "string"
+          },
+          {
+            "name": "MdiMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "MdIotM365IntegrationStatus",
+            "type": "string"
+          },
+          {
+            "name": "MixedLicenseMode",
+            "type": "string"
+          },
+          {
+            "name": "MtpConsent",
+            "type": "boolean"
+          },
+          {
+            "name": "MtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "OatpMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "OnboardingTileDismissed",
+            "type": "boolean"
+          },
+          {
+            "name": "OrgId",
+            "type": "string"
+          },
+          {
+            "name": "OtFlavor",
+            "type": "string"
+          },
+          {
+            "name": "RedirectAlertsToAttackStory",
+            "type": "boolean"
+          },
+          {
+            "name": "RolesJson",
+            "type": "string"
+          },
+          {
+            "name": "SecurityCopilotLicenseStatus",
+            "type": "string"
+          },
+          {
+            "name": "SentinelMtpPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "ServiceUrlsJson",
+            "type": "string"
+          },
+          {
+            "name": "TvmLicensesJson",
+            "type": "string"
+          },
+          {
+            "name": "UserAuthEnforcementMode",
+            "type": "string"
+          },
+          {
+            "name": "workloadsJson",
+            "type": "string"
+          },
+          {
+            "name": "createdBy",
+            "type": "string"
+          },
+          {
+            "name": "createdOn",
+            "type": "string"
+          },
+          {
+            "name": "eTag",
+            "type": "string"
+          },
+          {
+            "name": "isVariablePerTemplate",
+            "type": "string"
+          },
+          {
+            "name": "lastSyncedBy",
+            "type": "string"
+          },
+          {
+            "name": "lastSyncedOn",
+            "type": "string"
+          },
+          {
+            "name": "syncUnitStatusesJson",
+            "type": "string"
+          },
+          {
+            "name": "targetTenantIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "targetTenantIdsWithoutRelationship",
+            "type": "string"
+          },
+          {
+            "name": "templatesJson",
+            "type": "string"
+          },
+          {
+            "name": "templateVariablesJson",
+            "type": "string"
+          },
+          {
+            "name": "variablesJson",
+            "type": "string"
+          }
+        ],
+        "name": "Defender_Operations_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-operations-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_Operations_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-Operations-dest"
+          ],
+          "outputStream": "Custom-Defender_Operations_CL",
+          "streams": [
+            "Custom-Defender_Operations_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-Operations-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_Operations_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "ActionAutomationType",
+              "type": "string"
+            },
+            {
+              "name": "ActionDecision",
+              "type": "string"
+            },
+            {
+              "name": "ActionId",
+              "type": "string"
+            },
+            {
+              "name": "ActionSource",
+              "type": "string"
+            },
+            {
+              "name": "ActionStatus",
+              "type": "string"
+            },
+            {
+              "name": "ActionType",
+              "type": "string"
+            },
+            {
+              "name": "AdditionalFieldsJson",
+              "type": "string"
+            },
+            {
+              "name": "Comment",
+              "type": "string"
+            },
+            {
+              "name": "ComputerName",
+              "type": "string"
+            },
+            {
+              "name": "DecidedBy",
+              "type": "string"
+            },
+            {
+              "name": "EndTime",
+              "type": "string"
+            },
+            {
+              "name": "EntityType",
+              "type": "string"
+            },
+            {
+              "name": "EventTime",
+              "type": "datetime"
+            },
+            {
+              "name": "InvestigationId",
+              "type": "string"
+            },
+            {
+              "name": "MachineId",
+              "type": "string"
+            },
+            {
+              "name": "Product",
+              "type": "string"
+            },
+            {
+              "name": "RelatedEntitiesJson",
+              "type": "string"
+            },
+            {
+              "name": "StartTime",
+              "type": "datetime"
+            },
+            {
+              "name": "UserPrincipalName",
+              "type": "string"
+            },
+            {
+              "name": "destinationsJson",
+              "type": "string"
+            },
+            {
+              "name": "isEnabled",
+              "type": "string"
+            },
+            {
+              "name": "allTenantsCount",
+              "type": "string"
+            },
+            {
+              "name": "creationTime",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "name": "etag_x",
+              "type": "string"
+            },
+            {
+              "name": "exposedTargetTenantsInfoJson",
+              "type": "string"
+            },
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "lastUpdated",
+              "type": "string"
+            },
+            {
+              "name": "lastUpdatedByUpn",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "tenantGroupId",
+              "type": "string"
+            },
+            {
+              "name": "tenantId_x",
+              "type": "string"
+            },
+            {
+              "name": "ttl",
+              "type": "string"
+            },
+            {
+              "name": "type_x",
+              "type": "string"
+            },
+            {
+              "name": "userId",
+              "type": "string"
+            },
+            {
+              "name": "AadIpMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "AatpIntegrationEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "AatpWorkspaceExists",
+              "type": "boolean"
+            },
+            {
+              "name": "AccountMode",
+              "type": "long"
+            },
+            {
+              "name": "AccountType",
+              "type": "string"
+            },
+            {
+              "name": "ActiveMtpWorkloadsJson",
+              "type": "string"
+            },
+            {
+              "name": "AdIotIntegrationStatus",
+              "type": "string"
+            },
+            {
+              "name": "AdminMisconduct",
+              "type": "string"
+            },
+            {
+              "name": "AllowedActions",
+              "type": "long"
+            },
+            {
+              "name": "AuthInfoJson",
+              "type": "string"
+            },
+            {
+              "name": "AutomatedIrLiveResponse",
+              "type": "boolean"
+            },
+            {
+              "name": "DataCenter",
+              "type": "string"
+            },
+            {
+              "name": "DirRolesJson",
+              "type": "string"
+            },
+            {
+              "name": "DlpMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "EnvironmentName",
+              "type": "string"
+            },
+            {
+              "name": "ExcludeSentinelAlertsFromXDRCorrelation",
+              "type": "string"
+            },
+            {
+              "name": "ExposedSentinelWorkspacesJson",
+              "type": "string"
+            },
+            {
+              "name": "FeaturesJson",
+              "type": "string"
+            },
+            {
+              "name": "GeoRegion",
+              "type": "string"
+            },
+            {
+              "name": "HasFinishedPostOnboardingForSmb",
+              "type": "boolean"
+            },
+            {
+              "name": "HasMachineGroups",
+              "type": "boolean"
+            },
+            {
+              "name": "IotFlavor",
+              "type": "string"
+            },
+            {
+              "name": "IrmMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "IsAadIpActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsAutomatedIrEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "IsBilbaoTenant",
+              "type": "boolean"
+            },
+            {
+              "name": "IsDeceptionEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "IsDeleted",
+              "type": "boolean"
+            },
+            {
+              "name": "IsDexLicense",
+              "type": "boolean"
+            },
+            {
+              "name": "IsDlpActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsEnhancedTelemetryEnabled",
+              "type": "string"
+            },
+            {
+              "name": "IsEvaluationEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "IsExposedToAllMachineGroups",
+              "type": "boolean"
+            },
+            {
+              "name": "IsIrmActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsIsolationExclusionOptIn",
+              "type": "boolean"
+            },
+            {
+              "name": "IsItpActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsMapgActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsMdatpActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsMdatpLicenseExpired",
+              "type": "boolean"
+            },
+            {
+              "name": "IsMdcActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsMdiActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsMtpEligible",
+              "type": "boolean"
+            },
+            {
+              "name": "IsOatpActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsOnboardingComplete",
+              "type": "boolean"
+            },
+            {
+              "name": "IsPermittedOnboarding",
+              "type": "boolean"
+            },
+            {
+              "name": "IsSecurityCopilotHasLicense",
+              "type": "boolean"
+            },
+            {
+              "name": "IsSentinelActive",
+              "type": "boolean"
+            },
+            {
+              "name": "IsSiemEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "IsSuspended",
+              "type": "boolean"
+            },
+            {
+              "name": "IsTvmEligible",
+              "type": "boolean"
+            },
+            {
+              "name": "IsTvmEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "IsTvmOnboardingComplete",
+              "type": "boolean"
+            },
+            {
+              "name": "IsTvmPremiumDfsP2Enabled",
+              "type": "boolean"
+            },
+            {
+              "name": "ItpMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "KustoHotStorageInDays",
+              "type": "long"
+            },
+            {
+              "name": "MagellanOptOut",
+              "type": "boolean"
+            },
+            {
+              "name": "MapgMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "MdatpMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "MdcMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "MdeFlavor",
+              "type": "string"
+            },
+            {
+              "name": "MdiMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "MdIotM365IntegrationStatus",
+              "type": "string"
+            },
+            {
+              "name": "MixedLicenseMode",
+              "type": "string"
+            },
+            {
+              "name": "MtpConsent",
+              "type": "boolean"
+            },
+            {
+              "name": "MtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "OatpMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "OnboardingTileDismissed",
+              "type": "boolean"
+            },
+            {
+              "name": "OrgId",
+              "type": "string"
+            },
+            {
+              "name": "OtFlavor",
+              "type": "string"
+            },
+            {
+              "name": "RedirectAlertsToAttackStory",
+              "type": "boolean"
+            },
+            {
+              "name": "RolesJson",
+              "type": "string"
+            },
+            {
+              "name": "SecurityCopilotLicenseStatus",
+              "type": "string"
+            },
+            {
+              "name": "SentinelMtpPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "ServiceUrlsJson",
+              "type": "string"
+            },
+            {
+              "name": "TvmLicensesJson",
+              "type": "string"
+            },
+            {
+              "name": "UserAuthEnforcementMode",
+              "type": "string"
+            },
+            {
+              "name": "workloadsJson",
+              "type": "string"
+            },
+            {
+              "name": "createdBy",
+              "type": "string"
+            },
+            {
+              "name": "createdOn",
+              "type": "string"
+            },
+            {
+              "name": "eTag",
+              "type": "string"
+            },
+            {
+              "name": "isVariablePerTemplate",
+              "type": "string"
+            },
+            {
+              "name": "lastSyncedBy",
+              "type": "string"
+            },
+            {
+              "name": "lastSyncedOn",
+              "type": "string"
+            },
+            {
+              "name": "syncUnitStatusesJson",
+              "type": "string"
+            },
+            {
+              "name": "targetTenantIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "targetTenantIdsWithoutRelationship",
+              "type": "string"
+            },
+            {
+              "name": "templatesJson",
+              "type": "string"
+            },
+            {
+              "name": "templateVariablesJson",
+              "type": "string"
+            },
+            {
+              "name": "variablesJson",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-operations-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-operations-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_Operations_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_Operations_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_Operations_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActionAutomationType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActionDecision",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActionId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActionSource",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActionStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActionType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdditionalFieldsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Comment",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ComputerName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DecidedBy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "EndTime",
+                    "type": "string"
+                  },
+                  {
+                    "name": "EntityType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "EventTime",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "InvestigationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MachineId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Product",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RelatedEntitiesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "StartTime",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "UserPrincipalName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "destinationsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isEnabled",
+                    "type": "string"
+                  },
+                  {
+                    "name": "allTenantsCount",
+                    "type": "string"
+                  },
+                  {
+                    "name": "creationTime",
+                    "type": "string"
+                  },
+                  {
+                    "name": "description",
+                    "type": "string"
+                  },
+                  {
+                    "name": "etag_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "exposedTargetTenantsInfoJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastUpdated",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastUpdatedByUpn",
+                    "type": "string"
+                  },
+                  {
+                    "name": "name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantGroupId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantId_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ttl",
+                    "type": "string"
+                  },
+                  {
+                    "name": "type_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "userId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AadIpMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AatpIntegrationEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "AatpWorkspaceExists",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "AccountMode",
+                    "type": "long"
+                  },
+                  {
+                    "name": "AccountType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActiveMtpWorkloadsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdIotIntegrationStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdminMisconduct",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AllowedActions",
+                    "type": "long"
+                  },
+                  {
+                    "name": "AuthInfoJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AutomatedIrLiveResponse",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "DataCenter",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DirRolesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DlpMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "EnvironmentName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ExcludeSentinelAlertsFromXDRCorrelation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ExposedSentinelWorkspacesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "FeaturesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "GeoRegion",
+                    "type": "string"
+                  },
+                  {
+                    "name": "HasFinishedPostOnboardingForSmb",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "HasMachineGroups",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IotFlavor",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IrmMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsAadIpActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsAutomatedIrEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsBilbaoTenant",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsDeceptionEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsDeleted",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsDexLicense",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsDlpActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsEnhancedTelemetryEnabled",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsEvaluationEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsExposedToAllMachineGroups",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsIrmActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsIsolationExclusionOptIn",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsItpActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsMapgActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsMdatpActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsMdatpLicenseExpired",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsMdcActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsMdiActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsMtpEligible",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsOatpActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsOnboardingComplete",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsPermittedOnboarding",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsSecurityCopilotHasLicense",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsSentinelActive",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsSiemEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsSuspended",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsTvmEligible",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsTvmEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsTvmOnboardingComplete",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsTvmPremiumDfsP2Enabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "ItpMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "KustoHotStorageInDays",
+                    "type": "long"
+                  },
+                  {
+                    "name": "MagellanOptOut",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "MapgMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MdatpMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MdcMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MdeFlavor",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MdiMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MdIotM365IntegrationStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MixedLicenseMode",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MtpConsent",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "MtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "OatpMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "OnboardingTileDismissed",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "OrgId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "OtFlavor",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RedirectAlertsToAttackStory",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "RolesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SecurityCopilotLicenseStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SentinelMtpPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ServiceUrlsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "TvmLicensesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "UserAuthEnforcementMode",
+                    "type": "string"
+                  },
+                  {
+                    "name": "workloadsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "createdBy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "createdOn",
+                    "type": "string"
+                  },
+                  {
+                    "name": "eTag",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isVariablePerTemplate",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastSyncedBy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastSyncedOn",
+                    "type": "string"
+                  },
+                  {
+                    "name": "syncUnitStatusesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "targetTenantIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "targetTenantIdsWithoutRelationship",
+                    "type": "string"
+                  },
+                  {
+                    "name": "templatesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "templateVariablesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "variablesJson",
+                    "type": "string"
+                  }
+                ],
+                "name": "Defender_Operations_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-operations-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_Operations_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-Operations-dest"
+                  ],
+                  "outputStream": "Custom-Defender_Operations_CL",
+                  "streams": [
+                    "Custom-Defender_Operations_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-Operations-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_Operations_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActionAutomationType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActionDecision",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActionId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActionSource",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActionStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActionType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdditionalFieldsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Comment",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ComputerName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DecidedBy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "EndTime",
+                      "type": "string"
+                    },
+                    {
+                      "name": "EntityType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "EventTime",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "InvestigationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MachineId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Product",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RelatedEntitiesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "StartTime",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "UserPrincipalName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "destinationsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isEnabled",
+                      "type": "string"
+                    },
+                    {
+                      "name": "allTenantsCount",
+                      "type": "string"
+                    },
+                    {
+                      "name": "creationTime",
+                      "type": "string"
+                    },
+                    {
+                      "name": "description",
+                      "type": "string"
+                    },
+                    {
+                      "name": "etag_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "exposedTargetTenantsInfoJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastUpdated",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastUpdatedByUpn",
+                      "type": "string"
+                    },
+                    {
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantGroupId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantId_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ttl",
+                      "type": "string"
+                    },
+                    {
+                      "name": "type_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "userId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AadIpMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AatpIntegrationEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "AatpWorkspaceExists",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "AccountMode",
+                      "type": "long"
+                    },
+                    {
+                      "name": "AccountType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActiveMtpWorkloadsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdIotIntegrationStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdminMisconduct",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AllowedActions",
+                      "type": "long"
+                    },
+                    {
+                      "name": "AuthInfoJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AutomatedIrLiveResponse",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "DataCenter",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DirRolesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DlpMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "EnvironmentName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ExcludeSentinelAlertsFromXDRCorrelation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ExposedSentinelWorkspacesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "FeaturesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "GeoRegion",
+                      "type": "string"
+                    },
+                    {
+                      "name": "HasFinishedPostOnboardingForSmb",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "HasMachineGroups",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IotFlavor",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IrmMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsAadIpActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsAutomatedIrEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsBilbaoTenant",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsDeceptionEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsDeleted",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsDexLicense",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsDlpActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsEnhancedTelemetryEnabled",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsEvaluationEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsExposedToAllMachineGroups",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsIrmActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsIsolationExclusionOptIn",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsItpActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsMapgActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsMdatpActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsMdatpLicenseExpired",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsMdcActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsMdiActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsMtpEligible",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsOatpActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsOnboardingComplete",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsPermittedOnboarding",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsSecurityCopilotHasLicense",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsSentinelActive",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsSiemEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsSuspended",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsTvmEligible",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsTvmEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsTvmOnboardingComplete",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsTvmPremiumDfsP2Enabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "ItpMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "KustoHotStorageInDays",
+                      "type": "long"
+                    },
+                    {
+                      "name": "MagellanOptOut",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "MapgMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MdatpMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MdcMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MdeFlavor",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MdiMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MdIotM365IntegrationStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MixedLicenseMode",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MtpConsent",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "MtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "OatpMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "OnboardingTileDismissed",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "OrgId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "OtFlavor",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RedirectAlertsToAttackStory",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "RolesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SecurityCopilotLicenseStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SentinelMtpPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ServiceUrlsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "TvmLicensesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "UserAuthEnforcementMode",
+                      "type": "string"
+                    },
+                    {
+                      "name": "workloadsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "createdBy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "createdOn",
+                      "type": "string"
+                    },
+                    {
+                      "name": "eTag",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isVariablePerTemplate",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastSyncedBy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastSyncedOn",
+                      "type": "string"
+                    },
+                    {
+                      "name": "syncUnitStatusesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "targetTenantIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "targetTenantIdsWithoutRelationship",
+                      "type": "string"
+                    },
+                    {
+                      "name": "templatesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "templateVariablesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "variablesJson",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

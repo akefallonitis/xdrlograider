@@ -1,0 +1,79 @@
+{
+  "operationCount": 8,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/dlpmachines/filters",
+      "OperationId": "getDlpMachineFilters",
+      "Summary": "Get DLP machine filters",
+      "Tags": [
+        "DLPDevices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/sccManagement/mgmt/TenantContext",
+      "OperationId": "getMtpTenantContext",
+      "Summary": "Get shared MTP tenant context",
+      "Tags": [
+        "DLPDevices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/dlpmachines/summaryStatus",
+      "OperationId": "getDlpMachinesSummaryStatus",
+      "Summary": "Get DLP machines summary status",
+      "Tags": [
+        "DLPDevices"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/incidentQueue/incidents/alerts",
+      "OperationId": "queryIncidentAlerts",
+      "Summary": "Query incident alerts",
+      "Tags": [
+        "DLPDevices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/dlpmachines",
+      "OperationId": "listDlpMachines",
+      "Summary": "List DLP machines",
+      "Tags": [
+        "DLPDevices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/dlpmachines/count",
+      "OperationId": "getDlpMachineCount",
+      "Summary": "Get DLP machine count",
+      "Tags": [
+        "DLPDevices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/edlp/dlpInternalApi/api/cloud/dlp/logCollectionsSetting",
+      "OperationId": "getEndpointDlpLogCollectionSettings",
+      "Summary": "Get endpoint DLP log collection settings",
+      "Tags": [
+        "DLPDevices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/edlp/dlpInternalApi/api/cloud/dlp/logCollections/",
+      "OperationId": "listEndpointDlpLogCollections",
+      "Summary": "List endpoint DLP log collections",
+      "Tags": [
+        "DLPDevices"
+      ]
+    }
+  ],
+  "category": "dlp_devices",
+  "portal": "nodoc-purview"
+}

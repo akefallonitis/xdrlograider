@@ -1,0 +1,160 @@
+{
+  "operationCount": 17,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}",
+      "OperationId": null,
+      "Summary": "Get a specific access review instance",
+      "Tags": [
+        "Instances"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances",
+      "OperationId": null,
+      "Summary": "List instances of an access review",
+      "Tags": [
+        "Instances"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop",
+      "OperationId": null,
+      "Summary": "Stop an access review instance",
+      "Tags": [
+        "Instances"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests",
+      "OperationId": null,
+      "Summary": "List access review requests",
+      "Tags": [
+        "Requests"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests",
+      "OperationId": null,
+      "Summary": "Create an access review request",
+      "Tags": [
+        "Requests"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requestsAwaitingMyDecision",
+      "OperationId": null,
+      "Summary": "List access review requests awaiting my decision",
+      "Tags": [
+        "Requests"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/resetDecisions",
+      "OperationId": null,
+      "Summary": "Reset decisions for an access review instance",
+      "Tags": [
+        "Instances"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/businessFlows",
+      "OperationId": "AccessReviews.ListBusinessFlows",
+      "Summary": "List business flows for a provider",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/reports",
+      "OperationId": "AccessReviews.ListReports",
+      "Summary": "List access review reports",
+      "Tags": [
+        "Requests"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings",
+      "OperationId": null,
+      "Summary": "Get partner tenant settings",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/decisions",
+      "OperationId": null,
+      "Summary": "List decisions for an access review instance",
+      "Tags": [
+        "Decisions"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders",
+      "OperationId": null,
+      "Summary": "List approval workflow providers",
+      "Tags": [
+        "Providers"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}",
+      "OperationId": null,
+      "Summary": "Get a specific access review request",
+      "Tags": [
+        "Requests"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}",
+      "OperationId": null,
+      "Summary": "Delete an access review request",
+      "Tags": [
+        "Requests"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}",
+      "OperationId": null,
+      "Summary": "Update an access review request",
+      "Tags": [
+        "Requests"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/applyDecisions",
+      "OperationId": null,
+      "Summary": "Apply decisions for an access review instance",
+      "Tags": [
+        "Instances"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags",
+      "OperationId": null,
+      "Summary": "Get feature flags for a provider",
+      "Tags": [
+        "Configuration"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-entra-idgov"
+}

@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/api/v1/oauth2/aad_access_token",
+      "OperationId": "AuthHelpers_GetAadAccessToken",
+      "Summary": "Probe Viva Engage AAD access-token state",
+      "Tags": [
+        "AuthHelpers"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/cometd/",
+      "OperationId": "RealtimeRelay_PostSubscribe",
+      "Summary": "Subscribe to Viva Engage realtime relay channels",
+      "Tags": [
+        "RealtimeRelay"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/cometd/handshake",
+      "OperationId": "RealtimeRelay_PostHandshake",
+      "Summary": "Open a Viva Engage realtime relay session",
+      "Tags": [
+        "RealtimeRelay"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/cometd/connect",
+      "OperationId": "RealtimeRelay_PostConnect",
+      "Summary": "Poll the Viva Engage realtime relay",
+      "Tags": [
+        "RealtimeRelay"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/graphql",
+      "OperationId": "AdminGraphQL_PostGraphql",
+      "Summary": "Execute Viva Engage admin GraphQL operations",
+      "Tags": [
+        "AdminGraphQL"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-viva-engage"
+}

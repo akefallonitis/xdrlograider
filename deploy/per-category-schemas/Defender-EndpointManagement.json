@@ -1,0 +1,3246 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "EndpointManagement",
+    "TableName": "Defender_EndpointManagement_CL",
+    "StreamName": "Custom-Defender_EndpointManagement_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 180,
+    "TotalColumnCount": 189,
+    "OperationCount": 25,
+    "OperationKeys": [
+      "GetAdvancedFeaturesGet",
+      "GetAuthenticatedTelemetry",
+      "GetDataSensitivity",
+      "GetDiscoveryEnabledTags",
+      "GetIntuneConnection",
+      "GetLicenseReport",
+      "GetMachineGroups",
+      "GetMachinesWdatp",
+      "GetMachineTimelineEvents",
+      "GetMagellanFeatures",
+      "GetNdrDeviceTypeDistribution",
+      "GetNdrInterceptingMachines",
+      "GetNdrMachineExclusionDetails",
+      "GetPreviewFeatures",
+      "GetPuaConfiguration",
+      "GetPurviewSharing",
+      "GetRbacGroups",
+      "GetRbacGroupScopes",
+      "GetSensorCompatibleMachines",
+      "GetTags",
+      "GetTimeline",
+      "List",
+      "ListAlertEmailNotifications",
+      "ListCustomCollectionRules",
+      "ListManagedDevices"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_EndpointManagement_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "AatpIntegrationEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "AatpWorkspaceExists",
+            "type": "boolean"
+          },
+          {
+            "name": "AllowWdavNetworkBlock",
+            "type": "boolean"
+          },
+          {
+            "name": "AutoResolveInvestigatedAlerts",
+            "type": "boolean"
+          },
+          {
+            "name": "BilbaoApproved",
+            "type": "boolean"
+          },
+          {
+            "name": "BilbaoEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "BlockListEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "DartDataCollection",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableAggregatedReporting",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableAipIntegration",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableCustomAsrAdvancedProcessTermination",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableEndpointDlp",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableExcludedDevices",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableHVAOnboardingOptions",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableMcasIntegration",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableQuarantinedFileDownload",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableWdavAntiTampering",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableWdavAuditMode",
+            "type": "boolean"
+          },
+          {
+            "name": "EnableWdavPassiveModeRemediation",
+            "type": "boolean"
+          },
+          {
+            "name": "HidePotentialDuplications",
+            "type": "boolean"
+          },
+          {
+            "name": "IsolateIncidentsWithDifferentDeviceGroups",
+            "type": "boolean"
+          },
+          {
+            "name": "IsolationExclusionOptIn",
+            "type": "boolean"
+          },
+          {
+            "name": "LicenseEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "LowFidelityEnrichmentEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "M365SecureScoreIntegrationEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "MagellanOptOut",
+            "type": "boolean"
+          },
+          {
+            "name": "MobileDeactivationPeriodInDays",
+            "type": "string"
+          },
+          {
+            "name": "ShowUserAadProfile",
+            "type": "boolean"
+          },
+          {
+            "name": "SkypeIntegrationEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "UseSimplifiedConnectivity",
+            "type": "boolean"
+          },
+          {
+            "name": "UseSimplifiedConnectivityViaApi",
+            "type": "boolean"
+          },
+          {
+            "name": "WebCategoriesEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "isEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "EnabledTagsForScanJson",
+            "type": "string"
+          },
+          {
+            "name": "IsAllDevicesEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "AutoRemediationLevel",
+            "type": "long"
+          },
+          {
+            "name": "Description",
+            "type": "string"
+          },
+          {
+            "name": "GroupRulesJson",
+            "type": "string"
+          },
+          {
+            "name": "IsUnassignedMachineGroup",
+            "type": "boolean"
+          },
+          {
+            "name": "LastUpdated",
+            "type": "datetime"
+          },
+          {
+            "name": "MachineCount",
+            "type": "long"
+          },
+          {
+            "name": "MachineGroupId",
+            "type": "long"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "Priority",
+            "type": "long"
+          },
+          {
+            "name": "aadDeviceId",
+            "type": "string"
+          },
+          {
+            "name": "agentVersion",
+            "type": "string"
+          },
+          {
+            "name": "computerDnsName",
+            "type": "string"
+          },
+          {
+            "name": "deviceValue",
+            "type": "string"
+          },
+          {
+            "name": "exclusionReason",
+            "type": "string"
+          },
+          {
+            "name": "exposureLevel",
+            "type": "string"
+          },
+          {
+            "name": "firstSeen",
+            "type": "datetime"
+          },
+          {
+            "name": "healthStatus",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "ipAddressesJson",
+            "type": "string"
+          },
+          {
+            "name": "isAadJoined",
+            "type": "boolean"
+          },
+          {
+            "name": "IsExcluded",
+            "type": "boolean"
+          },
+          {
+            "name": "isPotentialDuplication",
+            "type": "boolean"
+          },
+          {
+            "name": "lastExternalIpAddress",
+            "type": "string"
+          },
+          {
+            "name": "lastIpAddress",
+            "type": "string"
+          },
+          {
+            "name": "lastSeen",
+            "type": "datetime"
+          },
+          {
+            "name": "machineTagsJson",
+            "type": "string"
+          },
+          {
+            "name": "ManagedBy",
+            "type": "string"
+          },
+          {
+            "name": "ManagedByStatus",
+            "type": "string"
+          },
+          {
+            "name": "mergedIntoMachineId",
+            "type": "string"
+          },
+          {
+            "name": "OnboardingStatus",
+            "type": "string"
+          },
+          {
+            "name": "osArchitecture",
+            "type": "string"
+          },
+          {
+            "name": "OsBuild",
+            "type": "long"
+          },
+          {
+            "name": "osPlatform",
+            "type": "string"
+          },
+          {
+            "name": "osProcessor",
+            "type": "string"
+          },
+          {
+            "name": "rbacGroupId",
+            "type": "long"
+          },
+          {
+            "name": "rbacGroupName",
+            "type": "string"
+          },
+          {
+            "name": "riskScore",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string"
+          },
+          {
+            "name": "vmMetadata",
+            "type": "string"
+          },
+          {
+            "name": "ActionTime",
+            "type": "string"
+          },
+          {
+            "name": "ActionTimeIsoString",
+            "type": "string"
+          },
+          {
+            "name": "ActionType",
+            "type": "string"
+          },
+          {
+            "name": "AlertIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "CyberActionTypeJson",
+            "type": "string"
+          },
+          {
+            "name": "EntitiesJson",
+            "type": "string"
+          },
+          {
+            "name": "HiddenDetailsJson",
+            "type": "string"
+          },
+          {
+            "name": "Icon",
+            "type": "string"
+          },
+          {
+            "name": "InitiatingProcessJson",
+            "type": "string"
+          },
+          {
+            "name": "InitiatingProcessParentJson",
+            "type": "string"
+          },
+          {
+            "name": "InitiatingUserJson",
+            "type": "string"
+          },
+          {
+            "name": "IsBoldEvent",
+            "type": "string"
+          },
+          {
+            "name": "IsCyberData",
+            "type": "string"
+          },
+          {
+            "name": "MachineJson",
+            "type": "string"
+          },
+          {
+            "name": "MergedItemsReportIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "MergedItemsReportIdsToTimesJson",
+            "type": "string"
+          },
+          {
+            "name": "MitreInfoJson",
+            "type": "string"
+          },
+          {
+            "name": "ProcessJson",
+            "type": "string"
+          },
+          {
+            "name": "RelatedObservationName",
+            "type": "string"
+          },
+          {
+            "name": "ReportId",
+            "type": "string"
+          },
+          {
+            "name": "SourceProvider",
+            "type": "string"
+          },
+          {
+            "name": "tagsJson",
+            "type": "string"
+          },
+          {
+            "name": "TypedDetailsJson",
+            "type": "string"
+          },
+          {
+            "name": "UserJson",
+            "type": "string"
+          },
+          {
+            "name": "IsCorelightIntegrationEnabled",
+            "type": "string"
+          },
+          {
+            "name": "IsLog4jScanningEnabled",
+            "type": "string"
+          },
+          {
+            "name": "IsProactiveDiscoveryEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "DeviceCategory",
+            "type": "string"
+          },
+          {
+            "name": "DeviceType",
+            "type": "string"
+          },
+          {
+            "name": "DeviceTypeCount",
+            "type": "long"
+          },
+          {
+            "name": "HighValueAssetTotal",
+            "type": "long"
+          },
+          {
+            "name": "ContainsUnauthorizedDevice",
+            "type": "string"
+          },
+          {
+            "name": "DeviceId",
+            "type": "string"
+          },
+          {
+            "name": "InterceptingDevicesJson",
+            "type": "string"
+          },
+          {
+            "name": "IsSeenByMdi",
+            "type": "string"
+          },
+          {
+            "name": "ExclusionState",
+            "type": "string"
+          },
+          {
+            "name": "Justification",
+            "type": "string"
+          },
+          {
+            "name": "Notes",
+            "type": "string"
+          },
+          {
+            "name": "RequestedByDisplayName",
+            "type": "string"
+          },
+          {
+            "name": "RequestedByOid",
+            "type": "string"
+          },
+          {
+            "name": "RequestedOn",
+            "type": "string"
+          },
+          {
+            "name": "SenseMachineId",
+            "type": "string"
+          },
+          {
+            "name": "IsOptIn",
+            "type": "boolean"
+          },
+          {
+            "name": "SliceId",
+            "type": "long"
+          },
+          {
+            "name": "tag",
+            "type": "string"
+          },
+          {
+            "name": "tagType",
+            "type": "string"
+          },
+          {
+            "name": "AdiotPlcKeyState",
+            "type": "string"
+          },
+          {
+            "name": "AdiotPlcModeLastUpdate",
+            "type": "string"
+          },
+          {
+            "name": "AdiotPlcRunState",
+            "type": "string"
+          },
+          {
+            "name": "AdiotProtocolsJson",
+            "type": "string"
+          },
+          {
+            "name": "AdiotPurdueLevel",
+            "type": "string"
+          },
+          {
+            "name": "AdiotSiteName",
+            "type": "string"
+          },
+          {
+            "name": "AdiotSiteTag",
+            "type": "string"
+          },
+          {
+            "name": "AssetInsightsJson",
+            "type": "string"
+          },
+          {
+            "name": "AssetValue",
+            "type": "string"
+          },
+          {
+            "name": "CloudResourceDetailsJson",
+            "type": "string"
+          },
+          {
+            "name": "ComputerNetBIOSName",
+            "type": "string"
+          },
+          {
+            "name": "CriticalityLevel",
+            "type": "string"
+          },
+          {
+            "name": "DataSourcesJson",
+            "type": "string"
+          },
+          {
+            "name": "DeviceRolesJson",
+            "type": "string"
+          },
+          {
+            "name": "DeviceSubtype",
+            "type": "string"
+          },
+          {
+            "name": "DiscoverySourcesJson",
+            "type": "string"
+          },
+          {
+            "name": "Domain",
+            "type": "string"
+          },
+          {
+            "name": "DynamicAssetValue",
+            "type": "string"
+          },
+          {
+            "name": "DynamicRulesTagsJson",
+            "type": "string"
+          },
+          {
+            "name": "ExploitLevel",
+            "type": "string"
+          },
+          {
+            "name": "ExposureScore",
+            "type": "string"
+          },
+          {
+            "name": "FirmwareVersion",
+            "type": "string"
+          },
+          {
+            "name": "HvaMode",
+            "type": "string"
+          },
+          {
+            "name": "InternalMachineId",
+            "type": "string"
+          },
+          {
+            "name": "InternetFacingReason",
+            "type": "string"
+          },
+          {
+            "name": "IsAdiotAuthorized",
+            "type": "string"
+          },
+          {
+            "name": "IsAdiotLocalSubnet",
+            "type": "string"
+          },
+          {
+            "name": "IsAdiotPlcSecured",
+            "type": "string"
+          },
+          {
+            "name": "IsAdiotProgramming",
+            "type": "string"
+          },
+          {
+            "name": "IsAdiotScanner",
+            "type": "string"
+          },
+          {
+            "name": "IsInternetFacing",
+            "type": "string"
+          },
+          {
+            "name": "IsLowFidelity",
+            "type": "string"
+          },
+          {
+            "name": "IsManagedByMdatp",
+            "type": "string"
+          },
+          {
+            "name": "IsolationState",
+            "type": "string"
+          },
+          {
+            "name": "IsTransient",
+            "type": "string"
+          },
+          {
+            "name": "IsUsiServer",
+            "type": "string"
+          },
+          {
+            "name": "LastIpV6Address",
+            "type": "string"
+          },
+          {
+            "name": "LastMacAddress",
+            "type": "string"
+          },
+          {
+            "name": "LowFidelitySourcesJson",
+            "type": "string"
+          },
+          {
+            "name": "MachineGroup",
+            "type": "string"
+          },
+          {
+            "name": "MachineGuid",
+            "type": "string"
+          },
+          {
+            "name": "machineId",
+            "type": "string"
+          },
+          {
+            "name": "MachineTags",
+            "type": "string"
+          },
+          {
+            "name": "OsPlatformFriendlyName",
+            "type": "string"
+          },
+          {
+            "name": "OsVersionFriendlyName",
+            "type": "string"
+          },
+          {
+            "name": "ReleaseVersion",
+            "type": "string"
+          },
+          {
+            "name": "SecurityScore",
+            "type": "string"
+          },
+          {
+            "name": "SenseGroupId",
+            "type": "string"
+          },
+          {
+            "name": "SensorNamesJson",
+            "type": "string"
+          },
+          {
+            "name": "SensorSite",
+            "type": "string"
+          },
+          {
+            "name": "SensorSiteDisplayName",
+            "type": "string"
+          },
+          {
+            "name": "SensorType",
+            "type": "string"
+          },
+          {
+            "name": "SensorZone",
+            "type": "string"
+          },
+          {
+            "name": "SystemManufacturer",
+            "type": "string"
+          },
+          {
+            "name": "SystemProductName",
+            "type": "string"
+          },
+          {
+            "name": "VulnerabilityAgeLevel",
+            "type": "string"
+          },
+          {
+            "name": "VulnerabilitySeverityLevel",
+            "type": "string"
+          },
+          {
+            "name": "WcdMachineId",
+            "type": "string"
+          },
+          {
+            "name": "frequency",
+            "type": "string"
+          },
+          {
+            "name": "query",
+            "type": "string"
+          }
+        ],
+        "name": "Defender_EndpointManagement_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-endpointmanagement-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_EndpointManagement_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-EndpointManagement-dest"
+          ],
+          "outputStream": "Custom-Defender_EndpointManagement_CL",
+          "streams": [
+            "Custom-Defender_EndpointManagement_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-EndpointManagement-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_EndpointManagement_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "AatpIntegrationEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "AatpWorkspaceExists",
+              "type": "boolean"
+            },
+            {
+              "name": "AllowWdavNetworkBlock",
+              "type": "boolean"
+            },
+            {
+              "name": "AutoResolveInvestigatedAlerts",
+              "type": "boolean"
+            },
+            {
+              "name": "BilbaoApproved",
+              "type": "boolean"
+            },
+            {
+              "name": "BilbaoEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "BlockListEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "DartDataCollection",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableAggregatedReporting",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableAipIntegration",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableCustomAsrAdvancedProcessTermination",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableEndpointDlp",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableExcludedDevices",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableHVAOnboardingOptions",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableMcasIntegration",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableQuarantinedFileDownload",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableWdavAntiTampering",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableWdavAuditMode",
+              "type": "boolean"
+            },
+            {
+              "name": "EnableWdavPassiveModeRemediation",
+              "type": "boolean"
+            },
+            {
+              "name": "HidePotentialDuplications",
+              "type": "boolean"
+            },
+            {
+              "name": "IsolateIncidentsWithDifferentDeviceGroups",
+              "type": "boolean"
+            },
+            {
+              "name": "IsolationExclusionOptIn",
+              "type": "boolean"
+            },
+            {
+              "name": "LicenseEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "LowFidelityEnrichmentEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "M365SecureScoreIntegrationEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "MagellanOptOut",
+              "type": "boolean"
+            },
+            {
+              "name": "MobileDeactivationPeriodInDays",
+              "type": "string"
+            },
+            {
+              "name": "ShowUserAadProfile",
+              "type": "boolean"
+            },
+            {
+              "name": "SkypeIntegrationEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "UseSimplifiedConnectivity",
+              "type": "boolean"
+            },
+            {
+              "name": "UseSimplifiedConnectivityViaApi",
+              "type": "boolean"
+            },
+            {
+              "name": "WebCategoriesEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "isEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "EnabledTagsForScanJson",
+              "type": "string"
+            },
+            {
+              "name": "IsAllDevicesEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "AutoRemediationLevel",
+              "type": "long"
+            },
+            {
+              "name": "Description",
+              "type": "string"
+            },
+            {
+              "name": "GroupRulesJson",
+              "type": "string"
+            },
+            {
+              "name": "IsUnassignedMachineGroup",
+              "type": "boolean"
+            },
+            {
+              "name": "LastUpdated",
+              "type": "datetime"
+            },
+            {
+              "name": "MachineCount",
+              "type": "long"
+            },
+            {
+              "name": "MachineGroupId",
+              "type": "long"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "Priority",
+              "type": "long"
+            },
+            {
+              "name": "aadDeviceId",
+              "type": "string"
+            },
+            {
+              "name": "agentVersion",
+              "type": "string"
+            },
+            {
+              "name": "computerDnsName",
+              "type": "string"
+            },
+            {
+              "name": "deviceValue",
+              "type": "string"
+            },
+            {
+              "name": "exclusionReason",
+              "type": "string"
+            },
+            {
+              "name": "exposureLevel",
+              "type": "string"
+            },
+            {
+              "name": "firstSeen",
+              "type": "datetime"
+            },
+            {
+              "name": "healthStatus",
+              "type": "string"
+            },
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "ipAddressesJson",
+              "type": "string"
+            },
+            {
+              "name": "isAadJoined",
+              "type": "boolean"
+            },
+            {
+              "name": "IsExcluded",
+              "type": "boolean"
+            },
+            {
+              "name": "isPotentialDuplication",
+              "type": "boolean"
+            },
+            {
+              "name": "lastExternalIpAddress",
+              "type": "string"
+            },
+            {
+              "name": "lastIpAddress",
+              "type": "string"
+            },
+            {
+              "name": "lastSeen",
+              "type": "datetime"
+            },
+            {
+              "name": "machineTagsJson",
+              "type": "string"
+            },
+            {
+              "name": "ManagedBy",
+              "type": "string"
+            },
+            {
+              "name": "ManagedByStatus",
+              "type": "string"
+            },
+            {
+              "name": "mergedIntoMachineId",
+              "type": "string"
+            },
+            {
+              "name": "OnboardingStatus",
+              "type": "string"
+            },
+            {
+              "name": "osArchitecture",
+              "type": "string"
+            },
+            {
+              "name": "OsBuild",
+              "type": "long"
+            },
+            {
+              "name": "osPlatform",
+              "type": "string"
+            },
+            {
+              "name": "osProcessor",
+              "type": "string"
+            },
+            {
+              "name": "rbacGroupId",
+              "type": "long"
+            },
+            {
+              "name": "rbacGroupName",
+              "type": "string"
+            },
+            {
+              "name": "riskScore",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "vmMetadata",
+              "type": "string"
+            },
+            {
+              "name": "ActionTime",
+              "type": "string"
+            },
+            {
+              "name": "ActionTimeIsoString",
+              "type": "string"
+            },
+            {
+              "name": "ActionType",
+              "type": "string"
+            },
+            {
+              "name": "AlertIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "CyberActionTypeJson",
+              "type": "string"
+            },
+            {
+              "name": "EntitiesJson",
+              "type": "string"
+            },
+            {
+              "name": "HiddenDetailsJson",
+              "type": "string"
+            },
+            {
+              "name": "Icon",
+              "type": "string"
+            },
+            {
+              "name": "InitiatingProcessJson",
+              "type": "string"
+            },
+            {
+              "name": "InitiatingProcessParentJson",
+              "type": "string"
+            },
+            {
+              "name": "InitiatingUserJson",
+              "type": "string"
+            },
+            {
+              "name": "IsBoldEvent",
+              "type": "string"
+            },
+            {
+              "name": "IsCyberData",
+              "type": "string"
+            },
+            {
+              "name": "MachineJson",
+              "type": "string"
+            },
+            {
+              "name": "MergedItemsReportIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "MergedItemsReportIdsToTimesJson",
+              "type": "string"
+            },
+            {
+              "name": "MitreInfoJson",
+              "type": "string"
+            },
+            {
+              "name": "ProcessJson",
+              "type": "string"
+            },
+            {
+              "name": "RelatedObservationName",
+              "type": "string"
+            },
+            {
+              "name": "ReportId",
+              "type": "string"
+            },
+            {
+              "name": "SourceProvider",
+              "type": "string"
+            },
+            {
+              "name": "tagsJson",
+              "type": "string"
+            },
+            {
+              "name": "TypedDetailsJson",
+              "type": "string"
+            },
+            {
+              "name": "UserJson",
+              "type": "string"
+            },
+            {
+              "name": "IsCorelightIntegrationEnabled",
+              "type": "string"
+            },
+            {
+              "name": "IsLog4jScanningEnabled",
+              "type": "string"
+            },
+            {
+              "name": "IsProactiveDiscoveryEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "DeviceCategory",
+              "type": "string"
+            },
+            {
+              "name": "DeviceType",
+              "type": "string"
+            },
+            {
+              "name": "DeviceTypeCount",
+              "type": "long"
+            },
+            {
+              "name": "HighValueAssetTotal",
+              "type": "long"
+            },
+            {
+              "name": "ContainsUnauthorizedDevice",
+              "type": "string"
+            },
+            {
+              "name": "DeviceId",
+              "type": "string"
+            },
+            {
+              "name": "InterceptingDevicesJson",
+              "type": "string"
+            },
+            {
+              "name": "IsSeenByMdi",
+              "type": "string"
+            },
+            {
+              "name": "ExclusionState",
+              "type": "string"
+            },
+            {
+              "name": "Justification",
+              "type": "string"
+            },
+            {
+              "name": "Notes",
+              "type": "string"
+            },
+            {
+              "name": "RequestedByDisplayName",
+              "type": "string"
+            },
+            {
+              "name": "RequestedByOid",
+              "type": "string"
+            },
+            {
+              "name": "RequestedOn",
+              "type": "string"
+            },
+            {
+              "name": "SenseMachineId",
+              "type": "string"
+            },
+            {
+              "name": "IsOptIn",
+              "type": "boolean"
+            },
+            {
+              "name": "SliceId",
+              "type": "long"
+            },
+            {
+              "name": "tag",
+              "type": "string"
+            },
+            {
+              "name": "tagType",
+              "type": "string"
+            },
+            {
+              "name": "AdiotPlcKeyState",
+              "type": "string"
+            },
+            {
+              "name": "AdiotPlcModeLastUpdate",
+              "type": "string"
+            },
+            {
+              "name": "AdiotPlcRunState",
+              "type": "string"
+            },
+            {
+              "name": "AdiotProtocolsJson",
+              "type": "string"
+            },
+            {
+              "name": "AdiotPurdueLevel",
+              "type": "string"
+            },
+            {
+              "name": "AdiotSiteName",
+              "type": "string"
+            },
+            {
+              "name": "AdiotSiteTag",
+              "type": "string"
+            },
+            {
+              "name": "AssetInsightsJson",
+              "type": "string"
+            },
+            {
+              "name": "AssetValue",
+              "type": "string"
+            },
+            {
+              "name": "CloudResourceDetailsJson",
+              "type": "string"
+            },
+            {
+              "name": "ComputerNetBIOSName",
+              "type": "string"
+            },
+            {
+              "name": "CriticalityLevel",
+              "type": "string"
+            },
+            {
+              "name": "DataSourcesJson",
+              "type": "string"
+            },
+            {
+              "name": "DeviceRolesJson",
+              "type": "string"
+            },
+            {
+              "name": "DeviceSubtype",
+              "type": "string"
+            },
+            {
+              "name": "DiscoverySourcesJson",
+              "type": "string"
+            },
+            {
+              "name": "Domain",
+              "type": "string"
+            },
+            {
+              "name": "DynamicAssetValue",
+              "type": "string"
+            },
+            {
+              "name": "DynamicRulesTagsJson",
+              "type": "string"
+            },
+            {
+              "name": "ExploitLevel",
+              "type": "string"
+            },
+            {
+              "name": "ExposureScore",
+              "type": "string"
+            },
+            {
+              "name": "FirmwareVersion",
+              "type": "string"
+            },
+            {
+              "name": "HvaMode",
+              "type": "string"
+            },
+            {
+              "name": "InternalMachineId",
+              "type": "string"
+            },
+            {
+              "name": "InternetFacingReason",
+              "type": "string"
+            },
+            {
+              "name": "IsAdiotAuthorized",
+              "type": "string"
+            },
+            {
+              "name": "IsAdiotLocalSubnet",
+              "type": "string"
+            },
+            {
+              "name": "IsAdiotPlcSecured",
+              "type": "string"
+            },
+            {
+              "name": "IsAdiotProgramming",
+              "type": "string"
+            },
+            {
+              "name": "IsAdiotScanner",
+              "type": "string"
+            },
+            {
+              "name": "IsInternetFacing",
+              "type": "string"
+            },
+            {
+              "name": "IsLowFidelity",
+              "type": "string"
+            },
+            {
+              "name": "IsManagedByMdatp",
+              "type": "string"
+            },
+            {
+              "name": "IsolationState",
+              "type": "string"
+            },
+            {
+              "name": "IsTransient",
+              "type": "string"
+            },
+            {
+              "name": "IsUsiServer",
+              "type": "string"
+            },
+            {
+              "name": "LastIpV6Address",
+              "type": "string"
+            },
+            {
+              "name": "LastMacAddress",
+              "type": "string"
+            },
+            {
+              "name": "LowFidelitySourcesJson",
+              "type": "string"
+            },
+            {
+              "name": "MachineGroup",
+              "type": "string"
+            },
+            {
+              "name": "MachineGuid",
+              "type": "string"
+            },
+            {
+              "name": "machineId",
+              "type": "string"
+            },
+            {
+              "name": "MachineTags",
+              "type": "string"
+            },
+            {
+              "name": "OsPlatformFriendlyName",
+              "type": "string"
+            },
+            {
+              "name": "OsVersionFriendlyName",
+              "type": "string"
+            },
+            {
+              "name": "ReleaseVersion",
+              "type": "string"
+            },
+            {
+              "name": "SecurityScore",
+              "type": "string"
+            },
+            {
+              "name": "SenseGroupId",
+              "type": "string"
+            },
+            {
+              "name": "SensorNamesJson",
+              "type": "string"
+            },
+            {
+              "name": "SensorSite",
+              "type": "string"
+            },
+            {
+              "name": "SensorSiteDisplayName",
+              "type": "string"
+            },
+            {
+              "name": "SensorType",
+              "type": "string"
+            },
+            {
+              "name": "SensorZone",
+              "type": "string"
+            },
+            {
+              "name": "SystemManufacturer",
+              "type": "string"
+            },
+            {
+              "name": "SystemProductName",
+              "type": "string"
+            },
+            {
+              "name": "VulnerabilityAgeLevel",
+              "type": "string"
+            },
+            {
+              "name": "VulnerabilitySeverityLevel",
+              "type": "string"
+            },
+            {
+              "name": "WcdMachineId",
+              "type": "string"
+            },
+            {
+              "name": "frequency",
+              "type": "string"
+            },
+            {
+              "name": "query",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-endpointmanagement-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-endpointmanagement-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_EndpointManagement_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_EndpointManagement_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_EndpointManagement_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AatpIntegrationEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "AatpWorkspaceExists",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "AllowWdavNetworkBlock",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "AutoResolveInvestigatedAlerts",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "BilbaoApproved",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "BilbaoEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "BlockListEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "DartDataCollection",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableAggregatedReporting",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableAipIntegration",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableCustomAsrAdvancedProcessTermination",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableEndpointDlp",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableExcludedDevices",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableHVAOnboardingOptions",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableMcasIntegration",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableQuarantinedFileDownload",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableWdavAntiTampering",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableWdavAuditMode",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnableWdavPassiveModeRemediation",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "HidePotentialDuplications",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsolateIncidentsWithDifferentDeviceGroups",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsolationExclusionOptIn",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "LicenseEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "LowFidelityEnrichmentEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "M365SecureScoreIntegrationEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "MagellanOptOut",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "MobileDeactivationPeriodInDays",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ShowUserAadProfile",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "SkypeIntegrationEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "UseSimplifiedConnectivity",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "UseSimplifiedConnectivityViaApi",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "WebCategoriesEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "EnabledTagsForScanJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsAllDevicesEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "AutoRemediationLevel",
+                    "type": "long"
+                  },
+                  {
+                    "name": "Description",
+                    "type": "string"
+                  },
+                  {
+                    "name": "GroupRulesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsUnassignedMachineGroup",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "LastUpdated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "MachineCount",
+                    "type": "long"
+                  },
+                  {
+                    "name": "MachineGroupId",
+                    "type": "long"
+                  },
+                  {
+                    "name": "name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Priority",
+                    "type": "long"
+                  },
+                  {
+                    "name": "aadDeviceId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "agentVersion",
+                    "type": "string"
+                  },
+                  {
+                    "name": "computerDnsName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "deviceValue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "exclusionReason",
+                    "type": "string"
+                  },
+                  {
+                    "name": "exposureLevel",
+                    "type": "string"
+                  },
+                  {
+                    "name": "firstSeen",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "healthStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ipAddressesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isAadJoined",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsExcluded",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isPotentialDuplication",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "lastExternalIpAddress",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastIpAddress",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastSeen",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "machineTagsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ManagedBy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ManagedByStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "mergedIntoMachineId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "OnboardingStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "osArchitecture",
+                    "type": "string"
+                  },
+                  {
+                    "name": "OsBuild",
+                    "type": "long"
+                  },
+                  {
+                    "name": "osPlatform",
+                    "type": "string"
+                  },
+                  {
+                    "name": "osProcessor",
+                    "type": "string"
+                  },
+                  {
+                    "name": "rbacGroupId",
+                    "type": "long"
+                  },
+                  {
+                    "name": "rbacGroupName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "riskScore",
+                    "type": "string"
+                  },
+                  {
+                    "name": "version",
+                    "type": "string"
+                  },
+                  {
+                    "name": "vmMetadata",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActionTime",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActionTimeIsoString",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ActionType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AlertIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CyberActionTypeJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "EntitiesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "HiddenDetailsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Icon",
+                    "type": "string"
+                  },
+                  {
+                    "name": "InitiatingProcessJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "InitiatingProcessParentJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "InitiatingUserJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsBoldEvent",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsCyberData",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MachineJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MergedItemsReportIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MergedItemsReportIdsToTimesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MitreInfoJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ProcessJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RelatedObservationName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ReportId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SourceProvider",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tagsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "TypedDetailsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "UserJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsCorelightIntegrationEnabled",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsLog4jScanningEnabled",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsProactiveDiscoveryEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "DeviceCategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DeviceType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DeviceTypeCount",
+                    "type": "long"
+                  },
+                  {
+                    "name": "HighValueAssetTotal",
+                    "type": "long"
+                  },
+                  {
+                    "name": "ContainsUnauthorizedDevice",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DeviceId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "InterceptingDevicesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsSeenByMdi",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ExclusionState",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Justification",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Notes",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RequestedByDisplayName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RequestedByOid",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RequestedOn",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SenseMachineId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsOptIn",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "SliceId",
+                    "type": "long"
+                  },
+                  {
+                    "name": "tag",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tagType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdiotPlcKeyState",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdiotPlcModeLastUpdate",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdiotPlcRunState",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdiotProtocolsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdiotPurdueLevel",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdiotSiteName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AdiotSiteTag",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AssetInsightsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AssetValue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CloudResourceDetailsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ComputerNetBIOSName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CriticalityLevel",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DataSourcesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DeviceRolesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DeviceSubtype",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DiscoverySourcesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Domain",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DynamicAssetValue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DynamicRulesTagsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ExploitLevel",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ExposureScore",
+                    "type": "string"
+                  },
+                  {
+                    "name": "FirmwareVersion",
+                    "type": "string"
+                  },
+                  {
+                    "name": "HvaMode",
+                    "type": "string"
+                  },
+                  {
+                    "name": "InternalMachineId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "InternetFacingReason",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsAdiotAuthorized",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsAdiotLocalSubnet",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsAdiotPlcSecured",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsAdiotProgramming",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsAdiotScanner",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsInternetFacing",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsLowFidelity",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsManagedByMdatp",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsolationState",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsTransient",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsUsiServer",
+                    "type": "string"
+                  },
+                  {
+                    "name": "LastIpV6Address",
+                    "type": "string"
+                  },
+                  {
+                    "name": "LastMacAddress",
+                    "type": "string"
+                  },
+                  {
+                    "name": "LowFidelitySourcesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MachineGroup",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MachineGuid",
+                    "type": "string"
+                  },
+                  {
+                    "name": "machineId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MachineTags",
+                    "type": "string"
+                  },
+                  {
+                    "name": "OsPlatformFriendlyName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "OsVersionFriendlyName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ReleaseVersion",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SecurityScore",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SenseGroupId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SensorNamesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SensorSite",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SensorSiteDisplayName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SensorType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SensorZone",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SystemManufacturer",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SystemProductName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "VulnerabilityAgeLevel",
+                    "type": "string"
+                  },
+                  {
+                    "name": "VulnerabilitySeverityLevel",
+                    "type": "string"
+                  },
+                  {
+                    "name": "WcdMachineId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "frequency",
+                    "type": "string"
+                  },
+                  {
+                    "name": "query",
+                    "type": "string"
+                  }
+                ],
+                "name": "Defender_EndpointManagement_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-endpointmanagement-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_EndpointManagement_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-EndpointManagement-dest"
+                  ],
+                  "outputStream": "Custom-Defender_EndpointManagement_CL",
+                  "streams": [
+                    "Custom-Defender_EndpointManagement_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-EndpointManagement-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_EndpointManagement_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AatpIntegrationEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "AatpWorkspaceExists",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "AllowWdavNetworkBlock",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "AutoResolveInvestigatedAlerts",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "BilbaoApproved",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "BilbaoEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "BlockListEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "DartDataCollection",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableAggregatedReporting",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableAipIntegration",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableCustomAsrAdvancedProcessTermination",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableEndpointDlp",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableExcludedDevices",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableHVAOnboardingOptions",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableMcasIntegration",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableQuarantinedFileDownload",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableWdavAntiTampering",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableWdavAuditMode",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnableWdavPassiveModeRemediation",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "HidePotentialDuplications",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsolateIncidentsWithDifferentDeviceGroups",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsolationExclusionOptIn",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "LicenseEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "LowFidelityEnrichmentEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "M365SecureScoreIntegrationEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "MagellanOptOut",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "MobileDeactivationPeriodInDays",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ShowUserAadProfile",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "SkypeIntegrationEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "UseSimplifiedConnectivity",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "UseSimplifiedConnectivityViaApi",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "WebCategoriesEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "isEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "EnabledTagsForScanJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsAllDevicesEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "AutoRemediationLevel",
+                      "type": "long"
+                    },
+                    {
+                      "name": "Description",
+                      "type": "string"
+                    },
+                    {
+                      "name": "GroupRulesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsUnassignedMachineGroup",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "LastUpdated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "MachineCount",
+                      "type": "long"
+                    },
+                    {
+                      "name": "MachineGroupId",
+                      "type": "long"
+                    },
+                    {
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Priority",
+                      "type": "long"
+                    },
+                    {
+                      "name": "aadDeviceId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "agentVersion",
+                      "type": "string"
+                    },
+                    {
+                      "name": "computerDnsName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "deviceValue",
+                      "type": "string"
+                    },
+                    {
+                      "name": "exclusionReason",
+                      "type": "string"
+                    },
+                    {
+                      "name": "exposureLevel",
+                      "type": "string"
+                    },
+                    {
+                      "name": "firstSeen",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "healthStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ipAddressesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isAadJoined",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsExcluded",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "isPotentialDuplication",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "lastExternalIpAddress",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastIpAddress",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastSeen",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "machineTagsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ManagedBy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ManagedByStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "mergedIntoMachineId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "OnboardingStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "osArchitecture",
+                      "type": "string"
+                    },
+                    {
+                      "name": "OsBuild",
+                      "type": "long"
+                    },
+                    {
+                      "name": "osPlatform",
+                      "type": "string"
+                    },
+                    {
+                      "name": "osProcessor",
+                      "type": "string"
+                    },
+                    {
+                      "name": "rbacGroupId",
+                      "type": "long"
+                    },
+                    {
+                      "name": "rbacGroupName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "riskScore",
+                      "type": "string"
+                    },
+                    {
+                      "name": "version",
+                      "type": "string"
+                    },
+                    {
+                      "name": "vmMetadata",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActionTime",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActionTimeIsoString",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ActionType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AlertIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CyberActionTypeJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "EntitiesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "HiddenDetailsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Icon",
+                      "type": "string"
+                    },
+                    {
+                      "name": "InitiatingProcessJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "InitiatingProcessParentJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "InitiatingUserJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsBoldEvent",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsCyberData",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MachineJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MergedItemsReportIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MergedItemsReportIdsToTimesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MitreInfoJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ProcessJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RelatedObservationName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ReportId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SourceProvider",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tagsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "TypedDetailsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "UserJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsCorelightIntegrationEnabled",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsLog4jScanningEnabled",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsProactiveDiscoveryEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "DeviceCategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DeviceType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DeviceTypeCount",
+                      "type": "long"
+                    },
+                    {
+                      "name": "HighValueAssetTotal",
+                      "type": "long"
+                    },
+                    {
+                      "name": "ContainsUnauthorizedDevice",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DeviceId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "InterceptingDevicesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsSeenByMdi",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ExclusionState",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Justification",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Notes",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RequestedByDisplayName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RequestedByOid",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RequestedOn",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SenseMachineId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsOptIn",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "SliceId",
+                      "type": "long"
+                    },
+                    {
+                      "name": "tag",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tagType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdiotPlcKeyState",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdiotPlcModeLastUpdate",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdiotPlcRunState",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdiotProtocolsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdiotPurdueLevel",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdiotSiteName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AdiotSiteTag",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AssetInsightsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AssetValue",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CloudResourceDetailsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ComputerNetBIOSName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CriticalityLevel",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DataSourcesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DeviceRolesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DeviceSubtype",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DiscoverySourcesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Domain",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DynamicAssetValue",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DynamicRulesTagsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ExploitLevel",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ExposureScore",
+                      "type": "string"
+                    },
+                    {
+                      "name": "FirmwareVersion",
+                      "type": "string"
+                    },
+                    {
+                      "name": "HvaMode",
+                      "type": "string"
+                    },
+                    {
+                      "name": "InternalMachineId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "InternetFacingReason",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsAdiotAuthorized",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsAdiotLocalSubnet",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsAdiotPlcSecured",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsAdiotProgramming",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsAdiotScanner",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsInternetFacing",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsLowFidelity",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsManagedByMdatp",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsolationState",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsTransient",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsUsiServer",
+                      "type": "string"
+                    },
+                    {
+                      "name": "LastIpV6Address",
+                      "type": "string"
+                    },
+                    {
+                      "name": "LastMacAddress",
+                      "type": "string"
+                    },
+                    {
+                      "name": "LowFidelitySourcesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MachineGroup",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MachineGuid",
+                      "type": "string"
+                    },
+                    {
+                      "name": "machineId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MachineTags",
+                      "type": "string"
+                    },
+                    {
+                      "name": "OsPlatformFriendlyName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "OsVersionFriendlyName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ReleaseVersion",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SecurityScore",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SenseGroupId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SensorNamesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SensorSite",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SensorSiteDisplayName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SensorType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SensorZone",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SystemManufacturer",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SystemProductName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "VulnerabilityAgeLevel",
+                      "type": "string"
+                    },
+                    {
+                      "name": "VulnerabilitySeverityLevel",
+                      "type": "string"
+                    },
+                    {
+                      "name": "WcdMachineId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "frequency",
+                      "type": "string"
+                    },
+                    {
+                      "name": "query",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

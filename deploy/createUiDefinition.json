@@ -1,0 +1,149 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "config": {
+      "isWizard": true,
+      "basics": {
+        "description": "**XdrLogRaider** — open-source Microsoft Sentinel data connector for Microsoft Defender XDR portal-internal `/apiproxy/*` audit and reporting endpoints. Deploys foundation Azure resources in your selected resource group and content (custom Log Analytics table + Data Collection Rule + Sentinel V3 content package) into your existing Sentinel-enabled workspace."
+      }
+    },
+    "basics": [],
+    "steps": [
+      {
+        "name": "deploymentConfig",
+        "label": "Deployment configuration",
+        "subLabel": {
+          "preValidation": "Configure resource group and region",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Deployment configuration",
+        "elements": [
+          {
+            "name": "infoBanner",
+            "type": "Microsoft.Common.InfoBox",
+            "options": {
+              "icon": "Info",
+              "text": "XdrLogRaider runs as a self-hosted Azure Function App in your subscription. It authenticates to the Defender XDR portal using a dedicated service account with TOTP or Passkey MFA, ingests events into custom Log Analytics tables via Data Collection Rules, and registers a Sentinel V3 content package on your existing workspace. Additional Categories are added incrementally without operator action."
+            }
+          }
+        ]
+      },
+      {
+        "name": "serviceAccountConfig",
+        "label": "Service account",
+        "bladeTitle": "Service account configuration",
+        "elements": [
+          {
+            "name": "serviceAccountUpn",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Service account UPN",
+            "placeholder": "xdrlogreader@contoso.com",
+            "toolTip": "UPN of the Entra service account that will authenticate to Defender XDR portal. Must have appropriate read permissions across Defender XDR.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+              "validationMessage": "Must be a valid UPN (email format)."
+            }
+          },
+          {
+            "name": "servicePassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Service account password",
+              "confirmPassword": "Confirm password"
+            },
+            "toolTip": "Password for the service account. Stored in Key Vault (encrypted at rest).",
+            "constraints": {
+              "required": true,
+              "regex": ".{8,}",
+              "validationMessage": "Password must be at least 8 characters."
+            },
+            "options": {
+              "hideConfirmation": false
+            }
+          }
+        ]
+      },
+      {
+        "name": "mfaConfig",
+        "label": "MFA method",
+        "bladeTitle": "Multi-factor authentication method",
+        "elements": [
+          {
+            "name": "authMethod",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "MFA method",
+            "defaultValue": "TOTP (Time-based one-time password)",
+            "toolTip": "Choose how the service account will satisfy MFA. TOTP uses a base32-encoded seed (most compatible). Passkey uses WebAuthn (more secure · requires the tenant to allow passkeys).",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "TOTP (Time-based one-time password)",
+                  "value": "TOTP"
+                },
+                {
+                  "label": "Passkey (WebAuthn)",
+                  "value": "Passkey"
+                }
+              ],
+              "required": true
+            }
+          },
+          {
+            "name": "totpSecret",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "TOTP secret (base32)",
+              "confirmPassword": "Confirm TOTP secret"
+            },
+            "toolTip": "Base32-encoded TOTP secret (e.g., 'JZ2GD6SHGY5RYRCN'). Only required when MFA method is TOTP. Get this from your authenticator app setup screen.",
+            "constraints": {
+              "regex": "^[A-Za-z2-7=]{16,128}$",
+              "validationMessage": "Must be a valid base32 string (16-128 chars · A-Z/a-z and 2-7)."
+            },
+            "visible": "[equals(steps('mfaConfig').authMethod, 'TOTP')]"
+          },
+          {
+            "name": "passkeyPem",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Passkey PEM (private key)",
+              "confirmPassword": "Confirm passkey PEM"
+            },
+            "toolTip": "WebAuthn private key in PEM format (begins with '-----BEGIN PRIVATE KEY-----'). Only required when MFA method is Passkey. Generate this when registering the passkey for the service account.",
+            "constraints": {
+              "regex": "^-----BEGIN [A-Z ]+-----[\\s\\S]{1,16384}-----END [A-Z ]+-----[\\s]{0,16}$",
+              "validationMessage": "Must be a valid PEM block (BEGIN/END headers + base64 body)."
+            },
+            "visible": "[equals(steps('mfaConfig').authMethod, 'Passkey')]"
+          }
+        ]
+      },
+      {
+        "name": "sentinelConfig",
+        "label": "Sentinel workspace",
+        "bladeTitle": "Sentinel workspace selection",
+        "elements": [
+          {
+            "name": "workspaceSelector",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Log Analytics workspace (Sentinel-enabled)",
+            "resourceType": "Microsoft.OperationalInsights/workspaces",
+            "toolTip": "Select the Log Analytics workspace where Defender_<Category>_CL custom tables and Sentinel connector content will be deployed."
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "location": "[location()]",
+      "workspaceResourceId": "[steps('sentinelConfig').workspaceSelector.id]",
+      "serviceAccountUpn": "[steps('serviceAccountConfig').serviceAccountUpn]",
+      "servicePassword": "[steps('serviceAccountConfig').servicePassword]",
+      "authMethod": "[steps('mfaConfig').authMethod]",
+      "totpSecret": "[if(equals(steps('mfaConfig').authMethod, 'TOTP'), steps('mfaConfig').totpSecret, '')]",
+      "passkeyPem": "[if(equals(steps('mfaConfig').authMethod, 'Passkey'), steps('mfaConfig').passkeyPem, '')]"
+    }
+  }
+}

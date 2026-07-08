@@ -1,0 +1,295 @@
+{
+  "operationCount": 32,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/mtp/suppressionRulesService/RulesCount",
+      "OperationId": "Alerts.GetSuppressionRulesCount",
+      "Summary": "Get alert suppression rules count",
+      "Tags": [
+        "Alerts"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/autoIr/incidents/{IncidentId}",
+      "OperationId": "Incidents.GetAutoIrIncident",
+      "Summary": "Get AutoIR incident data",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/phoenixValueReflectionApi/disrupt",
+      "OperationId": "Incidents.GetDisruptionSummary",
+      "Summary": "Get disruption summary",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/incidents/{IncidentId}/riskfactors",
+      "OperationId": "Incidents.GetRiskFactors",
+      "Summary": "Get incident risk factors",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/phoenixValueReflectionApi/summary/total",
+      "OperationId": "Incidents.GetSummaryTotals",
+      "Summary": "Get incident summary totals",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/incidentQueue/incidents/count",
+      "OperationId": "Incidents.GetCount",
+      "Summary": "Get incidents count",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/phoenixSocomatApi/activity/list/{IncidentId}",
+      "OperationId": "Incidents.GetIncidentActivityFeed",
+      "Summary": "Get incident activity feed",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/useServiceBaseUrl/ine/evidenceapiservice/evidence/incident/{IncidentId}/count",
+      "OperationId": "Incidents.CountIncidentEvidence",
+      "Summary": "Count incident evidence by type",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/GAIAMedeinaApi/skills/guidedresponse/{IncidentId}/similarIncidents",
+      "OperationId": "Incidents.GetGuidedResponseSimilarIncidents",
+      "Summary": "Get guided-response similar incidents",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/incidentQueue/incidents/alerts",
+      "OperationId": "Incidents.GetAssociatedAlerts",
+      "Summary": "Get incident associated alerts",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/incidentQueue/incidents/alerts",
+      "OperationId": "Incidents.QueryIncidentAlerts",
+      "Summary": "Query incidents with alert context",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/auditHistory/AuditHistory",
+      "OperationId": "Incidents.GetAuditHistory",
+      "Summary": "Get incident audit history",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/CaseManagement/be/tasks",
+      "OperationId": "Incidents.ListCaseTasks",
+      "Summary": "List case tasks",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/autoIr/incidents/{IncidentId}/filters",
+      "OperationId": "Incidents.GetAutoIrIncidentFilters",
+      "Summary": "Get AutoIR incident filters",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/incidentQueue/incidents/merge",
+      "OperationId": "Incidents.Merge",
+      "Summary": "Merge incidents",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/incidentDevices/incidents/{IncidentId}/devices",
+      "OperationId": "Incidents.ListIncidentDevices",
+      "Summary": "List incident devices",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary",
+      "OperationId": "Incidents.GetActiveIncidentsSummary",
+      "Summary": "Get active incidents summary",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/incidents/{IncidentId}/AggregatedCustomDetails",
+      "OperationId": "Incidents.GetAggregatedCustomDetails",
+      "Summary": "Get aggregated incident custom details",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/CaseManagement/be/caseRelations",
+      "OperationId": "Incidents.ListCaseRelations",
+      "Summary": "List case relations",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/unifiedActions/unifiedactions/Activities/{IncidentId}",
+      "OperationId": "Incidents.GetIncidentUnifiedActionActivities",
+      "Summary": "Get incident unified action activities",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/useServiceBaseUrl/ine/incidentgraphservice/incidentGraph/{IncidentId}",
+      "OperationId": "Incidents.GetIncidentGraph",
+      "Summary": "Get incident graph",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/alertsApiService/alerts/count",
+      "OperationId": "Alerts.GetCount",
+      "Summary": "Get alerts count",
+      "Tags": [
+        "Alerts"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/CaseManagement/be/cases",
+      "OperationId": "Incidents.ListCases",
+      "Summary": "List case management cases",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/alertsApiService/alerts",
+      "OperationId": "Alerts.List",
+      "Summary": "List alerts",
+      "Tags": [
+        "Alerts"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/incidentQueue/incidents/{IncidentId}",
+      "OperationId": "Incidents.Get",
+      "Summary": "Get incident",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/incidents/{IncidentId}/outbreaks",
+      "OperationId": "Incidents.GetOutbreaks",
+      "Summary": "Get incident outbreaks",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/incidents/{IncidentId}/AssociatedAlerts",
+      "OperationId": "Incidents.ListAssociatedAlerts",
+      "Summary": "List incident associated alerts",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/incidentQueue/incidents/update",
+      "OperationId": "Incidents.MoveAlert",
+      "Summary": "Move alert to incident",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/useServiceBaseUrl/ine/evidenceapiservice/evidence/incident/{IncidentId}",
+      "OperationId": "Incidents.ListIncidentEvidence",
+      "Summary": "List incident evidence",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/CaseManagement/be/templates/{TemplateId}",
+      "OperationId": "Incidents.GetCaseTemplate",
+      "Summary": "Get case template",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/incidents/dsiMessageBarIndicators",
+      "OperationId": "Incidents.GetMessageBarIndicators",
+      "Summary": "Get incident message bar indicators",
+      "Tags": [
+        "Incidents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/incidentUsers/incidents/{IncidentId}/users",
+      "OperationId": "Incidents.ListIncidentUsers",
+      "Summary": "List incident users",
+      "Tags": [
+        "Incidents"
+      ]
+    }
+  ],
+  "category": "alerts_incidents",
+  "portal": "nodoc-defender-xdr"
+}

@@ -1,0 +1,61 @@
+{
+  "operationCount": 6,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/api/userAttribute/GetAvailableOutputClaimsList",
+      "OperationId": "UserAttributes.ListAvailableOutputClaims",
+      "Summary": "List available output claims for custom user attributes",
+      "Tags": [
+        "User Flows"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/tenantResource/GetARpDataWithTenantId",
+      "OperationId": "TenantResource.GetARpDataWithTenantId",
+      "Summary": "Get Azure resource provider data for tenant",
+      "Tags": [
+        "Resources"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/tenants/GetAndInitializeTenantPolicy",
+      "OperationId": "Tenants.GetAndInitializeTenantPolicy",
+      "Summary": "Get and initialize tenant policy",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/adminuserjourneys",
+      "OperationId": "AdminUserJourneys.List",
+      "Summary": "List admin user journeys",
+      "Tags": [
+        "User Journeys"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/adminflows",
+      "OperationId": "AdminFlows.List",
+      "Summary": "List admin user flows",
+      "Tags": [
+        "User Flows"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/tenants/GetTenantInfo",
+      "OperationId": "Tenants.GetTenantInfo",
+      "Summary": "Get tenant info and feature flags",
+      "Tags": [
+        "Tenant"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-entra-b2c"
+}

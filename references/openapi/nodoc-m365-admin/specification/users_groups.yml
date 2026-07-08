@@ -1,0 +1,1049 @@
+paths:
+  /admin/api/users/getuserroles:
+    post:
+      summary: Get user roles
+      description: >-
+        Retrieve the admin roles assigned to a user. Accepts a principal ID and
+        security group memberships to resolve role assignments.
+      operationId: UsersGroups.GetUserRoles
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PrincipalId:
+                  type: string
+                  description: The principal (user) ID to look up roles for.
+                UserSecurityGroups:
+                  type: array
+                  description: List of security group IDs the user belongs to.
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User role assignments. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/Users/ListUsers:
+    post:
+      summary: List users
+      description: >-
+        Retrieve a paginated list of users in the tenant with sorting and filtering options.
+      operationId: UsersGroups.ListUsers
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ListAction:
+                  type: integer
+                  description: The list action type. Use -1 for initial load.
+                  default: -1
+                SortDirection:
+                  type: integer
+                  description: Sort direction (0 = ascending, 1 = descending).
+                  default: 0
+                SortPropertyName:
+                  type: string
+                  description: Property name to sort by.
+                  default: DisplayName
+                ListContext:
+                  type: string
+                  nullable: true
+                  description: Continuation context for pagination.
+                SearchText:
+                  type: string
+                  description: Search text to filter users.
+                  default: ''
+                SelectedView:
+                  type: string
+                  nullable: true
+                  description: Selected view filter.
+                SelectedViewType:
+                  type: string
+                  nullable: true
+                  description: Selected view type filter.
+                ServerContext:
+                  type: string
+                  nullable: true
+                  description: Server-side continuation context.
+      x-nodoc-operation-context:
+        surface: Users > Active users
+        workflows:
+          - Open Active users and page or filter the tenant user inventory.
+        headerProfile: m365-admin-homepage
+        requestShapes:
+          - name: paginated-user-list
+            contentType: application/json
+            bodyKind: query-object
+            requiredParameters:
+              - ListAction
+              - SortDirection
+              - SortPropertyName
+            notes: The portal uses body parameters instead of query parameters for paging and filtering.
+        variants:
+          - location: body
+            selector: SearchText
+            notes: SearchText is used for free-text filtering.
+          - location: body
+            selector: SelectedView
+            notes: SelectedView and SelectedViewType scope the list to saved portal views.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Paginated user list. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/contextualalerts:
+    post:
+      summary: Get contextual alerts
+      description: >-
+        Retrieve contextual alerts for the current admin user session.
+      operationId: UsersGroups.GetContextualAlerts
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Empty object. No properties required.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Contextual alerts. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/groups/GetGroups:
+    post:
+      summary: Get groups
+      description: >-
+        Retrieve a paginated list of groups in the tenant with sorting and filtering options.
+      operationId: UsersGroups.GetGroups
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PageToken:
+                  type: string
+                  nullable: true
+                  description: Pagination token for subsequent pages.
+                GroupTypes:
+                  type: string
+                  nullable: true
+                  description: Filter by group types.
+                SearchString:
+                  type: string
+                  description: Search string to filter groups.
+                  default: ''
+                SortDirection:
+                  type: integer
+                  description: Sort direction (0 = ascending, 1 = descending).
+                  default: 0
+                SortField:
+                  type: string
+                  description: Field name to sort by.
+                  default: GroupName
+      x-nodoc-operation-context:
+        surface: Users > Groups
+        workflows:
+          - Open Groups and page or filter the tenant group inventory.
+        headerProfile: m365-admin-homepage
+        requestShapes:
+          - name: paginated-group-list
+            contentType: application/json
+            bodyKind: query-object
+            requiredParameters:
+              - SearchString
+              - SortDirection
+              - SortField
+            notes: The portal uses body parameters instead of query parameters for paging and filtering.
+        variants:
+          - location: body
+            selector: GroupTypes
+            notes: GroupTypes narrows the result set to a specific group family.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Paginated group list. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/currentUser:
+    get:
+      summary: Get current user info
+      description: >-
+        Retrieve information about the currently authenticated admin user.
+      operationId: UsersGroups.GetCurrentUser
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CurrentUserResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/svinfo:
+    get:
+      summary: Get server version info
+      description: >-
+        Retrieve server version information for the admin portal.
+      operationId: UsersGroups.GetServerVersionInfo
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ServerViewInfoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/getcommondvpreferences:
+    get:
+      summary: Get common DV preferences
+      description: >-
+        Retrieve common data visualization preferences for the current user.
+      operationId: UsersGroups.GetCommonDVPreferences
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Common dashboard view preferences and teaching-bubble state for the current admin.
+              example:
+                CommonDashboardViewPreferences:
+                  ViewToShow: Default
+                  ShowDashboardSwitcherTeachingBubble: true
+                  EligibleDashboards:
+                    - SimplifiedView
+                    - Health
+                    - Default
+                  DismissProductFeedbackTopActions: null
+                  DismissDashboardHeaderTeachingBubble: null
+                  DismissDynamicCommandBarTeachingBubble: false
+                  ShouldShowDashboardHeaderTeachingBubble: true
+                CurrentViewInfo: null
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/products:
+    get:
+      summary: Get user products
+      description: >-
+        Retrieve the products and licenses associated with the current user.
+      operationId: UsersGroups.GetUserProducts
+      tags: [UsersGroups]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User license inventory with SKU availability and per-plan selection state.
+              example:
+                UserId: 00000000-0000-0000-0000-000000000000
+                Products:
+                  - ProductSkuId: f30db892-07e9-47e9-837c-80727f46fd3d
+                    AccountName: contoso
+                    SkuPartNumber: FLOW_FREE
+                    IsSelected: false
+                    IsPreviouslySelected: false
+                    IsDisabled: false
+                    IsLicenseDisabledState: false
+                    IsAssignable: true
+                    ProductDisplayName: Microsoft Power Automate Free
+                    TotalUnits: 10000
+                    AvailableUnits: 9997
+                    WarningUnits: 0
+                    HasUnlimitedSeats: false
+                    ServicePlans:
+                      - ServicePlan:
+                          ServiceName: DYN365_CDS_VIRAL
+                          ServicePlanId: 17ab22cd-a0b3-4536-910a-cb6eb12696c0
+                          ServiceType: CRM
+                          TargetClass: 1
+                          AppliesTo: null
+                        ServicePlanDisplayName: Common Data Service
+                        IsSelected: true
+                        IsDisabled: false
+                        IsServicePlanTenantLevel: false
+                        HideServicePlan: false
+                        IsGroupBased: false
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/dashboardlayout:
+    get:
+      summary: Get dashboard layout
+      description: >-
+        Retrieve the dashboard layout preferences for the current user.
+      operationId: UsersGroups.GetDashboardLayout
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Dashboard layout preferences stored for the current admin.
+              example: {}
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/getuseraccesstoken:
+    get:
+      summary: Get user access token
+      description: >-
+        Retrieve an access token for the current authenticated user.
+      operationId: UsersGroups.GetUserAccessToken
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User access token. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/teamssettingsinfo:
+    get:
+      summary: Get Teams settings info
+      description: >-
+        Retrieve Teams settings information for the current user.
+      operationId: UsersGroups.GetTeamsSettingsInfo
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Teams settings information. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/surveysInfo:
+    get:
+      summary: Get survey information
+      description: >-
+        Retrieve survey information for the current admin user.
+      operationId: UsersGroups.GetSurveysInfo
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Survey information. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/savecommondvpreferences:
+    post:
+      summary: Save common DV preferences
+      description: >-
+        Save common data visualization preferences for the current user.
+      operationId: UsersGroups.SaveCommonDVPreferences
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Common data visualization preferences to save. Exact schema pending.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/tokenWithExpiry:
+    post:
+      summary: Get token with expiry
+      description: >-
+        Retrieve a brokered token with expiry information for the current user.
+      operationId: UsersGroups.GetTokenWithExpiry
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: string
+              description: >-
+                Raw form payload posted by the portal, for example
+                `=https://management.azure.com/`.
+            example: =https://management.azure.com/
+      x-nodoc-operation-context:
+        surface: Users > Active users
+        workflows:
+          - Open an experience that needs a downstream resource token from the admin portal.
+        headerProfile: m365-admin-homepage
+        authProfile: m365-admin-brokered-arm-token
+        requestShapes:
+          - name: downstream-audience-token
+            contentType: application/x-www-form-urlencoded; charset=UTF-8
+            bodyKind: raw-form-urlencoded
+            notes: The portal posts the requested audience as an unnamed form value.
+        variants:
+          - location: body
+            selector: audience
+            knownValues:
+              - https://management.azure.com/
+            notes: The returned token shape depends on the requested audience.
+        availability:
+          level: request-dependent
+          notes:
+            - Acceptance and returned token content are sensitive to the downstream audience value.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals implementation and known issues notes.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified in the signed-in homepage shell with body `=https://management.azure.com/` and the `/homepage` admin context.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - AccessToken
+                  - Expiry
+                properties:
+                  AccessToken:
+                    type: string
+                    description: Raw JWT access token for the requested downstream audience.
+                  Expiry:
+                    type: string
+                    format: date-time
+                    description: UTC expiry timestamp returned by the portal token broker.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/groups/labels:
+    get:
+      summary: Get group labels
+      description: >-
+        Retrieve the available labels for groups in the tenant.
+      operationId: UsersGroups.GetGroupLabels
+      tags: [UsersGroups]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/GroupLabelsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/groups/permissions:
+    get:
+      summary: Get group permissions
+      description: >-
+        Retrieve the group permissions configuration for the tenant.
+      operationId: UsersGroups.GetGroupPermissions
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Group permissions. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/contact/Customization:
+    get:
+      summary: Get contact customization
+      description: >-
+        Retrieve contact list customization settings for the admin portal (Users > Contacts).
+      operationId: UsersGroups.GetContactCustomization
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/contact/GetContacts:
+    post:
+      summary: Get contacts
+      description: >-
+        Retrieve a list of contacts in the tenant (Users > Contacts).
+      operationId: UsersGroups.GetContacts
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/guestuserlist/Customization:
+    get:
+      summary: Get guest user list customization
+      description: >-
+        Retrieve guest user list customization settings for the admin portal (Users > Guest).
+      operationId: UsersGroups.GetGuestUserListCustomization
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/ListExternalGuestUsers:
+    post:
+      summary: List external guest users
+      description: >-
+        Retrieve a list of external guest users in the tenant (Users > Guest).
+      operationId: UsersGroups.ListExternalGuestUsers
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/UserList/Customization:
+    get:
+      summary: Get user list customization
+      description: >-
+        Retrieve active user list customization settings for the admin portal (Users > Active).
+      operationId: UsersGroups.GetUserListCustomization
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/administrativeunits:
+    get:
+      summary: Get administrative units
+      description: >-
+        Retrieve the list of administrative units for user management (Org Settings > Services).
+      operationId: UsersGroups.GetAdministrativeUnits
+      tags: [UsersGroups]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
+        - $ref: common.yml#/components/parameters/ODataOrderBy
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/deviceupdatechanneleligibility:
+    get:
+      summary: Get device update channel eligibility
+      description: >-
+        Retrieve device update channel eligibility information for users (Users > Active).
+      operationId: UsersGroups.GetDeviceUpdateChannelEligibility
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/getavailableroles:
+    get:
+      summary: Get available roles
+      description: >-
+        Retrieve the list of available admin roles that can be assigned to users (Users > Active).
+      operationId: UsersGroups.GetAvailableRoles
+      tags: [UsersGroups]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
+        - $ref: common.yml#/components/parameters/ODataOrderBy
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/rbac/roles:
+    get:
+      summary: List RBAC roles
+      description: >-
+        Retrieve the RBAC role definitions exposed by the admin center role-based
+        access control experience.
+      operationId: UsersGroups.ListRbacRoles
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: RBAC role definition payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/new/options:
+    get:
+      summary: Get new user options
+      description: >-
+        Retrieve options and configuration for creating new users or contacts (Users > Contacts).
+      operationId: UsersGroups.GetNewUserOptions
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/users/{userId}:
+    get:
+      summary: Get user by ID
+      description: >-
+        Retrieve detailed information for a specific user by their user ID (Reports > Usage).
+      operationId: UsersGroups.GetUserById
+      tags: [UsersGroups]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The unique identifier of the user.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/grouplist/Customization:
+    get:
+      summary: Get group list customization
+      description: >-
+        Retrieve group list customization settings for the admin portal (Groups > Active).
+      operationId: UsersGroups.GetGroupListCustomization
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/groups/GetGroupCount:
+    get:
+      summary: Get group count
+      description: >-
+        Retrieve the total count of groups in the tenant (Groups > Active).
+      operationId: UsersGroups.GetGroupCount
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/groups/getgroupsbyids:
+    post:
+      summary: Get groups by IDs
+      description: >-
+        Retrieve specific groups by their IDs, used for group lookups in settings like custom themes (Org Settings > Custom themes).
+      operationId: UsersGroups.GetGroupsByIds
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/groups/new/options:
+    get:
+      summary: Get new group options
+      description: >-
+        Retrieve options and configuration for creating new groups (Groups > Active).
+      operationId: UsersGroups.GetNewGroupOptions
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/localizedvideo/getbyfeature/{locale}:
+    post:
+      summary: Get localized video by feature
+      description: >-
+        Retrieve localized help videos by feature for the specified locale (Groups > Active).
+      operationId: UsersGroups.GetLocalizedVideoByFeature
+      tags: [UsersGroups]
+      parameters:
+        - name: locale
+          in: path
+          required: true
+          description: The locale code (e.g., en-US).
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

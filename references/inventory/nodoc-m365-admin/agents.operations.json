@@ -1,0 +1,70 @@
+{
+  "operationCount": 7,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/admin/api/agenttemplates/getpolicies",
+      "OperationId": "Agents.GetTemplatePolicies",
+      "Summary": "Get agent template policies",
+      "Tags": [
+        "Agents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/agentusers/metrics/agents/entitiesAtRisk",
+      "OperationId": "Agents.GetEntitiesAtRisk",
+      "Summary": "Get agent entities at risk",
+      "Tags": [
+        "Agents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/agenttemplates/getagenttemplates",
+      "OperationId": "Agents.GetAgentTemplates",
+      "Summary": "Get agent templates",
+      "Tags": [
+        "Agents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/agentssettings/mcpservers",
+      "OperationId": "Agents.GetMcpServers",
+      "Summary": "Get MCP servers",
+      "Tags": [
+        "Agents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/settings/company/frontier/access",
+      "OperationId": "Agents.GetFrontierAccess",
+      "Summary": "Get Frontier access policy",
+      "Tags": [
+        "Agents"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/settings/company/frontier/access",
+      "OperationId": "Agents.SetFrontierAccess",
+      "Summary": "Set Frontier access policy",
+      "Tags": [
+        "Agents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/agentusers/metrics/agents/risky",
+      "OperationId": "Agents.GetRiskyAgents",
+      "Summary": "Get risky agents",
+      "Tags": [
+        "Agents"
+      ]
+    }
+  ],
+  "category": "agents",
+  "portal": "nodoc-m365-admin"
+}

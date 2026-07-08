@@ -1,0 +1,35 @@
+# XdrLogRaider · consistent line endings across platforms
+# Generated 2026-06-01 · Phase 0.2 bootstrap
+
+# Default: auto-detect text/binary · LF in repo
+* text=auto eol=lf
+
+# PowerShell uses CRLF on Windows (FA Linux runtime tolerates both)
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+
+# Cross-platform text formats: LF
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+*.cfg text eol=lf
+*.toml text eol=lf
+
+# ARM JSON files: LF (consumed by az CLI on Linux runners)
+*Template.json text eol=lf
+*.template.json text eol=lf
+
+# Binary
+*.zip binary
+*.tar.gz binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.pem binary
+*.crt binary
+*.key binary

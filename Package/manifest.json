@@ -1,0 +1,26 @@
+{
+  "Name": "XdrLogRaider",
+  "Author": "Alex Kefallonitis - al.kefallonitis@gmail.com",
+  "Logo": "<img src=\"https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/Package/Logo/logo.svg\" width=\"75px\" height=\"75px\">",
+  "Description": "Open-source Microsoft Sentinel data connector for Microsoft Defender XDR portal-internal `/apiproxy/*` audit and reporting endpoints. Ingests Defender XDR events into per-Category custom Log Analytics tables (`Defender_<Category>_CL`) with one typed row per event, raw JSON preserved, and dynamic per-tenant capability discovery. Additional Categories activate via manifest entries without operator action.",
+  "Description2": "Runs entirely inside your Azure subscription as a self-hosted PowerShell Function App. Service account cookie + transparent SSO refresh (TOTP or Passkey MFA). Zero telemetry to the maintainer. Read-only by design — no action verbs ever invoked on the Defender portal.",
+  "Workbooks": [],
+  "WorkbooksBlade Description": "",
+  "AnalyticalRule Description": "",
+  "AnalyticalRules": [],
+  "Hunting Queries Description": "",
+  "HuntingQueries": [],
+  "Data Connectors": [
+    "Package/dataConnectors/XdrLogRaiderDataConnectorDefinition.json"
+  ],
+  "Data Connectors Description": "Defender XDR portal-internal `/apiproxy/*` connector · cookie-based authentication with transparent SSO refresh · per-Category typed schema",
+  "Parsers": [],
+  "Parser Description": "",
+  "Playbooks": [],
+  "PlaybooksBladeDescription": "",
+  "Metadata": "Package/SolutionMetadata.json",
+  "BasePath": "https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/",
+  "Version": "0.1.0",
+  "TemplateSpec": true,
+  "Is1PConnector": false
+}

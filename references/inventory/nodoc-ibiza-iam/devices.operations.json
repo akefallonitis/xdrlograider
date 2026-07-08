@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/SyncingDevices/{0}",
+      "OperationId": "SyncingDevices.Get",
+      "Summary": "Get syncing device details",
+      "Tags": [
+        "Device"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/Devices",
+      "OperationId": "Devices.Create",
+      "Summary": "Create device",
+      "Tags": [
+        "Device"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/SyncingDevices/{0}/Download",
+      "OperationId": "SyncingDevices.Download",
+      "Summary": "Download syncing device details",
+      "Tags": [
+        "Device"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/RoamingSettings",
+      "OperationId": "RoamingSettings.Get",
+      "Summary": "Get enterprise state roaming settings",
+      "Tags": [
+        "Enterprise State Roaming"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/RoamingSettings",
+      "OperationId": "RoamingSettings.Update",
+      "Summary": "Update enterprise state roaming settings",
+      "Tags": [
+        "Enterprise State Roaming"
+      ]
+    }
+  ],
+  "category": "devices",
+  "portal": "nodoc-ibiza-iam"
+}

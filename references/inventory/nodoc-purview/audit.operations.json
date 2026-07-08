@@ -1,0 +1,25 @@
+{
+  "operationCount": 2,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/adtsch/AuditLogSearch",
+      "OperationId": "listAuditLogSearches",
+      "Summary": "List audit log searches",
+      "Tags": [
+        "Audit"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/adtsch/AuditEnabled",
+      "OperationId": "checkAuditEnabled",
+      "Summary": "Check if audit is enabled for tenant",
+      "Tags": [
+        "Audit"
+      ]
+    }
+  ],
+  "category": "audit",
+  "portal": "nodoc-purview"
+}

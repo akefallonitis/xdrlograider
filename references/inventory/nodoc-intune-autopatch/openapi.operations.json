@@ -1,0 +1,484 @@
+{
+  "operationCount": 53,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/windowsFeatureUpdates/details",
+      "OperationId": "IntuneAutopatch.Reporting.ListFeatureUpdateDetails",
+      "Summary": "List feature update device details",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/Flighting",
+      "OperationId": "IntuneAutopatch.Platform.GetFlighting",
+      "Summary": "Get Autopatch feature flags",
+      "Tags": [
+        "Platform"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/access-control/odata/v1/ScopedForResources",
+      "OperationId": "IntuneAutopatch.Roles.GetScopedForResources",
+      "Summary": "Check whether a permission is resource-scoped",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/windowsFeatureUpdates/summary/releases",
+      "OperationId": "IntuneAutopatch.Reporting.ListFeatureUpdateReleases",
+      "Summary": "List feature update release summaries",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/windowsFeatureUpdates/detailsExport",
+      "OperationId": "IntuneAutopatch.Reporting.StartFeatureUpdateDetailsExport",
+      "Summary": "Start a feature update details export",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+      "OperationId": "IntuneAutopatch.Tenant.GetFeatureEnablementStatus",
+      "Summary": "Get starter feature enablement status",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/access-control/odata/v1/RoleDefinitions",
+      "OperationId": "IntuneAutopatch.Roles.ListRoleDefinitions",
+      "Summary": "List role definitions",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/deviceAccounting/wqu/details",
+      "OperationId": "IntuneAutopatch.Reporting.ListQualityUpdateDetails",
+      "Summary": "List quality update device details",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/support/v1/tenants/getSupportEntitlementInfo",
+      "OperationId": "IntuneAutopatch.Support.GetEntitlementInfo",
+      "Summary": "Get support entitlement info",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/windowsFeatureUpdates/distinct/planTypes/{plan}",
+      "OperationId": "IntuneAutopatch.Reporting.GetFeatureUpdateDistinctColumns",
+      "Summary": "Get feature update distinct filter values",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/unified-reporting/odata/1.0/AutopatchManagementStatusSummary",
+      "OperationId": "IntuneAutopatch.Reporting.GetManagementStatusSummaryOData",
+      "Summary": "Get Autopatch management status summary via URS",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/deviceAccounting/wqu/summary/deploymentgroups",
+      "OperationId": "IntuneAutopatch.Reporting.ListQualityUpdateDeploymentGroups",
+      "Summary": "List quality update deployment group summaries",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/support/odata/v1/supportRequests('{supportRequestId}')",
+      "OperationId": "IntuneAutopatch.Support.GetSupportRequest",
+      "Summary": "Get a support request",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/support/odata/v1/supportRequests('{supportRequestId}')",
+      "OperationId": "IntuneAutopatch.Support.UpdateSupportRequest",
+      "Summary": "Update a support request",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/unified-reporting/odata/1.0/WindowsFeatureUpdatesTrending",
+      "OperationId": "IntuneAutopatch.Reporting.ListFeatureUpdateTrendingOData",
+      "Summary": "List feature update trend points via URS",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/windowsFeatureUpdates/summary/phases",
+      "OperationId": "IntuneAutopatch.Reporting.ListFeatureUpdatePhases",
+      "Summary": "List feature update phase summaries",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/update-management/partnergraph/1.0/tenantSettings/mdmAppSettings",
+      "OperationId": "IntuneAutopatch.Tenant.GetMdmAppSettings",
+      "Summary": "Get MDM app tenant settings",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/unified-reporting/odata/1.0/WindowsFeatureUpdatesSummaryMetrics",
+      "OperationId": "IntuneAutopatch.Reporting.ListFeatureUpdateSummaryMetricsOData",
+      "Summary": "Get feature update summary metrics via URS",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/access-control/v1/UserToken",
+      "OperationId": "IntuneAutopatch.Roles.GetUserToken",
+      "Summary": "Get access-control user token context",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/support/odata/v1/supportRequests('{supportRequestId}')/UploadAttachment",
+      "OperationId": "IntuneAutopatch.Support.UploadSupportRequestAttachment",
+      "Summary": "Upload a support request attachment",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/device/v2/autopatchGroups",
+      "OperationId": "IntuneAutopatch.AutopatchGroups.List",
+      "Summary": "List Windows Autopatch groups",
+      "Tags": [
+        "AutopatchGroups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/support/v1/Messages/CustomerComms",
+      "OperationId": "IntuneAutopatch.Messages.ListCustomerComms",
+      "Summary": "List customer communications",
+      "Tags": [
+        "Messages"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/tenant-management/v2/AdminActionsV",
+      "OperationId": "IntuneAutopatch.Tenant.ListAdminActions",
+      "Summary": "Get tenant admin actions",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/tenant-management/v2/AdminActionsV",
+      "OperationId": "IntuneAutopatch.Tenant.SubmitAdminActions",
+      "Summary": "Submit tenant admin actions",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/unified-reporting/odata/1.0/WindowsFeatureUpdatesDistinctColumns",
+      "OperationId": "IntuneAutopatch.Reporting.ListFeatureUpdateDistinctColumnsOData",
+      "Summary": "Get feature update distinct columns via URS",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/access-control/odata/v1/EffectivePermissions",
+      "OperationId": "IntuneAutopatch.Roles.GetEffectivePermissions",
+      "Summary": "Get effective permissions",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/deviceAccounting/wqu/summary/businessgroups",
+      "OperationId": "IntuneAutopatch.Reporting.ListQualityUpdateBusinessGroups",
+      "Summary": "List quality update business group summaries",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/windowsFeatureUpdates/completion/releases",
+      "OperationId": "IntuneAutopatch.Reporting.ListFeatureUpdateCompletionReleases",
+      "Summary": "List feature update completion-by-release rows",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/support/odata/v1/supportRequests('{supportRequestId}')/activities",
+      "OperationId": "IntuneAutopatch.Support.ListSupportRequestActivities",
+      "Summary": "List support request activities",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/unified-reporting/odata/1.0/WindowsFeatureUpdatesSummaryRelease",
+      "OperationId": "IntuneAutopatch.Reporting.ListFeatureUpdateSummaryReleaseOData",
+      "Summary": "List feature update release summaries via URS",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/support/odata/v1/supportRequests('{supportRequestId}')/UpdateContact",
+      "OperationId": "IntuneAutopatch.Support.UpdateSupportRequestContact",
+      "Summary": "Update support request contact",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/access-control/odata/v1/ScopeTags",
+      "OperationId": "IntuneAutopatch.Roles.GetScopeTags",
+      "Summary": "Get scope tags for a permission",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/support/odata/v1/supportRequests('{supportRequestId}')/addNote",
+      "OperationId": "IntuneAutopatch.Support.AddSupportRequestNote",
+      "Summary": "Add a note to a support request",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/windowsFeatureUpdates/trending",
+      "OperationId": "IntuneAutopatch.Reporting.ListFeatureUpdateTrending",
+      "Summary": "List feature update trend points",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/deviceAccounting/wqu/trending",
+      "OperationId": "IntuneAutopatch.Reporting.ListQualityUpdateTrending",
+      "Summary": "List quality update trend points",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/unified-reporting/odata/1.0/AutopatchGroupMembershipRegistered",
+      "OperationId": "IntuneAutopatch.AutopatchGroups.ListMembershipRegistered",
+      "Summary": "List registered Autopatch group memberships",
+      "Tags": [
+        "AutopatchGroups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/access-control/odata/v1/ResourceOperations",
+      "OperationId": "IntuneAutopatch.Roles.ListResourceOperations",
+      "Summary": "List resource operations",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/deviceAccounting/wqu/detailsExport",
+      "OperationId": "IntuneAutopatch.Reporting.StartQualityUpdateDetailsExport",
+      "Summary": "Start a quality update details export",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/support/odata/v1/supportRequests('{supportRequestId}')/Reactivate",
+      "OperationId": "IntuneAutopatch.Support.ReactivateSupportRequest",
+      "Summary": "Reactivate a support request",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1.0/tenant/resolve",
+      "OperationId": "IntuneAutopatch.Tenant.Resolve",
+      "Summary": "Resolve tenant enrollment state",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/tenant-management/v2/AdminActionsV/actionStatus",
+      "OperationId": "IntuneAutopatch.Tenant.GetAdminActionStatus",
+      "Summary": "Get tenant admin action status",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/support/odata/v1/supportRequests",
+      "OperationId": "IntuneAutopatch.Support.ListSupportRequests",
+      "Summary": "List support requests",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/support/odata/v1/supportRequests",
+      "OperationId": "IntuneAutopatch.Support.CreateSupportRequest",
+      "Summary": "Create a support request",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/support/v1.0/Tenants/GetTenantManagedService/{plan}",
+      "OperationId": "IntuneAutopatch.Support.GetTenantManagedService",
+      "Summary": "Get tenant managed service state",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/deviceAccounting/wqu/summaryMetrics",
+      "OperationId": "IntuneAutopatch.Reporting.GetQualityUpdateSummaryMetrics",
+      "Summary": "Get quality update summary metrics",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/access-control/odata/v1/RoleAssignments",
+      "OperationId": "IntuneAutopatch.Roles.ListRoleAssignments",
+      "Summary": "List role assignments",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/support/v1/RequestTypeHierarchy",
+      "OperationId": "IntuneAutopatch.Support.GetRequestTypeHierarchy",
+      "Summary": "Get support request type hierarchy",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/reporting/reports/v1/export/status/",
+      "OperationId": "IntuneAutopatch.Reporting.GetExportStatus",
+      "Summary": "Get report export job status",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/support/v1/Languages",
+      "OperationId": "IntuneAutopatch.Support.ListLanguages",
+      "Summary": "List support languages",
+      "Tags": [
+        "Support"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/deviceAccounting/wqu/distinct/selectedColumns",
+      "OperationId": "IntuneAutopatch.Reporting.GetQualityUpdateDistinctColumns",
+      "Summary": "Get quality update distinct filter values",
+      "Tags": [
+        "Reporting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/tenant-management/v1/TenantSetting",
+      "OperationId": "IntuneAutopatch.Tenant.GetSetting",
+      "Summary": "Get a tenant setting",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/tenant-management/v1/TenantSetting",
+      "OperationId": "IntuneAutopatch.Tenant.UpdateSetting",
+      "Summary": "Update a tenant setting",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/reporting/reports/v2/windowsFeatureUpdates/summaryMetrics",
+      "OperationId": "IntuneAutopatch.Reporting.GetFeatureUpdateSummaryMetrics",
+      "Summary": "Get feature update summary metrics",
+      "Tags": [
+        "Reporting"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-intune-autopatch"
+}

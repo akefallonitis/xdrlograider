@@ -1,0 +1,151 @@
+{
+  "operationCount": 16,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts",
+      "OperationId": null,
+      "Summary": "List PIM alerts for a resource",
+      "Tags": [
+        "Alerts"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/roleAssignments",
+      "OperationId": null,
+      "Summary": "List role assignments",
+      "Tags": [
+        "Role Assignments"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/activities",
+      "OperationId": null,
+      "Summary": "List PIM activities (audit log)",
+      "Tags": [
+        "Audit"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleDefinitions",
+      "OperationId": null,
+      "Summary": "List role definitions for a resource",
+      "Tags": [
+        "Role Definitions"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/v2/privilegedAccess/{provider}/roleAssignmentRequests/{requestId}/cancel",
+      "OperationId": null,
+      "Summary": "Cancel a submitted role assignment request",
+      "Tags": [
+        "Role Assignment Requests"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/permissions",
+      "OperationId": null,
+      "Summary": "Get current user's PIM permissions for a resource",
+      "Tags": [
+        "Permissions"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/activities/getExpiredAssignmentAudits(roleAssignmentLevel='{level}',resourceId='{resourceId}',subjectId='{subjectId}')",
+      "OperationId": null,
+      "Summary": "Get expired assignment audit records",
+      "Tags": [
+        "Audit"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts/{alertId}",
+      "OperationId": null,
+      "Summary": "Get a specific PIM alert",
+      "Tags": [
+        "Alerts"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings",
+      "OperationId": null,
+      "Summary": "List role settings for a resource",
+      "Tags": [
+        "Role Settings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/roleAssignmentRequests",
+      "OperationId": null,
+      "Summary": "List role assignment requests",
+      "Tags": [
+        "Role Assignment Requests"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/v2/privilegedAccess/{provider}/roleAssignmentRequests",
+      "OperationId": null,
+      "Summary": "Create a role assignment request",
+      "Tags": [
+        "Role Assignment Requests"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings/{roleSettingId}",
+      "OperationId": null,
+      "Summary": "Get settings for a specific role",
+      "Tags": [
+        "Role Settings"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings/{roleSettingId}",
+      "OperationId": null,
+      "Summary": "Update role settings",
+      "Tags": [
+        "Role Settings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources",
+      "OperationId": null,
+      "Summary": "List PIM-managed resources",
+      "Tags": [
+        "Resources"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleDefinitions/{roleDefinitionId}",
+      "OperationId": null,
+      "Summary": "Get a specific role definition",
+      "Tags": [
+        "Role Definitions"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts/{alertId}/alertIncidents",
+      "OperationId": null,
+      "Summary": "List incidents for a PIM alert",
+      "Tags": [
+        "Alerts"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-entra-pim"
+}

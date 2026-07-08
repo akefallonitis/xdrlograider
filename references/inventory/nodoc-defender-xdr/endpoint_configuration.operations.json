@@ -1,0 +1,196 @@
+{
+  "operationCount": 21,
+  "operations": [
+    {
+      "Method": "PUT",
+      "Path": "/mtp/customDataCollection/rules/{RuleId}",
+      "OperationId": "EndpointConfiguration.UpdateCustomCollectionRule",
+      "Summary": "Update custom data collection rule",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/settings/GetPreviewExperienceSetting",
+      "OperationId": "EndpointConfiguration.GetPreviewFeatures",
+      "Summary": "Get preview features setting",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdiotSettingsService/settings/v2/MagellanFeatures",
+      "OperationId": "EndpointConfiguration.GetMagellanFeatures",
+      "Summary": "Get device discovery feature flags",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters",
+      "OperationId": "EndpointConfiguration.GetSecurityPolicyFilters",
+      "Summary": "Get endpoint security policy filters",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdiotSettingsService/settings/DiscoveryEnabledTags",
+      "OperationId": "EndpointConfiguration.GetDiscoveryEnabledTags",
+      "Summary": "Get device discovery enabled tags",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/configuration/PotentiallyUnwantedApplications",
+      "OperationId": "EndpointConfiguration.GetPuaConfiguration",
+      "Summary": "Get PUA configuration",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/settings/SaveAdvancedFeaturesSetting",
+      "OperationId": "EndpointConfiguration.SetAdvancedFeatures",
+      "Summary": "Set advanced features settings",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/customDataCollection/rules",
+      "OperationId": "EndpointConfiguration.ListCustomCollectionRules",
+      "Summary": "List custom data collection rules",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/customDataCollection/rules",
+      "OperationId": "EndpointConfiguration.CreateCustomCollectionRule",
+      "Summary": "Create custom data collection rule",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/configuration/PurviewSharing",
+      "OperationId": "EndpointConfiguration.GetPurviewSharing",
+      "Summary": "Get Purview sharing configuration",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/unifiedExperience/mde/configurationManagement/mem/device/{MachineId}/policies",
+      "OperationId": "EndpointConfiguration.ListDevicePolicies",
+      "Summary": "List device policy assignments",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/settings/GetAdvancedFeaturesSetting",
+      "OperationId": "EndpointConfiguration.GetAdvancedFeaturesGet",
+      "Summary": "Get advanced features setting",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/settings/GetAdvancedFeaturesSetting",
+      "OperationId": "EndpointConfiguration.GetAdvancedFeatures",
+      "Summary": "Get advanced features settings",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/configuration/IntuneConnection",
+      "OperationId": "EndpointConfiguration.GetIntuneConnection",
+      "Summary": "Get Intune connection configuration",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies",
+      "OperationId": "EndpointConfiguration.ListSecurityPolicies",
+      "Summary": "List endpoint security policies",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices/{ManagedDeviceId}/users",
+      "OperationId": "EndpointConfiguration.ListManagedDeviceUsers",
+      "Summary": "List managed device users",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/alertsEmailNotifications/email_notifications",
+      "OperationId": "EndpointConfiguration.ListAlertEmailNotifications",
+      "Summary": "List endpoint alert email notifications",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/configuration/AuthenticatedTelemetry",
+      "OperationId": "EndpointConfiguration.GetAuthenticatedTelemetry",
+      "Summary": "Get authenticated telemetry configuration",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdeCustomCollection/model",
+      "OperationId": "EndpointConfiguration.GetCustomCollectionModel",
+      "Summary": "Get custom data collection model",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices",
+      "OperationId": "EndpointConfiguration.ListManagedDevices",
+      "Summary": "Resolve Intune managed device",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/settings/overrideMdeFlavor",
+      "OperationId": "EndpointConfiguration.GetMdeFlavorOverride",
+      "Summary": "Get MDE flavor override",
+      "Tags": [
+        "Endpoint Configuration"
+      ]
+    }
+  ],
+  "category": "endpoint_configuration",
+  "portal": "nodoc-defender-xdr"
+}

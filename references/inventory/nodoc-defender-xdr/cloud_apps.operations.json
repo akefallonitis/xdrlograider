@@ -1,0 +1,864 @@
+{
+  "operationCount": 95,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/apps",
+      "OperationId": "AppGovernance.ListComplianceApps",
+      "Summary": "List App Governance compliance apps",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/mtp_scopes_and_permissions",
+      "OperationId": "CloudApps.GetMtpScopesAndPermissions",
+      "Summary": "Get MTP scopes and permissions",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/discovery/snapshot_reports",
+      "OperationId": "CloudApps.ListDiscoverySnapshotReports",
+      "Summary": "List discovery snapshot reports",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/getUserProfile",
+      "OperationId": "AppGovernance.GetUserProfile",
+      "Summary": "Get App Governance user profile",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/app_connectors/dashboard/get_supported_apps_metadata",
+      "OperationId": "CloudApps.GetSupportedAppConnectorMetadata",
+      "Summary": "Get supported app connector metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/api/v1/agents/siem/count",
+      "OperationId": "CloudApps.CountSiemAgents",
+      "Summary": "Count SIEM agents",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/connected_services/apps",
+      "OperationId": "CloudApps.ListConnectedServiceApps",
+      "Summary": "List connected service apps",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/update_usage_info",
+      "OperationId": "CloudApps.UpdateUsageInfo",
+      "Summary": "Update usage info",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/user_queries",
+      "OperationId": "CloudApps.ListUserQueries",
+      "Summary": "List user queries",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/services",
+      "OperationId": "CloudApps.ListServices",
+      "Summary": "List cloud app services",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/autocomplete/discovery_app_tags",
+      "OperationId": "CloudApps.AutocompleteDiscoveryAppTags",
+      "Summary": "Autocomplete discovery app tags",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/policies",
+      "OperationId": "AppGovernance.ListPolicies",
+      "Summary": "List App Governance policies",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/standalone_entities/count",
+      "OperationId": "CloudApps.GetStandaloneEntitiesCount",
+      "Summary": "Get standalone entities count",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status",
+      "OperationId": "CloudApps.GetAppsCountByStatus",
+      "Summary": "Get apps count by status (dashboard)",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/activities/get_activities_threat_scores",
+      "OperationId": "CloudApps.GetActivitiesThreatScores",
+      "Summary": "Get activity threat scores",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/about/info",
+      "OperationId": "CloudApps.GetAboutInfo",
+      "Summary": "Get Cloud Apps tenant info",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/app_catalog/metadata",
+      "OperationId": "CloudApps.GetDiscoveryAppCatalogMetadata",
+      "Summary": "Get discovery app catalog metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/policy_templates_inmemo/count",
+      "OperationId": "CloudApps.GetPolicyTemplatesCount",
+      "Summary": "Get policy templates count",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/tenantmetrics",
+      "OperationId": "AppGovernance.GetTenantMetrics",
+      "Summary": "Get App Governance tenant metrics",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/app_permissions",
+      "OperationId": "CloudApps.ListAppPermissions",
+      "Summary": "List app permissions",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/connected_services/instances",
+      "OperationId": "CloudApps.ListConnectedServiceInstances",
+      "Summary": "List connected service instances",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/subnet/metadata",
+      "OperationId": "CloudApps.GetSubnetMetadata",
+      "Summary": "Get subnet metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/discovery/discovered_apps",
+      "OperationId": "CloudApps.ListDiscoveredApps",
+      "Summary": "List discovered apps",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/app_permissions/metadata",
+      "OperationId": "CloudApps.GetAppPermissionsMetadata",
+      "Summary": "Get app permissions metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/tenantLabelMetric",
+      "OperationId": "AppGovernance.GetTenantLabelMetric",
+      "Summary": "Get App Governance tenant label metric",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/categories",
+      "OperationId": "CloudApps.ListDiscoveryCategories",
+      "Summary": "List discovery categories",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/discovery/streams",
+      "OperationId": "CloudApps.ListDiscoveryStreams",
+      "Summary": "List discovery streams",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/boot_constants",
+      "OperationId": "CloudApps.GetBootConstants",
+      "Summary": "Get boot constants",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/mail_settings/get",
+      "OperationId": "CloudApps.GetMailSettings",
+      "Summary": "Get Cloud Apps mail settings",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/app_connectors/dashboard/get_instance_count_by_app",
+      "OperationId": "CloudApps.GetAppConnectorInstanceCountByApp",
+      "Summary": "Get app connector instance count by app",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/policy_templates_inmemo/metadata",
+      "OperationId": "CloudApps.GetPolicyTemplatesMetadata",
+      "Summary": "Get policy templates metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/policies",
+      "OperationId": "CloudApps.ListPolicies",
+      "Summary": "List policies",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/policies",
+      "OperationId": "Files.ListCloudAppsMalwarePolicies",
+      "Summary": "Query malware policies for file prevalence",
+      "Tags": [
+        "CloudApps",
+        "Files"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/entities/resolve_entity",
+      "OperationId": "CloudApps.ResolveEntity",
+      "Summary": "Resolve Cloud Apps entity",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/api/v1/agents/siem",
+      "OperationId": "CloudApps.ListSiemAgents",
+      "Summary": "List SIEM agents",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/tenantdatatraffic",
+      "OperationId": "AppGovernance.GetTenantDataTraffic",
+      "Summary": "Get App Governance tenant data traffic",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/files/count",
+      "OperationId": "Files.GetCloudAppsFileCount",
+      "Summary": "Get Cloud Apps file count",
+      "Tags": [
+        "CloudApps",
+        "Files"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/governance/count",
+      "OperationId": "CloudApps.GetGovernanceCount",
+      "Summary": "Get governance actions count",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/activities_locations/by_user",
+      "OperationId": "CloudApps.GetActivityLocationsByUser",
+      "Summary": "Get activity locations by user",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/policy_templates_inmemo/linked_policies_by_template_ids",
+      "OperationId": "CloudApps.GetLinkedPoliciesByTemplateIds",
+      "Summary": "Get policies linked to templates",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/discovery/app_catalog",
+      "OperationId": "CloudApps.ListDiscoveryAppCatalog",
+      "Summary": "List discovery app catalog entries",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/app_connectors",
+      "OperationId": "CloudApps.GetAppConnectors",
+      "Summary": "Get app connectors",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/app_connectors",
+      "OperationId": "CloudApps.ListAppConnectors",
+      "Summary": "List app connectors",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/policyinsights",
+      "OperationId": "AppGovernance.GetPolicyInsights",
+      "Summary": "Get App Governance policy insights",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/discovered_apps/metadata",
+      "OperationId": "CloudApps.GetDiscoveredAppsMetadata",
+      "Summary": "Get discovered apps metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/top_entities",
+      "OperationId": "CloudApps.GetDiscoveryTopEntities",
+      "Summary": "Get top discovered entities",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/stories/get_stories_details",
+      "OperationId": "CloudApps.GetStoryDetails",
+      "Summary": "Get story details",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/Policy",
+      "OperationId": "AppGovernance.GetPolicy",
+      "Summary": "Get App Governance policy",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/policies/metadata",
+      "OperationId": "CloudApps.GetPoliciesMetadata",
+      "Summary": "Get policies metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/discovery/app_catalog/categories",
+      "OperationId": "CloudApps.ListDiscoveryAppCatalogCategories",
+      "Summary": "List discovery app catalog categories",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/service_locations",
+      "OperationId": "CloudApps.GetDiscoveryServiceLocations",
+      "Summary": "Get discovery service locations",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/policies/count",
+      "OperationId": "CloudApps.GetPoliciesCount",
+      "Summary": "Get policies count",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/discovery/discovered_apps/count",
+      "OperationId": "CloudApps.GetDiscoveredAppsCount",
+      "Summary": "Get discovered apps count",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/app_connectors/table_config_values",
+      "OperationId": "CloudApps.GetAppConnectorsTableConfigValues",
+      "Summary": "Get app connectors table config values",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/entities/metadata",
+      "OperationId": "CloudApps.GetEntitiesMetadata",
+      "Summary": "Get entities metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/translation/log-error",
+      "OperationId": "CloudApps.LogTranslationError",
+      "Summary": "Log translation error",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/constants",
+      "OperationId": "CloudApps.GetDiscoveryConstants",
+      "Summary": "Get discovery constants",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/activities/metadata",
+      "OperationId": "CloudApps.GetActivitiesMetadata",
+      "Summary": "Get activities metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/autocomplete/users",
+      "OperationId": "CloudApps.AutocompleteUsers",
+      "Summary": "Autocomplete users",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/top_categories",
+      "OperationId": "CloudApps.GetDiscoveryTopCategories",
+      "Summary": "Get top discovery categories",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/app_connectors/last_activity",
+      "OperationId": "CloudApps.GetAppConnectorsLastActivity",
+      "Summary": "Get app connectors last activity",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/discovery/app_catalog/count",
+      "OperationId": "CloudApps.GetDiscoveryAppCatalogCount",
+      "Summary": "Get discovery app catalog count",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/about/server_url",
+      "OperationId": "CloudApps.GetAboutServerUrl",
+      "Summary": "Get Cloud Apps portal URL",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/top_apps",
+      "OperationId": "CloudApps.GetDiscoveryTopApps",
+      "Summary": "Get top discovered apps",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/governance",
+      "OperationId": "CloudApps.ListGovernanceActions",
+      "Summary": "List governance actions",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/autocomplete/tags",
+      "OperationId": "CloudApps.AutocompleteTags",
+      "Summary": "Autocomplete tags",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/api/v1/autocomplete/app-permission-names",
+      "OperationId": "CloudApps.AutocompleteAppPermissionNames",
+      "Summary": "Autocomplete app permission names",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/policy_templates_inmemo",
+      "OperationId": "CloudApps.ListPolicyTemplates",
+      "Summary": "List policy templates",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/autocomplete/entities",
+      "OperationId": "CloudApps.AutocompleteEntities",
+      "Summary": "Autocomplete entities",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/category_stats",
+      "OperationId": "CloudApps.GetDiscoveryCategoryStats",
+      "Summary": "Get discovery category stats",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/user_tags/metadata",
+      "OperationId": "CloudApps.GetUserTagsMetadata",
+      "Summary": "Get user tag metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/manage_admins/is_external_user",
+      "OperationId": "CloudApps.IsExternalAdminUser",
+      "Summary": "Check whether current user is external",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/autocomplete/scoped_profiles",
+      "OperationId": "CloudApps.AutocompleteScopedProfiles",
+      "Summary": "Autocomplete scoped profiles",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/data_encryption_settings/get",
+      "OperationId": "CloudApps.GetDataEncryptionSettings",
+      "Summary": "Get data encryption settings",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/tokens/metadata",
+      "OperationId": "CloudApps.GetTokensMetadata",
+      "Summary": "Get API token metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/get_feature_values",
+      "OperationId": "CloudApps.GetFeatureValues",
+      "Summary": "Get feature values",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/app_permissions/count",
+      "OperationId": "CloudApps.GetAppPermissionsCount",
+      "Summary": "Get app permissions count",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/user_config/get_should_display_sync_bar",
+      "OperationId": "CloudApps.GetShouldDisplaySyncBar",
+      "Summary": "Get sync bar visibility",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/tags",
+      "OperationId": "CloudApps.ListTags",
+      "Summary": "List Cloud Apps tags",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/discovery/discovered_apps/categories",
+      "OperationId": "CloudApps.ListDiscoveredAppCategories",
+      "Summary": "List discovered app categories",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/activities/count",
+      "OperationId": "CloudApps.GetActivitiesCount",
+      "Summary": "Get activities count",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/appmetadata",
+      "OperationId": "AppGovernance.GetComplianceAppMetadata",
+      "Summary": "Get App Governance compliance metadata",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/app_connectors/metadata",
+      "OperationId": "CloudApps.GetAppConnectorsMetadata",
+      "Summary": "Get app connectors metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/activities",
+      "OperationId": "CloudApps.ListActivities",
+      "Summary": "List activities",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/app_connectors/count",
+      "OperationId": "CloudApps.GetAppConnectorsCount",
+      "Summary": "Get app connectors count",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/version",
+      "OperationId": "CloudApps.GetVersion",
+      "Summary": "Get Cloud Apps bundle versions",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/getLabels",
+      "OperationId": "AppGovernance.ListComplianceLabels",
+      "Summary": "List App Governance compliance labels",
+      "Tags": [
+        "AppGovernance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/discovery/get_locations",
+      "OperationId": "CloudApps.SearchDiscoveryLocations",
+      "Summary": "Search discovery locations",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/lcnc_settings",
+      "OperationId": "CloudApps.GetLcncSettings",
+      "Summary": "Get low-code no-code settings",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/api/v1/autocomplete/app-permission-permissions",
+      "OperationId": "CloudApps.AutocompleteAppPermissionPermissions",
+      "Summary": "Autocomplete app permission permissions",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/standalone_entities/metadata",
+      "OperationId": "CloudApps.GetStandaloneEntitiesMetadata",
+      "Summary": "Get standalone entities metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/governance/metadata",
+      "OperationId": "CloudApps.GetGovernanceMetadata",
+      "Summary": "Get governance metadata",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/invited_group_admins",
+      "OperationId": "CloudApps.ListInvitedGroupAdmins",
+      "Summary": "List invited group admins",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/settings",
+      "OperationId": "CloudApps.GetSettings",
+      "Summary": "Get Cloud Apps settings",
+      "Tags": [
+        "CloudApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/autocomplete/tokens",
+      "OperationId": "CloudApps.AutocompleteTokens",
+      "Summary": "Autocomplete API tokens",
+      "Tags": [
+        "CloudApps"
+      ]
+    }
+  ],
+  "category": "cloud_apps",
+  "portal": "nodoc-defender-xdr"
+}

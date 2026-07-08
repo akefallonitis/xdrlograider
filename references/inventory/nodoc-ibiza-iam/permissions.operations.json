@@ -1,0 +1,43 @@
+{
+  "operationCount": 4,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/Permissions/IsTenantRegionScopeAllowed",
+      "OperationId": "Permissions.TenantRegionScope.Check",
+      "Summary": "Check if Tenant Region Scope is allowed",
+      "Tags": [
+        "Permissions"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Permissions/{objectId}/IsOwner",
+      "OperationId": "Permissions.Object.Owner.Check",
+      "Summary": "Check if an object is owned by the currently authenticated context",
+      "Tags": [
+        "Permissions"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Permissions/GetUserSystemRoleTemplateIds",
+      "OperationId": "Permissions.SystemRoleTemplateIds.Get",
+      "Summary": "Get the system role template IDs assigned to the current authentication context.",
+      "Tags": [
+        "Permissions"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Permissions",
+      "OperationId": "Permissions.Get",
+      "Summary": "Get current permissions",
+      "Tags": [
+        "Permissions"
+      ]
+    }
+  ],
+  "category": "permissions",
+  "portal": "nodoc-ibiza-iam"
+}

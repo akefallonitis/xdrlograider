@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/EnterpriseApplications/UserSettings",
+      "OperationId": "EnterpriseApplication.UserSettings.Get",
+      "Summary": "Get Enterprise Application user settings",
+      "Tags": [
+        "Service Principal"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/EnterpriseApplications/UserSettings",
+      "OperationId": "EnterpriseApplication.UserSettings.Update",
+      "Summary": "Update Enterprise Application user settings",
+      "Tags": [
+        "Service Principal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/EnterpriseApplications/{spId}/Properties",
+      "OperationId": "EnterpriseApplication.Properties.Get",
+      "Summary": "Get Enterprise Application properties",
+      "Tags": [
+        "Service Principal"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/EnterpriseApplications/{spId}/Properties",
+      "OperationId": "EnterpriseApplication.Properties.Update",
+      "Summary": "Update Enterprise Application properties",
+      "Tags": [
+        "Service Principal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/EnterpriseApplications/{spId}/ServicePrincipalPermissions",
+      "OperationId": "EnterpriseApplication.Permissions.Get",
+      "Summary": "Get consented Enterprise Application permissions",
+      "Tags": [
+        "Service Principal"
+      ]
+    }
+  ],
+  "category": "enterprise_applications",
+  "portal": "nodoc-ibiza-iam"
+}

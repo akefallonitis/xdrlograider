@@ -1,0 +1,308 @@
+paths:
+  /api/v1/powerPortal/environment/CoreEntitiesPackageInstallStatus:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_environment_CoreEntitiesPackageInstallStatus
+      summary: "GET /api/v1/powerPortal/environment/CoreEntitiesPackageInstallStatus"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+      tags:
+        - PowerPagesPortalInfra
+      parameters:
+        - name: "lcid"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1033
+        - name: "orgId"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "621c0f33-3fd1-f011-83fb-000d3a106b3b"
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/powerPortal/environment/optInStatus:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_environment_optInStatus
+      summary: "GET /api/v1/powerPortal/environment/optInStatus"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+      tags:
+        - PowerPagesPortalInfra
+      parameters:
+        - name: "crmEditUrl"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uri
+            example: "https://org8c2f99d4.crm.dynamics.com/"
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/powerPortal/FeatureConfiguration/GetFeatureControlValues:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_FeatureConfiguration_GetFeatureControlValues
+      summary: "GET /api/v1/powerPortal/FeatureConfiguration/GetFeatureControlValues"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+      tags:
+        - PowerPagesPortalInfra
+      parameters:
+        - name: "featureNames"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "FCB.EnableAzureFrontDoor,FCB.DeveloperEnvironment,FCB.RestrictAccessToSelectedSharePointSites"
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/powerPortal/GetEnvironment:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_GetEnvironment
+      summary: "GET /api/v1/powerPortal/GetEnvironment"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+      tags:
+        - PowerPagesPortalInfra
+      x-nodoc-operation-context:
+        surface: Environments > Hub > Power Pages
+        workflows:
+          - Open an environment hub and let the Power Pages experience resolve the environment-level portal infrastructure context.
+        headerProfile: power-platform-service-bearer
+        requestShapes:
+          - name: power-pages-environment-context
+            bodyKind: none
+            requiredParameters:
+              - orgId
+            notes: The portal uses the Dataverse orgId query selector to resolve Power Pages environment metadata on the regional portal-infra host.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated Power Platform environment-hub browsing on the Power Pages blade.
+      parameters:
+        - name: "orgId"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "621c0f33-3fd1-f011-83fb-000d3a106b3b"
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/powerPortal/IsCDSOrg:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_IsCDSOrg
+      summary: "GET /api/v1/powerPortal/IsCDSOrg"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+      tags:
+        - PowerPagesPortalInfra
+      parameters:
+        - name: "orgUrl"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uri
+            example: "https://org8c2f99d4.crm.dynamics.com/"
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/powerPortal/ListPortals:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_ListPortals
+      summary: "GET /api/v1/powerPortal/ListPortals"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview"
+      tags:
+        - PowerPagesPortalInfra
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/powerPortal/ListPortalsByOrgId:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_ListPortalsByOrgId
+      summary: "GET /api/v1/powerPortal/ListPortalsByOrgId"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+      tags:
+        - PowerPagesPortalInfra
+      parameters:
+        - name: "orgId"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "621c0f33-3fd1-f011-83fb-000d3a106b3b"
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/powerPortal/tps/GetAvailablePackages:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_tps_GetAvailablePackages
+      summary: "GET /api/v1/powerPortal/tps/GetAvailablePackages"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+      tags:
+        - PowerPagesPortalInfra
+      parameters:
+        - name: "lcid"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1033
+        - name: "orgId"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "621c0f33-3fd1-f011-83fb-000d3a106b3b"
+        - name: "tenantId"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/powerPortal/tps/GetInstancePackages:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_tps_GetInstancePackages
+      summary: "GET /api/v1/powerPortal/tps/GetInstancePackages"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+      tags:
+        - PowerPagesPortalInfra
+      parameters:
+        - name: "lcid"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1033
+        - name: "orgId"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "621c0f33-3fd1-f011-83fb-000d3a106b3b"
+        - name: "tenantId"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/powerPortal/ZAP/GetDeepScanEnabledPortalByTenant:
+    servers:
+      - url: "https://{portalInfraHost}.portal-infra.dynamics.com"
+        description: "Power Pages portal infrastructure backend"
+        variables:
+          portalInfraHost:
+            default: "portalsitewide-nam"
+            description: "Regional portal-infra host observed in live Power Platform admin center traffic."
+    get:
+      operationId: PowerPagesPortalInfra_get_api_v1_powerPortal_ZAP_GetDeepScanEnabledPortalByTenant
+      summary: "GET /api/v1/powerPortal/ZAP/GetDeepScanEnabledPortalByTenant"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/Share%20My%20Labs%20(default)/portals"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+      tags:
+        - PowerPagesPortalInfra
+      responses:
+        '200':
+          description: "200 captured response"

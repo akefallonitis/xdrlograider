@@ -1,0 +1,142 @@
+{
+  "operationCount": 15,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/oversharing/api/v1/p4ai/tenant/register",
+      "OperationId": "registerPurviewAiTenant",
+      "Summary": "Register Purview for AI assessment tenant",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/oversharing/api/v1/p4ai/assessment('{assessmentId}')",
+      "OperationId": "getPurviewAiOversharingAssessment",
+      "Summary": "Get Purview for AI oversharing assessment",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/di/find/PurviewForAI",
+      "OperationId": "getPurviewForAiInsights",
+      "Summary": "Get Purview for AI insight data",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/gws/dspmaimtapp/api/v1/scenariosearch",
+      "OperationId": "searchDspmAiScenarios",
+      "Summary": "Search DSPM for AI scenarios",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/medeina/agentDefinitions",
+      "OperationId": "listPurviewAgentDefinitions",
+      "Summary": "List Purview agent definitions",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/di/find/PurviewForAISetting",
+      "OperationId": "getPurviewForAiSettings",
+      "Summary": "Get Purview for AI settings",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/oversharing/api/v1/p4ai/assessment",
+      "OperationId": "listPurviewAiOversharingAssessments",
+      "Summary": "List Purview for AI oversharing assessments",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cpm/v1.0/Tenant/AIHubActionsStatus",
+      "OperationId": "getPurviewAiHubActionsStatus",
+      "Summary": "Get AI Hub actions status",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/oversharing/api/v1/p4ai/tenantSettings/validateStored",
+      "OperationId": "validatePurviewAiStoredSettings",
+      "Summary": "Validate stored oversharing settings",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/oversharing/api/v1/p4ai/tenantSettings/validateStored/fabric",
+      "OperationId": "validatePurviewAiFabricStoredSettings",
+      "Summary": "Validate stored oversharing Fabric settings",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/WdatpPublicApi/irm/tenant/status",
+      "OperationId": "getPurviewAiIrmTenantStatus",
+      "Summary": "Get IRM tenant status",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/medeina/settings/datashare/defaultWorkspace",
+      "OperationId": "getPurviewDefaultDataShareWorkspace",
+      "Summary": "Get Purview default Copilot workspace",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/gws/dspmaimtapp/api/v1/Agents",
+      "OperationId": "listDspmAiAgents",
+      "Summary": "List DSPM for AI agents",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/di/search/PurviewForAIActivityData",
+      "OperationId": "searchPurviewForAiActivityData",
+      "Summary": "Search Purview for AI activity data",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/di/search/PurviewDataAssessmentsInsights",
+      "OperationId": "searchPurviewDataAssessmentsInsights",
+      "Summary": "Search Purview data assessment insights",
+      "Tags": [
+        "PurviewForAI"
+      ]
+    }
+  ],
+  "category": "purview_for_ai",
+  "portal": "nodoc-purview"
+}

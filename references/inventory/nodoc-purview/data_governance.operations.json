@@ -1,0 +1,34 @@
+{
+  "operationCount": 3,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/dgs/aggregate/GetTypeAggregates",
+      "OperationId": "getDataGovernanceTypeAggregates",
+      "Summary": "Get type aggregates",
+      "Tags": [
+        "DataGovernance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/dgs/item/GetTypesV2",
+      "OperationId": "getClassificationTypesV2",
+      "Summary": "Get classification types V2",
+      "Tags": [
+        "DataGovernance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/dgs/Item/GetTenantLicense",
+      "OperationId": "getTenantLicense",
+      "Summary": "Get tenant license information",
+      "Tags": [
+        "DataGovernance"
+      ]
+    }
+  ],
+  "category": "data_governance",
+  "portal": "nodoc-purview"
+}

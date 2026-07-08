@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/fd/purview/apiproxy/cpm/v1.0/Tenant/AIBaselineSummary",
+      "OperationId": "Purview.GetAIBaselineSummary",
+      "Summary": "Get AI baseline summary",
+      "Tags": [
+        "Purview"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/purview/api/boot/getNexusBootInfo",
+      "OperationId": "Purview.GetNexusBootInfo",
+      "Summary": "Get Nexus boot info",
+      "Tags": [
+        "Purview"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/purview/apiproxy/di/find/PurviewForAI",
+      "OperationId": "Purview.GetPurviewForAI",
+      "Summary": "Get Purview for AI findings",
+      "Tags": [
+        "Purview"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/purview/apiproxy/di/find/DlpSensitiveInformationType",
+      "OperationId": "Purview.GetSensitiveInfoTypes",
+      "Summary": "Get DLP sensitive information types",
+      "Tags": [
+        "Purview"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/purview/apiproxy/di/find/DlpCompliancePolicy",
+      "OperationId": "Purview.GetDlpPolicies",
+      "Summary": "Get DLP compliance policies",
+      "Tags": [
+        "Purview"
+      ]
+    }
+  ],
+  "category": "purview",
+  "portal": "nodoc-m365-admin"
+}

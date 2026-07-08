@@ -1,0 +1,160 @@
+{
+  "operationCount": 17,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/mtoapi/tenants/{TenantId}/huntingQueries/run",
+      "OperationId": "MultiTenant.RunHuntingQuery",
+      "Summary": "Run cross-tenant hunting query",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtoapi/mdi/identity/userapiservice/identities",
+      "OperationId": "MultiTenant.ListIdentities",
+      "Summary": "List MTO identities",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/mtp/CaseManagement/be/templates/{TemplateId}",
+      "OperationId": "MultiTenant.GetCaseTemplate",
+      "Summary": "Get MTO case template",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/tenantGroups/effective/",
+      "OperationId": "MultiTenant.GetEffectiveTenantGroup",
+      "Summary": "Get effective tenant group",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtoapi/mdi/identity/userapiservice/identities/aggregatedData",
+      "OperationId": "MultiTenant.GetIdentitiesAggregatedData",
+      "Summary": "Get MTO identities aggregated data",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/mtp/CaseManagement/be/cases",
+      "OperationId": "MultiTenant.ListCases",
+      "Summary": "List MTO cases",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/mtp/sccManagement/mgmt/TenantContext",
+      "OperationId": "MultiTenant.GetTenantContext",
+      "Summary": "Get MTO tenant context",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/tenantGroups",
+      "OperationId": "MultiTenant.ListTenantGroups",
+      "Summary": "List tenant groups",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/tenants/TenantPicker",
+      "OperationId": "MultiTenant.ListTenants",
+      "Summary": "Get MTO tenant picker",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/recentItems",
+      "OperationId": "MultiTenant.GetRecentItems",
+      "Summary": "Get recent items",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/tenants/{TenantId}/workloadStatus",
+      "OperationId": "MultiTenant.GetWorkloadStatus",
+      "Summary": "Get tenant workload status",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/assignments",
+      "OperationId": "MultiTenant.ListAssignments",
+      "Summary": "List content distribution assignments",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/mtp/userExposedRbacGroups/UserExposedRbacGroups",
+      "OperationId": "MultiTenant.GetHuntingRbacGroups",
+      "Summary": "Get MTO hunting RBAC groups",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting_mto",
+      "OperationId": "MultiTenant.GetAdvancedHuntingPreferences",
+      "Summary": "Get MTO advanced hunting preferences",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/cdssecuritycopilot/trial",
+      "OperationId": "MultiTenant.GetSecurityCopilotTrial",
+      "Summary": "Get MTO Security Copilot trial status",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtoapi/mdi/identity/userapiservice/identities/count",
+      "OperationId": "MultiTenant.GetIdentitiesCount",
+      "Summary": "Get MTO identities count",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtoapi/mtp/huntingService/queries/",
+      "OperationId": "MultiTenant.ListHuntingQueries",
+      "Summary": "List MTO hunting queries",
+      "Tags": [
+        "Multi-Tenant"
+      ]
+    }
+  ],
+  "category": "multi_tenant",
+  "portal": "nodoc-defender-xdr"
+}

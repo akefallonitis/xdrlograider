@@ -1,0 +1,277 @@
+{
+  "operationCount": 30,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/Directories/{tenantId}/OnPremisesPublishedResources",
+      "OperationId": "Directories.OnPremisesPublishedResources.List",
+      "Summary": "List on premises published resources",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/Directories/PropertiesV2",
+      "OperationId": "Directories.PropertiesV2.Set",
+      "Summary": "Set directory properties (V2)",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/DirectoryWhatsNew",
+      "OperationId": "Directories.WhatsNew.List",
+      "Summary": "List Entra ID news",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/FeatureSettingsProperties",
+      "OperationId": "Directories.FeatureSettingsProperties.Get",
+      "Summary": "Get directory feature setting properties",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/Directories/FeatureSettingsProperties",
+      "OperationId": "Directories.FeatureSettingsProperties.Update",
+      "Summary": "Update directory feature setting properties",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/DirectoryObjectPicker/Search",
+      "OperationId": "Directories.Search",
+      "Summary": "Search for directory objects",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/GetPasswordSyncStatus",
+      "OperationId": "Directories.PasswordSync.Check",
+      "Summary": "Get password sync status",
+      "Tags": [
+        "Microsoft Entra Connect"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/DeletionRestrictions",
+      "OperationId": "Directories.DeletionRestrictions.Get",
+      "Summary": "Get directory deletion restrictions",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/DirectoryObjectPicker/DirectoryMembersFromIds",
+      "OperationId": "Directories.Member.Get",
+      "Summary": "Get directory members",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/LcmSettings",
+      "OperationId": "Directories.LcmSettings.Get",
+      "Summary": "Get directory LCM setings",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/Directories/LcmSettings",
+      "OperationId": "Directories.LcmSettings.Update",
+      "Summary": "Update directory LCM setings",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/{tenantId}/Details",
+      "OperationId": "Directories.Details.Get",
+      "Summary": "Get directory details",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/{tenantId}/OnPremisesPublishedResources/{publishedResourceId}",
+      "OperationId": "Directories.OnPremisesPublishedResources.Get",
+      "Summary": "Get on premises published resource",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/RecommendedPayloads",
+      "OperationId": "Directories.RecommendedPayloads.Get",
+      "Summary": "Get recommended payloads (portal)",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/LoginTenantBrandings",
+      "OperationId": "Directories.LoginTenantBranding.List",
+      "Summary": "List login tenant branding",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/LoginTenantBrandings",
+      "OperationId": "Directories.LoginTenantBranding.Create",
+      "Summary": "Create login tenant branding",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/LoginTenantBrandings/BannerImage/{locale}",
+      "OperationId": "Directories.LoginTenantBranding.BannerImage.Get",
+      "Summary": "Get tenant branding banner image for locale",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/Properties",
+      "OperationId": "Directories.Properties.Get",
+      "Summary": "Get directory properties",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/Directories/Properties",
+      "OperationId": "Directories.Properties.Set",
+      "Summary": "Set directory properties",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/Summary",
+      "OperationId": "Directories.Summary.Get",
+      "Summary": "Get a summary of directory objects",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/directoryObjects/{objectId}",
+      "OperationId": "Directories.Object.Get",
+      "Summary": "Get a directory object",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/directoryObjects/{objectId}/memberOf/count",
+      "OperationId": "Directories.MemberOfCount.Get",
+      "Summary": "Get the membership count (memberOf) for a principal",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/{tenantId}/OnPremisesAgents",
+      "OperationId": "Directories.OnPremisesAgents.List",
+      "Summary": "List on premises agents",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/LoginTenantBrandings/{locale}",
+      "OperationId": "Directories.LoginTenantBranding.Get",
+      "Summary": "Get login tenant branding",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/LoginTenantBrandings/{locale}",
+      "OperationId": "Directories.LoginTenantBranding.Set",
+      "Summary": "Set login tenant branding",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/LoginTenantBrandings/{locale}",
+      "OperationId": "Directories.LoginTenantBranding.Delete",
+      "Summary": "Delete login tenant branding",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/SsgmProperties",
+      "OperationId": "Directories.SsgmProperties.Get",
+      "Summary": "Get self-service group management properties",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/Directories/SsgmProperties",
+      "OperationId": "Directories.SsgmProperties.Set",
+      "Summary": "Set self-service group management properties",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/DomainAvailability/{domainPrefix}",
+      "OperationId": "Directories.DomainAvailability.Check",
+      "Summary": "Check directory domain prefix availability",
+      "Tags": [
+        "Directory"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Directories/GetSeamlessSingleSignOnDomains",
+      "OperationId": "Directories.SeamlessSigleSignOnDomains.Get",
+      "Summary": "Get seamless single sign-on domains",
+      "Tags": [
+        "Directory"
+      ]
+    }
+  ],
+  "category": "directories",
+  "portal": "nodoc-ibiza-iam"
+}

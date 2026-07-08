@@ -1,0 +1,106 @@
+{
+  "operationCount": 11,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/api/v1/accessPackages/{accessPackageId}",
+      "OperationId": null,
+      "Summary": "Get a specific access package",
+      "Tags": [
+        "Entitlement Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/catalogs",
+      "OperationId": null,
+      "Summary": "List catalogs",
+      "Tags": [
+        "Entitlement Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/catalogs/{catalogId}",
+      "OperationId": null,
+      "Summary": "Get a specific catalog",
+      "Tags": [
+        "Entitlement Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/billingConfigurations/guestBilling",
+      "OperationId": null,
+      "Summary": "Get guest billing configuration",
+      "Tags": [
+        "Billing"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/api/v1/billingConfigurations/guestBilling",
+      "OperationId": null,
+      "Summary": "Update guest billing configuration",
+      "Tags": [
+        "Billing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/accessPackages",
+      "OperationId": null,
+      "Summary": "List access packages",
+      "Tags": [
+        "Entitlement Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/connectedOrganizations",
+      "OperationId": null,
+      "Summary": "List connected organizations",
+      "Tags": [
+        "Connected Organizations"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/connectedOrganizations/{connectedOrganizationId}",
+      "OperationId": null,
+      "Summary": "Get a specific connected organization",
+      "Tags": [
+        "Connected Organizations"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/catalogs/{catalogId}/resources",
+      "OperationId": null,
+      "Summary": "List resources in a catalog",
+      "Tags": [
+        "Entitlement Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v1/settings",
+      "OperationId": null,
+      "Summary": "Get Identity Governance settings",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/api/v1/settings",
+      "OperationId": null,
+      "Summary": "Update Identity Governance settings",
+      "Tags": [
+        "Settings"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-entra-iga"
+}

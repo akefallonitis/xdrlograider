@@ -1,0 +1,262 @@
+paths:
+  /securityplatform/lake/databases:
+    get:
+      summary: List data lake databases
+      description: >-
+        Retrieve a list of databases available in the security data lake.
+        The data lake provides unified access to security data across
+        Defender XDR workloads.
+      operationId: DataLake.ListDatabases
+      tags: [Data Lake]
+      parameters:
+        - name: api-version
+          in: query
+          description: The API version.
+          schema:
+            type: string
+            default: '2024-07-01'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Database'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/lake/kql/v1/rest/mgmt:
+    get:
+      summary: Get data lake table schema
+      description: >-
+        Retrieve the table schema for the security data lake using a KQL
+        management command. Returns detailed column information for each table.
+      operationId: DataLake.GetTableSchema
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - KQL management query results with table schemas
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/sentinelgraph/provisioning/checkTenant:
+    post:
+      summary: Check Sentinel provisioning
+      description: >-
+        Check whether the tenant has Sentinel provisioning configured
+        for the security platform data lake.
+      operationId: DataLake.CheckSentinelProvisioning
+      tags: [Data Lake]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - tenant provisioning check request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Sentinel provisioning status
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/jobs/details:
+    get:
+      summary: Get job details
+      description: >-
+        Retrieve job details for the security data lake and related security platform
+        background jobs.
+      operationId: DataLake.GetJobDetails
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - job details entry
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/jobs/runs/summary:
+    get:
+      summary: Get job runs summary
+      description: >-
+        Retrieve aggregate counters for configured jobs and recent job runs in the
+        security platform data lake experience.
+      operationId: DataLake.GetJobRunsSummary
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalJobs:
+                    type: integer
+                  enabledJobs:
+                    type: integer
+                  completedRuns:
+                    type: integer
+                  inProgressRuns:
+                    type: integer
+                  recentHealthIssues:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/lake/kql/query-history:
+    get:
+      summary: List KQL query history
+      description: >-
+        Retrieve the recent KQL query history shown by the Defender portal's lake explorer.
+      operationId: DataLake.ListQueryHistory
+      tags: [Data Lake]
+      parameters:
+        - name: querySource
+          in: query
+          description: The originating query experience to filter history by.
+          schema:
+            type: string
+            default: KUSTO_QUERY
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - saved query history entry
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/sentinelgraph/catalog/tables:
+    get:
+      summary: List Sentinel graph catalog tables
+      description: >-
+        Retrieve the Defender portal's Sentinel graph table catalog, including table
+        metadata and parquet/Kusto schema details used by the lake explorer.
+      operationId: DataLake.ListSentinelGraphCatalogTables
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        tableType:
+                          type: string
+                        provisioningState:
+                          type: string
+                        parquetSchema:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                        kustoSchema:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                      additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+components:
+  schemas:
+    Database:
+      type: object
+      description: A security data lake database.
+      properties:
+        name:
+          description: The database name.
+          type: string
+        tables:
+          description: Tables in the database.
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                description: The table name.
+                type: string
+              description:
+                description: A description of the table.
+                type: string

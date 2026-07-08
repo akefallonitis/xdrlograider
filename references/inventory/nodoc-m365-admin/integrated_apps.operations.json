@@ -1,0 +1,70 @@
+{
+  "operationCount": 7,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/fd/addins/api/v2/settings",
+      "OperationId": "IntegratedApps.GetSettings",
+      "Summary": "Get integrated apps settings",
+      "Tags": [
+        "IntegratedApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/addins/api/availableApps",
+      "OperationId": "IntegratedApps.GetAvailableApps",
+      "Summary": "Get available apps",
+      "Tags": [
+        "IntegratedApps"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/privatecatalog/GetAddInDetails",
+      "OperationId": "IntegratedApps.GetAddInDetails",
+      "Summary": "Get add-in details",
+      "Tags": [
+        "IntegratedApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/addins/api/apps",
+      "OperationId": "IntegratedApps.GetApps",
+      "Summary": "Get integrated apps",
+      "Tags": [
+        "IntegratedApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/addins/api/agents",
+      "OperationId": "IntegratedApps.GetAgents",
+      "Summary": "Get deployed agents",
+      "Tags": [
+        "IntegratedApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/addins/api/recommendations/appRecommendations",
+      "OperationId": "IntegratedApps.GetRecommendations",
+      "Summary": "Get app recommendations",
+      "Tags": [
+        "IntegratedApps"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/addins/api/actionableApps",
+      "OperationId": "IntegratedApps.GetActionableApps",
+      "Summary": "Get actionable apps",
+      "Tags": [
+        "IntegratedApps"
+      ]
+    }
+  ],
+  "category": "integrated_apps",
+  "portal": "nodoc-m365-admin"
+}

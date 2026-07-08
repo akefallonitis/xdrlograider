@@ -1,0 +1,214 @@
+{
+  "operationCount": 23,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/rollout/v1.0/residency",
+      "OperationId": null,
+      "Summary": "Get tenant residency metadata",
+      "Tags": [
+        "Rollout"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/appConfig/v1.0/userflights",
+      "OperationId": null,
+      "Summary": "Get portal feature flights",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/releases/v1.0/NextReleaseVersion/MonthlyEnterpriseChannel",
+      "OperationId": null,
+      "Summary": "Get next Monthly Enterprise release version",
+      "Tags": [
+        "Releases"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/endpointprovisionhealth/v1.0/tenantassociation",
+      "OperationId": null,
+      "Summary": "Get tenant association state",
+      "Tags": [
+        "Device Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/releases/v1.0/LatestRelease/CurrentChannel",
+      "OperationId": null,
+      "Summary": "Get latest Current Channel release",
+      "Tags": [
+        "Releases"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/policyadmin/v1.0/DbsLicensing/HasDbsLicense",
+      "OperationId": null,
+      "Summary": "Check DBS licensing",
+      "Tags": [
+        "Policy Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ServiceProfile/v1.0/Profiles",
+      "OperationId": null,
+      "Summary": "List servicing profiles",
+      "Tags": [
+        "Servicing Profiles"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/intents/v1.0/DeploymentConfiguration/UpdateConfiguration/{configurationId}",
+      "OperationId": null,
+      "Summary": "Update deployment configuration metadata",
+      "Tags": [
+        "Device Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/serviceProfile/v1.0/serviceProfileAggregator/{profileId}/rollbackEntries",
+      "OperationId": null,
+      "Summary": "Get servicing profile rollback entries",
+      "Tags": [
+        "Servicing Profiles"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/releases/v1.0/LatestRelease/MonthlyEnterpriseChannel",
+      "OperationId": null,
+      "Summary": "Get latest Monthly Enterprise release",
+      "Tags": [
+        "Releases"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/serviceProfile/v1.0/tenantrules",
+      "OperationId": null,
+      "Summary": "Get tenant servicing rules",
+      "Tags": [
+        "Servicing Profiles"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/serviceProfile/v1.0/tenantrules",
+      "OperationId": null,
+      "Summary": "Update tenant servicing rules",
+      "Tags": [
+        "Servicing Profiles"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/serviceProfile/v1.0/ServiceProfileAggregator/tenantServicingExclusionWindows",
+      "OperationId": null,
+      "Summary": "Get tenant servicing exclusion windows",
+      "Tags": [
+        "Servicing Profiles"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/appConfig/v1.0/ServiceHealth",
+      "OperationId": null,
+      "Summary": "Get service health bootstrap data",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/settings/v1.0/SettingsCatalog/auth/Settings",
+      "OperationId": null,
+      "Summary": "Query auth settings catalog entries",
+      "Tags": [
+        "Policy Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/intents/v1.0/DeploymentConfiguration/GetConfigurations",
+      "OperationId": null,
+      "Summary": "List deployment configurations",
+      "Tags": [
+        "Device Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/settings/v1.0/SettingsCatalog/Settings",
+      "OperationId": null,
+      "Summary": "Query settings catalog entries",
+      "Tags": [
+        "Policy Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/serviceProfile/v1.0/{profileId}/rules",
+      "OperationId": null,
+      "Summary": "Get servicing profile rules",
+      "Tags": [
+        "Servicing Profiles"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/serviceProfile/v3.0/profiles",
+      "OperationId": null,
+      "Summary": "List servicing profiles (v3)",
+      "Tags": [
+        "Servicing Profiles"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/intents/v1.0/AuthDeploymentSettings/UpdateConfiguration/{configurationId}",
+      "OperationId": null,
+      "Summary": "Update auth deployment settings for a configuration",
+      "Tags": [
+        "Device Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/policyadmin/v1.0/policies",
+      "OperationId": null,
+      "Summary": "List cloud policy containers",
+      "Tags": [
+        "Policy Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/appConfig/v1.0/ShellService/GetShellInfo",
+      "OperationId": null,
+      "Summary": "Get portal shell metadata",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/serviceProfile/v1.0/serviceProfileAggregator/filteredDevicesAndGroups",
+      "OperationId": null,
+      "Summary": "Get filtered devices and groups",
+      "Tags": [
+        "Servicing Profiles"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-m365-apps-config"
+}

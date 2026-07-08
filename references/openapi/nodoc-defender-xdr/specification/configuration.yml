@@ -1,0 +1,2107 @@
+paths:
+  /mtp/suppressionRulesService/suppressionRules:
+    get:
+      summary: List suppression rules
+      description: >-
+        Retrieve all alert suppression (tuning) rules configured in the tenant.
+        Suppression rules automatically suppress alerts matching specified conditions.
+      operationId: Configuration.ListSuppressionRules
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SuppressionRule'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/suppressionRulesService/suppressionRules/builtInRulesHash:
+    get:
+      summary: Get built-in suppression rules hash
+      description: >-
+        Retrieve the built-in suppression rules hash used by the portal to detect
+        whether the built-in rule catalog has changed.
+      operationId: Configuration.GetBuiltInSuppressionRulesHash
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/alertsApiService/workloads/disabled:
+    get:
+      summary: Get disabled alert service settings
+      description: >-
+        Retrieve the list of disabled alert service workloads, showing which
+        alert sources have been disabled in the tenant configuration.
+      operationId: Configuration.GetDisabledAlertServices
+      tags: [Configuration]
+      parameters:
+        - name: includeDetails
+          in: query
+          description: Whether to include detailed workload information.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - disabled workload configuration
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/ndr/rulesengine/rules:
+    get:
+      summary: Get asset rule management rules
+      description: >-
+        Retrieve the device asset rule management rules used for automatic
+        device tagging and classification.
+      operationId: Configuration.GetAssetRules
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    actions: { type: array }
+                    affectedAssetsCount: { type: number }
+                    assetType: { type: string }
+                    classificationValue: { type: string }
+                    createdBy: { type: string }
+                    createdByName: { type: string }
+                    creationTime: { type: string }
+                    criticalityLevel: { type: number }
+                    isDeleted: { type: boolean }
+                    isDisabled: { type: boolean }
+                    kqlQuery: { type: string }
+                    lastExecutionTime: { type: string }
+                    lastUpdatedBy: { type: string }
+                    lastUpdatedByName: { type: string }
+                    lastUpdateTime: { type: string }
+                    orgId: { type: string }
+                    ruleDefinition: { type: string }
+                    ruleDescription: { type: string }
+                    ruleId: { type: string }
+                    ruleName: { type: string }
+                    ruleType: { type: string }
+                    tenantId: { type: string }
+                    timestamp: { type: string }
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/preview_features/get:
+    get:
+      summary: Get Cloud Apps preview features
+      description: >-
+        Retrieve the preview features opt-in status for Microsoft Defender
+        for Cloud Apps (MCAS).
+      operationId: Configuration.GetMcasPreviewFeatures
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MCAS preview feature settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/management/optin:
+    get:
+      summary: Get Defender for Cloud preview features
+      description: >-
+        Retrieve the preview features opt-in status for Microsoft Defender for Cloud (MDC).
+      operationId: Configuration.GetMdcPreviewFeatures
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC preview feature settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/settings/SavePreviewExperienceSetting:
+    post:
+      summary: Set preview features
+      description: >-
+        Update the preview features opt-in status. Supports multiple contexts
+        including MTP and MDA.
+      operationId: Configuration.SetPreviewFeatures
+      tags: [Configuration]
+      parameters:
+        - name: context
+          in: query
+          required: true
+          description: The context to update preview settings for.
+          schema:
+            type: string
+            enum: [MtpContext, MdatpContext]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isOptedIn:
+                  description: Whether to opt in to preview features.
+                  type: boolean
+              required:
+                - isOptedIn
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/preview_features/update:
+    post:
+      summary: Set Cloud Apps preview features
+      description: >-
+        Update the preview features opt-in status for Microsoft Defender
+        for Cloud Apps (MCAS).
+      operationId: Configuration.SetMcasPreviewFeatures
+      tags: [Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - MCAS preview feature update body
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/sccManagement/mgmt/TenantContext:
+    get:
+      summary: Get tenant context
+      description: >-
+        Retrieve the tenant context information including tenant ID,
+        region, and configured workload status. Used for portal initialization.
+      operationId: Configuration.GetTenantContext
+      tags: [Configuration]
+      parameters:
+        - name: realTime
+          in: query
+          description: Whether to fetch real-time data instead of cached.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender tenant bootstrap with environment, geography, workload, and feature-flight state.
+              example:
+                EnvironmentName: Production
+                OrgId: 00000000-0000-0000-0000-000000000000
+                GeoRegion: Us3
+                DataCenter: EastUs3
+                AccountMode: 1
+                AccountType: Production
+                IsSuspended: false
+                IsDeleted: false
+                IsMdatpLicenseExpired: false
+                IsMtpEligible: true
+                HasMachineGroups: true
+                IsMdatpActive: true
+                IsOatpActive: true
+                IsItpActive: true
+                IsMapgActive: true
+                IsAadIpActive: true
+                IsDlpActive: true
+                IsIrmActive: true
+                IsMdiActive: true
+                IsMdcActive: true
+                IsSentinelActive: false
+                ActiveMtpWorkloads: [1, 2, 3, 4]
+                Features:
+                  MachineHealth: true
+                  CustomerTI: true
+                  'Response-Blacklist': true
+                  ProcessTree: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/xspmatlas/assetrules:
+    get:
+      summary: List critical asset classifications
+      description: >-
+        Retrieve all critical asset management classification rules configured
+        in the tenant.
+      operationId: Configuration.ListCriticalAssetClassifications
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CriticalAssetClassification'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Create critical asset classification
+      description: >-
+        Create a new critical asset classification rule.
+      operationId: Configuration.CreateCriticalAssetClassification
+      tags: [Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriticalAssetClassificationCreate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalAssetClassification'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    put:
+      summary: Update critical asset classification
+      description: >-
+        Update an existing critical asset classification rule.
+      operationId: Configuration.UpdateCriticalAssetClassification
+      tags: [Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriticalAssetClassificationCreate'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    delete:
+      summary: Delete critical asset classification
+      description: >-
+        Delete a critical asset classification rule.
+      operationId: Configuration.DeleteCriticalAssetClassification
+      tags: [Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ruleName:
+                  description: The name of the rule to delete.
+                  type: string
+              required:
+                - ruleName
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/xspmatlas/assetrules/querybuilder/assets/{encodedRuleName}:
+    get:
+      summary: Query critical asset classification
+      description: >-
+        Execute a critical asset classification rule query to preview
+        which assets would be classified.
+      operationId: Configuration.QueryCriticalAssetClassification
+      tags: [Configuration]
+      parameters:
+        - name: encodedRuleName
+          in: path
+          required: true
+          description: The URL-encoded rule name to query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - matched assets
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/xspmatlas/assetrules/querybuilder/schema:
+    get:
+      summary: Get critical asset classification schema
+      description: >-
+        Retrieve the query builder schema for critical asset classification rules,
+        including available fields, operators, and value types.
+      operationId: Configuration.GetCriticalAssetClassificationSchema
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - query builder schema
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/serviceaccounts/classificationrule/getall:
+    get:
+      summary: Get service account classification rules
+      description: >-
+        Retrieve all service account classification rules from the RADIUS
+        identity service. These rules define how service accounts are
+        automatically identified and classified.
+      operationId: Configuration.GetServiceAccountClassifications
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - service account classification rule
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/tenantinfo:
+    get:
+      summary: Get unified RBAC workload configuration
+      description: >-
+        Retrieve the unified RBAC (Role-Based Access Control) configuration
+        for the tenant, including enabled workloads and permission scopes.
+      operationId: Configuration.GetUnifiedRbacWorkload
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - unified RBAC configuration
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/settings:
+    get:
+      summary: Get Cloud Apps general settings
+      description: >-
+        Retrieve the general settings for Microsoft Defender for Cloud Apps (MCAS),
+        including organization details and feature configuration.
+      operationId: Configuration.GetCloudAppsSettings
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/autoIr/ui/properties:
+    get:
+      summary: Get automated investigation properties
+      description: >-
+        Retrieve the automated investigation and response (AIR) UI properties
+        and configuration settings.
+      operationId: Configuration.GetAutoIrProperties
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - automated investigation properties
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/wdatpInternalApi/compliance/alertSharing/status:
+    get:
+      summary: Get alert sharing compliance status
+      description: >-
+        Retrieve the alert sharing compliance status from the WDATP internal API.
+      operationId: Configuration.GetAlertSharingStatus
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - alert sharing compliance status
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/wdatpApi/dataexportsettings:
+    get:
+      summary: Get raw data export settings
+      description: >-
+        Retrieve Defender raw data export settings, including attached Log Analytics
+        workspace targets and enabled export categories.
+      operationId: Configuration.GetDataExportSettings
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - raw data export settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/onboarding/intune/status:
+    get:
+      summary: Get Intune onboarding status
+      description: >-
+        Retrieve the Intune onboarding status for the response API portal.
+      operationId: Configuration.GetIntuneOnboardingStatus
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Intune onboarding status
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/senseauth/allownonauthsense:
+    get:
+      summary: Get non-auth sense allowed
+      description: >-
+        Retrieve whether non-authenticated sense connections are allowed.
+      operationId: Configuration.GetAllowNonAuthSense
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - non-auth sense configuration
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/sentinelOnboarding/sentinel/workspaces/eligibleForOnboarding:
+    post:
+      summary: List eligible Sentinel workspaces
+      description: >-
+        Retrieve the Microsoft Sentinel workspaces that are eligible for onboarding from
+        the Defender portal's unified connector experience.
+      operationId: Configuration.ListEligibleSentinelWorkspaces
+      tags: [Configuration]
+      parameters:
+        - name: useRealTime
+          in: query
+          description: Whether the portal should bypass cached onboarding metadata.
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscriptions:
+                  type: array
+                  description: Azure subscription identifiers to inspect for eligible workspaces.
+                  items:
+                    type: string
+              required:
+                - subscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workspaces:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - eligible Sentinel workspace
+                  skipToken:
+                    type: string
+                    nullable: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/sentinelOnboarding/sentinel/workspaces/isOnboarded:
+    get:
+      summary: Get Sentinel onboarding state
+      description: >-
+        Retrieve whether Microsoft Sentinel onboarding has already been completed from
+        the Defender unified connector experience.
+      operationId: Configuration.GetSentinelOnboardedState
+      tags: [Configuration]
+      parameters:
+        - name: useRealTime
+          in: query
+          description: Whether the portal should bypass cached onboarding metadata.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/unifiedConnectors/public/connectors:
+    get:
+      summary: List unified connectors
+      description: >-
+        Retrieve the catalog of unified connectors available from the Defender portal's
+        Sentinel and identity connector experiences.
+      operationId: Configuration.ListUnifiedConnectors
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - unified connector definition
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/unifiedConnectors/public/connectors/checkrequirements:
+    get:
+      summary: Check unified connector requirements
+      description: >-
+        Retrieve workload activation and permission requirements for the unified connector
+        catalog.
+      operationId: Configuration.CheckUnifiedConnectorRequirements
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permissionStatus:
+                    type: object
+                    description: Permission status grouped by protection type.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions:
+    get:
+      summary: List unified RBAC role definitions
+      description: >-
+        Retrieve the unified RBAC role definitions shown on the Defender security
+        permissions page.
+      operationId: Configuration.ListUnifiedRbacRoleDefinitions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - unified RBAC role definition
+                  isPartial:
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/permissions:
+    get:
+      summary: Get unified RBAC permissions
+      description: >-
+        Retrieve the unified RBAC permissions catalog displayed on the Defender
+        security permissions page.
+      operationId: Configuration.GetUnifiedRbacPermissions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - unified RBAC permissions catalog
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions/{RoleDefinitionId}/roleAssignments:
+    get:
+      summary: List unified RBAC role assignments
+      description: >-
+        Retrieve the role assignments for a selected unified RBAC role definition
+        from the Defender security permissions detail page.
+      operationId: Configuration.ListUnifiedRbacRoleAssignments
+      tags: [Configuration]
+      parameters:
+        - name: RoleDefinitionId
+          in: path
+          required: true
+          description: The unified RBAC role definition identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - unified RBAC role assignments response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/workspaces:
+    get:
+      summary: List unified RBAC workspaces
+      description: >-
+        Retrieve the Defender workspaces and scope metadata used by the unified RBAC
+        configuration experience.
+      operationId: Configuration.ListUnifiedRbacWorkspaces
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - unified RBAC workspaces response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/papin/api/cloud/public/internal/indicators/count:
+    get:
+      summary: Get internal indicator count
+      description: >-
+        Retrieve the indicator count used by the internal email and collaboration
+        indicator management views in the Defender portal.
+      operationId: Configuration.GetInternalIndicatorCount
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - internal indicator count response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/papin/api/cloud/public/internal/indicators/filterValues:
+    get:
+      summary: Get internal indicator filter values
+      description: >-
+        Retrieve the available filter values for the internal email and collaboration
+        indicator management views in the Defender portal.
+      operationId: Configuration.GetInternalIndicatorFilterValues
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - internal indicator filter values
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/licenses/mgmt/aadlicenses/mdc/status:
+    get:
+      summary: Get MDC license status
+      description: >-
+        Retrieve the Microsoft Defender for Cloud licensing status surfaced by the
+        Defender portal's licensing helpers.
+      operationId: Configuration.GetMdcLicenseStatus
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC license status
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/licenses/mgmt/aadlicenses/sums:
+    get:
+      summary: Get license sums
+      description: >-
+        Retrieve the aggregated Entra license counts used by Defender portal
+        licensing checks.
+      operationId: Configuration.GetLicenseSums
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - license sums
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/disrupt/api/exclusions/exclude-all:
+    get:
+      summary: Get all disruption exclusions
+      description: >-
+        Retrieve the aggregate disruption exclusion settings shown by the
+        disruption exclusion experience.
+      operationId: Configuration.GetAllDisruptionExclusions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - disruption exclusion settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/disrupt/api/exclusions/Identity:
+    get:
+      summary: Get identity disruption exclusions
+      description: >-
+        Retrieve the identity-specific disruption exclusions configured in the Defender portal.
+      operationId: Configuration.GetIdentityDisruptionExclusions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identity disruption exclusions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/disrupt/api/exclusions/Identity/global-exclusion:
+    get:
+      summary: Get global identity disruption exclusion
+      description: >-
+        Retrieve the global identity disruption exclusion settings shown by the
+        Defender portal.
+      operationId: Configuration.GetGlobalIdentityDisruptionExclusion
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - global identity disruption exclusion
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/rbacManagementApi/rbac/aad_groups:
+    get:
+      summary: List RBAC Entra groups
+      description: >-
+        Retrieve the Microsoft Entra groups available to the Defender RBAC
+        management experience.
+      operationId: Configuration.ListRbacAadGroups
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - RBAC Entra groups response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/rbacManagementApi/rbac/user_roles:
+    get:
+      summary: Get current user RBAC roles
+      description: >-
+        Retrieve the RBAC role assignments resolved for the current Defender portal user.
+      operationId: Configuration.GetCurrentUserRbacRoles
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - current user RBAC roles
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/assets:
+    post:
+      summary: Query cloud asset inventory
+      description: >-
+        Retrieve the Defender for Cloud inventory table used by the assets inventory view.
+      operationId: Configuration.QueryCloudAssetInventory
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schemaId:
+                  type: string
+                  description: Inventory schema identifier to query.
+                schemaParameters:
+                  type: object
+                  additionalProperties: true
+                searchTerms:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - asset inventory search term
+                columns:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - requested inventory column
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - inventory filter
+                paging:
+                  type: object
+                  description: Paging settings for the inventory query.
+              required:
+                - schemaId
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud inventory table response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/metrics:
+    post:
+      summary: Query cloud asset inventory metrics
+      description: >-
+        Retrieve the aggregate metrics tiles shown above the Defender for Cloud asset
+        inventory table.
+      operationId: Configuration.QueryCloudAssetInventoryMetrics
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schemaId:
+                  type: string
+                aggregatedColumns:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - requested aggregation
+                schemaParameters:
+                  type: object
+                  additionalProperties: true
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - metrics filter
+              required:
+                - schemaId
+                - aggregatedColumns
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud inventory aggregation response.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/schema:
+    post:
+      summary: Get cloud asset inventory schema
+      description: >-
+        Retrieve the schema definition for the Defender for Cloud asset inventory view.
+      operationId: Configuration.GetCloudAssetInventorySchema
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schemaId:
+                  type: string
+                schemaParameters:
+                  type: object
+                  additionalProperties: true
+              required:
+                - schemaId
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud inventory schema definition.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/overview/overviewMetrics:
+    post:
+      summary: Get cloud overview metrics
+      description: >-
+        Retrieve the Defender for Cloud overview metrics payload used by the overview page.
+      operationId: Configuration.GetCloudOverviewMetrics
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDateTime:
+                  type: string
+                  format: date-time
+                  description: Start time for the overview metric window.
+              required:
+                - startDateTime
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud overview metrics response.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/ai-agents-v3/agents-current-count-by-platform-metrics:
+    post:
+      summary: Get AI agent counts by platform
+      description: >-
+        Retrieve the current AI-agent counts by platform for the Defender for Cloud
+        AI inventory experience.
+      operationId: Configuration.GetAiAgentCountsByPlatform
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                platforms:
+                  type: string
+                  description: Comma-separated AI platforms to include.
+                paging:
+                  type: object
+                  description: Paging settings for the metric query.
+              required:
+                - platforms
+                - paging
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AI-agent metric table response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/ai-agents-v3/agents-discovered-overtime:
+    post:
+      summary: Get AI agents discovered over time
+      description: >-
+        Retrieve the AI-agent discovery-over-time chart used by the Defender for Cloud
+        AI inventory experience.
+      operationId: Configuration.GetAiAgentsDiscoveredOverTime
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                daysAgo:
+                  type: string
+                  description: Relative lookback window such as 60d.
+                platforms:
+                  type: string
+                  description: Comma-separated AI platforms to include.
+                paging:
+                  type: object
+                  description: Paging settings for the metric query.
+              required:
+                - daysAgo
+                - platforms
+                - paging
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AI-agent discovery-over-time response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/ai-agents-v3/agents-requiring-attention-overtime-metrics:
+    post:
+      summary: Get AI agents requiring attention over time
+      description: >-
+        Retrieve the AI-agent attention-over-time chart used by the Defender for Cloud
+        AI inventory experience.
+      operationId: Configuration.GetAiAgentsRequiringAttentionOverTime
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                daysAgo:
+                  type: string
+                  description: Relative lookback window such as 60d.
+                platforms:
+                  type: string
+                  description: Comma-separated AI platforms to include.
+                paging:
+                  type: object
+                  description: Paging settings for the metric query.
+              required:
+                - daysAgo
+                - platforms
+                - paging
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AI-agent attention-over-time response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/papin/api/cloud/public/internal/IncidentNotificationSettingsV2:
+    get:
+      summary: List incident notification settings
+      description: >-
+        Retrieve the Defender XDR incident email-notification rules shown on
+        the Settings > Email notifications experience.
+      operationId: Configuration.ListIncidentNotificationSettings
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncidentNotificationSetting'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/settings/GetUserSettings:
+    get:
+      summary: Get Defender XDR user settings
+      description: >-
+        Retrieve tenant-level Defender XDR user settings such as regional context,
+        retention bounds, and industry-specific configuration flags.
+      operationId: Configuration.GetUserSettings
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/CustomerSubmissionService/file/enterprise/query/{TenantId}:
+    get:
+      summary: List file submissions
+      description: >-
+        Retrieve the file-submission entries displayed on the Defender portal's
+        submissions experience.
+      operationId: Configuration.ListFileSubmissions
+      tags: [Configuration]
+      parameters:
+        - name: TenantId
+          in: path
+          required: true
+          description: The Microsoft Entra tenant identifier.
+          schema:
+            type: string
+            format: uuid
+        - name: trackingId
+          in: query
+          description: Optional client tracking identifier added by the portal.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - file submission record
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/apps/all:
+    get:
+      summary: List connected apps
+      description: >-
+        Retrieve the connected application registrations and monthly activity counters
+        shown on the Defender portal's connected apps experience.
+      operationId: Configuration.ListConnectedApps
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Id:
+                      type: string
+                    DisplayName:
+                      type: string
+                    Enabled:
+                      type: boolean
+                    LatestConnectivity:
+                      type: string
+                      format: date-time
+                    ApplicationSettingsLink:
+                      type: string
+                      nullable: true
+                    MonthlyStatistics:
+                      type: array
+                      items:
+                        type: integer
+                    ImageBase64:
+                      type: string
+                      nullable: true
+                    ImageType:
+                      type: string
+                      nullable: true
+                    ImageUrl:
+                      type: string
+                      nullable: true
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/ti/indicators:
+    get:
+      summary: List custom threat indicators
+      description: >-
+        Retrieve the custom threat indicators shown in the Defender portal's
+        configuration management experience.
+      operationId: Configuration.ListThreatIndicators
+      tags: [Configuration]
+      parameters:
+        - name: type
+          in: query
+          description: Indicator type to return.
+          schema:
+            type: string
+            example: url
+        - name: PageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    IndicatorId:
+                      type: integer
+                    OrgId:
+                      type: string
+                    IndicatorType:
+                      type: integer
+                    IndicatorValue:
+                      type: string
+                    IoaDefinitionId:
+                      type: string
+                    CreationTime:
+                      type: string
+                      format: date-time
+                    CreatedBy:
+                      type: string
+                    LastUpdateTime:
+                      type: string
+                      format: date-time
+                    IsEnabled:
+                      type: boolean
+                    Action:
+                      type: integer
+                    Severity:
+                      type: integer
+                    Title:
+                      type: string
+                    Category:
+                      type: integer
+                    Description:
+                      type: string
+                    Application:
+                      type: string
+                    EducateUrl:
+                      type: string
+                      nullable: true
+                    GenerateAlert:
+                      type: boolean
+                    CreatedByDisplayName:
+                      type: string
+                    CreatedBySource:
+                      type: integer
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/webcategory/policies:
+    get:
+      summary: List web content filtering policies
+      description: >-
+        Retrieve the web content filtering policies configured through the Defender
+        portal's response API portal experience.
+      operationId: Configuration.ListWebCategoryPolicies
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    blockedCategoryIds:
+                      type: array
+                      items:
+                        type: integer
+                    auditCategoryIds:
+                      type: array
+                      items:
+                        type: integer
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/sccManagement/mgmt/ServicesUrls:
+    get:
+      summary: Get Defender service URLs
+      description: >-
+        Retrieve the backend service URL map used by the Defender portal's
+        configuration experiences.
+      operationId: Configuration.GetServiceUrls
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ServiceUrls:
+                    type: object
+                    additionalProperties:
+                      type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories:
+    get:
+      summary: Get top web content filtering categories
+      description: >-
+        Retrieve the top parent categories shown in the Defender portal's web content
+        filtering report experience.
+      operationId: Configuration.GetTopWebContentFilteringCategories
+      tags: [Configuration]
+      parameters:
+        - name: includeActivityChange
+          in: query
+          description: Whether to include activity change deltas in the report response.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  UpdateTime:
+                    type: string
+                    format: date-time
+                  TopParentCategories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        Name:
+                          type: string
+                        ActivityDeltaPercentage:
+                          type: number
+                          format: double
+                        IsDeltaPercentageValid:
+                          type: boolean
+                        TotalAccessRequests:
+                          type: integer
+                        TotalBlockedCount:
+                          type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/webThreatProtection/webThreats/reports/webThreatSummary:
+    get:
+      summary: Get web threat summary
+      description: >-
+        Retrieve the aggregate web threat counters shown in the Defender portal's web
+        threat protection reports.
+      operationId: Configuration.GetWebThreatSummary
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  TotalThreats:
+                    type: integer
+                  Phishing:
+                    type: integer
+                  Malicious:
+                    type: integer
+                  CustomIndicator:
+                    type: integer
+                  Unknown:
+                    type: integer
+                  CmdCtrl:
+                    type: integer
+                  TechScam:
+                    type: integer
+                  Untrusted:
+                    type: integer
+                  Exploit:
+                    type: integer
+                  UpdateTime:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+components:
+  schemas:
+    SuppressionRule:
+      type: object
+      description: An alert suppression (tuning) rule.
+      properties:
+        id:
+          description: The unique identifier of the rule.
+          type: string
+        name:
+          description: The name of the suppression rule.
+          type: string
+        isEnabled:
+          description: Whether the rule is enabled.
+          type: boolean
+        conditions:
+          description: The conditions for suppressing alerts.
+          type: object
+        createdBy:
+          description: The user who created the rule.
+          type: string
+        createdDateTime:
+          description: When the rule was created.
+          type: string
+          format: date-time
+        expirationDateTime:
+          description: When the rule expires.
+          type: string
+          format: date-time
+          nullable: true
+    CriticalAssetClassification:
+      type: object
+      description: A critical asset classification rule.
+      properties:
+        ruleName:
+          description: The name of the classification rule.
+          type: string
+        description:
+          description: A description of the rule.
+          type: string
+        query:
+          description: The classification query.
+          type: string
+        criticalityLevel:
+          description: The criticality level assigned by this rule.
+          type: integer
+        isBuiltIn:
+          description: Whether this is a built-in rule.
+          type: boolean
+        matchedAssetCount:
+          description: Number of assets matching this rule.
+          type: integer
+    CriticalAssetClassificationCreate:
+      type: object
+      description: Request body for creating or updating a critical asset classification.
+      properties:
+        ruleName:
+          description: The name of the classification rule.
+          type: string
+        description:
+          description: A description of the rule.
+          type: string
+        query:
+          description: The classification query.
+          type: string
+        criticalityLevel:
+          description: The criticality level to assign.
+          type: integer
+      required:
+        - ruleName
+        - query
+        - criticalityLevel
+    IncidentNotificationSetting:
+      type: object
+      description: Incident email-notification rule shown in the Defender XDR settings UI.
+      properties:
+        IncidentNotificationsSettingId:
+          type: integer
+        Name:
+          type: string
+        Description:
+          type: string
+        AlertSeverities:
+          type: integer
+        AllRbacGroups:
+          type: boolean
+        RbacGroupIds:
+          type: array
+          items:
+            type: string
+        Scopes:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        Rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncidentNotificationRule'
+        CreatedBy:
+          type: string
+          format: email
+        FormatOptions:
+          type: integer
+        SendOncePerIncident:
+          type: boolean
+        CreationTime:
+          type: string
+          format: date-time
+        LastUpdateTime:
+          type: string
+          format: date-time
+        Recipients:
+          type: array
+          items:
+            type: string
+            format: email
+        IsReadOnly:
+          type: boolean
+        RulesReadOnly:
+          type: boolean
+    IncidentNotificationRule:
+      type: object
+      description: Rule condition within an incident email-notification setting.
+      properties:
+        RuleOrder:
+          type: integer
+        AlertSeverities:
+          type: integer
+        RuleServiceSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncidentNotificationServiceSource'
+    IncidentNotificationServiceSource:
+      type: object
+      description: Detection-source selection for an incident notification rule.
+      properties:
+        ServiceSource:
+          type: integer
+        AllDetectionSources:
+          type: boolean
+        DetectionSources:
+          type: array
+          items:
+            type: integer
+    UserSettings:
+      type: object
+      description: Tenant-level Defender XDR user settings.
+      properties:
+        GeoRegion:
+          type: string
+        RetentionPolicy:
+          type: integer
+        MinEndpoints:
+          type: integer
+        MaxEndpoints:
+          type: integer
+        CommunicationsAndMedia:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.
+        FinancialServices:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.
+        ManufacturingAndResources:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.
+        PublicSector:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.
+        RetailConsumerProductsAndService:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.

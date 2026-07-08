@@ -1,0 +1,19 @@
+{
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 */1 * * * *",
+      "useMonitor": true,
+      "runOnStartup": false
+    },
+    {
+      "name": "starter",
+      "type": "durableClient",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "run.ps1",
+  "disabled": false
+}

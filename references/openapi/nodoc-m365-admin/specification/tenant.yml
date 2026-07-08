@@ -1,0 +1,398 @@
+paths:
+  /admin/api/tenant/datalocationandcommitments:
+    get:
+      summary: Get data location and commitments
+      description: >-
+        Retrieve the data residency location and commitment information for the tenant.
+      operationId: Tenant.GetDataLocation
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/DataLocationCommitmentsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/localdatalocation:
+    get:
+      summary: Get local data location
+      description: >-
+        Retrieve the local data location information for the tenant.
+      operationId: Tenant.GetLocalDataLocation
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/LocalDataLocationResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/azureSubscriptions:
+    get:
+      summary: Get Azure subscriptions
+      description: >-
+        Retrieve the Azure subscriptions associated with the tenant.
+      operationId: Tenant.GetAzureSubscriptions
+      tags: [Tenant]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - Azure subscription details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/billingAccountsWithShell:
+    get:
+      summary: Get billing accounts
+      description: >-
+        Retrieve billing accounts associated with the tenant, integrated
+        with the admin portal shell.
+      operationId: Tenant.GetBillingAccounts
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: common.yml#/components/schemas/BillingAccountWithShell
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/marketplaceSeatSize:
+    get:
+      summary: Get marketplace seat size
+      description: >-
+        Retrieve the marketplace seat size information for the tenant.
+      operationId: Tenant.GetMarketplaceSeatSize
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - marketplace seat size
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/selfServicePurchasePolicy/products:
+    get:
+      summary: Get self-service purchase products
+      description: >-
+        Retrieve the list of products available for self-service purchase
+        and their policy settings (enabled/disabled).
+      operationId: Tenant.GetSelfServicePurchaseProducts
+      tags: [Tenant]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - self-service purchase product details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/Tenant/StartOfflineProcesses:
+    get:
+      summary: Start offline processes
+      description: >-
+        Start tenant offline processes for background data processing.
+      operationId: Tenant.StartOfflineProcesses
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Offline processes status. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/o365activationusercounts:
+    get:
+      summary: Get O365 activation user counts
+      description: >-
+        Retrieve Office 365 activation user counts for the tenant.
+      operationId: Tenant.GetO365ActivationUserCounts
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: O365 activation user counts. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/isReportsPrivacyEnabled:
+    get:
+      summary: Check reports privacy enabled
+      description: >-
+        Check if reports privacy is enabled for the tenant.
+      operationId: Tenant.IsReportsPrivacyEnabled
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Reports privacy enabled status. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /_api/v2.1/unifiedStorageQuotaEligible:
+    get:
+      summary: Get unified storage quota eligibility
+      description: >-
+        Retrieve whether the tenant is eligible for the unified SharePoint and
+        OneDrive storage quota experience, including over-quota state and last
+        refresh time.
+      operationId: Tenant.GetUnifiedStorageQuotaEligibility
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  isEligible:
+                    type: boolean
+                  lastUpdated:
+                    type: string
+                    format: date-time
+                  isOverQuota:
+                    type: boolean
+                  isEligibleFeature:
+                    type: string
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/SACProvisioning:
+    post:
+      summary: SAC provisioning
+      description: >-
+        Trigger Self-service Account Creation (SAC) provisioning for the tenant (Users > Active).
+      operationId: Tenant.SACProvisioning
+      tags: [Tenant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/customviewfilterdefaults:
+    get:
+      summary: Get custom view filter defaults
+      description: >-
+        Retrieve default filter settings for custom user list views (Users > Active).
+      operationId: Tenant.GetCustomViewFilterDefaults
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/userviews:
+    get:
+      summary: Get user views
+      description: >-
+        Retrieve the configured user views for the tenant admin portal (Users > Active).
+      operationId: Tenant.GetUserViews
+      tags: [Tenant]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/isTenantEligibleToRemoveSAC:
+    get:
+      summary: Check SAC removal eligibility
+      description: >-
+        Check if the tenant is eligible to remove Self-service Account Creation (SAC) (Org Settings > M365 installation options).
+      operationId: Tenant.IsTenantEligibleToRemoveSAC
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/tenant/seatSize:
+    get:
+      summary: Get tenant seat size
+      description: >-
+        Retrieve the tenant seat size information (Copilot > Data).
+      operationId: Tenant.GetSeatSize
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

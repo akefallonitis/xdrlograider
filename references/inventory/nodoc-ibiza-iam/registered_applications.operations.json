@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/RegisteredApplications/{appId}/Consent",
+      "OperationId": "RegisteredApplication.Consent",
+      "Summary": "Consent to app registration",
+      "Tags": [
+        "Application Registration"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/RegisteredApplications/{appId}",
+      "OperationId": "RegisteredApplication.Update",
+      "Summary": "Update app registration",
+      "Tags": [
+        "Application Registration"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/RegisteredApplications/{appId}",
+      "OperationId": "RegisteredApplication.Delete",
+      "Summary": "Delete app registration",
+      "Tags": [
+        "Application Registration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/RegisteredApplications",
+      "OperationId": "RegisteredApplication.List",
+      "Summary": "List app registrations",
+      "Tags": [
+        "Application Registration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/RegisteredApplications",
+      "OperationId": "RegisteredApplication.Create",
+      "Summary": "Create app registration",
+      "Tags": [
+        "Application Registration"
+      ]
+    }
+  ],
+  "category": "registered_applications",
+  "portal": "nodoc-ibiza-iam"
+}

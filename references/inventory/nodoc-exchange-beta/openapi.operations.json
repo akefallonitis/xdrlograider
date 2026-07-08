@@ -1,0 +1,556 @@
+{
+  "operationCount": 61,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/beta/UserProfile/ExchangeAdminCenter.GetFeedbackAccessToken()",
+      "OperationId": "ExchangeBeta.Preferences.GetFeedbackAccessToken",
+      "Summary": "Get a feedback access token",
+      "Tags": [
+        "Preferences"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/UserProfile/ExchangeAdminCenter.GetFeedbackAttribute()",
+      "OperationId": "ExchangeBeta.Preferences.GetFeedbackAttribute",
+      "Summary": "Get feedback attributes",
+      "Tags": [
+        "Preferences"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/TimeZone",
+      "OperationId": "ExchangeBeta.Bootstrap.ListTimeZones",
+      "Summary": "List available Exchange time zones",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MobileDeviceMailboxPolicy",
+      "OperationId": "ExchangeBeta.Mobile.ListMobileDeviceMailboxPolicies",
+      "Summary": "List mobile device mailbox policies",
+      "Tags": [
+        "Mobile"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/PublicFolder",
+      "OperationId": "ExchangeBeta.Folders.ListPublicFolders",
+      "Summary": "List public folders",
+      "Tags": [
+        "Folders"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/ActiveSyncDeviceAccessRule",
+      "OperationId": "ExchangeBeta.Mobile.ListActiveSyncDeviceAccessRules",
+      "Summary": "List ActiveSync device access rules",
+      "Tags": [
+        "Mobile"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/UserPreference(PrimaryKey='{primaryKey}')",
+      "OperationId": "ExchangeBeta.Preferences.GetRawPreference",
+      "Summary": "Get a raw preference record",
+      "Tags": [
+        "Preferences"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/AddressBookPolicy",
+      "OperationId": "ExchangeBeta.Objects.ListAddressBookPolicies",
+      "Summary": "List address book policies",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/DynamicDistributionGroupIC",
+      "OperationId": "ExchangeBeta.Objects.ListDynamicDistributionGroups",
+      "Summary": "List dynamic distribution groups",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/TransportRule",
+      "OperationId": "ExchangeBeta.MailFlow.ListTransportRules",
+      "Summary": "List transport rules",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/OrganizationRelationship('{organizationRelationshipId}')",
+      "OperationId": "ExchangeBeta.Sharing.GetOrganizationRelationship",
+      "Summary": "Get organization relationship details",
+      "Tags": [
+        "Sharing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MigrationEndpoint",
+      "OperationId": "ExchangeBeta.Migration.ListMigrationEndpoints",
+      "Summary": "List migration endpoints",
+      "Tags": [
+        "Migration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Groupv05('{groupId}')/BypassModerationFromSendersOrMembers",
+      "OperationId": "ExchangeBeta.Objects.ListGroupModerationBypassSenders",
+      "Summary": "List moderation bypass senders for a group",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/TenantDataBoundary",
+      "OperationId": "ExchangeBeta.Bootstrap.GetTenantDataBoundary",
+      "Summary": "Get tenant data boundary settings",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/ProtectionAlert/ExchangeAdminCenter.GetAlertPolicies()",
+      "OperationId": "ExchangeBeta.MailFlow.GetAlertPolicies",
+      "Summary": "Get Exchange alert policies",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MailflowReportTDP/ExchangeAdminCenter.CustomerInsight(StartDate={startDate},EndDate={endDate},InsightType='{insightType}')",
+      "OperationId": "ExchangeBeta.MailFlow.GetCustomerInsight",
+      "Summary": "Get Exchange customer insight data",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/OutboundConnector",
+      "OperationId": "ExchangeBeta.MailFlow.ListOutboundConnectors",
+      "Summary": "List outbound connectors",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/ResourceMailbox",
+      "OperationId": "ExchangeBeta.Objects.ListResourceMailboxes",
+      "Summary": "List resource mailboxes",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/HistoricalSearch",
+      "OperationId": "ExchangeBeta.MailFlow.ListHistoricalSearches",
+      "Summary": "List historical message trace searches",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MailflowReport/ExchangeAdminCenter.MailflowForwarding(StartDate={startDate},EndDate={endDate})",
+      "OperationId": "ExchangeBeta.MailFlow.GetMailflowForwardingReport",
+      "Summary": "Get auto-forwarding report data",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/OwaMailboxPolicy",
+      "OperationId": "ExchangeBeta.Objects.ListOwaMailboxPolicies",
+      "Summary": "List Outlook on the web mailbox policies",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/beta/UserPreference",
+      "OperationId": "ExchangeBeta.Preferences.UpsertUserPreference",
+      "Summary": "Upsert a portal user preference",
+      "Tags": [
+        "Preferences"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/UserProfile/ExchangeAdminCenter.GetOCPSAccessToken()",
+      "OperationId": "ExchangeBeta.Preferences.GetOCPSAccessToken",
+      "Summary": "Get an OCPS access token",
+      "Tags": [
+        "Preferences"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+      "OperationId": "ExchangeBeta.Bootstrap.GetMyTimeZone",
+      "Summary": "Get the current user's Exchange time zone",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Mailbox({mailboxId})/SendOnBehalfPermission",
+      "OperationId": "ExchangeBeta.Objects.GetMailboxSendOnBehalfPermissions",
+      "Summary": "Get mailbox send-on-behalf permissions",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/UserProfile",
+      "OperationId": "ExchangeBeta.Preferences.GetUserProfile",
+      "Summary": "Get the Exchange portal user profile",
+      "Tags": [
+        "Preferences"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MailContact",
+      "OperationId": "ExchangeBeta.Objects.ListMailContacts",
+      "Summary": "List mail contacts",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MailflowReport/ExchangeAdminCenter.ConnectorReport(ReportType='{reportType}',StartDate={startDate},EndDate={endDate})",
+      "OperationId": "ExchangeBeta.MailFlow.GetConnectorReport",
+      "Summary": "Get connector report data",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/OrganizationRelationship",
+      "OperationId": "ExchangeBeta.Sharing.ListOrganizationRelationships",
+      "Summary": "List organization relationships",
+      "Tags": [
+        "Sharing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/ManagementRoleV2",
+      "OperationId": "ExchangeBeta.Roles.ListManagementRoles",
+      "Summary": "List management roles",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/RoleGroup('{roleGroupId}')/ExchangeAdminCenter.GetRoleGroupMembers()",
+      "OperationId": "ExchangeBeta.Roles.GetRoleGroupMembers",
+      "Summary": "Get role group members",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/PublicFolderMailbox",
+      "OperationId": "ExchangeBeta.Folders.ListPublicFolderMailboxes",
+      "Summary": "List public folder mailboxes",
+      "Tags": [
+        "Folders"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/AcceptedDomainFullListIC",
+      "OperationId": "ExchangeBeta.MailFlow.ListAcceptedDomainsFull",
+      "Summary": "List accepted domains with full portal details",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/RoleAssignments",
+      "OperationId": "ExchangeBeta.Roles.ListRoleAssignments",
+      "Summary": "List role assignments",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Recipient/ExchangeAdminCenter.GetRecipientsIC",
+      "OperationId": "ExchangeBeta.Objects.GetRecipientsIC",
+      "Summary": "Get recipient inventory for the Exchange list view",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/TenantMonitoring",
+      "OperationId": "ExchangeBeta.Bootstrap.GetTenantMonitoring",
+      "Summary": "Get tenant monitoring status",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MailflowReport/ExchangeAdminCenter.RecentAlertsReport(StartDate={startDate},EndDate={endDate})",
+      "OperationId": "ExchangeBeta.MailFlow.GetRecentAlertsReport",
+      "Summary": "Get recent alerts report data",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/AcceptedDomain",
+      "OperationId": "ExchangeBeta.MailFlow.ListAcceptedDomains",
+      "Summary": "List accepted domains",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/IndividualSharing({individualSharingId})",
+      "OperationId": "ExchangeBeta.Sharing.GetIndividualSharingPolicy",
+      "Summary": "Get individual sharing policy details",
+      "Tags": [
+        "Sharing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/RoleGroup",
+      "OperationId": "ExchangeBeta.Roles.ListRoleGroups",
+      "Summary": "List Exchange role groups",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MailUserIC",
+      "OperationId": "ExchangeBeta.Objects.ListMailUsersIC",
+      "Summary": "List high-volume email mail users",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Recipient",
+      "OperationId": "ExchangeBeta.Objects.ListRecipients",
+      "Summary": "List recipients for mailbox detail selectors",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Groupv05('{groupId}')/ModeratedBy",
+      "OperationId": "ExchangeBeta.Objects.ListGroupModerators",
+      "Summary": "List moderators for a group",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Mailbox({mailboxId})",
+      "OperationId": "ExchangeBeta.Objects.GetMailbox",
+      "Summary": "Get mailbox details",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Mailbox({mailboxId})/FullAccessPermission",
+      "OperationId": "ExchangeBeta.Objects.GetMailboxFullAccessPermissions",
+      "Summary": "Get mailbox full-access permissions",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/ResourceMailbox('{resourceMailboxId}')",
+      "OperationId": "ExchangeBeta.Objects.GetResourceMailbox",
+      "Summary": "Get resource mailbox details",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Shell",
+      "OperationId": "ExchangeBeta.Bootstrap.GetShell",
+      "Summary": "Get Exchange shell bootstrap",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Mailbox({mailboxId})/ExchangeAdminCenter.GetMailboxStatistics(Archive=false)",
+      "OperationId": "ExchangeBeta.Objects.GetMailboxStatistics",
+      "Summary": "Get mailbox statistics",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Groupv05('{groupId}')/AcceptMessagesOnlyFromSendersOrMembers",
+      "OperationId": "ExchangeBeta.Objects.ListGroupApprovedSenders",
+      "Summary": "List approved senders for a group",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/InboundConnector",
+      "OperationId": "ExchangeBeta.MailFlow.ListInboundConnectors",
+      "Summary": "List inbound connectors",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MailboxAutoReplyConfiguration('{mailboxId}')",
+      "OperationId": "ExchangeBeta.Objects.GetMailboxAutoReplyConfiguration",
+      "Summary": "Get mailbox auto-reply configuration",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MailflowReport/ExchangeAdminCenter.EtrLastExecutionData",
+      "OperationId": "ExchangeBeta.MailFlow.GetTransportRuleLastExecutionData",
+      "Summary": "Get transport rule last-execution data",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/CmdletInfo",
+      "OperationId": "ExchangeBeta.Bootstrap.GetCmdletInfo",
+      "Summary": "Get cmdlet metadata",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MobileDevice",
+      "OperationId": "ExchangeBeta.Mobile.ListMobileDevices",
+      "Summary": "List mobile devices",
+      "Tags": [
+        "Mobile"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/Mailbox({mailboxId})/SendAsPermission",
+      "OperationId": "ExchangeBeta.Objects.GetMailboxSendAsPermissions",
+      "Summary": "Get mailbox send-as permissions",
+      "Tags": [
+        "Objects"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/RemoteDomain",
+      "OperationId": "ExchangeBeta.MailFlow.ListRemoteDomains",
+      "Summary": "List remote domains",
+      "Tags": [
+        "MailFlow"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/IndividualSharing",
+      "OperationId": "ExchangeBeta.Sharing.ListIndividualSharingPolicies",
+      "Summary": "List individual sharing policies",
+      "Tags": [
+        "Sharing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/UserPreference(PrimaryKey='{primaryKey}')/ExchangeAdminCenter.GetItemInCollection(SubKey='{subKey}')",
+      "OperationId": "ExchangeBeta.Preferences.GetItemInCollection",
+      "Summary": "Get a single value from a preference bucket",
+      "Tags": [
+        "Preferences"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/ActiveSyncDeviceClass",
+      "OperationId": "ExchangeBeta.Mobile.ListActiveSyncDeviceClasses",
+      "Summary": "List ActiveSync device classes",
+      "Tags": [
+        "Mobile"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/UserPreference(PrimaryKey='{primaryKey}')/ExchangeAdminCenter.GetAll()",
+      "OperationId": "ExchangeBeta.Preferences.GetAllForPrimaryKey",
+      "Summary": "Get all values for a preference bucket",
+      "Tags": [
+        "Preferences"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/beta/MigrationBatch",
+      "OperationId": "ExchangeBeta.Migration.ListMigrationBatches",
+      "Summary": "List migration batches",
+      "Tags": [
+        "Migration"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-exchange-beta"
+}

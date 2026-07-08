@@ -1,0 +1,151 @@
+{
+  "operationCount": 16,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/metadata",
+      "OperationId": "SentinelPrecision.ListMetadata",
+      "Summary": "List Sentinel content metadata",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/workbooks",
+      "OperationId": "SentinelPrecision.ListWorkbooks",
+      "Summary": "List Sentinel workbooks",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/contenttemplates",
+      "OperationId": "SentinelPrecision.ListContentTemplates",
+      "Summary": "List Sentinel content templates",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/recommendations",
+      "OperationId": "SentinelPrecision.ListRecommendations",
+      "Summary": "List Sentinel precision recommendations",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/threatintelligence/main/query",
+      "OperationId": "SentinelPrecision.QueryThreatIntelligence",
+      "Summary": "Query Sentinel threat intelligence items",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/apiproxy/arm/providers/Microsoft.ResourceGraph/resources",
+      "OperationId": "SentinelPrecision.QueryResourceGraph",
+      "Summary": "Query Azure Resource Graph",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}",
+      "OperationId": "SentinelPrecision.GetWorkspace",
+      "Summary": "Get Sentinel workspace",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/overview",
+      "OperationId": "SentinelPrecision.GetOverview",
+      "Summary": "Get Sentinel overview sections",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectorDefinitions",
+      "OperationId": "SentinelPrecision.ListDataConnectorDefinitions",
+      "Summary": "List Sentinel data connector definitions",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/threatintelligence/main/count",
+      "OperationId": "SentinelPrecision.CountThreatIntelligence",
+      "Summary": "Count Sentinel threat intelligence items",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/microsoft.authorization/permissions",
+      "OperationId": "SentinelPrecision.ListWorkspacePermissions",
+      "Summary": "List Sentinel workspace permissions",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables",
+      "OperationId": "SentinelPrecision.ListWorkspaceTables",
+      "Summary": "List Sentinel workspace tables",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions",
+      "OperationId": "SentinelPrecision.ListSubscriptions",
+      "Summary": "List Azure subscriptions",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/settings/{settingName}",
+      "OperationId": "SentinelPrecision.GetSetting",
+      "Summary": "Get Sentinel workspace setting",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/entities/GetAnomaliesSummary",
+      "OperationId": "SentinelPrecision.GetAnomaliesSummary",
+      "Summary": "Get Sentinel anomalies summary",
+      "Tags": [
+        "Sentinel"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectors",
+      "OperationId": "SentinelPrecision.ListDataConnectors",
+      "Summary": "List Sentinel data connectors",
+      "Tags": [
+        "Sentinel"
+      ]
+    }
+  ],
+  "category": "sentinel_precision",
+  "portal": "nodoc-defender-xdr"
+}

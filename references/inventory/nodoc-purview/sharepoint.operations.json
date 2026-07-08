@@ -1,0 +1,25 @@
+{
+  "operationCount": 2,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/spo/admin/_api/SPO.Tenant/EnableAIPIntegration",
+      "OperationId": "checkAipIntegrationEnabled",
+      "Summary": "Check if Azure Information Protection integration is enabled",
+      "Tags": [
+        "SharePoint"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/spo/admin/_api/SPO.Tenant/EnableSensitivityLabelForPDF",
+      "OperationId": "checkSensitivityLabelForPdfEnabled",
+      "Summary": "Check if sensitivity labels for PDF are enabled",
+      "Tags": [
+        "SharePoint"
+      ]
+    }
+  ],
+  "category": "sharepoint",
+  "portal": "nodoc-purview"
+}

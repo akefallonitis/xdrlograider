@@ -1,0 +1,205 @@
+{
+  "operationCount": 22,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/msgraph/v1.0/users",
+      "OperationId": "PortalServices.ListUsersGraph",
+      "Summary": "List users via Graph proxy",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/istenantinsightsready",
+      "OperationId": "PortalServices.CheckAppGovernanceInsightsReady",
+      "Summary": "Check App Governance insights ready",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/di/Aggregate/ThreatInstanceList",
+      "OperationId": "PortalServices.AggregateThreatInstances",
+      "Summary": "Aggregate threat instances",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/optimize/OptimizeRecommendation",
+      "OperationId": "PortalServices.GetOptimizeRecommendations",
+      "Summary": "Get optimize recommendations",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/m365appprotection/mapg-glsservice/compliance/istenantonboarded",
+      "OperationId": "PortalServices.CheckAppGovernanceOnboarding",
+      "Summary": "Check App Governance onboarding",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/di/Find/CustomTag",
+      "OperationId": "PortalServices.FindCustomTag",
+      "Summary": "Find custom tags",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/di/Search/SubmissionDIESData",
+      "OperationId": "PortalServices.SearchSubmissionDiesData",
+      "Summary": "Search report submission data",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes",
+      "OperationId": "PortalServices.CheckCompliancePermissions",
+      "Summary": "Check compliance permissions",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference",
+      "OperationId": "PortalServices.GetUserPreferences",
+      "Summary": "Get user preferences",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference",
+      "OperationId": "PortalServices.UpdateUserPreference",
+      "Summary": "Update user preference",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/shell/api/shell/shellinfo",
+      "OperationId": "PortalServices.GetShellInfo",
+      "Summary": "Get shell info",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/alwaysUseUtc",
+      "OperationId": "PortalServices.GetUtcPreference",
+      "Summary": "Get UTC preference",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/msgraph/v1.0/users/{UserId}",
+      "OperationId": "PortalServices.GetUserGraph",
+      "Summary": "Get user via Graph proxy",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/di/Search/SubmissionDIESDataAggregation",
+      "OperationId": "PortalServices.AggregateSubmissionDiesData",
+      "Summary": "Aggregate report submission data",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdepDnH/reports/machineHealth/healthStatus",
+      "OperationId": "PortalServices.GetMachineHealthStatus",
+      "Summary": "Get machine health status report",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/Beta/{tenantId}/InvokeCommand",
+      "OperationId": "PortalServices.InvokeAdminCommand",
+      "Summary": "Invoke admin command",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/di/Aggregate/ThreatProfileDetails",
+      "OperationId": "PortalServices.AggregateThreatProfileDetails",
+      "Summary": "Aggregate threat profile details",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/msgraph/v1.0/subscribedSkus",
+      "OperationId": "PortalServices.GetSubscribedSkusGraph",
+      "Summary": "Get subscribed SKUs via Graph proxy",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/di/Find/TrialOffer",
+      "OperationId": "PortalServices.FindTrialOffer",
+      "Summary": "Find trial offers",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/medeina/auth",
+      "OperationId": "PortalServices.GetMedeinaAuth",
+      "Summary": "Get Medeina (Copilot) auth",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cdssecuritycopilot/trial",
+      "OperationId": "PortalServices.GetSecurityCopilotTrial",
+      "Summary": "Get Security Copilot trial status",
+      "Tags": [
+        "Portal Services"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/astgws/AttackSimulator/api/v1/AdvanceReporting/chart/UserCoverage",
+      "OperationId": "PortalServices.GetAttackSimUserCoverage",
+      "Summary": "Get attack simulator user coverage",
+      "Tags": [
+        "Portal Services"
+      ]
+    }
+  ],
+  "category": "portal_services",
+  "portal": "nodoc-defender-xdr"
+}

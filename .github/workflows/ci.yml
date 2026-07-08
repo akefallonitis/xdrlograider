@@ -1,0 +1,225 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-gauntlet:
+    name: Offline gauntlet (Tier-1 + L1 + Validate + ARM-TTK + Build-FA)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup PowerShell modules cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          path: ~/.local/share/powershell/Modules
+          key: psmod-${{ runner.os }}-pester-yaml-${{ hashFiles('src/requirements.psd1') }}
+          restore-keys: |
+            psmod-${{ runner.os }}-pester-yaml-
+
+      - name: Install Pester + powershell-yaml
+        shell: pwsh
+        run: |
+          if (-not (Get-Module -ListAvailable Pester | Where-Object Version -ge '5.5')) {
+            Install-Module Pester -RequiredVersion 5.5.0 -Force -SkipPublisherCheck -Scope CurrentUser
+          }
+          if (-not (Get-Module -ListAvailable powershell-yaml)) {
+            Install-Module powershell-yaml -Force -SkipPublisherCheck -Scope CurrentUser
+          }
+
+      - name: L1 · Parse gauntlet (PowerShell · JSON · YAML)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # PS parse
+          $err = $null
+          Get-ChildItem -Recurse -Path src/, tools/ -Include '*.ps1','*.psm1','*.psd1' -ErrorAction SilentlyContinue | ForEach-Object {
+            $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$err)
+            if ($err.Count -gt 0) { Write-Error "Parse fail in $($_.FullName): $($err[0].Message)"; exit 1 }
+          }
+          # JSON parse
+          Get-ChildItem -Recurse -Path deploy/, src/, Package/ -Include '*.json' -ErrorAction SilentlyContinue | ForEach-Object {
+            try { $null = Get-Content $_.FullName -Raw | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "JSON parse fail $($_.FullName): $($_.Exception.Message)"; exit 1 }
+          }
+          # YAML parse (references/openapi/)
+          Import-Module powershell-yaml -Force
+          $bad = 0
+          Get-ChildItem -Recurse -Path references/openapi/ -Include '*.yml','*.yaml' -ErrorAction SilentlyContinue | ForEach-Object {
+            try { $null = Get-Content $_.FullName -Raw | ConvertFrom-Yaml } catch { Write-Warning "YAML parse fail $($_.FullName): $($_.Exception.Message)"; $bad++ }
+          }
+          if ($bad -gt 0) { Write-Warning "$bad YAML files failed parse · refs only (non-blocking)" }
+          Write-Host "L1 parse GREEN"
+
+      - name: gitleaks · scan for committed secrets
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7  # v2.3.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Default ruleset (~150 detectors: AWS/Azure/GCP/Slack/SSH PEMs/etc). Custom rules
+        # would live in .gitleaks.toml at repo root; intentionally absent so the default applies.
+
+      - name: PSScriptAnalyzer · static analysis + custom B-25 type-check rule
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Get-Module -ListAvailable PSScriptAnalyzer | Where-Object Version -ge '1.21')) {
+            Install-Module PSScriptAnalyzer -RequiredVersion 1.22.0 -Force -SkipPublisherCheck -Scope CurrentUser
+          }
+          Import-Module PSScriptAnalyzer -Force
+          $settingsPath = if (Test-Path 'PSScriptAnalyzerSettings.psd1') { 'PSScriptAnalyzerSettings.psd1' } else { $null }
+          $results = Get-ChildItem -Recurse -Path src/, tools/ -Include '*.ps1','*.psm1' -ErrorAction SilentlyContinue | ForEach-Object {
+            if ($settingsPath) {
+              Invoke-ScriptAnalyzer -Path $_.FullName -Settings $settingsPath -Severity Error,Warning -ErrorAction SilentlyContinue
+            } else {
+              Invoke-ScriptAnalyzer -Path $_.FullName -Severity Error -ErrorAction SilentlyContinue
+            }
+          }
+          $errors = $results | Where-Object Severity -eq 'Error'
+          if ($errors) {
+            $errors | Format-List RuleName, Severity, ScriptName, Line, Message
+            Write-Error "PSScriptAnalyzer found $($errors.Count) errors"
+            exit 1
+          }
+          $warnings = $results | Where-Object Severity -eq 'Warning'
+          if ($warnings) {
+            Write-Host "PSScriptAnalyzer: $($warnings.Count) warnings (advisory · review):"
+            $warnings | Group-Object RuleName | Sort-Object Count -Descending | Format-Table Count, Name
+          }
+          Write-Host "PSScriptAnalyzer GREEN (0 errors · $($warnings.Count) warnings)"
+
+      - name: Tier-1 · Pester unit tests
+        shell: pwsh
+        run: |
+          if (-not (Test-Path tests)) { Write-Host 'No tests/ yet · Phase 2+ adds them'; exit 0 }
+          $config = New-PesterConfiguration
+          $config.Run.Path = 'tests'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Normal'
+          $config.Should.ErrorAction = 'Continue'
+          Invoke-Pester -Configuration $config
+
+      - name: Validate-Manifests
+        shell: pwsh
+        run: |
+          if (Test-Path tools/Validate-Manifests.ps1) {
+            pwsh tools/Validate-Manifests.ps1
+          } else {
+            Write-Host 'tools/Validate-Manifests.ps1 not yet present (Phase 1.6) · skip'
+          }
+
+      - name: Regen-gate · manifest regenerated from catalogue == committed (mirrors pre-push axis 28)
+        shell: pwsh
+        run: |
+          # Mirrors tools/Run-PrePushGauntlet.ps1 axis 28 (regen->diff keystone · plan §9 G4): regenerate
+          # the manifest from the COMMITTED catalogue and fail on any drift vs the committed manifest. This
+          # proves the manifest was GENERATED from the catalogue, not hand-edited. Comparison is line-ending
+          # normalized + TrimEnd (identical to axis 28) so CRLF/LF and trailing-newline differences do not
+          # false-fail. Non-zero exit on difference.
+          $ErrorActionPreference = 'Stop'
+          $gen = 'dev-tools/Generate-Manifest.ps1'
+          $committed = 'manifests/Defender/Operations.psd1'
+          if (-not (Test-Path $gen))       { Write-Error "regen-gate: $gen missing"; exit 1 }
+          if (-not (Test-Path $committed)) { Write-Error "regen-gate: committed $committed missing"; exit 1 }
+          $tmp = Join-Path ([IO.Path]::GetTempPath()) ("xdrlr-regen-" + [Guid]::NewGuid().ToString('N') + ".psd1")
+          try {
+            pwsh -NoProfile -File $gen -Portal Defender -Group Operations -OutPath $tmp *> $null
+            if (-not (Test-Path $tmp)) { Write-Error 'regen-gate: Generate-Manifest produced no output'; exit 1 }
+            $a = ((Get-Content $committed -Raw) -replace "`r`n", "`n").TrimEnd()
+            $b = ((Get-Content $tmp -Raw)       -replace "`r`n", "`n").TrimEnd()
+            if ($a -ne $b) {
+              Write-Error 'regen-gate FAIL · committed manifests/Defender/Operations.psd1 != regenerated-from-catalogue (hand-edited or stale catalogue?)'
+              exit 1
+            }
+            Write-Host 'Regen-gate GREEN · manifest is catalogue-derived (no hand-edit drift)'
+          } finally {
+            if (Test-Path $tmp) { Remove-Item $tmp -Force -ErrorAction SilentlyContinue }
+          }
+
+      - name: ARM-TTK on deploy/mainTemplate.json (blocking · v11 senior-dev rule)
+        shell: pwsh
+        run: |
+          # v11 methodology: ARM-TTK is BLOCKING. Some rules have legitimate exceptions (older
+          # apiVersions on stable Microsoft RPs); those are surfaced explicitly and skipped via
+          # KnownIssue allowlist below. Any NEW or unallowed failure blocks the push.
+          if (-not (Test-Path deploy/mainTemplate.json)) { Write-Error 'deploy/mainTemplate.json missing'; exit 1 }
+          if (-not (Test-Path "$HOME/arm-ttk")) {
+            git clone --depth 1 https://github.com/Azure/arm-ttk.git "$HOME/arm-ttk"
+          }
+          Import-Module "$HOME/arm-ttk/arm-ttk/arm-ttk.psd1" -Force
+          $ErrorActionPreference = 'Continue'
+          # Known-acceptable rule failures (older apiVersions on stable Microsoft RPs that have
+          # no newer release · explicitly tracked here so any NEW failure surfaces)
+          $allowedRules = @(
+              'apiVersions Should Be Recent'
+          )
+          $results = Test-AzTemplate -TemplatePath deploy/mainTemplate.json -ErrorAction SilentlyContinue 2>$null
+          $failed = @($results | Where-Object { -not $_.Passed })
+          $passed = @($results | Where-Object { $_.Passed }).Count
+          $blocking = @($failed | Where-Object { $_.Name -notin $allowedRules })
+          Write-Host "ARM-TTK: $passed passed · $($failed.Count) failed (allowlisted: $($failed.Count - $blocking.Count)) · blocking failures: $($blocking.Count)"
+          if ($blocking.Count -gt 0) {
+            $blocking | Format-List Name, @{N='ResourceFile';E={$_.File.Name}}
+            Write-Error "ARM-TTK FAIL · $($blocking.Count) blocking failures (not in allowlist)"
+            exit 1
+          }
+          if ($failed.Count -gt 0) {
+            Write-Host 'Allowlisted failures (informational):'
+            $failed | Format-List Name, @{N='ResourceFile';E={$_.File.Name}}
+          }
+          Write-Host 'ARM-TTK GREEN (blocking · 0 unallowed failures)'
+
+      - name: Build-FunctionAppZip
+        shell: pwsh
+        run: |
+          if (Test-Path tools/Build-FunctionAppZip.ps1) {
+            pwsh tools/Build-FunctionAppZip.ps1
+            if (-not (Test-Path function-app.zip)) { Write-Error 'function-app.zip not produced'; exit 1 }
+            $sizeMB = [math]::Round((Get-Item function-app.zip).Length / 1MB, 1)
+            Write-Host "function-app.zip built · ${sizeMB}MB"
+          } else {
+            Write-Host 'tools/Build-FunctionAppZip.ps1 not yet present (Phase 1.6) · skip'
+          }
+
+      - name: Anti-bloat gate · function-app.zip size + manifest line count sanity
+        shell: pwsh
+        run: |
+          if (Test-Path function-app.zip) {
+            $sizeMB = (Get-Item function-app.zip).Length / 1MB
+            if ($sizeMB -gt 25) { Write-Error "function-app.zip ${sizeMB}MB exceeds 25MB sanity cap"; exit 1 }
+          }
+          Get-ChildItem -Recurse -Path manifests/ -Include '*.psd1' -ErrorAction SilentlyContinue | ForEach-Object {
+            $lines = (Get-Content $_.FullName | Measure-Object -Line).Lines
+            if ($lines -gt 10000) { Write-Error "$($_.Name) manifest exceeds 10K lines · likely runaway generation"; exit 1 }
+          }
+          Write-Host "Anti-bloat gate GREEN"
+
+      - name: Full pre-push gauntlet (38 axes · the SoT · closes the CI gap on axes 14/29/30 + exactly-once replay)
+        shell: pwsh
+        run: |
+          # G3 (structural gate 3 · plan §F): CI invokes the SAME 38-axis Run-PrePushGauntlet the pre-push hook runs,
+          # so CI can no longer OMIT / DRIFT from the axes the inline steps above don't cover — axis 14 (DCR<->table
+          # <->per-category-schema set-equality), axis 29 (exactly-once offline replay), axis 30 (per-category schema
+          # regen->diff), and the rest. The inline steps above remain as a fast-fail subset; Φ5 consolidates CI to
+          # invoke ONLY this gauntlet (removing the redundancy). Deps (Pester/PSScriptAnalyzer/powershell-yaml) +
+          # arm-ttk ($HOME/arm-ttk) were installed/cloned by the steps above. Non-zero exit fails CI.
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path tools/Run-PrePushGauntlet.ps1)) { Write-Error 'Run-PrePushGauntlet.ps1 missing'; exit 1 }
+          pwsh -NoProfile -File tools/Run-PrePushGauntlet.ps1
+          if ($LASTEXITCODE -ne 0) { Write-Error "Full 38-axis gauntlet FAIL · exit=$LASTEXITCODE"; exit $LASTEXITCODE }
+          Write-Host 'Full 38-axis gauntlet GREEN in CI'

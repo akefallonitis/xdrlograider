@@ -1,0 +1,46 @@
+# XdrLogRaider · PUBLIC-ALLOWLIST (locked decision G4 · single-repo deny-by-default)
+# Every git-TRACKED path must match one of these entries or gauntlet axis 35 FAILS the push.
+# An entry ending in '/' allows the whole subtree; otherwise it allows exactly that file.
+# The internal layer (references/live/ · probes · .audit/ · local logs) is NOT listed —
+# tracking anything outside this list is structurally impossible to ship.
+
+# --- root files ---
+.gitattributes
+.gitignore
+.gitleaks.toml
+CONTRIBUTING.md
+LICENSE
+PRIVACY.md
+PSScriptAnalyzerSettings.psd1
+README.md
+SECURITY.md
+TERMS.md
+
+# --- public subtrees ---
+.github/
+deploy/
+dev-tools/
+manifests/
+Package/
+src/
+tests/
+tools/
+
+# --- docs: PUBLIC operator/contributor docs only (the internal dev record — DECISION-LEDGER, CATALOGUE-REVIEW — is
+#     gitignored + untracked · NOT listed here · so it can never re-enter the public tree under deny-by-default) ---
+docs/ONBOARDING-RUNBOOK.md
+docs/runbooks/
+docs/ROADMAP.md
+docs/CATALOGUE.md
+docs/SETUP.md
+docs/RBAC.md
+docs/CRED-FLOW.md
+docs/SECURITY-CONSIDERATIONS.md
+docs/PRIOR-RESEARCH.md
+
+# --- research corpus: derived + upstream-sourced ONLY (references/live is the internal layer · NEVER listed) ---
+references/INVENTORY.md
+references/cross-source/
+references/inventory/
+references/openapi/
+references/postman/

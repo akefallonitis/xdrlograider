@@ -1,0 +1,70 @@
+{
+  "operationCount": 7,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/securityplatform/lake/kql/v1/rest/mgmt",
+      "OperationId": "DataLake.GetTableSchema",
+      "Summary": "Get data lake table schema",
+      "Tags": [
+        "Data Lake"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/securityplatform/lake/databases",
+      "OperationId": "DataLake.ListDatabases",
+      "Summary": "List data lake databases",
+      "Tags": [
+        "Data Lake"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/securityplatform/jobs/details",
+      "OperationId": "DataLake.GetJobDetails",
+      "Summary": "Get job details",
+      "Tags": [
+        "Data Lake"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/securityplatform/jobs/runs/summary",
+      "OperationId": "DataLake.GetJobRunsSummary",
+      "Summary": "Get job runs summary",
+      "Tags": [
+        "Data Lake"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/securityplatform/sentinelgraph/catalog/tables",
+      "OperationId": "DataLake.ListSentinelGraphCatalogTables",
+      "Summary": "List Sentinel graph catalog tables",
+      "Tags": [
+        "Data Lake"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/securityplatform/sentinelgraph/provisioning/checkTenant",
+      "OperationId": "DataLake.CheckSentinelProvisioning",
+      "Summary": "Check Sentinel provisioning",
+      "Tags": [
+        "Data Lake"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/securityplatform/lake/kql/query-history",
+      "OperationId": "DataLake.ListQueryHistory",
+      "Summary": "List KQL query history",
+      "Tags": [
+        "Data Lake"
+      ]
+    }
+  ],
+  "category": "data_lake",
+  "portal": "nodoc-defender-xdr"
+}

@@ -1,0 +1,63 @@
+name: per-operation-gate
+
+# Per-Operation 8/8 gate enforced via PR replay
+# When a PR touches manifests/<Portal>/<Category>.psd1 OR tests/replay/<Portal>/<Category>/<Operation>.Tests.ps1
+# this gate runs the affected Pester replay tests offline (live verify is post-deploy).
+
+on:
+  pull_request:
+    paths:
+      - 'manifests/**/*.psd1'
+      - 'tests/replay/**/*.Tests.ps1'
+      - 'src/Modules/**'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: per-operation-gate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  replay-affected:
+    name: Pester replay for affected Operations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Identify affected Operations
+        id: affected
+        shell: bash
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          changed=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '(manifests/|tests/replay/|src/Modules/)' || true)
+          echo "Changed files:"
+          echo "$changed"
+          # Phase 2+ logic: derive OperationKeys from changed files · for now run all tests/replay/
+          echo "run_full=true" >> $GITHUB_OUTPUT
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          if (-not (Get-Module -ListAvailable Pester | Where-Object Version -ge '5.5')) {
+            Install-Module Pester -RequiredVersion 5.5.0 -Force -SkipPublisherCheck -Scope CurrentUser
+          }
+
+      - name: Run replay tests (when present)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path tests/replay)) {
+            Write-Host 'tests/replay/ not yet populated (Phase 2+ adds per-Operation tests)'
+            exit 0
+          }
+          $config = New-PesterConfiguration
+          $config.Run.Path = 'tests/replay'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          $config.Should.ErrorAction = 'Continue'
+          Invoke-Pester -Configuration $config

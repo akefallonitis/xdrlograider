@@ -1,0 +1,61 @@
+{
+  "operationCount": 6,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/ExtensibleIndicators",
+      "OperationId": "listExtensibleIndicators",
+      "Summary": "List extensible indicators",
+      "Tags": [
+        "InsiderRisk"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/ExtensibleIndicators/limits",
+      "OperationId": "getExtensibleIndicatorLimits",
+      "Summary": "Get extensible indicator limits",
+      "Tags": [
+        "InsiderRisk"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/app_connectors/",
+      "OperationId": "listInsiderRiskAppConnectors",
+      "Summary": "List Defender for Cloud Apps connectors",
+      "Tags": [
+        "InsiderRisk"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskAnalyticsInsightMetadata('{date}')",
+      "OperationId": "getInsiderRiskAnalyticsInsightMetadata",
+      "Summary": "Get insider risk analytics insight metadata",
+      "Tags": [
+        "InsiderRisk"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/PolicyScoringDefaults",
+      "OperationId": "getPolicyScoringDefaults",
+      "Summary": "Get Insider Risk policy scoring defaults",
+      "Tags": [
+        "InsiderRisk"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/IsMcasEnabled",
+      "OperationId": "getInsiderRiskMcasStatus",
+      "Summary": "Get Insider Risk MCAS status",
+      "Tags": [
+        "InsiderRisk"
+      ]
+    }
+  ],
+  "category": "insider_risk",
+  "portal": "nodoc-purview"
+}

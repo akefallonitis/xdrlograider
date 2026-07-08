@@ -1,0 +1,115 @@
+{
+  "operationCount": 12,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/mtp/liveResponseApi/create_session",
+      "OperationId": "LiveResponse.CreateSession",
+      "Summary": "Create Live Response session",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/liveResponseApi/get_command_definitions",
+      "OperationId": "LiveResponse.GetCommandDefinitions",
+      "Summary": "Get command definitions",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/liveResponseApi/download_file",
+      "OperationId": "LiveResponse.DownloadFile",
+      "Summary": "Download file from Live Response",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/liveResponseApi/library",
+      "OperationId": "LiveResponse.ListLibraryFiles",
+      "Summary": "List Live Response library files",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/liveResponseApi/library",
+      "OperationId": "LiveResponse.UploadLibraryFile",
+      "Summary": "Upload Live Response library file",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/liveResponseApi/close_session",
+      "OperationId": "LiveResponse.CloseSession",
+      "Summary": "Close Live Response session",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/liveResponseApi/commands/{autoCommandId}",
+      "OperationId": "LiveResponse.GetCommandResult",
+      "Summary": "Get Live Response command result",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/liveResponseApi/commands/{autoCommandId}",
+      "OperationId": "LiveResponse.RunCommand",
+      "Summary": "Run Live Response command",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/liveResponseApi/library/{FileId}",
+      "OperationId": "LiveResponse.GetLibraryFile",
+      "Summary": "Get Live Response library file",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/mtp/liveResponseApi/library/{FileId}",
+      "OperationId": "LiveResponse.DeleteLibraryFile",
+      "Summary": "Delete Live Response library file",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/liveResponseApi/get_properties",
+      "OperationId": "LiveResponse.GetProperties",
+      "Summary": "Get live response properties",
+      "Tags": [
+        "Live Response"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/liveResponseApi/sessions/{sessionId}",
+      "OperationId": "LiveResponse.GetSession",
+      "Summary": "Get Live Response session",
+      "Tags": [
+        "Live Response"
+      ]
+    }
+  ],
+  "category": "live_response",
+  "portal": "nodoc-defender-xdr"
+}

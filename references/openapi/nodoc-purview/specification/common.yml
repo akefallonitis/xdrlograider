@@ -1,0 +1,1806 @@
+components:
+  parameters:
+    TenantId:
+      name: tenantId
+      description: The unique identifier (GUID) of the tenant.
+      in: query
+      schema:
+        type: string
+        format: uuid
+      required: true
+    CorrelationIdQuery:
+      name: correlationId
+      description: A unique identifier for correlating requests across services.
+      in: query
+      schema:
+        type: string
+        format: uuid
+      required: false
+    CorrelationIdHeader:
+      name: x-ms-correlation-id
+      description: A unique identifier for correlating requests across services.
+      in: header
+      schema:
+        type: string
+        format: uuid
+      required: false
+  headers:
+    Cache-Control:
+      description: Directives for caching mechanisms.
+      schema:
+        type: string
+        example: no-cache, no-store
+    Content-Type:
+      description: The media type of the response body.
+      schema:
+        type: string
+        example: application/json; charset=utf-8
+    X-Content-Type-Options:
+      description: Prevents MIME-sniffing.
+      schema:
+        type: string
+        example: nosniff
+    Strict-Transport-Security:
+      description: HTTP Strict Transport Security header.
+      schema:
+        type: string
+        example: max-age=31536000; includeSubDomains
+    x-ms-correlation-id:
+      description: A correlation identifier for the request.
+      schema:
+        type: string
+        format: uuid
+    Date:
+      description: The date and time at which the response was generated.
+      schema:
+        type: string
+        format: date-time
+    Content-Length:
+      description: The length of the response body in bytes.
+      schema:
+        type: integer
+  schemas:
+    ErrorResponse:
+      type: object
+      description: A standard error response from the Purview API.
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              description: The error code.
+              type: string
+              example: BadRequest
+            message:
+              description: A human-readable error message.
+              type: string
+              example: The request is invalid.
+    ComplianceSummaryItem:
+      type: object
+      description: Score summary row used by Compliance Manager posture responses.
+      properties:
+        id:
+          description: Identifier for the score summary bucket.
+          type: string
+          example: Overall
+        title:
+          description: Display title for the score summary bucket.
+          type: string
+          example: Overall
+        description:
+          description: Optional description of the score bucket.
+          type: string
+          example: ''
+        aggregatedAchievedScore:
+          description: Achieved compliance score for the bucket.
+          type: number
+          example: 14534.3
+        aggregatedMaxScore:
+          description: Maximum possible compliance score for the bucket.
+          type: number
+          example: 26509
+        aggregatedScorePercentage:
+          description: Percentage of achieved score versus maximum score.
+          type: number
+          example: 54.82
+        passedActionsCount:
+          description: Number of actions marked as passed.
+          type: integer
+          example: 805
+        pendingActionsCount:
+          description: Number of actions still pending.
+          type: integer
+          example: 908
+        notInScopeActionsCount:
+          description: Number of actions excluded from scope.
+          type: integer
+          example: 25
+    ComplianceApplicationUserContext:
+      type: object
+      description: Compliance Manager bootstrap payload describing current user, tenant, permissions, and flighting.
+      properties:
+        userInfo:
+          type: object
+          properties:
+            id:
+              description: Entra object ID of the signed-in user.
+              type: string
+              format: uuid
+              example: a2307c5a-76df-4513-b575-0537842c1d8b
+            userPrincipalName:
+              description: User principal name of the signed-in user.
+              type: string
+              example: ''
+            anonymousId:
+              description: Anonymous analytics identifier used by the Compliance Manager UI.
+              type: string
+              example: 1,C231A8620D4553316F3F96B03BC0A7C1E53D381A8A16019C1B9642A9D25C918A
+            primaryText:
+              description: Optional primary label shown for the user in the UI.
+              type: string
+              example: ''
+        tenantInfo:
+          type: object
+          properties:
+            hasEnrolledForTrial:
+              type: boolean
+              example: false
+            isInitialSetupCreated:
+              type: boolean
+              example: true
+            hasCopilotLicense:
+              type: boolean
+              example: true
+            isAIBaselineCreated:
+              type: boolean
+              example: true
+            license:
+              type: string
+              example: E5
+            isTenantLicenseSuccess:
+              type: boolean
+              example: true
+            isLicenseCheckDisabled:
+              type: boolean
+              example: false
+            isTrialActive:
+              type: boolean
+              example: false
+            trialEnrollmentLink:
+              type: string
+              format: uri
+              example: https://admin.microsoft.com/Adminportal/Home?#/catalog/offer-details/compliance-manager-premium-assessment-add-on/00000000-0000-0000-0000-000000000000
+            maxTotalEvidenceFileUploadSizeInBytes:
+              type: integer
+              example: 1073741824
+            tenantContentUpdateState:
+              type: string
+              example: None
+        scopedAuthorizationRights:
+          description: Permission map keyed by Compliance Manager scope.
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        entityScopedAuthorizationRights:
+          description: Entity-scoped permission overrides.
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        flights:
+          description: Feature flags enabled for the current tenant or user.
+          type: array
+          items:
+            type: string
+        hasComplianceManagerAdministrationRights:
+          description: Whether the current user can administer Compliance Manager.
+          type: boolean
+          example: true
+        entityIdToScopeTypeMap:
+          description: Mapping of entity IDs to scope types.
+          type: object
+          additionalProperties:
+            type: string
+    CompliancePostureSummaryResponse:
+      type: object
+      description: Aggregate scoring summary returned by Compliance Manager posture APIs.
+      properties:
+        overallScore:
+          $ref: '#/components/schemas/ComplianceSummaryItem'
+        serviceSummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        regulationSummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        solutionCategorySummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        solutionSummaryMap:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        aggregatedScorePerActionTypeMap:
+          description: Score summaries keyed by action type.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        topImprovementActions:
+          description: Highest-priority actions that would improve the overall score.
+          type: array
+          items:
+            type: object
+    EdiscoveryViewStateResponse:
+      type: object
+      description: Persisted eDiscovery grid or page state for the current user.
+      properties:
+        id:
+          description: Composite identifier for the saved view state.
+          type: string
+          example: a2307c5a-76df-4513-b575-0537842c1d8b-undefined-PurviewCases
+        viewState:
+          description: JSON-serialized client view state including sort, group, and filter settings.
+          type: string
+          example: '{"groupBy":"","sortBy":{"property":"favorite","order":"asc"},"filter":{}}'
+        tenantId:
+          description: Tenant ID associated with the saved view state.
+          type: string
+          format: uuid
+          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+        caseId:
+          description: eDiscovery case identifier associated with the view state.
+          type: string
+          example: undefined
+        userId:
+          description: User ID associated with the saved view state.
+          type: string
+          format: uuid
+          example: a2307c5a-76df-4513-b575-0537842c1d8b
+        feature:
+          description: eDiscovery feature name the view state applies to.
+          type: string
+          example: PurviewCases
+    PurviewCase:
+      type: object
+      description: Purview eDiscovery case summary.
+      properties:
+        id:
+          description: Unique identifier of the eDiscovery case.
+          type: string
+          format: uuid
+          example: 2fffc0b2-a860-445e-bea3-db586d2b812b
+        displayName:
+          description: Display name of the case.
+          type: string
+          example: Test
+        description:
+          description: Case description entered by administrators.
+          type: string
+          example: ''
+        createdBy:
+          description: User who created the case.
+          type: string
+          nullable: true
+          example: null
+        createdDateTime:
+          description: Human-readable timestamp when the case was created.
+          type: string
+          example: 5/8/2025 9:44:22 PM +00:00
+        lastModifiedBy:
+          description: User who last modified the case.
+          type: string
+          example: Nathan McNulty
+        lastModifiedDateTime:
+          description: Human-readable timestamp when the case was last modified.
+          type: string
+          example: 5/8/2025 9:44:22 PM +00:00
+        status:
+          description: Current lifecycle state of the case.
+          type: string
+          example: Active
+        caseType:
+          description: Type of eDiscovery case.
+          type: string
+          example: AdvancedEdiscovery
+        closedBy:
+          description: User who closed the case, if closed.
+          type: string
+          example: ''
+        closedDateTime:
+          description: Timestamp when the case was closed.
+          type: string
+          nullable: true
+          example: null
+        externalId:
+          description: External tracking identifier for the case.
+          type: string
+          example: ''
+        isPrioritized:
+          description: Whether the case is prioritized in the UI.
+          type: boolean
+          nullable: true
+          example: null
+        loadSetsCount:
+          description: Number of load sets attached to the case.
+          type: integer
+          example: 0
+        isExodiaEnabled:
+          description: Whether advanced Exodia capabilities are enabled for the case.
+          type: boolean
+          example: true
+    PurviewCasesResponse:
+      type: object
+      description: OData list response containing Purview eDiscovery cases.
+      properties:
+        '@odata.context':
+          description: OData metadata URI describing the Purview case entity set.
+          type: string
+          format: uri
+          example: https://nam1.mccservice.ediscovery.svc.cloud.microsoft/ediscovery/v1/$metadata#purviewcases
+        '@odata.count':
+          description: Number of cases returned by the current query.
+          type: integer
+          example: 2
+        value:
+          description: Case summaries returned by the query.
+          type: array
+          items:
+            $ref: '#/components/schemas/PurviewCase'
+    ComplianceUserFilterCriteria:
+      type: object
+      description: A saved filter criterion within the Compliance Manager user profile.
+      properties:
+        filterName:
+          type: string
+          example: Status
+        filterValues:
+          type: array
+          items:
+            type: string
+    ComplianceUserSavedFilter:
+      type: object
+      description: A saved filter definition in the Compliance Manager user profile.
+      properties:
+        id:
+          type: string
+          example: ImprovementActions
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+          example: '2025-05-08T21:21:01.9975439+00:00'
+        filterCriterias:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceUserFilterCriteria'
+    ComplianceUserFlight:
+      type: object
+      description: A user-scoped feature flight returned by Compliance Manager.
+      properties:
+        id:
+          type: string
+          example: FirstRunExperience
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+          example: '2025-05-08T21:21:01.9975439+00:00'
+        flightsEnabled:
+          type: array
+          items:
+            type: string
+          example: [Carousel, BYOACarousel]
+    ComplianceManagerUserProfile:
+      type: object
+      description: Compliance Manager profile preferences and feature flights for the signed-in user.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: a2307c5a-76df-4513-b575-0537842c1d8b
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceUserSavedFilter'
+        flights:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceUserFlight'
+    ComplianceFilterOption:
+      type: object
+      description: A selectable filter value exposed by Compliance Manager.
+      properties:
+        key:
+          type: string
+          format: uuid
+          example: 8c289e92-a159-4ee2-a9a9-c34b4467b952
+        value:
+          type: string
+          example: Microsoft 365
+    ComplianceFiltersResponse:
+      type: object
+      description: Filter catalog used by Compliance Manager assessment views.
+      properties:
+        allEligibleFilters:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/ComplianceFilterOption'
+    ComplianceAssessmentActionSummary:
+      type: object
+      description: Score breakdown for a single control type within an assessment.
+      properties:
+        maxScore:
+          type: number
+          example: 12181
+        currentScore:
+          type: number
+          example: 1663.19
+        controlType:
+          type: string
+          example: CustomerManagedControl
+        remainingActionCount:
+          type: integer
+          example: 815
+        completedActionCount:
+          type: integer
+          example: 54
+    ComplianceAssessmentSummary:
+      type: object
+      description: Compliance Manager assessment summary row.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 86747024-0a1b-4881-b400-d773d9954fc2
+        name:
+          type: string
+          example: Data Protection Baseline for Microsoft 365
+        title:
+          type: string
+          example: Data Protection Baseline for Microsoft 365
+        groupName:
+          type: string
+          example: Default Group
+        groupId:
+          type: string
+          format: uuid
+          example: 83bde06e-8217-49f3-b221-255232c8e2cd
+        productId:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        productName:
+          type: string
+          example: ''
+        regulationId:
+          type: string
+          format: uuid
+          example: e82fc1a0-9c0d-49b4-a399-56d8ff45d016
+        regulationName:
+          type: string
+          example: Data protection baseline
+        templateId:
+          type: string
+          format: uuid
+          example: eaae4041-2e6c-454e-a197-3919baf36650
+        status:
+          type: string
+          example: InProgress
+        currentScore:
+          type: number
+          example: 14216.19
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceAssessmentActionSummary'
+        maxScore:
+          type: number
+          example: 24827
+        hasNewVersion:
+          type: boolean
+          example: true
+        isTemplateDeprecated:
+          type: boolean
+          example: false
+        serviceSubscriptionsMap:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        connectorServiceInstancesMap:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        serviceMapping:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        serviceAndInstancesList:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        userRole:
+          type: string
+          example: ComplianceManagerAdministration
+        whenCreated:
+          type: string
+          format: date-time
+          example: '0001-01-01T00:00:00+00:00'
+    ComplianceAssessmentsResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/ComplianceAssessmentSummary'
+    EdiscoveryFavoritesResponse:
+      type: array
+      description: Favorite items saved by the current eDiscovery user. The observed tenant returned an empty array.
+      items:
+        type: object
+        additionalProperties: true
+    DataGovernanceTenantLicenseResponse:
+      type: object
+      description: Licensing tier returned by the data governance services backend.
+      properties:
+        License:
+          type: string
+          example: E5
+    DataGovernanceTypeAggregatesResponse:
+      type: object
+      description: Aggregate counts for a specific data governance workload.
+      properties:
+        AggregateType:
+          type: string
+          example: Retention
+        Records:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    AuditSearchJob:
+      type: object
+      description: Saved or historical Purview audit log search.
+      properties:
+        createdTimeUtc:
+          type: string
+          format: date-time
+          example: '2026-03-16T20:24:48.7653684Z'
+        lastModifiedTimeUtc:
+          type: string
+          format: date-time
+          example: '2026-03-16T20:28:00.2784392Z'
+        executedTimeUtc:
+          type: string
+          format: date-time
+          example: '2026-03-16T20:25:00.8357448Z'
+        completedTimeUtc:
+          type: string
+          format: date-time
+          example: '2026-03-16T20:28:00.251451Z'
+        requestId:
+          type: string
+          format: uuid
+          example: 5bca110d-54d3-45bc-911e-fed649aa2a9f
+        jobId:
+          type: string
+          format: uuid
+          example: 11a331ac-090a-4fc8-8af6-2b56726bef7c
+        errorMessage:
+          type: string
+          nullable: true
+          example: null
+        progressPercent:
+          type: number
+          example: 100
+        completenessPercent:
+          type: number
+          example: 100
+        status:
+          type: string
+          example: Succeeded
+        isExpensiveQuery:
+          type: boolean
+          example: true
+        request:
+          type: string
+          description: JSON-serialized audit search request envelope.
+        totalItemCount:
+          type: integer
+          example: 257
+        searchUser:
+          type: string
+          example: nathan@contoso.com
+        correlationId:
+          type: string
+          format: uuid
+          example: e247da32-a6e6-4532-91c2-37ec557d3fff
+        resultStorageName:
+          type: string
+          example: stoadtschresna001001
+        requestStorageName:
+          type: string
+          example: stoadtschreqna004001
+        dataGroupId:
+          type: string
+          format: uuid
+          example: 47269931-557e-4aa8-8688-008270722268
+        exportStatus:
+          type: string
+          nullable: true
+          example: null
+        exportProgressPercent:
+          type: number
+          example: 0
+        exportResultUri:
+          type: string
+          nullable: true
+          example: null
+    AuditSearchResponse:
+      type: object
+      description: Paged list of Purview audit searches.
+      properties:
+        pageResult:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditSearchJob'
+        continuationToken:
+          type: string
+          nullable: true
+          example: null
+        pageNumber:
+          type: integer
+          example: 0
+        pageSize:
+          type: integer
+          example: 150
+        totalPages:
+          type: integer
+          example: 0
+        totalCount:
+          type: integer
+          example: 0
+        TotalCount:
+          type: integer
+          example: 0
+    GovernanceRoleIdentifier:
+      type: object
+      description: Identifier block describing a Purview RBAC role.
+      properties:
+        RoleType:
+          type: string
+          example: RBACRole
+        Name:
+          type: string
+          example: DataConnectorAdmin
+        RoleId:
+          type: string
+          example: b298b5da-7275-cdef-8d78-1ae711fbcd3a
+    GovernanceGrantedRoleInformation:
+      type: object
+      description: A role currently granted to the signed-in Purview user.
+      properties:
+        RoleIdentifier:
+          $ref: '#/components/schemas/GovernanceRoleIdentifier'
+        DisplayName:
+          type: string
+          example: Data Connector Admin
+        GrantedByRoleGroupIds:
+          type: array
+          items:
+            type: string
+          example:
+            - 19412722-832a-153a-3b55-6b08106a83bc
+            - c67a9ca6-1cfd-9919-65ed-9bcc6f8b8627
+    GovernanceRolesWithScopeInfoResponse:
+      type: object
+      description: Purview governance authorization response describing granted roles and scope mappings.
+      properties:
+        GrantedRoleInformations:
+          type: array
+          items:
+            $ref: '#/components/schemas/GovernanceGrantedRoleInformation'
+        GrantedScopeResourceTypeToScopeInfos:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+        GrantedByRoleGroupInfos:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    PurviewInsightCloudStatus:
+      type: object
+      description: Protection-status counts for a specific cloud workload family.
+      properties:
+        CloudName:
+          type: string
+          example: M365
+        RegisteredCount:
+          type: integer
+          example: 0
+        ScannedCount:
+          type: integer
+          example: 0
+        EncryptItemCount:
+          type: integer
+          example: 0
+        AccessControlItemCount:
+          type: integer
+          example: 0
+        NotProtectedItemCount:
+          type: integer
+          example: 13
+        LastScanStatus:
+          type: string
+          example: ScanCompleted
+        LastScanTime:
+          type: string
+          format: date-time
+          example: '0001-01-01T00:00:00Z'
+    PurviewOverallProtectionStatusResponse:
+      type: object
+      description: Overall protection coverage summary surfaced by Purview platform insights.
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+          example: https://nam-assetregistry.trafficmanager.net/purview/api/v1/Insight/$metadata#GetOverallProtectionStatus/$entity
+        KeyType:
+          type: string
+          example: OverallProtectionStatus
+        Clouds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurviewInsightCloudStatus'
+        DeltaClouds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurviewInsightCloudStatus'
+    PurviewInsightAggregateRecord:
+      type: object
+      description: Aggregate record returned by Purview platform insight APIs.
+      properties:
+        LatestTimeOfAzureUpdate:
+          type: string
+          nullable: true
+          format: date-time
+          example: null
+        Name:
+          type: string
+          example: OneDrive
+        Id:
+          type: string
+          example: M365;ODB
+        Actions:
+          type: string
+          nullable: true
+          example: ''
+        Count:
+          type: integer
+          example: 280
+        DeltaCount:
+          type: integer
+          example: 0
+        EventDate:
+          type: string
+          nullable: true
+          example: null
+        WorkloadCount:
+          type: object
+          additionalProperties:
+            type: integer
+        WorkloadDeltaCount:
+          type: object
+          additionalProperties:
+            type: integer
+        Workloads:
+          type: object
+          additionalProperties:
+            type: string
+        DeltaWorkloads:
+          type: object
+          additionalProperties:
+            type: string
+    PurviewInsightSnapshot:
+      type: object
+      description: Snapshot timestamp metadata for a Purview insight aggregate.
+      properties:
+        aggregateType:
+          type: string
+          nullable: true
+          example: ScanStatus
+        CloudName:
+          type: string
+          example: M365
+        Timestamp:
+          type: string
+          format: date-time
+          example: '2026-04-01T18:52:02.9013091Z'
+    PurviewInsightAggregatesResponse:
+      type: object
+      description: Aggregate counts and timestamps returned by Purview platform insights.
+      properties:
+        AggregateType:
+          type: string
+          example: SensitiveInformationType
+        Records:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurviewInsightAggregateRecord'
+        SnapshotTimeStamps:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurviewInsightSnapshot'
+    PurviewDirectoryErrorData:
+      type: object
+      description: Error block returned by directory-style find endpoints.
+      properties:
+        ErrorMessage:
+          type: string
+          example: ''
+        ErrorType:
+          type: string
+          example: ''
+        ExceptionName:
+          type: string
+          example: ''
+    ProtectionCompliancePolicyResponse:
+      type: object
+      description: Directory query wrapper for protection compliance policies.
+      properties:
+        DataType:
+          type: string
+          example: ProtectionCompliancePolicy
+        Database:
+          type: string
+          example: Directory
+        WaterMark:
+          type: string
+          nullable: true
+          example: ''
+        Session:
+          type: string
+          example: ''
+        LastPage:
+          type: boolean
+          example: true
+        TotalResultCount:
+          type: integer
+          example: -1
+        RecordCount:
+          type: integer
+          example: -1
+        ErrorData:
+          $ref: '#/components/schemas/PurviewDirectoryErrorData'
+        ResultCode:
+          type: string
+          example: NoContent
+        ResultData:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+    DlpAlertSensitiveInfo:
+      type: object
+      description: Sensitive-info reference used in a DLP alert policy rule.
+      properties:
+        Id:
+          type: string
+          format: uuid
+          example: 50842eb7-edc8-4019-85dd-5a5c1f2bb085
+        Type:
+          type: string
+          example: SensitiveInfoType
+    DlpAlertPolicyRule:
+      type: object
+      description: Rule included in a DLP alert policy insight response.
+      properties:
+        RuleId:
+          type: string
+          format: uuid
+          example: 18475d26-a9e5-434d-9b41-e6ffcc2b00d5
+        RuleName:
+          type: string
+          example: Default Teams DLP policy rule
+        HasCCSICondition:
+          type: boolean
+          example: true
+        SensitiveInfos:
+          type: array
+          items:
+            $ref: '#/components/schemas/DlpAlertSensitiveInfo'
+        HasFileCollectionEnabled:
+          type: boolean
+          example: false
+    DlpAlertPolicySummary:
+      type: object
+      description: DLP policy insight summary for a specific workload.
+      properties:
+        PolicyId:
+          type: string
+          format: uuid
+          example: ced53fc8-1277-4644-b7f9-056dff113712
+        PolicyName:
+          type: string
+          example: Default policy for Teams
+        Workload:
+          type: string
+          example: Teams
+        AlertsGenerated:
+          type: integer
+          example: 0
+        Rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/DlpAlertPolicyRule'
+    DlpAlertEvidenceSettings:
+      type: object
+      description: Full-file evidence settings attached to DLP alert insights.
+      properties:
+        FileEvidenceIsEnabled:
+          type: boolean
+          example: true
+        Store:
+          type: string
+          example: CustomerManaged
+        NumberOfDaysToRetain:
+          type: integer
+          example: 60
+    DlpAlertAgentInsightsItem:
+      type: object
+      description: Result entry returned by the DLP alert policy insights endpoint.
+      properties:
+        FullFileEvidenceSettings:
+          $ref: '#/components/schemas/DlpAlertEvidenceSettings'
+        StartTime:
+          type: string
+          format: date-time
+          example: '2026-03-25T18:51:35.2202384Z'
+        EndTime:
+          type: string
+          format: date-time
+          example: '2026-04-01T18:51:35.2202384Z'
+        Policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DlpAlertPolicySummary'
+    DlpAlertAgentPolicyInsightsResponse:
+      type: object
+      description: DLP alert policy insight wrapper returned by Purview directory queries.
+      properties:
+        DataType:
+          type: string
+          example: DlpAlertAgentPolicyInsights
+        Database:
+          type: string
+          example: DataInsightsKusto
+        WaterMark:
+          type: string
+          nullable: true
+          example: null
+        Session:
+          type: string
+          example: ''
+        LastPage:
+          type: boolean
+          example: true
+        TotalResultCount:
+          type: integer
+          example: -1
+        RecordCount:
+          type: integer
+          example: 1
+        ErrorData:
+          $ref: '#/components/schemas/PurviewDirectoryErrorData'
+        ResultCode:
+          oneOf:
+            - type: integer
+            - type: string
+          example: 200
+        ResultData:
+          type: array
+          items:
+            $ref: '#/components/schemas/DlpAlertAgentInsightsItem'
+    InsiderRiskPolicyResponse:
+      type: object
+      description: Directory query wrapper for insider risk policies.
+      properties:
+        DataType:
+          type: string
+          example: InsiderRiskPolicy
+        Database:
+          type: string
+          example: Directory
+        WaterMark:
+          type: string
+          example: HctBC4IwGIDhvzJ2X23falPJDvot...
+        Session:
+          type: string
+          example: ''
+        LastPage:
+          type: boolean
+          example: true
+        TotalResultCount:
+          type: integer
+          example: -1
+        RecordCount:
+          type: integer
+          example: 1
+        ErrorData:
+          $ref: '#/components/schemas/PurviewDirectoryErrorData'
+        ResultCode:
+          type: string
+          example: Success
+        ResultData:
+          type: array
+          items:
+            type: object
+            properties:
+              Mode:
+                type: string
+                example: Enable
+              Type:
+                type: string
+                example: InsiderRisk
+              InsiderRiskScenario:
+                type: string
+                example: TenantSetting
+              IndicatorVersion:
+                type: string
+                example: '1.1'
+              Indicators:
+                type: array
+                items:
+                  type: string
+            additionalProperties: true
+    OcpsPolicySetting:
+      type: object
+      description: Individual Office Configuration Service policy setting returned for the current user.
+      properties:
+        allowOverride:
+          type: boolean
+          example: false
+        app:
+          type: string
+          example: office16
+        class:
+          type: string
+          example: User
+        enabled:
+          type: boolean
+          example: false
+        key:
+          type: string
+          example: common\copilot
+        maxVersion:
+          type: string
+          nullable: true
+          example: null
+        minVersion:
+          type: string
+          nullable: true
+          example: null
+        name:
+          type: string
+          nullable: true
+          example: null
+        platform:
+          type: string
+          example: Web
+        settingId:
+          type: string
+          example: office16;L_CopilotPinning
+        type:
+          type: string
+          example: REG_DWORD
+        value:
+          type: string
+          example: '1'
+        valueName:
+          type: string
+          example: CopilotPinning
+        version:
+          type: string
+          nullable: true
+          example: null
+        isVersionNeutral:
+          type: string
+          example: 'False'
+        docVersion:
+          type: string
+          nullable: true
+          example: null
+    OcpsPolicy:
+      type: object
+      description: Policy bundle returned by the Office Configuration Policy Service.
+      properties:
+        id:
+          type: string
+          example: LgAAAABL98jnn3dbTodIHhoLPV13AQBU2RKeFn4XSbN3IhlmUnUGAAGcBXeNAAAB0
+        policyType:
+          type: integer
+          example: 1
+        priority:
+          type: integer
+          example: 0
+        policiesPayload:
+          type: array
+          items:
+            $ref: '#/components/schemas/OcpsPolicySetting'
+    OcpsPoliciesResponse:
+      type: object
+      description: Office Configuration Policy Service payload for current-user web policies.
+      properties:
+        policiesHash:
+          type: string
+          example: LTY5NDY5MTk0NzEyOTQyOTIxMjM=
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/OcpsPolicy'
+    IrisSelectionErrorResponse:
+      type: object
+      description: IRIS selection response observed when no eligible content is available for the requested placement.
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              example: 2040
+            msg:
+              type: string
+              example: 'Demand source returns error (Name: GN_ps, Error: No eligible content.).'
+    EdiscoveryTenantSettingsResponse:
+      type: object
+      description: Tenant-level eDiscovery settings lookup result for a requested feature.
+      properties:
+        "@odata.context":
+          type: string
+          example: https://nam2.mccservice.ediscovery.svc.cloud.microsoft/ediscovery/v1/$metadata#Edm.String
+        value:
+          type: string
+          example: 'Tenant settings not found for the feature: GeneralSettings'
+    CompliancePremiumTemplateAssessmentInstance:
+      type: object
+      description: Assessment instance associated with a premium regulation template.
+      properties:
+        group:
+          type: string
+          example: Default Group
+        title:
+          type: string
+          example: CJIS Assessment
+        templateTitle:
+          type: string
+          example: Criminal Justice Information Services (CJIS) Security Policy
+        childTemplateTitle:
+          type: string
+          example: ''
+    CompliancePremiumTemplateConsumption:
+      type: object
+      description: Premium regulation template consumption entry for the current tenant.
+      properties:
+        title:
+          type: string
+          example: CJIS
+        associatedInstances:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompliancePremiumTemplateAssessmentInstance'
+    CompliancePremiumRegulationSummaryResponse:
+      type: object
+      description: Compliance Manager premium regulation entitlement and consumption summary.
+      properties:
+        consumedCount:
+          type: integer
+          example: 1
+        allowedCount:
+          type: integer
+          example: 3
+        premiumTemplatesConsumed:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompliancePremiumTemplateConsumption'
+        anonymousTenantId:
+          type: string
+          example: 1,170E91BBBD42B0783E66D316ED666CCB34C38BB6196FF1864413FC518DD896FD
+        activeAssessmentTemplateIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    ComplianceRegulationDimension:
+      type: object
+      description: Dimension metadata attached to a Compliance Manager regulation template.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        key:
+          type: string
+          example: Product
+        value:
+          type: string
+          example: Universal
+        isMappedToComplianceEntities:
+          type: boolean
+          example: false
+        isMultiselectionAllowed:
+          type: boolean
+          example: false
+        isGlobalDimension:
+          type: boolean
+          example: false
+    ComplianceRegulationServiceMapping:
+      type: object
+      description: Service mapped to a regulation template.
+      properties:
+        title:
+          type: string
+          example: Microsoft 365
+        serviceId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+    ComplianceRegulationTemplate:
+      type: object
+      description: Compliance Manager regulation template record.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        draftRegulationId:
+          type: string
+          example: ''
+        _etag:
+          type: string
+          example: ''
+        syncTag:
+          type: string
+          example: ''
+        itemStorageType:
+          type: string
+          example: ''
+        whenCreated:
+          type: string
+          format: date-time
+          example: 2021-10-15T05:29:07.7637852+00:00
+        whoCreated:
+          type: string
+          example: Microsoft
+        whenLastUpdated:
+          type: string
+          format: date-time
+          example: 0001-01-01T00:00:00+00:00
+        whoModified:
+          type: string
+          example: ''
+        parentId:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        templateId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        title:
+          type: string
+          example: NIST 800-171
+        description:
+          type: string
+          example: ''
+        dimension:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceRegulationDimension'
+        version:
+          type: integer
+          example: 0
+        isCurrentVersion:
+          type: boolean
+          example: false
+        state:
+          type: string
+          example: Active
+        status:
+          type: string
+          example: Approved
+        inScopeServices:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        overarchingRegulation:
+          type: string
+          example: NIST 800-171
+        whenPublished:
+          type: string
+          format: date-time
+          example: 2023-07-11T00:53:24.8850875Z
+        whoPublished:
+          type: string
+          example: Microsoft
+        draftId:
+          type: string
+          example: ''
+        draftOwnerId:
+          type: string
+          example: ''
+        whenApproved:
+          type: string
+          format: date-time
+          example: 0001-01-01T00:00:00.0000000
+        whoApproved:
+          type: string
+          example: Microsoft
+        controlFamilies:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        isTenantSubscribed:
+          type: boolean
+          example: false
+        assessmentInstanceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        score:
+          type: integer
+          example: 0
+        isTenantTemplate:
+          type: boolean
+          example: false
+        isTemplateActivated:
+          type: boolean
+          example: false
+        templateType:
+          type: string
+          example: Default
+        regulationType:
+          type: string
+          example: Premium
+        servicesWithControlMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceRegulationServiceMapping'
+        userRole:
+          type: string
+          example: ComplianceManagerAdministration
+        regulationPublishState:
+          type: string
+          example: Published
+      additionalProperties: true
+    ComplianceRegulationTemplatesResponse:
+      type: array
+      description: Compliance Manager regulation templates returned by the portal catalog view.
+      items:
+        $ref: '#/components/schemas/ComplianceRegulationTemplate'
+    DataSecurityInvestigationsResponse:
+      type: object
+      description: OData response wrapper for Data Security Investigations.
+      properties:
+        "@odata.context":
+          type: string
+          example: https://nam2.dsiservice.dsi.svc.cloud.microsoft/api/v1/$metadata#investigations
+        "@odata.count":
+          type: integer
+          example: 0
+        value:
+          type: array
+          items:
+            type: object
+            description: Investigation resources. The captured sample returned an empty list.
+            additionalProperties: true
+    GraphDirectoryRole:
+      type: object
+      description: Microsoft Entra directory role returned through the Graph proxy.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        deletedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        description:
+          type: string
+          example: Can manage all aspects of Microsoft Entra ID and Microsoft services that use Microsoft Entra identities.
+        displayName:
+          type: string
+          example: <redacted-name>
+        roleTemplateId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+    GraphDirectoryRolesResponse:
+      type: object
+      description: OData response wrapper for directory roles proxied through Purview.
+      properties:
+        "@odata.context":
+          type: string
+          example: https://graph.microsoft.com/v1.0/$metadata#directoryRoles
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphDirectoryRole'
+    GraphMemberObjectsRequest:
+      type: object
+      description: Request payload for resolving the current user's transitive memberships.
+      properties:
+        securityEnabledOnly:
+          type: boolean
+          example: true
+    GraphMemberObjectsResponse:
+      type: object
+      description: OData response wrapper containing the current user's transitive memberships.
+      properties:
+        "@odata.context":
+          type: string
+          example: https://graph.microsoft.com/v1.0/$metadata#Collection(Edm.String)
+        value:
+          type: array
+          items:
+            type: string
+            format: uuid
+            example: <guid-redacted>
+    ArmRoleAssignmentProperties:
+      type: object
+      description: ARM role assignment properties returned by the Purview proxy.
+      properties:
+        roleDefinitionId:
+          type: string
+          example: /providers/Microsoft.Authorization/roleDefinitions/<guid-redacted>
+        principalId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        principalType:
+          type: string
+          example: User
+        scope:
+          type: string
+          example: /
+        condition:
+          type: string
+          nullable: true
+          example: null
+        conditionVersion:
+          type: string
+          nullable: true
+          example: null
+        createdOn:
+          type: string
+          format: date-time
+          example: 2023-02-17T00:51:08.2215118Z
+        updatedOn:
+          type: string
+          format: date-time
+          example: 2023-02-17T00:51:08.2215118Z
+        createdBy:
+          type: string
+          nullable: true
+          example: <guid-redacted>
+        updatedBy:
+          type: string
+          nullable: true
+          example: <guid-redacted>
+        delegatedManagedIdentityResourceId:
+          type: string
+          nullable: true
+          example: null
+        description:
+          type: string
+          nullable: true
+          example: null
+    ArmRoleAssignment:
+      type: object
+      description: Azure Resource Manager role assignment record.
+      properties:
+        properties:
+          $ref: '#/components/schemas/ArmRoleAssignmentProperties'
+        id:
+          type: string
+          example: /providers/Microsoft.Authorization/roleAssignments/<guid-redacted>
+        type:
+          type: string
+          example: Microsoft.Authorization/roleAssignments
+        name:
+          type: string
+          example: <guid-redacted>
+    ArmRoleAssignmentsResponse:
+      type: object
+      description: ARM role assignment list returned through the Purview proxy.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArmRoleAssignment'
+    MtpTenantContextResponse:
+      type: object
+      description: Shared MTP tenant context used by Purview-integrated information protection experiences.
+      properties:
+        EnvironmentName:
+          type: string
+          example: Production
+        OrgId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        GeoRegion:
+          type: string
+          example: Us3
+        DataCenter:
+          type: string
+          example: EastUs3
+        AccountMode:
+          type: integer
+          example: 1
+        AccountType:
+          type: string
+          example: Production
+        IsSuspended:
+          type: boolean
+          example: false
+        IsDeleted:
+          type: boolean
+          example: false
+        IsMdatpLicenseExpired:
+          type: boolean
+          example: false
+        IsMtpEligible:
+          type: boolean
+          example: true
+        HasMachineGroups:
+          type: boolean
+          example: true
+        IsMdatpActive:
+          type: boolean
+          example: true
+        IsOatpActive:
+          type: boolean
+          example: true
+        IsItpActive:
+          type: boolean
+          example: true
+        IsMapgActive:
+          type: boolean
+          example: true
+        IsAadIpActive:
+          type: boolean
+          example: true
+        IsDlpActive:
+          type: boolean
+          example: true
+        IsIrmActive:
+          type: boolean
+          example: true
+        IsMdiActive:
+          type: boolean
+          example: true
+        IsMdcActive:
+          type: boolean
+          example: true
+        IsSentinelActive:
+          type: boolean
+          example: false
+        ActiveMtpWorkloads:
+          type: array
+          items:
+            type: integer
+        Features:
+          type: object
+          additionalProperties:
+            type: boolean
+      additionalProperties: true
+    SecurityPlatformSystemData:
+      type: object
+      description: System metadata returned by Security Platform resources.
+      properties:
+        createdBy:
+          type: string
+          nullable: true
+          example: <guid-redacted>
+        createdByType:
+          type: string
+          example: User
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-08-07T06:35:35.7057904Z
+        lastModifiedBy:
+          type: string
+          nullable: true
+          example: <guid-redacted>
+        lastModifiedByType:
+          type: string
+          example: User
+        lastModifiedAt:
+          type: string
+          format: date-time
+          example: 2025-08-07T06:36:04.8469301Z
+      additionalProperties: true
+    SecurityPlatformPod:
+      type: object
+      description: Provisioned Security Platform environment (pod).
+      properties:
+        podId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        geo:
+          type: string
+          example: United States
+        geoCode:
+          type: string
+          example: US
+        provisioningState:
+          type: string
+          example: Succeeded
+        resourceType:
+          type: string
+          example: Microsoft.SecurityPlatform/environments
+        systemData:
+          $ref: '#/components/schemas/SecurityPlatformSystemData'
+    SecurityPlatformAccountResponse:
+      type: object
+      description: Tenant-level Security Platform account returned by Purview.
+      properties:
+        accountId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        tenantId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        pods:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityPlatformPod'
+        resourceType:
+          type: string
+          example: Microsoft.SecurityPlatform/accounts
+        systemData:
+          $ref: '#/components/schemas/SecurityPlatformSystemData'
+      additionalProperties: true
+    SecurityPlatformWorkspaceOptInConfig:
+      type: object
+      description: Workspace opt-in flags returned as strings by the preview service.
+      properties:
+        isAllowModelImprovement:
+          type: string
+          example: 'true'
+        isAllowProductImprovement:
+          type: string
+          example: 'true'
+    SecurityPlatformCapacityReference:
+      type: object
+      description: Capacity reference attached to a Security Platform workspace.
+      properties:
+        type:
+          type: string
+          example: CapacityReference
+        referenceName:
+          type: string
+          example: security-copilot
+    SecurityPlatformWorkspace:
+      type: object
+      description: Security Platform workspace record.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        name:
+          type: string
+          example: security-copilot
+        workspaceOptInConfig:
+          $ref: '#/components/schemas/SecurityPlatformWorkspaceOptInConfig'
+        capacity:
+          $ref: '#/components/schemas/SecurityPlatformCapacityReference'
+        managementUrl:
+          type: string
+          example: us.api.securityplatform.microsoft.com
+        path:
+          type: string
+          example: pods/<guid-redacted>/workspaces/security-copilot
+        systemData:
+          $ref: '#/components/schemas/SecurityPlatformSystemData'
+      additionalProperties: true
+    SecurityPlatformWorkspacesResponse:
+      type: object
+      description: Workspace list returned by the Security Platform preview API.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityPlatformWorkspace'
+        count:
+          type: integer
+          example: 1
+    SecurityPlatformAccountProperties:
+      type: object
+      description: Tenant provisioning outcome returned by the Sentinel Graph preview API.
+      properties:
+        status:
+          type: string
+          example: Succeeded
+        primaryRegion:
+          type: string
+          example: westus2
+        features:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            Lake_USX: Succeeded
+            Graph_USX: Succeeded
+            Graph_USX_Optional: Failed
+        errorCode:
+          type: string
+          example: None
+      additionalProperties: true
+    SecurityPlatformCheckTenantResponse:
+      type: object
+      description: Tenant provisioning and feature eligibility response for Security Platform.
+      properties:
+        accountProperties:
+          $ref: '#/components/schemas/SecurityPlatformAccountProperties'
+        eligibleFeatures:
+          type: array
+          items:
+            type: string
+          example:
+            - Lake_USX
+            - Lake_Purview
+            - Graph_USX
+            - Graph_DSI
+            - Graph_IRM
+  responses:
+    Unauthorized:
+      description: Unauthorized - Authentication is required or has failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden - The authenticated user does not have sufficient permissions.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found - The requested resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal Server Error - An unexpected error occurred on the server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ClientException:
+      description: Client Error - An error occurred processing the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,79 @@
+{
+  "operationCount": 8,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/cdssecuritycopilot/trial",
+      "OperationId": "getSecurityCopilotTrialStatus",
+      "Summary": "Get Security Copilot trial status",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/securityplatform/provisioning/account",
+      "OperationId": "getSecurityPlatformAccount",
+      "Summary": "Get Security Platform account",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/medeina/agents",
+      "OperationId": "listCopilotAgents",
+      "Summary": "List Copilot agents",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/securityplatform/sentinelgraph/provisioning/checkTenant",
+      "OperationId": "checkSecurityPlatformTenantProvisioning",
+      "Summary": "Check Security Platform tenant provisioning",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/securityplatform/workspaces",
+      "OperationId": "listSecurityPlatformWorkspaces",
+      "Summary": "List Security Platform workspaces",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/medeina/settings/datashare",
+      "OperationId": "getCopilotDataShareSettings",
+      "Summary": "Get Copilot data sharing settings",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/medeina/auth/expiryDate",
+      "OperationId": "getCopilotAuthExpiryDate",
+      "Summary": "Get Copilot auth token expiry date",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/medeina/auth",
+      "OperationId": "checkCopilotAuth",
+      "Summary": "Check Copilot authentication status",
+      "Tags": [
+        "Copilot"
+      ]
+    }
+  ],
+  "category": "copilot",
+  "portal": "nodoc-purview"
+}

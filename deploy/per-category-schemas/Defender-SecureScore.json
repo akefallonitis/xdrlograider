@@ -1,0 +1,1242 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "SecureScore",
+    "TableName": "Defender_SecureScore_CL",
+    "StreamName": "Custom-Defender_SecureScore_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 56,
+    "TotalColumnCount": 65,
+    "OperationCount": 5,
+    "OperationKeys": [
+      "GetInsights",
+      "GetControlProfilesV2",
+      "GetSecureScoresV2",
+      "GetSecurityInitiativesV2",
+      "GetTenantProfile"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_SecureScore_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "averageScore",
+            "type": "real"
+          },
+          {
+            "name": "benchmarkJson",
+            "type": "string"
+          },
+          {
+            "name": "createdDate",
+            "type": "datetime"
+          },
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "initiative",
+            "type": "string"
+          },
+          {
+            "name": "pillarInsightsJson",
+            "type": "string"
+          },
+          {
+            "name": "tenantCount",
+            "type": "long"
+          },
+          {
+            "name": "actionType",
+            "type": "string"
+          },
+          {
+            "name": "actionUrl",
+            "type": "string"
+          },
+          {
+            "name": "azureTenantId",
+            "type": "string"
+          },
+          {
+            "name": "baseControl",
+            "type": "string"
+          },
+          {
+            "name": "controlCategory",
+            "type": "string"
+          },
+          {
+            "name": "controlStateUpdatesJson",
+            "type": "string"
+          },
+          {
+            "name": "dateAdded",
+            "type": "datetime"
+          },
+          {
+            "name": "dateRemoved",
+            "type": "string"
+          },
+          {
+            "name": "deprecated",
+            "type": "boolean"
+          },
+          {
+            "name": "hasLowAccuracy",
+            "type": "boolean"
+          },
+          {
+            "name": "implementationCost",
+            "type": "string"
+          },
+          {
+            "name": "instanceName",
+            "type": "string"
+          },
+          {
+            "name": "isCustomControl",
+            "type": "boolean"
+          },
+          {
+            "name": "isEmergencyControl",
+            "type": "boolean"
+          },
+          {
+            "name": "lastModifiedDateTime",
+            "type": "string"
+          },
+          {
+            "name": "learnMoreResourcesJson",
+            "type": "string"
+          },
+          {
+            "name": "licensePrerequisitesJson",
+            "type": "string"
+          },
+          {
+            "name": "maxScore",
+            "type": "real"
+          },
+          {
+            "name": "prerequisitesControlsJson",
+            "type": "string"
+          },
+          {
+            "name": "rank",
+            "type": "long"
+          },
+          {
+            "name": "relatedControlsJson",
+            "type": "string"
+          },
+          {
+            "name": "relatedReportsJson",
+            "type": "string"
+          },
+          {
+            "name": "remediation",
+            "type": "string"
+          },
+          {
+            "name": "remediationImpact",
+            "type": "string"
+          },
+          {
+            "name": "service",
+            "type": "string"
+          },
+          {
+            "name": "threatsJson",
+            "type": "string"
+          },
+          {
+            "name": "tier",
+            "type": "string"
+          },
+          {
+            "name": "title_x",
+            "type": "string"
+          },
+          {
+            "name": "userAffected",
+            "type": "string"
+          },
+          {
+            "name": "userImpact",
+            "type": "string"
+          },
+          {
+            "name": "vendorInformationJson",
+            "type": "string"
+          },
+          {
+            "name": "activeUserCount",
+            "type": "long"
+          },
+          {
+            "name": "averageComparativeScoresJson",
+            "type": "string"
+          },
+          {
+            "name": "controlScoresJson",
+            "type": "string"
+          },
+          {
+            "name": "createdDateTime",
+            "type": "datetime"
+          },
+          {
+            "name": "currentScore",
+            "type": "real"
+          },
+          {
+            "name": "currentScoreInPercentage",
+            "type": "real"
+          },
+          {
+            "name": "enabledServicesJson",
+            "type": "string"
+          },
+          {
+            "name": "licensedUserCount",
+            "type": "long"
+          },
+          {
+            "name": "scoreImpactChangeLogsJson",
+            "type": "string"
+          },
+          {
+            "name": "category_x",
+            "type": "string"
+          },
+          {
+            "name": "DefaultGrouping",
+            "type": "string"
+          },
+          {
+            "name": "Description",
+            "type": "string"
+          },
+          {
+            "name": "LinksJson",
+            "type": "string"
+          },
+          {
+            "name": "Name",
+            "type": "string"
+          },
+          {
+            "name": "SubgroupsJson",
+            "type": "string"
+          },
+          {
+            "name": "secureScoreZoneJson",
+            "type": "string"
+          },
+          {
+            "name": "taggedControlsJson",
+            "type": "string"
+          },
+          {
+            "name": "tenantBenchmarksJson",
+            "type": "string"
+          }
+        ],
+        "name": "Defender_SecureScore_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-securescore-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_SecureScore_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-SecureScore-dest"
+          ],
+          "outputStream": "Custom-Defender_SecureScore_CL",
+          "streams": [
+            "Custom-Defender_SecureScore_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-SecureScore-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_SecureScore_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "averageScore",
+              "type": "real"
+            },
+            {
+              "name": "benchmarkJson",
+              "type": "string"
+            },
+            {
+              "name": "createdDate",
+              "type": "datetime"
+            },
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "initiative",
+              "type": "string"
+            },
+            {
+              "name": "pillarInsightsJson",
+              "type": "string"
+            },
+            {
+              "name": "tenantCount",
+              "type": "long"
+            },
+            {
+              "name": "actionType",
+              "type": "string"
+            },
+            {
+              "name": "actionUrl",
+              "type": "string"
+            },
+            {
+              "name": "azureTenantId",
+              "type": "string"
+            },
+            {
+              "name": "baseControl",
+              "type": "string"
+            },
+            {
+              "name": "controlCategory",
+              "type": "string"
+            },
+            {
+              "name": "controlStateUpdatesJson",
+              "type": "string"
+            },
+            {
+              "name": "dateAdded",
+              "type": "datetime"
+            },
+            {
+              "name": "dateRemoved",
+              "type": "string"
+            },
+            {
+              "name": "deprecated",
+              "type": "boolean"
+            },
+            {
+              "name": "hasLowAccuracy",
+              "type": "boolean"
+            },
+            {
+              "name": "implementationCost",
+              "type": "string"
+            },
+            {
+              "name": "instanceName",
+              "type": "string"
+            },
+            {
+              "name": "isCustomControl",
+              "type": "boolean"
+            },
+            {
+              "name": "isEmergencyControl",
+              "type": "boolean"
+            },
+            {
+              "name": "lastModifiedDateTime",
+              "type": "string"
+            },
+            {
+              "name": "learnMoreResourcesJson",
+              "type": "string"
+            },
+            {
+              "name": "licensePrerequisitesJson",
+              "type": "string"
+            },
+            {
+              "name": "maxScore",
+              "type": "real"
+            },
+            {
+              "name": "prerequisitesControlsJson",
+              "type": "string"
+            },
+            {
+              "name": "rank",
+              "type": "long"
+            },
+            {
+              "name": "relatedControlsJson",
+              "type": "string"
+            },
+            {
+              "name": "relatedReportsJson",
+              "type": "string"
+            },
+            {
+              "name": "remediation",
+              "type": "string"
+            },
+            {
+              "name": "remediationImpact",
+              "type": "string"
+            },
+            {
+              "name": "service",
+              "type": "string"
+            },
+            {
+              "name": "threatsJson",
+              "type": "string"
+            },
+            {
+              "name": "tier",
+              "type": "string"
+            },
+            {
+              "name": "title_x",
+              "type": "string"
+            },
+            {
+              "name": "userAffected",
+              "type": "string"
+            },
+            {
+              "name": "userImpact",
+              "type": "string"
+            },
+            {
+              "name": "vendorInformationJson",
+              "type": "string"
+            },
+            {
+              "name": "activeUserCount",
+              "type": "long"
+            },
+            {
+              "name": "averageComparativeScoresJson",
+              "type": "string"
+            },
+            {
+              "name": "controlScoresJson",
+              "type": "string"
+            },
+            {
+              "name": "createdDateTime",
+              "type": "datetime"
+            },
+            {
+              "name": "currentScore",
+              "type": "real"
+            },
+            {
+              "name": "currentScoreInPercentage",
+              "type": "real"
+            },
+            {
+              "name": "enabledServicesJson",
+              "type": "string"
+            },
+            {
+              "name": "licensedUserCount",
+              "type": "long"
+            },
+            {
+              "name": "scoreImpactChangeLogsJson",
+              "type": "string"
+            },
+            {
+              "name": "category_x",
+              "type": "string"
+            },
+            {
+              "name": "DefaultGrouping",
+              "type": "string"
+            },
+            {
+              "name": "Description",
+              "type": "string"
+            },
+            {
+              "name": "LinksJson",
+              "type": "string"
+            },
+            {
+              "name": "Name",
+              "type": "string"
+            },
+            {
+              "name": "SubgroupsJson",
+              "type": "string"
+            },
+            {
+              "name": "secureScoreZoneJson",
+              "type": "string"
+            },
+            {
+              "name": "taggedControlsJson",
+              "type": "string"
+            },
+            {
+              "name": "tenantBenchmarksJson",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-securescore-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-securescore-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_SecureScore_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_SecureScore_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_SecureScore_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "averageScore",
+                    "type": "real"
+                  },
+                  {
+                    "name": "benchmarkJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "createdDate",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "initiative",
+                    "type": "string"
+                  },
+                  {
+                    "name": "pillarInsightsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantCount",
+                    "type": "long"
+                  },
+                  {
+                    "name": "actionType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "actionUrl",
+                    "type": "string"
+                  },
+                  {
+                    "name": "azureTenantId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "baseControl",
+                    "type": "string"
+                  },
+                  {
+                    "name": "controlCategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "controlStateUpdatesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "dateAdded",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "dateRemoved",
+                    "type": "string"
+                  },
+                  {
+                    "name": "deprecated",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "hasLowAccuracy",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "implementationCost",
+                    "type": "string"
+                  },
+                  {
+                    "name": "instanceName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isCustomControl",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isEmergencyControl",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "lastModifiedDateTime",
+                    "type": "string"
+                  },
+                  {
+                    "name": "learnMoreResourcesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "licensePrerequisitesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "maxScore",
+                    "type": "real"
+                  },
+                  {
+                    "name": "prerequisitesControlsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "rank",
+                    "type": "long"
+                  },
+                  {
+                    "name": "relatedControlsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "relatedReportsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "remediation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "remediationImpact",
+                    "type": "string"
+                  },
+                  {
+                    "name": "service",
+                    "type": "string"
+                  },
+                  {
+                    "name": "threatsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tier",
+                    "type": "string"
+                  },
+                  {
+                    "name": "title_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "userAffected",
+                    "type": "string"
+                  },
+                  {
+                    "name": "userImpact",
+                    "type": "string"
+                  },
+                  {
+                    "name": "vendorInformationJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "activeUserCount",
+                    "type": "long"
+                  },
+                  {
+                    "name": "averageComparativeScoresJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "controlScoresJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "createdDateTime",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "currentScore",
+                    "type": "real"
+                  },
+                  {
+                    "name": "currentScoreInPercentage",
+                    "type": "real"
+                  },
+                  {
+                    "name": "enabledServicesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "licensedUserCount",
+                    "type": "long"
+                  },
+                  {
+                    "name": "scoreImpactChangeLogsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "category_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DefaultGrouping",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Description",
+                    "type": "string"
+                  },
+                  {
+                    "name": "LinksJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SubgroupsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "secureScoreZoneJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "taggedControlsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantBenchmarksJson",
+                    "type": "string"
+                  }
+                ],
+                "name": "Defender_SecureScore_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-securescore-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_SecureScore_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-SecureScore-dest"
+                  ],
+                  "outputStream": "Custom-Defender_SecureScore_CL",
+                  "streams": [
+                    "Custom-Defender_SecureScore_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-SecureScore-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_SecureScore_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "averageScore",
+                      "type": "real"
+                    },
+                    {
+                      "name": "benchmarkJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "createdDate",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "initiative",
+                      "type": "string"
+                    },
+                    {
+                      "name": "pillarInsightsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantCount",
+                      "type": "long"
+                    },
+                    {
+                      "name": "actionType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "actionUrl",
+                      "type": "string"
+                    },
+                    {
+                      "name": "azureTenantId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "baseControl",
+                      "type": "string"
+                    },
+                    {
+                      "name": "controlCategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "controlStateUpdatesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "dateAdded",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "dateRemoved",
+                      "type": "string"
+                    },
+                    {
+                      "name": "deprecated",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "hasLowAccuracy",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "implementationCost",
+                      "type": "string"
+                    },
+                    {
+                      "name": "instanceName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isCustomControl",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "isEmergencyControl",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "lastModifiedDateTime",
+                      "type": "string"
+                    },
+                    {
+                      "name": "learnMoreResourcesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "licensePrerequisitesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "maxScore",
+                      "type": "real"
+                    },
+                    {
+                      "name": "prerequisitesControlsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "rank",
+                      "type": "long"
+                    },
+                    {
+                      "name": "relatedControlsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "relatedReportsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "remediation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "remediationImpact",
+                      "type": "string"
+                    },
+                    {
+                      "name": "service",
+                      "type": "string"
+                    },
+                    {
+                      "name": "threatsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tier",
+                      "type": "string"
+                    },
+                    {
+                      "name": "title_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "userAffected",
+                      "type": "string"
+                    },
+                    {
+                      "name": "userImpact",
+                      "type": "string"
+                    },
+                    {
+                      "name": "vendorInformationJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "activeUserCount",
+                      "type": "long"
+                    },
+                    {
+                      "name": "averageComparativeScoresJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "controlScoresJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "createdDateTime",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "currentScore",
+                      "type": "real"
+                    },
+                    {
+                      "name": "currentScoreInPercentage",
+                      "type": "real"
+                    },
+                    {
+                      "name": "enabledServicesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "licensedUserCount",
+                      "type": "long"
+                    },
+                    {
+                      "name": "scoreImpactChangeLogsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "category_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DefaultGrouping",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Description",
+                      "type": "string"
+                    },
+                    {
+                      "name": "LinksJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Name",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SubgroupsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "secureScoreZoneJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "taggedControlsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantBenchmarksJson",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

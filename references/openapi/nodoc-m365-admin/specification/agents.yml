@@ -1,0 +1,216 @@
+paths:
+  /admin/api/agentusers/metrics/agents/risky:
+    get:
+      summary: Get risky agents
+      description: >-
+        Retrieve a list of agents flagged as risky based on usage metrics and security analysis.
+      operationId: Agents.GetRiskyAgents
+      tags: [Agents]
+      parameters:
+        - name: maxCount
+          in: query
+          description: Maximum number of risky agents to return. Use 0 for no limit.
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: List of risky agents. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/agenttemplates/getpolicies:
+    get:
+      summary: Get agent template policies
+      description: >-
+        Retrieve policies governing agent templates in the tenant, including creation
+        and deployment permissions.
+      operationId: Agents.GetTemplatePolicies
+      tags: [Agents]
+      parameters:
+        - name: expand
+          in: query
+          description: Whether to expand policy details.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Agent template policies. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/agenttemplates/getagenttemplates:
+    get:
+      summary: Get agent templates
+      description: >-
+        Retrieve the list of available agent templates for the tenant.
+      operationId: Agents.GetAgentTemplates
+      tags: [Agents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Agent templates list. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/agentssettings/mcpservers:
+    get:
+      summary: Get MCP servers
+      description: >-
+        Retrieve the list of Model Context Protocol (MCP) servers configured for agent tools
+        in the tenant.
+      operationId: Agents.GetMcpServers
+      tags: [Agents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: MCP server configurations. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/company/frontier/access:
+    get:
+      summary: Get Frontier access policy
+      description: >-
+        Retrieve the Frontier (agent) access policy for the tenant, controlling which
+        users and groups can access agent capabilities.
+      operationId: Agents.GetFrontierAccess
+      tags: [Agents]
+      x-nodoc-operation-context:
+        surface: Copilot > Agents
+        workflows:
+          - Open the Copilot agent administration experience and inspect access controls.
+        headerProfile: m365-admin-homepage
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Frontier access policy settings. Exact schema pending.
+                properties:
+                  FrontierPolicy:
+                    type: object
+                    description: The Frontier access policy configuration.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Frontier access policy
+      description: >-
+        Update the Frontier (agent) access policy for the tenant. Merges provided settings
+        into the existing policy configuration.
+      operationId: Agents.SetFrontierAccess
+      tags: [Agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Frontier policy payload. Properties are merged with current settings.
+              properties:
+                FrontierPolicy:
+                  type: object
+                  description: The Frontier access policy configuration to update.
+      x-nodoc-operation-context:
+        surface: Copilot > Agents
+        workflows:
+          - Open the Copilot agent administration experience and save access policy changes.
+        headerProfile: m365-admin-homepage
+        requestShapes:
+          - name: merged-frontier-policy
+            contentType: application/json
+            bodyKind: object-merge
+            notes: The portal merges the supplied FrontierPolicy object into the current server document.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/agentusers/metrics/agents/entitiesAtRisk:
+    post:
+      summary: Get agent entities at risk
+      description: >-
+        Retrieve metrics about agent entities at risk including security and compliance concerns (Copilot > Agents).
+      operationId: Agents.GetEntitiesAtRisk
+      tags: [Agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

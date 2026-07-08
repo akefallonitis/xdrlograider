@@ -1,0 +1,59 @@
+paths:
+  /notificationservice/notifications/metadata:
+    servers:
+      - url: "https://{tenantIslandHost}.tenant.api.powerplatform.com"
+        description: "Tenant-island Power Platform notification host"
+        variables:
+          tenantIslandHost:
+            default: "il-847b5907ca1540f4b171eb18619dbf.ab"
+            description: "Tenant island prefix observed in live Power Platform admin center traffic."
+    get:
+      operationId: NotificationService_get_notificationservice_notifications_metadata
+      summary: "GET /notificationservice/notifications/metadata"
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview"
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations"
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview"
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview"
+        additionalPageCount: 83
+      tags:
+        - NotificationService
+      x-nodoc-operation-context:
+        surface: Notification hub
+        workflows:
+          - Open Power Platform admin center pages that hydrate the global notification hub and shell metadata.
+        headerProfile: power-platform-tenant-api
+        variants:
+          - location: query
+            selector: api-version
+            knownValues:
+              - 2022-03-01-preview
+            notes: The notification metadata helper was captured with the preview api-version selector.
+          - location: query
+            selector: targetClient
+            knownValues:
+              - PPAC
+            notes: The retained requests identified the Power Platform admin center as the target client.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified repeatedly during authenticated Power Platform admin browsing across licensing, environment, and support surfaces.
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2022-03-01-preview"
+        - name: "targetClient"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "PPAC"
+      responses:
+        '200':
+          description: "200 captured response"

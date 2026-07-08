@@ -1,0 +1,70 @@
+{
+  "operationCount": 7,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/RequestApprovals/V2/Requests/{requestId}/deny",
+      "OperationId": "RequestApprovalsV2.Request.Deny",
+      "Summary": "Deny approval request (v2)",
+      "Tags": [
+        "General"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/RequestApprovals/V2/BusinessFlows",
+      "OperationId": "RequestApprovalsV2.BusinessFlows.Get",
+      "Summary": "Get request approval business flows (v2)",
+      "Tags": [
+        "General"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/RequestApprovals/V2/Requests",
+      "OperationId": "RequestApprovalsV2.Request.List",
+      "Summary": "List approval requests (v2)",
+      "Tags": [
+        "General"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/RequestApprovals/V2/Requests/{requestId}/block/{0}",
+      "OperationId": "RequestApprovalsV2.Request.Block",
+      "Summary": "Block approval request (v2)",
+      "Tags": [
+        "General"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/RequestApprovals/V2/PolicyTemplates",
+      "OperationId": "RequestApprovalsV2.PolicyTemplate.Create",
+      "Summary": "Create request approval policy template (v2)",
+      "Tags": [
+        "General"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/RequestApprovals/V2/PolicyTemplates/{templateId}",
+      "OperationId": "RequestApprovalsV2.PolicyTemplate.Delete",
+      "Summary": "Delete request approval policy template (v2)",
+      "Tags": [
+        "General"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/RequestApprovals/V2/PolicyTemplates/{templateId}",
+      "OperationId": "RequestApprovalsV2.PolicyTemplate.Update",
+      "Summary": "Update request approval policy template (v2)",
+      "Tags": [
+        "General"
+      ]
+    }
+  ],
+  "category": "request_approvals",
+  "portal": "nodoc-ibiza-iam"
+}

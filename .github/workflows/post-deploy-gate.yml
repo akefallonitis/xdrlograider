@@ -1,0 +1,47 @@
+name: post-deploy-gate
+
+# FH-6 · CI-VISIBLE postdeploy gate. The FULL postdeploy verify is LOCAL-ONLY (the service account must never
+# authenticate in CI · security lock) — tools/Confirm-PostDeploy.ps1 runs it on the operator's machine after a live
+# deploy and posts a commit status (postdeploy/verified=success) for the deployed SHA. This workflow does NOT run the
+# verify; it only READS that status for a given SHA so the operator can confirm a deployment is recorded as verified
+# BEFORE tagging a release (release.yml enforces the SAME check at build time). It is also a repository_dispatch
+# receiver so the local Confirm-PostDeploy can announce a result into the GitHub UI.
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Commit SHA to check (default: the triggering ref HEAD)'
+        required: false
+  repository_dispatch:
+    types: [postdeploy-verified]
+
+permissions:
+  contents: read
+  statuses: read
+
+concurrency:
+  group: post-deploy-gate-${{ github.event.inputs.sha || github.event.client_payload.sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  check-postdeploy-status:
+    name: Confirm a green postdeploy/verified status exists for the SHA
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read + gate on the postdeploy/verified commit status
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          SHA="${{ github.event.inputs.sha || github.event.client_payload.sha || github.sha }}"
+          echo "Checking postdeploy/verified commit status for $SHA"
+          STATE="$(gh api "repos/${{ github.repository }}/commits/${SHA}/status" --jq '.statuses[] | select(.context=="postdeploy/verified") | .state' 2>/dev/null | head -1 || true)"
+          if [ "$STATE" = "success" ]; then
+            echo "postdeploy/verified=success for $SHA · this SHA is cleared to release"
+          else
+            echo "::error::No green postdeploy/verified status for $SHA (got '${STATE:-<none>}'). Run tools/Confirm-PostDeploy.ps1 against the live deployment of this SHA before releasing."
+            exit 1
+          fi

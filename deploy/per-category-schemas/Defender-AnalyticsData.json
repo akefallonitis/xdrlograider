@@ -1,0 +1,936 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "AnalyticsData",
+    "TableName": "Defender_AnalyticsData_CL",
+    "StreamName": "Custom-Defender_AnalyticsData_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 37,
+    "TotalColumnCount": 46,
+    "OperationCount": 3,
+    "OperationKeys": [
+      "GetEnrichedOutbreakData",
+      "GetTopThreats",
+      "ListPortalOutbreaks"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_AnalyticsData_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "AlertsCountJson",
+            "type": "string"
+          },
+          {
+            "name": "AllCvesAreNotSupported",
+            "type": "boolean"
+          },
+          {
+            "name": "CreatedOn",
+            "type": "datetime"
+          },
+          {
+            "name": "CveAndScidNotDefined",
+            "type": "boolean"
+          },
+          {
+            "name": "CveNotDefined",
+            "type": "boolean"
+          },
+          {
+            "name": "DisplayName",
+            "type": "string"
+          },
+          {
+            "name": "exposedDevices",
+            "type": "long"
+          },
+          {
+            "name": "ExposureScore",
+            "type": "long"
+          },
+          {
+            "name": "ExposureSeverity",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "ImpactedEntitiesCountJson",
+            "type": "string"
+          },
+          {
+            "name": "IsTaVNext",
+            "type": "boolean"
+          },
+          {
+            "name": "LastUpdatedOn",
+            "type": "datetime"
+          },
+          {
+            "name": "ReportType",
+            "type": "string"
+          },
+          {
+            "name": "ScaExposedDevices",
+            "type": "long"
+          },
+          {
+            "name": "ScidNotDefined",
+            "type": "boolean"
+          },
+          {
+            "name": "StartedOn",
+            "type": "datetime"
+          },
+          {
+            "name": "tagsJson",
+            "type": "string"
+          },
+          {
+            "name": "UserStateJson",
+            "type": "string"
+          },
+          {
+            "name": "VaExposedDevices",
+            "type": "long"
+          },
+          {
+            "name": "AlertsCount",
+            "type": "string"
+          },
+          {
+            "name": "CurrentAlertsCountJson",
+            "type": "string"
+          },
+          {
+            "name": "DevicesCalculationStatus",
+            "type": "string"
+          },
+          {
+            "name": "MailboxesCalculationStatus",
+            "type": "string"
+          },
+          {
+            "name": "ThreatExposureCalculationStatus",
+            "type": "string"
+          },
+          {
+            "name": "ThreatsExposureJson",
+            "type": "string"
+          },
+          {
+            "name": "TotalActiveThreats",
+            "type": "long"
+          },
+          {
+            "name": "TotalThreatRequiresAction",
+            "type": "long"
+          },
+          {
+            "name": "IOAIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "IsVNext",
+            "type": "boolean"
+          },
+          {
+            "name": "KeywordsJson",
+            "type": "string"
+          },
+          {
+            "name": "LastVisitTime",
+            "type": "string"
+          },
+          {
+            "name": "MitigationTypesJson",
+            "type": "string"
+          },
+          {
+            "name": "OutbreakOverviewContent",
+            "type": "string"
+          },
+          {
+            "name": "ReferencesJson",
+            "type": "string"
+          },
+          {
+            "name": "SecureScoreIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "severity",
+            "type": "long"
+          }
+        ],
+        "name": "Defender_AnalyticsData_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-analyticsdata-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_AnalyticsData_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-AnalyticsData-dest"
+          ],
+          "outputStream": "Custom-Defender_AnalyticsData_CL",
+          "streams": [
+            "Custom-Defender_AnalyticsData_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-AnalyticsData-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_AnalyticsData_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "AlertsCountJson",
+              "type": "string"
+            },
+            {
+              "name": "AllCvesAreNotSupported",
+              "type": "boolean"
+            },
+            {
+              "name": "CreatedOn",
+              "type": "datetime"
+            },
+            {
+              "name": "CveAndScidNotDefined",
+              "type": "boolean"
+            },
+            {
+              "name": "CveNotDefined",
+              "type": "boolean"
+            },
+            {
+              "name": "DisplayName",
+              "type": "string"
+            },
+            {
+              "name": "exposedDevices",
+              "type": "long"
+            },
+            {
+              "name": "ExposureScore",
+              "type": "long"
+            },
+            {
+              "name": "ExposureSeverity",
+              "type": "string"
+            },
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "ImpactedEntitiesCountJson",
+              "type": "string"
+            },
+            {
+              "name": "IsTaVNext",
+              "type": "boolean"
+            },
+            {
+              "name": "LastUpdatedOn",
+              "type": "datetime"
+            },
+            {
+              "name": "ReportType",
+              "type": "string"
+            },
+            {
+              "name": "ScaExposedDevices",
+              "type": "long"
+            },
+            {
+              "name": "ScidNotDefined",
+              "type": "boolean"
+            },
+            {
+              "name": "StartedOn",
+              "type": "datetime"
+            },
+            {
+              "name": "tagsJson",
+              "type": "string"
+            },
+            {
+              "name": "UserStateJson",
+              "type": "string"
+            },
+            {
+              "name": "VaExposedDevices",
+              "type": "long"
+            },
+            {
+              "name": "AlertsCount",
+              "type": "string"
+            },
+            {
+              "name": "CurrentAlertsCountJson",
+              "type": "string"
+            },
+            {
+              "name": "DevicesCalculationStatus",
+              "type": "string"
+            },
+            {
+              "name": "MailboxesCalculationStatus",
+              "type": "string"
+            },
+            {
+              "name": "ThreatExposureCalculationStatus",
+              "type": "string"
+            },
+            {
+              "name": "ThreatsExposureJson",
+              "type": "string"
+            },
+            {
+              "name": "TotalActiveThreats",
+              "type": "long"
+            },
+            {
+              "name": "TotalThreatRequiresAction",
+              "type": "long"
+            },
+            {
+              "name": "IOAIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "IsVNext",
+              "type": "boolean"
+            },
+            {
+              "name": "KeywordsJson",
+              "type": "string"
+            },
+            {
+              "name": "LastVisitTime",
+              "type": "string"
+            },
+            {
+              "name": "MitigationTypesJson",
+              "type": "string"
+            },
+            {
+              "name": "OutbreakOverviewContent",
+              "type": "string"
+            },
+            {
+              "name": "ReferencesJson",
+              "type": "string"
+            },
+            {
+              "name": "SecureScoreIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "severity",
+              "type": "long"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-analyticsdata-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-analyticsdata-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_AnalyticsData_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_AnalyticsData_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_AnalyticsData_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AlertsCountJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AllCvesAreNotSupported",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "CreatedOn",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "CveAndScidNotDefined",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "CveNotDefined",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "DisplayName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "exposedDevices",
+                    "type": "long"
+                  },
+                  {
+                    "name": "ExposureScore",
+                    "type": "long"
+                  },
+                  {
+                    "name": "ExposureSeverity",
+                    "type": "string"
+                  },
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ImpactedEntitiesCountJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsTaVNext",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "LastUpdatedOn",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "ReportType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ScaExposedDevices",
+                    "type": "long"
+                  },
+                  {
+                    "name": "ScidNotDefined",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "StartedOn",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "tagsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "UserStateJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "VaExposedDevices",
+                    "type": "long"
+                  },
+                  {
+                    "name": "AlertsCount",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CurrentAlertsCountJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DevicesCalculationStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MailboxesCalculationStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ThreatExposureCalculationStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ThreatsExposureJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "TotalActiveThreats",
+                    "type": "long"
+                  },
+                  {
+                    "name": "TotalThreatRequiresAction",
+                    "type": "long"
+                  },
+                  {
+                    "name": "IOAIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsVNext",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "KeywordsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "LastVisitTime",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MitigationTypesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "OutbreakOverviewContent",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ReferencesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SecureScoreIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "severity",
+                    "type": "long"
+                  }
+                ],
+                "name": "Defender_AnalyticsData_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-analyticsdata-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_AnalyticsData_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-AnalyticsData-dest"
+                  ],
+                  "outputStream": "Custom-Defender_AnalyticsData_CL",
+                  "streams": [
+                    "Custom-Defender_AnalyticsData_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-AnalyticsData-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_AnalyticsData_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AlertsCountJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AllCvesAreNotSupported",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "CreatedOn",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "CveAndScidNotDefined",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "CveNotDefined",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "DisplayName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "exposedDevices",
+                      "type": "long"
+                    },
+                    {
+                      "name": "ExposureScore",
+                      "type": "long"
+                    },
+                    {
+                      "name": "ExposureSeverity",
+                      "type": "string"
+                    },
+                    {
+                      "name": "id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ImpactedEntitiesCountJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsTaVNext",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "LastUpdatedOn",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "ReportType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ScaExposedDevices",
+                      "type": "long"
+                    },
+                    {
+                      "name": "ScidNotDefined",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "StartedOn",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "tagsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "UserStateJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "VaExposedDevices",
+                      "type": "long"
+                    },
+                    {
+                      "name": "AlertsCount",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CurrentAlertsCountJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DevicesCalculationStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MailboxesCalculationStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ThreatExposureCalculationStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ThreatsExposureJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "TotalActiveThreats",
+                      "type": "long"
+                    },
+                    {
+                      "name": "TotalThreatRequiresAction",
+                      "type": "long"
+                    },
+                    {
+                      "name": "IOAIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsVNext",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "KeywordsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "LastVisitTime",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MitigationTypesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "OutbreakOverviewContent",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ReferencesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SecureScoreIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "severity",
+                      "type": "long"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

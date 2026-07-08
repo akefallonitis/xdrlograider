@@ -1,0 +1,322 @@
+{
+  "operationCount": 35,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/ExpandedTenantModel",
+      "OperationId": "Mfa.ExpandedTenantModel.Get",
+      "Summary": "Get MFA expanded tenant model",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/TenantModel/LicenseKey",
+      "OperationId": "Mfa.LicenseKey.Get",
+      "Summary": "Get tenant MFA license key",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/TenantModel",
+      "OperationId": "MultiFactorAuthentication.TenantModel.Get",
+      "Summary": "Get MFA tenant model",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/MultiFactorAuthentication/TenantModel",
+      "OperationId": "MultiFactorAuthentication.TenantModel.Update",
+      "Summary": "Update MFA tenant model",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/Greeting",
+      "OperationId": "Mfa.Greetings.List",
+      "Summary": "List MFA greetings",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/Greeting",
+      "OperationId": "Mfa.Greetings.Create",
+      "Summary": "Create MFA greetings",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/MultiFactorAuthentication/Greeting",
+      "OperationId": "Mfa.Greetings.Delete",
+      "Summary": "Delete MFA greetings",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/BlockedUser",
+      "OperationId": "Mfa.BlockedUsers.List",
+      "Summary": "List MFA blocked users",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/BlockedUser",
+      "OperationId": "Mfa.BlockedUsers.Create",
+      "Summary": "Block user from MFA",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/MultiFactorAuthentication/BlockedUser",
+      "OperationId": "Mfa.BlockedUsers.Delete",
+      "Summary": "Unlock user from MFA",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/HardwareToken/remove",
+      "OperationId": "Mfa.HardwareToken.Delete",
+      "Summary": "Remove MFA hardware token",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/HardwareToken/upload",
+      "OperationId": "Mfa.HardwareToken.Create",
+      "Summary": "Create MFA hardware token",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/Soundfile",
+      "OperationId": "Mfa.SoundFile.Create",
+      "Summary": "Create MFA sound file",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/ServerStatusReport",
+      "OperationId": "Mfa.ServerStatusReport.Get",
+      "Summary": "Get MFA server status report",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/HardwareToken/users/download",
+      "OperationId": "Mfa.HardwareToken.Users.Download",
+      "Summary": "Download hardware token user assignments",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/BypassedUser",
+      "OperationId": "Mfa.BypassedUsers.List",
+      "Summary": "List MFA bypassed users",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/BypassedUser",
+      "OperationId": "Mfa.BypassedUsers.Create",
+      "Summary": "Bypass MFA for user",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/MultiFactorAuthentication/BypassedUser",
+      "OperationId": "Mfa.BypassedUsers.Delete",
+      "Summary": "Remove MFA bypass for user",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/Group",
+      "OperationId": "Mfa.Groups.List",
+      "Summary": "List MFA groups",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/GetOrCreateExpandedTenantModel",
+      "OperationId": "MultiFactorAuthentication.Get",
+      "Summary": "Get expanded MFA tenant model",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/HasPaidSubscription",
+      "OperationId": "MultiFactorAuthentication.PaidSubscription.Check",
+      "Summary": "Check if tenant has paid MFA subscription",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/HardwareToken/users",
+      "OperationId": "MultiFactorAuthentication.HardwareToken.Users.List",
+      "Summary": "List user hardware MFA tokens",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/RevokeMFA/{0}",
+      "OperationId": "Mfa.Revoke",
+      "Summary": "Revoke MFA",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/ActivationCredentials",
+      "OperationId": "Mfa.ActivationCredentials.Get",
+      "Summary": "Get MFA activation credentials",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/MultiFactorAuthentication/HardwareToken/upload/{tokenId}",
+      "OperationId": "Mfa.HardwareToken.Upload",
+      "Summary": "Remove MFA hardware token upload",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/CacheConfig",
+      "OperationId": "Mfa.CacheConfig.List",
+      "Summary": "List MFA cache configs",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/CacheConfig",
+      "OperationId": "Mfa.CacheConfig.Create",
+      "Summary": "Create MFA cache config",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/MultiFactorAuthentication/CacheConfig",
+      "OperationId": "Mfa.CacheConfig.Delete",
+      "Summary": "Delete MFA cache config",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/MultiFactorAuthentication/CacheConfig/{configId}",
+      "OperationId": "Mfa.CacheConfig.Update",
+      "Summary": "Update MFA cache config",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/HardwareToken/listUploads",
+      "OperationId": "MultiFactorAuthentication.HardwareToken.Uploads.List",
+      "Summary": "List uploads for hardware MFA tokens",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/HardwareToken/enable",
+      "OperationId": "MultiFactorAuthentication.HardwareToken.Enable",
+      "Summary": "Enable hardware MFA tokens",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/AuthenticationReport",
+      "OperationId": "MFA.AuthenticationReport.Get",
+      "Summary": "Get MFA authentication report",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/DownloadServerStatusReport",
+      "OperationId": "Mfa.ServerStatusReport.Download",
+      "Summary": "Download MFA server status report",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/MultiFactorAuthentication/DownloadAuthenticationReport",
+      "OperationId": "Mfa.AuthenticationReport.Download",
+      "Summary": "Download MFA Authentication report",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MultiFactorAuthentication/Providers",
+      "OperationId": "Mfa.Providers.List",
+      "Summary": "List MFA providers",
+      "Tags": [
+        "Multi Factor Authentication"
+      ]
+    }
+  ],
+  "category": "multifactor_authentication",
+  "portal": "nodoc-ibiza-iam"
+}

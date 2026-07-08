@@ -1,0 +1,70 @@
+{
+  "operationCount": 7,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/cbill/PurviewAccount",
+      "OperationId": "getPurviewBillingAccount",
+      "Summary": "Get Purview billing account info",
+      "Tags": [
+        "Billing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cbill/LicenseUsage/E5TenantLicenseBreakdown",
+      "OperationId": "getE5TenantLicenseBreakdown",
+      "Summary": "Get E5 tenant license breakdown",
+      "Tags": [
+        "Billing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cbill/LicenseUsage/E5TenantSolutionBreakdown",
+      "OperationId": "getE5TenantSolutionBreakdown",
+      "Summary": "Get E5 tenant solution breakdown",
+      "Tags": [
+        "Billing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cbill/LicenseUsage/E5TenantUsage",
+      "OperationId": "getE5TenantUsage",
+      "Summary": "Get E5 tenant usage summary",
+      "Tags": [
+        "Billing"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/cbill/CbsReport/ReportingAPI/GetAggregates",
+      "OperationId": "getPurviewBillingAggregates",
+      "Summary": "Get Purview pay-as-you-go usage aggregates",
+      "Tags": [
+        "Billing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cbill/purview/offer/freetrial",
+      "OperationId": "checkFreeTrialAvailability",
+      "Summary": "Check Purview free trial offer availability",
+      "Tags": [
+        "Billing"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cbill/PurviewAccount/billing-config-details",
+      "OperationId": "getPurviewBillingConfigDetails",
+      "Summary": "Get Purview billing configuration details",
+      "Tags": [
+        "Billing"
+      ]
+    }
+  ],
+  "category": "billing",
+  "portal": "nodoc-purview"
+}

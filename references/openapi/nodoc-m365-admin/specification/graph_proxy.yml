@@ -1,0 +1,641 @@
+paths:
+  /fd/msgraph/v1.0/subscribedSkus:
+    get:
+      summary: Get subscribed SKUs
+      description: >-
+        Retrieve the list of commercial subscriptions (SKUs) that the tenant has acquired,
+        proxied through the M365 Admin Center to Microsoft Graph.
+      operationId: GraphProxy.GetSubscribedSkus
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubscribedSku'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/v1.0/devices:
+    get:
+      summary: Get devices
+      description: >-
+        Retrieve the list of Entra ID registered devices for the tenant,
+        proxied through the M365 Admin Center to Microsoft Graph.
+      operationId: GraphProxy.GetDevices
+      tags: [GraphProxy]
+      parameters:
+        - name: $count
+          in: query
+          description: Include a count of the total number of items.
+          schema:
+            type: boolean
+            default: true
+        - name: $top
+          in: query
+          description: Maximum number of items to return.
+          schema:
+            type: integer
+            default: 1
+        - name: ConsistencyLevel
+          in: header
+          description: Consistency level for the request. Required for count queries.
+          schema:
+            type: string
+            default: eventual
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.count':
+                    type: integer
+                    description: Total count of devices.
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: Device details. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/v1.0/devices/$count:
+    get:
+      summary: Get device count
+      description: >-
+        Retrieve the total count of Entra ID devices via the M365 Admin Center Graph proxy.
+      operationId: GraphProxy.GetDevicesCount
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/v1.0/users/{userId}/extensions/commerce.Common.Preferences:
+    get:
+      summary: Get user commerce preferences extension
+      description: >-
+        Retrieve the user-scoped `commerce.Common.Preferences` extension via the
+        admin center Graph proxy. The portal probes this extension even when the
+        extension is not provisioned for the user.
+      operationId: GraphProxy.GetUserCommercePreferencesExtension
+      tags: [GraphProxy]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The user object identifier targeted by the extension lookup.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User extension payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          description: Extension with the requested identifier was not found for the user.
+
+  /fd/msgraph/v1.0/$batch:
+    post:
+      summary: Graph v1.0 batch request
+      description: >-
+        Submit a batch of Microsoft Graph v1.0 API requests in a single call,
+        proxied through the M365 Admin Center.
+      operationId: GraphProxy.BatchV1
+      tags: [GraphProxy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique identifier for the request in the batch.
+                      method:
+                        type: string
+                        description: HTTP method (GET, POST, PUT, PATCH, DELETE).
+                      url:
+                        type: string
+                        description: Relative Graph API URL.
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load the OneDrive and Exchange summary cards.
+        headerProfile: m365-admin-microsoft-365-backup
+        requestShapes:
+          - name: backup-onedrive-summary
+            contentType: application/json
+            bodyKind: batch
+            notes: The live portal batched drive protection unit counts, OneDrive protection policies, and active restore session counts.
+          - name: backup-exchange-summary
+            contentType: application/json
+            bodyKind: batch
+            notes: The live portal batched mailbox protection unit counts, Exchange protection policies, and active restore session counts.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        status:
+                          type: integer
+                        body:
+                          type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/deviceManagement:
+    get:
+      summary: Get device management root
+      description: >-
+        Retrieve the Microsoft Graph beta deviceManagement root used by the Edge
+        management experience.
+      operationId: GraphProxy.GetDeviceManagementRoot
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Device management root payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/deviceManagement/configurationPolicies:
+    get:
+      summary: List device management configuration policies
+      description: >-
+        Retrieve device management configuration policies via the Graph beta proxy,
+        including filtered and paged policy lists.
+      operationId: GraphProxy.ListDeviceManagementConfigurationPolicies
+      tags: [GraphProxy]
+      parameters:
+        - name: $filter
+          in: query
+          description: OData filter expression applied to the configuration policy list.
+          schema:
+            type: string
+        - name: $skiptoken
+          in: query
+          description: Server-issued paging token for the next policy result page.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  '@odata.nextLink':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: Device management configuration policy. Exact schema pending.
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/solutions/backupRestore:
+    get:
+      summary: Get backup restore solution status
+      description: >-
+        Retrieve the root Microsoft 365 Backup solution resource used by the admin
+        portal to determine whether the backup service is enabled and which consumer
+        state is active.
+      operationId: GraphProxy.GetBackupRestoreSolution
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  serviceStatus:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                      disableReason:
+                        type: string
+                      backupServiceConsumer:
+                        type: string
+                      lastModifiedDateTime:
+                        type: string
+                        format: date-time
+                      lastModifiedBy:
+                        type: object
+                        additionalProperties: true
+                    additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/solutions/backupRestore/protectionPolicies:
+    get:
+      summary: Get backup protection policies
+      description: >-
+        Retrieve the Microsoft 365 Backup protection policy configuration proxied through Microsoft Graph.
+      operationId: GraphProxy.GetBackupProtectionPolicies
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load the connected protection policy section.
+        headerProfile: m365-admin-microsoft-365-backup
+        availability:
+          level: tenant-conditional
+          notes:
+            - The live tenant returned HTTP 402 when Microsoft 365 Backup was not enabled.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Backup protection policy payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '402':
+          description: Feature not enabled or billing prerequisites unmet.
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/solutions/backupRestore/emailNotificationsSetting:
+    get:
+      summary: Get backup email notification settings
+      description: >-
+        Retrieve the Microsoft 365 Backup email notification configuration proxied through Microsoft Graph.
+      operationId: GraphProxy.GetBackupEmailNotificationsSetting
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load notification-related configuration.
+        headerProfile: m365-admin-microsoft-365-backup
+        availability:
+          level: tenant-conditional
+          notes:
+            - The live tenant returned HTTP 402 when Microsoft 365 Backup was not enabled.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Backup email notification settings payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '402':
+          description: Feature not enabled or billing prerequisites unmet.
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams:
+    get:
+      summary: List cloud app discovery uploaded streams
+      description: >-
+        Retrieve uploaded stream sources exposed by the security data discovery
+        Graph beta API, proxied through the M365 Admin Center.
+      operationId: GraphProxy.ListCloudAppDiscoveryUploadedStreams
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        displayName:
+                          type: string
+                        createdDateTime:
+                          type: string
+                          format: date-time
+                        lastDataReceivedDateTime:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        lastModifiedDateTime:
+                          type: string
+                          format: date-time
+                        logDataProvider:
+                          type: string
+                        logFileCount:
+                          type: integer
+                      additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams/{streamId}/microsoft.graph.security.aggregatedAppsDetails(period=duration'P90D'):
+    get:
+      summary: Get cloud app discovery aggregated app details
+      description: >-
+        Retrieve the 90-day aggregated app detail set for a specific uploaded stream,
+        optionally filtered by category.
+      operationId: GraphProxy.GetCloudAppDiscoveryAggregatedAppsDetails
+      tags: [GraphProxy]
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          description: The uploaded stream identifier.
+          schema:
+            type: string
+        - name: $filter
+          in: query
+          description: OData filter expression applied to the aggregated app detail set.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        displayName:
+                          type: string
+                        category:
+                          type: string
+                        riskScore:
+                          type: integer
+                        lastSeenDateTime:
+                          type: string
+                          format: date-time
+                        userCount:
+                          type: integer
+                        transactionCount:
+                          type: integer
+                        deviceCount:
+                          type: integer
+                      additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/$batch:
+    post:
+      summary: Graph batch request
+      description: >-
+        Submit a batch of Microsoft Graph API requests in a single call,
+        proxied through the M365 Admin Center. Supports combining multiple
+        Graph API calls for efficiency.
+      operationId: GraphProxy.Batch
+      tags: [GraphProxy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique identifier for the request in the batch.
+                      method:
+                        type: string
+                        description: HTTP method (GET, POST, PUT, PATCH, DELETE).
+                      url:
+                        type: string
+                        description: Relative Graph API URL.
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load offboarding summary counts.
+        headerProfile: m365-admin-microsoft-365-backup
+        requestShapes:
+          - name: backup-offboarding-counts
+            contentType: application/json
+            bodyKind: batch
+            notes: The live portal batched offboarding count reads for SharePoint site, OneDrive drive, and Exchange mailbox protection units.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route. Other portal surfaces may also use this generic batch endpoint.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        status:
+                          type: integer
+                        body:
+                          type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+components:
+  schemas:
+    SubscribedSku:
+      type: object
+      properties:
+        id:
+          type: string
+        skuId:
+          type: string
+          format: uuid
+        skuPartNumber:
+          type: string
+        appliesTo:
+          type: string
+        capabilityStatus:
+          type: string
+        consumedUnits:
+          type: integer
+        prepaidUnits:
+          type: object
+          properties:
+            enabled:
+              type: integer
+            suspended:
+              type: integer
+            warning:
+              type: integer
+        servicePlans:
+          type: array
+          items:
+            type: object
+            properties:
+              servicePlanId:
+                type: string
+                format: uuid
+              servicePlanName:
+                type: string
+              provisioningStatus:
+                type: string
+              appliesTo:
+                type: string

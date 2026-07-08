@@ -1,0 +1,277 @@
+{
+  "operationCount": 30,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/FederatedSsoV4/{appId}",
+      "OperationId": "ApplicationSso.FederatedSsoV4.Get",
+      "Summary": "Get Application Federated SSO state (v4)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/FederatedSsoClaimsPolicyV3",
+      "OperationId": "ApplicationSso.FederatedSsoClaimsPolicyV3.Set",
+      "Summary": "Set Application Federated SSO claims policy (V3)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/GetCertificateByThumbprintBase64String/{thumbprint}",
+      "OperationId": "ApplicationSso.Certificate.Get",
+      "Summary": "Get Application SSO certificate.",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/SetupClaimTest",
+      "OperationId": "ApplicationSso.ClaimTest.Setup",
+      "Summary": "Setup federated SSO claims test",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/TestLink",
+      "OperationId": "ApplicationSso.TestLink.Get",
+      "Summary": "Get linked Application SSO tests",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/IsValidIdentifierUriV2",
+      "OperationId": "ApplicationSso.ValidIdentifierUri.Check",
+      "Summary": "Check whether an application identifier URI is valid (v2)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/SPsWithSharedPolicy",
+      "OperationId": "ApplicationSso.SPsWithSharedPolicy.Get",
+      "Summary": "List service principals with shared policies",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/FederatedSsoConfigV2",
+      "OperationId": "ApplicationSso.FederatedSsoConfigV2.Update",
+      "Summary": "Update Application SSO federated SSO config (v2)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/CleanClaimTest",
+      "OperationId": "ApplicationSso.CleanClaimTest.Run",
+      "Summary": "Run Application SSO Clean Claim Test",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/GetSignInUrl",
+      "OperationId": "ApplicationSso.SignInUrl.Get",
+      "Summary": "Get Application SSO sign in URL",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/LinkedSso",
+      "OperationId": "ApplicationSso.LinkedSso.Get",
+      "Summary": "Get Application SSO linked SSO",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/EvaluateRegexTransformation",
+      "OperationId": "ApplicationSso.RegexTransformation.Evaluate",
+      "Summary": "Evaluate Regex transformation",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/GetFederatedOneClickSsoSetupData",
+      "OperationId": "ApplicationSso.FederatedOneClickSsoSetupData.Get",
+      "Summary": "Get Application SSO federated one clieck SSO setup data",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/FederatedSsoClaimsPolicyV2",
+      "OperationId": "ApplicationSso.FederatedSsoClaimsPolicyV2.Set",
+      "Summary": "Set Application Federated SSO claims policy (V2)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/FederatedSsoV3",
+      "OperationId": "ApplicationSso.FederatedSsoV3.Get",
+      "Summary": "Get Application Federated SSO state (v3)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/FederatedSsoV3",
+      "OperationId": "ApplicationSso.FederatedSsoV3.Set",
+      "Summary": "Set Application Federated SSO state (v3)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/ClaimIssuancePolicyId",
+      "OperationId": "ApplicationSso.ClaimIssuancePolicyId.Get",
+      "Summary": "Get Application SSO claim issuance policy ID",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/LinkFederatedSsoClaimsPolicy",
+      "OperationId": "ApplicationSso.FederatedSsoClaimsPolicy.Link",
+      "Summary": "Link federated SSO claims policy",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/TokenIssuancePolicyId",
+      "OperationId": "ApplicationSso.TokenIssuancePolicyId.Get",
+      "Summary": "Get Application SSO token issuance policy ID",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/FederatedSsoDefaultClaimsV2",
+      "OperationId": "Application.FederatedSsoDefaultClaimsV2.Get",
+      "Summary": "Get Application Federated SSO default claims (V2)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/SingleSignOn",
+      "OperationId": "ApplicationSso.SingleSignOn.Get",
+      "Summary": "Get Application SSO state",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/SingleSignOn",
+      "OperationId": "ApplicationSso.SingleSignOn.Set",
+      "Summary": "Set Application SSO state",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/SetupFederation",
+      "OperationId": "ApplicationSso.SsoFederation.Setup",
+      "Summary": "Setup federation for SSO application",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/FederatedSsoV2",
+      "OperationId": "ApplicationSso.FederatedSsoV2.Get",
+      "Summary": "Get Application Federated SSO state (v2)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/{spId}/FederatedSsoV2",
+      "OperationId": "ApplicationSso.FederatedSsoV2.Set",
+      "Summary": "Set Application Federated SSO state (v2)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/TokenSigningCert",
+      "OperationId": "ApplicationSso.TokenSigningCert.Get",
+      "Summary": "Update Application SSO token signing cert",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/UserExtensionProperties",
+      "OperationId": "Application.UserExtensionProperties.Get",
+      "Summary": "Get Application SSO User Extension Properties",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/FederatedSsoConfigV4/{appId}",
+      "OperationId": "ApplicationSso.FederatedSsoConfigV4.Update",
+      "Summary": "Update Application SSO federated SSO config (v4)",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ApplicationSso/IsValidUri",
+      "OperationId": "ApplicationSso.ValidUri.Check",
+      "Summary": "Check whether an application Uri is valid",
+      "Tags": [
+        "Application SSO"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationSso/{spId}/SsoApplication",
+      "OperationId": "ApplicationSso.SsoApplication.Get",
+      "Summary": "Get Application SSO properties",
+      "Tags": [
+        "Application SSO"
+      ]
+    }
+  ],
+  "category": "application_sso",
+  "portal": "nodoc-ibiza-iam"
+}

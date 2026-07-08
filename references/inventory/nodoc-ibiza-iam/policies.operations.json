@@ -1,0 +1,79 @@
+{
+  "operationCount": 8,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/Policies",
+      "OperationId": "Policies.Create",
+      "Summary": "Create policy",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/Policies/Validate",
+      "OperationId": "Policies.Validate",
+      "Summary": "Validate policy",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Policies/Policies",
+      "OperationId": "Policies.List",
+      "Summary": "List policies",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/WhatIf/Evaluate",
+      "OperationId": "WhatIf.Evaluate",
+      "Summary": "Evaluate policy",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Policies/PolicyCountUnderMaxAllowedLimit",
+      "OperationId": "Policies.CheckPolicyCountUnderMaxAllowedLimit",
+      "Summary": "Check if policy count is under max allowed limit",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Policies/{policyId}",
+      "OperationId": "Policies.Get",
+      "Summary": "Get policy",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/Policies/{policyId}",
+      "OperationId": "Policies.Update",
+      "Summary": "Update policy",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/Policies/{policyId}",
+      "OperationId": "Policies.Delete",
+      "Summary": "Delete policy",
+      "Tags": [
+        "Policies"
+      ]
+    }
+  ],
+  "category": "policies",
+  "portal": "nodoc-ibiza-iam"
+}

@@ -1,0 +1,295 @@
+{
+  "operationCount": 32,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/config/v1/SecurityMarketplaceClient/1.0.0",
+      "OperationId": "SecurityCopilotPortal.Store.GetClientConfiguration",
+      "Summary": "Get Security Store client configuration",
+      "Tags": [
+        "Store"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/provisioning/checkTenant",
+      "OperationId": "SecurityCopilotPortal.Provisioning.CheckTenant",
+      "Summary": "Check Security Platform tenant eligibility",
+      "Tags": [
+        "Provisioning"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/promptbooks",
+      "OperationId": "SecurityCopilotPortal.Promptbooks.List",
+      "Summary": "List promptbooks",
+      "Tags": [
+        "Promptbooks"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/checkRequirements",
+      "OperationId": "SecurityCopilotPortal.Skillsets.CheckRequirements",
+      "Summary": "Check builder requirements for skillsets",
+      "Tags": [
+        "Builder"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/prompt-suggestions/personas",
+      "OperationId": "SecurityCopilotPortal.PromptSuggestions.ListByPersona",
+      "Summary": "Get persona-scoped suggested prompts",
+      "Tags": [
+        "Sessions"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/settings/datashare/defaultWorkspace",
+      "OperationId": "SecurityCopilotPortal.Settings.GetDefaultWorkspace",
+      "Summary": "Get default workspace preference",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/gateway/actions/containers/me",
+      "OperationId": "SecurityCopilotPortal.ActionGateway.EvaluateContainerPermissions",
+      "Summary": "Evaluate current-container permissions",
+      "Tags": [
+        "Provisioning"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/auth",
+      "OperationId": "SecurityCopilotPortal.Auth.Probe",
+      "Summary": "Probe Security Copilot auth readiness",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/catalog/search",
+      "OperationId": "SecurityCopilotPortal.Store.SearchCatalog",
+      "Summary": "Search Security Store catalog",
+      "Tags": [
+        "Store"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/personas/values",
+      "OperationId": "SecurityCopilotPortal.Personas.ListValues",
+      "Summary": "List persona labels",
+      "Tags": [
+        "Workspace"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/sessions",
+      "OperationId": "SecurityCopilotPortal.Sessions.List",
+      "Summary": "List recent Security Copilot sessions",
+      "Tags": [
+        "Sessions"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/usage/capacities",
+      "OperationId": "SecurityCopilotPortal.Usage.ListCapacities",
+      "Summary": "List attached Security Copilot capacities",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/graphData/details",
+      "OperationId": "SecurityCopilotPortal.GraphData.GetDetails",
+      "Summary": "Resolve Entra object details for workspace policy views",
+      "Tags": [
+        "Workspace"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}",
+      "OperationId": "SecurityCopilotPortal.Workspaces.Get",
+      "Summary": "Get workspace metadata",
+      "Tags": [
+        "Workspace"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/account/workspaces",
+      "OperationId": "SecurityCopilotPortal.Account.ListWorkspaces",
+      "Summary": "List Security Copilot workspaces",
+      "Tags": [
+        "Provisioning"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/users/features",
+      "OperationId": "SecurityCopilotPortal.Users.GetFeatures",
+      "Summary": "Get Security Copilot feature flags",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/auth/userInfo",
+      "OperationId": "SecurityCopilotPortal.Auth.GetUserInfo",
+      "Summary": "Get current Security Copilot user context",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/agents",
+      "OperationId": "SecurityCopilotPortal.Agents.List",
+      "Summary": "List agents",
+      "Tags": [
+        "Agents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets",
+      "OperationId": "SecurityCopilotPortal.Skillsets.List",
+      "Summary": "List skillsets and plugins",
+      "Tags": [
+        "Builder"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/agentdefinitions",
+      "OperationId": "SecurityCopilotPortal.AgentDefinitions.List",
+      "Summary": "List agent definitions",
+      "Tags": [
+        "Agents"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/userPreferences/currentWorkspace",
+      "OperationId": "SecurityCopilotPortal.UserPreferences.GetCurrentWorkspace",
+      "Summary": "Get current workspace preference",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/trial",
+      "OperationId": "SecurityCopilotPortal.Trial.List",
+      "Summary": "List Security Copilot trial records",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/policystore/workspaces/{workspaceName}/workspacePolicy",
+      "OperationId": "SecurityCopilotPortal.WorkspacePolicy.Get",
+      "Summary": "Get workspace policy document",
+      "Tags": [
+        "Workspace"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/personas/skillsets",
+      "OperationId": "SecurityCopilotPortal.Personas.ListSkillsets",
+      "Summary": "List persona skillset mappings",
+      "Tags": [
+        "Workspace"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/availabletrials",
+      "OperationId": "SecurityCopilotPortal.Workspace.ListAvailableTrials",
+      "Summary": "List workspace-available trials",
+      "Tags": [
+        "Workspace"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/configurations",
+      "OperationId": "SecurityCopilotPortal.Skillsets.ListConfigurations",
+      "Summary": "List skillset configurations",
+      "Tags": [
+        "Builder"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/provisioning/create",
+      "OperationId": "SecurityCopilotPortal.Provisioning.CreateWhatIf",
+      "Summary": "Run Security Copilot create-capacity what-if",
+      "Tags": [
+        "Provisioning"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/auth/expiryDate",
+      "OperationId": "SecurityCopilotPortal.Auth.GetExpiryDate",
+      "Summary": "Get workspace capacity auth expiry state",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/provisioning/account",
+      "OperationId": "SecurityCopilotPortal.Provisioning.GetAccount",
+      "Summary": "Get Security Platform account and pod inventory",
+      "Tags": [
+        "Provisioning"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/users/{userId}/activities",
+      "OperationId": "SecurityCopilotPortal.Users.GetActivities",
+      "Summary": "Get recent Security Copilot user activity",
+      "Tags": [
+        "Workspace"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/settings/datashare",
+      "OperationId": "SecurityCopilotPortal.Settings.GetDataShare",
+      "Summary": "Get tenant data-sharing settings",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/{skillsetName}/skills",
+      "OperationId": "SecurityCopilotPortal.Skillsets.ListSkills",
+      "Summary": "List skills for a skillset",
+      "Tags": [
+        "Builder"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-security-copilot"
+}

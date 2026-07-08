@@ -1,0 +1,70 @@
+{
+  "operationCount": 7,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/ManagedApplications/{spId}/PasswordSsoCustomApp",
+      "OperationId": "ManagedApplications.PasswordSsoCustomApp.Create",
+      "Summary": "Create managed application Password SSO custom app",
+      "Tags": [
+        "Managed Applications"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ManagedApplications/List",
+      "OperationId": "ManagedApplication.List",
+      "Summary": "List managed applications",
+      "Tags": [
+        "Managed Applications"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ManagedApplications/{spId}",
+      "OperationId": "ManagedApplication.Get",
+      "Summary": "Get managed application",
+      "Tags": [
+        "Managed Applications"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ManagedApplications/{spId}/AppRoleAssignments",
+      "OperationId": "ManagedApplication.AppRoleAssginemnts.Get",
+      "Summary": "Get managed application app role assignments",
+      "Tags": [
+        "Managed Applications"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ManagedApplications/{spId}/AppRoleAssignments",
+      "OperationId": "ManagedApplication.AppRoleAssginemnts.Create",
+      "Summary": "Create managed application app role assignments",
+      "Tags": [
+        "Managed Applications"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ManagedApplications/{spId}/PasswordSsoCredentials/{targetType}/{targetId}",
+      "OperationId": "ManagedApplications.PasswordSsoCustomApp.Target.Get",
+      "Summary": "Get managed application Password SSO custom app target",
+      "Tags": [
+        "Managed Applications"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ManagedApplications/{spId}/PasswordSsoCustomApp/{customAppId}",
+      "OperationId": "ManagedApplications.PasswordSsoCustomApp.Get",
+      "Summary": "Get managed application Password SSO custom app",
+      "Tags": [
+        "Managed Applications"
+      ]
+    }
+  ],
+  "category": "managed_applications",
+  "portal": "nodoc-ibiza-iam"
+}

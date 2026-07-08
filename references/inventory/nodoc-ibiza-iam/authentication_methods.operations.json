@@ -1,0 +1,61 @@
+{
+  "operationCount": 6,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/AuthenticationMethods/PasswordPolicy",
+      "OperationId": "AuthenticationMethods.PasswordPolicy.Get",
+      "Summary": "Get password policy",
+      "Tags": [
+        "Authentication Methods"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/AuthenticationMethods/PasswordPolicy",
+      "OperationId": "AuthenticationMethods.PasswordPolicy.Update",
+      "Summary": "Update password policy",
+      "Tags": [
+        "Authentication Methods"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/RequireAuthMethodVerification/{0}",
+      "OperationId": "AuthenticationMethods.RequireVerification",
+      "Summary": "Require auth method verification",
+      "Tags": [
+        "Authentication Methods"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/AuthenticationMethods/AuthenticationMethodsPolicy",
+      "OperationId": "AuthenticationMethods.AuthenticationMethodsPolicy.Get",
+      "Summary": "Get authentication methods policy",
+      "Tags": [
+        "Authentication Methods"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/AuthenticationMethods/AuthenticationMethodsPolicy",
+      "OperationId": "AuthenticationMethods.AuthenticationMethodsPolicy.Update",
+      "Summary": "Update authentication methods policy",
+      "Tags": [
+        "Authentication Methods"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/AuthenticationMethods/AuthenticationMethodsPolicy",
+      "OperationId": "AuthenticationMethods.AuthenticationMethodsPolicy.Delete",
+      "Summary": "Delete authentication methods policy",
+      "Tags": [
+        "Authentication Methods"
+      ]
+    }
+  ],
+  "category": "authentication_methods",
+  "portal": "nodoc-ibiza-iam"
+}

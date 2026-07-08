@@ -1,0 +1,61 @@
+{
+  "operationCount": 6,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/NamedNetworksV2",
+      "OperationId": "NamedNetworksV2.List",
+      "Summary": "List named networks (v2)",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/NamedNetworksV2",
+      "OperationId": "NamedNetworksV2.Create",
+      "Summary": "Create named network (v2)",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/NamedNetworks",
+      "OperationId": "NamedNetworks.List",
+      "Summary": "List named networks",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/NamedNetworksV2/{id}",
+      "OperationId": "NamedNetworksV2.Get",
+      "Summary": "Get named network (v2)",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/NamedNetworksV2/ValidatePolicySize/{id}",
+      "OperationId": "NamedNetworksV2.PolicySize.Validate",
+      "Summary": "Validate named network policy size (v2)",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/NamedNetworksV2/CountryCodes",
+      "OperationId": "NamedNetworksV2.CountryCodes.List",
+      "Summary": "List named network country codes (v2)",
+      "Tags": [
+        "Policies"
+      ]
+    }
+  ],
+  "category": "named_networks",
+  "portal": "nodoc-ibiza-iam"
+}

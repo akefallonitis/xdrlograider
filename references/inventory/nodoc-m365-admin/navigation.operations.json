@@ -1,0 +1,34 @@
+{
+  "operationCount": 3,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/admin/api/navigation",
+      "OperationId": "Navigation.GetNavigation",
+      "Summary": "Get navigation configuration",
+      "Tags": [
+        "Navigation"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/navigation/async",
+      "OperationId": "Navigation.GetAsyncNavigation",
+      "Summary": "Get async navigation items",
+      "Tags": [
+        "Navigation"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/navigation/darkmode",
+      "OperationId": "Navigation.GetDarkMode",
+      "Summary": "Get dark mode preference",
+      "Tags": [
+        "Navigation"
+      ]
+    }
+  ],
+  "category": "navigation",
+  "portal": "nodoc-m365-admin"
+}

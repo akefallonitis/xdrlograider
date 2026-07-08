@@ -1,0 +1,262 @@
+paths:
+  /admin/api/Settings/security/o365guestuser:
+    get:
+      summary: Get O365 guest user settings
+      description: >-
+        Retrieve the Office 365 guest user sharing and access settings.
+      operationId: SecuritySettings.GetO365GuestUser
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - O365 guest user settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set O365 guest user settings
+      description: >-
+        Update the Office 365 guest user sharing and access settings.
+      operationId: SecuritySettings.SetO365GuestUser
+      tags: [SecuritySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - O365 guest user settings update body
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/Settings/security/guestUserPolicy:
+    get:
+      summary: Get guest user policy
+      description: >-
+        Retrieve the guest user policy settings for the tenant.
+      operationId: SecuritySettings.GetGuestUserPolicy
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - guest user policy settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set guest user policy
+      description: >-
+        Update the guest user policy settings.
+      operationId: SecuritySettings.SetGuestUserPolicy
+      tags: [SecuritySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - guest user policy update body
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/security/passwordpolicy:
+    get:
+      summary: Get password expiration policy
+      description: >-
+        Retrieve the password expiration policy settings for the tenant (Org Settings > Password expiration).
+      operationId: SecuritySettings.GetPasswordPolicy
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/security/privacypolicy:
+    get:
+      summary: Get privacy policy settings
+      description: >-
+        Retrieve the privacy profile and policy settings for the tenant (Org Settings > Privacy profile).
+      operationId: SecuritySettings.GetPrivacyPolicy
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/security/tenantLockbox:
+    get:
+      summary: Get tenant lockbox settings
+      description: >-
+        Retrieve the tenant lockbox (privileged access) settings for the tenant (Org Settings > Privileged access).
+      operationId: SecuritySettings.GetTenantLockbox
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/security/dataaccess:
+    get:
+      summary: Get customer lockbox data access settings
+      description: >-
+        Retrieve the customer lockbox data access settings for the tenant (Org Settings > Customer lockbox).
+      operationId: SecuritySettings.GetDataAccess
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/securitysettings/settings:
+    get:
+      summary: Get secure-by-default settings catalog
+      description: >-
+        Retrieve the catalog of secure-by-default controls shown in Org Settings >
+        Security & privacy.
+      operationId: SecuritySettings.GetSecurityControlsCatalog
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SecuritySettingsCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/securitysettings/optIn:
+    get:
+      summary: Get secure-by-default opt-in status
+      description: >-
+        Retrieve the opt-in envelope used by the secure-by-default experience. The
+        observed response body was an empty JSON object.
+      operationId: SecuritySettings.GetSecurityControlsOptIn
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/EmptyObjectResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/securitysettings/settings/status:
+    get:
+      summary: Get secure-by-default control status
+      description: >-
+        Retrieve per-control status results, including links and exclusion metadata
+        for settings that are at risk or customized.
+      operationId: SecuritySettings.GetSecurityControlsStatus
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SecuritySettingsStatusResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

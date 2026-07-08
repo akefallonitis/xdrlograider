@@ -1,0 +1,87 @@
+{
+  "_comment": "Machine-readable live-probe findings: facts the OpenAPI spec gets WRONG or cannot express, captured from real lab-tenant probing. The catalogue Decide stage reads these as authoritative overrides (live > openapi). One entry per OperationId. Fixture = the live response capture used for schema mapping. Only fields that the spec cannot yield are pinned here; everything else is derived.",
+  "operations": {
+    "ActionCenter.GetHistory": {
+      "Fixture": "references/live/source-xdrlograider-raw/MDE_ActionCenter_CL-raw.json",
+      "PageIndexStart": 1,
+      "PageIndexStartReason": "OpenAPI declares pageIndex default 0, which returns bodyless HTTP 500 on this endpoint; live-proven 1-based 2026-06-04 (pageIndex=1 -> 200 with rows). This endpoint family is 1-based.",
+      "CursorField": "EventTime",
+      "NaturalKey": ["ActionId"],
+      "SortProven": true,
+      "SortProvenReason": "sortByField=EventTime&sortOrder=Descending returns 200 (LIVE-PROVEN 2026-06-04); enables exactly-once early-stop.",
+      "ProvenUtc": "2026-06-04T00:00:00Z"
+    },
+    "ActionCenter.GetPending": {
+      "PageIndexStart": 1,
+      "PageIndexStartReason": "ActionCenter pending-actions: pageIndex=0 returns a bodyless HTTP 500 (observed live in the FA 2026-06-10); same 1-based endpoint family as GetHistory (live-proven 1-based 2026-06-04). Set to 1; pending P2 live-confirm (pageIndex=1 -> 200 with rows)."
+    },
+    "VulnerabilityManagement.ListChangeEvents": {
+      "PageIndexStart": 1,
+      "PageIndexStartReason": "tvm/analytics is 1-BASED — live-proven 2026-06-25 (Probe-TvmPaginationForm-Local: /changeEvents/ & /products ?pageIndex=1&pageSize=50 -> HTTP 200 echoing pageIndex:1; ?pageIndex=0 -> HTTP 400 'Wrong pagination parameters'; pageIndex=2 -> real page 2). Build-Catalogue default 0 emitted pageIndex=0 which the backend rejects (and the engine mislabeled UnsupportedApiVersion). Same 1-based family as ActionCenter.",
+      "ProvenUtc": "2026-06-25T00:00:00Z"
+    },
+    "VulnerabilityManagement.ListProducts": {
+      "PageIndexStart": 1,
+      "PageIndexStartReason": "tvm/analytics 1-based (live-proven 2026-06-25 AND re-proven 2026-07-04 Probe-TvmPaginationForm-Local: /products ?pageIndex=1&pageSize=50 -> HTTP 200 (50 rows); ?pageIndex=0&pageSize=50 -> HTTP 400 'Wrong pagination parameters'; bare -> 20 rows echoing pageIndex:1). The OpenAPI spec declared ONLY pageIndex (no pageSize) so Build-Catalogue emitted Mode=none -> the connector single-paged 20 of ~51 products (DATA-INCOMPLETE, surfaced by the snapshot-dedup diagnosis). Added pageSize to the spec + PageIndexStart=1 here so the pageIndexIncrement loop fetches the COMPLETE product set each poll.",
+      "ProvenUtc": "2026-07-04T00:00:00Z"
+    },
+    "VulnerabilityManagement.ListAssetInstallations": {
+      "PageIndexStart": 1,
+      "PageIndexStartReason": "tvm/analytics 1-based (live-proven 2026-06-25 · same probe). assets/{assetId}/installations wrapper (numOfResults/pageIndex/results[]). The deployed pageIndex=0 was the 400 the engine logged as UnsupportedApiVersion; pageIndex=1 -> 200.",
+      "ProvenUtc": "2026-06-25T00:00:00Z"
+    },
+    "ExposureManagement.ListPostureOversightMetrics": {
+      "NaturalKey": ["id"],
+      "NaturalKeyProvenReason": "SNAPSHOT op. Live count==dcount('id') latest cycle: 10 rows / 10 distinct id (2026-06-16 K1 re-prove). 'id' = stable per-metric identity -> populates RecordId + makes SNAPSHOT within-cycle dup-free verifiable.",
+      "ProvenUtc": "2026-06-16T00:00:00Z"
+    },
+    "ExposureManagement.ListPostureOversightRecommendations": {
+      "NaturalKey": ["id"],
+      "NaturalKeyProvenReason": "SNAPSHOT op. Live count==dcount('id') latest cycle: 10 rows / 10 distinct id (2026-06-16 K1 re-prove). 'id' = stable recommendation identity.",
+      "ProvenUtc": "2026-06-16T00:00:00Z"
+    },
+    "ExposureManagement.ListPostureOversightInitiatives": {
+      "NaturalKey": ["id"],
+      "NaturalKeyProvenReason": "SNAPSHOT op. Live count==dcount('id') latest cycle: 9 rows / 9 distinct id (2026-06-16 K1 re-prove). 'id' = stable initiative identity.",
+      "ProvenUtc": "2026-06-16T00:00:00Z"
+    },
+    "ExposureManagement.ListPostureSecurityEvents": {
+      "NaturalKey": ["id"],
+      "NaturalKeyProvenReason": "SNAPSHOT op. Live count==dcount('id') latest cycle: 124 rows / 124 distinct id (2026-06-16 K1 re-prove). 'id' = stable security-event identity.",
+      "ProvenUtc": "2026-06-16T00:00:00Z"
+    },
+    "ExposureManagement.GetPostureOversightTenants": {
+      "NaturalKey": ["orgId"],
+      "NaturalKeyProvenReason": "SNAPSHOT op. Live count==dcount('orgId') latest cycle: 1 row / 1 distinct orgId (2026-06-16 K1 re-prove). 'orgId' = stable tenant-org identity (per-customer-single-tenant connector).",
+      "ProvenUtc": "2026-06-16T00:00:00Z"
+    },
+    "ExposureManagement.GetAppsSecureScoreMetric": {
+      "NaturalKey": ["id"],
+      "NaturalKeyProvenReason": "SNAPSHOT single-row metric. Live count==dcount('id') 2026-06-16 (re-poll 22:28:52Z): 1 row / 1 distinct id (id='category_apps_secure_score'). 'id' = the stable secure-score-pillar identity -> populates RecordId. ColumnTypes (latestValue/latestCount/latestTotal=real) PROVEN typed-populated the same cycle.",
+      "ProvenUtc": "2026-06-16T00:00:00Z"
+    },
+    "ExposureManagement.GetDataSecureScoreMetric": {
+      "NaturalKey": ["id"],
+      "NaturalKeyProvenReason": "SNAPSHOT single-row metric. Live count==dcount('id') 2026-06-16 (re-poll 22:28:52Z): 1 row / 1 distinct id (id='category_data_secure_score'). Distinct security pillar from Apps/Identity (signatureDecisions: distinct).",
+      "ProvenUtc": "2026-06-16T00:00:00Z"
+    },
+    "ExposureManagement.GetIdentitySecureScoreMetric": {
+      "NaturalKey": ["id"],
+      "NaturalKeyProvenReason": "SNAPSHOT single-row metric. Live count==dcount('id') 2026-06-16 (re-poll 22:28:52Z): 1 row / 1 distinct id (id='category_identity_secure_score'). Distinct security pillar from Apps/Data (signatureDecisions: distinct).",
+      "ProvenUtc": "2026-06-16T00:00:00Z"
+    },
+    "MultiTenant.GetTenantContext": {
+      "NaturalKey": ["OrgId"],
+      "NaturalKeyProvenReason": "SNAPSHOT singleObject (tenant context · 1 row/cycle). Single-tenant connector -> OrgId is the stable per-tenant-org identity (live-derived JSON type=guid 2026-06-17 · OrgId='9c121001-7ee4-4aa7-9117-101000da3766' · 1 row/cycle => within-cycle count==dcount('OrgId')=1/1). Populates RecordId + makes the SNAPSHOT per-cycle dup-free verifiable. SAME mechanism as ExposureManagement.GetPostureOversightTenants (orgId).",
+      "ProvenUtc": "2026-06-17T00:00:00Z"
+    },
+    "SecureScore.GetInsights": {
+      "Fixture": "references/live/source-mvp-fixtures/GetInsights/response.json",
+      "CursorField": "createdDate",
+      "IngestionMode": "CURSOR",
+      "CursorFieldProvenReason": "BUCKETED-DATE CURSOR (a daily cohort TIME-SERIES, NOT a flat snapshot). createdDate is a per-DAY bucket — many insights share each date, so count != dcount('createdDate') by design (the per-record count==dcount cursor test does NOT apply here). LIVE-OBSERVED 2026-06-19: GetInsights returns a multi-day createdDate series (~30 insights per day) whose max advances daily, while the CURRENT day's cohort scores recompute intra-day (volatile). As a flat SNAPSHOT the whole-snapshot signature re-emits ALL ~2700 rows on ANY current-day change (live-caught dup-accumulation). Reclassified CURSOR-by-createdDate: the EO drops the frozen history (< high-water) and at the high-water (the current day) the KEYLESS boundary tie dedups by RecordId (the content-hash) — unchanged current-day rows drop, changed ones (new scores -> new content-hash) are kept. Exactly-once therefore comes from the RecordId boundary, NOT from cursor uniqueness.",
+      "IngestionModeProvenReason": "CURSOR (bucketed-date). Keyless -> the runtime keyless-CURSOR RecordId-boundary path (Xdr.Common.Runtime.psm1 · F-KEYLESS-CURSOR 2026-06-20 · Select-XdrExactlyOnceRows + Get-XdrAdvancedFrontier fall back to RecordId when NaturalKey is empty) provides cross-cycle exactly-once. Proven live post-deploy by the C6 dup-accumulation gate (total <= dcount x bound). The classifier (Build-Catalogue) honors this explicit IngestionMode because the op name 'Insights' misses the history|audit|events|log|timeline keyword heuristic.",
+      "ProvenUtc": "2026-06-19T00:00:00Z"
+    }
+  }
+}

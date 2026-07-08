@@ -1,0 +1,79 @@
+{
+  "operationCount": 8,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/api/Auth/getSpaAuthCode",
+      "OperationId": "PurviewPortal.Auth.GetSpaAuthCode",
+      "Summary": "Get the SPA auth helper value",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/Report/GetReportSummaryData",
+      "OperationId": "PurviewPortal.Analytics.GetReportSummaryData",
+      "Summary": "Get report summary data",
+      "Tags": [
+        "Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/Auth/getToken",
+      "OperationId": "PurviewPortal.Auth.GetToken",
+      "Summary": "Mint a downstream bearer token",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/adminauditlogconfig/",
+      "OperationId": "PurviewPortal.Audit.GetAdminAuditLogConfig",
+      "Summary": "Get admin audit log configuration",
+      "Tags": [
+        "Audit"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/auth/IsInRoles",
+      "OperationId": "PurviewPortal.Auth.IsInRoles",
+      "Summary": "Evaluate role and feature membership",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/v2/auth/GetCachedRoles",
+      "OperationId": "PurviewPortal.Auth.GetCachedRoles",
+      "Summary": "Get cached Purview roles",
+      "Tags": [
+        "Auth"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/LabelUserActivityLog/GetChartData",
+      "OperationId": "PurviewPortal.Analytics.GetLabelUserActivityChartData",
+      "Summary": "Get label user activity chart data",
+      "Tags": [
+        "Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/api/user/",
+      "OperationId": "PurviewPortal.Users.Search",
+      "Summary": "Search users for portal pickers",
+      "Tags": [
+        "Users"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-purview-portal"
+}

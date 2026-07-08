@@ -1,0 +1,764 @@
+openapi: 3.0.1
+info:
+  title: Entra IDGov
+  x-nodoc-category: Entra
+  description: |
+    The Entra IDGov (Identity Governance) API is used by the Microsoft Entra portal
+    (entra.microsoft.com → Identity Governance → Access Reviews) for managing access
+    review campaigns and approval workflows, including:
+
+      - Access Review Definitions and Instances
+      - Approval Workflow Providers
+      - Access Review Requests and Decisions
+      - Feature Flags and Partner Tenant Settings
+      - Consent and Terms of Use Approvals
+
+    All endpoints are served from `api.accessreviews.identitygovernance.azure.com`
+    and require a valid Azure AD bearer token.
+
+    **Note:** This specification was generated through browser traffic analysis of the
+    Entra portal. The access reviews service uses provider-based routing where different
+    providers (identified by GUID) handle different review types:
+    - `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags and configuration
+    - `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://api.accessreviews.identitygovernance.azure.com
+    description: Entra Access Reviews API
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Azure AD bearer token with access review permissions
+  schemas:
+    AccessReviewFeatureFlagsResponse:
+      type: object
+      description: Feature flags returned by the IDGov configuration provider.
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+          example: https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('F40AE6A6-7BFC-4ABF-9E2A-63120C21A538')/featureFlags/$entity
+        sqlOutage:
+          type: boolean
+          example: false
+        emergencyRAE:
+          type: string
+          example: none
+        isArFusionAuthorative:
+          type: boolean
+          example: false
+    AccessReviewSettings:
+      type: object
+      description: Access review behavior settings returned with a request definition.
+      properties:
+        mailNotificationsEnabled:
+          type: boolean
+          example: true
+        remindersEnabled:
+          type: boolean
+          example: true
+        justificationRequiredOnApproval:
+          type: boolean
+          example: true
+        autoReviewEnabled:
+          type: boolean
+          example: false
+        activityDurationInDays:
+          type: integer
+          example: 0
+        autoApplyReviewResultsEnabled:
+          type: boolean
+          example: false
+        selfApprovalAllowed:
+          type: boolean
+          example: false
+        accessRecommendationsEnabled:
+          type: boolean
+          example: true
+        escalationEnabled:
+          type: boolean
+          example: false
+        timeSpanToEscalation:
+          type: string
+          example: PT0S
+      additionalProperties: true
+    AccessReviewRequestItem:
+      type: object
+      description: Access review campaign/definition returned by the IDGov requests endpoint.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 52a2c256-9a91-4f56-9edc-06969fdcc298
+        displayName:
+          type: string
+          example: czvbxcvb
+        status:
+          type: string
+          example: InProgress
+        businessFlowId:
+          type: string
+          format: uuid
+          example: 4dec5ff3-622d-48da-8ff0-755f2ef0c9a8
+        businessFlowTemplateId:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        createdDateTime:
+          type: string
+          format: date-time
+          example: '2026-01-27T18:09:30.2847107Z'
+        decisionsCriteria:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        reviewedEntity:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        policy:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        settings:
+          $ref: '#/components/schemas/AccessReviewSettings'
+        errors:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+      additionalProperties: true
+    AccessReviewRequestListResponse:
+      type: object
+      description: OData response containing access review requests.
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+          example: https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE')/requests/Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.AccessReview(id,businessFlowId,decisionsCriteria,reviewedEntity,businessFlowTemplateId,policy,settings,errors,displayName,status,createdDateTime)
+        '@odata.count':
+          type: integer
+          example: 5
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessReviewRequestItem'
+    AccessReviewInstanceItem:
+      type: object
+      description: A concrete review-cycle instance of an access review definition.
+      properties:
+        '@odata.type':
+          type: string
+          example: '#Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.Request'
+        id:
+          type: string
+          format: uuid
+          example: acd75ae2-ec75-4345-9388-3dd2b57e3e02
+        parentReviewId:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        stage:
+          type: integer
+          example: 0
+        displayName:
+          type: string
+          example: czvbxcvb
+        startDateTime:
+          type: string
+          format: date-time
+          example: '2026-01-27T18:09:30.283Z'
+        endDateTime:
+          type: string
+          format: date-time
+          example: '2026-02-10T18:09:30.283Z'
+        status:
+          type: string
+          example: Completed
+        state:
+          type: string
+          nullable: true
+          example: null
+        businessFlowId:
+          type: string
+          format: uuid
+          example: 4dec5ff3-622d-48da-8ff0-755f2ef0c9a8
+        partnerId:
+          type: string
+          format: uuid
+          example: d5ec9f3b-324e-4f8a-af55-b69edd48ecbe
+        reviewerType:
+          type: string
+          example: ''
+        'description':
+          type: string
+          example: ''
+        emailFriendlyDescription:
+          type: string
+          example: ''
+        deDuplicationId:
+          type: string
+          nullable: true
+          example: null
+        customData:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        businessFlowTemplateId:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        policyTemplateId:
+          type: string
+          nullable: true
+          example: null
+        schemaId:
+          type: string
+          nullable: true
+          example: null
+        createdDateTime:
+          type: string
+          format: date-time
+          example: '2026-01-27T18:09:30.2857108Z'
+        recordVersion:
+          type: string
+          nullable: true
+          example: null
+        version:
+          type: integer
+          example: 0
+      additionalProperties: true
+    AccessReviewInstanceListResponse:
+      type: object
+      description: OData response containing access review instances for a request.
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+          example: https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE')/requests('52a2c256-9a91-4f56-9edc-06969fdcc298')/instances
+        '@odata.count':
+          type: integer
+          example: 1
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessReviewInstanceItem'
+  parameters:
+    providerId:
+      name: providerId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: |
+        The approval workflow provider ID. Known providers:
+        - `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration
+        - `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests
+    requestId:
+      name: requestId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The access review request ID
+    $filter:
+      name: $filter
+      in: query
+      schema:
+        type: string
+      description: OData filter expression
+    $top:
+      name: $top
+      in: query
+      schema:
+        type: integer
+      description: Maximum number of results to return
+    $skip:
+      name: $skip
+      in: query
+      schema:
+        type: integer
+      description: Number of results to skip
+tags:
+  - name: Providers
+    description: Approval workflow provider operations
+  - name: Requests
+    description: Access review request management
+  - name: Instances
+    description: Access review instances (individual review cycles)
+  - name: Decisions
+    description: Access review decisions
+  - name: Configuration
+    description: Feature flags and tenant settings
+x-tagGroups:
+  - name: Review configuration
+    tags: [Providers, Configuration]
+  - name: Review execution
+    tags: [Requests, Instances, Decisions]
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-entra-idgov/specification
+paths:
+  /accessReviews/v2.0/approvalWorkflowProviders:
+    get:
+      tags: [Providers]
+      summary: List approval workflow providers
+      description: |
+        Retrieves all registered approval workflow providers. Each provider
+        handles a specific type of access review or approval workflow.
+      responses:
+        '200':
+          description: List of approval workflow providers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags:
+    get:
+      tags: [Configuration]
+      summary: Get feature flags for a provider
+      description: |
+        Retrieves the feature flags configuration for the specified provider.
+        Used by the portal to determine which UI features are enabled.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+      responses:
+        '200':
+          description: Feature flags configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessReviewFeatureFlagsResponse'
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('F40AE6A6-7BFC-4ABF-9E2A-63120C21A538')/featureFlags/$entity"
+                sqlOutage: false
+                emergencyRAE: none
+                isArFusionAuthorative: false
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings:
+    get:
+      tags: [Configuration]
+      summary: Get partner tenant settings
+      description: |
+        Retrieves partner/tenant-specific settings for the access reviews provider.
+        Includes configuration like default review duration, notification settings,
+        and auto-apply behavior.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+      responses:
+        '200':
+          description: Partner tenant settings
+          content:
+            application/json:
+              schema:
+                type: object
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/businessFlows:
+    get:
+      tags: [Configuration]
+      summary: List business flows for a provider
+      description: |
+        Retrieves access review business flows surfaced by the Access reviews > Programs
+        experience. Confirmed live from the Identity Governance Programs blade.
+      operationId: AccessReviews.ListBusinessFlows
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - name: $count
+          in: query
+          required: false
+          description: Include the total count of matching business flows.
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+      responses:
+        '200':
+          description: Business flows returned successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  '@odata.count':
+                    type: integer
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        partnerId:
+                          type: string
+                          format: uuid
+                        displayName:
+                          type: string
+                        'description':
+                          type: string
+                        createdDateTime:
+                          type: string
+                          format: date-time
+                        lastUpdatedDateTime:
+                          type: string
+                          format: date-time
+                        deDuplicationId:
+                          type: string
+                        recordVersion:
+                          type: string
+                        customData:
+                          type: object
+                          nullable: true
+                          additionalProperties: true
+                        policyTemplateId:
+                          type: string
+                          nullable: true
+                        isDefault:
+                          type: boolean
+                        schemaId:
+                          type: string
+                          nullable: true
+                        settings:
+                          type: object
+                          nullable: true
+                          additionalProperties: true
+                        policy:
+                          type: object
+                          nullable: true
+                          additionalProperties: true
+                        'summary':
+                          type: object
+                          nullable: true
+                          additionalProperties: true
+                      additionalProperties: true
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('F40AE6A6-7BFC-4ABF-9E2A-63120C21A538')/businessFlows"
+                '@odata.count': 1
+                value:
+                  - id: 52a2c256-9a91-4f56-9edc-06969fdcc298
+                    partnerId: d5ec9f3b-324e-4f8a-af55-b69edd48ecbe
+                    displayName: Quarterly guest access review
+                    description: Reviews guest access to the CRM application.
+                    createdDateTime: '2026-01-27T18:09:30.2847107Z'
+                    lastUpdatedDateTime: '2026-02-01T14:15:00Z'
+                    deDuplicationId: null
+                    recordVersion: '1'
+                    customData: null
+                    policyTemplateId: null
+                    isDefault: false
+                    schemaId: null
+                    settings: null
+                    policy: null
+                    summary: null
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests:
+    get:
+      tags: [Requests]
+      summary: List access review requests
+      description: |
+        Retrieves access review requests (campaigns/definitions) for the specified
+        provider. Each request represents an access review definition that may have
+        multiple instances (recurrence cycles).
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+      responses:
+        '200':
+          description: List of access review requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessReviewRequestListResponse'
+    post:
+      tags: [Requests]
+      summary: Create an access review request
+      description: |
+        Creates a new access review definition/campaign.
+
+        **Warning:** This endpoint creates access review campaigns.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Access review request created
+        '400':
+          description: Invalid request
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requestsAwaitingMyDecision:
+    get:
+      tags: [Requests]
+      summary: List access review requests awaiting my decision
+      description: |
+        Retrieves access review definitions currently awaiting a decision from the
+        signed-in reviewer. Confirmed live from the Access Reviews landing page,
+        which filtered the request set by `decisionsCriteria`.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+        - name: $count
+          in: query
+          required: false
+          description: Include the total count of matching access reviews.
+          schema:
+            type: boolean
+        - name: $select
+          in: query
+          required: false
+          description: Comma-separated list of properties to include in the response.
+          schema:
+            type: string
+        - name: $orderby
+          in: query
+          required: false
+          description: OData ordering expression applied to the result set.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Access review requests awaiting the caller's decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessReviewRequestListResponse'
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('00000000-0000-0000-0000-000000000000')/requestsAwaitingMyDecision/Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.AccessReview(id,displayName,endDateTime,decisionsCriteria)"
+                '@odata.count': 0
+                value: []
+  /accessReviews/v2.0/reports:
+    get:
+      tags: [Requests]
+      summary: List access review reports
+      description: |
+        Retrieves report rows shown by the Access reviews > Review History experience.
+        Confirmed live from the Identity Governance Review History blade.
+      operationId: AccessReviews.ListReports
+      parameters:
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: Access review reports returned successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  '@odata.count':
+                    type: integer
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#reports"
+                '@odata.count': 1
+                value:
+                  - requestId: 52a2c256-9a91-4f56-9edc-06969fdcc298
+                    displayName: Quarterly guest access review
+                    status: Completed
+                    reviewedEntityCount: 42
+                    startDateTime: '2026-01-27T18:09:30.283Z'
+                    endDateTime: '2026-02-10T18:09:30.283Z'
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}:
+    get:
+      tags: [Requests]
+      summary: Get a specific access review request
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '200':
+          description: Access review request details
+    patch:
+      tags: [Requests]
+      summary: Update an access review request
+      description: |
+        Updates an existing access review definition.
+
+        **Warning:** This endpoint modifies access review configuration.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Access review request updated
+    delete:
+      tags: [Requests]
+      summary: Delete an access review request
+      description: |
+        Deletes an access review definition and all its instances.
+
+        **Warning:** This endpoint permanently deletes access review data.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '204':
+          description: Access review request deleted
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances:
+    get:
+      tags: [Instances]
+      summary: List instances of an access review
+      description: |
+        Retrieves all instances (review cycles) for a specific access review request.
+        For recurring reviews, each recurrence creates a new instance.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '200':
+          description: List of access review instances
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessReviewInstanceListResponse'
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}:
+    get:
+      tags: [Instances]
+      summary: Get a specific access review instance
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Access review instance details
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/decisions:
+    get:
+      tags: [Decisions]
+      summary: List decisions for an access review instance
+      description: |
+        Retrieves all review decisions for a specific instance. Each decision
+        represents one reviewer's determination for one reviewed access.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: List of access review decisions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop:
+    post:
+      tags: [Instances]
+      summary: Stop an access review instance
+      description: |
+        Stops a currently active access review instance.
+
+        **Warning:** This endpoint terminates an active review.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Review instance stopped
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/applyDecisions:
+    post:
+      tags: [Instances]
+      summary: Apply decisions for an access review instance
+      description: |
+        Applies the review decisions for a completed instance. This triggers
+        the actual access changes (removal, approval, etc.) based on the decisions.
+
+        **Warning:** This endpoint applies access changes.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Decisions applied
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/resetDecisions:
+    post:
+      tags: [Instances]
+      summary: Reset decisions for an access review instance
+      description: |
+        Resets all decisions for an active review instance back to NotReviewed.
+
+        **Warning:** This endpoint clears all review progress.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Decisions reset

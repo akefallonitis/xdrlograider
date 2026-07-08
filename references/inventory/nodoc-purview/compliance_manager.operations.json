@@ -1,0 +1,88 @@
+{
+  "operationCount": 9,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/cpm/v1.0/Users/Profile",
+      "OperationId": "getComplianceManagerUserProfile",
+      "Summary": "Get user profile in Compliance Manager",
+      "Tags": [
+        "ComplianceManager"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cpm/v1.0/Tenant/Filters",
+      "OperationId": "getTenantAssessmentFilters",
+      "Summary": "Get tenant assessment filters",
+      "Tags": [
+        "ComplianceManager"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cpm/v1.0/Regulations/PremiumRegulationSummary",
+      "OperationId": "getPremiumRegulationSummary",
+      "Summary": "Get premium regulation consumption summary",
+      "Tags": [
+        "ComplianceManager"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cpm/v1.0/ApplicationUserContext",
+      "OperationId": "getApplicationUserContext",
+      "Summary": "Get application user context",
+      "Tags": [
+        "ComplianceManager"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/cpm/v1.0/Reporting/Export",
+      "OperationId": "exportComplianceManagerHistoryReport",
+      "Summary": "Export compliance history report",
+      "Tags": [
+        "ComplianceManager"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/cpm/v1.0/Tenant/CompliancePostureSummary",
+      "OperationId": "getTenantCompliancePostureSummary",
+      "Summary": "Get tenant compliance posture summary",
+      "Tags": [
+        "ComplianceManager"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/cpm/v1.0/Assessments/List",
+      "OperationId": "listComplianceAssessments",
+      "Summary": "List compliance assessments",
+      "Tags": [
+        "ComplianceManager"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Ingestion/NativeConnectorJob",
+      "OperationId": "getNativeConnectorJobStatus",
+      "Summary": "Get native connector ingestion job status",
+      "Tags": [
+        "ComplianceManager"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/cpm/v1.0/RegulationTemplates",
+      "OperationId": "listRegulationTemplates",
+      "Summary": "List regulation templates",
+      "Tags": [
+        "ComplianceManager"
+      ]
+    }
+  ],
+  "category": "compliance_manager",
+  "portal": "nodoc-purview"
+}

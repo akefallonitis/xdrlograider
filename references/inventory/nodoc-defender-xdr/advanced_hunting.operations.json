@@ -1,0 +1,250 @@
+{
+  "operationCount": 27,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/reports/userHistory",
+      "OperationId": "AdvancedHunting.GetUserHistory",
+      "Summary": "Get user hunting query history",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/huntingService/reports/userHistory",
+      "OperationId": "AdvancedHunting.GetUserHistoryReport",
+      "Summary": "Get user hunting history report",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting",
+      "OperationId": "AdvancedHunting.GetUserPreferences",
+      "Summary": "Get advanced hunting user preferences",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/functions/defender/savedfunctions/{Id}",
+      "OperationId": "AdvancedHunting.GetFunction",
+      "Summary": "Get saved function",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/guidedQueries/filterSchema",
+      "OperationId": "AdvancedHunting.GetGuidedQueriesFilterSchema",
+      "Summary": "Get guided queries filter schema",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/huntingService/goHunt/IP",
+      "OperationId": "AdvancedHunting.GoHuntIp",
+      "Summary": "Build IP go hunt deep links",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/mtp/huntingService/functions/defender/updateFunction",
+      "OperationId": "AdvancedHunting.UpdateFunction",
+      "Summary": "Update saved function",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/favorites",
+      "OperationId": "AdvancedHunting.GetFavorites",
+      "Summary": "Get hunting favorites",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/userExposedRbacGroups/UserExposedRbacGroups",
+      "OperationId": "AdvancedHunting.GetUserRbacGroups",
+      "Summary": "Get user RBAC groups",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/schema",
+      "OperationId": "AdvancedHunting.GetTableSchema",
+      "Summary": "Get advanced hunting table schema",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/queries/encode",
+      "OperationId": "AdvancedHunting.EncodeQuery",
+      "Summary": "Encode hunting query",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/huntingService/queries/encode",
+      "OperationId": "AdvancedHunting.EncodeQueryBody",
+      "Summary": "Encode hunting query payload",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/queries",
+      "OperationId": "AdvancedHunting.ListQueries",
+      "Summary": "List hunting queries",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/schema/functions",
+      "OperationId": "AdvancedHunting.GetSchemaFunctions",
+      "Summary": "Get hunting schema functions",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/huntingService/queryExecutor",
+      "OperationId": "AdvancedHunting.ExecuteQuery",
+      "Summary": "Execute hunting query",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/documentation/GettingStarted",
+      "OperationId": "AdvancedHunting.GetGettingStarted",
+      "Summary": "Get getting started docs",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/mtp/huntingService/functions/{Id}",
+      "OperationId": "AdvancedHunting.DeleteFunction",
+      "Summary": "Delete saved function",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/rules/unified",
+      "OperationId": "AdvancedHunting.ListUnifiedDetectionRules",
+      "Summary": "List unified custom detection rules",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/queries/defender/communityqueries/{id}",
+      "OperationId": "AdvancedHunting.GetCommunityQuery",
+      "Summary": "Get community query by ID",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/huntingService/queryExecutor/huntingGraph",
+      "OperationId": "AdvancedHunting.ExecuteGraphQuery",
+      "Summary": "Execute hunting graph query",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/huntingService/savedFunctions",
+      "OperationId": "AdvancedHunting.CreateFunction",
+      "Summary": "Create saved function",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/huntingService/goHunt/Device",
+      "OperationId": "AdvancedHunting.GoHuntDevice",
+      "Summary": "Build device go hunt deep links",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/huntingService/goHunt/URL",
+      "OperationId": "AdvancedHunting.GoHuntUrl",
+      "Summary": "Build URL go hunt deep links",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/communityQueries",
+      "OperationId": "AdvancedHunting.GetCommunityQueries",
+      "Summary": "Get community queries",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/queries/defender/savedqueries/{id}",
+      "OperationId": "AdvancedHunting.GetSavedQuery",
+      "Summary": "Get saved query by ID",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/documentation/GuidedHuntingGettingStarted",
+      "OperationId": "AdvancedHunting.GetGuidedHuntingGettingStarted",
+      "Summary": "Get guided hunting getting started docs",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/huntingService/rules/streamingDetectionCompatibleRules",
+      "OperationId": "AdvancedHunting.ListStreamingDetectionCompatibleRules",
+      "Summary": "List streaming-compatible detection rules",
+      "Tags": [
+        "Advanced Hunting"
+      ]
+    }
+  ],
+  "category": "advanced_hunting",
+  "portal": "nodoc-defender-xdr"
+}

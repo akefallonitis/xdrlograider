@@ -1,0 +1,178 @@
+{
+  "operationCount": 19,
+  "operations": [
+    {
+      "Method": "PATCH",
+      "Path": "/UpdateUser/{userId}/MfaProperties",
+      "OperationId": "Users.MFAProperties.Update",
+      "Summary": "Update user MFA properties",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/UpdateUser/{userId}/ImageProperties",
+      "OperationId": "Users.ImageProperties.Update",
+      "Summary": "Update user image properties",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Users/IsUPNInAllowedDomain",
+      "OperationId": "Users.Upn.AllowedDomain.Check",
+      "Summary": "Check if UPN is in valid domain",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/User/{userId}/FIDODevices",
+      "OperationId": "User.FIDODevices.List",
+      "Summary": "List user FIDO devices",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/UserDetails/{userId}",
+      "OperationId": "UserDetails.Id.Get",
+      "Summary": "Retrieve user details",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/UserDetails",
+      "OperationId": "UserDetails.Create",
+      "Summary": "Create a new user",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Users/{userId}",
+      "OperationId": "User.Id.Get",
+      "Summary": "Retrieve basic user details",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/Users/{userId}",
+      "OperationId": "User.Id.Delete",
+      "Summary": "Delete a specific user",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Users/{userId}/assignedApplications",
+      "OperationId": "User.AssignedApplications.List",
+      "Summary": "List applications assigned to a user",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Users/IsUPNUniqueOrPending/{userPrincipalName}",
+      "OperationId": "User.UPNUnique.Check",
+      "Summary": "Check if a UPN is unique",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Users/ListVerifiedDomains",
+      "OperationId": "Users.VerifiedDomains.List",
+      "Summary": "List verified domains",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Users/IsUPNUnique",
+      "OperationId": "Users.Upn.Unique.Check",
+      "Summary": "Check if UPN is unique",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/Users/GetUserFromObjectIds",
+      "OperationId": "Users.Get",
+      "Summary": "Get users by object IDs",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/User/TemporaryPassword",
+      "OperationId": "User.TemporaryPassword.Get",
+      "Summary": "Generate temporary password",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Users/Settings",
+      "OperationId": "Users.CountryCode.List",
+      "Summary": "List country code",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/Users/ReInvite",
+      "OperationId": "Users.Reinvite",
+      "Summary": "Reinvite user",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/Users",
+      "OperationId": "User.Query",
+      "Summary": "Query users",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/Users",
+      "OperationId": "User.Delete",
+      "Summary": "Delete users",
+      "Tags": [
+        "Users"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/Users/PermanentDelete",
+      "OperationId": "User.Permanent.Delete",
+      "Summary": "Permanently delete users",
+      "Tags": [
+        "Users"
+      ]
+    }
+  ],
+  "category": "users",
+  "portal": "nodoc-ibiza-iam"
+}

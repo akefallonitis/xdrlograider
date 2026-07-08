@@ -1,0 +1,827 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.1.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "XdrLogRaider",
+      "version": "0.1.0",
+      "templateHash": "v0.1.0"
+    },
+    "description": "XdrLogRaider · open-source Microsoft Sentinel data connector for Microsoft Defender XDR portal-internal /apiproxy/* audit and reporting endpoints. Deploys foundation Azure resources (Key Vault, Storage, Application Insights, Data Collection Endpoint, PowerShell Function App on Linux Consumption, role assignments) in the selected resource group and Defender content (custom Log Analytics table, DCR, Sentinel V3 content package) into the selected existing Sentinel-enabled workspace. Additional Categories are added incrementally.",
+    "_foundation": {
+      "role": "portal-agnostic foundation fragment",
+      "note": "Source-of-truth foundation for the deploy-assembly factory. Assembled into deploy/mainTemplate.json by dev-tools/Build-MainTemplate.ps1 = these foundation resources + each shipped category per-category-schema (cross-RG nested table deployment + top-level DCR + FA appSetting XDRLR_DCR_<PORTAL>_<CATEGORY> + per-DCR Monitoring Metrics Publisher role). Contains EVERYTHING except the per-category table/DCR/appSetting/DCR-role: KeyVault(+secrets) + Storage(+tables/containers) + DataCollectionEndpoint + Function App + AppInsights + all foundation RBAC + the Sentinel V3 content (dataConnectorDefinition card + contentPackages) carried in the xdrlr-sentinel nested deployment. DO NOT hand-add per-category resources here."
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region for all resources (default: resource group location)."
+      }
+    },
+    "deploymentNameSuffix": {
+      "type": "string",
+      "defaultValue": "[take(uniqueString(resourceGroup().id), 6)]",
+      "metadata": {
+        "description": "6-char suffix for resource names (auto-generated · stable per RG). MUST NOT include deployment().name in uniqueString — that resolves to different values across template validation phases (variable site vs. reference site) in portal Custom Template flow, breaking resourceId() cross-references to nested deployments."
+      }
+    },
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the existing Log Analytics workspace where Defender_<Category>_CL tables will be created and Sentinel content packages installed."
+      }
+    },
+    "serviceAccountUpn": {
+      "type": "string",
+      "metadata": {
+        "description": "UPN of the Entra service account that will authenticate to Defender XDR portal (e.g., xdrlogreader@contoso.com). Must have appropriate Defender XDR portal read permissions."
+      },
+      "minLength": 5,
+      "maxLength": 128
+    },
+    "servicePassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the service account (stored in Key Vault · accessed via SAMI at runtime)."
+      }
+    },
+    "authMethod": {
+      "type": "string",
+      "defaultValue": "TOTP",
+      "allowedValues": [
+        "TOTP",
+        "Passkey"
+      ],
+      "metadata": {
+        "description": "MFA method for service account. TOTP = time-based one-time password (operator provides seed). Passkey = WebAuthn key pair (operator provides PEM)."
+      }
+    },
+    "totpSecret": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Base32-encoded TOTP secret (only required if authMethod=TOTP). Stored in KV."
+      }
+    },
+    "passkeyPem": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "WebAuthn private key in PEM format (only required if authMethod=Passkey). Stored in KV."
+      }
+    },
+    "logoUrl": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/akefallonitis/xdrlograider/main/Package/Logo/logo.svg",
+      "metadata": {
+        "description": "URL to the connector logo SVG (used by Sentinel content package)."
+      }
+    },
+    "functionAppPackageUri": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "URL to the Function App deployment package (zip) written to WEBSITE_RUN_FROM_PACKAGE. LEAVE EMPTY (default) to auto-derive the SINGLE-HOP pinned release URL releases/download/v<connectorVersion>/function-app.zip via variables('defaultPackageUri'). ROOT-CAUSE FIX 2026-07-08: the prior 'releases/latest/download/...' pointer DOUBLE-redirects (github /latest/ -> the versioned release -> objects.githubusercontent = 2 hops); Azure's run-from-package fetcher follows only the FIRST hop, so the payload never mounts and the host 503s with portal 'Runtime version: Error' + zero telemetry + function list 'Bad Request' (live-proven: switching this FA from the latest URL to the version-pinned URL booted it immediately — 200, all 3 functions loaded, host wrote its key store). The version-derived pinned URL is a SINGLE redirect hop the fetcher CAN follow and still auto-tracks each release through connectorVersion. Override this parameter explicitly ONLY to sync an existing deployment to a specific build (releases/download/<tag>/function-app.zip)."
+      }
+    },
+    "connectorGitSha": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. Git commit SHA of the connector build · surfaced in the Boot.VersionProbe telemetry so the deployed code revision can be confirmed. The zip's baked BUILD_SHA (WS4.3) is artifact-truth regardless; this env mirror defaults to empty. No operator action required."
+      }
+    },
+    "connectorVersion": {
+      "type": "string",
+      "defaultValue": "0.1.0",
+      "metadata": {
+        "description": "Connector semver · WS4.3 release-derived (was hardcoded in the template body). The release flow ships templates whose default tracks the tag; XDRLR_CONNECTOR_VERSION + the connectorVersion tag both derive from this parameter."
+      }
+    }
+  },
+  "variables": {
+    "namePrefix": "xdrlr",
+    "suffix": "[parameters('deploymentNameSuffix')]",
+    "keyVaultName": "[concat(variables('namePrefix'), '-kv-', variables('suffix'))]",
+    "storageAccountName": "[take(concat(variables('namePrefix'), 'sa', variables('suffix'), uniqueString(resourceGroup().id)), 24)]",
+    "appInsightsName": "[concat(variables('namePrefix'), '-ai-', variables('suffix'))]",
+    "dceName": "[concat(variables('namePrefix'), '-dce-', variables('suffix'))]",
+    "appServicePlanName": "[concat(variables('namePrefix'), '-plan-', variables('suffix'))]",
+    "functionAppName": "[concat(variables('namePrefix'), '-fa-', variables('suffix'))]",
+    "defaultPackageUri": "[concat('https://github.com/akefallonitis/xdrlograider/releases/download/v', parameters('connectorVersion'), '/function-app.zip')]",
+    "workspaceId": "[parameters('workspaceResourceId')]",
+    "workspaceSubscriptionId": "[split(parameters('workspaceResourceId'), '/')[2]]",
+    "workspaceResourceGroup": "[split(parameters('workspaceResourceId'), '/')[4]]",
+    "workspaceName": "[last(split(parameters('workspaceResourceId'), '/'))]",
+    "connectorDefinitionName": "XdrLogRaiderDefenderXdr",
+    "contentPackageId": "xdrlograider-defender-xdr",
+    "nestedDeploymentName": "[concat('xdrlr-sentinel-', variables('suffix'))]",
+    "dcrName": "[concat(variables('namePrefix'), '-dcr-operations-', variables('suffix'))]",
+    "kvSecretsUserRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]",
+    "monitoringMetricsPublisherRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3913510d-42f4-4e42-8a64-420c390055eb')]",
+    "storageTableDataContributorRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3')]",
+    "storageBlobDataContributorRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+    "storageQueueDataContributorRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88')]",
+    "tags": {
+      "connector": "XdrLogRaider",
+      "connectorVersion": "[parameters('connectorVersion')]",
+      "owner": "[parameters('serviceAccountUpn')]",
+      "env": "production",
+      "managedBy": "ARM"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2024-11-01",
+      "name": "[variables('keyVaultName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "enableRbacAuthorization": true,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 7,
+        "publicNetworkAccess": "Enabled"
+      },
+      "resources": [
+        {
+          "type": "secrets",
+          "apiVersion": "2024-11-01",
+          "name": "ServicePassword",
+          "dependsOn": [
+            "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+          ],
+          "properties": {
+            "value": "[parameters('servicePassword')]",
+            "contentType": "Defender service account password"
+          }
+        },
+        {
+          "type": "secrets",
+          "apiVersion": "2024-11-01",
+          "name": "TotpSecret",
+          "dependsOn": [
+            "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+          ],
+          "properties": {
+            "value": "[if(equals(parameters('authMethod'), 'TOTP'), parameters('totpSecret'), 'NOT-USED-PASSKEY-MODE')]",
+            "contentType": "TOTP seed (base32) · only valid when authMethod=TOTP"
+          }
+        },
+        {
+          "type": "secrets",
+          "apiVersion": "2024-11-01",
+          "name": "PasskeyPem",
+          "dependsOn": [
+            "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+          ],
+          "properties": {
+            "value": "[if(equals(parameters('authMethod'), 'Passkey'), parameters('passkeyPem'), 'NOT-USED-TOTP-MODE')]",
+            "contentType": "WebAuthn passkey PEM · only valid when authMethod=Passkey"
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2024-01-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": false,
+        "allowSharedKeyAccess": false,
+        "supportsHttpsTrafficOnly": true,
+        "publicNetworkAccess": "Enabled",
+        "networkAcls": {
+          "defaultAction": "Allow",
+          "bypass": "AzureServices"
+        }
+      },
+      "resources": [
+        {
+          "type": "tableServices/tables",
+          "apiVersion": "2024-01-01",
+          "name": "default/XdrTierState",
+          "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          ]
+        },
+        {
+          "type": "tableServices/tables",
+          "apiVersion": "2024-01-01",
+          "name": "default/XdrCheckpoint",
+          "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          ]
+        },
+        {
+          "type": "tableServices/tables",
+          "apiVersion": "2024-01-01",
+          "name": "default/TenantCapabilities",
+          "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          ]
+        },
+        {
+          "type": "tableServices/tables",
+          "apiVersion": "2024-01-01",
+          "name": "default/XdrIngestDlq",
+          "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          ]
+        },
+        {
+          "type": "tableServices/tables",
+          "apiVersion": "2024-01-01",
+          "name": "default/XdrCircuitState",
+          "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          ]
+        },
+        {
+          "type": "tableServices/tables",
+          "apiVersion": "2024-01-01",
+          "name": "default/TenantContext",
+          "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          ]
+        },
+        {
+          "comments": "MutexStore container — one small blob per single-flight lease key. Azure Blob Lease is the server-enforced atomic mutex primitive used by Xdr.Common.Lease. No public access; SAMI Storage Blob Data Contributor grants the FA write+lease.",
+          "type": "blobServices/containers",
+          "apiVersion": "2024-01-01",
+          "name": "default/leases",
+          "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          ],
+          "properties": {
+            "publicAccess": "None"
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('appInsightsName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "Flow_Type": "Bluefield",
+        "Request_Source": "rest",
+        "WorkspaceResourceId": "[parameters('workspaceResourceId')]",
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled",
+        "RetentionInDays": 90,
+        "SamplingPercentage": 100
+      }
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionEndpoints",
+      "apiVersion": "2023-03-11",
+      "name": "[variables('dceName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "networkAcls": {
+          "publicNetworkAccess": "Enabled"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2024-11-01",
+      "name": "[variables('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic"
+      },
+      "kind": "functionapp,linux",
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2024-11-01",
+      "name": "[variables('functionAppName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "kind": "functionapp,linux",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "httpsOnly": true,
+        "clientAffinityEnabled": false,
+        "siteConfig": {
+          "linuxFxVersion": "PowerShell|7.4",
+          "alwaysOn": false,
+          "ftpsState": "Disabled",
+          "minTlsVersion": "1.2",
+          "use32BitWorkerProcess": false,
+          "appSettings": [
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "powershell"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
+              "value": "7.4"
+            },
+            {
+              "name": "WEBSITE_RUN_FROM_PACKAGE",
+              "value": "[if(empty(parameters('functionAppPackageUri')), variables('defaultPackageUri'), parameters('functionAppPackageUri'))]"
+            },
+            {
+              "name": "AzureWebJobsStorage__accountName",
+              "value": "[variables('storageAccountName')]"
+            },
+            {
+              "comment": "Iter#12 fix · Durable azureStorage provider managed-identity requires explicit __credential. Without it the Azure SDK ConfigurationManager falls through to connection-string mode and emits 'No connection string configuration was found for AzureWebJobsStorage'. Microsoft canonical pattern: __accountName + __credential pair.",
+              "name": "AzureWebJobsStorage__credential",
+              "value": "managedidentity"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2020-02-02').ConnectionString]"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2020-02-02').InstrumentationKey]"
+            },
+            {
+              "name": "XDRLR_KEYVAULT_NAME",
+              "value": "[variables('keyVaultName')]"
+            },
+            {
+              "name": "XDRLR_KEYVAULT_URL",
+              "value": "[reference(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), '2024-11-01').vaultUri]"
+            },
+            {
+              "name": "XDRLR_DCE_ENDPOINT",
+              "value": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]"
+            },
+            {
+              "name": "XDRLR_SERVICE_ACCOUNT_UPN",
+              "value": "[parameters('serviceAccountUpn')]"
+            },
+            {
+              "name": "XDRLR_TENANT_ID",
+              "value": "[subscription().tenantId]"
+            },
+            {
+              "name": "XDRLR_AUTH_METHOD",
+              "value": "[parameters('authMethod')]"
+            },
+            {
+              "name": "XDRLR_WORKSPACE_RESOURCE_ID",
+              "value": "[parameters('workspaceResourceId')]"
+            },
+            {
+              "name": "XDRLR_WORKSPACE_ID",
+              "value": "[reference(parameters('workspaceResourceId'), '2023-09-01').customerId]"
+            },
+            {
+              "name": "XDRLR_CONNECTOR_VERSION",
+              "value": "[parameters('connectorVersion')]"
+            },
+            {
+              "name": "XDRLR_GIT_COMMIT_SHA",
+              "value": "[parameters('connectorGitSha')]"
+            },
+            {
+              "name": "XDRLR_STORAGE_ACCOUNT",
+              "value": "[variables('storageAccountName')]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comments": "WS4.1 · ALL foundation RBAC in ONE nested deployment so every roleAssignment NAME is seeded with the SAMI principalId (passed as a parameter — ARM forbids reference() directly in a resource name). Same principal → same GUIDs → re-running the template is an idempotent no-op; FA recreated (new principal) → NEW GUIDs → fresh assignments are CREATED instead of colliding — the RoleAssignmentExists/RoleAssignmentUpdateNotPermitted whole-deployment-rollback class (live-proven 2026-06-04: it rolled back the bundled 136-col schema, the original 0-useful-rows seam) is structurally dead. Roles exist ONLY in the deployment (operator lock: never created ad-hoc by tooling, never deleted by cleanup/sync paths). Prior lessons preserved verbatim: iter#9 canonical KV-Secrets-User GUID 4633458b-17de-408a-b874-0445c86b69e6 (Validate-ArmCrossReferences guards typos) · iter#12 Queue Data Contributor for the Durable azureStorage provider (Tables AND Queues) · the KV secrets dependsOn kept as defensive ordering.",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[concat('xdrlr-roles-foundation-', variables('suffix'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'ServicePassword')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'TotpSecret')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'PasskeyPem')]",
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "parameters": {
+          "principalId": {
+            "value": "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2024-11-01', 'full').identity.principalId]"
+          },
+          "keyVaultName": {
+            "value": "[variables('keyVaultName')]"
+          },
+          "dceName": {
+            "value": "[variables('dceName')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "kvSecretsUserRoleId": {
+            "value": "[variables('kvSecretsUserRoleId')]"
+          },
+          "monitoringMetricsPublisherRoleId": {
+            "value": "[variables('monitoringMetricsPublisherRoleId')]"
+          },
+          "storageTableDataContributorRoleId": {
+            "value": "[variables('storageTableDataContributorRoleId')]"
+          },
+          "storageBlobDataContributorRoleId": {
+            "value": "[variables('storageBlobDataContributorRoleId')]"
+          },
+          "storageQueueDataContributorRoleId": {
+            "value": "[variables('storageQueueDataContributorRoleId')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "principalId": {
+              "type": "string"
+            },
+            "keyVaultName": {
+              "type": "string"
+            },
+            "dceName": {
+              "type": "string"
+            },
+            "storageAccountName": {
+              "type": "string"
+            },
+            "kvSecretsUserRoleId": {
+              "type": "string"
+            },
+            "monitoringMetricsPublisherRoleId": {
+              "type": "string"
+            },
+            "storageTableDataContributorRoleId": {
+              "type": "string"
+            },
+            "storageBlobDataContributorRoleId": {
+              "type": "string"
+            },
+            "storageQueueDataContributorRoleId": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), parameters('principalId'), 'KVSecretsUser')]",
+              "scope": "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]",
+              "properties": {
+                "roleDefinitionId": "[parameters('kvSecretsUserRoleId')]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dceName')), parameters('principalId'), 'MMP')]",
+              "scope": "[concat('Microsoft.Insights/dataCollectionEndpoints/', parameters('dceName'))]",
+              "properties": {
+                "roleDefinitionId": "[parameters('monitoringMetricsPublisherRoleId')]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), parameters('principalId'), 'TableContrib')]",
+              "scope": "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
+              "properties": {
+                "roleDefinitionId": "[parameters('storageTableDataContributorRoleId')]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), parameters('principalId'), 'BlobContrib')]",
+              "scope": "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
+              "properties": {
+                "roleDefinitionId": "[parameters('storageBlobDataContributorRoleId')]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), parameters('principalId'), 'QueueContrib')]",
+              "scope": "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
+              "properties": {
+                "roleDefinitionId": "[parameters('storageQueueDataContributorRoleId')]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comments": "Nested cross-RG deployment · creates pilot ActionCenter workspace table + DCR + Sentinel V3 connector card + content package in the workspace's existing RG. Per Microsoft ARM canonical pattern (https://learn.microsoft.com/azure/azure-resource-manager/templates/deploy-to-resource-group): same-subscription cross-RG deployments specify ONLY 'resourceGroup' property · NOT 'subscriptionId'. Specifying both treats it as cross-subscription which breaks resourceId() resolution at portal Custom Template pre-validation (resource appears 'not defined in template' even though it is). For future cross-subscription deployments, add 'subscriptionId': '[variables('workspaceSubscriptionId')]' back · but for v0.1.0 same-tenant deploys this property is omitted. Custom workspace table MUST exist before DCR streamDeclarations references it (dependsOn enforces order).",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[variables('nestedDeploymentName')]",
+      "resourceGroup": "[variables('workspaceResourceGroup')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "parameters": {
+          "workspaceName": {
+            "value": "[variables('workspaceName')]"
+          },
+          "workspaceResourceId": {
+            "value": "[parameters('workspaceResourceId')]"
+          },
+          "connectorDefinitionName": {
+            "value": "[variables('connectorDefinitionName')]"
+          },
+          "contentPackageId": {
+            "value": "[variables('contentPackageId')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "logoUrl": {
+            "value": "[parameters('logoUrl')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "tableName": {
+            "value": "Defender_Operations_CL"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "workspaceName": {
+              "type": "string"
+            },
+            "workspaceResourceId": {
+              "type": "string"
+            },
+            "connectorDefinitionName": {
+              "type": "string"
+            },
+            "contentPackageId": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "logoUrl": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "tableName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "comments": "Sentinel V3 dataConnectorDefinition · ONE connector card for the whole XdrLogRaider connector (one card, N category tables). Build-MainTemplate REGENERATES dataTypes/graphQueries/sampleQueries/connectivityCriteria to enumerate EVERY shipped category (FH-5) — the arrays below are the pilot seed; the deployed deploy/mainTemplate.json card is the generated one.",
+              "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectorDefinitions",
+              "apiVersion": "2023-04-01-preview",
+              "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', parameters('connectorDefinitionName'))]",
+              "location": "[parameters('location')]",
+              "kind": "Customizable",
+              "properties": {
+                "connectorUiConfig": {
+                  "id": "[parameters('connectorDefinitionName')]",
+                  "title": "Microsoft Defender XDR (XdrLogRaider)",
+                  "publisher": "Alex Kefallonitis",
+                  "descriptionMarkdown": "Open-source Microsoft Sentinel data connector for Microsoft Defender XDR portal-internal `/apiproxy/*` audit and reporting endpoints. Self-hosted in your Azure subscription with cookie-based authentication and transparent SSO refresh. Read-only by design — no action verbs are ever invoked on the Defender portal.",
+                  "graphQueriesTableName": "[parameters('tableName')]",
+                  "graphQueries": [
+                    {
+                      "metricName": "Defender Operations audit events",
+                      "legend": "{{graphQueriesTableName}}",
+                      "baseQuery": "{{graphQueriesTableName}}"
+                    }
+                  ],
+                  "sampleQueries": [
+                    {
+                      "description": "ActionCenter history actions (last 24h)",
+                      "query": "{{graphQueriesTableName}}\n| where TimeGenerated > ago(24h)\n| project TimeGenerated, ActionType, ActionStatus, ActionSource, DecidedBy, UserPrincipalName, ComputerName, MachineId, EventTime"
+                    },
+                    {
+                      "description": "ActionCenter by ActionType breakdown (last 7d)",
+                      "query": "{{graphQueriesTableName}}\n| where TimeGenerated > ago(7d)\n| summarize Count=count() by ActionType, ActionStatus\n| order by Count desc"
+                    },
+                    {
+                      "description": "Manual interventions by user (last 7d)",
+                      "query": "{{graphQueriesTableName}}\n| where TimeGenerated > ago(7d)\n| where ActionAutomationType == 'Manual'\n| summarize Count=count() by DecidedBy, ActionType\n| order by Count desc"
+                    }
+                  ],
+                  "dataTypes": [
+                    {
+                      "name": "[parameters('tableName')]",
+                      "lastDataReceivedQuery": "{{graphQueriesTableName}}\n| summarize Time = max(TimeGenerated)\n| where isnotempty(Time)"
+                    }
+                  ],
+                  "connectivityCriteria": [
+                    {
+                      "type": "IsConnectedQuery",
+                      "value": [
+                        "{{graphQueriesTableName}}\n| summarize LastLogReceived = max(TimeGenerated)\n| project IsConnected = LastLogReceived > ago(3d)"
+                      ]
+                    }
+                  ],
+                  "availability": {
+                    "status": 1,
+                    "isPreview": true
+                  },
+                  "permissions": {
+                    "resourceProvider": [
+                      {
+                        "provider": "Microsoft.OperationalInsights/workspaces",
+                        "permissionsDisplayText": "read/write permissions on workspace · contributor",
+                        "providerDisplayName": "Workspace",
+                        "scope": "Workspace",
+                        "requiredPermissions": {
+                          "write": true,
+                          "read": true,
+                          "delete": false
+                        }
+                      }
+                    ],
+                    "customs": [
+                      {
+                        "name": "Defender XDR service account",
+                        "description": "An Entra service account with appropriate Defender XDR portal read permissions. The account satisfies MFA via TOTP or Passkey."
+                      },
+                      {
+                        "name": "Sentinel-enabled Log Analytics workspace",
+                        "description": "The connector ingests data into this workspace via the data collection endpoint and rule."
+                      }
+                    ]
+                  },
+                  "instructionSteps": [
+                    {
+                      "title": "Step 1 · Service account credentials (automatic)",
+                      "description": "The deployment template stored your service account credentials (password and TOTP seed or Passkey PEM) into the deployment Key Vault. No manual action is required if the deployment completed successfully.",
+                      "instructions": []
+                    },
+                    {
+                      "title": "Step 2 · Unattended authentication (automatic)",
+                      "description": "On the first cycle, the Function App performs an unattended Entra OAuth login using the stored credentials. Single sign-on state is captured and persisted so subsequent cycles use silent refresh. No operator interaction is required.",
+                      "instructions": []
+                    },
+                    {
+                      "title": "Step 3 · Verify ingestion (~10 minutes after deploy)",
+                      "description": "Query the workspace for ingested rows in any active `Defender_<Category>_CL` table. Cycle telemetry (Boot, Auth, Cycle, Entry events) is available via Application Insights for end-to-end observability.",
+                      "instructions": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "comments": "Sentinel V3 contentPackage · registers the connector in Content Hub. Microsoft V3 canonical schema requires ALL of contentId + contentProductId + id (top-level) — omitting any one of them causes the contentPackages PUT to silently no-op while reporting success.",
+              "type": "Microsoft.OperationalInsights/workspaces/providers/contentPackages",
+              "apiVersion": "2023-04-01-preview",
+              "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', parameters('contentPackageId'))]",
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces/providers/dataConnectorDefinitions', parameters('workspaceName'), 'Microsoft.SecurityInsights', parameters('connectorDefinitionName'))]"
+              ],
+              "properties": {
+                "contentId": "[parameters('contentPackageId')]",
+                "contentProductId": "[concat(parameters('contentPackageId'), '-0.1.0')]",
+                "id": "[concat(parameters('contentPackageId'), '-0.1.0')]",
+                "contentKind": "Solution",
+                "version": "0.1.0",
+                "displayName": "XdrLogRaider · Microsoft Defender XDR",
+                "description": "Open-source Microsoft Sentinel data connector for Microsoft Defender XDR portal-internal /apiproxy/* audit and reporting telemetry that has no public API equivalent. Self-hosted in your Azure subscription, read-only by design, surfacing Microsoft Defender XDR security-operations categories.",
+                "publisherDisplayName": "Alex Kefallonitis · al.kefallonitis@gmail.com",
+                "contentSchemaVersion": "3.0.0",
+                "icon": "[parameters('logoUrl')]",
+                "source": {
+                  "kind": "Solution",
+                  "name": "XdrLogRaider Defender XDR",
+                  "sourceId": "[parameters('contentPackageId')]"
+                },
+                "dependencies": {
+                  "operator": "AND",
+                  "criteria": [
+                    {
+                      "contentId": "[parameters('connectorDefinitionName')]",
+                      "kind": "DataConnector",
+                      "version": "0.1.0"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "outputs": {}
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "functionAppName": {
+      "type": "string",
+      "value": "[variables('functionAppName')]"
+    },
+    "functionAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2024-11-01', 'full').identity.principalId]"
+    },
+    "keyVaultName": {
+      "type": "string",
+      "value": "[variables('keyVaultName')]"
+    },
+    "keyVaultUri": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), '2024-11-01').vaultUri]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[variables('storageAccountName')]"
+    },
+    "dceEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName')), '2023-03-11').logsIngestion.endpoint]"
+    },
+    "appInsightsName": {
+      "type": "string",
+      "value": "[variables('appInsightsName')]"
+    },
+    "connectorVersion": {
+      "type": "string",
+      "value": "0.1.0"
+    },
+    "dcrResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName'))]"
+    },
+    "dcrImmutableId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName')), '2023-03-11').immutableId]"
+    },
+    "contentPackageId": {
+      "type": "string",
+      "value": "[variables('contentPackageId')]"
+    }
+  }
+}

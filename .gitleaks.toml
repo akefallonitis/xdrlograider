@@ -1,0 +1,16 @@
+# Gitleaks config — default ruleset stays FULLY active; the allowlist below is the narrowest cut that
+# unblocks the vendored nodoc corpus, where upstream-published 40-hex entity-id EXAMPLE values (file SHA1 /
+# machine-id shaped) false-positive generic token rules (observed: sourcegraph-access-token on
+# references/postman/defender.collection.json — the same literal id appears in the upstream nodoc
+# specification/files.yml, i.e. it is public vendor example data, not a credential).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "nodoc vendor corpus: postman collections are upstream-published example data; the named literal is the upstream example entity-id that also flows into the derived catalogue"
+paths = [
+    '''references/postman/[^/]+\.collection\.json''',
+]
+regexes = [
+    '''82d330861950d594c415efaa33fe388b50d7cfbf''',
+]

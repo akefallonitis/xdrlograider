@@ -1,0 +1,385 @@
+{
+  "operationCount": 42,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/metrics/category_identity_secure_score",
+      "OperationId": "ExposureManagement.GetIdentitySecureScoreMetric",
+      "Summary": "Get identity secure score metric",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/scaRecommendations/filters",
+      "OperationId": "ExposureManagement.GetScaRecommendationFilters",
+      "Summary": "Get SCA recommendation filter categories",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/vulnerabilities/schema",
+      "OperationId": "ExposureManagement.GetMdcVulnerabilitySchema",
+      "Summary": "Get MDC vulnerabilities schema",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/recommendations/recommendationsMetrics",
+      "OperationId": "ExposureManagement.GetMdcRecommendationMetrics",
+      "Summary": "Get MDC recommendation metrics",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/exposureManagement/recommendations",
+      "OperationId": "ExposureManagement.GetRecommendations",
+      "Summary": "Get exposure recommendations",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/metrics/category_data_secure_score",
+      "OperationId": "ExposureManagement.GetDataSecureScoreMetric",
+      "Summary": "Get data secure score metric",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/vulnerabilities/vulnerabilitiesInsights",
+      "OperationId": "ExposureManagement.GetMdcVulnerabilityInsights",
+      "Summary": "Get MDC vulnerability insights",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/recommendations/items",
+      "OperationId": "ExposureManagement.ListMdcRecommendationItems",
+      "Summary": "List MDC recommendation items",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/tenants",
+      "OperationId": "ExposureManagement.GetPostureOversightTenants",
+      "Summary": "Get posture oversight tenant configuration",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/k8s/machines/deviceTotals",
+      "OperationId": "ExposureManagement.GetK8sDeviceTotals",
+      "Summary": "Get Kubernetes device totals",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/xspm/topentrypoints",
+      "OperationId": "ExposureManagement.GetTopEntryPoints",
+      "Summary": "Get top entry points",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/recommendations",
+      "OperationId": "ExposureManagement.ListPostureOversightRecommendations",
+      "Summary": "List posture oversight recommendations",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/initiatives/{InitiativeId}",
+      "OperationId": "ExposureManagement.GetPostureOversightInitiative",
+      "Summary": "Get posture oversight initiative details",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/recommendations/aggregated",
+      "OperationId": "ExposureManagement.GetPostureOversightRecommendationsAggregated",
+      "Summary": "Get aggregated posture recommendations",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/updates",
+      "OperationId": "ExposureManagement.ListPostureOversightUpdates",
+      "Summary": "List posture oversight updates",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/easm/vendors",
+      "OperationId": "ExposureManagement.GetEasmVendors",
+      "Summary": "Get EASM vendor list",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/vulnerabilities/topCloudCVEsSchema",
+      "OperationId": "ExposureManagement.GetMdcTopCloudCvesSchema",
+      "Summary": "Get MDC top cloud CVE schema",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/tvm/analytics/riskscore",
+      "OperationId": "ExposureManagement.GetTvmRiskScore",
+      "Summary": "Get TVM risk score",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/vulnerabilities/items",
+      "OperationId": "ExposureManagement.ListMdcVulnerabilityItems",
+      "Summary": "List MDC vulnerability items",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/xspm/toptargets",
+      "OperationId": "ExposureManagement.GetTopTargets",
+      "Summary": "Get top targets",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/recommendations/schema",
+      "OperationId": "ExposureManagement.GetMdcRecommendationSchema",
+      "Summary": "Get MDC recommendations schema",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/metrics/category_apps_secure_score",
+      "OperationId": "ExposureManagement.GetAppsSecureScoreMetric",
+      "Summary": "Get SaaS apps secure score metric",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/vulnerabilities/statisticsHeader",
+      "OperationId": "ExposureManagement.GetMdcVulnerabilityStatisticsHeader",
+      "Summary": "Get MDC vulnerability statistics header",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/xspmatlas/attacksurface/attackpaths/filters",
+      "OperationId": "ExposureManagement.GetAttackSurfaceAttackPathFilters",
+      "Summary": "Get attack path filter options",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/securityEvents",
+      "OperationId": "ExposureManagement.ListPostureSecurityEvents",
+      "Summary": "List posture security events",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/vulnerabilities/recommendationsByResourceType",
+      "OperationId": "ExposureManagement.GetMdcRecommendationsByResourceType",
+      "Summary": "Get MDC recommendations by resource type",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/xspm/attackpaths",
+      "OperationId": "ExposureManagement.GetAttackPaths",
+      "Summary": "Get attack paths",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/xspmatlas/attacksurface/chokepoints/list",
+      "OperationId": "ExposureManagement.ListAttackSurfaceChokepoints",
+      "Summary": "List attack surface choke points",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/xspmatlas/attacksurface/query",
+      "OperationId": "ExposureManagement.QueryAttackSurface",
+      "Summary": "Query attack surface graph",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/initiatives/summarized",
+      "OperationId": "ExposureManagement.GetPostureOversightInitiativesSummarized",
+      "Summary": "Get summarized posture initiatives",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/vulnerabilities/allVulnerabilitiesPageItems",
+      "OperationId": "ExposureManagement.ListMdcAllVulnerabilitiesPageItems",
+      "Summary": "List MDC all-vulnerabilities page items",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/vulnerabilities/getVulnerabilitiesOvertime",
+      "OperationId": "ExposureManagement.GetMdcVulnerabilitiesOverTime",
+      "Summary": "Get MDC vulnerabilities over time",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/xspmatlas/attacksurface/chokepoints/filters",
+      "OperationId": "ExposureManagement.GetAttackSurfaceChokepointFilters",
+      "Summary": "Get choke point filter options",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/vulnerabilities/topCloudCVEsItems",
+      "OperationId": "ExposureManagement.ListMdcTopCloudCvesItems",
+      "Summary": "List MDC top cloud CVE items",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/XspmConnectors/connectors/getAllConnectors",
+      "OperationId": "ExposureManagement.ListXspmConnectors",
+      "Summary": "List XSPM connectors",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/metrics/ids",
+      "OperationId": "ExposureManagement.GetPostureOversightMetricIds",
+      "Summary": "Get posture metric IDs",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/xspm/chokepoints",
+      "OperationId": "ExposureManagement.GetChokePoints",
+      "Summary": "Get choke points",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/xspmatlas/attacksurface/attackpaths",
+      "OperationId": "ExposureManagement.ListAttackSurfaceAttackPaths",
+      "Summary": "List attack surface attack paths",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/initiatives",
+      "OperationId": "ExposureManagement.ListPostureOversightInitiatives",
+      "Summary": "List posture oversight initiatives",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/scaRecommendations/tags",
+      "OperationId": "ExposureManagement.GetScaRecommendationTags",
+      "Summary": "Get SCA recommendation tags",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/posture/oversight/metrics",
+      "OperationId": "ExposureManagement.ListPostureOversightMetrics",
+      "Summary": "List posture oversight metrics",
+      "Tags": [
+        "Exposure Management"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/xspm/hunting",
+      "OperationId": "ExposureManagement.RunHuntingQuery",
+      "Summary": "Run XSPM hunting query",
+      "Tags": [
+        "Exposure Management"
+      ]
+    }
+  ],
+  "category": "exposure_management",
+  "portal": "nodoc-defender-xdr"
+}

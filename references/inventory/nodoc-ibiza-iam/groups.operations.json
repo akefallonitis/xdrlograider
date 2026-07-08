@@ -1,0 +1,79 @@
+{
+  "operationCount": 8,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/Groups",
+      "OperationId": "Group.list",
+      "Summary": "List groups",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Groups/{groupId}/GetDynamicGroupProperties",
+      "OperationId": "Group.id.dynamic,get",
+      "Summary": "Get group dynamic group properties",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Groups/{groupId}/GetExtensionPropertiesByApp",
+      "OperationId": "Group.ExtensionPropertiesByApp.Get",
+      "Summary": "Get group extension properties by app",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Groups/{groupId}/owners/count",
+      "OperationId": "Group.id.owner.count.get",
+      "Summary": "Get owner count for group",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Groups/{groupId}/members/count",
+      "OperationId": "Group.MemberCount.Get",
+      "Summary": "Get group member count",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Groups/{groupId}",
+      "OperationId": "Group.id.get",
+      "Summary": "Get group",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Groups/GetSupportedDynamicMembershipOperators",
+      "OperationId": "Group.DynamicMembershipOperators.List",
+      "Summary": "List dynamic membership operators",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Groups/GetSupportedDynamicMembershipBaseAttributes/{id}",
+      "OperationId": "Group.DynamicMembershipBaseAttributes.Get",
+      "Summary": "Get dynamic membership base attribute",
+      "Tags": [
+        "Groups"
+      ]
+    }
+  ],
+  "category": "groups",
+  "portal": "nodoc-ibiza-iam"
+}

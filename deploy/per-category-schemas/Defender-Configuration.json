@@ -1,0 +1,2377 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "Configuration",
+    "TableName": "Defender_Configuration_CL",
+    "StreamName": "Custom-Defender_Configuration_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 126,
+    "TotalColumnCount": 135,
+    "OperationCount": 20,
+    "OperationKeys": [
+      "GetAlertSharingStatus",
+      "GetAssetRules",
+      "GetAutoIrProperties",
+      "GetDataExportSettings",
+      "GetDisabledAlertServices",
+      "GetGlobalIdentityDisruptionExclusion",
+      "GetIntuneOnboardingStatus",
+      "GetMcasPreviewFeatures",
+      "GetMdcPreviewFeatures",
+      "GetSentinelOnboardedState",
+      "GetTopWebContentFilteringCategories",
+      "GetUnifiedRbacWorkload",
+      "GetUserSettings",
+      "ListConnectedApps",
+      "ListCriticalAssetClassifications",
+      "ListIncidentNotificationSettings",
+      "ListSuppressionRules",
+      "ListThreatIndicators",
+      "ListUnifiedConnectors",
+      "ListWebCategoryPolicies"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_Configuration_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "Value",
+            "type": "string"
+          },
+          {
+            "name": "actionsJson",
+            "type": "string"
+          },
+          {
+            "name": "affectedAssetsCount",
+            "type": "long"
+          },
+          {
+            "name": "assetType",
+            "type": "string"
+          },
+          {
+            "name": "classificationValue",
+            "type": "string"
+          },
+          {
+            "name": "CreatedBy",
+            "type": "string"
+          },
+          {
+            "name": "createdByName",
+            "type": "string"
+          },
+          {
+            "name": "CreationTime",
+            "type": "datetime"
+          },
+          {
+            "name": "criticalityLevel",
+            "type": "long"
+          },
+          {
+            "name": "IsDeleted",
+            "type": "boolean"
+          },
+          {
+            "name": "isDisabled",
+            "type": "boolean"
+          },
+          {
+            "name": "kqlQuery",
+            "type": "string"
+          },
+          {
+            "name": "lastExecutionTime",
+            "type": "datetime"
+          },
+          {
+            "name": "lastUpdatedBy",
+            "type": "string"
+          },
+          {
+            "name": "lastUpdatedByName",
+            "type": "string"
+          },
+          {
+            "name": "LastUpdateTime",
+            "type": "datetime"
+          },
+          {
+            "name": "OrgId",
+            "type": "string"
+          },
+          {
+            "name": "ruleDefinition",
+            "type": "string"
+          },
+          {
+            "name": "ruleDescription",
+            "type": "string"
+          },
+          {
+            "name": "ruleId",
+            "type": "string"
+          },
+          {
+            "name": "ruleName",
+            "type": "string"
+          },
+          {
+            "name": "RuleType",
+            "type": "string"
+          },
+          {
+            "name": "tenantId_x",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "datetime"
+          },
+          {
+            "name": "AutomatedIrPuaAsSuspicious",
+            "type": "boolean"
+          },
+          {
+            "name": "IsAutomatedIrContainDeviceEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "designatedTenantId",
+            "type": "string"
+          },
+          {
+            "name": "eventHubProperties",
+            "type": "string"
+          },
+          {
+            "name": "Id",
+            "type": "string"
+          },
+          {
+            "name": "logsJson",
+            "type": "string"
+          },
+          {
+            "name": "storageAccountProperties",
+            "type": "string"
+          },
+          {
+            "name": "workspacePropertiesJson",
+            "type": "string"
+          },
+          {
+            "name": "isOptIn",
+            "type": "boolean"
+          },
+          {
+            "name": "ActivityDeltaPercentage",
+            "type": "long"
+          },
+          {
+            "name": "IsDeltaPercentageValid",
+            "type": "boolean"
+          },
+          {
+            "name": "Name",
+            "type": "string"
+          },
+          {
+            "name": "TotalAccessRequests",
+            "type": "long"
+          },
+          {
+            "name": "TotalBlockedCount",
+            "type": "long"
+          },
+          {
+            "name": "CommunicationsAndMedia",
+            "type": "string"
+          },
+          {
+            "name": "FinancialServices",
+            "type": "string"
+          },
+          {
+            "name": "GeoRegion",
+            "type": "string"
+          },
+          {
+            "name": "ManufacturingAndResources",
+            "type": "string"
+          },
+          {
+            "name": "MaxEndpoints",
+            "type": "long"
+          },
+          {
+            "name": "MinEndpoints",
+            "type": "long"
+          },
+          {
+            "name": "PublicSector",
+            "type": "string"
+          },
+          {
+            "name": "RetailConsumerProductsAndService",
+            "type": "string"
+          },
+          {
+            "name": "RetentionPolicy",
+            "type": "long"
+          },
+          {
+            "name": "ApplicationSettingsLink",
+            "type": "string"
+          },
+          {
+            "name": "DisplayName",
+            "type": "string"
+          },
+          {
+            "name": "Enabled",
+            "type": "boolean"
+          },
+          {
+            "name": "ImageBase64",
+            "type": "string"
+          },
+          {
+            "name": "ImageType",
+            "type": "string"
+          },
+          {
+            "name": "ImageUrl",
+            "type": "string"
+          },
+          {
+            "name": "LatestConnectivity",
+            "type": "datetime"
+          },
+          {
+            "name": "MonthlyStatisticsJson",
+            "type": "string"
+          },
+          {
+            "name": "ruleDefinitionJson",
+            "type": "string"
+          },
+          {
+            "name": "AlertSeverities",
+            "type": "long"
+          },
+          {
+            "name": "AllRbacGroups",
+            "type": "boolean"
+          },
+          {
+            "name": "Description",
+            "type": "string"
+          },
+          {
+            "name": "FormatOptions",
+            "type": "long"
+          },
+          {
+            "name": "IncidentNotificationsSettingId",
+            "type": "long"
+          },
+          {
+            "name": "IsReadOnly",
+            "type": "boolean"
+          },
+          {
+            "name": "RbacGroupIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "RecipientsJson",
+            "type": "string"
+          },
+          {
+            "name": "RulesJson",
+            "type": "string"
+          },
+          {
+            "name": "RulesReadOnly",
+            "type": "boolean"
+          },
+          {
+            "name": "ScopesJson",
+            "type": "string"
+          },
+          {
+            "name": "SendOncePerIncident",
+            "type": "boolean"
+          },
+          {
+            "name": "Action",
+            "type": "long"
+          },
+          {
+            "name": "ActivationDate",
+            "type": "datetime"
+          },
+          {
+            "name": "AdditionalDetails",
+            "type": "string"
+          },
+          {
+            "name": "AlertTitle",
+            "type": "string"
+          },
+          {
+            "name": "BitwiseServiceSources",
+            "type": "long"
+          },
+          {
+            "name": "ComputerDnsName",
+            "type": "string"
+          },
+          {
+            "name": "DeserializedRbacGroupIds",
+            "type": "string"
+          },
+          {
+            "name": "DeserializedScopeConditionsJson",
+            "type": "string"
+          },
+          {
+            "name": "FullDeserializedRbacGroupIds",
+            "type": "string"
+          },
+          {
+            "name": "IoaDefinitionId",
+            "type": "string"
+          },
+          {
+            "name": "IsEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "IsInOptOutPeriod",
+            "type": "boolean"
+          },
+          {
+            "name": "IsSilent",
+            "type": "boolean"
+          },
+          {
+            "name": "IsTestRule",
+            "type": "boolean"
+          },
+          {
+            "name": "LastActivity",
+            "type": "string"
+          },
+          {
+            "name": "MatchingAlertsCount",
+            "type": "long"
+          },
+          {
+            "name": "OrderIndex",
+            "type": "long"
+          },
+          {
+            "name": "RbacGroupIds",
+            "type": "string"
+          },
+          {
+            "name": "RuleConditions",
+            "type": "string"
+          },
+          {
+            "name": "RuleSource",
+            "type": "long"
+          },
+          {
+            "name": "RuleTitle",
+            "type": "string"
+          },
+          {
+            "name": "Scope",
+            "type": "long"
+          },
+          {
+            "name": "ScopeConditions",
+            "type": "string"
+          },
+          {
+            "name": "SenseMachineId",
+            "type": "string"
+          },
+          {
+            "name": "ThreatFamilyName",
+            "type": "string"
+          },
+          {
+            "name": "UpdateTime",
+            "type": "datetime"
+          },
+          {
+            "name": "Application",
+            "type": "string"
+          },
+          {
+            "name": "Category_x",
+            "type": "string"
+          },
+          {
+            "name": "CreatedByDisplayName",
+            "type": "string"
+          },
+          {
+            "name": "CreatedBySource",
+            "type": "string"
+          },
+          {
+            "name": "EducateUrl",
+            "type": "string"
+          },
+          {
+            "name": "GenerateAlert",
+            "type": "string"
+          },
+          {
+            "name": "IndicatorId",
+            "type": "string"
+          },
+          {
+            "name": "IndicatorType",
+            "type": "string"
+          },
+          {
+            "name": "IndicatorValue",
+            "type": "string"
+          },
+          {
+            "name": "Severity",
+            "type": "string"
+          },
+          {
+            "name": "Title_x",
+            "type": "string"
+          },
+          {
+            "name": "changeDetails",
+            "type": "string"
+          },
+          {
+            "name": "instanceSchemaJson",
+            "type": "string"
+          },
+          {
+            "name": "instancesCount",
+            "type": "long"
+          },
+          {
+            "name": "instancesJson",
+            "type": "string"
+          },
+          {
+            "name": "isMultiInstancesSupported",
+            "type": "boolean"
+          },
+          {
+            "name": "isStatic",
+            "type": "boolean"
+          },
+          {
+            "name": "kind_x",
+            "type": "string"
+          },
+          {
+            "name": "operations",
+            "type": "string"
+          },
+          {
+            "name": "prerequisitesJson",
+            "type": "string"
+          },
+          {
+            "name": "providerJson",
+            "type": "string"
+          },
+          {
+            "name": "requiredPermissionsJson",
+            "type": "string"
+          },
+          {
+            "name": "statusJson",
+            "type": "string"
+          },
+          {
+            "name": "supportedByJson",
+            "type": "string"
+          },
+          {
+            "name": "supportedCredentialsKindsJson",
+            "type": "string"
+          },
+          {
+            "name": "supportedProtectionTypesJson",
+            "type": "string"
+          },
+          {
+            "name": "uiDefinitionJson",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string"
+          },
+          {
+            "name": "versionChangeLogJson",
+            "type": "string"
+          },
+          {
+            "name": "versionStage",
+            "type": "string"
+          },
+          {
+            "name": "auditCategoryIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "blockedCategoryIdsJson",
+            "type": "string"
+          }
+        ],
+        "name": "Defender_Configuration_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-configuration-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_Configuration_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-Configuration-dest"
+          ],
+          "outputStream": "Custom-Defender_Configuration_CL",
+          "streams": [
+            "Custom-Defender_Configuration_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-Configuration-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_Configuration_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "Value",
+              "type": "string"
+            },
+            {
+              "name": "actionsJson",
+              "type": "string"
+            },
+            {
+              "name": "affectedAssetsCount",
+              "type": "long"
+            },
+            {
+              "name": "assetType",
+              "type": "string"
+            },
+            {
+              "name": "classificationValue",
+              "type": "string"
+            },
+            {
+              "name": "CreatedBy",
+              "type": "string"
+            },
+            {
+              "name": "createdByName",
+              "type": "string"
+            },
+            {
+              "name": "CreationTime",
+              "type": "datetime"
+            },
+            {
+              "name": "criticalityLevel",
+              "type": "long"
+            },
+            {
+              "name": "IsDeleted",
+              "type": "boolean"
+            },
+            {
+              "name": "isDisabled",
+              "type": "boolean"
+            },
+            {
+              "name": "kqlQuery",
+              "type": "string"
+            },
+            {
+              "name": "lastExecutionTime",
+              "type": "datetime"
+            },
+            {
+              "name": "lastUpdatedBy",
+              "type": "string"
+            },
+            {
+              "name": "lastUpdatedByName",
+              "type": "string"
+            },
+            {
+              "name": "LastUpdateTime",
+              "type": "datetime"
+            },
+            {
+              "name": "OrgId",
+              "type": "string"
+            },
+            {
+              "name": "ruleDefinition",
+              "type": "string"
+            },
+            {
+              "name": "ruleDescription",
+              "type": "string"
+            },
+            {
+              "name": "ruleId",
+              "type": "string"
+            },
+            {
+              "name": "ruleName",
+              "type": "string"
+            },
+            {
+              "name": "RuleType",
+              "type": "string"
+            },
+            {
+              "name": "tenantId_x",
+              "type": "string"
+            },
+            {
+              "name": "timestamp",
+              "type": "datetime"
+            },
+            {
+              "name": "AutomatedIrPuaAsSuspicious",
+              "type": "boolean"
+            },
+            {
+              "name": "IsAutomatedIrContainDeviceEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "designatedTenantId",
+              "type": "string"
+            },
+            {
+              "name": "eventHubProperties",
+              "type": "string"
+            },
+            {
+              "name": "Id",
+              "type": "string"
+            },
+            {
+              "name": "logsJson",
+              "type": "string"
+            },
+            {
+              "name": "storageAccountProperties",
+              "type": "string"
+            },
+            {
+              "name": "workspacePropertiesJson",
+              "type": "string"
+            },
+            {
+              "name": "isOptIn",
+              "type": "boolean"
+            },
+            {
+              "name": "ActivityDeltaPercentage",
+              "type": "long"
+            },
+            {
+              "name": "IsDeltaPercentageValid",
+              "type": "boolean"
+            },
+            {
+              "name": "Name",
+              "type": "string"
+            },
+            {
+              "name": "TotalAccessRequests",
+              "type": "long"
+            },
+            {
+              "name": "TotalBlockedCount",
+              "type": "long"
+            },
+            {
+              "name": "CommunicationsAndMedia",
+              "type": "string"
+            },
+            {
+              "name": "FinancialServices",
+              "type": "string"
+            },
+            {
+              "name": "GeoRegion",
+              "type": "string"
+            },
+            {
+              "name": "ManufacturingAndResources",
+              "type": "string"
+            },
+            {
+              "name": "MaxEndpoints",
+              "type": "long"
+            },
+            {
+              "name": "MinEndpoints",
+              "type": "long"
+            },
+            {
+              "name": "PublicSector",
+              "type": "string"
+            },
+            {
+              "name": "RetailConsumerProductsAndService",
+              "type": "string"
+            },
+            {
+              "name": "RetentionPolicy",
+              "type": "long"
+            },
+            {
+              "name": "ApplicationSettingsLink",
+              "type": "string"
+            },
+            {
+              "name": "DisplayName",
+              "type": "string"
+            },
+            {
+              "name": "Enabled",
+              "type": "boolean"
+            },
+            {
+              "name": "ImageBase64",
+              "type": "string"
+            },
+            {
+              "name": "ImageType",
+              "type": "string"
+            },
+            {
+              "name": "ImageUrl",
+              "type": "string"
+            },
+            {
+              "name": "LatestConnectivity",
+              "type": "datetime"
+            },
+            {
+              "name": "MonthlyStatisticsJson",
+              "type": "string"
+            },
+            {
+              "name": "ruleDefinitionJson",
+              "type": "string"
+            },
+            {
+              "name": "AlertSeverities",
+              "type": "long"
+            },
+            {
+              "name": "AllRbacGroups",
+              "type": "boolean"
+            },
+            {
+              "name": "Description",
+              "type": "string"
+            },
+            {
+              "name": "FormatOptions",
+              "type": "long"
+            },
+            {
+              "name": "IncidentNotificationsSettingId",
+              "type": "long"
+            },
+            {
+              "name": "IsReadOnly",
+              "type": "boolean"
+            },
+            {
+              "name": "RbacGroupIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "RecipientsJson",
+              "type": "string"
+            },
+            {
+              "name": "RulesJson",
+              "type": "string"
+            },
+            {
+              "name": "RulesReadOnly",
+              "type": "boolean"
+            },
+            {
+              "name": "ScopesJson",
+              "type": "string"
+            },
+            {
+              "name": "SendOncePerIncident",
+              "type": "boolean"
+            },
+            {
+              "name": "Action",
+              "type": "long"
+            },
+            {
+              "name": "ActivationDate",
+              "type": "datetime"
+            },
+            {
+              "name": "AdditionalDetails",
+              "type": "string"
+            },
+            {
+              "name": "AlertTitle",
+              "type": "string"
+            },
+            {
+              "name": "BitwiseServiceSources",
+              "type": "long"
+            },
+            {
+              "name": "ComputerDnsName",
+              "type": "string"
+            },
+            {
+              "name": "DeserializedRbacGroupIds",
+              "type": "string"
+            },
+            {
+              "name": "DeserializedScopeConditionsJson",
+              "type": "string"
+            },
+            {
+              "name": "FullDeserializedRbacGroupIds",
+              "type": "string"
+            },
+            {
+              "name": "IoaDefinitionId",
+              "type": "string"
+            },
+            {
+              "name": "IsEnabled",
+              "type": "boolean"
+            },
+            {
+              "name": "IsInOptOutPeriod",
+              "type": "boolean"
+            },
+            {
+              "name": "IsSilent",
+              "type": "boolean"
+            },
+            {
+              "name": "IsTestRule",
+              "type": "boolean"
+            },
+            {
+              "name": "LastActivity",
+              "type": "string"
+            },
+            {
+              "name": "MatchingAlertsCount",
+              "type": "long"
+            },
+            {
+              "name": "OrderIndex",
+              "type": "long"
+            },
+            {
+              "name": "RbacGroupIds",
+              "type": "string"
+            },
+            {
+              "name": "RuleConditions",
+              "type": "string"
+            },
+            {
+              "name": "RuleSource",
+              "type": "long"
+            },
+            {
+              "name": "RuleTitle",
+              "type": "string"
+            },
+            {
+              "name": "Scope",
+              "type": "long"
+            },
+            {
+              "name": "ScopeConditions",
+              "type": "string"
+            },
+            {
+              "name": "SenseMachineId",
+              "type": "string"
+            },
+            {
+              "name": "ThreatFamilyName",
+              "type": "string"
+            },
+            {
+              "name": "UpdateTime",
+              "type": "datetime"
+            },
+            {
+              "name": "Application",
+              "type": "string"
+            },
+            {
+              "name": "Category_x",
+              "type": "string"
+            },
+            {
+              "name": "CreatedByDisplayName",
+              "type": "string"
+            },
+            {
+              "name": "CreatedBySource",
+              "type": "string"
+            },
+            {
+              "name": "EducateUrl",
+              "type": "string"
+            },
+            {
+              "name": "GenerateAlert",
+              "type": "string"
+            },
+            {
+              "name": "IndicatorId",
+              "type": "string"
+            },
+            {
+              "name": "IndicatorType",
+              "type": "string"
+            },
+            {
+              "name": "IndicatorValue",
+              "type": "string"
+            },
+            {
+              "name": "Severity",
+              "type": "string"
+            },
+            {
+              "name": "Title_x",
+              "type": "string"
+            },
+            {
+              "name": "changeDetails",
+              "type": "string"
+            },
+            {
+              "name": "instanceSchemaJson",
+              "type": "string"
+            },
+            {
+              "name": "instancesCount",
+              "type": "long"
+            },
+            {
+              "name": "instancesJson",
+              "type": "string"
+            },
+            {
+              "name": "isMultiInstancesSupported",
+              "type": "boolean"
+            },
+            {
+              "name": "isStatic",
+              "type": "boolean"
+            },
+            {
+              "name": "kind_x",
+              "type": "string"
+            },
+            {
+              "name": "operations",
+              "type": "string"
+            },
+            {
+              "name": "prerequisitesJson",
+              "type": "string"
+            },
+            {
+              "name": "providerJson",
+              "type": "string"
+            },
+            {
+              "name": "requiredPermissionsJson",
+              "type": "string"
+            },
+            {
+              "name": "statusJson",
+              "type": "string"
+            },
+            {
+              "name": "supportedByJson",
+              "type": "string"
+            },
+            {
+              "name": "supportedCredentialsKindsJson",
+              "type": "string"
+            },
+            {
+              "name": "supportedProtectionTypesJson",
+              "type": "string"
+            },
+            {
+              "name": "uiDefinitionJson",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "versionChangeLogJson",
+              "type": "string"
+            },
+            {
+              "name": "versionStage",
+              "type": "string"
+            },
+            {
+              "name": "auditCategoryIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "blockedCategoryIdsJson",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-configuration-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-configuration-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_Configuration_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_Configuration_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_Configuration_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Value",
+                    "type": "string"
+                  },
+                  {
+                    "name": "actionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "affectedAssetsCount",
+                    "type": "long"
+                  },
+                  {
+                    "name": "assetType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "classificationValue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CreatedBy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "createdByName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CreationTime",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "criticalityLevel",
+                    "type": "long"
+                  },
+                  {
+                    "name": "IsDeleted",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isDisabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "kqlQuery",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastExecutionTime",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "lastUpdatedBy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastUpdatedByName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "LastUpdateTime",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "OrgId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ruleDefinition",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ruleDescription",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ruleId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ruleName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RuleType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantId_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "timestamp",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "AutomatedIrPuaAsSuspicious",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsAutomatedIrContainDeviceEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "designatedTenantId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "eventHubProperties",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "logsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "storageAccountProperties",
+                    "type": "string"
+                  },
+                  {
+                    "name": "workspacePropertiesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isOptIn",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "ActivityDeltaPercentage",
+                    "type": "long"
+                  },
+                  {
+                    "name": "IsDeltaPercentageValid",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "Name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "TotalAccessRequests",
+                    "type": "long"
+                  },
+                  {
+                    "name": "TotalBlockedCount",
+                    "type": "long"
+                  },
+                  {
+                    "name": "CommunicationsAndMedia",
+                    "type": "string"
+                  },
+                  {
+                    "name": "FinancialServices",
+                    "type": "string"
+                  },
+                  {
+                    "name": "GeoRegion",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ManufacturingAndResources",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MaxEndpoints",
+                    "type": "long"
+                  },
+                  {
+                    "name": "MinEndpoints",
+                    "type": "long"
+                  },
+                  {
+                    "name": "PublicSector",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RetailConsumerProductsAndService",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RetentionPolicy",
+                    "type": "long"
+                  },
+                  {
+                    "name": "ApplicationSettingsLink",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DisplayName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Enabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "ImageBase64",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ImageType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ImageUrl",
+                    "type": "string"
+                  },
+                  {
+                    "name": "LatestConnectivity",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "MonthlyStatisticsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ruleDefinitionJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AlertSeverities",
+                    "type": "long"
+                  },
+                  {
+                    "name": "AllRbacGroups",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "Description",
+                    "type": "string"
+                  },
+                  {
+                    "name": "FormatOptions",
+                    "type": "long"
+                  },
+                  {
+                    "name": "IncidentNotificationsSettingId",
+                    "type": "long"
+                  },
+                  {
+                    "name": "IsReadOnly",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "RbacGroupIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecipientsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RulesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RulesReadOnly",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "ScopesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SendOncePerIncident",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "Action",
+                    "type": "long"
+                  },
+                  {
+                    "name": "ActivationDate",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "AdditionalDetails",
+                    "type": "string"
+                  },
+                  {
+                    "name": "AlertTitle",
+                    "type": "string"
+                  },
+                  {
+                    "name": "BitwiseServiceSources",
+                    "type": "long"
+                  },
+                  {
+                    "name": "ComputerDnsName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DeserializedRbacGroupIds",
+                    "type": "string"
+                  },
+                  {
+                    "name": "DeserializedScopeConditionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "FullDeserializedRbacGroupIds",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IoaDefinitionId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IsEnabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsInOptOutPeriod",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsSilent",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "IsTestRule",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "LastActivity",
+                    "type": "string"
+                  },
+                  {
+                    "name": "MatchingAlertsCount",
+                    "type": "long"
+                  },
+                  {
+                    "name": "OrderIndex",
+                    "type": "long"
+                  },
+                  {
+                    "name": "RbacGroupIds",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RuleConditions",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RuleSource",
+                    "type": "long"
+                  },
+                  {
+                    "name": "RuleTitle",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Scope",
+                    "type": "long"
+                  },
+                  {
+                    "name": "ScopeConditions",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SenseMachineId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ThreatFamilyName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "UpdateTime",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Application",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CreatedByDisplayName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CreatedBySource",
+                    "type": "string"
+                  },
+                  {
+                    "name": "EducateUrl",
+                    "type": "string"
+                  },
+                  {
+                    "name": "GenerateAlert",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IndicatorId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IndicatorType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "IndicatorValue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Severity",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Title_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "changeDetails",
+                    "type": "string"
+                  },
+                  {
+                    "name": "instanceSchemaJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "instancesCount",
+                    "type": "long"
+                  },
+                  {
+                    "name": "instancesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isMultiInstancesSupported",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isStatic",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "kind_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "operations",
+                    "type": "string"
+                  },
+                  {
+                    "name": "prerequisitesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "providerJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "requiredPermissionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "statusJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "supportedByJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "supportedCredentialsKindsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "supportedProtectionTypesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "uiDefinitionJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "version",
+                    "type": "string"
+                  },
+                  {
+                    "name": "versionChangeLogJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "versionStage",
+                    "type": "string"
+                  },
+                  {
+                    "name": "auditCategoryIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "blockedCategoryIdsJson",
+                    "type": "string"
+                  }
+                ],
+                "name": "Defender_Configuration_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-configuration-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_Configuration_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-Configuration-dest"
+                  ],
+                  "outputStream": "Custom-Defender_Configuration_CL",
+                  "streams": [
+                    "Custom-Defender_Configuration_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-Configuration-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_Configuration_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Value",
+                      "type": "string"
+                    },
+                    {
+                      "name": "actionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "affectedAssetsCount",
+                      "type": "long"
+                    },
+                    {
+                      "name": "assetType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "classificationValue",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CreatedBy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "createdByName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CreationTime",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "criticalityLevel",
+                      "type": "long"
+                    },
+                    {
+                      "name": "IsDeleted",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "isDisabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "kqlQuery",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastExecutionTime",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "lastUpdatedBy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastUpdatedByName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "LastUpdateTime",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "OrgId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ruleDefinition",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ruleDescription",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ruleId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ruleName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RuleType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantId_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "timestamp",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "AutomatedIrPuaAsSuspicious",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsAutomatedIrContainDeviceEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "designatedTenantId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "eventHubProperties",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "logsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "storageAccountProperties",
+                      "type": "string"
+                    },
+                    {
+                      "name": "workspacePropertiesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isOptIn",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "ActivityDeltaPercentage",
+                      "type": "long"
+                    },
+                    {
+                      "name": "IsDeltaPercentageValid",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "Name",
+                      "type": "string"
+                    },
+                    {
+                      "name": "TotalAccessRequests",
+                      "type": "long"
+                    },
+                    {
+                      "name": "TotalBlockedCount",
+                      "type": "long"
+                    },
+                    {
+                      "name": "CommunicationsAndMedia",
+                      "type": "string"
+                    },
+                    {
+                      "name": "FinancialServices",
+                      "type": "string"
+                    },
+                    {
+                      "name": "GeoRegion",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ManufacturingAndResources",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MaxEndpoints",
+                      "type": "long"
+                    },
+                    {
+                      "name": "MinEndpoints",
+                      "type": "long"
+                    },
+                    {
+                      "name": "PublicSector",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RetailConsumerProductsAndService",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RetentionPolicy",
+                      "type": "long"
+                    },
+                    {
+                      "name": "ApplicationSettingsLink",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DisplayName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Enabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "ImageBase64",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ImageType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ImageUrl",
+                      "type": "string"
+                    },
+                    {
+                      "name": "LatestConnectivity",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "MonthlyStatisticsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ruleDefinitionJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AlertSeverities",
+                      "type": "long"
+                    },
+                    {
+                      "name": "AllRbacGroups",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "Description",
+                      "type": "string"
+                    },
+                    {
+                      "name": "FormatOptions",
+                      "type": "long"
+                    },
+                    {
+                      "name": "IncidentNotificationsSettingId",
+                      "type": "long"
+                    },
+                    {
+                      "name": "IsReadOnly",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "RbacGroupIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecipientsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RulesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RulesReadOnly",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "ScopesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SendOncePerIncident",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "Action",
+                      "type": "long"
+                    },
+                    {
+                      "name": "ActivationDate",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "AdditionalDetails",
+                      "type": "string"
+                    },
+                    {
+                      "name": "AlertTitle",
+                      "type": "string"
+                    },
+                    {
+                      "name": "BitwiseServiceSources",
+                      "type": "long"
+                    },
+                    {
+                      "name": "ComputerDnsName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DeserializedRbacGroupIds",
+                      "type": "string"
+                    },
+                    {
+                      "name": "DeserializedScopeConditionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "FullDeserializedRbacGroupIds",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IoaDefinitionId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IsEnabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsInOptOutPeriod",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsSilent",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "IsTestRule",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "LastActivity",
+                      "type": "string"
+                    },
+                    {
+                      "name": "MatchingAlertsCount",
+                      "type": "long"
+                    },
+                    {
+                      "name": "OrderIndex",
+                      "type": "long"
+                    },
+                    {
+                      "name": "RbacGroupIds",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RuleConditions",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RuleSource",
+                      "type": "long"
+                    },
+                    {
+                      "name": "RuleTitle",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Scope",
+                      "type": "long"
+                    },
+                    {
+                      "name": "ScopeConditions",
+                      "type": "string"
+                    },
+                    {
+                      "name": "SenseMachineId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ThreatFamilyName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "UpdateTime",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Application",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CreatedByDisplayName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CreatedBySource",
+                      "type": "string"
+                    },
+                    {
+                      "name": "EducateUrl",
+                      "type": "string"
+                    },
+                    {
+                      "name": "GenerateAlert",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IndicatorId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IndicatorType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "IndicatorValue",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Severity",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Title_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "changeDetails",
+                      "type": "string"
+                    },
+                    {
+                      "name": "instanceSchemaJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "instancesCount",
+                      "type": "long"
+                    },
+                    {
+                      "name": "instancesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isMultiInstancesSupported",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "isStatic",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "kind_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "operations",
+                      "type": "string"
+                    },
+                    {
+                      "name": "prerequisitesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "providerJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "requiredPermissionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "statusJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "supportedByJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "supportedCredentialsKindsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "supportedProtectionTypesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "uiDefinitionJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "version",
+                      "type": "string"
+                    },
+                    {
+                      "name": "versionChangeLogJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "versionStage",
+                      "type": "string"
+                    },
+                    {
+                      "name": "auditCategoryIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "blockedCategoryIdsJson",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

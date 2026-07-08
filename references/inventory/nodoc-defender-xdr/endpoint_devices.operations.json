@@ -1,0 +1,448 @@
+{
+  "operationCount": 49,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/{MachineId}/InterceptingMachines",
+      "OperationId": "EndpointDevices.GetNdrInterceptingMachines",
+      "Summary": "Get NDR intercepting machines",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/deviceVendors",
+      "OperationId": "EndpointDevices.ListVendors",
+      "Summary": "List device vendors",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/commandExport",
+      "OperationId": "EndpointDevices.ExportNdrMachines",
+      "Summary": "Export NDR machine inventory",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/requests/machinestate",
+      "OperationId": "EndpointDevices.GetActionState",
+      "Summary": "Get device response action state",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/allMachinesTags",
+      "OperationId": "EndpointDevices.GetAllMachineTags",
+      "Summary": "Get all machine tags",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/rbacGroupAssignment/rbacGroupsScopes/{DeviceId}",
+      "OperationId": "EndpointDevices.GetRbacGroupScopes",
+      "Summary": "Get device RBAC group scopes",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/allModels",
+      "OperationId": "EndpointDevices.GetAllModels",
+      "Summary": "Get all device models",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/allVendors",
+      "OperationId": "EndpointDevices.GetAllVendors",
+      "Summary": "Get all vendors",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/machineExclusionState/updateMachineExclusionState",
+      "OperationId": "EndpointDevices.SetExclusionState",
+      "Summary": "Set device exclusion state",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/assetvalue/setCriticalityLevel",
+      "OperationId": "EndpointDevices.SetCriticalityLevel",
+      "Summary": "Set device criticality level",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/devicesWithoutSiteTotals",
+      "OperationId": "EndpointDevices.GetDevicesWithoutSiteTotals",
+      "Summary": "Get device counts without site totals",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/machineTags",
+      "OperationId": "EndpointDevices.GetNdrMachineTags",
+      "Summary": "Get NDR machine tags",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/requests/machine/any",
+      "OperationId": "EndpointDevices.HasAnyActionRequests",
+      "Summary": "Check for any device response actions",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/machineTag/machineTags/{DeviceId}",
+      "OperationId": "EndpointDevices.GetTags",
+      "Summary": "Get device tags",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/getMachineMarkedEvents/machines/{MachineId}/eventMarks",
+      "OperationId": "EndpointDevices.GetMachineMarkedEvents",
+      "Summary": "Get machine marked events",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/rbacManagementApi/rbac/machine_groups",
+      "OperationId": "EndpointDevices.GetMachineGroups",
+      "Summary": "Get machine groups (RBAC)",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/deviceTotals",
+      "OperationId": "EndpointDevices.GetDeviceTotals",
+      "Summary": "Get device totals",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/{MachineId}/exclusionDetails",
+      "OperationId": "EndpointDevices.GetNdrMachineExclusionDetails",
+      "Summary": "Get NDR machine exclusion details",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/wdatpApi/machines",
+      "OperationId": "EndpointDevices.GetMachinesWdatp",
+      "Summary": "Get machines via WDATP API",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/mtp/machineTag/machineTag",
+      "OperationId": "EndpointDevices.SetTag",
+      "Summary": "Set device tag",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdi/tri/defensor/onboarding/devices/sensor_compatible_machines",
+      "OperationId": "EndpointDevices.GetSensorCompatibleMachines",
+      "Summary": "Get MDI sensor-compatible machines",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines",
+      "OperationId": "EndpointDevices.List",
+      "Summary": "List endpoint devices",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/requests/latest",
+      "OperationId": "EndpointDevices.GetLatestActionRequest",
+      "Summary": "Get latest device response action",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/getMachine/machines",
+      "OperationId": "EndpointDevices.Get",
+      "Summary": "Get endpoint device details",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/rbacGroupAssignment/machineRbacGroupAssignments/{DeviceId}",
+      "OperationId": "EndpointDevices.GetRbacGroups",
+      "Summary": "Get device RBAC group assignments",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/deviceTypeDistribution",
+      "OperationId": "EndpointDevices.GetNdrDeviceTypeDistribution",
+      "Summary": "Get NDR device type distribution",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/osVersions",
+      "OperationId": "EndpointDevices.ListOsVersions",
+      "Summary": "List OS version friendly names",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdeTimelineExperience/ips/{IpAddress}/events",
+      "OperationId": "EndpointDevices.GetIpTimelineEvents",
+      "Summary": "Get IP timeline events",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/allFirmwareVersions",
+      "OperationId": "EndpointDevices.GetAllFirmwareVersions",
+      "Summary": "Get all firmware versions",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/requests/{ActionId}",
+      "OperationId": "EndpointDevices.GetActionResult",
+      "Summary": "Get device action result",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/mtp/responseApiPortal/requests/{ActionId}",
+      "OperationId": "EndpointDevices.StopAction",
+      "Summary": "Stop device action",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/allOsVersionFriendlyNames",
+      "OperationId": "EndpointDevices.GetAllOsVersionFriendlyNames",
+      "Summary": "Get all OS version friendly names",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/getTopUsersByIds/TopUsersByIds",
+      "OperationId": "EndpointDevices.GetTopUsers",
+      "Summary": "Get top users for device",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/mdeTimelineExperience/machines/{MachineId}/prefetch",
+      "OperationId": "EndpointDevices.PrefetchMachineTimeline",
+      "Summary": "Prefetch machine timeline",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/allWindowsReleaseVersions",
+      "OperationId": "EndpointDevices.GetAllWindowsReleaseVersions",
+      "Summary": "Get all Windows release versions",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/getLatestMachineIpsByIds/LatestMachineIpsByIds",
+      "OperationId": "EndpointDevices.GetLatestIps",
+      "Summary": "Get latest device IP addresses",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/machines/deviceTotalCount",
+      "OperationId": "EndpointDevices.GetNdrDeviceTotalCount",
+      "Summary": "Get NDR device total count",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/deviceModels",
+      "OperationId": "EndpointDevices.ListModels",
+      "Summary": "List device models",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/getDataSensitivity/machines/{MachineId}/dataSensitivity",
+      "OperationId": "EndpointDevices.GetDataSensitivity",
+      "Summary": "Get machine data sensitivity",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/mdeTimelineExperience/machines/{MachineId}/events",
+      "OperationId": "EndpointDevices.GetMachineTimelineEvents",
+      "Summary": "Get machine timeline events",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/deviceTotals",
+      "OperationId": "EndpointDevices.GetTotals",
+      "Summary": "Get device totals",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceTimeline/timeline/{DeviceId}",
+      "OperationId": "EndpointDevices.GetTimeline",
+      "Summary": "Get device timeline",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/requests/permissions",
+      "OperationId": "EndpointDevices.GetActionPermissions",
+      "Summary": "Get device response action permissions",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/assetvalue/machineAssetValue",
+      "OperationId": "EndpointDevices.SetAssetValue",
+      "Summary": "Set device asset value",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/responseApiPortal/requests/create",
+      "OperationId": "EndpointDevices.InvokeAction",
+      "Summary": "Invoke device action",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/windowsReleaseVersions",
+      "OperationId": "EndpointDevices.ListWindowsReleaseVersions",
+      "Summary": "List Windows release versions",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/alertsApiService/Evidences/device/Alerts",
+      "OperationId": "EndpointDevices.ListAlertEvidences",
+      "Summary": "List device alert evidences",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/deviceManagement/deviceLicenseReport",
+      "OperationId": "EndpointDevices.GetLicenseReport",
+      "Summary": "Get endpoint license report",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/rbacGroupAssignment/updateMachineRbacGroupAssignments",
+      "OperationId": "EndpointDevices.SetRbacGroup",
+      "Summary": "Set device RBAC group",
+      "Tags": [
+        "Endpoint Devices"
+      ]
+    }
+  ],
+  "category": "endpoint_devices",
+  "portal": "nodoc-defender-xdr"
+}

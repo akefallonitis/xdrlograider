@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/DocumentProcessorTasks/ListTasks",
+      "OperationId": "DocumentProcessorTasks.List",
+      "Summary": "List document processor tasks",
+      "Tags": [
+        "Document Processor Tasks"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/DocumentProcessorTasks",
+      "OperationId": "DocumentProcessorTasks.Create",
+      "Summary": "Create document processor task",
+      "Tags": [
+        "Document Processor Tasks"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/DocumentProcessorTasks/Download/{id}",
+      "OperationId": "DocumentProcessorTasks.Download",
+      "Summary": "Download document processor task",
+      "Tags": [
+        "Document Processor Tasks"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/DocumentProcessorTasks/{id}",
+      "OperationId": "DocumentProcessorTasks.Get",
+      "Summary": "Get document processor task",
+      "Tags": [
+        "Document Processor Tasks"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/DocumentProcessorTasks/UploadTaskFile",
+      "OperationId": "DocumentProcessorTasks.TaskFile.Upload",
+      "Summary": "Upload document processor task file",
+      "Tags": [
+        "Document Processor Tasks"
+      ]
+    }
+  ],
+  "category": "document_processor_tasks",
+  "portal": "nodoc-ibiza-iam"
+}

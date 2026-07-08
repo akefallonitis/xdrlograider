@@ -1,0 +1,34 @@
+{
+  "operationCount": 3,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/SecurityDefaults/GetSecurityDefaultStatus",
+      "OperationId": "SecurityDefaults.Status.Get",
+      "Summary": "Get Security Defaults status",
+      "Tags": [
+        "Security Defaults"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/SecurityDefaults/Configuration",
+      "OperationId": "SecurityDefaults.Configuration.Get",
+      "Summary": "Get Security Defaults configuration",
+      "Tags": [
+        "Security Defaults"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/SecurityDefaults/UpdateSecurityDefaultOnSave",
+      "OperationId": "SecurityDefaults.Set",
+      "Summary": "Set Security Defaults",
+      "Tags": [
+        "Security Defaults"
+      ]
+    }
+  ],
+  "category": "security_defaults",
+  "portal": "nodoc-ibiza-iam"
+}

@@ -1,0 +1,79 @@
+{
+  "operationCount": 8,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/msgraph/v1.0/admin/serviceAnnouncement/messages",
+      "OperationId": "getServiceAnnouncementMessages",
+      "Summary": "Get service announcement messages",
+      "Tags": [
+        "GraphProxy"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/msgraph/v1.0/me/getMemberObjects",
+      "OperationId": "getCurrentUserMemberObjects",
+      "Summary": "Get current user's transitive memberships",
+      "Tags": [
+        "GraphProxy"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/msgraph/beta/identity/conditionalAccess/policies",
+      "OperationId": "getConditionalAccessPolicies",
+      "Summary": "Get conditional access policies",
+      "Tags": [
+        "GraphProxy"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/msgraph/v1.0/directoryRoles",
+      "OperationId": "listDirectoryRoles",
+      "Summary": "List directory roles",
+      "Tags": [
+        "GraphProxy"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/msgraph/v1.0/subscribedSkus",
+      "OperationId": "getSubscribedSkus",
+      "Summary": "Get subscribed SKUs (license info)",
+      "Tags": [
+        "GraphProxy"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/msgraph/beta/roleManagement/directory/transitiveRoleAssignments",
+      "OperationId": "getTransitiveRoleAssignments",
+      "Summary": "Get transitive role assignments",
+      "Tags": [
+        "GraphProxy"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/msgraph/v1.0/directory/administrativeUnits",
+      "OperationId": "getAdministrativeUnits",
+      "Summary": "Get administrative units",
+      "Tags": [
+        "GraphProxy"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/msgraph/v1.0/roleManagement/directory/roleAssignments",
+      "OperationId": "getDirectoryRoleAssignments",
+      "Summary": "Get directory role assignments",
+      "Tags": [
+        "GraphProxy"
+      ]
+    }
+  ],
+  "category": "graph_proxy",
+  "portal": "nodoc-purview"
+}

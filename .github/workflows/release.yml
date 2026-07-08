@@ -1,0 +1,230 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re-)release (e.g., v0.1.0)'
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+  packages: read
+  statuses: read   # FH-6 · read the postdeploy/verified commit status (the postdeploy enforcement gate below)
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    name: Build + cosign sign + SBOM + always-latest pointer
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Determine tag
+        id: tag
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install gauntlet deps (Pester + PSScriptAnalyzer + powershell-yaml + arm-ttk)
+        shell: pwsh
+        run: |
+          # FH (audit): the release path runs the SAME 38-axis Run-PrePushGauntlet below, so it MUST install the SAME deps
+          # as ci.yml. Without PSScriptAnalyzer, gauntlet axis 15 SELF-PASSES (graceful-skip returns $true) and the custom
+          # B-25 type-check rule never runs -- on a tag-push / workflow_dispatch commit that bypassed ci.yml, a PSSA-Error
+          # regression would ship in a SIGNED, PUBLISHED release green. Mirror ci.yml's Pester/PSSA/yaml installs + arm-ttk.
+          if (-not (Get-Module -ListAvailable Pester | Where-Object Version -ge '5.5')) {
+            Install-Module Pester -RequiredVersion 5.5.0 -Force -SkipPublisherCheck -Scope CurrentUser
+          }
+          if (-not (Get-Module -ListAvailable PSScriptAnalyzer | Where-Object Version -ge '1.21')) {
+            Install-Module PSScriptAnalyzer -RequiredVersion 1.22.0 -Force -SkipPublisherCheck -Scope CurrentUser
+          }
+          if (-not (Get-Module -ListAvailable powershell-yaml)) {
+            Install-Module powershell-yaml -Force -SkipPublisherCheck -Scope CurrentUser
+          }
+          if (-not (Test-Path "$HOME/arm-ttk")) {
+            git clone --depth 1 https://github.com/Azure/arm-ttk.git "$HOME/arm-ttk"
+          }
+
+      - name: Pre-release gauntlet gate (defense-in-depth · §3 "CI and release")
+        shell: pwsh
+        run: |
+          # ci.yml runs the gauntlet on every push to main, so the normal push->retag flow is already gated. But a tag
+          # push OR workflow_dispatch can point at a commit that did NOT pass ci.yml (the residual hole). Run the SAME
+          # 38-axis Run-PrePushGauntlet here so a release is NEVER built/signed/published from un-gated code.
+          if (-not (Test-Path tools/Run-PrePushGauntlet.ps1)) {
+            Write-Error 'tools/Run-PrePushGauntlet.ps1 missing · cannot gate the release'
+            exit 1
+          }
+          pwsh -NoProfile -File tools/Run-PrePushGauntlet.ps1
+          if ($LASTEXITCODE -ne 0) { Write-Error "Pre-release gauntlet FAIL · exit=$LASTEXITCODE · refusing to build a release"; exit $LASTEXITCODE }
+          Write-Host 'Pre-release gauntlet GREEN · proceeding to build'
+
+      - name: Postdeploy enforcement gate (FH-6 · refuse to release a SHA without a green postdeploy/verified status)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # The FULL postdeploy verify is LOCAL-ONLY (the service account must never authenticate in CI · security lock):
+          # tools/Confirm-PostDeploy.ps1 runs it on the operator's machine AFTER a live deploy and posts a commit status
+          # (postdeploy/verified=success) for the deployed SHA. A GA release MUST NOT build/sign/publish a SHA with no green
+          # postdeploy record — else a LIVE-only defect (cross-cycle dup · DCR-403 0-rows · cadence/auth/version regression)
+          # would ship in a SIGNED, PUBLISHED GA release. Here we only READ that status (CI-safe · no creds) and refuse.
+          TAG="${{ steps.tag.outputs.tag }}"
+          # GA-ONLY: a PRERELEASE tag (hyphenated · v0.1.0-pre-N) IS the deploy-for-verification vehicle — you cannot have
+          # a postdeploy/verified record before this very build deploys the code to be verified. Only the GA publish (clean
+          # semver · NO hyphen · make_latest) requires the green record. (release.yml already treats hyphen = prerelease.)
+          if [[ "$TAG" == *-* ]]; then
+            echo "Prerelease tag $TAG · the postdeploy gate is GA-ONLY · skipping (this build exists to deploy + verify)"
+            exit 0
+          fi
+          SHA="$(git rev-parse HEAD)"
+          echo "GA tag $TAG · checking postdeploy/verified commit status for $SHA"
+          STATE="$(gh api "repos/${{ github.repository }}/commits/${SHA}/status" --jq '.statuses[] | select(.context=="postdeploy/verified") | .state' 2>/dev/null | head -1 || true)"
+          if [ "$STATE" = "success" ]; then
+            echo "postdeploy/verified=success for $SHA · release may proceed"
+          else
+            echo "::error::No green postdeploy/verified status for $SHA (got '${STATE:-<none>}'). Run tools/Confirm-PostDeploy.ps1 against the live deployment of this SHA before tagging/releasing."
+            exit 1
+          fi
+
+      - name: Build-FunctionAppZip
+        shell: pwsh
+        run: |
+          if (-not (Test-Path tools/Build-FunctionAppZip.ps1)) {
+            Write-Error 'tools/Build-FunctionAppZip.ps1 missing · cannot build release'
+            exit 1
+          }
+          pwsh tools/Build-FunctionAppZip.ps1
+          if (-not (Test-Path function-app.zip)) { Write-Error 'function-app.zip not produced'; exit 1 }
+          Get-FileHash function-app.zip -Algorithm SHA256 | Format-List
+
+      - name: Build-SolutionPackage (Sentinel V3 Content Hub solution zip · §B-build-now)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path tools/Build-SolutionPackage.ps1)) {
+            Write-Error 'tools/Build-SolutionPackage.ps1 missing · senior-dev rule: NO DEFER · build everything now'
+            exit 1
+          }
+          $tagRaw = '${{ steps.tag.outputs.tag }}'
+          $version = $tagRaw -replace '^v', '' -replace '-.*$', ''
+          pwsh tools/Build-SolutionPackage.ps1 -Version $version
+          $expectedZip = "artifacts/xdrlograider-solution-v${version}.zip"
+          if (-not (Test-Path $expectedZip)) { Write-Error "Solution package not produced: $expectedZip"; exit 1 }
+          # Stage at repo root for cosign + release upload
+          Copy-Item $expectedZip "xdrlograider-solution.zip" -Force
+          Get-FileHash xdrlograider-solution.zip -Algorithm SHA256 | Format-List
+
+      - name: Generate SBOM (SPDX 2.3)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0.24.0
+        with:
+          path: ./
+          format: spdx-json
+          output-file: SBOM.spdx.json
+          artifact-name: SBOM.spdx.json
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
+
+      - name: Cosign keyless sign function-app.zip + SBOM + solution package (bundle format)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for artifact in function-app.zip SBOM.spdx.json xdrlograider-solution.zip; do
+            if [ -f "$artifact" ]; then
+              cosign sign-blob --yes --bundle "${artifact}.cosign.bundle" "$artifact"
+            fi
+          done
+
+      - name: Generate SHA256SUMS (after cosign · sums itself signed too · includes solution zip)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Include solution package if it was built (always for v0.1.0+ per §B-build-now)
+          if [ -f xdrlograider-solution.zip ]; then
+            sha256sum function-app.zip xdrlograider-solution.zip *.cosign.bundle SBOM.spdx.json > SHA256SUMS
+          else
+            sha256sum function-app.zip *.cosign.bundle SBOM.spdx.json > SHA256SUMS
+          fi
+          cosign sign-blob --yes --bundle SHA256SUMS.cosign.bundle SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Delete any existing releases for this tag (orphan-release prevention · D-π3 retag idempotency)
+        # softprops/action-gh-release@v3.0.0 has a known issue: when a tag is force-retagged (D-π3 pattern)
+        # the existing draft + published releases for that tag remain · the action creates a NEW DRAFT then
+        # tries to "finalize" it · GitHub API rejects with HttpError "already_exists" because the tag is
+        # already claimed by the previous published release. This step deletes all existing releases for
+        # the current tag BEFORE the action runs · making release.yml idempotent across retags.
+        # We don't delete the TAG itself (that's the D-π3 retag operator's job) · only the release objects
+        # that wrap it. The tag stays · only release metadata is recreated cleanly.
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.tag.outputs.tag }}"
+          echo "Searching for any existing GitHub Releases for tag $TAG (drafts + published)"
+          existing_ids=$(gh api "repos/${{ github.repository }}/releases" --jq ".[] | select(.tag_name == \"$TAG\") | .id" || true)
+          if [ -z "$existing_ids" ]; then
+            echo "No existing releases for $TAG · clean state"
+          else
+            for rid in $existing_ids; do
+              echo "Deleting orphan release id=$rid (tag $TAG)"
+              gh api -X DELETE "repos/${{ github.repository }}/releases/$rid" || true
+            done
+            echo "Orphan releases cleared · action-gh-release will create fresh release"
+          fi
+
+      - name: Upload release assets (incl Sentinel solution package · prerelease policy per plan §9)
+        # prerelease=true for ANY tag containing a hyphen (v0.1.0-pre · v0.1.0-alpha-N · v0.1.0-rc-N)
+        # prerelease=false ONLY for clean semver tags (v0.1.0 · v0.1.1 · v0.2.0 · GA-line)
+        # This ensures /releases/latest/ is RESERVED for GA · pre-GA alphas use explicit tag URLs
+        # per plan §9 versioning model.
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # v3.0.0
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          prerelease: ${{ contains(steps.tag.outputs.tag, '-') }}
+          make_latest: ${{ !contains(steps.tag.outputs.tag, '-') }}
+          generate_release_notes: true
+          files: |
+            function-app.zip
+            function-app.zip.cosign.bundle
+            xdrlograider-solution.zip
+            xdrlograider-solution.zip.cosign.bundle
+            SBOM.spdx.json
+            SBOM.spdx.json.cosign.bundle
+            SHA256SUMS
+            SHA256SUMS.cosign.bundle
+
+      - name: Release verification + version-pinning advisory (plan §9 Approach C)
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.tag.outputs.tag }}"
+          IS_PRERELEASE="${{ contains(steps.tag.outputs.tag, '-') }}"
+          echo "Tag $TAG published · prerelease=$IS_PRERELEASE"
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            echo "Pre-GA tag · /releases/latest/ NOT updated (reserved for GA)"
+            echo "FA WEBSITE_RUN_FROM_PACKAGE should pin to: https://github.com/${{ github.repository }}/releases/download/${TAG}/function-app.zip"
+            echo "Per-alpha-N sync flow: Sync-ExistingDeployment.ps1 with parameters.local.json containing functionAppPackageUri=<this URL>"
+          else
+            echo "GA-line tag · marked Latest on GitHub · the one-click ARM default is the version-pinned releases/download/v<connectorVersion>/function-app.zip (resolves to this build when connectorVersion == ${TAG#v})"
+          fi

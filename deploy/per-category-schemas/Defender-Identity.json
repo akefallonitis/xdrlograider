@@ -1,0 +1,727 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "Identity",
+    "TableName": "Defender_Identity_CL",
+    "StreamName": "Custom-Defender_Identity_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 23,
+    "TotalColumnCount": 32,
+    "OperationCount": 18,
+    "OperationKeys": [
+      "GetAlertThreshold",
+      "GetAlertThresholdsRecommendedTestMode",
+      "GetAlertThresholdsWithExpiry",
+      "GetDefensorConfiguration",
+      "GetGlobalExclusionEntities",
+      "GetMachinesManagedByStatus",
+      "GetMemOnboardStatus",
+      "GetOnboardedMachinesStatus",
+      "GetOnboardingStatus",
+      "GetPasswordDomainsPolicies",
+      "GetPasswordPolicyReportDefinitions",
+      "GetPasswordPolicyReports",
+      "GetRemediationActionsConfig",
+      "GetSecurityAlertExclusions",
+      "GetSyslogConfiguration",
+      "GetUserTimeline",
+      "GetVpnConfiguration",
+      "GetWorkspaceMonitoringAlerts"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_Identity_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "mde",
+            "type": "string"
+          },
+          {
+            "name": "mdm_x",
+            "type": "string"
+          },
+          {
+            "name": "osPlatform",
+            "type": "string"
+          },
+          {
+            "name": "sccm",
+            "type": "string"
+          },
+          {
+            "name": "total",
+            "type": "string"
+          },
+          {
+            "name": "unknown",
+            "type": "string"
+          },
+          {
+            "name": "isOnboarded",
+            "type": "string"
+          },
+          {
+            "name": "certificateError",
+            "type": "string"
+          },
+          {
+            "name": "clockSyncIssue",
+            "type": "string"
+          },
+          {
+            "name": "connectivityIssue",
+            "type": "string"
+          },
+          {
+            "name": "dnsError",
+            "type": "string"
+          },
+          {
+            "name": "generalError",
+            "type": "string"
+          },
+          {
+            "name": "generalHybridJoinFailure",
+            "type": "string"
+          },
+          {
+            "name": "hybridErrorServiceConnectionPoint",
+            "type": "string"
+          },
+          {
+            "name": "ldapApiError",
+            "type": "string"
+          },
+          {
+            "name": "mdeOsFamilyOnboardedMachinesJson",
+            "type": "string"
+          },
+          {
+            "name": "mdeWithError",
+            "type": "string"
+          },
+          {
+            "name": "memConfigurationIssue",
+            "type": "string"
+          },
+          {
+            "name": "onPremiseSyncIssue",
+            "type": "string"
+          },
+          {
+            "name": "success",
+            "type": "string"
+          },
+          {
+            "name": "tenantMismatch",
+            "type": "string"
+          },
+          {
+            "name": "sensorCount",
+            "type": "string"
+          },
+          {
+            "name": "EntraJson",
+            "type": "string"
+          }
+        ],
+        "name": "Defender_Identity_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-identity-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_Identity_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-Identity-dest"
+          ],
+          "outputStream": "Custom-Defender_Identity_CL",
+          "streams": [
+            "Custom-Defender_Identity_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-Identity-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_Identity_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "mde",
+              "type": "string"
+            },
+            {
+              "name": "mdm_x",
+              "type": "string"
+            },
+            {
+              "name": "osPlatform",
+              "type": "string"
+            },
+            {
+              "name": "sccm",
+              "type": "string"
+            },
+            {
+              "name": "total",
+              "type": "string"
+            },
+            {
+              "name": "unknown",
+              "type": "string"
+            },
+            {
+              "name": "isOnboarded",
+              "type": "string"
+            },
+            {
+              "name": "certificateError",
+              "type": "string"
+            },
+            {
+              "name": "clockSyncIssue",
+              "type": "string"
+            },
+            {
+              "name": "connectivityIssue",
+              "type": "string"
+            },
+            {
+              "name": "dnsError",
+              "type": "string"
+            },
+            {
+              "name": "generalError",
+              "type": "string"
+            },
+            {
+              "name": "generalHybridJoinFailure",
+              "type": "string"
+            },
+            {
+              "name": "hybridErrorServiceConnectionPoint",
+              "type": "string"
+            },
+            {
+              "name": "ldapApiError",
+              "type": "string"
+            },
+            {
+              "name": "mdeOsFamilyOnboardedMachinesJson",
+              "type": "string"
+            },
+            {
+              "name": "mdeWithError",
+              "type": "string"
+            },
+            {
+              "name": "memConfigurationIssue",
+              "type": "string"
+            },
+            {
+              "name": "onPremiseSyncIssue",
+              "type": "string"
+            },
+            {
+              "name": "success",
+              "type": "string"
+            },
+            {
+              "name": "tenantMismatch",
+              "type": "string"
+            },
+            {
+              "name": "sensorCount",
+              "type": "string"
+            },
+            {
+              "name": "EntraJson",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-identity-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-identity-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_Identity_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_Identity_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_Identity_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "mde",
+                    "type": "string"
+                  },
+                  {
+                    "name": "mdm_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "osPlatform",
+                    "type": "string"
+                  },
+                  {
+                    "name": "sccm",
+                    "type": "string"
+                  },
+                  {
+                    "name": "total",
+                    "type": "string"
+                  },
+                  {
+                    "name": "unknown",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isOnboarded",
+                    "type": "string"
+                  },
+                  {
+                    "name": "certificateError",
+                    "type": "string"
+                  },
+                  {
+                    "name": "clockSyncIssue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "connectivityIssue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "dnsError",
+                    "type": "string"
+                  },
+                  {
+                    "name": "generalError",
+                    "type": "string"
+                  },
+                  {
+                    "name": "generalHybridJoinFailure",
+                    "type": "string"
+                  },
+                  {
+                    "name": "hybridErrorServiceConnectionPoint",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ldapApiError",
+                    "type": "string"
+                  },
+                  {
+                    "name": "mdeOsFamilyOnboardedMachinesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "mdeWithError",
+                    "type": "string"
+                  },
+                  {
+                    "name": "memConfigurationIssue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "onPremiseSyncIssue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "success",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantMismatch",
+                    "type": "string"
+                  },
+                  {
+                    "name": "sensorCount",
+                    "type": "string"
+                  },
+                  {
+                    "name": "EntraJson",
+                    "type": "string"
+                  }
+                ],
+                "name": "Defender_Identity_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-identity-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_Identity_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-Identity-dest"
+                  ],
+                  "outputStream": "Custom-Defender_Identity_CL",
+                  "streams": [
+                    "Custom-Defender_Identity_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-Identity-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_Identity_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "mde",
+                      "type": "string"
+                    },
+                    {
+                      "name": "mdm_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "osPlatform",
+                      "type": "string"
+                    },
+                    {
+                      "name": "sccm",
+                      "type": "string"
+                    },
+                    {
+                      "name": "total",
+                      "type": "string"
+                    },
+                    {
+                      "name": "unknown",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isOnboarded",
+                      "type": "string"
+                    },
+                    {
+                      "name": "certificateError",
+                      "type": "string"
+                    },
+                    {
+                      "name": "clockSyncIssue",
+                      "type": "string"
+                    },
+                    {
+                      "name": "connectivityIssue",
+                      "type": "string"
+                    },
+                    {
+                      "name": "dnsError",
+                      "type": "string"
+                    },
+                    {
+                      "name": "generalError",
+                      "type": "string"
+                    },
+                    {
+                      "name": "generalHybridJoinFailure",
+                      "type": "string"
+                    },
+                    {
+                      "name": "hybridErrorServiceConnectionPoint",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ldapApiError",
+                      "type": "string"
+                    },
+                    {
+                      "name": "mdeOsFamilyOnboardedMachinesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "mdeWithError",
+                      "type": "string"
+                    },
+                    {
+                      "name": "memConfigurationIssue",
+                      "type": "string"
+                    },
+                    {
+                      "name": "onPremiseSyncIssue",
+                      "type": "string"
+                    },
+                    {
+                      "name": "success",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantMismatch",
+                      "type": "string"
+                    },
+                    {
+                      "name": "sensorCount",
+                      "type": "string"
+                    },
+                    {
+                      "name": "EntraJson",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

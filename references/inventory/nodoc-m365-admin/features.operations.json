@@ -1,0 +1,43 @@
+{
+  "operationCount": 4,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/admin/api/features/config",
+      "OperationId": "Features.GetConfig",
+      "Summary": "Get features configuration",
+      "Tags": [
+        "Features"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/features/all",
+      "OperationId": "Features.GetAll",
+      "Summary": "Get all feature flags",
+      "Tags": [
+        "Features"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/features/admincontentcdnimagepath",
+      "OperationId": "Features.GetAdminContentCdnImagePath",
+      "Summary": "Get admin content CDN image path",
+      "Tags": [
+        "Features"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/features/initialload",
+      "OperationId": "Features.GetInitialLoad",
+      "Summary": "Get initial load feature flags",
+      "Tags": [
+        "Features"
+      ]
+    }
+  ],
+  "category": "features",
+  "portal": "nodoc-m365-admin"
+}

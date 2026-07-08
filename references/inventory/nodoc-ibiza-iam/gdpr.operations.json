@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/GDPR/DeleteSelf",
+      "OperationId": "Gdpr.SelfDelete.Create",
+      "Summary": "Initiate GDPR self delete",
+      "Tags": [
+        "GDPR"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/GDPR/DeleteSelf",
+      "OperationId": "Gdpr.SelfDelete.Delete",
+      "Summary": "Initiate GDPR self delete",
+      "Tags": [
+        "GDPR"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/GDPR/ListRequests",
+      "OperationId": "Gdpr.Requests.List",
+      "Summary": "List GDPR requests",
+      "Tags": [
+        "GDPR"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/GDPR/IsViralUser",
+      "OperationId": "Gdpr.IsViralUser.Check",
+      "Summary": "Check if user is viral user",
+      "Tags": [
+        "GDPR"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/GDPR/InitiateExportRequest",
+      "OperationId": "Gdpr.ExportRequest.Create",
+      "Summary": "Initiate GDPR export request",
+      "Tags": [
+        "GDPR"
+      ]
+    }
+  ],
+  "category": "gdpr",
+  "portal": "nodoc-ibiza-iam"
+}

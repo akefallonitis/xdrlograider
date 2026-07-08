@@ -1,0 +1,160 @@
+{
+  "operationCount": 17,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/admin/api/Settings/company/theme/v2",
+      "OperationId": "CompanySettings.GetTheme",
+      "Summary": "Get company theme",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/Settings/company/sendfromaddress",
+      "OperationId": "CompanySettings.GetSendFromAddress",
+      "Summary": "Get send-from address settings",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/Settings/company/sendfromaddress",
+      "OperationId": "CompanySettings.SetSendFromAddress",
+      "Summary": "Set send-from address settings",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/Settings/company/releasetrack",
+      "OperationId": "CompanySettings.GetReleaseTrack",
+      "Summary": "Get release track settings",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/Settings/company/releasetrack",
+      "OperationId": "CompanySettings.SetReleaseTrack",
+      "Summary": "Set release track settings",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/GroupSiteManager/GetValidSiteUrlFromAlias",
+      "OperationId": "CompanySettings.GetBrandCenterSiteUrl",
+      "Summary": "Resolve Brand Center site URL",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/Settings/company/profile",
+      "OperationId": "CompanySettings.GetProfile",
+      "Summary": "Get company profile",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/Settings/company/profile",
+      "OperationId": "CompanySettings.SetProfile",
+      "Summary": "Set company profile",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPOInternalUseOnly.TenantAdminSettings/AutoQuotaEnabled",
+      "OperationId": "CompanySettings.GetSharePointAutoQuotaEnabled",
+      "Summary": "Get SharePoint auto-quota setting",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/_api/SPOInternalUseOnly.TenantAdminSettings/AutoQuotaEnabled",
+      "OperationId": "CompanySettings.SetTheme",
+      "Summary": "Set company theme",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/Settings/company/tile",
+      "OperationId": "CompanySettings.GetTile",
+      "Summary": "Get custom tile settings",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/Settings/company/tile",
+      "OperationId": "CompanySettings.SetTile",
+      "Summary": "Set custom tile settings",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant/GetSPOSiteCreationSources",
+      "OperationId": "CompanySettings.GetSharePointSiteCreationSources",
+      "Summary": "Get SharePoint site creation sources",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/spo.tenant/GetBrandCenterConfiguration",
+      "OperationId": "CompanySettings.GetBrandCenterConfiguration",
+      "Summary": "Get Brand Center configuration",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/Settings/company/helpdesk",
+      "OperationId": "CompanySettings.GetHelpdesk",
+      "Summary": "Get helpdesk settings",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/Settings/company/helpdesk",
+      "OperationId": "CompanySettings.SetHelpdesk",
+      "Summary": "Set helpdesk settings",
+      "Tags": [
+        "CompanySettings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPOInternalUseOnly.Tenant",
+      "OperationId": "CompanySettings.GetSharePointInternalTenantSettings",
+      "Summary": "Get SharePoint internal tenant settings",
+      "Tags": [
+        "CompanySettings"
+      ]
+    }
+  ],
+  "category": "company_settings",
+  "portal": "nodoc-m365-admin"
+}

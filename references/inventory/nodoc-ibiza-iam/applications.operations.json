@@ -1,0 +1,43 @@
+{
+  "operationCount": 4,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/Applications/Gallery",
+      "OperationId": "Application.Gallery.List",
+      "Summary": "List Gallery Applications",
+      "Tags": [
+        "Service Principal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ApplicationManagement/ApplicationObject/{appId}",
+      "OperationId": "Application.ApplicationObject.Get",
+      "Summary": "Get Application Registration by app ID",
+      "Tags": [
+        "Application Registration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/Applications/Gallery/{appId}",
+      "OperationId": "Application.Gallery.Get",
+      "Summary": "Get Gallery Application by app ID",
+      "Tags": [
+        "Service Principal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/IntegratedApplications/{spId}/GetFederatedOneClickSsoConfigureInfo",
+      "OperationId": "ApplicationSso.FederatedOneClickSsoConfigureInfo.Get",
+      "Summary": "Get integrated application federated one-click SSO configuration info",
+      "Tags": [
+        "Application SSO"
+      ]
+    }
+  ],
+  "category": "applications",
+  "portal": "nodoc-ibiza-iam"
+}

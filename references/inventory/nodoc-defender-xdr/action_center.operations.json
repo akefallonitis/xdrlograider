@@ -1,0 +1,106 @@
+{
+  "operationCount": 11,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/mtp/actionCenter/actioncenterui/pending-actions/pending-actions-summary",
+      "OperationId": "ActionCenter.GetPendingSummary",
+      "Summary": "Get pending actions summary",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/actionCenter/actioncenterui/pending-actions",
+      "OperationId": "ActionCenter.GetPending",
+      "Summary": "Get pending actions",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/CaseManagement/be/cases/{CaseId}/activities",
+      "OperationId": "ActionCenter.ListCaseActivities",
+      "Summary": "List case activities",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/actionCenter/actioncenterui/pending-actions/filters",
+      "OperationId": "ActionCenter.GetPendingFilters",
+      "Summary": "Get pending actions filters",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/actionCenter/actioncenterui/history-actions/filters",
+      "OperationId": "ActionCenter.GetHistoryFilters",
+      "Summary": "Get history actions filters",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/CaseManagement/be/cases/{CaseId}",
+      "OperationId": "ActionCenter.GetCase",
+      "Summary": "Get case details",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/actionCenter/actioncenterui/tile",
+      "OperationId": "ActionCenter.GetTileSummary",
+      "Summary": "Get action center tile summary",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/automation/internal/automation/{TenantId}/automationRules",
+      "OperationId": "ActionCenter.ListAutomationRules",
+      "Summary": "List automation rules",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/actionCenter/actioncenterui/history-actions",
+      "OperationId": "ActionCenter.GetHistory",
+      "Summary": "Get action center history",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/actionCenter/actioncenterui/history-actions/export",
+      "OperationId": "ActionCenter.ExportHistory",
+      "Summary": "Export action center history",
+      "Tags": [
+        "Action Center"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/CaseManagement/be/attachments",
+      "OperationId": "ActionCenter.ListCaseAttachments",
+      "Summary": "List case attachments",
+      "Tags": [
+        "Action Center"
+      ]
+    }
+  ],
+  "category": "action_center",
+  "portal": "nodoc-defender-xdr"
+}

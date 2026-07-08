@@ -1,0 +1,124 @@
+{
+  "operationCount": 13,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/admin/api/searchadminapi/firstrunexperience/get",
+      "OperationId": "Search.GetFirstRunExperience",
+      "Summary": "Get search first-run experience settings",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/searchadminapi/UDTConnectorsSummary",
+      "OperationId": "Search.GetConnectorsSummary",
+      "Summary": "Get connectors summary",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/searchadminapi/news/options/Bing",
+      "OperationId": "Search.GetBingNewsOptions",
+      "Summary": "Get Bing news options",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/mssearchinsights/api/v1/{tenantId}/status/reportdata",
+      "OperationId": "Search.GetInsightsReportStatus",
+      "Summary": "Get search insights report readiness",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/fd/mssearchinsights/api/v1/{tenantId}/TenantReports/GenericReport",
+      "OperationId": "Search.GetInsightsGenericReport",
+      "Summary": "Get a generic search insights report",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/searchadminapi/searchintelligencehome/cards",
+      "OperationId": "Search.GetSearchIntelligenceHomeCards",
+      "Summary": "Get search intelligence home cards",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/fd/substrateBookmarks/api/v3/management/bookmarks",
+      "OperationId": "Search.GetSubstrateBookmarks",
+      "Summary": "Get substrate bookmarks",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/searchadminapi/Qnas",
+      "OperationId": "Search.GetQnas",
+      "Summary": "Get search Q&A answers",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/mssearchconnectors/v1.0/admin/connections",
+      "OperationId": "Search.ListConnectorConnections",
+      "Summary": "List search connector connections",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/mssearchconnectors/v1.0/admin/AdminUxOptions",
+      "OperationId": "Search.GetConnectorAdminUxOptions",
+      "Summary": "Get search connector admin UX options",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/fd/mssearchconnectors/v1.0/admin/connections/getStatistics",
+      "OperationId": "Search.GetConnectionStatistics",
+      "Summary": "Get connection statistics",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/fd/substrateAcronyms/api/v1.0/GetTenantAdminAcronymsFromSds",
+      "OperationId": "Search.GetTenantAcronyms",
+      "Summary": "Get tenant acronyms from substrate",
+      "Tags": [
+        "Search"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/searchadminapi/configurations",
+      "OperationId": "Search.GetConfigurations",
+      "Summary": "Get search configurations",
+      "Tags": [
+        "Search"
+      ]
+    }
+  ],
+  "category": "search",
+  "portal": "nodoc-m365-admin"
+}

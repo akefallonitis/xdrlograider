@@ -1,0 +1,700 @@
+{
+  "operationCount": 77,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/identities/count",
+      "OperationId": "Identity.GetIdentitiesCount",
+      "Summary": "Get identities count",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/identitiesapiservice/identity/entities",
+      "OperationId": "Identity.ListEntities",
+      "Summary": "List identity entities",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/pdProtection/reportDefinitions/LeakedCredentials",
+      "OperationId": "Identity.GetLeakedCredentialReportDefinitions",
+      "Summary": "Get leaked-credential report definitions",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/serviceAccounts/count",
+      "OperationId": "Identity.GetServiceAccountsCount",
+      "Summary": "Get service accounts count",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/odata/sensors",
+      "OperationId": "Identity.ListSensorsOdata",
+      "Summary": "List sensors (OData)",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/workspaces/isWorkspaceExists",
+      "OperationId": "Identity.CheckWorkspaceExists",
+      "Summary": "Check if workspace exists",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/pdProtection/mdaReports/PasswordPolicies",
+      "OperationId": "Identity.GetPasswordPolicyReports",
+      "Summary": "Get password policy reports",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/siamApi/MachinesManagedByStatus",
+      "OperationId": "Identity.GetMachinesManagedByStatus",
+      "Summary": "Get SIAM managed-by status",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/radius/api/radius/identities/getIdentityType",
+      "OperationId": "Identity.GetRadiusIdentityType",
+      "Summary": "Get Radius identity type",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/serviceaccount/entities",
+      "OperationId": "Identity.ListServiceAccounts",
+      "Summary": "List service accounts",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/radius/api/radius/identities/accountsByUserIdCount",
+      "OperationId": "Identity.GetRadiusAccountsByUserIdCount",
+      "Summary": "Get Radius accounts count by user ID",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/mtp/applicationData",
+      "OperationId": "Identity.GetAatpApplicationData",
+      "Summary": "Get AATP application data",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/pdProtection/reportDefinitions/PasswordPolicies",
+      "OperationId": "Identity.GetPasswordPolicyReportDefinitions",
+      "Summary": "Get password policy report definitions",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/alertThreshold",
+      "OperationId": "Identity.GetAlertThreshold",
+      "Summary": "Get alert threshold",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/identities/aggregatedData",
+      "OperationId": "Identity.GetIdentitiesAggregatedData",
+      "Summary": "Get identities aggregated data",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/alertthresholds/withExpiry",
+      "OperationId": "Identity.GetAlertThresholdsWithExpiry",
+      "Summary": "Get alert thresholds with expiry",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/actions/byAccounts",
+      "OperationId": "Identity.GetActionsByAccounts",
+      "Summary": "Get account actions",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/radius/api/radius/identities/getDefenderRiskScoresOverTime",
+      "OperationId": "Identity.GetRadiusDefenderRiskScoresOverTime",
+      "Summary": "Get Defender risk scores over time",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/defensor/defensorConfiguration",
+      "OperationId": "Identity.GetDefensorConfiguration",
+      "Summary": "Get defensor configuration",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/identities",
+      "OperationId": "Identity.ListIdentities",
+      "Summary": "List identities",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/odata/workspaceMonitoringAlerts",
+      "OperationId": "Identity.GetWorkspaceMonitoringAlerts",
+      "Summary": "Get workspace monitoring alerts",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/unifiedrbac/usedScopes",
+      "OperationId": "Identity.GetUsedUnifiedRbacScopes",
+      "Summary": "Get used unified RBAC scopes",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/siamApi/OnboardedMachinesStatus",
+      "OperationId": "Identity.GetOnboardedMachinesStatus",
+      "Summary": "Get onboarded machines status",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/odata/TaggedSecurityPrincipals",
+      "OperationId": "Identity.GetTaggedSecurityPrincipals",
+      "Summary": "Get tagged security principals (sensitive)",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/ispmReports/UnsecureDomainConfigurations/newEntryCount",
+      "OperationId": "Identity.GetUnsecureDomainConfigurationsNewEntryCount",
+      "Summary": "Get unsecure domain configuration delta",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/serviceAccounts/filterOptions",
+      "OperationId": "Identity.GetServiceAccountFilterOptions",
+      "Summary": "Get service account filter options",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/identitiesapiservice/remediationAccount",
+      "OperationId": "Identity.GetRemediationAccount",
+      "Summary": "Get remediation action account",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/identitiesapiservice/remediationAccount",
+      "OperationId": "Identity.CreateRemediationAccount",
+      "Summary": "Create remediation action account",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/mdi/identity/identitiesapiservice/remediationAccount",
+      "OperationId": "Identity.UpdateRemediationAccount",
+      "Summary": "Update remediation action account",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/mdi/identity/identitiesapiservice/remediationAccount",
+      "OperationId": "Identity.DeleteRemediationAccount",
+      "Summary": "Delete remediation action account",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/devices/count",
+      "OperationId": "Identity.GetUserDevicesCount",
+      "Summary": "Get user devices count",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/siamApi/domaincontrollers/totals",
+      "OperationId": "Identity.GetDomainControllerTotals",
+      "Summary": "Get SIAM domain controller totals",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/ispmReports/RiskyLateralMovementPath/newEntryCount",
+      "OperationId": "Identity.GetRiskyLateralMovementPathNewEntryCount",
+      "Summary": "Get risky lateral movement path delta",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/sensors/sensorsCoverage",
+      "OperationId": "Identity.GetSensorsCoverage",
+      "Summary": "Get sensors coverage",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/odata/EntityRemediatorCredentials",
+      "OperationId": "Identity.GetEntityRemediatorCredentials",
+      "Summary": "Get entity remediator credentials",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/identitiesapiservice/domainController/coverage",
+      "OperationId": "Identity.GetDomainControllerCoverage",
+      "Summary": "Get domain controller coverage",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/alertthresholds/withExpiry/recommendedTestMode",
+      "OperationId": "Identity.GetAlertThresholdsRecommendedTestMode",
+      "Summary": "Get recommended test mode alert thresholds",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/serviceAccounts",
+      "OperationId": "Identity.ListServiceAccountsV2",
+      "Summary": "List service accounts",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/odata/ExclusionEntityDatas/Global",
+      "OperationId": "Identity.GetGlobalExclusionEntities",
+      "Summary": "Get global excluded entities",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/radius/api/radius/identities/getDefenderRiskSummary",
+      "OperationId": "Identity.GetRadiusDefenderRiskSummary",
+      "Summary": "Get Defender risk summary",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/siamApi/memonboardstatus",
+      "OperationId": "Identity.GetMemOnboardStatus",
+      "Summary": "Get MEM onboarding status",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/siamApi/domaincontrollers/list",
+      "OperationId": "Identity.ListDomainControllers",
+      "Summary": "List SIAM domain controllers",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/workspace/isActive",
+      "OperationId": "Identity.CheckWorkspaceActive",
+      "Summary": "Check workspace active status",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/user/activityPeriod",
+      "OperationId": "Identity.GetUserActivityPeriod",
+      "Summary": "Get user activity period",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/odata/directoryServices",
+      "OperationId": "Identity.GetDirectoryServicesOdata",
+      "Summary": "Get directory services accounts",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/pdProtection/entities",
+      "OperationId": "Identity.ListPasswordProtectionEntities",
+      "Summary": "List password protection entities",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/workspace/configuration/syslog",
+      "OperationId": "Identity.GetSyslogConfiguration",
+      "Summary": "Get syslog configuration",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/timeline/mtp",
+      "OperationId": "Identity.GetUserMtpTimeline",
+      "Summary": "Get user cross-workload timeline",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/radius/api/radius/identities/getCriticalityScore",
+      "OperationId": "Identity.GetRadiusCriticalityScore",
+      "Summary": "Get identity criticality score",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/status",
+      "OperationId": "Identity.GetOnboardingStatus",
+      "Summary": "Get onboarding status",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/users/IdentitiesStats",
+      "OperationId": "Identity.GetIdentitiesStats",
+      "Summary": "Get identity stats",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/remediationActions/configuration",
+      "OperationId": "Identity.GetRemediationActionsConfig",
+      "Summary": "Get remediation actions configuration",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/pdProtection/reportDefinitions/ExposedPasswords",
+      "OperationId": "Identity.GetExposedPasswordReportDefinitions",
+      "Summary": "Get exposed-password report definitions",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/radius/api/radius/remediation/lmf/{Sid}",
+      "OperationId": "Identity.GetRadiusRemediationState",
+      "Summary": "Get Radius remediation state",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/statistics",
+      "OperationId": "Identity.GetStatistics",
+      "Summary": "Get identity statistics",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/ispmReports/UnsecureDomainConfigurations",
+      "OperationId": "Identity.ListUnsecureDomainConfigurations",
+      "Summary": "List unsecure domain configurations",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/radius/api/radius/identities/getDefenderRiskKillChain",
+      "OperationId": "Identity.GetRadiusDefenderRiskKillChain",
+      "Summary": "Get Defender risk kill chain",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/siamApi/MdeAttachEnabled",
+      "OperationId": "Identity.GetMdeAttachEnabled",
+      "Summary": "Get SIAM MDE attachment state",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/devices",
+      "OperationId": "Identity.ListUserDevices",
+      "Summary": "List user devices",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/pdProtection/reportDefinitions/PasswordHygiene",
+      "OperationId": "Identity.GetPasswordHygieneReportDefinitions",
+      "Summary": "Get password hygiene report definitions",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/ispms",
+      "OperationId": "Identity.GetIspmData",
+      "Summary": "Get identity ISPM data",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/sensors/domainControllerCoverage",
+      "OperationId": "Identity.GetDomainControllerCoverageAatp",
+      "Summary": "Get domain controller coverage (AATP)",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/ispmReports/DormantEntities/newEntryCount",
+      "OperationId": "Identity.GetDormantEntitiesNewEntryCount",
+      "Summary": "Get dormant entities report delta",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/siamApi/Onboarding",
+      "OperationId": "Identity.GetOnboardingSummary",
+      "Summary": "Get SIAM onboarding summary",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/pdProtection/mdaReports/PasswordHygiene",
+      "OperationId": "Identity.GetPasswordHygieneReports",
+      "Summary": "Get password hygiene reports",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/sensors/identityInfrastructuresInfo",
+      "OperationId": "Identity.GetInfrastructureInfo",
+      "Summary": "Get identity infrastructure inventory",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/manager",
+      "OperationId": "Identity.GetManager",
+      "Summary": "Get user manager",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdi/identity/userapiservice/user/resolve",
+      "OperationId": "Identity.ResolveUser",
+      "Summary": "Resolve identity user",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/radius/api/radius/identities/accountsByUserId",
+      "OperationId": "Identity.ListRadiusAccountsByUserId",
+      "Summary": "List Radius accounts by user ID",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/radius/api/radius/identities/getTenantPartners",
+      "OperationId": "Identity.GetRadiusTenantPartners",
+      "Summary": "Get Radius tenant partners",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/directoryServiceAccount",
+      "OperationId": "Identity.GetDirectoryServiceAccount",
+      "Summary": "Get directory service account",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/mtp/vpnConfiguration",
+      "OperationId": "Identity.GetVpnConfiguration",
+      "Summary": "Get VPN configuration",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/user/timeline",
+      "OperationId": "Identity.GetUserTimeline",
+      "Summary": "Get user timeline",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/unifiedrbac/scopes",
+      "OperationId": "Identity.GetUnifiedRbacScopes",
+      "Summary": "Get unified RBAC scopes",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdi/identity/userapiservice/pdProtection/domainsPolicies",
+      "OperationId": "Identity.GetPasswordDomainsPolicies",
+      "Summary": "Get password domains and policies",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/odata/SecurityAlertExclusionDatas",
+      "OperationId": "Identity.GetSecurityAlertExclusions",
+      "Summary": "Get security alert exclusions by detection rule",
+      "Tags": [
+        "Identity"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/aatp/api/workspace/configuration/scopedHealthNotifications",
+      "OperationId": "Identity.GetScopedHealthNotifications",
+      "Summary": "Get scoped health notifications",
+      "Tags": [
+        "Identity"
+      ]
+    }
+  ],
+  "category": "identity",
+  "portal": "nodoc-defender-xdr"
+}

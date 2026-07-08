@@ -1,0 +1,139 @@
+# XdrLogRaider · .gitignore
+# Generated 2026-06-01 · Phase 0.2 bootstrap
+
+# === Secrets · NEVER commit ===
+.env
+.env.local
+.env.*.local
+parameters.local.json
+*.passkey.pem
+*.totp.seed
+secrets/
+.secrets/
+.azure-sp*/
+.azure/
+
+# === Build artifacts ===
+function-app.zip
+xdrlograider-*.zip
+solution.zip
+*.zip
+*.tar.gz
+*.7z
+SBOM.spdx.json
+SBOM.spdx
+*.sig
+*.pem
+!Package/*.pem
+SHA256SUMS
+
+# === Derived build state (regenerated from RAW) ===
+references/contracts/
+.audit/cache/
+.audit/runtime/
+.audit/operation-tracker.lock
+
+# === Per-environment local overrides ===
+parameters.*.local.json
+local.settings.json
+
+# === Bundled dependencies (restored from PSGallery in CI) ===
+src/Modules/Az/
+src/Modules/Az.*/
+Modules/Az/
+Modules/Az.*/
+
+# === Node / Python / .NET artifacts ===
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+bin/
+obj/
+Debug/
+Release/
+
+# === IDE / editor ===
+.vs/
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+*.suo
+*.user
+*.swp
+*~
+
+# === OS junk ===
+Thumbs.db
+.DS_Store
+ehthumbs.db
+desktop.ini
+
+# === Logs ===
+*.log
+logs/
+npm-debug.log*
+
+# === Coverage ===
+coverage/
+coverage.xml
+*.cover
+
+# === Test artifacts ===
+TestResults/
+PesterResult.xml
+
+# === Sentinel local probe outputs ===
+probe-results-*.json
+probe-*.log
+
+# === Internal audit/process artifacts · local-only · NEVER in public repo ===
+.audit/
+PHASE_*.md
+*_GATE_*.md
+*_PROGRESS.md
+*-snug-rain.md
+
+# === Internal research layer (G4 single-repo model · operator-local lab captures · tests use tests/fixtures/live) ===
+references/live/
+
+# === Process-engine tooling · TRACKED (operator 2026-06-04: "dev-tools needed for the whole process") ===
+# The cataloguing/generation/onboarding engine (Build-Catalogue · Generate-Manifest · Build-PerCategorySchema ·
+# Build-EndpointContracts · Inventory-References · ...) is the reproducible factory for
+# the STATIC generated manifests/schemas. The contributor (agent/operator) regenerates; CI validates the static
+# outputs. Secrets live ONLY in .env.local (gitignored above). Only the transient generated scratch is ignored:
+dev-tools/.generated/
+# Legacy nested-deployment side files: fed the removed per-category injector; Build-MainTemplate now assembles the
+# nested block itself from <Portal>-<Category>.json, so these are never consumed and must not be committed (drift hole).
+deploy/per-category-schemas/*-nested-deployment.json
+
+# Internal development record (operator 2026-06-14 · NOT public · stays local as the working registry)
+docs/DECISION-LEDGER.md
+docs/CATALOGUE-REVIEW-WS2.md
+dev-tools/Capture-PurviewFixture.ps1
+
+# === Google Drive rclone bisync CONFLICT copies (NEVER commit · the hourly bisync races local edits and writes
+# <file>.conflictN · they are stale duplicates · `git add -A` must never sweep them into a commit · the .zip rule
+# above misses them because the suffix is .conflictN not .zip) ===
+*.conflict
+*.conflict[0-9]*
+
+# === Stray path-mangled AZURE_CONFIG_DIR artifact holding LIVE service-account creds/tokens (MSYS collapsed
+# C:\Users\alkef\.azure-xdlr → a repo-root 'Usersalkef.azure-xdlr' dir) · NEVER commit · the REAL az context lives
+# OUTSIDE the repo at C:\Users\alkef\.azure-xdlr (audit SEC-2 · pre-squash security lock) ===
+Usersalkef.azure-xdlr/
+*.azure-xdlr/
+.azure-xdlr/
+.azure/
+
+# === Operator-local probe scratch (dev-only diagnostics · never public · same class as the other *-Local probes) ===
+tools/Probe-AsrApiVersion-Local.ps1
+tools/Probe-AsrDetections-Local.ps1
+tools/Probe-AsrExclusions-Local.ps1
+tools/Probe-AsrReconfirm-Local.ps1
+tools/Probe-AsrSurface-Local.ps1
+tools/Probe-HeldOps-Local.ps1
+tools/Probe-TvmPaginationForm-Local.ps1

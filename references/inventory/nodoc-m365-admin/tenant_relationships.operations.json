@@ -1,0 +1,34 @@
+{
+  "operationCount": 3,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/admin/api/tenantRelationships/userSyncApps/outboundDetails",
+      "OperationId": "TenantRelationships.GetUserSyncOutbound",
+      "Summary": "Get user sync outbound details",
+      "Tags": [
+        "TenantRelationships"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/tenantRelationships/multiTenantOrganization/tenants",
+      "OperationId": "TenantRelationships.GetMTOTenants",
+      "Summary": "Get MTO tenants",
+      "Tags": [
+        "TenantRelationships"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/tenantRelationships/multiTenantOrganization",
+      "OperationId": "TenantRelationships.GetMTO",
+      "Summary": "Get multi-tenant organization",
+      "Tags": [
+        "TenantRelationships"
+      ]
+    }
+  ],
+  "category": "tenant_relationships",
+  "portal": "nodoc-m365-admin"
+}

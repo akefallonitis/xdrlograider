@@ -1,0 +1,93 @@
+paths:
+  /dgs/Item/GetTenantLicense:
+    get:
+      operationId: getTenantLicense
+      summary: Get tenant license information
+      description: >-
+        Retrieve tenant license information from the Data Governance Services.
+        Returns the current licensing status and entitlements for Purview features.
+      tags: [DataGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/DataGovernanceTenantLicenseResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /dgs/aggregate/GetTypeAggregates:
+    get:
+      operationId: getDataGovernanceTypeAggregates
+      summary: Get type aggregates
+      description: >-
+        Retrieve type aggregates from the Data Governance Services.
+        Returns aggregated counts and statistics grouped by data type.
+      tags: [DataGovernance]
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: The type of aggregate to retrieve.
+          schema:
+            type: string
+        - name: fetchTagNames
+          in: query
+          required: false
+          description: Whether to include tag names in the response.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/DataGovernanceTypeAggregatesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /dgs/item/GetTypesV2:
+    get:
+      operationId: getClassificationTypesV2
+      summary: Get classification types V2
+      description: >-
+        Retrieve classification types (version 2) from the Data Governance Services.
+        Returns the available classification type definitions for data cataloging.
+      tags: [DataGovernance]
+      parameters:
+        - name: types
+          in: query
+          required: false
+          description: Comma-separated list of classification types to retrieve.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

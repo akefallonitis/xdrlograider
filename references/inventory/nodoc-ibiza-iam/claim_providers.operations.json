@@ -1,0 +1,61 @@
+{
+  "operationCount": 6,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/ClaimProviders",
+      "OperationId": "ClaimProvider.List",
+      "Summary": "List claim provider",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ClaimProviders",
+      "OperationId": "ClaimProvider.Create",
+      "Summary": "Create claim provider",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/ClaimProviders",
+      "OperationId": "ClaimProvider.Update",
+      "Summary": "Update claim provider",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/ClaimProviders",
+      "OperationId": "ClaimProvider.Delete",
+      "Summary": "Delete claim provider",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/ClaimProviders/Validate",
+      "OperationId": "ClaimProvider.Validate",
+      "Summary": "Validate claim provider definition",
+      "Tags": [
+        "Policies"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/ClaimProviders/Controls",
+      "OperationId": "ClaimProvider.Controls.List",
+      "Summary": "List claim provider controls",
+      "Tags": [
+        "Policies"
+      ]
+    }
+  ],
+  "category": "claim_providers",
+  "portal": "nodoc-ibiza-iam"
+}

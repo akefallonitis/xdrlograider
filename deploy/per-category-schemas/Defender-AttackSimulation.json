@@ -1,0 +1,953 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "AttackSimulation",
+    "TableName": "Defender_AttackSimulation_CL",
+    "StreamName": "Custom-Defender_AttackSimulation_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 38,
+    "TotalColumnCount": 47,
+    "OperationCount": 4,
+    "OperationKeys": [
+      "GetCampaignSettings",
+      "GetRecommendations",
+      "ListGlobalPayloads",
+      "ListSimulations"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_AttackSimulation_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "eTag",
+            "type": "string"
+          },
+          {
+            "name": "organizationInsightsSettingsJson",
+            "type": "string"
+          },
+          {
+            "name": "repeatOffenderSettingsJson",
+            "type": "string"
+          },
+          {
+            "name": "trainingDedupSettingsJson",
+            "type": "string"
+          },
+          {
+            "name": "trainingNotificationSettings",
+            "type": "string"
+          },
+          {
+            "name": "userReminderSettingsJson",
+            "type": "string"
+          },
+          {
+            "name": "userSusceptibilitySettingsJson",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "payloadId",
+            "type": "string"
+          },
+          {
+            "name": "payloadName",
+            "type": "string"
+          },
+          {
+            "name": "recommendationType",
+            "type": "string"
+          },
+          {
+            "name": "technique",
+            "type": "string"
+          },
+          {
+            "name": "attackType",
+            "type": "string"
+          },
+          {
+            "name": "complexity",
+            "type": "string"
+          },
+          {
+            "name": "createdBy",
+            "type": "string"
+          },
+          {
+            "name": "createdTime",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "etag_x",
+            "type": "string"
+          },
+          {
+            "name": "isAutomated",
+            "type": "string"
+          },
+          {
+            "name": "isControversial",
+            "type": "string"
+          },
+          {
+            "name": "isCurrentEvent",
+            "type": "string"
+          },
+          {
+            "name": "language",
+            "type": "string"
+          },
+          {
+            "name": "lastModifiedBy",
+            "type": "string"
+          },
+          {
+            "name": "lastModifiedTime",
+            "type": "string"
+          },
+          {
+            "name": "missedPercentage",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "payloadBrand",
+            "type": "string"
+          },
+          {
+            "name": "payloadDetail",
+            "type": "string"
+          },
+          {
+            "name": "payloadIndustry",
+            "type": "string"
+          },
+          {
+            "name": "payloadStatistics",
+            "type": "string"
+          },
+          {
+            "name": "payloadTagsJson",
+            "type": "string"
+          },
+          {
+            "name": "payloadTheme",
+            "type": "string"
+          },
+          {
+            "name": "platform",
+            "type": "string"
+          },
+          {
+            "name": "predictedCompromiseRate",
+            "type": "string"
+          },
+          {
+            "name": "source",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "tenantFlightingIds",
+            "type": "string"
+          },
+          {
+            "name": "tenantsImpacted",
+            "type": "string"
+          }
+        ],
+        "name": "Defender_AttackSimulation_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-attacksimulation-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_AttackSimulation_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-AttackSimulation-dest"
+          ],
+          "outputStream": "Custom-Defender_AttackSimulation_CL",
+          "streams": [
+            "Custom-Defender_AttackSimulation_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-AttackSimulation-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_AttackSimulation_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "eTag",
+              "type": "string"
+            },
+            {
+              "name": "organizationInsightsSettingsJson",
+              "type": "string"
+            },
+            {
+              "name": "repeatOffenderSettingsJson",
+              "type": "string"
+            },
+            {
+              "name": "trainingDedupSettingsJson",
+              "type": "string"
+            },
+            {
+              "name": "trainingNotificationSettings",
+              "type": "string"
+            },
+            {
+              "name": "userReminderSettingsJson",
+              "type": "string"
+            },
+            {
+              "name": "userSusceptibilitySettingsJson",
+              "type": "string"
+            },
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "payloadId",
+              "type": "string"
+            },
+            {
+              "name": "payloadName",
+              "type": "string"
+            },
+            {
+              "name": "recommendationType",
+              "type": "string"
+            },
+            {
+              "name": "technique",
+              "type": "string"
+            },
+            {
+              "name": "attackType",
+              "type": "string"
+            },
+            {
+              "name": "complexity",
+              "type": "string"
+            },
+            {
+              "name": "createdBy",
+              "type": "string"
+            },
+            {
+              "name": "createdTime",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "name": "etag_x",
+              "type": "string"
+            },
+            {
+              "name": "isAutomated",
+              "type": "string"
+            },
+            {
+              "name": "isControversial",
+              "type": "string"
+            },
+            {
+              "name": "isCurrentEvent",
+              "type": "string"
+            },
+            {
+              "name": "language",
+              "type": "string"
+            },
+            {
+              "name": "lastModifiedBy",
+              "type": "string"
+            },
+            {
+              "name": "lastModifiedTime",
+              "type": "string"
+            },
+            {
+              "name": "missedPercentage",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "payloadBrand",
+              "type": "string"
+            },
+            {
+              "name": "payloadDetail",
+              "type": "string"
+            },
+            {
+              "name": "payloadIndustry",
+              "type": "string"
+            },
+            {
+              "name": "payloadStatistics",
+              "type": "string"
+            },
+            {
+              "name": "payloadTagsJson",
+              "type": "string"
+            },
+            {
+              "name": "payloadTheme",
+              "type": "string"
+            },
+            {
+              "name": "platform",
+              "type": "string"
+            },
+            {
+              "name": "predictedCompromiseRate",
+              "type": "string"
+            },
+            {
+              "name": "source",
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "type": "string"
+            },
+            {
+              "name": "tenantFlightingIds",
+              "type": "string"
+            },
+            {
+              "name": "tenantsImpacted",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-attacksimulation-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-attacksimulation-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_AttackSimulation_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_AttackSimulation_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_AttackSimulation_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "eTag",
+                    "type": "string"
+                  },
+                  {
+                    "name": "organizationInsightsSettingsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "repeatOffenderSettingsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "trainingDedupSettingsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "trainingNotificationSettings",
+                    "type": "string"
+                  },
+                  {
+                    "name": "userReminderSettingsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "userSusceptibilitySettingsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "payloadId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "payloadName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "recommendationType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "technique",
+                    "type": "string"
+                  },
+                  {
+                    "name": "attackType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "complexity",
+                    "type": "string"
+                  },
+                  {
+                    "name": "createdBy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "createdTime",
+                    "type": "string"
+                  },
+                  {
+                    "name": "description",
+                    "type": "string"
+                  },
+                  {
+                    "name": "etag_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isAutomated",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isControversial",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isCurrentEvent",
+                    "type": "string"
+                  },
+                  {
+                    "name": "language",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastModifiedBy",
+                    "type": "string"
+                  },
+                  {
+                    "name": "lastModifiedTime",
+                    "type": "string"
+                  },
+                  {
+                    "name": "missedPercentage",
+                    "type": "string"
+                  },
+                  {
+                    "name": "name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "payloadBrand",
+                    "type": "string"
+                  },
+                  {
+                    "name": "payloadDetail",
+                    "type": "string"
+                  },
+                  {
+                    "name": "payloadIndustry",
+                    "type": "string"
+                  },
+                  {
+                    "name": "payloadStatistics",
+                    "type": "string"
+                  },
+                  {
+                    "name": "payloadTagsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "payloadTheme",
+                    "type": "string"
+                  },
+                  {
+                    "name": "platform",
+                    "type": "string"
+                  },
+                  {
+                    "name": "predictedCompromiseRate",
+                    "type": "string"
+                  },
+                  {
+                    "name": "source",
+                    "type": "string"
+                  },
+                  {
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantFlightingIds",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantsImpacted",
+                    "type": "string"
+                  }
+                ],
+                "name": "Defender_AttackSimulation_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-attacksimulation-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_AttackSimulation_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-AttackSimulation-dest"
+                  ],
+                  "outputStream": "Custom-Defender_AttackSimulation_CL",
+                  "streams": [
+                    "Custom-Defender_AttackSimulation_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-AttackSimulation-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_AttackSimulation_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "eTag",
+                      "type": "string"
+                    },
+                    {
+                      "name": "organizationInsightsSettingsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "repeatOffenderSettingsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "trainingDedupSettingsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "trainingNotificationSettings",
+                      "type": "string"
+                    },
+                    {
+                      "name": "userReminderSettingsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "userSusceptibilitySettingsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "payloadId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "payloadName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "recommendationType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "technique",
+                      "type": "string"
+                    },
+                    {
+                      "name": "attackType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "complexity",
+                      "type": "string"
+                    },
+                    {
+                      "name": "createdBy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "createdTime",
+                      "type": "string"
+                    },
+                    {
+                      "name": "description",
+                      "type": "string"
+                    },
+                    {
+                      "name": "etag_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isAutomated",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isControversial",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isCurrentEvent",
+                      "type": "string"
+                    },
+                    {
+                      "name": "language",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastModifiedBy",
+                      "type": "string"
+                    },
+                    {
+                      "name": "lastModifiedTime",
+                      "type": "string"
+                    },
+                    {
+                      "name": "missedPercentage",
+                      "type": "string"
+                    },
+                    {
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "name": "payloadBrand",
+                      "type": "string"
+                    },
+                    {
+                      "name": "payloadDetail",
+                      "type": "string"
+                    },
+                    {
+                      "name": "payloadIndustry",
+                      "type": "string"
+                    },
+                    {
+                      "name": "payloadStatistics",
+                      "type": "string"
+                    },
+                    {
+                      "name": "payloadTagsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "payloadTheme",
+                      "type": "string"
+                    },
+                    {
+                      "name": "platform",
+                      "type": "string"
+                    },
+                    {
+                      "name": "predictedCompromiseRate",
+                      "type": "string"
+                    },
+                    {
+                      "name": "source",
+                      "type": "string"
+                    },
+                    {
+                      "name": "status",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantFlightingIds",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantsImpacted",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

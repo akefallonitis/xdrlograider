@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/MdmApplications/Application/{appId}",
+      "OperationId": "MdmApplication.Application.Get",
+      "Summary": "Get MDM application",
+      "Tags": [
+        "MDM"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MdmApplications/{spId}",
+      "OperationId": "MdmApplication.Get",
+      "Summary": "Get MDM application",
+      "Tags": [
+        "MDM"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/MdmApplications/{spId}",
+      "OperationId": "MdmApplication.Update",
+      "Summary": "Update MDM application",
+      "Tags": [
+        "MDM"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MdmApplications/Permissions/{appId}",
+      "OperationId": "MdmApplication.Permissions.List",
+      "Summary": "List MDM application permissions",
+      "Tags": [
+        "MDM"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/MdmApplications",
+      "OperationId": "MdmApplication.List",
+      "Summary": "List MDM applications",
+      "Tags": [
+        "MDM"
+      ]
+    }
+  ],
+  "category": "mdm_applications",
+  "portal": "nodoc-ibiza-iam"
+}

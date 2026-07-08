@@ -1,0 +1,70 @@
+{
+  "operationCount": 7,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/admin/api/copilotsettings/settings",
+      "OperationId": "Copilot.GetSettings",
+      "Summary": "Get Copilot settings",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/copilotsettings/settings/dismissed",
+      "OperationId": "Copilot.GetDismissedSettings",
+      "Summary": "Get dismissed Copilot settings",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/Copilot/getcopilotlicenseassignmentdate",
+      "OperationId": "Copilot.GetLicenseAssignmentDate",
+      "Summary": "Get Copilot license assignment date",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/copilotsettings/securitycopilot/auth",
+      "OperationId": "Copilot.GetSecurityCopilotAuth",
+      "Summary": "Get Security Copilot auth settings",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/m365copilot/ShowColorCopilotIcon",
+      "OperationId": "Copilot.GetShowColorCopilotIcon",
+      "Summary": "Get Copilot color icon setting",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/admin/api/settings/company/copilotpolicy/pin",
+      "OperationId": "Copilot.GetPinPolicy",
+      "Summary": "Get Copilot pin policy",
+      "Tags": [
+        "Copilot"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/admin/api/settings/company/copilotpolicy/pin",
+      "OperationId": "Copilot.SetPinPolicy",
+      "Summary": "Set Copilot pin policy",
+      "Tags": [
+        "Copilot"
+      ]
+    }
+  ],
+  "category": "copilot",
+  "portal": "nodoc-m365-admin"
+}

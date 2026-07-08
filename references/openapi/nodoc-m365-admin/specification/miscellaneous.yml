@@ -1,0 +1,754 @@
+paths:
+  /admin/api/coordinatedbootstrap/shellinfo:
+    get:
+      summary: Get shell info
+      description: >-
+        Retrieve the coordinated bootstrap shell information used to initialize
+        the M365 Admin Center portal, including feature flags, user context,
+        and available services.
+      operationId: Misc.GetShellInfo
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CoordinatedBootstrapResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /adminportal/home/ClassicModernAdminDataStream:
+    get:
+      summary: Get admin home data stream
+      description: >-
+        Retrieve the admin home page data stream, providing dashboard information
+        including service health, message center items, and quick actions.
+      operationId: Misc.GetHomeDataStream
+      tags: [Miscellaneous]
+      parameters:
+        - name: ref
+          in: query
+          description: The referring page path.
+          schema:
+            type: string
+            default: /homepage
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Home data stream. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/dirsyncerrors/listdirsyncerrors:
+    post:
+      summary: Get directory sync errors
+      description: >-
+        Retrieve the list of directory synchronization errors for Entra Connect
+        (AAD Connect) sync.
+      operationId: Misc.GetDirSyncErrors
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Directory sync errors. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/recommendations/m365/ccs:
+    get:
+      summary: Get M365 recommendations
+      description: >-
+        Retrieve Microsoft 365 recommendations from the Central Configuration
+        Service (CCS) for improving tenant security and productivity.
+      operationId: Misc.GetRecommendations
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: M365 recommendations. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/offerrec/offer/{id}:
+    get:
+      summary: Get offer recommendation
+      description: >-
+        Retrieve a specific offer recommendation by ID, including upgrade
+        and cross-sell recommendations from Microsoft.
+      operationId: Misc.GetOfferRecommendation
+      tags: [Miscellaneous]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The offer recommendation identifier (e.g., 48, 49).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Offer recommendation details. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/offerrec/marketplaceoffer:
+    get:
+      summary: Get marketplace offer recommendation
+      description: >-
+        Retrieve the marketplace offer recommendation payload used by the admin center
+        marketplace landing experience.
+      operationId: Misc.GetMarketplaceOfferRecommendation
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  OfferRecommendationName:
+                    type: integer
+                  Data:
+                    type: object
+                    nullable: true
+                    additionalProperties: true
+                  PersonalizedContent:
+                    type: object
+                    nullable: true
+                    additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/enhancedRestorev2/v1/featureSetting:
+    get:
+      summary: Get enhanced restore settings
+      description: >-
+        Retrieve the enhanced restore (v2) feature settings for the tenant,
+        including backup and recovery configurations.
+      operationId: Misc.GetEnhancedRestoreSettings
+      tags: [Miscellaneous]
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup settings experience.
+        headerProfile: m365-admin-microsoft-365-backup
+        availability:
+          level: tenant-conditional
+          notes:
+            - 'A live capture from a tenant without Microsoft 365 Backup enabled returned `status: disabled` with billing flags still present.'
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified against the signed-in Settings > Microsoft 365 Backup blade at `#/Settings/enhancedRestore`.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - backupServiceConsumer
+                  - isDepartmentBillingEnabled
+                  - isRbacEnabledForBilling
+                  - hasEXOEUPIAttributionConsent
+                properties:
+                  '@odata.context':
+                    type: string
+                  status:
+                    type: string
+                  backupServiceConsumer:
+                    type: string
+                  isDepartmentBillingEnabled:
+                    type: boolean
+                  isRbacEnabledForBilling:
+                    type: boolean
+                  hasEXOEUPIAttributionConsent:
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/arm/providers/Microsoft.Billing/billingAccounts:
+    get:
+      summary: Get ARM billing accounts
+      description: >-
+        Retrieve billing accounts via the Azure Resource Manager (ARM) proxy,
+        providing access to the tenant billing account details.
+      operationId: Misc.GetARMBillingAccounts
+      tags: [Miscellaneous]
+      parameters:
+        - name: api-version
+          in: query
+          description: ARM API version.
+          schema:
+            type: string
+            default: '2020-05-01'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: ARM billing accounts. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/iris:
+    get:
+      summary: Get IRIS placement content
+      description: >-
+        Retrieve IRIS placement content and recommendation payloads used by the admin
+        center homepage. The observed live tenant returned a no-content placement error
+        for the requested slot.
+      operationId: Misc.GetIrisPlacement
+      tags: [Miscellaneous]
+      parameters:
+        - name: placement
+          in: query
+          description: Placement identifier requested by the client. Some homepage probes send `undefined`.
+          schema:
+            type: string
+        - name: nct
+          in: query
+          description: Numeric content type discriminator.
+          schema:
+            type: integer
+        - name: country
+          in: query
+          description: Country code associated with the request context.
+          schema:
+            type: string
+        - name: locale
+          in: query
+          description: Locale associated with the request context.
+          schema:
+            type: string
+        - name: bcnt
+          in: query
+          description: Homepage batch-count discriminator.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batchrsp:
+                    type: object
+                    properties:
+                      ver:
+                        type: string
+                      errors:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            code:
+                              type: integer
+                            msg:
+                              type: string
+                          additionalProperties: true
+                    additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/notifications:
+    get:
+      summary: Get admin notifications
+      description: >-
+        Retrieve admin notifications for the current user.
+      operationId: Misc.GetNotifications
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/NotificationPollResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/rememberpreferences:
+    get:
+      summary: Get remembered preferences
+      description: >-
+        Retrieve remembered user preferences for the admin portal.
+      operationId: Misc.GetRememberPreferences
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: common.yml#/components/schemas/PreferenceGroup
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/setupwizard/setupbanner:
+    get:
+      summary: Get setup wizard banner
+      description: >-
+        Retrieve the setup wizard banner status for the admin portal.
+      operationId: Misc.GetSetupBanner
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Setup wizard banner status. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/uxversion:
+    get:
+      summary: Get UX version
+      description: >-
+        Retrieve the current UX version of the admin portal.
+      operationId: Misc.GetUxVersion
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: UX version information. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/a365conversion:
+    get:
+      summary: Get A365 conversion status
+      description: >-
+        Retrieve the A365 conversion status for the tenant.
+      operationId: Misc.GetA365Conversion
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: A365 conversion status. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/recommendations/m365alerts:
+    get:
+      summary: Get M365 recommendation alerts
+      description: >-
+        Retrieve Microsoft 365 recommendation alerts for the tenant.
+      operationId: Misc.GetM365Alerts
+      tags: [Miscellaneous]
+      parameters:
+        - name: referrer
+          in: query
+          required: false
+          description: Referring shell surface captured by the portal.
+          schema:
+            type: string
+            default: M365AdminDashboard
+      x-nodoc-operation-context:
+        surface: Dashboard > Recommendations
+        workflows:
+          - Open the admin dashboard recommendations area.
+        headerProfile: m365-admin-homepage
+        variants:
+          - location: query
+            selector: referrer
+            knownValues:
+              - M365AdminDashboard
+            notes: The portal currently sends the dashboard referrer value on alert reads.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: M365 recommendation alerts. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/admindashboard/tenantsettings:
+    get:
+      summary: Get admin dashboard tenant settings
+      description: >-
+        Retrieve tenant-scoped dashboard and marketplace preference flags tracked by
+        the admin shell, including whether marketplace left-navigation entry points
+        have already been shown.
+      operationId: Misc.GetAdminDashboardTenantSettings
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  HasSeenMarketplaceLeftNav:
+                    type: integer
+                  HasSeenMarketplaceLeftNavV2:
+                    type: integer
+                  HasSeenMarketplaceLeftNavV3:
+                    type: integer
+                  HasUpgradedToBusinessStandard:
+                    type: integer
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/DirsyncManagement/hasobjectswithdirsyncerrors:
+    get:
+      summary: Check for directory sync errors
+      description: >-
+        Check whether the tenant currently has Entra Connect objects with directory
+        synchronization errors.
+      operationId: Misc.HasObjectsWithDirSyncErrors
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/DirsyncManagement/manage:
+    get:
+      summary: Get directory sync management
+      description: >-
+        Retrieve directory synchronization management status, warnings, and support
+        links for the tenant's Entra Connect configuration.
+      operationId: Misc.GetDirSyncManagement
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  IsDirSyncEnabled:
+                    type: boolean
+                  IsFederated:
+                    type: boolean
+                  IsPasswordSyncEnabled:
+                    type: boolean
+                  IsSyncNormal:
+                    type: boolean
+                  IsPasswordSyncNormal:
+                    type: boolean
+                  CompanyName:
+                    type: string
+                  DirSyncClientVersion:
+                    type: string
+                  DirSyncClientMachineName:
+                    type: string
+                  DirSyncLastSyncTime:
+                    type: string
+                  PasswordSyncLastSyncTime:
+                    type: string
+                  VerifiedDomainCount:
+                    type: integer
+                  UnverifiedDomainCount:
+                    type: integer
+                  CDNUrls:
+                    type: object
+                    additionalProperties:
+                      type: string
+                  TroubleShootUrl:
+                    type: string
+                  DirSyncObjectErrorsUrl:
+                    type: string
+                  DomainsPageUrl:
+                    type: string
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/irisrecommendations/v1:
+    get:
+      summary: Get IRIS recommendations
+      description: >-
+        Retrieve IRIS (Intelligent Recommendations and Insights Service) recommendations for the tenant (Org Settings > Briefing email).
+      operationId: Misc.GetIrisRecommendations
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/recommendations/m365:
+    get:
+      summary: Get M365 recommendations
+      description: >-
+        Retrieve Microsoft 365 recommendations for the tenant including feature adoption suggestions (Org Settings > Briefing email).
+      operationId: Misc.GetM365Recommendations
+      tags: [Miscellaneous]
+      x-nodoc-operation-context:
+        surface: Org settings > Briefing email
+        workflows:
+          - Open the recommendations experience rooted in Briefing email or recommendation cards.
+        headerProfile: m365-admin-homepage
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/recommendations/m365suggestions:
+    get:
+      summary: Get M365 search suggestions
+      description: >-
+        Retrieve recommendation suggestions shown in Microsoft Search-backed admin experiences.
+      operationId: Misc.GetM365Suggestions
+      tags: [Miscellaneous]
+      parameters:
+        - name: referrer
+          in: query
+          required: false
+          description: Referring shell surface captured by the portal.
+          schema:
+            type: string
+            default: SearchAnswers
+      x-nodoc-operation-context:
+        surface: Microsoft Search > Search answers
+        workflows:
+          - Open the Search & intelligence experience. The portal currently emits this request with the `SearchAnswers` referrer during page load.
+        headerProfile: m365-admin-microsoft-search
+        variants:
+          - location: query
+            selector: referrer
+            knownValues:
+              - SearchAnswers
+            notes: The portal currently sends the SearchAnswers referrer on this route.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals recommendation cmdlet.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - 'Verified on the signed-in `#/MicrosoftSearch` route with `x-adminapp-request: /MicrosoftSearch`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Search-backed M365 recommendation suggestions. The live capture returned an empty array for the current tenant.
+                items:
+                  type: object
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/recommendations/m365/BlockGenAIRecommendation/view:
+    post:
+      summary: Block GenAI recommendation view
+      description: >-
+        Record a view or block action for a GenAI recommendation in the M365 admin center (Org Settings > Briefing email).
+      operationId: Misc.BlockGenAIRecommendationView
+      tags: [Miscellaneous]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

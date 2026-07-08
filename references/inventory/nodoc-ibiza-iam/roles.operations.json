@@ -1,0 +1,43 @@
+{
+  "operationCount": 4,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/Roles/User/{userId}/RoleAssignments",
+      "OperationId": "Role.User.Assignments.Get",
+      "Summary": "Get user role assignments",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/Roles/User/{userId}/RoleAssignments",
+      "OperationId": "Role.User.Assignments.Create",
+      "Summary": "Create user role assignment",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/Roles/{roleId}/RoleAssignments",
+      "OperationId": "Role.Assignments.Create",
+      "Summary": "Create user role assignment",
+      "Tags": [
+        "Roles"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/Roles/{roleId}/RoleAssignments",
+      "OperationId": "Role.Assignments.Delete",
+      "Summary": "Delete user role assignment",
+      "Tags": [
+        "Roles"
+      ]
+    }
+  ],
+  "category": "roles",
+  "portal": "nodoc-ibiza-iam"
+}

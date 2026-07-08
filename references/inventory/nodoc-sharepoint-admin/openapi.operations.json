@@ -1,0 +1,376 @@
+{
+  "operationCount": 41,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant/sites('{siteId}')",
+      "OperationId": "SharePointAdmin.GetSiteById",
+      "Summary": "Get site details by id",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPOInternalUseOnly.Tenant",
+      "OperationId": "SharePointAdmin.GetInternalTenantProperties",
+      "Summary": "Get internal-only tenant properties",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/TenantAdminSettings",
+      "OperationId": "SharePointAdmin.GetTenantAdminSettings",
+      "Summary": "Get selected tenant admin settings",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant/GetTrackViewFeatureAlwaysVisible",
+      "OperationId": "SharePointAdmin.GetTrackViewFeatureVisibility",
+      "Summary": "Get track-view feature visibility",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/v2.1/unifiedstoragequota/tenant/services/SPO",
+      "OperationId": "SharePointAdmin.GetUnifiedStorageQuotaService",
+      "Summary": "Get unified storage quota service details",
+      "Tags": [
+        "Storage"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant/RestrictedOneDriveLicense",
+      "OperationId": "SharePointAdmin.GetRestrictedOneDriveLicense",
+      "Summary": "Get restricted OneDrive license flag",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/GroupSiteManager/GetGroupCreationContext",
+      "OperationId": "SharePointAdmin.GetGroupCreationContext",
+      "Summary": "Get group creation context",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SP.CompliancePolicy.SPPolicyStoreProxy.CheckSiteIsDeletableById('{siteId}')",
+      "OperationId": "SharePointAdmin.CheckSiteIsDeletableById",
+      "Summary": "Check whether a site can be deleted",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPOInternalUseOnly.TenantAdminSettings",
+      "OperationId": "SharePointAdmin.GetInternalTenantAdminSettings",
+      "Summary": "Get internal tenant admin settings",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/v2.1/unifiedStorageQuotaEligible",
+      "OperationId": "SharePointAdmin.GetUnifiedStorageQuotaEligibility",
+      "Summary": "Check unified storage quota eligibility",
+      "Tags": [
+        "Storage"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/_api/web/GetClientSideComponents",
+      "OperationId": "SharePointAdmin.GetClientSideComponents",
+      "Summary": "Get client-side component manifests",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/TenantAdminSettings/GetTenantSharingStatus",
+      "OperationId": "SharePointAdmin.GetTenantSharingStatus",
+      "Summary": "Get tenant sharing status",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/_api/SPO.Tenant/UpdateJobsWorkItems",
+      "OperationId": "SharePointAdmin.UpdateJobsWorkItems",
+      "Summary": "Update pending job work items",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/MigrationCenterServices/Properties/GetProperty('{propertyName}')",
+      "OperationId": "SharePointAdmin.GetMigrationProperty",
+      "Summary": "Get a migration center property",
+      "Tags": [
+        "Migration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SP.Site.Exists(url=@v)",
+      "OperationId": "SharePointAdmin.CheckSiteExists",
+      "Summary": "Check whether a site exists",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/HubSites",
+      "OperationId": "SharePointAdmin.GetHubSites",
+      "Summary": "Get hub sites",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/_api/SPO.Tenant/GetSPListRootFolderProperties",
+      "OperationId": "SharePointAdmin.GetAdminListRootFolderProperties",
+      "Summary": "Get admin list root folder properties",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/web/lists/GetByTitle('DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_POLICYINSIGHTS_STORAGE')/items",
+      "OperationId": "SharePointAdmin.GetAggregatedPolicyInsightsItems",
+      "Summary": "Get aggregated policy insights items",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant/GetSPOSiteCreationSources",
+      "OperationId": "SharePointAdmin.GetSiteCreationSources",
+      "Summary": "Get site creation sources",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/_api/SPO.Tenant/ExportToCSV",
+      "OperationId": "SharePointAdmin.ExportSitesToCsv",
+      "Summary": "Start a CSV export",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant/GetBrandCenterConfiguration",
+      "OperationId": "SharePointAdmin.GetBrandCenterConfiguration",
+      "Summary": "Get Brand Center configuration",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/_api/SPO.Tenant/GetSiteAdministrators",
+      "OperationId": "SharePointAdmin.GetSiteAdministrators",
+      "Summary": "Get site administrators",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/_api/SPO.Tenant/GetFilteredSPListItems",
+      "OperationId": "SharePointAdmin.GetFilteredListItems",
+      "Summary": "Get filtered admin list items",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/GroupSiteManager/CanUserCreateGroup",
+      "OperationId": "SharePointAdmin.CanUserCreateGroup",
+      "Summary": "Check whether the user can create group-connected sites",
+      "Tags": [
+        "Groups"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant/GetSPOAllWebTemplates",
+      "OperationId": "SharePointAdmin.GetAllWebTemplates",
+      "Summary": "Get SharePoint web templates",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant/GetAdminListViews",
+      "OperationId": "SharePointAdmin.GetAdminListViews",
+      "Summary": "Get admin list views",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/_api/SPO.Tenant/RenderAdminListData",
+      "OperationId": "SharePointAdmin.RenderAdminListData",
+      "Summary": "Render admin list data",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SP_TenantSettings_Current",
+      "OperationId": "SharePointAdmin.GetCurrentTenantSettings",
+      "Summary": "Get current tenant settings summary",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/TenantAdminSettings/AutoQuotaEnabled",
+      "OperationId": "SharePointAdmin.GetAutoQuotaEnabled",
+      "Summary": "Get auto quota setting",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/web/lists/GetByTitle('DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_SITECOLLECTIONS')/RootFolder/Properties",
+      "OperationId": "SharePointAdmin.GetAggregatedSiteCollectionsRootProperties",
+      "Summary": "Get aggregated site-collections list root properties",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPOInternalUseOnly.Tenant/CheckTenantLicenses",
+      "OperationId": "SharePointAdmin.CheckTenantLicenses",
+      "Summary": "Check tenant licenses",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant",
+      "OperationId": "SharePointAdmin.GetTenantProperties",
+      "Summary": "Get selected SPO tenant properties",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/_api/SPO.Tenant/GetSitesByState",
+      "OperationId": "SharePointAdmin.GetSitesByState",
+      "Summary": "Get sites by state",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/Microsoft.SharePoint.Portal.SuiteNavData.GetSuiteNavData",
+      "OperationId": "SharePointAdmin.GetSuiteNavData",
+      "Summary": "Get suite navigation bootstrap data",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SP.Directory.DirectorySession/User(principalName='{principalName}')",
+      "OperationId": "SharePointAdmin.GetDirectoryUser",
+      "Summary": "Resolve a user through the SharePoint directory session",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/_api/SPO.Tenant/GetSPListItemCount",
+      "OperationId": "SharePointAdmin.GetAdminListItemCount",
+      "Summary": "Get admin list item count",
+      "Tags": [
+        "Sites"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/TenantInformationCollection",
+      "OperationId": "SharePointAdmin.GetTenantInformationCollection",
+      "Summary": "Get tenant information collection",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/StorageQuotas()",
+      "OperationId": "SharePointAdmin.GetStorageQuotas",
+      "Summary": "Get storage quotas",
+      "Tags": [
+        "Storage"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/MigrationCenterServices/Storage/TotalDevicesAdded",
+      "OperationId": "SharePointAdmin.GetMigrationTotalDevicesAdded",
+      "Summary": "Get total migration devices added",
+      "Tags": [
+        "Migration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/TenantAdminEndpoints",
+      "OperationId": "SharePointAdmin.GetTenantAdminEndpoints",
+      "Summary": "Get tenant admin endpoint map",
+      "Tags": [
+        "Tenant"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/_api/SPO.Tenant/GetHomeSitesDetails",
+      "OperationId": "SharePointAdmin.GetHomeSitesDetails",
+      "Summary": "Get home sites details",
+      "Tags": [
+        "Settings"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-sharepoint-admin"
+}

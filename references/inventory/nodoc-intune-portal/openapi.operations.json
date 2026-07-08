@@ -1,0 +1,52 @@
+{
+  "operationCount": 5,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/api/Experimentation/GetExtensionVariants",
+      "OperationId": "IntunePortal.Experimentation.GetExtensionVariants",
+      "Summary": "Get extension variants",
+      "Tags": [
+        "Experimentation"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/Settings/Update",
+      "OperationId": "IntunePortal.Settings.Update",
+      "Summary": "Update portal persistent settings",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/Settings/Select",
+      "OperationId": "IntunePortal.Settings.Select",
+      "Summary": "Read portal persistent settings",
+      "Tags": [
+        "Settings"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/Portal/GetLazyUserData",
+      "OperationId": "IntunePortal.Portal.GetLazyUserData",
+      "Summary": "Get deferred portal bootstrap data",
+      "Tags": [
+        "Bootstrap"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/api/Portal/GetEarlyUserData",
+      "OperationId": "IntunePortal.Portal.GetEarlyUserData",
+      "Summary": "Get early portal bootstrap data",
+      "Tags": [
+        "Bootstrap"
+      ]
+    }
+  ],
+  "category": "openapi",
+  "portal": "nodoc-intune-portal"
+}

@@ -1,0 +1,35 @@
+{
+  "version": "2.0",
+  "functionTimeout": "00:10:00",
+  "extensions": {
+    "durableTask": {
+      "hubName": "XdrLogRaiderHub",
+      "maxConcurrentActivityFunctions": 10,
+      "maxConcurrentOrchestratorFunctions": 5,
+      "storageProvider": {
+        "connectionStringName": "AzureWebJobsStorage"
+      }
+    }
+  },
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
+    "version": "[4.*, 5.0.0)"
+  },
+  "logging": {
+    "logLevel": {
+      "default": "Information",
+      "Function": "Information",
+      "Host.Aggregator": "Trace",
+      "Host.Results": "Information"
+    },
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "maxTelemetryItemsPerSecond": 5,
+        "excludedTypes": "Request;Exception"
+      }
+    }
+  },
+  "_telemetryGovernance_ws33_note": "WS3.3 (live evidence: 1.57M AppTraces/48h, requests=0). Host.Results=Information RESTORES per-invocation request telemetry (Warning suppressed it -> the requests=0 visibility gap). Adaptive sampling ON (5 items/sec steady-state) bounds the trace flood (Durable replays re-log host lines); Request+Exception are NEVER sampled (the health/DoD signals). The high-volume replay diagnostics (CTX-INPUT/RAW-INPUT dumps) are additionally gated behind XDRLR_DEBUG_DURABLE.",
+  "_managedDependency_iter15_note": "NO managedDependency block + NO bundled Az modules. iter#14 bundled Az.Accounts+Az.KeyVault but the Az.KeyVault.private assembly failed to bind on Legion (cascade-failing all module loads). iter#15 removed the Az dependency entirely: KV secrets, DCE token, and Storage token are all acquired via the managed-identity REST endpoint (IDENTITY_ENDPOINT). The function-app.zip contains ONLY src/ (~100KB · zero PSGallery modules)."
+}

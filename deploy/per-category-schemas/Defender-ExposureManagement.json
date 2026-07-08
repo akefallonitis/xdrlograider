@@ -1,0 +1,1829 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "ExposureManagement",
+    "TableName": "Defender_ExposureManagement_CL",
+    "StreamName": "Custom-Defender_ExposureManagement_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 92,
+    "TotalColumnCount": 101,
+    "OperationCount": 16,
+    "OperationKeys": [
+      "GetAppsSecureScoreMetric",
+      "GetDataSecureScoreMetric",
+      "GetIdentitySecureScoreMetric",
+      "GetPostureOversightInitiative",
+      "GetPostureOversightInitiativesSummarized",
+      "GetPostureOversightTenants",
+      "GetRecommendations",
+      "GetTvmRiskScore",
+      "ListAttackSurfaceAttackPaths",
+      "ListAttackSurfaceChokepoints",
+      "ListPostureOversightInitiatives",
+      "ListPostureOversightMetrics",
+      "ListPostureOversightRecommendations",
+      "ListPostureOversightUpdates",
+      "ListPostureSecurityEvents",
+      "MachineSecurityStates"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_ExposureManagement_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "category_x",
+            "type": "string"
+          },
+          {
+            "name": "dataHistoryJson",
+            "type": "string"
+          },
+          {
+            "name": "dataTypesJson",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "hasNoAssets",
+            "type": "boolean"
+          },
+          {
+            "name": "hasNoDataHistory",
+            "type": "boolean"
+          },
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "initiativeScoreImpact",
+            "type": "real"
+          },
+          {
+            "name": "latestCalculatedScoreImpact",
+            "type": "real"
+          },
+          {
+            "name": "latestCalculatedWeight",
+            "type": "real"
+          },
+          {
+            "name": "latestCalculationId",
+            "type": "string"
+          },
+          {
+            "name": "latestCount",
+            "type": "real"
+          },
+          {
+            "name": "latestScore",
+            "type": "real"
+          },
+          {
+            "name": "latestTotal",
+            "type": "real"
+          },
+          {
+            "name": "latestValue",
+            "type": "real"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "recommendationsJson",
+            "type": "string"
+          },
+          {
+            "name": "recommendationsV2Json",
+            "type": "string"
+          },
+          {
+            "name": "sentimentType",
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "name": "suggestionsJson",
+            "type": "string"
+          },
+          {
+            "name": "supportGetAssets",
+            "type": "boolean"
+          },
+          {
+            "name": "targetValue",
+            "type": "real"
+          },
+          {
+            "name": "version",
+            "type": "real"
+          },
+          {
+            "name": "weight",
+            "type": "real"
+          },
+          {
+            "name": "workloadsJson",
+            "type": "string"
+          },
+          {
+            "name": "activeMetricIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "isFavorite",
+            "type": "boolean"
+          },
+          {
+            "name": "metricIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "programsJson",
+            "type": "string"
+          },
+          {
+            "name": "recommendationIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "supportGetAggregatedAssets",
+            "type": "boolean"
+          },
+          {
+            "name": "tenantActiveMetricIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "threatAnalyticsDataJson",
+            "type": "string"
+          },
+          {
+            "name": "dataCenter",
+            "type": "string"
+          },
+          {
+            "name": "featureFlagsJson",
+            "type": "string"
+          },
+          {
+            "name": "geoRegion",
+            "type": "string"
+          },
+          {
+            "name": "immuneTvmDedicatedClusterUrl",
+            "type": "string"
+          },
+          {
+            "name": "isMdcEligible",
+            "type": "boolean"
+          },
+          {
+            "name": "lastUpdated",
+            "type": "datetime"
+          },
+          {
+            "name": "mpsDataCenter",
+            "type": "string"
+          },
+          {
+            "name": "mpsSliceId",
+            "type": "long"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "oversightSliceId",
+            "type": "long"
+          },
+          {
+            "name": "oversightTvmDedicatedClusterUrl",
+            "type": "string"
+          },
+          {
+            "name": "tenantId_x",
+            "type": "string"
+          },
+          {
+            "name": "totalCount",
+            "type": "string"
+          },
+          {
+            "name": "assetCount",
+            "type": "string"
+          },
+          {
+            "name": "assetCountHistoryJson",
+            "type": "string"
+          },
+          {
+            "name": "risk",
+            "type": "string"
+          },
+          {
+            "name": "riskHistoryJson",
+            "type": "string"
+          },
+          {
+            "name": "releaseNotesJson",
+            "type": "string"
+          },
+          {
+            "name": "updateId",
+            "type": "string"
+          },
+          {
+            "name": "actionUrl",
+            "type": "string"
+          },
+          {
+            "name": "compliantAssets",
+            "type": "string"
+          },
+          {
+            "name": "currentState",
+            "type": "string"
+          },
+          {
+            "name": "domainScoreImpact",
+            "type": "real"
+          },
+          {
+            "name": "implementationCost",
+            "type": "string"
+          },
+          {
+            "name": "implementationStatus",
+            "type": "string"
+          },
+          {
+            "name": "isDisabled",
+            "type": "boolean"
+          },
+          {
+            "name": "isStatic",
+            "type": "boolean"
+          },
+          {
+            "name": "lastStateChange",
+            "type": "datetime"
+          },
+          {
+            "name": "lastStateUpdate",
+            "type": "datetime"
+          },
+          {
+            "name": "lastSynced",
+            "type": "datetime"
+          },
+          {
+            "name": "learnMoreResourcesJson",
+            "type": "string"
+          },
+          {
+            "name": "maxScore",
+            "type": "real"
+          },
+          {
+            "name": "mssControlState",
+            "type": "string"
+          },
+          {
+            "name": "mssScoreImpact",
+            "type": "real"
+          },
+          {
+            "name": "mssTaggedControlsJson",
+            "type": "string"
+          },
+          {
+            "name": "notCompliantAssets",
+            "type": "string"
+          },
+          {
+            "name": "pointAchieved",
+            "type": "real"
+          },
+          {
+            "name": "product",
+            "type": "string"
+          },
+          {
+            "name": "relatedInitiativesIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "relatedMetricsIdsJson",
+            "type": "string"
+          },
+          {
+            "name": "remediation",
+            "type": "string"
+          },
+          {
+            "name": "remediationImpact",
+            "type": "string"
+          },
+          {
+            "name": "score",
+            "type": "real"
+          },
+          {
+            "name": "severity",
+            "type": "string"
+          },
+          {
+            "name": "showOnMainCatalog",
+            "type": "boolean"
+          },
+          {
+            "name": "source",
+            "type": "string"
+          },
+          {
+            "name": "title_x",
+            "type": "string"
+          },
+          {
+            "name": "totalAssets",
+            "type": "string"
+          },
+          {
+            "name": "userAffected",
+            "type": "string"
+          },
+          {
+            "name": "userImpact",
+            "type": "string"
+          },
+          {
+            "name": "recordsCount",
+            "type": "string"
+          },
+          {
+            "name": "createdTimestamp",
+            "type": "datetime"
+          },
+          {
+            "name": "eventTime",
+            "type": "datetime"
+          },
+          {
+            "name": "eventType",
+            "type": "string"
+          },
+          {
+            "name": "isGlobal",
+            "type": "boolean"
+          },
+          {
+            "name": "propertiesJson",
+            "type": "string"
+          },
+          {
+            "name": "asrConfigurationStatesJson",
+            "type": "string"
+          },
+          {
+            "name": "machineName",
+            "type": "string"
+          }
+        ],
+        "name": "Defender_ExposureManagement_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-exposuremanagement-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_ExposureManagement_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-ExposureManagement-dest"
+          ],
+          "outputStream": "Custom-Defender_ExposureManagement_CL",
+          "streams": [
+            "Custom-Defender_ExposureManagement_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-ExposureManagement-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_ExposureManagement_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "category_x",
+              "type": "string"
+            },
+            {
+              "name": "dataHistoryJson",
+              "type": "string"
+            },
+            {
+              "name": "dataTypesJson",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "name": "hasNoAssets",
+              "type": "boolean"
+            },
+            {
+              "name": "hasNoDataHistory",
+              "type": "boolean"
+            },
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "initiativeScoreImpact",
+              "type": "real"
+            },
+            {
+              "name": "latestCalculatedScoreImpact",
+              "type": "real"
+            },
+            {
+              "name": "latestCalculatedWeight",
+              "type": "real"
+            },
+            {
+              "name": "latestCalculationId",
+              "type": "string"
+            },
+            {
+              "name": "latestCount",
+              "type": "real"
+            },
+            {
+              "name": "latestScore",
+              "type": "real"
+            },
+            {
+              "name": "latestTotal",
+              "type": "real"
+            },
+            {
+              "name": "latestValue",
+              "type": "real"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "recommendationsJson",
+              "type": "string"
+            },
+            {
+              "name": "recommendationsV2Json",
+              "type": "string"
+            },
+            {
+              "name": "sentimentType",
+              "type": "string"
+            },
+            {
+              "name": "state",
+              "type": "string"
+            },
+            {
+              "name": "suggestionsJson",
+              "type": "string"
+            },
+            {
+              "name": "supportGetAssets",
+              "type": "boolean"
+            },
+            {
+              "name": "targetValue",
+              "type": "real"
+            },
+            {
+              "name": "version",
+              "type": "real"
+            },
+            {
+              "name": "weight",
+              "type": "real"
+            },
+            {
+              "name": "workloadsJson",
+              "type": "string"
+            },
+            {
+              "name": "activeMetricIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "isFavorite",
+              "type": "boolean"
+            },
+            {
+              "name": "metricIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "programsJson",
+              "type": "string"
+            },
+            {
+              "name": "recommendationIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "supportGetAggregatedAssets",
+              "type": "boolean"
+            },
+            {
+              "name": "tenantActiveMetricIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "threatAnalyticsDataJson",
+              "type": "string"
+            },
+            {
+              "name": "dataCenter",
+              "type": "string"
+            },
+            {
+              "name": "featureFlagsJson",
+              "type": "string"
+            },
+            {
+              "name": "geoRegion",
+              "type": "string"
+            },
+            {
+              "name": "immuneTvmDedicatedClusterUrl",
+              "type": "string"
+            },
+            {
+              "name": "isMdcEligible",
+              "type": "boolean"
+            },
+            {
+              "name": "lastUpdated",
+              "type": "datetime"
+            },
+            {
+              "name": "mpsDataCenter",
+              "type": "string"
+            },
+            {
+              "name": "mpsSliceId",
+              "type": "long"
+            },
+            {
+              "name": "orgId",
+              "type": "string"
+            },
+            {
+              "name": "oversightSliceId",
+              "type": "long"
+            },
+            {
+              "name": "oversightTvmDedicatedClusterUrl",
+              "type": "string"
+            },
+            {
+              "name": "tenantId_x",
+              "type": "string"
+            },
+            {
+              "name": "totalCount",
+              "type": "string"
+            },
+            {
+              "name": "assetCount",
+              "type": "string"
+            },
+            {
+              "name": "assetCountHistoryJson",
+              "type": "string"
+            },
+            {
+              "name": "risk",
+              "type": "string"
+            },
+            {
+              "name": "riskHistoryJson",
+              "type": "string"
+            },
+            {
+              "name": "releaseNotesJson",
+              "type": "string"
+            },
+            {
+              "name": "updateId",
+              "type": "string"
+            },
+            {
+              "name": "actionUrl",
+              "type": "string"
+            },
+            {
+              "name": "compliantAssets",
+              "type": "string"
+            },
+            {
+              "name": "currentState",
+              "type": "string"
+            },
+            {
+              "name": "domainScoreImpact",
+              "type": "real"
+            },
+            {
+              "name": "implementationCost",
+              "type": "string"
+            },
+            {
+              "name": "implementationStatus",
+              "type": "string"
+            },
+            {
+              "name": "isDisabled",
+              "type": "boolean"
+            },
+            {
+              "name": "isStatic",
+              "type": "boolean"
+            },
+            {
+              "name": "lastStateChange",
+              "type": "datetime"
+            },
+            {
+              "name": "lastStateUpdate",
+              "type": "datetime"
+            },
+            {
+              "name": "lastSynced",
+              "type": "datetime"
+            },
+            {
+              "name": "learnMoreResourcesJson",
+              "type": "string"
+            },
+            {
+              "name": "maxScore",
+              "type": "real"
+            },
+            {
+              "name": "mssControlState",
+              "type": "string"
+            },
+            {
+              "name": "mssScoreImpact",
+              "type": "real"
+            },
+            {
+              "name": "mssTaggedControlsJson",
+              "type": "string"
+            },
+            {
+              "name": "notCompliantAssets",
+              "type": "string"
+            },
+            {
+              "name": "pointAchieved",
+              "type": "real"
+            },
+            {
+              "name": "product",
+              "type": "string"
+            },
+            {
+              "name": "relatedInitiativesIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "relatedMetricsIdsJson",
+              "type": "string"
+            },
+            {
+              "name": "remediation",
+              "type": "string"
+            },
+            {
+              "name": "remediationImpact",
+              "type": "string"
+            },
+            {
+              "name": "score",
+              "type": "real"
+            },
+            {
+              "name": "severity",
+              "type": "string"
+            },
+            {
+              "name": "showOnMainCatalog",
+              "type": "boolean"
+            },
+            {
+              "name": "source",
+              "type": "string"
+            },
+            {
+              "name": "title_x",
+              "type": "string"
+            },
+            {
+              "name": "totalAssets",
+              "type": "string"
+            },
+            {
+              "name": "userAffected",
+              "type": "string"
+            },
+            {
+              "name": "userImpact",
+              "type": "string"
+            },
+            {
+              "name": "recordsCount",
+              "type": "string"
+            },
+            {
+              "name": "createdTimestamp",
+              "type": "datetime"
+            },
+            {
+              "name": "eventTime",
+              "type": "datetime"
+            },
+            {
+              "name": "eventType",
+              "type": "string"
+            },
+            {
+              "name": "isGlobal",
+              "type": "boolean"
+            },
+            {
+              "name": "propertiesJson",
+              "type": "string"
+            },
+            {
+              "name": "asrConfigurationStatesJson",
+              "type": "string"
+            },
+            {
+              "name": "machineName",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-exposuremanagement-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-exposuremanagement-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_ExposureManagement_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_ExposureManagement_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_ExposureManagement_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "category_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "dataHistoryJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "dataTypesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "description",
+                    "type": "string"
+                  },
+                  {
+                    "name": "hasNoAssets",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "hasNoDataHistory",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "initiativeScoreImpact",
+                    "type": "real"
+                  },
+                  {
+                    "name": "latestCalculatedScoreImpact",
+                    "type": "real"
+                  },
+                  {
+                    "name": "latestCalculatedWeight",
+                    "type": "real"
+                  },
+                  {
+                    "name": "latestCalculationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "latestCount",
+                    "type": "real"
+                  },
+                  {
+                    "name": "latestScore",
+                    "type": "real"
+                  },
+                  {
+                    "name": "latestTotal",
+                    "type": "real"
+                  },
+                  {
+                    "name": "latestValue",
+                    "type": "real"
+                  },
+                  {
+                    "name": "name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "recommendationsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "recommendationsV2Json",
+                    "type": "string"
+                  },
+                  {
+                    "name": "sentimentType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "state",
+                    "type": "string"
+                  },
+                  {
+                    "name": "suggestionsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "supportGetAssets",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "targetValue",
+                    "type": "real"
+                  },
+                  {
+                    "name": "version",
+                    "type": "real"
+                  },
+                  {
+                    "name": "weight",
+                    "type": "real"
+                  },
+                  {
+                    "name": "workloadsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "activeMetricIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isFavorite",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "metricIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "programsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "recommendationIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "supportGetAggregatedAssets",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "tenantActiveMetricIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "threatAnalyticsDataJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "dataCenter",
+                    "type": "string"
+                  },
+                  {
+                    "name": "featureFlagsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "geoRegion",
+                    "type": "string"
+                  },
+                  {
+                    "name": "immuneTvmDedicatedClusterUrl",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isMdcEligible",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "lastUpdated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "mpsDataCenter",
+                    "type": "string"
+                  },
+                  {
+                    "name": "mpsSliceId",
+                    "type": "long"
+                  },
+                  {
+                    "name": "orgId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "oversightSliceId",
+                    "type": "long"
+                  },
+                  {
+                    "name": "oversightTvmDedicatedClusterUrl",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantId_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "totalCount",
+                    "type": "string"
+                  },
+                  {
+                    "name": "assetCount",
+                    "type": "string"
+                  },
+                  {
+                    "name": "assetCountHistoryJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "risk",
+                    "type": "string"
+                  },
+                  {
+                    "name": "riskHistoryJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "releaseNotesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "updateId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "actionUrl",
+                    "type": "string"
+                  },
+                  {
+                    "name": "compliantAssets",
+                    "type": "string"
+                  },
+                  {
+                    "name": "currentState",
+                    "type": "string"
+                  },
+                  {
+                    "name": "domainScoreImpact",
+                    "type": "real"
+                  },
+                  {
+                    "name": "implementationCost",
+                    "type": "string"
+                  },
+                  {
+                    "name": "implementationStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isDisabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isStatic",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "lastStateChange",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "lastStateUpdate",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "lastSynced",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "learnMoreResourcesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "maxScore",
+                    "type": "real"
+                  },
+                  {
+                    "name": "mssControlState",
+                    "type": "string"
+                  },
+                  {
+                    "name": "mssScoreImpact",
+                    "type": "real"
+                  },
+                  {
+                    "name": "mssTaggedControlsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "notCompliantAssets",
+                    "type": "string"
+                  },
+                  {
+                    "name": "pointAchieved",
+                    "type": "real"
+                  },
+                  {
+                    "name": "product",
+                    "type": "string"
+                  },
+                  {
+                    "name": "relatedInitiativesIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "relatedMetricsIdsJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "remediation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "remediationImpact",
+                    "type": "string"
+                  },
+                  {
+                    "name": "score",
+                    "type": "real"
+                  },
+                  {
+                    "name": "severity",
+                    "type": "string"
+                  },
+                  {
+                    "name": "showOnMainCatalog",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "source",
+                    "type": "string"
+                  },
+                  {
+                    "name": "title_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "totalAssets",
+                    "type": "string"
+                  },
+                  {
+                    "name": "userAffected",
+                    "type": "string"
+                  },
+                  {
+                    "name": "userImpact",
+                    "type": "string"
+                  },
+                  {
+                    "name": "recordsCount",
+                    "type": "string"
+                  },
+                  {
+                    "name": "createdTimestamp",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "eventTime",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "eventType",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isGlobal",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "propertiesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "asrConfigurationStatesJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "machineName",
+                    "type": "string"
+                  }
+                ],
+                "name": "Defender_ExposureManagement_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-exposuremanagement-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_ExposureManagement_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-ExposureManagement-dest"
+                  ],
+                  "outputStream": "Custom-Defender_ExposureManagement_CL",
+                  "streams": [
+                    "Custom-Defender_ExposureManagement_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-ExposureManagement-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_ExposureManagement_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "category_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "dataHistoryJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "dataTypesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "description",
+                      "type": "string"
+                    },
+                    {
+                      "name": "hasNoAssets",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "hasNoDataHistory",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "initiativeScoreImpact",
+                      "type": "real"
+                    },
+                    {
+                      "name": "latestCalculatedScoreImpact",
+                      "type": "real"
+                    },
+                    {
+                      "name": "latestCalculatedWeight",
+                      "type": "real"
+                    },
+                    {
+                      "name": "latestCalculationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "latestCount",
+                      "type": "real"
+                    },
+                    {
+                      "name": "latestScore",
+                      "type": "real"
+                    },
+                    {
+                      "name": "latestTotal",
+                      "type": "real"
+                    },
+                    {
+                      "name": "latestValue",
+                      "type": "real"
+                    },
+                    {
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "name": "recommendationsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "recommendationsV2Json",
+                      "type": "string"
+                    },
+                    {
+                      "name": "sentimentType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "state",
+                      "type": "string"
+                    },
+                    {
+                      "name": "suggestionsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "supportGetAssets",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "targetValue",
+                      "type": "real"
+                    },
+                    {
+                      "name": "version",
+                      "type": "real"
+                    },
+                    {
+                      "name": "weight",
+                      "type": "real"
+                    },
+                    {
+                      "name": "workloadsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "activeMetricIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isFavorite",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "metricIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "programsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "recommendationIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "supportGetAggregatedAssets",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "tenantActiveMetricIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "threatAnalyticsDataJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "dataCenter",
+                      "type": "string"
+                    },
+                    {
+                      "name": "featureFlagsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "geoRegion",
+                      "type": "string"
+                    },
+                    {
+                      "name": "immuneTvmDedicatedClusterUrl",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isMdcEligible",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "lastUpdated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "mpsDataCenter",
+                      "type": "string"
+                    },
+                    {
+                      "name": "mpsSliceId",
+                      "type": "long"
+                    },
+                    {
+                      "name": "orgId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "oversightSliceId",
+                      "type": "long"
+                    },
+                    {
+                      "name": "oversightTvmDedicatedClusterUrl",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantId_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "totalCount",
+                      "type": "string"
+                    },
+                    {
+                      "name": "assetCount",
+                      "type": "string"
+                    },
+                    {
+                      "name": "assetCountHistoryJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "risk",
+                      "type": "string"
+                    },
+                    {
+                      "name": "riskHistoryJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "releaseNotesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "updateId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "actionUrl",
+                      "type": "string"
+                    },
+                    {
+                      "name": "compliantAssets",
+                      "type": "string"
+                    },
+                    {
+                      "name": "currentState",
+                      "type": "string"
+                    },
+                    {
+                      "name": "domainScoreImpact",
+                      "type": "real"
+                    },
+                    {
+                      "name": "implementationCost",
+                      "type": "string"
+                    },
+                    {
+                      "name": "implementationStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isDisabled",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "isStatic",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "lastStateChange",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "lastStateUpdate",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "lastSynced",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "learnMoreResourcesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "maxScore",
+                      "type": "real"
+                    },
+                    {
+                      "name": "mssControlState",
+                      "type": "string"
+                    },
+                    {
+                      "name": "mssScoreImpact",
+                      "type": "real"
+                    },
+                    {
+                      "name": "mssTaggedControlsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "notCompliantAssets",
+                      "type": "string"
+                    },
+                    {
+                      "name": "pointAchieved",
+                      "type": "real"
+                    },
+                    {
+                      "name": "product",
+                      "type": "string"
+                    },
+                    {
+                      "name": "relatedInitiativesIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "relatedMetricsIdsJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "remediation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "remediationImpact",
+                      "type": "string"
+                    },
+                    {
+                      "name": "score",
+                      "type": "real"
+                    },
+                    {
+                      "name": "severity",
+                      "type": "string"
+                    },
+                    {
+                      "name": "showOnMainCatalog",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "source",
+                      "type": "string"
+                    },
+                    {
+                      "name": "title_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "totalAssets",
+                      "type": "string"
+                    },
+                    {
+                      "name": "userAffected",
+                      "type": "string"
+                    },
+                    {
+                      "name": "userImpact",
+                      "type": "string"
+                    },
+                    {
+                      "name": "recordsCount",
+                      "type": "string"
+                    },
+                    {
+                      "name": "createdTimestamp",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "eventTime",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "eventType",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isGlobal",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "propertiesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "asrConfigurationStatesJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "machineName",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

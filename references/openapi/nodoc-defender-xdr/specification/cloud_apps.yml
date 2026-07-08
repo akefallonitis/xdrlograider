@@ -1,0 +1,2596 @@
+paths:
+  /mcas/api/v1/autocomplete/app-permission-names:
+    get:
+      summary: Autocomplete app permission names
+      description: >-
+        Retrieve autocomplete suggestions for app permission names. Discovered on OAuth Apps page.
+      operationId: CloudApps.AutocompleteAppPermissionNames
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/api/v1/autocomplete/app-permission-permissions:
+    get:
+      summary: Autocomplete app permission permissions
+      description: >-
+        Retrieve autocomplete suggestions for app permission permissions. Discovered on OAuth Apps page.
+      operationId: CloudApps.AutocompleteAppPermissionPermissions
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/services:
+    get:
+      summary: List cloud app services
+      description: >-
+        Retrieve a list of cloud app services. Discovered on Activity Log page.
+      operationId: CloudApps.ListServices
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsServiceCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/version:
+    get:
+      summary: Get Cloud Apps bundle versions
+      description: >-
+        Retrieve the current console, i18n, and supporting bundle versions used by
+        Defender for Cloud Apps.
+      operationId: CloudApps.GetVersion
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsVersionResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/tags:
+    get:
+      summary: List Cloud Apps tags
+      description: >-
+        Retrieve built-in and custom tags used by Defender for Cloud Apps for
+        discovery, entity labeling, and governance filters.
+      operationId: CloudApps.ListTags
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsTagListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/discovery/streams:
+    get:
+      summary: List discovery streams
+      description: >-
+        Retrieve the Cloud Discovery traffic streams available for reporting and
+        filtering. Discovered during the Defender for Cloud Apps full-nav
+        capture.
+      operationId: CloudApps.ListDiscoveryStreams
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/stories/get_stories_details:
+    get:
+      summary: Get story details
+      description: >-
+        Retrieve the details behind a Defender for Cloud Apps story card.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetStoryDetails
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/about/info:
+    get:
+      summary: Get Cloud Apps tenant info
+      description: >-
+        Retrieve the Defender for Cloud Apps locale, region, and tenant metadata from
+        the About experience.
+      operationId: CloudApps.GetAboutInfo
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAboutInfoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/about/server_url:
+    get:
+      summary: Get Cloud Apps portal URL
+      description: >-
+        Retrieve the tenant-specific Defender for Cloud Apps portal URL used by the
+        current environment.
+      operationId: CloudApps.GetAboutServerUrl
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uri
+                example: https://contoso.us2.portal.cloudappsecurity.com
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/settings:
+    get:
+      summary: Get Cloud Apps settings
+      description: >-
+        Retrieve tenant-wide Defender for Cloud Apps settings, including quarantine,
+        masking, integration, and session-control options.
+      operationId: CloudApps.GetSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/mail_settings/get:
+    get:
+      summary: Get Cloud Apps mail settings
+      description: >-
+        Retrieve the mail notification settings envelope used by Defender for Cloud Apps.
+      operationId: CloudApps.GetMailSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMailSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/subnet/metadata:
+    get:
+      summary: Get subnet metadata
+      description: >-
+        Retrieve filter and sorting metadata for the IP address ranges grid in Defender
+        for Cloud Apps.
+      operationId: CloudApps.GetSubnetMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMetadataCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/user_tags/metadata:
+    get:
+      summary: Get user tag metadata
+      description: >-
+        Retrieve filter and sorting metadata for the user groups grid in Defender for
+        Cloud Apps.
+      operationId: CloudApps.GetUserTagsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMetadataCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/tokens/metadata:
+    get:
+      summary: Get API token metadata
+      description: >-
+        Retrieve filter and sorting metadata for the API tokens grid in Defender for
+        Cloud Apps.
+      operationId: CloudApps.GetTokensMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMetadataCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/activities:
+    post:
+      summary: List activities
+      description: >-
+        Retrieve a list of cloud app activities with filtering. Discovered on Activity Log page.
+      operationId: CloudApps.ListActivities
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Activity list query envelope with filter, paging, and sort controls.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Activity collection returned for the supplied cloud app activity query.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/activities/count:
+    post:
+      summary: Get activities count
+      description: >-
+        Retrieve the count of cloud app activities matching filter criteria. Discovered on Activity Log page.
+      operationId: CloudApps.GetActivitiesCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Aggregate count of activities matching the supplied query.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/activities/get_activities_threat_scores:
+    post:
+      summary: Get activity threat scores
+      description: >-
+        Retrieve threat scores for cloud app activities. Discovered on Activity Log page.
+      operationId: CloudApps.GetActivitiesThreatScores
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/activities/metadata:
+    get:
+      summary: Get activities metadata
+      description: >-
+        Retrieve metadata for the activities endpoint including filter definitions. Discovered on Activity Log page.
+      operationId: CloudApps.GetActivitiesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_connectors:
+    post:
+      summary: List app connectors
+      description: >-
+        Retrieve a list of cloud app connectors. POST method is used for
+        listing with filter parameters. Discovered on Cloud Apps Dashboard page.
+      operationId: CloudApps.ListAppConnectors
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Connector list query envelope used when the dashboard applies filters, paging, or sorting.
+            example: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cloud app connector collection with API, proxy, and discovery connection state.
+              example:
+                data:
+                  - appId: 11161
+                    name: Microsoft 365
+                    _id: 63dd5f272b9cbba7bb29d703
+                    instanceName: null
+                    category: SAASDB_CATEGORY_COLLABORATION
+                    api:
+                      lastCheckTime: 1775347859564
+                      isConnected: true
+                      usersCount: 898
+                      creator: user@contoso.com
+                      isEnabled: true
+                      lastConnected: 1773702127907
+                      disabledBy: console
+                      isSSPMEnabled: true
+                    proxy:
+                      status: 0
+                      inDeployment: false
+                      isConnected: false
+                      isInProxyPolicy: null
+                      isSuspended: false
+                      isConfigured: false
+                      isConfiguredInAAD: false
+                      isSessionProxySupported: false
+                      isAppStatusEnabled: false
+                      isSessionProxyDisabled: true
+                      lastConnected: null
+                      proxySettings: null
+                      isOIDCBasedProtocol: true
+                    discovery:
+                      isConnected: false
+                    isOfficeApp: true
+                    isApiConnectable: true
+                    aadInfo: null
+                    lastUsed: null
+                    customData: {}
+                    isCustomApp: false
+                    securityConfiguration: {}
+                    appName: Microsoft 365
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    get:
+      summary: Get app connectors
+      description: >-
+        Retrieve app connectors information. Discovered on App Governance page.
+      operationId: CloudApps.GetAppConnectors
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cloud app connector collection with API, proxy, and discovery connection state.
+              example:
+                data:
+                  - appId: 11161
+                    name: Microsoft 365
+                    _id: 63dd5f272b9cbba7bb29d703
+                    instanceName: null
+                    category: SAASDB_CATEGORY_COLLABORATION
+                    api:
+                      isConnected: true
+                      usersCount: 898
+                      creator: user@contoso.com
+                      isEnabled: true
+                    proxy:
+                      isConnected: false
+                      isConfigured: false
+                      isSessionProxySupported: false
+                    discovery:
+                      isConnected: false
+                    isOfficeApp: true
+                    isApiConnectable: true
+                    appName: Microsoft 365
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_connectors/count:
+    post:
+      summary: Get app connectors count
+      description: >-
+        Retrieve the count of app connectors matching filter criteria. Discovered on OAuth Apps page.
+      operationId: CloudApps.GetAppConnectorsCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status:
+    get:
+      summary: Get apps count by status (dashboard)
+      description: >-
+        Retrieve the count of connected cloud apps grouped by their connection status for the dashboard.
+      operationId: CloudApps.GetAppsCountByStatus
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsStatusCountResponse
+              example:
+                data:
+                  protected: 2
+                  needAttention: 0
+                  notProtected: 2
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_connectors/dashboard/get_instance_count_by_app:
+    get:
+      summary: Get app connector instance count by app
+      description: >-
+        Retrieve the number of connected instances grouped by app for the app
+        connectors dashboard. Discovered during the Defender for Cloud Apps
+        full-nav capture.
+      operationId: CloudApps.GetAppConnectorInstanceCountByApp
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_connectors/dashboard/get_supported_apps_metadata:
+    get:
+      summary: Get supported app connector metadata
+      description: >-
+        Retrieve metadata for supported connected apps shown in the app
+        connectors dashboard. Discovered during the Defender for Cloud Apps
+        full-nav capture.
+      operationId: CloudApps.GetSupportedAppConnectorMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_connectors/last_activity:
+    get:
+      summary: Get app connectors last activity
+      description: >-
+        Retrieve last activity timestamps for app connectors. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.GetAppConnectorsLastActivity
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_connectors/metadata:
+    get:
+      summary: Get app connectors metadata
+      description: >-
+        Retrieve metadata for app connectors including filter definitions. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.GetAppConnectorsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_connectors/table_config_values:
+    get:
+      summary: Get app connectors table config values
+      description: >-
+        Retrieve table configuration values for the app connectors view. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.GetAppConnectorsTableConfigValues
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_permissions:
+    post:
+      summary: List app permissions
+      description: >-
+        Retrieve a list of OAuth app permissions with filtering. Discovered on OAuth Apps page.
+      operationId: CloudApps.ListAppPermissions
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_permissions/count:
+    post:
+      summary: Get app permissions count
+      description: >-
+        Retrieve the count of OAuth app permissions matching filter criteria. Discovered on OAuth Apps page.
+      operationId: CloudApps.GetAppPermissionsCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_permissions/metadata:
+    get:
+      summary: Get app permissions metadata
+      description: >-
+        Retrieve metadata for the app permissions endpoint including filter definitions. Discovered on OAuth Apps page.
+      operationId: CloudApps.GetAppPermissionsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/autocomplete/entities:
+    get:
+      summary: Autocomplete entities
+      description: >-
+        Retrieve autocomplete suggestions for entities. Discovered on OAuth Apps page.
+      operationId: CloudApps.AutocompleteEntities
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/autocomplete/discovery_app_tags:
+    get:
+      summary: Autocomplete discovery app tags
+      description: >-
+        Retrieve autocomplete suggestions for Cloud Discovery app tags.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.AutocompleteDiscoveryAppTags
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/autocomplete/scoped_profiles:
+    get:
+      summary: Autocomplete scoped profiles
+      description: >-
+        Retrieve autocomplete suggestions for scoped profiles used by Defender
+        for Cloud Apps. Discovered during the Defender for Cloud Apps full-nav
+        capture.
+      operationId: CloudApps.AutocompleteScopedProfiles
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/autocomplete/tags:
+    get:
+      summary: Autocomplete tags
+      description: >-
+        Retrieve autocomplete suggestions for tag records in Defender for Cloud Apps.
+      operationId: CloudApps.AutocompleteTags
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/autocomplete/tokens:
+    get:
+      summary: Autocomplete API tokens
+      description: >-
+        Retrieve autocomplete suggestions for token-like records. The observed tenant
+        returned an empty record set.
+      operationId: CloudApps.AutocompleteTokens
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/autocomplete/users:
+    get:
+      summary: Autocomplete users
+      description: >-
+        Retrieve autocomplete suggestions for users and user-like entities. The
+        observed tenant returned an empty record set.
+      operationId: CloudApps.AutocompleteUsers
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/connected_services/apps:
+    get:
+      summary: List connected service apps
+      description: >-
+        Retrieve a list of connected service applications. Discovered on Activity Log page.
+      operationId: CloudApps.ListConnectedServiceApps
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsConnectedServiceListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/connected_services/instances:
+    get:
+      summary: List connected service instances
+      description: >-
+        Retrieve a list of connected service instances. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.ListConnectedServiceInstances
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsConnectedServiceListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/categories:
+    get:
+      summary: List discovery categories
+      description: >-
+        Retrieve a list of cloud app discovery categories. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.ListDiscoveryCategories
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/constants:
+    get:
+      summary: Get discovery constants
+      description: >-
+        Retrieve the Cloud Discovery constants, lookup values, and static configuration
+        used by the applications and discovery policy experiences in the Defender portal.
+      operationId: CloudApps.GetDiscoveryConstants
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Cloud Discovery constants payload
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/app_catalog:
+    post:
+      summary: List discovery app catalog entries
+      description: >-
+        Retrieve a paged list of discovered apps from the Cloud Discovery app
+        catalog. Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.ListDiscoveryAppCatalog
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - app catalog query envelope
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/app_catalog/categories:
+    post:
+      summary: List discovery app catalog categories
+      description: >-
+        Retrieve category aggregates for the current Cloud Discovery app catalog
+        query. Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.ListDiscoveryAppCatalogCategories
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - app catalog category aggregation query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/app_catalog/count:
+    post:
+      summary: Get discovery app catalog count
+      description: >-
+        Retrieve the total number of discovered apps matching the current app
+        catalog query. Discovered during the Defender for Cloud Apps full-nav
+        capture.
+      operationId: CloudApps.GetDiscoveryAppCatalogCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - app catalog count query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/app_catalog/metadata:
+    get:
+      summary: Get discovery app catalog metadata
+      description: >-
+        Retrieve filter and column metadata for the Cloud Discovery app catalog.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetDiscoveryAppCatalogMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/discovered_apps/metadata:
+    get:
+      summary: Get discovered apps metadata
+      description: >-
+        Retrieve filter and column metadata for the Cloud Discovery discovered-apps
+        grid shown on the Defender Applications page. Observed live returning the
+        `discovered_apps` schema definition, including available filters and operators.
+      operationId: CloudApps.GetDiscoveredAppsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered apps metadata
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/discovered_apps/count:
+    post:
+      summary: Get discovered apps count
+      description: >-
+        Retrieve the total number of discovered apps that match the current Cloud
+        Discovery filter set. Observed live posting paging and stream parameters
+        and returning a `total` count envelope.
+      operationId: CloudApps.GetDiscoveredAppsCount
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - discovered apps count query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered apps count response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/discovered_apps:
+    post:
+      summary: List discovered apps
+      description: >-
+        Retrieve the paged Cloud Discovery discovered-apps inventory shown on the
+        Defender Applications page. Observed live posting paging, sorting, stream,
+        and timeframe settings and returning a `data` array with `hasNext`.
+      operationId: CloudApps.ListDiscoveredApps
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - discovered apps query envelope
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered apps page
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/discovered_apps/categories:
+    post:
+      summary: List discovered app categories
+      description: >-
+        Retrieve category aggregates for the current discovered-apps query. Observed
+        live posting sort and stream context and returning `id`/`total` category buckets.
+      operationId: CloudApps.ListDiscoveredAppCategories
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - discovered app category aggregation query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered app category buckets
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/category_stats:
+    get:
+      summary: Get discovery category stats
+      description: >-
+        Retrieve category-level Cloud Discovery metrics for the selected stream
+        and timeframe. Discovered during the Defender for Cloud Apps full-nav
+        capture.
+      operationId: CloudApps.GetDiscoveryCategoryStats
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/get_locations:
+    get:
+      summary: Search discovery locations
+      description: >-
+        Retrieve location suggestions for Cloud Discovery filtering. Discovered
+        during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.SearchDiscoveryLocations
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/service_locations:
+    get:
+      summary: Get discovery service locations
+      description: >-
+        Retrieve service-location metrics for the selected Cloud Discovery
+        stream. Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetDiscoveryServiceLocations
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/snapshot_reports:
+    post:
+      summary: List discovery snapshot reports
+      description: >-
+        Retrieve snapshot reports available for Cloud Discovery. Discovered
+        during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.ListDiscoverySnapshotReports
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - snapshot report query envelope
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/top_apps:
+    get:
+      summary: Get top discovered apps
+      description: >-
+        Retrieve the top discovered apps for the selected Cloud Discovery
+        stream and timeframe. Discovered during the Defender for Cloud Apps
+        full-nav capture.
+      operationId: CloudApps.GetDiscoveryTopApps
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/top_categories:
+    get:
+      summary: Get top discovery categories
+      description: >-
+        Retrieve the top Cloud Discovery categories for the selected stream and
+        timeframe. Discovered during the Defender for Cloud Apps full-nav
+        capture.
+      operationId: CloudApps.GetDiscoveryTopCategories
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/top_entities:
+    get:
+      summary: Get top discovered entities
+      description: >-
+        Retrieve the top entities for the selected Cloud Discovery stream,
+        entity type, and timeframe. Discovered during the Defender for Cloud
+        Apps full-nav capture.
+      operationId: CloudApps.GetDiscoveryTopEntities
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/entities/metadata:
+    get:
+      summary: Get entities metadata
+      description: >-
+        Retrieve metadata for the entities endpoint. Discovered on Activity Log page.
+      operationId: CloudApps.GetEntitiesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/get_feature_values:
+    post:
+      summary: Get feature values
+      description: >-
+        Resolve Cloud Apps feature flag values for a requested set of feature
+        names. Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetFeatureValues
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - feature flag lookup request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/lcnc_settings:
+    get:
+      summary: Get low-code no-code settings
+      description: >-
+        Retrieve low-code/no-code governance settings used by Defender for Cloud
+        Apps. Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetLcncSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/mtp_scopes_and_permissions:
+    get:
+      summary: Get MTP scopes and permissions
+      description: >-
+        Retrieve MTP scopes and permissions available to Defender for Cloud Apps
+        integrations. The observed tenant returned `403`, but the route is
+        confirmed from portal traffic.
+      operationId: CloudApps.GetMtpScopesAndPermissions
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/governance:
+    post:
+      summary: List governance actions
+      description: >-
+        Retrieve a list of governance actions with filtering. Discovered on Governance Log page.
+      operationId: CloudApps.ListGovernanceActions
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/governance/count:
+    post:
+      summary: Get governance actions count
+      description: >-
+        Retrieve the count of governance actions matching filter criteria. Discovered on Governance Log page.
+      operationId: CloudApps.GetGovernanceCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/governance/metadata:
+    get:
+      summary: Get governance metadata
+      description: >-
+        Retrieve metadata for the governance endpoint including filter definitions. Discovered on Governance Log page.
+      operationId: CloudApps.GetGovernanceMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/policies:
+    get:
+      summary: List policies
+      description: >-
+        Retrieve a list of Cloud Apps policies. Discovered on Governance Log page.
+      operationId: CloudApps.ListPolicies
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Query malware policies for file prevalence
+      description: >-
+        Retrieve the malware policy IDs the Defender file page uses before querying
+        Defender for Cloud Apps file prevalence by SHA-256.
+      operationId: Files.ListCloudAppsMalwarePolicies
+      tags: [CloudApps, Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: files.yml#/components/schemas/CloudAppsPolicyQueryRequest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: files.yml#/components/schemas/CloudAppsPoliciesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/policies/count:
+    post:
+      summary: Get policies count
+      description: >-
+        Retrieve the count of Cloud Apps policies matching filter criteria.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetPoliciesCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - policies count query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/policies/metadata:
+    get:
+      summary: Get policies metadata
+      description: >-
+        Retrieve filter and column metadata for the Cloud Apps policies grid.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetPoliciesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/files/count:
+    post:
+      summary: Get Cloud Apps file count
+      description: >-
+        Return the Defender for Cloud Apps prevalence count for a file hash under a
+        selected malware policy. This call is used by the Defender file page.
+      operationId: Files.GetCloudAppsFileCount
+      tags: [CloudApps, Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: files.yml#/components/schemas/CloudAppsFileCountRequest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: files.yml#/components/schemas/CloudAppsFileCountResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/policy_templates_inmemo:
+    post:
+      summary: List policy templates
+      description: >-
+        Retrieve built-in policy templates available in Defender for Cloud Apps.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.ListPolicyTemplates
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - policy template query envelope
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/policy_templates_inmemo/count:
+    post:
+      summary: Get policy templates count
+      description: >-
+        Retrieve the count of policy templates matching the current query.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetPolicyTemplatesCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - policy template count query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/policy_templates_inmemo/linked_policies_by_template_ids:
+    post:
+      summary: Get policies linked to templates
+      description: >-
+        Retrieve existing policies associated with the provided policy template
+        IDs. Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetLinkedPoliciesByTemplateIds
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - policy template ID batch query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/policy_templates_inmemo/metadata:
+    get:
+      summary: Get policy templates metadata
+      description: >-
+        Retrieve filter and column metadata for the policy templates grid.
+        Discovered during the Defender for Cloud Apps full-nav capture.
+      operationId: CloudApps.GetPolicyTemplatesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/standalone_entities/count:
+    post:
+      summary: Get standalone entities count
+      description: >-
+        Retrieve the count of standalone entities matching the current filter
+        criteria. Discovered during the Defender for Cloud Apps full-nav
+        capture.
+      operationId: CloudApps.GetStandaloneEntitiesCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - standalone entity count query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/standalone_entities/metadata:
+    get:
+      summary: Get standalone entities metadata
+      description: >-
+        Retrieve metadata for standalone entities. Discovered on Activity Log page.
+      operationId: CloudApps.GetStandaloneEntitiesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/translation/log-error:
+    post:
+      summary: Log translation error
+      description: >-
+        Log a translation error in the Cloud Apps service. Discovered on OAuth Apps page.
+      operationId: CloudApps.LogTranslationError
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/user_queries:
+    get:
+      summary: List user queries
+      description: >-
+        Retrieve saved user queries for Cloud Apps. Discovered on OAuth Apps page.
+      operationId: CloudApps.ListUserQueries
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsSavedQueryListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/manage_admins/is_external_user:
+    get:
+      summary: Check whether current user is external
+      description: >-
+        Retrieve a boolean indicating whether the current Defender for Cloud Apps
+        administrator is considered external to the tenant.
+      operationId: CloudApps.IsExternalAdminUser
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/data_encryption_settings/get:
+    get:
+      summary: Get data encryption settings
+      description: >-
+        Retrieve the tenant setting that controls Defender for Cloud Apps encryption
+        of data at rest.
+      operationId: CloudApps.GetDataEncryptionSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsDataEncryptionSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/user_config/get_should_display_sync_bar:
+    get:
+      summary: Get sync bar visibility
+      description: >-
+        Retrieve whether the Cloud Apps UI should show the synchronization status bar
+        for the current user.
+      operationId: CloudApps.GetShouldDisplaySyncBar
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/invited_group_admins:
+    get:
+      summary: List invited group admins
+      description: >-
+        Retrieve invited group-admin records for tenant administration. The observed
+        tenant returned an empty list.
+      operationId: CloudApps.ListInvitedGroupAdmins
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsInvitedGroupAdminListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/boot_constants:
+    get:
+      summary: Get boot constants
+      description: >-
+        Retrieve boot constants for the Cloud Apps service. Discovered on OAuth Apps page.
+      operationId: CloudApps.GetBootConstants
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/api/v1/agents/siem:
+    get:
+      summary: List SIEM agents
+      description: >-
+        Retrieve configured SIEM agents and pagination state for Defender for Cloud Apps.
+      operationId: CloudApps.ListSiemAgents
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SiemAgentsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/api/v1/agents/siem/count:
+    get:
+      summary: Count SIEM agents
+      description: >-
+        Retrieve the SIEM agent count summary for Defender for Cloud Apps.
+      operationId: CloudApps.CountSiemAgents
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SiemAgentCountResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/update_usage_info:
+    post:
+      summary: Update usage info
+      description: >-
+        Update Cloud Apps usage information. Discovered on App Governance page.
+      operationId: CloudApps.UpdateUsageInfo
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/getUserProfile:
+    get:
+      summary: Get App Governance user profile
+      description: >-
+        Retrieve the current user's App Governance profile. Discovered on App Governance page.
+      operationId: AppGovernance.GetUserProfile
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/appmetadata:
+    post:
+      summary: Get App Governance compliance metadata
+      description: >-
+        Retrieve the metadata envelope used to render the Defender portal's App Governance
+        compliance and non-human identity experiences, including column and label context
+        for the apps list.
+      operationId: AppGovernance.GetComplianceAppMetadata
+      tags: [AppGovernance]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - App Governance compliance metadata request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance compliance metadata response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/apps:
+    get:
+      summary: List App Governance compliance apps
+      description: >-
+        Retrieve the applications surfaced by the App Governance compliance and non-human
+        identity experience in the Defender portal.
+      operationId: AppGovernance.ListComplianceApps
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance compliance apps response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/getLabels:
+    get:
+      summary: List App Governance compliance labels
+      description: >-
+        Retrieve the labels used by the App Governance compliance and non-human identity
+        experiences to classify connected applications.
+      operationId: AppGovernance.ListComplianceLabels
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance compliance labels response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/policies:
+    get:
+      summary: List App Governance policies
+      description: >-
+        Retrieve the App Governance policy definitions displayed on the
+        compliance and non-human identities policy surfaces.
+      operationId: AppGovernance.ListPolicies
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance policies response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/Policy:
+    get:
+      summary: Get App Governance policy
+      description: >-
+        Retrieve a single App Governance policy record for the Defender portal's
+        policy detail experience.
+      operationId: AppGovernance.GetPolicy
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance policy response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/policyinsights:
+    get:
+      summary: Get App Governance policy insights
+      description: >-
+        Retrieve the insight cards and metrics shown for App Governance policies
+        in the Defender portal.
+      operationId: AppGovernance.GetPolicyInsights
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance policy insights
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/tenantdatatraffic:
+    get:
+      summary: Get App Governance tenant data traffic
+      description: >-
+        Retrieve tenant data-traffic metrics shown by the App Governance
+        compliance dashboards in the Defender portal.
+      operationId: AppGovernance.GetTenantDataTraffic
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - tenant data traffic
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/tenantLabelMetric:
+    get:
+      summary: Get App Governance tenant label metric
+      description: >-
+        Retrieve label distribution metrics used by the App Governance tenant
+        overview in the Defender portal.
+      operationId: AppGovernance.GetTenantLabelMetric
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - tenant label metric
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/tenantmetrics:
+    get:
+      summary: Get App Governance tenant metrics
+      description: >-
+        Retrieve tenant-level App Governance metrics shown on the Defender portal's
+        compliance overview.
+      operationId: AppGovernance.GetTenantMetrics
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - tenant metrics
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/activities_locations/by_user:
+    get:
+      summary: Get activity locations by user
+      description: >-
+        Retrieve the activity-location summary shown for a resolved Cloud Apps user entity.
+      operationId: CloudApps.GetActivityLocationsByUser
+      tags: [CloudApps]
+      parameters:
+        - name: username
+          in: query
+          required: true
+          description: The encoded Cloud Apps entity identifier for the selected user.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - activity locations by user response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/entities/resolve_entity:
+    post:
+      summary: Resolve Cloud Apps entity
+      description: >-
+        Resolve a Cloud Apps entity into the richer user profile used by the unified
+        Cloud Apps investigation pane, including available governance actions.
+      operationId: CloudApps.ResolveEntity
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                aad:
+                  type: string
+                  description: The Microsoft Entra object identifier for the user.
+                sid:
+                  type: string
+                  description: The Windows SID associated with the resolved user.
+                complexIdBase64:
+                  type: string
+                  description: The Cloud Apps encoded complex entity identifier.
+              required:
+                - aad
+                - sid
+                - complexIdBase64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  displayName:
+                    type: string
+                  email:
+                    type: string
+                  actions:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - governance action metadata
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

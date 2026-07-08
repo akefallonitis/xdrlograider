@@ -1,0 +1,34 @@
+{
+  "operationCount": 3,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/gws/CommsComplianceService/api/v1/Supervision/Policy",
+      "OperationId": "listCommunicationCompliancePolicies",
+      "Summary": "List supervision policies",
+      "Tags": [
+        "CommunicationCompliance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/gws/CommsComplianceService/api/v1/Supervision/ServiceSettings",
+      "OperationId": "getCommunicationComplianceServiceSettings",
+      "Summary": "Get supervision service settings",
+      "Tags": [
+        "CommunicationCompliance"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/gws/CommsComplianceService/api/v1/Supervision/Policy/GetSelectedSITsForSITIndicator",
+      "OperationId": "getSelectedSitsForSitIndicator",
+      "Summary": "Get selected SITs for SIT indicator",
+      "Tags": [
+        "CommunicationCompliance"
+      ]
+    }
+  ],
+  "category": "communication_compliance",
+  "portal": "nodoc-purview"
+}

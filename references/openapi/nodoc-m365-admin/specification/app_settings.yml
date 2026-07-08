@@ -1,0 +1,1314 @@
+paths:
+  /admin/api/settings/apps/bookings:
+    get:
+      summary: Get Bookings settings
+      description: >-
+        Retrieve the Microsoft Bookings application settings for the tenant.
+      operationId: AppSettings.GetBookings
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/BookingsSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Bookings settings
+      description: >-
+        Update the Microsoft Bookings application settings for the tenant.
+      operationId: AppSettings.SetBookings
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Bookings settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/mail:
+    get:
+      summary: Get Mail settings
+      description: >-
+        Retrieve the Mail application settings for the tenant.
+      operationId: AppSettings.GetMail
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Mail application settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Mail settings
+      description: >-
+        Update the Mail application settings for the tenant.
+      operationId: AppSettings.SetMail
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Mail settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/skypeteams:
+    get:
+      summary: Get Microsoft Teams settings
+      description: >-
+        Retrieve the Microsoft Teams application settings for the tenant.
+      operationId: AppSettings.GetTeams
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/TeamsSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Microsoft Teams settings
+      description: >-
+        Update the Microsoft Teams application settings for the tenant.
+      operationId: AppSettings.SetTeams
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Teams settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/IC3Config/Skype.Policy/configurations/TeamsClientConfiguration:
+    get:
+      summary: Get Teams client configuration policy
+      description: >-
+        Retrieve the tenant-scoped Teams client configuration policy used by the
+        admin center to hydrate Teams interoperability and content-sharing settings.
+      operationId: AppSettings.GetTeamsClientConfiguration
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Teams client configuration policy record. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/TeamsProvisioning/Customization:
+    get:
+      summary: Get Teams provisioning customization flag
+      description: >-
+        Retrieve the boolean customization flag used by the Teams provisioning
+        experience in the admin center.
+      operationId: AppSettings.GetTeamsProvisioningCustomization
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/calendarsharing:
+    get:
+      summary: Get Calendar Sharing settings
+      description: >-
+        Retrieve the Calendar Sharing application settings for the tenant.
+      operationId: AppSettings.GetCalendarSharing
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Calendar Sharing settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Calendar Sharing settings
+      description: >-
+        Update the Calendar Sharing application settings for the tenant.
+      operationId: AppSettings.SetCalendarSharing
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Calendar Sharing settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/learning:
+    get:
+      summary: Get Viva Learning settings
+      description: >-
+        Retrieve the Viva Learning application settings for the tenant.
+      operationId: AppSettings.GetLearning
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Viva Learning settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Viva Learning settings
+      description: >-
+        Update the Viva Learning application settings for the tenant.
+      operationId: AppSettings.SetLearning
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Learning settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/store:
+    get:
+      summary: Get Store settings
+      description: >-
+        Retrieve the Microsoft Store (user-owned apps and services) settings for the tenant.
+      operationId: AppSettings.GetStore
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Store settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Store settings
+      description: >-
+        Update the Microsoft Store settings for the tenant.
+      operationId: AppSettings.SetStore
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Store settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/cortana:
+    get:
+      summary: Get Cortana settings
+      description: >-
+        Retrieve the Cortana application settings for the tenant.
+      operationId: AppSettings.GetCortana
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cortana application settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Cortana settings
+      description: >-
+        Update the Cortana application settings for the tenant.
+      operationId: AppSettings.SetCortana
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Cortana settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/officeforms:
+    get:
+      summary: Get Microsoft Forms settings
+      description: >-
+        Retrieve the Microsoft Forms (Office Forms) application settings for the tenant.
+      operationId: AppSettings.GetOfficeForms
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Microsoft Forms settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Microsoft Forms settings
+      description: >-
+        Update the Microsoft Forms application settings for the tenant.
+      operationId: AppSettings.SetOfficeForms
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Forms settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/officeontheweb:
+    get:
+      summary: Get Office on the Web settings
+      description: >-
+        Retrieve the Office on the Web (Office Online) application settings for the tenant.
+        The live portal currently routes this blade through the `officeonline` endpoint family.
+      operationId: AppSettings.GetOfficeOnTheWeb
+      tags: [AppSettings]
+      x-nodoc-operation-context:
+        surface: Org settings > Services > Microsoft 365 on the web
+        workflows:
+          - Open Org settings, then Services, then Microsoft 365 on the web.
+        headerProfile: m365-admin-office-online
+        canonicalPath: /admin/api/settings/apps/officeonline
+        availability:
+          level: request-dependent
+          notes:
+            - The clickable blade routed to `#/Settings/Services/:/Settings/L1/OfficeOnline` during live capture.
+            - A direct `#/Settings/Services/:/Settings/L1/OfficeOnTheWeb` hash fell back to `#/homepage`, so treat this path as a documented alias until new live evidence appears.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - The checked-in M365Internals helper resolves this surface to /admin/api/settings/apps/officeonline.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Live navigation clicked the Microsoft 365 on the web row and the resulting request used `/admin/api/settings/apps/officeonline`.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Enabled
+                properties:
+                  Enabled:
+                    type: boolean
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Office on the Web settings
+      description: >-
+        Update the Office on the Web application settings for the tenant.
+      operationId: AppSettings.SetOfficeOnTheWeb
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Office on the Web settings payload.
+      x-nodoc-operation-context:
+        surface: Org settings > Services > Microsoft 365 on the web
+        workflows:
+          - Open Org settings, then Services, then Microsoft 365 on the web.
+        headerProfile: m365-admin-office-online
+        canonicalPath: /admin/api/settings/apps/officeonline
+        requestShapes:
+          - name: merged-office-on-the-web-settings
+            contentType: application/json
+            bodyKind: object-merge
+            notes: The portal posts the merged settings document for this surface.
+        availability:
+          level: request-dependent
+          notes:
+            - The clickable blade routed to `#/Settings/Services/:/Settings/L1/OfficeOnline` during live capture.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - The checked-in M365Internals helper resolves this surface to /admin/api/settings/apps/officeonline.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Live navigation confirmed the UI now resolves through the OfficeOnline route family.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/planner:
+    get:
+      summary: Get Planner settings
+      description: >-
+        Retrieve the Microsoft Planner application settings for the tenant.
+      operationId: AppSettings.GetPlanner
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Planner application settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Planner settings
+      description: >-
+        Update the Microsoft Planner application settings for the tenant.
+      operationId: AppSettings.SetPlanner
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Planner settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/sway:
+    get:
+      summary: Get Sway settings
+      description: >-
+        Retrieve the Microsoft Sway application settings for the tenant.
+      operationId: AppSettings.GetSway
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Sway application settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Sway settings
+      description: >-
+        Update the Microsoft Sway application settings for the tenant.
+      operationId: AppSettings.SetSway
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Sway settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/todo:
+    get:
+      summary: Get To Do settings
+      description: >-
+        Retrieve the Microsoft To Do application settings for the tenant.
+      operationId: AppSettings.GetToDo
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: To Do application settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set To Do settings
+      description: >-
+        Update the Microsoft To Do application settings for the tenant.
+      operationId: AppSettings.SetToDo
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged To Do settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/whiteboard:
+    get:
+      summary: Get Whiteboard settings
+      description: >-
+        Retrieve the Microsoft Whiteboard application settings for the tenant.
+      operationId: AppSettings.GetWhiteboard
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Whiteboard application settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Whiteboard settings
+      description: >-
+        Update the Microsoft Whiteboard application settings for the tenant.
+      operationId: AppSettings.SetWhiteboard
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Whiteboard settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/m365groups:
+    get:
+      summary: Get Microsoft 365 Groups settings
+      description: >-
+        Retrieve the Microsoft 365 Groups application settings for the tenant.
+      operationId: AppSettings.GetM365Groups
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Microsoft 365 Groups settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Microsoft 365 Groups settings
+      description: >-
+        Update the Microsoft 365 Groups application settings for the tenant.
+      operationId: AppSettings.SetM365Groups
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged M365 Groups settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/MicrosoftLoop:
+    get:
+      summary: Get Microsoft Loop settings
+      description: >-
+        Retrieve the Microsoft Loop application settings for the tenant.
+        Also accessible via the looppolicy endpoint alias.
+      operationId: AppSettings.GetMicrosoftLoop
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Microsoft Loop settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Microsoft Loop settings
+      description: >-
+        Update the Microsoft Loop application settings for the tenant.
+      operationId: AppSettings.SetMicrosoftLoop
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Loop settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/briefing:
+    get:
+      summary: Get Briefing email settings
+      description: >-
+        Retrieve the Briefing email application settings for the tenant.
+      operationId: AppSettings.GetBriefing
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Briefing email settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set Briefing email settings
+      description: >-
+        Update the Briefing email application settings for the tenant.
+      operationId: AppSettings.SetBriefing
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Briefing settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/userownedapps:
+    get:
+      summary: Get user-owned apps settings
+      description: >-
+        Retrieve the user-owned apps and services settings for the tenant.
+      operationId: AppSettings.GetUserOwnedApps
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User-owned apps settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set user-owned apps settings
+      description: >-
+        Update the user-owned apps and services settings for the tenant.
+      operationId: AppSettings.SetUserOwnedApps
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged user-owned apps settings payload.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/services/apps/cortana:
+    get:
+      summary: Get Cortana service settings
+      description: >-
+        Retrieve the Cortana service-level settings for the tenant (Org Settings > Cortana).
+      operationId: AppSettings.GetCortanaService
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/services/apps/m365lighthouse:
+    get:
+      summary: Get M365 Lighthouse settings
+      description: >-
+        Retrieve the Microsoft 365 Lighthouse service settings for the tenant (Org Settings > Microsoft 365 Lighthouse).
+      operationId: AppSettings.GetM365Lighthouse
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/services/apps/modernAuth:
+    get:
+      summary: Get modern authentication settings
+      description: >-
+        Retrieve the modern authentication service settings for the tenant (Org Settings > Modern Auth).
+      operationId: AppSettings.GetModernAuth
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/services/apps/myanalytics:
+    get:
+      summary: Get MyAnalytics settings
+      description: >-
+        Retrieve the MyAnalytics (Viva Insights personal) service settings for the tenant (Org Settings > MyAnalytics).
+      operationId: AppSettings.GetMyAnalytics
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/services/apps/planner:
+    get:
+      summary: Get Planner service settings
+      description: >-
+        Retrieve the Microsoft Planner service-level settings for the tenant (Org Settings > Microsoft Planner).
+      operationId: AppSettings.GetPlannerService
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/services/apps/todo:
+    get:
+      summary: Get To Do service settings
+      description: >-
+        Retrieve the Microsoft To Do service-level settings for the tenant (Org Settings > Microsoft To Do).
+      operationId: AppSettings.GetToDoService
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/services/apps/vivainsights:
+    get:
+      summary: Get Viva Insights settings
+      description: >-
+        Retrieve the Viva Insights service settings for the tenant (Org Settings > Viva Insights).
+      operationId: AppSettings.GetVivaInsights
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/EndUserCommunications:
+    get:
+      summary: Get end user communications settings
+      description: >-
+        Retrieve the Microsoft communication to users settings for the tenant (Org Settings > Microsoft communication to users).
+      operationId: AppSettings.GetEndUserCommunications
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/o365dataplan:
+    get:
+      summary: Get Microsoft Graph Data Connect settings
+      description: >-
+        Retrieve the Microsoft Graph Data Connect (O365 data plan) settings for the tenant (Org Settings > Microsoft Graph Data Connect).
+      operationId: AppSettings.GetO365DataPlan
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/officeonline:
+    get:
+      summary: Get M365 on the web settings
+      description: >-
+        Retrieve the Microsoft 365 on the web (Office Online) settings for the tenant (Org Settings > M365 on the web).
+      operationId: AppSettings.GetOfficeOnline
+      tags: [AppSettings]
+      x-nodoc-operation-context:
+        surface: Org settings > Services > Microsoft 365 on the web
+        workflows:
+          - Open Org settings, then Services, then Microsoft 365 on the web.
+        headerProfile: m365-admin-office-online
+        canonicalPath: /admin/api/settings/apps/officeonline
+        pathAliases:
+          - /admin/api/settings/apps/officeontheweb
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - The checked-in M365Internals helper maps both Microsoft365OnTheWeb and OfficeOnline to this path.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Live navigation clicked the Microsoft 365 on the web row and issued `GET /admin/api/settings/apps/officeonline` with the OfficeOnline blade context.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Enabled
+                properties:
+                  Enabled:
+                    type: boolean
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set M365 on the web settings
+      description: >-
+        Update the Microsoft 365 on the web (Office Online) settings for the tenant.
+      operationId: AppSettings.SetOfficeOnline
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Microsoft 365 on the web settings payload.
+      x-nodoc-operation-context:
+        surface: Org settings > Services > Microsoft 365 on the web
+        workflows:
+          - Open Org settings, then Services, then Microsoft 365 on the web.
+        headerProfile: m365-admin-office-online
+        canonicalPath: /admin/api/settings/apps/officeonline
+        pathAliases:
+          - /admin/api/settings/apps/officeontheweb
+        requestShapes:
+          - name: merged-office-online-settings
+            contentType: application/json
+            bodyKind: object-merge
+            notes: The portal posts the merged settings document for this surface.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - The checked-in M365Internals helper maps both Microsoft365OnTheWeb and OfficeOnline to this path.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - The live blade route was `#/Settings/Services/:/Settings/L1/OfficeOnline`, matching the canonical `officeonline` path.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/ocps/user/v1.0/web/policies:
+    get:
+      summary: Get Office on the web policy projection
+      description: >-
+        Retrieve the Office on the web policy projection keyed by the current policy
+        hash. The admin center homepage prefetch uses this to decide whether refreshed
+        web policy data is available.
+      operationId: AppSettings.GetOfficeOnTheWebPolicies
+      tags: [AppSettings]
+      parameters:
+        - name: PoliciesHash
+          in: query
+          required: true
+          description: The policy hash currently cached by the admin center client.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  policiesHash:
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/sitessharing:
+    get:
+      summary: Get sites sharing settings
+      description: >-
+        Retrieve the SharePoint sites sharing settings for the tenant (Org Settings > Sites).
+      operationId: AppSettings.GetSitesSharing
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/apps/usersoftware:
+    get:
+      summary: Get M365 installation options
+      description: >-
+        Retrieve the Microsoft 365 installation options (user software) settings for the tenant (Org Settings > M365 installation options).
+      operationId: AppSettings.GetUserSoftware
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

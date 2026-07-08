@@ -1,0 +1,553 @@
+{
+  "Summary": {
+    "Portal": "Defender",
+    "Category": "PortalServices",
+    "TableName": "Defender_PortalServices_CL",
+    "StreamName": "Custom-Defender_PortalServices_CL",
+    "EnvelopeColumnCount": 9,
+    "TypedColumnCount": 13,
+    "TotalColumnCount": 22,
+    "OperationCount": 4,
+    "OperationKeys": [
+      "CheckAppGovernanceOnboarding",
+      "GetAttackSimUserCoverage",
+      "GetMachineHealthStatus",
+      "GetOptimizeRecommendations"
+    ]
+  },
+  "TableResource": {
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "apiVersion": "2023-09-01",
+    "name": "[concat(parameters('workspaceName'), '/', 'Defender_PortalServices_CL')]",
+    "properties": {
+      "plan": "Analytics",
+      "schema": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Portal",
+            "type": "string"
+          },
+          {
+            "name": "Category",
+            "type": "string"
+          },
+          {
+            "name": "Subcategory",
+            "type": "string"
+          },
+          {
+            "name": "Operation",
+            "type": "string"
+          },
+          {
+            "name": "RecordId",
+            "type": "string"
+          },
+          {
+            "name": "ParentRecordId",
+            "type": "string"
+          },
+          {
+            "name": "CorrelationId",
+            "type": "string"
+          },
+          {
+            "name": "RawJson",
+            "type": "string"
+          },
+          {
+            "name": "forestName",
+            "type": "string"
+          },
+          {
+            "name": "hasConsentToExportData",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "isFirstLoginForCurrentUser",
+            "type": "string"
+          },
+          {
+            "name": "isRegionSupported",
+            "type": "string"
+          },
+          {
+            "name": "isTenantOnboarded",
+            "type": "string"
+          },
+          {
+            "name": "odatacontext_x",
+            "type": "string"
+          },
+          {
+            "name": "tenantId_x",
+            "type": "string"
+          },
+          {
+            "name": "toggleStatus",
+            "type": "string"
+          },
+          {
+            "name": "coveredCount",
+            "type": "string"
+          },
+          {
+            "name": "totalUserCount",
+            "type": "string"
+          },
+          {
+            "name": "date_x",
+            "type": "string"
+          },
+          {
+            "name": "valuesJson",
+            "type": "string"
+          }
+        ],
+        "name": "Defender_PortalServices_CL"
+      }
+    }
+  },
+  "DcrResource": {
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "apiVersion": "2023-03-11",
+    "name": "[concat(variables('namePrefix'), '-dcr-portalservices-', variables('suffix'))]",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_PortalServices_CL')]"
+    ],
+    "properties": {
+      "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+      "dataFlows": [
+        {
+          "destinations": [
+            "xdrlr-PortalServices-dest"
+          ],
+          "outputStream": "Custom-Defender_PortalServices_CL",
+          "streams": [
+            "Custom-Defender_PortalServices_CL"
+          ],
+          "transformKql": "source"
+        }
+      ],
+      "destinations": {
+        "logAnalytics": [
+          {
+            "name": "xdrlr-PortalServices-dest",
+            "workspaceResourceId": "[parameters('workspaceResourceId')]"
+          }
+        ]
+      },
+      "streamDeclarations": {
+        "Custom-Defender_PortalServices_CL": {
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "Portal",
+              "type": "string"
+            },
+            {
+              "name": "Category",
+              "type": "string"
+            },
+            {
+              "name": "Subcategory",
+              "type": "string"
+            },
+            {
+              "name": "Operation",
+              "type": "string"
+            },
+            {
+              "name": "RecordId",
+              "type": "string"
+            },
+            {
+              "name": "ParentRecordId",
+              "type": "string"
+            },
+            {
+              "name": "CorrelationId",
+              "type": "string"
+            },
+            {
+              "name": "RawJson",
+              "type": "string"
+            },
+            {
+              "name": "forestName",
+              "type": "string"
+            },
+            {
+              "name": "hasConsentToExportData",
+              "type": "string"
+            },
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "isFirstLoginForCurrentUser",
+              "type": "string"
+            },
+            {
+              "name": "isRegionSupported",
+              "type": "string"
+            },
+            {
+              "name": "isTenantOnboarded",
+              "type": "string"
+            },
+            {
+              "name": "odatacontext_x",
+              "type": "string"
+            },
+            {
+              "name": "tenantId_x",
+              "type": "string"
+            },
+            {
+              "name": "toggleStatus",
+              "type": "string"
+            },
+            {
+              "name": "coveredCount",
+              "type": "string"
+            },
+            {
+              "name": "totalUserCount",
+              "type": "string"
+            },
+            {
+              "name": "date_x",
+              "type": "string"
+            },
+            {
+              "name": "valuesJson",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "NestedDeployment": {
+    "type": "Microsoft.Resources/deployments",
+    "apiVersion": "2024-03-01",
+    "name": "[concat('xdrlr-nested-portalservices-', variables('suffix'))]",
+    "subscriptionId": "[variables('workspaceSubscriptionId')]",
+    "resourceGroup": "[variables('workspaceResourceGroup')]",
+    "dependsOn": [
+      "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]"
+    ],
+    "properties": {
+      "expressionEvaluationOptions": {
+        "scope": "inner"
+      },
+      "mode": "Incremental",
+      "parameters": {
+        "dceName": {
+          "value": "[variables('dceName')]"
+        },
+        "location": {
+          "value": "[parameters('location')]"
+        },
+        "namePrefix": {
+          "value": "[variables('namePrefix')]"
+        },
+        "suffix": {
+          "value": "[variables('suffix')]"
+        },
+        "workspaceName": {
+          "value": "[variables('workspaceName')]"
+        },
+        "workspaceResourceId": {
+          "value": "[parameters('workspaceResourceId')]"
+        }
+      },
+      "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "outputs": {
+          "dcrImmutableId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat(parameters('namePrefix'), '-dcr-portalservices-', parameters('suffix'))), '2023-03-11').immutableId]"
+          },
+          "streamName": {
+            "type": "string",
+            "value": "'Custom-Defender_PortalServices_CL'"
+          },
+          "tableName": {
+            "type": "string",
+            "value": "'Defender_PortalServices_CL'"
+          }
+        },
+        "parameters": {
+          "dceName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namePrefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "workspaceResourceId": {
+            "type": "string"
+          }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.OperationalInsights/workspaces/tables",
+            "apiVersion": "2023-09-01",
+            "name": "[concat(parameters('workspaceName'), '/', 'Defender_PortalServices_CL')]",
+            "properties": {
+              "plan": "Analytics",
+              "schema": {
+                "columns": [
+                  {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "Portal",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Category",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Subcategory",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Operation",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "ParentRecordId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "CorrelationId",
+                    "type": "string"
+                  },
+                  {
+                    "name": "RawJson",
+                    "type": "string"
+                  },
+                  {
+                    "name": "forestName",
+                    "type": "string"
+                  },
+                  {
+                    "name": "hasConsentToExportData",
+                    "type": "string"
+                  },
+                  {
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isFirstLoginForCurrentUser",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isRegionSupported",
+                    "type": "string"
+                  },
+                  {
+                    "name": "isTenantOnboarded",
+                    "type": "string"
+                  },
+                  {
+                    "name": "odatacontext_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "tenantId_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "toggleStatus",
+                    "type": "string"
+                  },
+                  {
+                    "name": "coveredCount",
+                    "type": "string"
+                  },
+                  {
+                    "name": "totalUserCount",
+                    "type": "string"
+                  },
+                  {
+                    "name": "date_x",
+                    "type": "string"
+                  },
+                  {
+                    "name": "valuesJson",
+                    "type": "string"
+                  }
+                ],
+                "name": "Defender_PortalServices_CL"
+              }
+            }
+          },
+          {
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2023-03-11",
+            "name": "[concat(variables('namePrefix'), '-dcr-portalservices-', variables('suffix'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspaceName'), 'Defender_PortalServices_CL')]"
+            ],
+            "properties": {
+              "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', variables('dceName'))]",
+              "dataFlows": [
+                {
+                  "destinations": [
+                    "xdrlr-PortalServices-dest"
+                  ],
+                  "outputStream": "Custom-Defender_PortalServices_CL",
+                  "streams": [
+                    "Custom-Defender_PortalServices_CL"
+                  ],
+                  "transformKql": "source"
+                }
+              ],
+              "destinations": {
+                "logAnalytics": [
+                  {
+                    "name": "xdrlr-PortalServices-dest",
+                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                  }
+                ]
+              },
+              "streamDeclarations": {
+                "Custom-Defender_PortalServices_CL": {
+                  "columns": [
+                    {
+                      "name": "TimeGenerated",
+                      "type": "datetime"
+                    },
+                    {
+                      "name": "Portal",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Category",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Subcategory",
+                      "type": "string"
+                    },
+                    {
+                      "name": "Operation",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "ParentRecordId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "CorrelationId",
+                      "type": "string"
+                    },
+                    {
+                      "name": "RawJson",
+                      "type": "string"
+                    },
+                    {
+                      "name": "forestName",
+                      "type": "string"
+                    },
+                    {
+                      "name": "hasConsentToExportData",
+                      "type": "string"
+                    },
+                    {
+                      "name": "id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isFirstLoginForCurrentUser",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isRegionSupported",
+                      "type": "string"
+                    },
+                    {
+                      "name": "isTenantOnboarded",
+                      "type": "string"
+                    },
+                    {
+                      "name": "odatacontext_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "tenantId_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "toggleStatus",
+                      "type": "string"
+                    },
+                    {
+                      "name": "coveredCount",
+                      "type": "string"
+                    },
+                    {
+                      "name": "totalUserCount",
+                      "type": "string"
+                    },
+                    {
+                      "name": "date_x",
+                      "type": "string"
+                    },
+                    {
+                      "name": "valuesJson",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "variables": {
+          "dceName": "[parameters('dceName')]",
+          "namePrefix": "[parameters('namePrefix')]",
+          "suffix": "[parameters('suffix')]"
+        }
+      }
+    }
+  }
+}

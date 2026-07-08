@@ -1,0 +1,511 @@
+{
+  "operationCount": 56,
+  "operations": [
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/inventory/schema",
+      "OperationId": "Configuration.GetCloudAssetInventorySchema",
+      "Summary": "Get cloud asset inventory schema",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/papin/api/cloud/public/internal/indicators/filterValues",
+      "OperationId": "Configuration.GetInternalIndicatorFilterValues",
+      "Summary": "Get internal indicator filter values",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/ndr/rulesengine/rules",
+      "OperationId": "Configuration.GetAssetRules",
+      "Summary": "Get asset rule management rules",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/ti/indicators",
+      "OperationId": "Configuration.ListThreatIndicators",
+      "Summary": "List custom threat indicators",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/webcategory/policies",
+      "OperationId": "Configuration.ListWebCategoryPolicies",
+      "Summary": "List web content filtering policies",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/sccManagement/mgmt/ServicesUrls",
+      "OperationId": "Configuration.GetServiceUrls",
+      "Summary": "Get Defender service URLs",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/papin/api/cloud/public/internal/indicators/count",
+      "OperationId": "Configuration.GetInternalIndicatorCount",
+      "Summary": "Get internal indicator count",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/inventory/metrics",
+      "OperationId": "Configuration.QueryCloudAssetInventoryMetrics",
+      "Summary": "Query cloud asset inventory metrics",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mdc/management/optin",
+      "OperationId": "Configuration.GetMdcPreviewFeatures",
+      "Summary": "Get Defender for Cloud preview features",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/senseauth/allownonauthsense",
+      "OperationId": "Configuration.GetAllowNonAuthSense",
+      "Summary": "Get non-auth sense allowed",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/preview_features/get",
+      "OperationId": "Configuration.GetMcasPreviewFeatures",
+      "Summary": "Get Cloud Apps preview features",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/wdatpApi/dataexportsettings",
+      "OperationId": "Configuration.GetDataExportSettings",
+      "Summary": "Get raw data export settings",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/xspmatlas/assetrules",
+      "OperationId": "Configuration.ListCriticalAssetClassifications",
+      "Summary": "List critical asset classifications",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/xspmatlas/assetrules",
+      "OperationId": "Configuration.CreateCriticalAssetClassification",
+      "Summary": "Create critical asset classification",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "PUT",
+      "Path": "/mtp/xspmatlas/assetrules",
+      "OperationId": "Configuration.UpdateCriticalAssetClassification",
+      "Summary": "Update critical asset classification",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "DELETE",
+      "Path": "/mtp/xspmatlas/assetrules",
+      "OperationId": "Configuration.DeleteCriticalAssetClassification",
+      "Summary": "Delete critical asset classification",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mcas/cas/api/v1/preview_features/update",
+      "OperationId": "Configuration.SetMcasPreviewFeatures",
+      "Summary": "Set Cloud Apps preview features",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions/{RoleDefinitionId}/roleAssignments",
+      "OperationId": "Configuration.ListUnifiedRbacRoleAssignments",
+      "Summary": "List unified RBAC role assignments",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/apps/all",
+      "OperationId": "Configuration.ListConnectedApps",
+      "Summary": "List connected apps",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/webThreatProtection/webThreats/reports/webThreatSummary",
+      "OperationId": "Configuration.GetWebThreatSummary",
+      "Summary": "Get web threat summary",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/urbacConfiguration/gw/unifiedrbac/configuration/permissions",
+      "OperationId": "Configuration.GetUnifiedRbacPermissions",
+      "Summary": "Get unified RBAC permissions",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/alertsApiService/workloads/disabled",
+      "OperationId": "Configuration.GetDisabledAlertServices",
+      "Summary": "Get disabled alert service settings",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/xspmatlas/assetrules/querybuilder/assets/{encodedRuleName}",
+      "OperationId": "Configuration.QueryCriticalAssetClassification",
+      "Summary": "Query critical asset classification",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/unifiedConnectors/public/connectors",
+      "OperationId": "Configuration.ListUnifiedConnectors",
+      "Summary": "List unified connectors",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/CustomerSubmissionService/file/enterprise/query/{TenantId}",
+      "OperationId": "Configuration.ListFileSubmissions",
+      "Summary": "List file submissions",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/licenses/mgmt/aadlicenses/sums",
+      "OperationId": "Configuration.GetLicenseSums",
+      "Summary": "Get license sums",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/xspmatlas/assetrules/querybuilder/schema",
+      "OperationId": "Configuration.GetCriticalAssetClassificationSchema",
+      "Summary": "Get critical asset classification schema",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/urbacConfiguration/gw/unifiedrbac/configuration/workspaces",
+      "OperationId": "Configuration.ListUnifiedRbacWorkspaces",
+      "Summary": "List unified RBAC workspaces",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/disrupt/api/exclusions/Identity/global-exclusion",
+      "OperationId": "Configuration.GetGlobalIdentityDisruptionExclusion",
+      "Summary": "Get global identity disruption exclusion",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/suppressionRulesService/suppressionRules",
+      "OperationId": "Configuration.ListSuppressionRules",
+      "Summary": "List suppression rules",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/inventory/assets",
+      "OperationId": "Configuration.QueryCloudAssetInventory",
+      "Summary": "Query cloud asset inventory",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/suppressionRulesService/suppressionRules/builtInRulesHash",
+      "OperationId": "Configuration.GetBuiltInSuppressionRulesHash",
+      "Summary": "Get built-in suppression rules hash",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/autoIr/ui/properties",
+      "OperationId": "Configuration.GetAutoIrProperties",
+      "Summary": "Get automated investigation properties",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/sentinelOnboarding/sentinel/workspaces/isOnboarded",
+      "OperationId": "Configuration.GetSentinelOnboardedState",
+      "Summary": "Get Sentinel onboarding state",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/overview/overviewMetrics",
+      "OperationId": "Configuration.GetCloudOverviewMetrics",
+      "Summary": "Get cloud overview metrics",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mcas/cas/api/v1/settings",
+      "OperationId": "Configuration.GetCloudAppsSettings",
+      "Summary": "Get Cloud Apps general settings",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/inventory/ai-agents-v3/agents-discovered-overtime",
+      "OperationId": "Configuration.GetAiAgentsDiscoveredOverTime",
+      "Summary": "Get AI agents discovered over time",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/unifiedConnectors/public/connectors/checkrequirements",
+      "OperationId": "Configuration.CheckUnifiedConnectorRequirements",
+      "Summary": "Check unified connector requirements",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/rbacManagementApi/rbac/user_roles",
+      "OperationId": "Configuration.GetCurrentUserRbacRoles",
+      "Summary": "Get current user RBAC roles",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories",
+      "OperationId": "Configuration.GetTopWebContentFilteringCategories",
+      "Summary": "Get top web content filtering categories",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/sentinelOnboarding/sentinel/workspaces/eligibleForOnboarding",
+      "OperationId": "Configuration.ListEligibleSentinelWorkspaces",
+      "Summary": "List eligible Sentinel workspaces",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/responseApiPortal/onboarding/intune/status",
+      "OperationId": "Configuration.GetIntuneOnboardingStatus",
+      "Summary": "Get Intune onboarding status",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/disrupt/api/exclusions/exclude-all",
+      "OperationId": "Configuration.GetAllDisruptionExclusions",
+      "Summary": "Get all disruption exclusions",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/papin/api/cloud/public/internal/IncidentNotificationSettingsV2",
+      "OperationId": "Configuration.ListIncidentNotificationSettings",
+      "Summary": "List incident notification settings",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/settings/SavePreviewExperienceSetting",
+      "OperationId": "Configuration.SetPreviewFeatures",
+      "Summary": "Set preview features",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/settings/GetUserSettings",
+      "OperationId": "Configuration.GetUserSettings",
+      "Summary": "Get Defender XDR user settings",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/licenses/mgmt/aadlicenses/mdc/status",
+      "OperationId": "Configuration.GetMdcLicenseStatus",
+      "Summary": "Get MDC license status",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/urbacConfiguration/gw/unifiedrbac/configuration/tenantinfo",
+      "OperationId": "Configuration.GetUnifiedRbacWorkload",
+      "Summary": "Get unified RBAC workload configuration",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/rbacManagementApi/rbac/aad_groups",
+      "OperationId": "Configuration.ListRbacAadGroups",
+      "Summary": "List RBAC Entra groups",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions",
+      "OperationId": "Configuration.ListUnifiedRbacRoleDefinitions",
+      "Summary": "List unified RBAC role definitions",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/inventory/ai-agents-v3/agents-current-count-by-platform-metrics",
+      "OperationId": "Configuration.GetAiAgentCountsByPlatform",
+      "Summary": "Get AI agent counts by platform",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/sccManagement/mgmt/TenantContext",
+      "OperationId": "Configuration.GetTenantContext",
+      "Summary": "Get tenant context",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/disrupt/api/exclusions/Identity",
+      "OperationId": "Configuration.GetIdentityDisruptionExclusions",
+      "Summary": "Get identity disruption exclusions",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mdc/views/inventory/ai-agents-v3/agents-requiring-attention-overtime-metrics",
+      "OperationId": "Configuration.GetAiAgentsRequiringAttentionOverTime",
+      "Summary": "Get AI agents requiring attention over time",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/wdatpInternalApi/compliance/alertSharing/status",
+      "OperationId": "Configuration.GetAlertSharingStatus",
+      "Summary": "Get alert sharing compliance status",
+      "Tags": [
+        "Configuration"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/radius/api/radius/serviceaccounts/classificationrule/getall",
+      "OperationId": "Configuration.GetServiceAccountClassifications",
+      "Summary": "Get service account classification rules",
+      "Tags": [
+        "Configuration"
+      ]
+    }
+  ],
+  "category": "configuration",
+  "portal": "nodoc-defender-xdr"
+}

@@ -1,0 +1,187 @@
+{
+  "operationCount": 20,
+  "operations": [
+    {
+      "Method": "GET",
+      "Path": "/mtp/outbreaks/outbreaks/v2/{OutbreakId}/devices",
+      "OperationId": "ThreatAnalytics.GetOutbreakDevices",
+      "Summary": "Get outbreak devices",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/topthreats",
+      "OperationId": "ThreatAnalytics.GetTopThreats",
+      "Summary": "Get top threats",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/incidentsAlertsSummary",
+      "OperationId": "ThreatAnalytics.GetOutbreakIncidentsAlertsSummary",
+      "Summary": "Get outbreak incidents and alerts summary",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/count",
+      "OperationId": "ThreatAnalytics.CountOutbreakIndicators",
+      "Summary": "Count outbreak indicators",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/changeCount",
+      "OperationId": "ThreatAnalytics.GetOutbreakChangeCount",
+      "Summary": "Get outbreak change count",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalyticsAPI/outbreaks",
+      "OperationId": "ThreatAnalytics.ListOutbreaks",
+      "Summary": "List threat analytics outbreaks",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsSummary",
+      "OperationId": "ThreatAnalytics.GetOutbreakImpactedAssetsSummary",
+      "Summary": "Get outbreak impacted assets summary",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsOvertime",
+      "OperationId": "ThreatAnalytics.GetOutbreakImpactedAssetsOverTime",
+      "Summary": "Get outbreak impacted assets over time",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/{OutbreakId}/alertsOvertimeSummary",
+      "OperationId": "ThreatAnalytics.GetOutbreakAlertsOverTimeSummary",
+      "Summary": "Get outbreak alerts over time summary",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/{OutbreakId}/patchdata",
+      "OperationId": "ThreatAnalytics.GetOutbreakPatchData",
+      "Summary": "Get outbreak patch data",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/userExposure",
+      "OperationId": "ThreatAnalytics.GetOutbreakUserExposure",
+      "Summary": "Get outbreak user exposure",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/{OutbreakId}/overview",
+      "OperationId": "ThreatAnalytics.GetOutbreakOverview",
+      "Summary": "Get outbreak overview",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "POST",
+      "Path": "/mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/query",
+      "OperationId": "ThreatAnalytics.QueryOutbreakIndicators",
+      "Summary": "Query outbreak indicators",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalyticsIndicators/stix/oneti/reputation",
+      "OperationId": "ThreatAnalytics.GetIndicatorReputation",
+      "Summary": "Get indicator reputation",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "PATCH",
+      "Path": "/mtp/threatAnalytics/outbreaks/userState",
+      "OperationId": "ThreatAnalytics.UpdateOutbreakUserState",
+      "Summary": "Update outbreak user state",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/outbreaksEnrichedDataMtp",
+      "OperationId": "ThreatAnalytics.GetEnrichedOutbreakData",
+      "Summary": "Get enriched outbreak data",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/{OutbreakId}/relatedIntelligence",
+      "OperationId": "ThreatAnalytics.GetOutbreakRelatedIntelligence",
+      "Summary": "Get outbreak related intelligence",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalyticsIndicators/stix/oneti/reputation/URL",
+      "OperationId": "ThreatAnalytics.GetUrlReputation",
+      "Summary": "Get URL reputation",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks",
+      "OperationId": "ThreatAnalytics.ListPortalOutbreaks",
+      "Summary": "List threat analytics report cards",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    },
+    {
+      "Method": "GET",
+      "Path": "/mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/tvmDetails",
+      "OperationId": "ThreatAnalytics.GetOutbreakTvmDetails",
+      "Summary": "Get outbreak TVM details",
+      "Tags": [
+        "Threat Analytics"
+      ]
+    }
+  ],
+  "category": "threat_analytics",
+  "portal": "nodoc-defender-xdr"
+}
