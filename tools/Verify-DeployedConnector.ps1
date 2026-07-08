@@ -86,6 +86,23 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# ── ROBUSTNESS (2026-07-08) · never crash opaquely. An UNHANDLED terminating error in a gate — e.g. a projection /
+#    JSON serialization on a large deeply-nested category like Configuration (the ListUnifiedConnectors class, 11 nested
+#    *Json cols) — means the verify COULD NOT COMPLETE for this category. That is INCONCLUSIVE (exit 2), NOT a data
+#    pass/fail, and it MUST be diagnosable (print the exception + exact file:line) and NON-FATAL to the caller
+#    (Run-PostDeployVerify -KeepGoing then records it and continues the remaining categories). Prior behaviour: a silent
+#    exit -1 that halted the whole -AllOps run at the first heavy category. Explicit `exit 3`/`exit $exitCode` are NOT
+#    errors, so the trap never intercepts them; inner try/catch still wins.
+trap {
+    Write-Host "[Verify-DeployedConnector] UNHANDLED ERROR — category verify could not complete (INCONCLUSIVE · exit 2 · NOT a data verdict):" -ForegroundColor Red
+    Write-Host ("  {0}: {1}" -f $_.Exception.GetType().Name, $_.Exception.Message) -ForegroundColor Red
+    if ($_.InvocationInfo) {
+        Write-Host ("  at {0}:{1} · {2}" -f [System.IO.Path]::GetFileName([string]$_.InvocationInfo.ScriptName), $_.InvocationInfo.ScriptLineNumber, (('' + $_.InvocationInfo.Line).Trim())) -ForegroundColor DarkYellow
+    }
+    exit 2
+}
+
 $repoRoot = Resolve-Path "$PSScriptRoot\.." | ForEach-Object Path
 
 # Window → default SinceMinutes mapping
@@ -2873,10 +2890,10 @@ if ($results.Blockers.Count -gt 0) {
 # gates were inconclusive) — write it whenever -JsonReportPath is set, INDEPENDENT of the console $OutputFormat. BUG FIX:
 # it was nested inside the 'Json' case, so default 'Console' runs never wrote it → the tolerance probe saw no report file
 # (Test-Path false) → an expected-only Reauth INCO could never be tolerated → re-prove exit-1.
-if ($JsonReportPath) { ($results | ConvertTo-Json -Depth 10) | Out-File -FilePath $JsonReportPath -Encoding utf8 -Force }
+if ($JsonReportPath) { ($results | ConvertTo-Json -Depth 25) | Out-File -FilePath $JsonReportPath -Encoding utf8 -Force }
 switch ($OutputFormat) {
     'Json' {
-        $results | ConvertTo-Json -Depth 10
+        $results | ConvertTo-Json -Depth 25
     }
     'Markdown' {
         Write-Host "# Verify-DeployedConnector report"
