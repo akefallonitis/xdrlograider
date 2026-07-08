@@ -134,6 +134,47 @@
             "toolTip": "Select the Log Analytics workspace where Defender_<Category>_CL custom tables and Sentinel connector content will be deployed."
           }
         ]
+      },
+      {
+        "name": "ingestionConfig",
+        "label": "Category selection",
+        "bladeTitle": "Category selection (optional)",
+        "elements": [
+          {
+            "name": "selectionInfo",
+            "type": "Microsoft.Common.InfoBox",
+            "options": {
+              "icon": "Info",
+              "text": "Choose which Defender categories actively poll and ingest. Leave all selected (default) to ingest everything. All tables and Data Collection Rules are created regardless — empty tables are free — so this controls only polling. Change the selection any time after deployment on the Function App's Configuration blade (XDRLR_ENABLED_CATEGORIES) and restart; checkpoints persist and no redeploy is needed."
+            }
+          },
+          {
+            "name": "enabledCategories",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Enabled categories",
+            "multiselect": true,
+            "selectAll": true,
+            "filter": true,
+            "defaultValue": [ "Analytics & Data", "Attack Simulation", "Cloud Apps", "Configuration", "Endpoint Management", "Exposure Management", "Identity", "Operations", "Portal Services", "Secure Score", "Vulnerability Management" ],
+            "toolTip": "Categories that actively poll and ingest. All selected = ingest everything (recommended). Deselect to reduce API and ingestion cost for a subset of Defender data. NOTE (SSOT §7): this allowedValues list is the shipped Defender categories and should be regenerated from the catalogue at build time as the surface grows.",
+            "constraints": {
+              "allowedValues": [
+                { "label": "Analytics & Data", "value": "AnalyticsData" },
+                { "label": "Attack Simulation", "value": "AttackSimulation" },
+                { "label": "Cloud Apps", "value": "CloudApps" },
+                { "label": "Configuration", "value": "Configuration" },
+                { "label": "Endpoint Management", "value": "EndpointManagement" },
+                { "label": "Exposure Management", "value": "ExposureManagement" },
+                { "label": "Identity", "value": "Identity" },
+                { "label": "Operations", "value": "Operations" },
+                { "label": "Portal Services", "value": "PortalServices" },
+                { "label": "Secure Score", "value": "SecureScore" },
+                { "label": "Vulnerability Management", "value": "VulnerabilityManagement" }
+              ],
+              "required": true
+            }
+          }
+        ]
       }
     ],
     "outputs": {
@@ -143,7 +184,8 @@
       "servicePassword": "[steps('serviceAccountConfig').servicePassword]",
       "authMethod": "[steps('mfaConfig').authMethod]",
       "totpSecret": "[if(equals(steps('mfaConfig').authMethod, 'TOTP'), steps('mfaConfig').totpSecret, '')]",
-      "passkeyPem": "[if(equals(steps('mfaConfig').authMethod, 'Passkey'), steps('mfaConfig').passkeyPem, '')]"
+      "passkeyPem": "[if(equals(steps('mfaConfig').authMethod, 'Passkey'), steps('mfaConfig').passkeyPem, '')]",
+      "enabledCategories": "[steps('ingestionConfig').enabledCategories]"
     }
   }
 }

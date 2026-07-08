@@ -44,6 +44,18 @@ if (Get-Command Get-XdrTenantCapabilities -ErrorAction SilentlyContinue) {
 }
 $tenantProducts = if ($tenantCapabilities) { $tenantCapabilities.Products } else { $null }
 
+# ─── G-Selection · user category selection (SSOT §7 · additive · composes with G-Capability + G-Cadence) ─────────────
+# XDRLR_ENABLED_CATEGORIES is an OPTIONAL CSV app setting (e.g. "Configuration,Operations") gating which CATEGORIES
+# actively poll+ingest. UNSET/EMPTY => ALL categories enabled (backward-compatible default). Infra (DCRs/tables/DCE) is
+# FULLY onboarded regardless — empty tables are free — so enable/disable is a pure app-setting flip + FA restart
+# (checkpoints persist · NO ARM/DCR/table redeploy). Match is case-insensitive; entries trimmed; blanks dropped. A
+# category polls IFF (user-enabled) AND (product-present · G-Capability) AND (cadence-due · G-Cadence): three orthogonal
+# skip-gates. Emits Entry.Selection.Skipped (mirrors the other skip-gates) for observability. Parse via the tested
+# Get-XdrEnabledCategorySet helper (Runtime module): returns $null (=> ALL enabled) or a case-insensitive HashSet.
+$enabledCategories = if (Get-Command Get-XdrEnabledCategorySet -ErrorAction SilentlyContinue) {
+    Get-XdrEnabledCategorySet -Raw ([string][Environment]::GetEnvironmentVariable('XDRLR_ENABLED_CATEGORIES'))
+} else { $null }
+
 # ─── Manifest entry enumeration (ALL portals with a shipped manifest · registry-driven · Defender-only today) ──────────
 # Runspace-independent load (plan §23 · fixes count=0). profile.ps1 populates $script:LoadedManifests
 # in ITS runspace only; the pooled runspaces that run this TimerTrigger don't see it (observed live:
@@ -71,6 +83,20 @@ if ($loadedManifests -and $loadedManifests.Count -gt 0) {
             # Each .psd1 returns @{ Defender = @{ Category=..; Operations=@() } } · unwrap defensively.
             $catBlock = if ($catData.ContainsKey($portalKey)) { $catData[$portalKey] } else { $catData }
             if (-not $catBlock.ContainsKey('Operations')) { continue }
+            # G-Selection: skip a category the operator has NOT enabled via XDRLR_ENABLED_CATEGORIES ($null set = all enabled).
+            # Category read via the StrictMode-safe indexer (a manifest missing the OPTIONAL key yields '' — never a
+            # dot-access throw that would abort the WHOLE enumeration). Membership decision delegated to the unit-tested
+            # Test-XdrCategoryEnabled (the selection SoT · mirrors Test-XdrRequiresProducts for the capability gate).
+            $catName = if ($catBlock.ContainsKey('Category')) { [string]$catBlock['Category'] } else { '' }
+            if ($enabledCategories -and -not (Test-XdrCategoryEnabled -EnabledCategories $enabledCategories -Category $catName)) {
+                Track-XdrEvent -Name 'Entry.Selection.Skipped' -Properties @{
+                    Category          = $catName
+                    Portal            = [string]$portalKey
+                    EnabledCategories = (@($enabledCategories) -join ',')
+                    CorrelationId     = $cycleId
+                }
+                continue
+            }
             # F7 · batch-read this category's checkpoint partition ONCE (kills the cadence gate's O(N) per-op
             # cold-start point-reads + the timeout risk). FAIL-OPEN: @{} on any error/absence → every op treated as
             # due (the SAME fail-open the per-op gate's catch used). The poll itself still does its own EO1-strict

@@ -2919,7 +2919,64 @@ function Test-XdrIsCapabilityAbsent {
     return $false
 }
 
+# ── Selective ingestion · category allow-set parser (SSOT §7 · G-Selection · additive · operator-locked) ──────────────
+function Get-XdrEnabledCategorySet {
+    <#
+    .SYNOPSIS
+    Parse the optional XDRLR_ENABLED_CATEGORIES app setting into a category allow-set (SSOT §7 · selective ingestion).
+    .DESCRIPTION
+    G-Selection: the per-cycle dispatcher consults this to skip categories the operator has NOT enabled. It composes
+    with G-Capability (product-present) and G-Cadence (poll-due) as a THIRD orthogonal skip-gate. The infra
+    (DCRs/tables/DCE) is fully onboarded regardless — this gates only POLLING — so re-selecting is a pure app-setting
+    flip + Function App restart (checkpoints persist · NO ARM/DCR/table redeploy).
+
+    Semantics (operator-locked · backward-compatible): UNSET / EMPTY / whitespace-only / commas-only => $null =>
+    ALL categories enabled (the default · an existing deployment with no app setting behaves exactly as before). A
+    non-empty CSV => a case-insensitive HashSet of the named categories; entries are trimmed and blank entries dropped.
+    .OUTPUTS
+    $null                                        → no selection (ALL categories enabled · the default)
+    [System.Collections.Generic.HashSet[string]] → the explicit allow-set (case-insensitive membership)
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Generic.HashSet[string]])]
+    param([AllowNull()][string] $Raw)
+
+    if ([string]::IsNullOrWhiteSpace($Raw)) { return $null }   # unset/empty => ALL enabled (backward-compatible)
+    $parts = @($Raw.Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    if ($parts.Count -eq 0) { return $null }                    # only blanks/commas => ALL enabled
+    # Comparer-first constructor + Add loop: the two-arg HashSet(IEnumerable, comparer) overload does NOT reliably bind
+    # the IEqualityComparer under PowerShell overload resolution (the comparer is dropped → case-SENSITIVE membership,
+    # which would silently disable a category on portal/app-setting casing drift). This form is unambiguous.
+    $set = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($p in $parts) { [void]$set.Add($p) }
+    return ,$set
+}
+
+function Test-XdrCategoryEnabled {
+    <#
+    .SYNOPSIS
+    G-Selection dispatch decision: TRUE when a category should actively poll under the operator's selection (SSOT §7).
+    .DESCRIPTION
+    The single source of truth for the selection decision the dispatcher branches on — run.ps1 skips a category IFF this
+    returns $false. Factored out (mirrors Test-XdrRequiresProducts for G-Capability) so the decision is unit-tested
+    directly rather than re-implemented in tests. Membership defers to the HashSet's own comparer (OrdinalIgnoreCase as
+    built by Get-XdrEnabledCategorySet), so casing drift never silently disables a category.
+    .OUTPUTS
+    $true  → category is enabled (no selection active, OR the set contains it) → dispatch it
+    $false → a selection is active AND the set does not contain it → skip (emit Entry.Selection.Skipped)
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [AllowNull()] $EnabledCategories,   # $null => no selection (ALL enabled); else a HashSet[string]
+        [AllowNull()][AllowEmptyString()][string] $Category
+    )
+    if ($null -eq $EnabledCategories) { return $true }         # no selection => all enabled (backward-compatible)
+    return [bool]$EnabledCategories.Contains([string]$Category)
+}
+
 Export-ModuleMember -Function `
+    Get-XdrEnabledCategorySet, Test-XdrCategoryEnabled, `
     Invoke-XdrEntryPoll, Invoke-XdrPortalHttp, Invoke-XdrAuthenticated, Test-XdrIsCapabilityAbsent, `
     Select-XdrExactlyOnceRows, Get-XdrAdvancedFrontier, Get-XdrCursorAtPrecision, `
     Invoke-XdrEntityFanout, Get-XdrParentEntityIds, Add-XdrEntityIds, Get-XdrCachedEntityIds, Clear-XdrEntityCache, Get-XdrEntityIdField, `

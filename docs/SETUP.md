@@ -56,8 +56,42 @@ Click **Deploy to Azure** and provide:
 | `authMethod` | `TOTP` or `Passkey` |
 | `totpSecret` | The base32 seed (`securestring`, TOTP mode) |
 | `passkeyPem` | The private-key PEM / JSON envelope (`securestring`, Passkey mode) |
+| `enabledCategories` | *(optional)* Categories to ingest — multi-select, **all** by default. See [§4](#4-selective-ingestion-optional). |
 
 ARM provisions a fresh Key Vault, writes all three secrets into it (`ServicePassword`, `TotpSecret`, `PasskeyPem`), and grants the Function App's system-assigned managed identity **Key Vault Secrets User** so it can read them at runtime. No secret is ever placed in an app setting or a log. See [CRED-FLOW.md](CRED-FLOW.md) for exactly where each value lands.
+
+---
+
+## 4. Selective ingestion (optional)
+
+By default XdrLogRaider ingests **all** Defender categories. If you only want a subset — to reduce Log Analytics ingestion cost or Defender API traffic — you can restrict which **categories** actively poll.
+
+**At deploy time.** The wizard's **Category selection** step is a multi-select of every shipped Defender category, **all selected by default**. Leave it as-is to ingest everything, or deselect the categories you don't want. Whatever you pick is written to the `XDRLR_ENABLED_CATEGORIES` app setting as a CSV.
+
+**After deployment.** Change the selection at any time without a redeploy:
+
+1. **Function App → Settings → Environment variables** (Configuration) → edit **`XDRLR_ENABLED_CATEGORIES`**.
+   - A comma-separated list of category keys polls **only** those, e.g. `Configuration,Operations,SecureScore`.
+   - **Empty (or the setting removed) = all categories enabled** — the backward-compatible default.
+2. **Restart** the Function App. The change takes effect on the next timer cycle.
+
+```bash
+# enable a subset
+az functionapp config appsettings set -g <rg> -n <funcapp> \
+  --settings XDRLR_ENABLED_CATEGORIES="Configuration,Operations,SecureScore"
+# back to all
+az functionapp config appsettings set -g <rg> -n <funcapp> \
+  --settings XDRLR_ENABLED_CATEGORIES=""
+az functionapp restart -g <rg> -n <funcapp>
+```
+
+Notes:
+
+- **All** tables and Data Collection Rules are created regardless of the selection (empty custom tables cost nothing); this gates only **polling**. So switching a category on/off is a pure app-setting flip — **no** table/DCR/ARM redeploy.
+- Checkpoints persist. Re-enabling a category resumes from where it left off; it does not re-ingest history.
+- Category keys are case-insensitive. The valid keys are the shipped Defender categories (see [CATALOGUE.md](CATALOGUE.md)); an unknown key simply matches nothing — so a CSV of only unrecognized/typo'd keys disables **all** ingestion. Use the exact category keys, not the display labels.
+- **Future categories:** if you pin an explicit list, categories added by later connector updates stay **off** until you add them to `XDRLR_ENABLED_CATEGORIES` (or clear it to re-enable everything). Leaving the selection empty (all-enabled) opts you into new categories automatically as they ship.
+- Selection composes with the connector's other two per-cycle gates — a category polls only when it is **enabled** *and* the tenant **has the product** *and* its **cadence is due**.
 
 ---
 

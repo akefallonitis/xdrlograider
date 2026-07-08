@@ -100,6 +100,13 @@
       "metadata": {
         "description": "Connector semver · WS4.3 release-derived (was hardcoded in the template body). The release flow ships templates whose default tracks the tag; XDRLR_CONNECTOR_VERSION + the connectorVersion tag both derive from this parameter."
       }
+    },
+    "enabledCategories": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "OPTIONAL selective ingestion (SSOT §7). The Defender categories that actively poll + ingest. EMPTY (default) = ALL categories enabled. ALL categories' tables/DCRs are always onboarded (empty tables are free); this gates only POLLING, surfaced as the XDRLR_ENABLED_CATEGORIES app setting. Changeable any time post-deploy (portal Configuration blade / az functionapp config appsettings set / redeploy) + restart the Function App — checkpoints persist, no DCR/table/ARM redeploy. Rendered as a multi-select in createUiDefinition."
+      }
     }
   },
   "variables": {
@@ -434,6 +441,11 @@
             {
               "name": "XDRLR_STORAGE_ACCOUNT",
               "value": "[variables('storageAccountName')]"
+            },
+            {
+              "comment": "Selective ingestion (SSOT §7). CSV of enabled categories from the createUiDefinition multi-select. EMPTY = ALL enabled (backward-compatible). The enabledCategories parameter is typed 'array' so ARM guarantees an array here (a non-array UI output would fail type validation at deploy, never land silently wrong); join therefore needs no array() wrap — and array() on an already-array value has no explicit documented behaviour, so it is deliberately avoided. Runtime G-Selection gate reads this; change + restart to re-select (checkpoints persist).",
+              "name": "XDRLR_ENABLED_CATEGORIES",
+              "value": "[join(parameters('enabledCategories'), ',')]"
             },
             {
               "name": "XDRLR_DCR_DEFENDER_ANALYTICSDATA",

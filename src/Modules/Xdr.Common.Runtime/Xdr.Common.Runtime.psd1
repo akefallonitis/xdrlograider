@@ -36,7 +36,9 @@
         'Update-XdrCircuitState',
         'Get-XdrManifests',
         'ConvertTo-XdrDeepHashtable',
-        'ConvertFrom-XdrActivityInput'
+        'ConvertFrom-XdrActivityInput',
+        'Get-XdrEnabledCategorySet',
+        'Test-XdrCategoryEnabled'
     )
     CmdletsToExport   = @()
     VariablesToExport = @()
