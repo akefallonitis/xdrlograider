@@ -1,6 +1,6 @@
 # Setup — Service Account & Unattended MFA
 
-XdrLogRaider signs in to the Microsoft Defender XDR portal as a **dedicated Entra ID service account**, exactly as an operator's browser would, and satisfies MFA **headlessly** using a secret you export once at enrollment time. This is one of the seven authentication methods the codebase supports (see [Auth model](#auth-model-context) below). The two that run **unattended** — and the only two the one-click deploy exposes — are **Credentials + TOTP** and **Credentials + Passkey/FIDO2**. Pick one.
+XdrLogRaider signs in to the Microsoft Defender XDR portal as a **dedicated Entra ID service account**, exactly as an operator's browser would, and satisfies MFA **headlessly** using a secret you export once at enrollment time. The codebase implements **two** credential methods, both **unattended** — and the only two the one-click deploy exposes — **Credentials + TOTP** and **Credentials + Passkey/FIDO2** (see [Auth model](#auth-model-context) below). Pick one.
 
 > **Before you create the account:** this is an always-on, non-interactive identity with standing read access to your Defender XDR tenant. Read [SECURITY-CONSIDERATIONS.md](SECURITY-CONSIDERATIONS.md) first — it must be scoped and monitored like any other standing-access credential.
 
@@ -63,17 +63,17 @@ ARM provisions a fresh Key Vault, writes all three secrets into it (`ServicePass
 
 ## Auth model (context)
 
-The auth engine supports **seven** methods; the deploy exposes the two unattended ones. The rest are for local development and interactive re-auth.
+Two credential methods are **implemented today**, both **unattended** (KMSI 90-day SSO): **Credentials + TOTP** and **Passkey / FIDO2**. Each drives the portal sign-in to obtain a portal **cookie** (`sccauth`, for Defender/Purview) or a **bearer token** (auth-code + PKCE + `refresh_token`, for Entra/Intune/Security Copilot). The five further methods below are described in the design but are **not yet implemented** — do not rely on them.
 
-| # | Method | API surface | Auto-refresh | Unattended |
-|---|--------|-------------|--------------|------------|
-| 1 | Credentials + TOTP    | Portal-internal | yes (KMSI 90d) | **yes** ← deploy |
-| 2 | Passkey / FIDO2       | Portal-internal | yes (KMSI 90d) | **yes** ← deploy |
-| 3 | ESTS cookie           | Portal-internal | no  | no |
-| 4 | TAP                   | Portal-internal | no  | no |
-| 5 | Direct sccauth        | Portal-internal | no  | no |
-| 6 | Device code           | Official OAuth  | no  | no |
-| 7 | Client credentials    | Official OAuth  | yes | yes (limited surface) |
+| # | Method | API surface | Status | Unattended |
+|---|--------|-------------|--------|------------|
+| 1 | Credentials + TOTP                 | Portal cookie / bearer | ✅ **Implemented** ← deploy | yes (KMSI 90d) |
+| 2 | Passkey / FIDO2                    | Portal cookie / bearer | ✅ **Implemented** ← deploy | yes (KMSI 90d) |
+| 3 | ESTS cookie (operator-supplied)    | Portal-internal | ⛔ Not implemented (planned) | — |
+| 4 | TAP (Temporary Access Pass)        | Portal-internal | ⛔ Not implemented (planned) | — |
+| 5 | Direct sccauth (operator-supplied) | Portal-internal | ⛔ Not implemented (planned) | — |
+| 6 | Device code                        | Official OAuth  | ⛔ Not implemented (planned) | — |
+| 7 | Client credentials                 | Official OAuth  | ⛔ Not implemented (planned) | would be (app-only) |
 
 In steady state the connector rides **cookie + KMSI 90-day SSO**. A full headless login (method 1 or 2) fires only ~4×/year per UPN, when KMSI expires.
 

@@ -49,9 +49,9 @@ Access Pass), and **KMSI**-backed SSO — alongside its pagination, time-filter,
 routing conventions.
 
 XdrLogRaider's own authentication is **implemented in-tree** (it does not import XDRInternals, call
-its cmdlets, or take it as a dependency), but its approach to the portal-internal sign-in flows —
-ESTS, passkey/FIDO2, TOTP, and TAP — **adapts the community-established patterns that XDRInternals
-documents**, and it cross-validates its per-operation manifests (pagination strategy, time-filter
+its cmdlets, or take it as a dependency), but its approach to the portal-internal sign-in flow —
+the ESTS cookie chain with **TOTP** and **passkey/FIDO2** MFA (the two methods it implements) — **adapts
+the community-established patterns that XDRInternals documents**, and it cross-validates its per-operation manifests (pagination strategy, time-filter
 naming, sub-portal mapping) against the same conventions. The consolidated cross-reference lives
 under [`references/cross-source/xdrinternals/`](../references/cross-source/xdrinternals/).
 
@@ -117,7 +117,7 @@ Microsoft Sentinel data connector** engineered to run for years without a hand o
 
 | Capability | A one-off harvester | XdrLogRaider |
 |---|---|---|
-| **Auth** | Interactive login per run; breaks on cookie / MFA rotation | **Dynamic multi-method auth** (Creds+TOTP, Passkey/FIDO2, ESTS, TAP, direct `sccauth`, Device Code, Client Credentials) with **silent KMSI 90-day SSO refresh** — full headless re-auth ~4×/year |
+| **Auth** | Interactive login per run; breaks on cookie / MFA rotation | **Unattended delegated auth** — Creds+TOTP and Passkey/FIDO2 (the two implemented methods), each yielding a portal cookie (`sccauth`) or a bearer token, with **silent KMSI 90-day SSO refresh** — full headless re-auth ~4×/year. Further methods (ESTS/`sccauth` input, TAP, device code, client credentials) are planned, not yet implemented |
 | **Scope** | Hardcoded set of endpoints | **Dynamically-curated surface** — operations derived from the nodoc OpenAPI corpus, never a hardcoded count; new operations / categories / portals activate by manifest, no engine change |
 | **Product / tenant fit** | Assumes one tenant's licensing | **Dynamic product & tenant discovery** — each operation capability-gates and lights up only when the tenant licenses the underlying product (MDE / MDI / MDVM / MDCA / XSPM …) |
 | **Data quality** | Raw JSON dumped to a table | **Exactly-once, typed ingestion** — one typed Sentinel row per Defender event, full raw response retained per row, client-side dedup that holds across restarts and redeploys |

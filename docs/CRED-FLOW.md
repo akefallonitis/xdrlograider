@@ -42,19 +42,25 @@ No secret ever lives in source, in an app setting, or in a log. Values you enter
 - **Least Key Vault surface.** The SAMI holds **Key Vault Secrets User** (read secret values) — not Contributor, not a Keys/Certificates officer role. The Storage account has shared-key access disabled (`allowSharedKeyAccess: false`); the vault is the sole secret store.
 - **Secrets read only when needed.** The connector's steady state is the cookie/KMSI cache. It re-reads `ServicePassword` plus the seed/PEM from Key Vault only when a full re-auth is required (~4×/year, on KMSI expiry) or when the 30-minute in-process secret cache lapses.
 
-## The seven auth methods (overview)
+## Auth methods — implemented vs planned
 
-The deploy exposes the two unattended methods; the auth engine supports seven in total.
+XdrLogRaider implements **two** credential methods today, both **unattended** via KMSI 90-day SSO:
+**Credentials + TOTP** and **Passkey / FIDO2**. Each drives the portal sign-in and yields either a portal
+**cookie** (`sccauth` + `XSRF`, for the cookie portals — Defender, Purview) or a **bearer token**
+(authorization-code + PKCE + `refresh_token`, for the bearer portals — Entra, Intune, Security Copilot). Steady
+state is silent renewal (KMSI re-mint / `refresh_token`); a full headless re-auth fires only on KMSI expiry (~4×/year).
 
-| # | Method | API surface | Auto-refresh | Unattended |
-|---|--------|-------------|--------------|------------|
-| 1 | Credentials + TOTP    | Portal-internal | yes (KMSI 90d) | **yes** ← deploy |
-| 2 | Passkey / FIDO2       | Portal-internal | yes (KMSI 90d) | **yes** ← deploy |
-| 3 | ESTS cookie           | Portal-internal | no  | no |
-| 4 | TAP                   | Portal-internal | no  | no |
-| 5 | Direct sccauth        | Portal-internal | no  | no |
-| 6 | Device code           | Official OAuth  | no  | no |
-| 7 | Client credentials    | Official OAuth  | yes | yes (limited surface) |
+The five methods below are described in the design but are **not yet implemented** — do not rely on them.
+
+| # | Method | API surface | Status | Unattended |
+|---|--------|-------------|--------|------------|
+| 1 | Credentials + TOTP                 | Portal cookie / bearer | ✅ **Implemented** ← deploy | yes (KMSI 90d) |
+| 2 | Passkey / FIDO2                    | Portal cookie / bearer | ✅ **Implemented** ← deploy | yes (KMSI 90d) |
+| 3 | ESTS cookie (operator-supplied)    | Portal-internal | ⛔ Not implemented (planned) | — |
+| 4 | TAP (Temporary Access Pass)        | Portal-internal | ⛔ Not implemented (planned) | — |
+| 5 | Direct sccauth (operator-supplied) | Portal-internal | ⛔ Not implemented (planned) | — |
+| 6 | Device code                        | Official OAuth  | ⛔ Not implemented (planned) | — |
+| 7 | Client credentials                 | Official OAuth  | ⛔ Not implemented (planned) | would be (app-only) |
 
 See [SETUP.md](SETUP.md) for enrolling the unattended MFA secret, and [SECURITY-CONSIDERATIONS.md](SECURITY-CONSIDERATIONS.md) for governing the resulting standing credential.
 
